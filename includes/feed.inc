@@ -52,7 +52,7 @@ class Feed extends FeedsConfigurable {
     $form['content_type'] = array(
       '#type' => 'select',
       '#title' => t('Attach to content type'),
-      '#description' => t('When you attach a configuration to a node, you can use nodes for creating feeds on your site.'),
+      '#description' => t('If you attach a configuration to a node you can use nodes for creating feeds on your site.'),
       '#options' => array('' => t('None')) + node_get_types('names'),
       '#default_value' => $this->config['content_type'],
     );
