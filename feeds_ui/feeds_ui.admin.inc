@@ -82,6 +82,8 @@ function feeds_ui_build_create_form(&$form_state) {
 
 /**
  * Validation handler for feeds_build_create_form().
+ * 
+ * @todo: don't allow attaching more than one configuration to one content type.
  */
 function feeds_ui_build_create_form_validate($form, &$form_state) {
   ctools_include('export');
