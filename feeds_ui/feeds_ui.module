@@ -80,6 +80,14 @@ function feeds_ui_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 2,
   );
+  $items['admin/build/feeds/delete/%feeds'] = array(
+    'title' => t('Create preset'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_ui_build_delete_form', 4),
+    'access arguments' => array('administer feeds'),
+    'file' => 'feeds_ui.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
