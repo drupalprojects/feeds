@@ -81,6 +81,36 @@ class Feed extends FeedsConfigurable {
   }
 
   /**
+   * Feed class specific plugin form.
+   */
+  public function pluginsForm(&$form_state) {
+    $form = array();
+    $plugins = feeds_get_plugins();
+    $form['fetcher'] = array(
+      '#type' => 'radios',
+      '#title' => t('Fetcher'),
+      '#options' => $plugins['fetcher'],
+      '#description' => t('Select a fetcher for this configuration.'),
+      '#default_value' => $this->config['fetcher'],
+    );
+    $form['parser'] = array(
+      '#type' => 'radios',
+      '#title' => t('Parser'),
+      '#options' => $plugins['parser'],
+      '#description' => t('Select a parser for this configuration.'),
+      '#default_value' => $this->config['parser'],
+    );
+    $form['processors'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Processors'),
+      '#options' => $plugins['processor'],
+      '#description' => t('Select processors for this configuration.'),
+      '#default_value' => $this->config['processors'],
+    );
+    return $form;
+  }
+
+  /**
    * Import feed by using configured fetchers, parsers, processors.
    */
   public function import() {
