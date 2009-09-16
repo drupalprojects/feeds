@@ -1,0 +1,6 @@
+;$Id$
+name = Feeds
+description = API for importing feeds of data.
+package = Feeds
+dependencies[] = ctools
+core = 6.x
