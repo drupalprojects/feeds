@@ -6,9 +6,6 @@
 
 /**
  * Importer class.
- * 
- * After fetch() has been invoked, it can be cached and revoked in a subsequent 
- * page callback until it is reset().
  */
 class Feed extends FeedsConfigurable {
 
