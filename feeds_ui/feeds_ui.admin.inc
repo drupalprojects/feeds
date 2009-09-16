@@ -64,6 +64,7 @@ function feeds_ui_build_create_form(&$form_state) {
     );
   }
   else {
+    // @todo: present plugin form first.
     feeds_include('feed');
     $feed = feeds_get_feed($form_state['storage']['id']);
     $form['settings'] = array(

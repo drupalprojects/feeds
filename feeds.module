@@ -43,6 +43,11 @@ function feeds_feeds_plugin() {
       'file' => drupal_get_path('module', 'feeds') .'/plugins/FeedsHttpFetcher.inc',
       'parent' => 'FeedsFetcher',
     ),
+    'FeedsFileFetcher' => array(
+      'name' => t('File fetcher'),
+      'file' =>  drupal_get_path('module', 'feeds') .'/plugins/FeedsFileFetcher.inc',
+      'parent' => 'FeedsFetcher',
+    ),
     'FeedsCSVParser' => array(
       'name' => t('CSV parser'),
       'file' => drupal_get_path('module', 'feeds') .'/plugins/FeedsCSVParser.inc',
