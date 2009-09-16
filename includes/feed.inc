@@ -33,6 +33,21 @@ class Feed extends FeedsConfigurable {
   }
 
   /**
+   * Return defaults for feed configuration.
+   */
+  public function getDefaultConfig() {
+    return array(
+      'fetcher' => 'FeedsHttpFetcher',
+      'parser' => 'FeedsSyndicationParser',
+      'processors' => array('FeedsNodeProcessor'),
+      'content_type' => '',
+      'source' => array(),
+      'update' => 0,
+      'refresh_period' => FEEDAPI_CRON_NEVER_REFRESH,
+    );
+  }
+
+  /**
    * Import feed by using configured fetchers, parsers, processors.
    */
   public function import() {
@@ -146,7 +161,14 @@ class FeedsConfigurable {
   }
 
   public function setConfig($config) {
-    $this->config = $config;
+    $default_keys = $this->getDefaultConfig();
+    $this->config = array_intersect_key($config, $default_keys);
+  }
+
+  public function addConfig($config) {
+    $this->config = array_merge($this->config, $config);
+    $default_keys = $this->getDefaultConfig();
+    $this->config = array_intersect_key($this->config, $default_keys);
   }
 
   public function getDefaultConfig() {

@@ -21,6 +21,19 @@ function feeds_perm() {
 }
 
 /**
+ * Implementation of hook_ctools_plugin_api().
+ * 
+ * @todo: switch hook_feeds_plugin() over to hook_ctools_plugin_api().
+ */
+function feeds_ctools_plugin_api($owner, $api) {
+  if ($owner == 'feeds' && $api == 'plugins') {
+    return array(
+      'version' => 1,
+      '');
+  }
+}
+
+/**
  * Implementation of hook_feeds_plugin().
  */
 function feeds_feeds_plugin() {

@@ -11,7 +11,7 @@ function feeds_schema() {
   $schema['feeds_configuration'] = array(
     'description' => 'Configuration of feeds objects.',
     'export' => array(
-      'key' => 'name',
+      'key' => 'id',
       'identifier' => 'feed_object',
       'default hook' => 'feeds',  // Function hook name.
       'api' => array(
