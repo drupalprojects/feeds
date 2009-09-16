@@ -38,7 +38,6 @@ class Feed extends FeedsConfigurable {
       'parser' => 'FeedsSyndicationParser',
       'processors' => array('FeedsNodeProcessor'),
       'content_type' => '',
-      'source' => array(),
       'update' => 0,
       'refresh_period' => FEEDAPI_CRON_NEVER_REFRESH,
     );
