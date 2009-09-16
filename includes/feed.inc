@@ -111,6 +111,24 @@ class Feed extends FeedsConfigurable {
   }
 
   /**
+   * Validation handler for pluginForm().
+   */
+  public function pluginFormValidate($form, &$form_state) {
+    $form_state['values']['processors'] = array_filter($form_state['values']['processors']);
+    if (!count($form_state['values']['processors'])) {
+      form_set_error('processors', t('At least one processor needs to be enabled.'));
+    }
+  }
+
+  /**
+   * Submit handler for pluginForm().
+   */
+  public function pluginFormSubmit($form, &$form_state) {
+    $this->addConfig($form_state['values']);
+    $this->save();
+  }
+
+  /**
    * Import feed by using configured fetchers, parsers, processors.
    */
   public function import() {
@@ -289,8 +307,6 @@ class FeedsConfigurable {
 
   /**
    * Validation handler for configForm().
-   *
-   * @return unknown
    */
   public function configFormValidate($form, &$form_state) {
   }
