@@ -83,7 +83,7 @@ class Feed extends FeedsConfigurable {
   /**
    * Feed class specific plugin form.
    */
-  public function pluginsForm(&$form_state) {
+  public function pluginForm(&$form_state) {
     $form = array();
     $plugins = feeds_get_plugins();
     $form['fetcher'] = array(

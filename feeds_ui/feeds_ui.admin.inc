@@ -174,7 +174,7 @@ function feeds_ui_build_plugin_form(&$form_state, $feed) {
     '#type' => 'fieldset',
     '#title' => t('Plugins'),
   );
-  $form['plugins'] += $feed->pluginsForm($form_state);
+  $form['plugins'] += $feed->pluginForm($form_state);
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
