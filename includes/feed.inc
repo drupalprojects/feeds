@@ -367,11 +367,4 @@ class FeedsProcessor extends FeedsConfigurable {
   public function getMappingTargets() {
     return NULL;
   }
-
-  /**
-   * Build the mapping form.
-   */
-  public function mappingForm() {
-    return array();
-  }
 }
