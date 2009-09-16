@@ -374,11 +374,4 @@ class FeedsProcessor extends FeedsConfigurable {
   public function mappingForm() {
     return array();
   }
-
-  /**
-   * Return TRUE if processor requires that the feed configuration be attached to a feed node.
-   */
-  public function requiresFeedAsNode() {
-    return TRUE;
-  }
 }
