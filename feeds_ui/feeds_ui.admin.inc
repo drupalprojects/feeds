@@ -270,8 +270,8 @@ function theme_feeds_ui_build_mapping_form($form) {
     if (is_array($form['processors'][$processor]['#mappings'])) {
       foreach ($form['processors'][$processor]['#mappings'] as $target => $mapping) {
         $rows[] = array(
-          $source,
           $mapping['source'],
+          $target,
           $mapping['unique'] ? t('Yes') : t('No'),
           t('Remove'),
         ); 
