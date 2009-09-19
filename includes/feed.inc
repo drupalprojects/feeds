@@ -409,8 +409,8 @@ class FeedsProcessor extends FeedsConfigurable {
   public function addMapping($source, $target, $unique = NULL) {
     if (!empty($source) && !empty($target)) {
       $config = $this->getConfig();
-      $config['mappings'][$source] = array(
-        'target' => $target,
+      $config['mappings'][$target] = array(
+        'source' => $source,
         'unique' => $unique,
       );
     }

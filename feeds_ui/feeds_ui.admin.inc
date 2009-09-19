@@ -268,10 +268,10 @@ function theme_feeds_ui_build_mapping_form($form) {
   foreach (element_children($form['processors']) as $processor) {
     $rows = array();
     if (is_array($form['processors'][$processor]['#mappings'])) {
-      foreach ($form['processors'][$processor]['#mappings'] as $source => $mapping) {
+      foreach ($form['processors'][$processor]['#mappings'] as $target => $mapping) {
         $rows[] = array(
           $source,
-          $mapping['target'],
+          $mapping['source'],
           $mapping['unique'] ? t('Yes') : t('No'),
           t('Remove'),
         ); 
