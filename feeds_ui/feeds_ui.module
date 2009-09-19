@@ -92,6 +92,18 @@ function feeds_ui_menu() {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function feeds_ui_theme() {
+  return array(
+    'feeds_ui_build_mapping_form' => array(
+      'arguments' => array('form'),
+      'file' => 'feeds_ui.admin.inc',
+    ),
+  );
+}
+
+/**
  * Title callback.
  */
 function feed_ui_title($feed) {

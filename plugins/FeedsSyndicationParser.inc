@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * Class definition for Common Syndication Parser.
+ * 
+ * Parses RSS and Atom feeds.
+ */
 class FeedsSyndicationParser extends FeedsParser {
 
   /**
