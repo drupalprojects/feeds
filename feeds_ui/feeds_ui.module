@@ -80,6 +80,13 @@ function feeds_ui_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 2,
   );
+  $items['admin/build/feeds/map-remove/%feeds'] = array(
+    'page callback' => 'feeds_ui_build_mapping_remove',
+    'page arguments' => array(4),
+    'access arguments' => array('administer feeds'),
+    'file' => 'feeds_ui.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
   $items['admin/build/feeds/delete/%feeds'] = array(
     'title' => t('Create configuration'),
     'page callback' => 'drupal_get_form',

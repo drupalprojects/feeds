@@ -1,6 +1,6 @@
 ;$Id$
 name = Feeds
-description = API for importing feeds of data.
+description = Provides an API for importing feeds of data: Aggregate RSS/Atom/RDF feeds, import CSV files and more.
 package = Feeds
 dependencies[] = ctools
 core = 6.x
