@@ -39,6 +39,7 @@ Requirements
   http://drupal.org/node/599136
   http://drupal.org/node/531522
 - Drupal 6.14 or higher.
+- PHP 5.2.x
 
 Installation
 ============
