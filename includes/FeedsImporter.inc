@@ -321,7 +321,7 @@ class FeedsImporter extends FeedsConfigurable {
       '#type' => 'select',
       '#title' => t('Attach to content type'),
       '#description' => t('If you attach a configuration to a node you can use nodes for creating feeds on your site.'),
-      '#options' => array('' => t('None')) + node_get_types('names'),
+      '#options' => array('' => t('Use standalone form')) + node_get_types('names'),
       '#default_value' => $this->config['content_type'],
     );
     $period = drupal_map_assoc(array(0, 900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
