@@ -21,7 +21,7 @@ function feeds_page() {
       }
       elseif (user_access('create '. $importer->config['content_type'] .' content')) {
         $link = 'node/add/'. str_replace('_', '-', $importer->config['content_type']);
-        $title = t('!type (!config)', array('!type' => node_get_types('name', $importer->config['content_type']), '!config' => $importer->config['name']));
+        $title = node_get_types('name', $importer->config['content_type']);
       }
       $rows[] = array(
         l($title, $link),
@@ -30,7 +30,7 @@ function feeds_page() {
     }
   }
   $header = array(
-    t('Configuration'),
+    t('Importer'),
     t('Description'),
   );
   return theme('table', $header, $rows);
