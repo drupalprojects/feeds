@@ -211,7 +211,7 @@ class FeedsDataProcessor extends FeedsProcessor {
    */
   protected function existingItemId($source_item, FeedsSource $source) {
     foreach ($this->uniqueTargets($source_item) as $target => $value) {
-      if ($records = $this->handler()->load(array($target => $value))) {
+      if ($records = $this->handler()->load(array('feed_nid' => $source->feed_nid, $target => $value))) {
         return $records[0]['id'];
       }
     }
