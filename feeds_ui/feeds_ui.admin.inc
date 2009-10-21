@@ -139,6 +139,11 @@ function feeds_ui_overview_form_submit($form, &$form_state) {
     $disabled[$importer->id] = !$form_state['values'][$importer->id];
   }
   variable_set('default_feeds_importer', $disabled);
+
+  // Clear caches.
+  node_get_types('types', NULL, TRUE);
+  cache_clear_all();
+  menu_rebuild();
 }
 
 /**
