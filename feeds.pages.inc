@@ -30,7 +30,7 @@ function feeds_page() {
     }
   }
   $header = array(
-    t('Importer'),
+    t('Import'),
     t('Description'),
   );
   return theme('table', $header, $rows);
