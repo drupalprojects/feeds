@@ -1,6 +1,9 @@
 /* $Id$ */
 
 /* Feeds admin overview form. */
+table.feeds-admin-importers thead th {
+  border: none;
+  }
 table.feeds-admin-importers td.disabled {
   color: #ccc;
   }
