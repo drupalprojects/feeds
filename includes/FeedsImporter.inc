@@ -130,6 +130,7 @@ class FeedsImporter extends FeedsConfigurable {
    *   If a problem with fetching, parsing or processing occured.
    *   @todo: Iron out and document potential Exceptions.
    *   @todo: Support batching.
+   *   @todo: catch exceptions outside of import(), clear() and expire().
    */
   public function import(FeedsSource $source) {
     try {
