@@ -67,7 +67,7 @@ function _feeds_feeds_plugins() {
     ),
   );
   $info['FeedsFileFetcher'] = array(
-    'name' => 'File fetcher',
+    'name' => 'File upload',
     'description' => 'Upload content from a local file.',
     'handler' => array(
       'parent' => 'FeedsFetcher',
