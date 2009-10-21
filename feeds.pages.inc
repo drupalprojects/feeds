@@ -20,7 +20,7 @@ function feeds_page() {
         $title = $importer->config['name'];
       }
       elseif (user_access('create '. $importer->config['content_type'] .' content')) {
-        $link = 'node/add/'. $importer->config['content_type'];
+        $link = 'node/add/'. str_replace('_', '-', $importer->config['content_type']);
         $title = t('!type (!config)', array('!type' => node_get_types('name', $importer->config['content_type']), '!config' => $importer->config['name']));
       }
       $rows[] = array(
