@@ -140,9 +140,13 @@ function feeds_ui_overview_form_submit($form, &$form_state) {
   }
   variable_set('default_feeds_importer', $disabled);
 
-  // Clear caches.
+  // Clear caches: reset export cache, as objects have been enabled/disabled,
+  // reset node type cache, as some features provide content types, rebuild
+  // menu as content type changes or importer enabling/disabling can have
+  // impact on node/add/ or import/.
+  ctools_include('export');
+  ctools_export_load_object_reset('feeds_importer');
   node_get_types('types', NULL, TRUE);
-  cache_clear_all();
   menu_rebuild();
 }
 
