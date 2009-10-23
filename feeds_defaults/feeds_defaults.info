@@ -1,0 +1,7 @@
+; $Id$
+core = "6.x"
+name = "Feeds defaults"
+package = "Feeds"
+description = "Get started: useful default configurations for Feeds: RSS/Atom aggregation, OPML import, node import and user import."
+project = "Feeds"
+dependencies[] = "feeds"
