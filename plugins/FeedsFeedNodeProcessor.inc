@@ -159,7 +159,11 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
       $class = get_class($this->feedNodeImporter()->fetcher);
       $target_node->feeds[$class]['source'] = $value;
     }
-    elseif (in_array($target_element, array('title', 'teaser', 'status', 'created'))) {
+    elseif ($target_element == 'body') {
+      $target_node->teaser = $value;
+      $target_node->body = $value;
+    }
+    elseif (in_array($target_element, array('title', 'status', 'created'))) {
       $target_node->$target_element = $value;
     }
   }
@@ -178,7 +182,7 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
       'created' => array(
         'name' => t('Published date'),
       ),
-      'teaser' => array(
+      'body' => array(
         'name' => t('Body'),
       ),
       'source' => array(
