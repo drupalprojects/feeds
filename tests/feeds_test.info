@@ -1,7 +1,0 @@
-; $Id$
-name = "Feeds tests"
-description = "Test module for Feeds."
-package = Testing
-version = VERSION
-core = 6.x
-; hidden = TRUE
