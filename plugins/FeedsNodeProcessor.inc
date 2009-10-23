@@ -49,10 +49,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
     // Set messages.
     if ($created) {
-      drupal_set_message(t('Created !number !type nodes.', array('!number' => $created, '!type' => $this->config['content_type'])));
+      drupal_set_message(t('Created !number !type nodes.', array('!number' => $created, '!type' => node_get_types('name', $this->config['content_type']))));
     }
     elseif ($updated) {
-      drupal_set_message(t('Updated !number !type nodes.', array('!number' => $updated, '!type' => $this->config['content_type'])));
+      drupal_set_message(t('Updated !number !type nodes.', array('!number' => $updated, '!type' => node_get_types('name', $this->config['content_type']))));
     }
     else {
       drupal_set_message(t('There is no new content.'));
