@@ -42,9 +42,11 @@ Requirements
 Installation
 ============
 
-- Check out from github into your modules directory, enable module.
+- Install Feeds, Feeds Admin UI and Feeds defaults. 
 - Navigate to admin/build/feeds.
-- Create at least one feed configuration.
+- Enable one or more default configuration or create your own: from scratch or
+  by cloning.
+- Go to import/ to import data.
 - To use SimplePie parser, download SimplePie and place simplepie.inc into
   feeds/libraries
   http://simplepie.org/
