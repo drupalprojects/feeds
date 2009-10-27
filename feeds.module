@@ -358,20 +358,8 @@ function feeds_form_alter(&$form, $form_state, $form_id) {
 
       // Cannot pass on the FeedsImporter object, pass on id.
       $form['#feed_id'] = $importer->id;
-      // Only set validation handler. Save object on hook_nodeapi('insert')
-//      $form['#validate'][] = 'feeds_node_form_validate';
     }
   }
-}
-
-/**
- * Additional validation handler for node forms.
- *
- * @see feeds_form_alter().
- */
-function feeds_node_form_validate($form, &$form_state) {
-  feeds_include('feeds.pages', '.');
-  feeds_import_form_validate($form, $form_state);
 }
 
 /**
