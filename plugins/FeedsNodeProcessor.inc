@@ -229,7 +229,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     $targets = array(
       'title' => array(
         'name' => t('Title'),
-        'description' => t('The title of the node'),
+        'description' => t('The title of the node.'),
        ),
       'status' => array(
         'name' => t('Published status'),
