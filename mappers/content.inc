@@ -25,7 +25,7 @@ function content_feeds_node_processor_targets_alter(&$targets, $content_type) {
     $targets[$k] = array(
       'name' => $name,
       'callback' => 'content_feeds_set_target',
-      'description' => t('Maps to the !name CCK field.', array('!name' => $name)),
+      'description' => t('The CCK !name field of the node.', array('!name' => $name)),
     );
   }
 }
