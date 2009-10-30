@@ -18,6 +18,8 @@ define('FEEDS_EXPIRE_NEVER', -1);
 // An object is not persistent at all. Compare to EXPORT_IN_DATABASE OR
 // EXPORT_IN_CODE.
 define('FEEDS_EXPORT_NONE', 0x0);
+// The Drupal Queue FeedsScheduler may use for scheduling importing or expiry.
+define('FEEDS_SCHEDULER_QUEUE', 'feeds_queue');
 
 
 /**
@@ -38,7 +40,7 @@ function feeds_cron() {
  */
 function feeds_cron_queue_info() {
   $queues = array();
-  $queues['feeds_queue'] = array(
+  $queues[FEEDS_SCHEDULER_QUEUE] = array(
     'worker callback' => 'feeds_scheduler_work',
     'time' => variable_get('feeds_worker_time', 60),
   );
