@@ -62,6 +62,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
   /**
    * Implementation of FeedsProcessor::clear().
    * @todo: use batch API.
+   * @todo: node_delete() fails when user does not have appropriate permissions.
+   *   http://drupal.org/node/619110
    */
   public function clear(FeedsSource $source) {
     // Count number of deleted nodes.
