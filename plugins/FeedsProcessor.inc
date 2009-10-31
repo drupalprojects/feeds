@@ -74,7 +74,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     foreach ($this->config['mappings'] as $mapping) {
       $value = $parser->getSourceElement($source_item, $mapping['source']);
 
-      if (isset($targets[$mapping['target']]['callback']) && function_exists($targets[$mapping['target']]['callback'])) {
+      if (is_array($targets[$mapping['target']]) && isset($targets[$mapping['target']]['callback']) && function_exists($targets[$mapping['target']]['callback'])) {
         $callback = $targets[$mapping['target']]['callback'];
         $callback($target_item, $mapping['target'], $value);
       }
