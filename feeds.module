@@ -42,7 +42,7 @@ function feeds_cron_queue_info() {
   $queues = array();
   $queues[FEEDS_SCHEDULER_QUEUE] = array(
     'worker callback' => 'feeds_scheduler_work',
-    'time' => variable_get('feeds_worker_time', 60),
+    'time' => variable_get('feeds_worker_time', 15),
   );
   return $queues;
 }
