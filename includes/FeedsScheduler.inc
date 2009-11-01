@@ -96,17 +96,12 @@ class FeedsScheduler implements IFeedsScheduler {
    */
   public function cron() {
 
-    // Logging and timeout tracking.
-    if ($this->time() == FEEDS_REQUEST_TIME) {
-      watchdog('FeedsScheduler', 'Start processing');
-    }
-    else {
-      watchdog('FeedsScheduler', 'Start - !date (debug time !time)', array('!date' => format_date($this->time()), '!time' => $this->time()));
-    }
+    // Check and set scheduler semaphore, take time.
     if (variable_get('feeds_scheduler_cron', FALSE)) {
       watchdog('FeedsScheduler', 'Last cron process did not finish.', array(), WATCHDOG_ERROR);
     }
     variable_set('feeds_scheduler_cron', TRUE);
+    $start = time();
 
     // Get feeds configuration, check whether drupal_queue is present and set
     // parameters accordingly.
@@ -157,7 +152,7 @@ class FeedsScheduler implements IFeedsScheduler {
 
     // Unflag and post a message that we're done.
     variable_set('feeds_scheduler_cron', FALSE);
-    watchdog('FeedsScheduler', 'Finished processing schedule after !time.', array('!time' => format_interval(time() - $this->time())));
+    watchdog('FeedsScheduler', 'Finished processing schedule after !time.', array('!time' => format_interval(time() - $start)));
   }
 
   /**
