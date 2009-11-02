@@ -500,9 +500,8 @@ function feeds_ui_mapping_form(&$form_state, $importer) {
   if ($sources = $importer->parser->getMappingSources()) {
     $source_options = _feeds_ui_format_options($sources);
     foreach ($sources as $k => $source) {
-      // @todo: make format homogenous.
-      $legend['sources'][$k]['name']['#value'] = is_array($source) ? $source['name'] : $source;
-      $legend['sources'][$k]['description']['#value'] = (is_array($source) && !empty($source['description'])) ? $source['description'] : '';
+      $legend['sources'][$k]['name']['#value'] = empty($source['name']) ? $k : $source['name'];
+      $legend['sources'][$k]['description']['#value'] = empty($source['description']) ? '' : $source['description'];
     }
   }
   else {
