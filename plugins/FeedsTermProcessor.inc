@@ -154,6 +154,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     $targets = array(
       'name' => array(
         'name' => t('Term name'),
+        'description' => t('Name of the taxonomy term.'),
         'optional_unique' => TRUE,
        ),
     );
