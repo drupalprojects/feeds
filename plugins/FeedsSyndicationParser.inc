@@ -39,8 +39,8 @@ class FeedsSyndicationParser extends FeedsParser {
         'name' => t('Description'),
         'description' => t('Description of the feed item.'),
       ),
-      'author' => array(
-        'name' => t('Author'),
+      'author_name' => array(
+        'name' => t('Author name'),
         'description' => t('Author of the feed item (string).'),
       ),
       'timestamp' => array(
