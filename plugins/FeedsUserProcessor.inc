@@ -153,14 +153,17 @@ class FeedsUserProcessor extends FeedsProcessor {
     $targets = array(
       'name' => array(
         'name' => t('User name'),
+        'description' => t('Name of the user.'),
         'optional_unique' => TRUE,
        ),
       'mail' => array(
-        'name' => t('E-mail address'),
+        'name' => t('Email address'),
+        'description' => t('Email address of the user.'),
         'optional_unique' => TRUE,
        ),
       'created' => array(
         'name' => t('Created date'),
+        'description' => t('The created (e. g. joined) data of the user.'),
        ),
     );
     return $targets;
