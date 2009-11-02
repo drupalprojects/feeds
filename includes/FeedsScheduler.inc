@@ -110,9 +110,11 @@ class FeedsScheduler implements IFeedsScheduler {
       if ($use_queue = module_exists('drupal_queue')) {
         drupal_queue_include();
         $queue = drupal_queue_get(FEEDS_SCHEDULER_QUEUE);
+        $num = variable_get('feeds_schedule_queue_num', 200);
       }
-      $num = variable_get('feeds_schedule_num', $use_queue ? 200 : 5);
-      $num = $num ? $num : 1;
+      else {
+        $num = variable_get('feeds_schedule_num', 5);
+      }
 
       // Iterate over feed configurations, pick $num feeds for each
       // configuration, push to queue or refresh feeds.
