@@ -30,8 +30,14 @@ class FeedsOPMLParser extends FeedsParser {
    */
   public function getMappingSources() {
     return array(
-      'title' => t('Feed title'),
-      'xmlurl' => t('Feed URL'),
-     );
+      'title' => array(
+        'name' => t('Feed title'),
+        'description' => t('Title of the feed.'),
+      ),
+      'xmlurl' => array(
+        'name' => t('Feed URL'),
+        'description' => t('URL of the feed.'),
+      ),
+    );
   }
 }
