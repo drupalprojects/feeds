@@ -33,7 +33,7 @@ class FeedsSyndicationParser extends FeedsParser {
     return array(
       'title' => array(
         'name' => t('Title'),
-        'description' => t('The title of the feed item.'),
+        'description' => t('Title of the feed item.'),
       ),
       'description' => array(
         'name' => t('Description'),
@@ -45,15 +45,15 @@ class FeedsSyndicationParser extends FeedsParser {
       ),
       'timestamp' => array(
         'name' => t('Published date'),
-        'description' => t('The published date as UNIX time GMT of the feed item.'),
+        'description' => t('Published date as UNIX time GMT of the feed item.'),
       ),
       'url' => array(
         'name' => t('Item URL (link)'),
-        'description' => t('The URLl of the feed item.'),
+        'description' => t('URL of the feed item.'),
       ),
       'guid' => array(
         'name' => t('Item GUID'),
-        'description' => t('The Global Unique Identifier of the feed item.'),
+        'description' => t('Global Unique Identifier of the feed item.'),
       ),
       'tags' => array(
         'name' => t('Categories'),
