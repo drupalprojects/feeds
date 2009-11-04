@@ -3,8 +3,9 @@
 Feeds 6.x 1.0 xxxxx x, 200x-xx-xx
 ---------------------------------
 
-- Allow cURL only to download via http or https.
-- Throw an exception in FeedsHTTPFetcher if result is not 200.
+- #622654 Don't show body as option for mapper when body is disabled
+- Allow cURL only to download via http or https
+- Throw an exception in FeedsHTTPFetcher if result is not 200
 
 Feeds 6.x 1.0 Alpha 6, 2009-11-03
 ---------------------------------
