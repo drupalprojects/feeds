@@ -31,6 +31,9 @@ class FeedsHTTPFetcher extends FeedsFetcher {
     else {
       $result = http_request_get($url);
     }
+    if ($result->code != 200) {
+      throw new Exception(t('Download of @url failed with code !code.', array('@url' => $url, '!code' => $result->code)));
+    }
     return new FeedsFetcherResult($result->data, 'text/xml');
   }
 
