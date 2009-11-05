@@ -76,7 +76,7 @@ class ParserCSV {
    * By default, the comma (',') is used as delimiter.
    */
   public function setDelimiter($delimiter) {
-    $this->delimiter = ',';
+    $this->delimiter = $delimiter;
   }
 
   /**
