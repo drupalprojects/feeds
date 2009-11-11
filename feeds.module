@@ -141,7 +141,6 @@ function feeds_menu() {
 
 /**
  * Menu loader callback.
- * @todo: rename to feeds_importer_load().
  */
 function feeds_importer_load($id) {
   return feeds_importer($id);
