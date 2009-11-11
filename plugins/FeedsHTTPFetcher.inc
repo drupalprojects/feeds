@@ -4,7 +4,6 @@
 /**
  * @file
  * Home of the FeedsHTTPFetcher.
- * @todo: Use all caps for HTTP.
  */
 
 /**
