@@ -119,6 +119,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     // Assign an aggregated node always to anonymous.
     // @todo: change to feed node uid to keep in line with feedapi.
     $target_node->uid = 0;
+    $target_node->log = 'Created/updated by FeedsNodeProcessor';
 
     // Load all mappers. parent::map() might invoke their callbacks.
     self::loadMappers();
