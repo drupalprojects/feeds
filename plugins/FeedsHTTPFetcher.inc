@@ -57,6 +57,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       '#title' => t('URL'),
       '#description' => t('Enter a feed URL.'),
       '#default_value' => isset($source_config['source']) ? $source_config['source'] : '',
+      '#maxlength' => NULL,
       '#required' => TRUE,
     );
     return $form;
