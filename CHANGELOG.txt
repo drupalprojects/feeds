@@ -3,6 +3,7 @@
 Feeds 6.x 1.x, XXXX-XX-XX
 --------------------------
 
+- #613494 miasma: Remove length limit from URL.
 - #631050 z.stolar: Add feed_nid on node_load of a feed item.
 - #631248 velosol: Set log message when creating a node in FeedsNodeProcessor.
 
