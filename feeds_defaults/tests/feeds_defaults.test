@@ -280,6 +280,8 @@ class FeedsDefaultsNodeTestCase extends FeedsDefaultsTestCase {
     $this->assertText('Lorem ipsum');
     $this->assertText('Ut wisi enim ad minim veniam');
     $this->assertText('1976');
+    // Nam liber tempor has the same GUID as Lorem ipsum.
+    $this->assertNoText('Nam liber tempor');
 
     // Click through to one node.
     $this->clickLink('Lorem ipsum');
