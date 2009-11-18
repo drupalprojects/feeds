@@ -29,9 +29,10 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
         // Map item to a node.
         $node = $this->map($item);
 
-        // Set node id if available.
+        // If updating populate nid and vid avoiding an expensive node_load().
         if (!empty($nid)) {
           $node->nid = $nid;
+          $node->vid = db_result(db_query('SELECT vid FROM {node} WHERE nid = %d', $nid));
         }
 
         // Save the node.
