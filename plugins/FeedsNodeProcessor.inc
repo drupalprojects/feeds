@@ -148,33 +148,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'content_type' => $type, // @todo: provide default content type feed_item.
       'update_existing' => 0,
       'expire' => FEEDS_EXPIRE_NEVER,
-      'mappings' => array(
-        '0' => array(
-          'source' => 'title',
-          'target' => 'title',
-          'unique' => FALSE,
-        ),
-        '1' => array(
-          'source' => 'description',
-          'target' => 'body',
-          'unique' => FALSE,
-        ),
-        '2' => array(
-          'source' => 'timestamp',
-          'target' => 'created',
-          'unique' => FALSE,
-        ),
-        '3' => array(
-          'source' => 'url',
-          'target' => 'url',
-          'unique' => TRUE,
-        ),
-        '4' => array(
-          'source' => 'guid',
-          'target' => 'guid',
-          'unique' => TRUE,
-        ),
-      ),
+      'mappings' => array(),
     );
   }
 

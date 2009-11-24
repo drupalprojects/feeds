@@ -123,6 +123,21 @@ class FeedsWebTestCase extends DrupalWebTestCase {
   }
 
   /**
+   * Set importer or plugin settings.
+   *
+   * @param $id
+   *   The importer configuration's id.
+   * @param $plugin
+   *   The plugin (class) name, or NULL to set importer's settings
+   * @param $settings
+   *   The settings to set.
+   */
+  public function setSettings($id, $plugin, $settings) {
+    $this->drupalPost('admin/build/feeds/edit/'. $id .'/settings/'. $plugin, $settings, 'Save');
+    $this->assertText('Your changes have been saved.');
+  }
+
+  /**
    * Create a test feed node. Test user has to have sufficient permissions:
    *
    * * create [type] content
