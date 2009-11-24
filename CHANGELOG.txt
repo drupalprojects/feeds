@@ -1,5 +1,11 @@
 // $Id$
 
+Feeds 6.x 1.0 xxxx, 200x-xx-xx
+------------------------------
+
+- #623452 mongolito404: Port basic test infrastructure for mappers, test for
+  basic CCK mapper.
+
 Feeds 6.x 1.0 Alpha 8, 2009-11-18
 ---------------------------------
 
