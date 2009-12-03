@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 xxxx, 200x-xx-xx
 ------------------------------
 
+- #631962 velosol, alex_b: FeedsNodeProcessor: Update when changed.
 - #623452 mongolito404: Port basic test infrastructure for mappers, test for
   basic CCK mapper.
 
