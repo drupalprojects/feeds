@@ -269,7 +269,7 @@ class FeedsDataProcessor extends FeedsProcessor {
    * Return the data table name for this feed.
    */
   protected function tableName() {
-    return 'feeds_data_'. $this->id;
+    return variable_get('feeds_data_'. $this->id, 'feeds_data_'. $this->id);
   }
 
   /**
