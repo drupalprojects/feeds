@@ -42,15 +42,6 @@ interface FeedsSourceInterface {
 }
 
 /**
- * This exception gets thrown when no source is available
- * for a given feed_nid.
- *
- * @todo: don't use internal source loading + exception, but load source
- * object and pass it into FeedsImporter object.
- */
-class FeedsNoSourceException extends Exception {}
-
-/**
  * This class encapsulates a source of a feed. While a FeedsImporter object
  * contains a feed import configuration, a FeedsSource object is what passes
  * through such an import configuration, holds information about the feed's
