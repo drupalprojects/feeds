@@ -88,7 +88,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
   public function createFeedConfiguration($name = 'Syndication', $id = 'syndication') {
     // Create new feed configuration.
     $this->drupalGet('admin/build/feeds');
-    $this->clickLink('New configuration');
+    $this->clickLink('New importer');
     $edit = array(
       'name' => $name,
       'id' => $id,
