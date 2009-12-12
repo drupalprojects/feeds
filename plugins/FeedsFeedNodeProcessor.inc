@@ -217,8 +217,8 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
    * Helper for retrieving the importer object for the feed nodes to produce.
    */
   protected function feedNodeImporter() {
-   if ($importer = feeds_importer_by_content_type($this->config['content_type'])) {
-      return $importer;
+   if ($id = feeds_get_importer_id($this->config['content_type'])) {
+      return feeds_importer($id);
     }
     else {
       throw new Exception(t('Content type to be created is not a valid Feed content type.'));
