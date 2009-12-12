@@ -385,7 +385,9 @@ function feeds_scheduler_work($feed_info) {
 /**
  * Load all importers.
  *
- * @
+ * @param $load_disabled
+ *   Pass TRUE to load all importers, enabled or disabled, pass FALSE to only
+ *   retrieve enabled importers.
  *
  * @return
  *   An array of all feed configurations available.
