@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXX, 20XX-XX-XX
 ---------------------------------
 
+- #662104 Aron Novak: Specify PHP requirement in .info file.
 - #657374 dtomasch: Common Parser does not get RSS Authors correctly.
 
 Feeds 6.x 1.0 Alpha 9, 2009-12-14
