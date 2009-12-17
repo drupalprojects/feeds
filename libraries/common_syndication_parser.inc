@@ -374,8 +374,8 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
       $body = "{$news['title']}";
     }
 
-    if (!empty($feed_XML->channel->title)) {
-      $original_author = "{$feed_XML->channel->title}";
+    if (!empty($news['author'])) {
+      $original_author = "{$news['author']}";
     }
 
     if (!empty($news['link'])) {
