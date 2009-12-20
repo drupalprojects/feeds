@@ -9,17 +9,15 @@
 class FeedsSyndicationParser extends FeedsParser {
 
   /**
-   * Parses a raw string and returns a Feed object from it.
+   * Parses a string in RSS/Atom format.
    */
-  public function parse(FeedsFetcherResult $fetcherResult, FeedsSource $source) {
-    if ($fetcherResult->type == 'text/filepath') {
-      $string = file_get_contents($fetcherResult->value);
-    }
-    else {
-      $string = $fetcherResult->value;
-    }
+  public function parse(FeedsImportBatch $batch, FeedsSource $source) {
     feeds_include_library('common_syndication_parser.inc', 'common_syndication_parser');
-    return new FeedsParserResult(common_syndication_parser_parse($string), 'syndication');
+    $result = common_syndication_parser_parse($batch->getRaw());
+    $batch->setTitle($result['title']);
+    $batch->setDescription($result['description']);
+    $batch->setLink($result['link']);
+    $batch->setItems($result['items']);
   }
 
   /**

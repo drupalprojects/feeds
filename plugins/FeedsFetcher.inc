@@ -2,17 +2,6 @@
 // $Id$
 
 /**
- * Defines the object a Fetcher returns on fetch().
- */
-class FeedsFetcherResult extends FeedsResult {
-  // Define valid types.
-  // @todo: does text/filepath make sense?
-  // @todo: If convenient, we could expand on this concept and build content
-  //   type negotiation between Fetchers and Parsers.
-  protected $valid_types = array('text/filepath', 'text/xml');
-}
-
-/**
  * Abstract class, defines shared functionality between fetchers.
  *
  * Implements FeedsSourceInfoInterface to expose source forms to Feeds.

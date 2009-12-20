@@ -14,12 +14,12 @@ class FeedsNodeProcessor extends FeedsProcessor {
   /**
    * Implementation of FeedsProcessor::process().
    */
-  public function process(FeedsParserResult $parserResult, FeedsSource $source) {
+  public function process(FeedsImportBatch $batch, FeedsSource $source) {
 
     // Count number of created and updated nodes.
     $created = $updated = 0;
 
-    foreach ($parserResult->value['items'] as $item) {
+    while ($item = $batch->shiftItem()) {
 
       // Create/update if item does not exist or update existing is enabled.
       if (!($nid = $this->existingItemId($item, $source)) || $this->config['update_existing']) {

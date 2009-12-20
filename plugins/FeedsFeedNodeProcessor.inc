@@ -15,12 +15,12 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
   /**
    * Implementation of FeedsProcessor::process().
    */
-  public function process(FeedsParserResult $parserResult, FeedsSource $source) {
+  public function process(FeedsImportBatch $batch, FeedsSource $source) {
 
     // Count number of created and updated nodes.
     $created  = $updated = 0;
 
-    foreach ($parserResult->value['items'] as $item) {
+    while ($item = $batch->shiftItem()) {
 
       // If the target item does not exist OR if update_existing is enabled,
       // map and save.
