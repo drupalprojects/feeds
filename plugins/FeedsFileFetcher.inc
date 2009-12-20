@@ -12,7 +12,7 @@
 class FeedsFileFetcher extends FeedsFetcher {
 
   /**
-   * Fetch a local resource.
+   * Implementation of FeedsFetcher::fetch().
    */
   public function fetch(FeedsSource $source) {
     $source_config = $source->getConfigFor($this);

@@ -9,7 +9,7 @@
 class FeedsSimplePieParser extends FeedsParser {
 
   /**
-   * Parses a string in RSS/Atom format.
+   * Implementation of FeedsParser::parse().
    */
   public function parse(FeedsImportBatch $batch, FeedsSource $source) {
     feeds_include_library('simplepie.inc', 'simplepie');

@@ -12,13 +12,7 @@
 class FeedsHTTPFetcher extends FeedsFetcher {
 
   /**
-   * Fetch a resource via http.
-   *
-   * @param $resource
-   *   A resource description of type FeedsResource.
-   *
-   * @return
-   *   A string from the requested location if successful, or FALSE if not.
+   * Implementation of FeedsFetcher::fetch().
    */
   public function fetch(FeedsSource $source) {
     $source_config = $source->getConfigFor($this);

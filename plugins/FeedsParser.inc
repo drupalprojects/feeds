@@ -9,7 +9,7 @@ abstract class FeedsParser extends FeedsPlugin {
   /**
    * Parse content fetched by fetcher.
    *
-   * Stub method. Extending classes must implement this method.
+   * Extending classes must implement this method.
    *
    * @param $batch
    *   FeedsImportBatch returned by fetcher.

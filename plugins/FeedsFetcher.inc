@@ -11,7 +11,7 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Fetch content from a source and return it.
    *
-   * Stub method. Every class that extends FeedsFetcher must implement this method.
+   * Every class that extends FeedsFetcher must implement this method.
    *
    * @param $source
    *   Source value as entered by user through sourceForm().

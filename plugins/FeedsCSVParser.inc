@@ -7,7 +7,7 @@
 class FeedsCSVParser extends FeedsParser {
 
   /**
-   * Parses a file in CSV format.
+   * Implementation of FeedsParser::parse().
    */
   public function parse(FeedsImportBatch $batch, FeedsSource $source) {
 
@@ -42,7 +42,7 @@ class FeedsCSVParser extends FeedsParser {
   }
 
   /**
-   * Override parent::getSourceElement to use only lower keys.
+   * Override parent::getSourceElement() to use only lower keys.
    */
   public function getSourceElement($item, $element_key) {
     $element_key = strtolower($element_key);

@@ -12,7 +12,7 @@
 class FeedsOPMLParser extends FeedsParser {
 
   /**
-   * Parses an RSS/Atom formatted string.
+   * Implementation of FeedsParser::parse().
    */
   public function parse(FeedsImportBatch $batch, FeedsSource $source) {
     feeds_include_library('opml_parser.inc', 'opml_parser');
