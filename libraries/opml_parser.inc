@@ -20,7 +20,7 @@ function opml_parser_parse($raw) {
 
   $feeds['title'] = (string)current($xml->xpath('//head/title'));
 
-  // @todo: Make xpath case insensitive.
+  // @todo Make xpath case insensitive.
   $outlines = $xml->xpath('//outline[@xmlUrl]');
   foreach ($outlines as $outline) {
     $item = array();

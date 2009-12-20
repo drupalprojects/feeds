@@ -38,7 +38,7 @@ class FeedsUserProcessor extends FeedsProcessor {
         }
 
         // Save the user.
-        // @todo: is this really the best way to use this function?
+        // @todo Is this really the best way to use this function?
         user_save($account, (array) $account);
 
         if ($uid) {

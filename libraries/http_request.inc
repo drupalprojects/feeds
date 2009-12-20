@@ -14,9 +14,9 @@
  * HTML document, function attempts to discover RSS or Atom feeds and downloads
  * them.
  *
- * @todo: debug
- * @todo: cache detected rss feeds in url.
- * @todo: use exceptions, not string or false return values.
+ * @todo Debug
+ * @todo Cache detected rss feeds in url.
+ * @todo Use exceptions, not string or false return values.
  *
  * @return
  *  string - the downloaded data, FALSE - if the URL is not reachable

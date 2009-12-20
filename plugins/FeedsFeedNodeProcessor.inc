@@ -89,7 +89,7 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
 
     /*
     Assign an aggregated node always to current user.
-    @todo: this won't work in all cases as the assumption here is that
+    @todo This won't work in all cases as the assumption here is that
     import is happening one off when user is logged in. Assumption breaks if
     feed node processor is being used for aggregation on cron time and a
     specific user should still be the owner of the imported feed nodes.
@@ -125,8 +125,6 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
     }
     if (empty($types)) {
       $types[''] = t('No feed node content type available');
-      // @todo: configForm() is executed 4 times - why?
-      // drupal_set_message(t('There is no feed content type available. In order to import feed nodes, you must first create at least configuration that is attached to a content type.'), 'error');
     }
     else {
       $types = array(

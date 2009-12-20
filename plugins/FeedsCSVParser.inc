@@ -22,7 +22,7 @@ class FeedsCSVParser extends FeedsParser {
     unset($parser);
 
     // Apply titles in lower case.
-    // @todo: push this functionality into ParserCSV.
+    // @todo Push this functionality into ParserCSV.
     $header = array_shift($rows);
     foreach ($header as $i => $title) {
       $header[$i] = strtolower($title); // Use lower case only.

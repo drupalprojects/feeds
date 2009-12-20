@@ -3,8 +3,6 @@
 
 /**
  * Abstract class, defines interface for parsers.
- *
- * @todo: make implement FeedsSourceInterface
  */
 abstract class FeedsParser extends FeedsPlugin {
 
@@ -17,11 +15,6 @@ abstract class FeedsParser extends FeedsPlugin {
    *   FeedsImportBatch returned by fetcher.
    * @param FeedsSource $source
    *   Source information.
-   * @return
-   *   A parsed array.
-   *   @todo: define this array (object?).
-   *
-   * @todo: Should it be execute() ?
    */
   public abstract function parse(FeedsImportBatch $batch, FeedsSource $source);
 

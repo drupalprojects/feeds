@@ -292,7 +292,7 @@ function _parser_common_syndication_RDF10_parse($feed_XML) {
     $item['rdf'] = (object)array();
     foreach ($rdf_data as $rdf_property => $rdf_value) {
       // looks nicer in the mapper UI
-      // @todo: revisit, not used with feedapi mapper anymore.
+      // @todo Revisit, not used with feedapi mapper anymore.
       $rdf_property = str_replace(':', '_', $rdf_property);
       $item['rdf'][$rdf_property] = $rdf_value;
     }

@@ -57,21 +57,5 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   public function configDefaults() {
     return array('auto_detect_feeds' => FALSE);
   }
-
-  /**
-   * Configuration form.
-   */
-  public function configForm(&$form_state) {
-    $form = array();
-    return $form;
-    // @todo:
-    $form['auto_detect_feeds'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Auto detect feeds (not tested)'),
-      '#description' => t('Auto detect RSS or Atom feeds in the downloaded document and use them instead of the given URL.'),
-      '#default_value' => $this->config['auto_detect_feeds'],
-      );
-    return $form;
-  }
 }
 
