@@ -96,6 +96,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     }
 
     // Set message.
+    drupal_get_messages('status');
     if ($deleted) {
       drupal_set_message(t('Deleted !number nodes.', array('!number' => $deleted)));
     }
