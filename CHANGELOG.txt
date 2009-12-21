@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXX, 20XX-XX-XX
 ---------------------------------
 
+- Redirect to node or import form after manual import or delete.
 - #663830 Aron Novak, alex_b: When download of URL failed, node w/ empty title
   is created.
 - #654728 Aron Novak: Fix parsing + data handling error with RDF 1.0 feeds.
