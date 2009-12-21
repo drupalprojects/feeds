@@ -250,18 +250,16 @@ function feeds_nodeapi(&$node, $op, $form) {
             // @todo Too many indirections. Clean up.
             $batch = $source->importer->fetcher->fetch($source);
             $source->importer->parser->parse($batch, $source);
-            if (!$batch->getTitle()) {
-              form_set_error('title', t('Could not retrieve title from feed.'), 'error');
-            }
-            else {
-              // Keep the title in a static cache and populate $node->title on
-              // 'presave' as node module looses any changes to $node after
-              // 'validate'.
-              $last_title = $batch->getTitle();
+            // Keep the title in a static cache and populate $node->title on
+            // 'presave' as node module looses any changes to $node after
+            // 'validate'.
+            if (!$last_title = $batch->getTitle()) {
+              throw new Exception();
             }
           }
           catch (Exception $e) {
             drupal_set_message($e->getMessage(), 'error');
+            form_set_error('title', t('Could not retrieve title from feed.'), 'error');
           }
         }
 
