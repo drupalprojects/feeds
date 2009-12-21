@@ -228,7 +228,7 @@ function _parser_common_syndication_RDF10_parse($feed_XML) {
 
   // Process the <rss:channel> resource containing feed metadata:
   foreach ($feed_XML->children($canonical_namespaces['rss'])->channel as $rss_channel) {
-    $parsed_source = (object)array(
+    $parsed_source = array(
       'title'       => _parser_common_syndication_title((string)$rss_channel->title),
       'description' => (string)$rss_channel->description,
       'options'     => (object)array('link' => (string)$rss_channel->link),
