@@ -42,7 +42,7 @@ class FeedsImportBatch {
         feeds_include_library('http_request.inc', 'http_request');
         $result = http_request_get($this->url);
         if ($result->code != 200) {
-          throw new Exception(t('Download of @url failed with code !code.', array('@url' => $url, '!code' => $result->code)));
+          throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->url, '!code' => $result->code)));
         }
         $this->raw = $result->data;
       }
