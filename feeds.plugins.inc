@@ -113,7 +113,7 @@ function _feeds_feeds_plugins() {
       'description' => 'Parse RSS and Atom feeds.',
       'help' => 'Use <a href="http://simplepie.org">SimplePie</a> to parse XML feeds in RSS 1, RSS 2 and Atom format.',
       'handler' => array(
-        'parent' => 'FeedsParser',
+        'parent' => 'FeedsSyndicationParser',
         'class' => 'FeedsSimplePieParser',
         'file' => 'FeedsSimplePieParser.inc',
         'path' => $path,

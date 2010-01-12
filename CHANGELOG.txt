@@ -3,6 +3,8 @@
 Feeds 6.x 1.0 XXXXXXX, 20XX-XX-XX
 ---------------------------------
 
+- #624088: mongolito404, David Goode, alex_b: Imagefield/filefield mapper,
+  formalize feed elements.
 - #584034: aaroncouch, mongolito404: Views integration.
 - Redirect to node or import form after manual import or delete.
 - #663830 Aron Novak, alex_b: When download of URL failed, node w/ empty title
