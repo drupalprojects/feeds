@@ -21,8 +21,8 @@ function filefield_feeds_node_processor_targets_alter($targets, $content_type) {
         $name = isset($field['widget']['label']) ? $field['widget']['label'] : $field_name;
         $targets[$field_name] = array(
           'name' => $name,
-          'callback' => $field['type'].'_feeds_set_target',
-          'description' => t('The URL for the CCK !name field of the node.', array('!name' => $name)),
+          'callback' => 'filefield_feeds_set_target',
+          'description' => t('The URL for the CCK @name field of the node.', array('@name' => $name)),
         );
       }
     }
