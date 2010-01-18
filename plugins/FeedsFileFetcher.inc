@@ -16,8 +16,6 @@ class FeedsFileFetcher extends FeedsFetcher {
    */
   public function fetch(FeedsSource $source) {
     $source_config = $source->getConfigFor($this);
-    // Just return path to file, contents can be read easily with
-    // file_get_contents($file_path);
     return new FeedsImportBatch(NULL, $source_config['source']);
   }
 
