@@ -65,3 +65,16 @@ function hook_feeds_term_processor_targets_alter(&$targets, $vid) {
     );
   }
 }
+
+/**
+ * Alter mapping targets for Data table entries. Use this hook to add additional
+ * target options to the mapping form of Data processor.
+ */
+function hook_feeds_data_processor_targets(&$fields, $data_table) {
+  if ($data_table == mymodule_base_table()) {
+    $fields['mytable:category'] = array(
+      'name' => t('Category'),
+      'description' => t('One or more category terms.'),
+    );
+  }
+}

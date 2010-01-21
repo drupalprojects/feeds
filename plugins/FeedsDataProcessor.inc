@@ -185,7 +185,9 @@ class FeedsDataProcessor extends FeedsProcessor {
         'description' => t('Creates a new column of type !type.', array('!type' => $v)),
       );
     }
-    return $new_fields + $existing_fields;
+    $fields = $new_fields + $existing_fields;
+    drupal_alter('feeds_data_processor_targets', $fields, $this->table()->get('name'));
+    return $fields;
   }
 
   /**
