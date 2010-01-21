@@ -194,7 +194,7 @@ class FeedsDataHandler extends DataHandler {
       $query->addSubject($table);
       $query->addJoin($table, "$table.{$this->key} = $this_table.{$this->key}", 'LEFT JOIN');
     }
-    drupal_alter('data_delete_query', $query);
+    drupal_alter('data_delete_query', $query, $this->table);
     if (!empty($query->where)) {
       $query->execute();
     }
