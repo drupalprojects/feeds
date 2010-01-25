@@ -1,7 +1,7 @@
 // $Id$
 
-Feeds 6.x 1.0 XXXXXXX, 20XX-XX-XX
----------------------------------
+Feeds 6.x 1.0 Alpha 10, 2010-01-25
+----------------------------------
 
 - #647128 bigkevmcd, Michelle: Fix broken author info in FeedsSyndicationParser.
 - alex_b: Add mapping API for FeedsDataProcessor.
