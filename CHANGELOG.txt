@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXX, 20XX-XX-XX
 ---------------------------------
 
+- #647128 bigkevmcd, Michelle: Fix broken author info in FeedsSyndicationParser.
 - alex_b: Add mapping API for FeedsDataProcessor.
 - alex_b: Decode HTML entities for title and author name in
   FeedsSimplePieParser.
