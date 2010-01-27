@@ -60,13 +60,12 @@ abstract class FeedsConfigurable {
   protected function __construct($id) {
     // Set this object's id.
     $this->id = $id;
-
     // Per default we assume that a Feeds object is not saved to
     // database nor is it exported to code.
     $this->export_type = FEEDS_EXPORT_NONE;
-
     // Make sure configuration is populated.
     $this->config = $this->configDefaults();
+    $this->disabled = FALSE;
   }
 
   /**
