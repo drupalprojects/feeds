@@ -16,7 +16,7 @@ class FeedsMapperContentTestCase extends FeedsMapperTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Mapper: Content'),
-      'description' => t('Test Feeds Mapper support for CCK fields'),
+      'description' => t('Test Feeds Mapper support for CCK fields. <strong>Requires CCK module</strong>.'),
       'group' => t('Feeds'),
     );
   }
