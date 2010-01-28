@@ -31,7 +31,7 @@ function hook_feeds_after_import(FeedsImporter $importer, FeedsSource $source) {
  * @param $content_type
  *   The content type of the target node.
  */
-function hook_feeds_node_processor_targets_alter(&$targts, $content_type) {
+function hook_feeds_node_processor_targets_alter(&$targets, $content_type) {
   $targets['my_node_field'] = array(
     'name' => t('My custom node field'),
     'description' => t('Description of what my custom node field does.'),
