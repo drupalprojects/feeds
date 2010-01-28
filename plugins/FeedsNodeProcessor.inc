@@ -46,6 +46,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
         // Populate and prepare node object.
         $node->type = $this->config['content_type'];
+        $node->created = FEEDS_REQUEST_TIME;
         $node->feeds_node_item = new stdClass();
         $node->feeds_node_item->hash = $hash;
         $node->feeds_node_item->id = $this->id;
