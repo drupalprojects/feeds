@@ -1,5 +1,11 @@
 // $Id$
 
+Feeds 6.x 1.0 xxxxx xx, xxxx-xx-xx
+----------------------------------
+
+- #698356 alex_b: Refactor and clean up FeedsScheduler::work() to allow more
+  scheduled tasks than 'import' and 'expire'.
+
 Feeds 6.x 1.0 Alpha 10, 2010-01-25
 ----------------------------------
 
