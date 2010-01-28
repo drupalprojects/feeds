@@ -237,10 +237,10 @@ class FeedsDateTimeElement extends FeedsElement {
   protected static function readDateField($node, $field_name) {
     $field = content_fields($field_name);
     $ret = new FeedsDateTimeElement();
-    if ($node->{$field_name}[0]['date'] instanceof FeedsDateTime) {
+    if (isset($node->{$field_name}[0]['date']) && $node->{$field_name}[0]['date'] instanceof FeedsDateTime) {
       $ret->start = $node->{$field_name}[0]['date'];
     }
-    if ($node->{$field_name}[0]['date2'] instanceof FeedsDateTime) {
+    if (isset($node->{$field_name}[0]['date2']) && $node->{$field_name}[0]['date2'] instanceof FeedsDateTime) {
       $ret->end = $node->{$field_name}[0]['date2'];
     }
     return $ret;
