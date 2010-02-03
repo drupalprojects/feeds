@@ -35,9 +35,11 @@ Features
 Requirements
 ============
 
-- CTools 1.1
-- Drupal 6.14 or higher.
-- PHP 5.2.x
+- CTools 1.x
+  http://drupal.org/project/ctools
+- Drupal 6.x
+  http://drupal.org/project/drupal
+- PHP 5.2.x recommended
 
 Installation
 ============
