@@ -17,7 +17,9 @@ class FeedsSyndicationParser extends FeedsParser {
     $batch->setTitle($result['title']);
     $batch->setDescription($result['description']);
     $batch->setLink($result['link']);
-    $batch->setItems($result['items']);
+    if (is_array($result['items'])) {
+      $batch->setItems($result['items']);
+    }
   }
 
   /**

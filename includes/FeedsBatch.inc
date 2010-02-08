@@ -133,6 +133,9 @@ class FeedsImportBatch {
 
   /**
    * Set items.
+   * 
+   * @param $items
+   *   An array of the items in the feed. Cannot be NULL.
    */
   public function setItems($items) {
     $this->items = $items;
