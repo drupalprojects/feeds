@@ -264,7 +264,7 @@ class FeedsDateTimeElement extends FeedsElement {
 
     // Set timezone if not already in the FeedsDateTime object
     $to_tz = date_get_timezone($field['tz_handling'], date_default_timezone_name());
-    $temp = new FeedsDateTime($to_tz, NULL);
+    $temp = new FeedsDateTime(NULL, new DateTimeZone($to_tz));
 
     $db_tz = '';
     if ($use_start) {
