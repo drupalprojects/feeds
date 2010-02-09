@@ -447,9 +447,10 @@ class FeedsDateTime extends DateTime {
   protected function setGranularityFromTime($time, $tz) {
     $this->granularity = array();
     $temp = date_parse($time);
-    // This PHP method currently doesn't have resolution down to seconds, so if there is some time, all will be set.
+    // This PHP method currently doesn't have resolution down to seconds, so if
+    // there is some time, all will be set.
     foreach (self::$allgranularity AS $g) {
-      if (is_numeric($temp[$g]) || ($g == 'zone' && $temp['zone_type'] > 0)) {
+      if ((isset($temp[$g]) && is_numeric($temp[$g])) || ($g == 'zone' && (isset($temp['zone_type']) && $temp['zone_type'] > 0))) {
         $this->granularity[] = $g;
       }
     }
