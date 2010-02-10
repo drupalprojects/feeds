@@ -125,6 +125,11 @@ Description: The table used by FeedsDataProcessor to store feed items. Usually a
              and the importer's id ($importer_id). This default table name can
              be overridden by defining a variable with the same name.
 
+Name:        feeds_node_batch_size
+Default:     50
+             The number of nodes feed node processor creates or deletes in one
+             page load.
+
 Glossary
 ========
 

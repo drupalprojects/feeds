@@ -3,6 +3,10 @@
 Feeds 6.x 1.0 xxxxx xx, xxxx-xx-xx
 ----------------------------------
 
+- #600584 alexb: Use Batch API. NOTE: third party plugins/extensions
+  implementing FeedsProcessor::process(), FeedsProcessor::clear() or
+  FeedsImporter::expire() need to adjust their implementations.
+
 Feeds 6.x 1.0 Alpha 11, 2010-02-10
 ----------------------------------
 
