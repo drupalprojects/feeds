@@ -165,6 +165,7 @@ class FeedsScheduler implements FeedsSchedulerInterface {
     }
     catch (Exception $e) {
       watchdog('FeedsScheduler', $e->getMessage(), array(), WATCHDOG_ERROR);
+      $this->finished($job);
     }
     // Make sure that job is not scheduled after this method has executed.
     $this->unschedule($job);
