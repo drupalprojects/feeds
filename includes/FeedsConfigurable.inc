@@ -200,6 +200,7 @@ function feeds_config_form(&$form_state, $configurable) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#weight' => 100,
   );
   return $form;
 }
