@@ -172,7 +172,10 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    * Encode basic authentication credentials in URL depending on configuration.
    */
   protected function basicAuth($url, $source_config = array()) {
-    if ($this->config['basic_auth'] == FEEDS_HTTP_BASIC_AUTH_PER_SOURCE) {
+    if (!isset($this->config['basic_auth'])) {
+      return $url;
+    }
+    elseif ($this->config['basic_auth'] == FEEDS_HTTP_BASIC_AUTH_PER_SOURCE) {
       if (!empty($source_config['basic_auth_user']) && !empty($source_config['basic_auth_password'])) {
         return $this->basicAuthEncodeCredentials($url, $source_config['basic_auth_user'], $source_config['basic_auth_password']);
       }
