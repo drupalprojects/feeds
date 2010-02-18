@@ -53,7 +53,7 @@ Drupal.behaviors.feeds = function() {
   // Replace checkbox with .feeds-ui-checkbox-link class with a link.
   $('.feeds-ui-checkbox-link:not(.processed)').each(function(i) {
     $(this).addClass('processed').after(
-      '<a href="#" onclick="return false;" class="feeds-ui-trigger-remove">' + $(this).children(' label').text() + '</a>'
+      '<a href="#" onclick="return false;" class="feeds-ui-trigger-remove">' + $('label', this).text() + '</a>'
     ).hide();
   });
 
