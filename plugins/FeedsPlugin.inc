@@ -67,7 +67,17 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   /**
    * Validation handler for sourceForm.
    */
-  public function sourceFormValidate(&$values) {}
+  public function sourceFormValidate(&$source_config) {}
+
+  /**
+   * A source is being saved.
+   */
+  public function sourceSave(FeedsSource $source) {}
+
+  /**
+   * A source is being deleted.
+   */
+  public function sourceDelete(FeedsSource $source) {}
 }
 
 /**
