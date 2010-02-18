@@ -142,7 +142,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    */
   public function configFormValidate(&$values) {
     // Don't accidentally wipe out password.
-    if (empty($values['basic_auth_password'])) {
+    if (empty($values['basic_auth_password']) && !empty($this->config['basic_auth_password'])) {
       $values['basic_auth_password'] = $this->config['basic_auth_password'];
     }
     if ($values['basic_auth'] != FEEDS_HTTP_BASIC_AUTH_PER_IMPORTER) {
