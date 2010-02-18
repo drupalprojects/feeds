@@ -173,6 +173,7 @@ abstract class FeedsConfigurable {
  *   Rendered config form, if available. Empty string otherwise.
  */
 function feeds_get_config_form($configurable) {
+  $form_state = array();
   if ($configurable->configForm($form_state)) {
     return drupal_get_form(get_class($configurable) .'_feeds_config_form', $configurable);
   }
