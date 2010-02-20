@@ -7,10 +7,8 @@ $Id$
 FEEDS
 =====
 
-The new incarnation of FeedAPI and Feed Element Mapper. Work in progress.
-
-Contact alex_b for details:
-http://drupal.org/user/53995
+An import and aggregation framework for Drupal.
+http://drupal.org/project/feeds
 
 Features
 ========
