@@ -98,16 +98,13 @@ class FeedsImporter extends FeedsConfigurable {
    *   Throws Exception if an error occurs working off the job.
    */
   public function work($job) {
-    if ($this->export_type == FEEDS_EXPORT_NONE) {
-      return;
-    }
     switch ($job['callback']) {
       case 'import':
         return feeds_source($job['id'], $job['feed_nid'])->import();
-        break;
       case 'expire':
         return $this->expire();
     }
+    return FEEDS_BATCH_COMPLETE;
   }
 
   /**
