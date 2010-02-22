@@ -64,7 +64,7 @@ class FeedsFileFetcher extends FeedsFetcher {
     $form['upload'] = array(
       '#type' => 'file',
       '#title' => t('Upload'),
-      '#description' => t('Choose a file from your local computer, then click "Import".'),
+      '#description' => t('Choose a file from your local computer.'),
     );
     return $form;
   }
