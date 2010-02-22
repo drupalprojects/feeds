@@ -45,8 +45,9 @@ Installation
 - Install Feeds, Feeds Admin UI and Feeds defaults.
 - Make sure cron is correctly configured http://drupal.org/cron
 - Navigate to admin/build/feeds.
-- Enable one or more default configuration or create your own: from scratch or
-  by cloning.
+- Enable one or more importers, create your own by adding a new one, modify an
+  existing one by clicking on 'override' or copy and modify an existing one by
+  clicking on 'clone'.
 - Go to import/ to import data.
 - To use SimplePie parser, download SimplePie and place simplepie.inc into
   feeds/libraries.
