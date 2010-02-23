@@ -139,3 +139,13 @@ function feeds_delete_tab_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
   feeds_batch_set(t('Deleting'), 'clear', $form['#importer_id'], empty($form['#feed_nid']) ? 0 : $form['#feed_nid']);
 }
+
+/**
+ * Handle a fetcher callback.
+ */
+function feeds_fetcher_callback($importer, $feed_nid = 0) {
+  if ($importer instanceof FeedsImporter) {
+    return $importer->fetcher->request($feed_nid);
+  }
+  drupal_access_denied();
+}
