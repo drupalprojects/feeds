@@ -15,7 +15,7 @@ Features
 
 - Pluggable import configurations consisting of fetchers (get data) parsers
   (read and transform data) and processors (create content on Drupal).
--- HTTP upload.
+-- HTTP upload (with optional PubSubHubbub support).
 -- File upload.
 -- CSV, RSS, Atom parsing.
 -- Creates nodes or terms.
