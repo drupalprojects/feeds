@@ -22,7 +22,7 @@ define('FEEDS_SCHEDULER_QUEUE', 'feeds_queue');
 
 
 /**
- * @defgroup hooks Hooks and callbacks
+ * @defgroup hooks Hook and callback implementations
  * @{
  */
 
@@ -371,7 +371,7 @@ function feeds_scheduler_work($feed_info) {
  */
 
 /**
- * @defgroup batch Batch functions.
+ * @defgroup batch Batch functions
  */
 
 /**
