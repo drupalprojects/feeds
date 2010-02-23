@@ -4,6 +4,8 @@
 Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
 ----------------------------------
 
+- #718460 jerdavis: In FeedsNodeProcessor, clear items only for the current
+  importer id.
 - #718474 jerdavis: In FeedsNodeProcessor, check for duplicate items within
   same importer id.
 
