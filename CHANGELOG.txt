@@ -1,5 +1,12 @@
 // $Id$
 
+
+Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
+----------------------------------
+
+- #718474 jerdavis: In FeedsNodeProcessor, check for duplicate items within
+  same importer id.
+
 Feeds 6.x 1.0 Alpha 12, 2010-02-23
 ----------------------------------
 
