@@ -13,7 +13,9 @@ class FeedsNotExistingException extends Exception {
 }
 
 /**
- * A configurable class.
+ * Base class for configurable classes. Captures configuration handling, form
+ * handling and distinguishes between in-memory configuration and persistent
+ * configuration.
  */
 abstract class FeedsConfigurable {
 
