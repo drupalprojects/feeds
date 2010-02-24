@@ -16,7 +16,7 @@ function feeds_page() {
       if ($importer->disabled) {
         continue;
       }
-      if (!user_access('import '. $importer->id .' feeds')) {
+      if (!(user_access('import '. $importer->id .' feeds') || user_access('administer feeds'))) {
         continue;
       }
       if (empty($importer->config['content_type'])) {
