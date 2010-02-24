@@ -7,7 +7,7 @@
  */
 
 /**
- * Render a page of available feed configuration.
+ * Render a page of available importers.
  */
 function feeds_page() {
   $rows = array();
