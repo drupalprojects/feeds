@@ -68,7 +68,7 @@ function hook_feeds_plugins() {
 }
 
 /**
- * @} End of "defgroup pluginapi".
+ * @}
  */
 
 /**
@@ -89,7 +89,7 @@ function hook_feeds_after_import(FeedsImporter $importer, FeedsSource $source) {
 }
 
 /**
- * @} End of "defgroup import".
+ * @}
  */
 
 /**
@@ -159,5 +159,5 @@ function hook_feeds_data_processor_targets_alter(&$fields, $data_table) {
 }
 
 /**
- * @} End of "defgroup mappingapi".
+ * @}
  */
