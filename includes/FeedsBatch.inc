@@ -32,16 +32,20 @@ class FeedsBatch {
  * A Parser must populate a FeedsImportBatch object through the set methods upon
  * parse(). For instance:
  *
+ * @code
  * $batch->setItems($parsed_rows);
  * $batch->setTitle('My imported document');
+ * @endcode
  *
  * Finally, a processor can work off the information produced on the parsing
  * stage by consuming items with $batch->shiftItem().
  *
+ * @code
  * while ($item = $batch->shiftItem()) {
  *   $object = $this->map($item);
  *   $object->save();
  * }
+ * @endcode
  *
  * Note: Knowledge of the internal structure of a single item in the $items
  * array is managed by the mapping API specified in FeedsParser class and
