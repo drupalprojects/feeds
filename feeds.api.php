@@ -2,8 +2,9 @@
 // $Id$
 
 /**
- * @file
- * Doxygen API documentation for hooks invoked by Feeds.
+ * @mainpage
+ *
+ * @verbinclude README.txt
  */
 
 /**
@@ -15,7 +16,7 @@
  * @see FeedsParser
  * @see FeedsProcessor
  *
- * @defgroup pluginapi Plugin API hooks
+ * @defgroup pluginapi Plugin API
  * @{
  */
 
@@ -102,7 +103,7 @@ function hook_feeds_after_import(FeedsImporter $importer, FeedsSource $source) {
  */
 
 /**
- * @defgroup mappingapi Mapping API hooks
+ * @defgroup mappingapi Mapping API
  * @{
  */
 
