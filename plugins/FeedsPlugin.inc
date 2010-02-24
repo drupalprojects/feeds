@@ -12,10 +12,6 @@
  * Note how this class does not attempt to store source information locally.
  * Doing this would break the model where source information is represented by
  * an object that is being passed into a Feed object and its plugins.
- *
- * There is only one instance of a Feed or a FeedsPlugin per feed configuration,
- * whereas there is one instance of a FeedsSource per feed configuration, per
- * source info definition.
  */
 abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInterface {
 
