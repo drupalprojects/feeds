@@ -50,7 +50,7 @@ Installation
   clicking on 'clone'.
 - Go to import/ to import data.
 - To use SimplePie parser, download SimplePie and place simplepie.inc into
-  feeds/libraries.
+  feeds/libraries. Recommended version: 1.2.
   http://simplepie.org/
 
 PubSubHubbub support
