@@ -59,14 +59,14 @@ function feeds_perm() {
 
 /**
  * Implementation of hook_forms().
+ *
+ * Declare form callbacks for all known classes derived from FeedsConfigurable.
  */
 function feeds_forms() {
-  // Declare form callbacks for all known classes derived from FeedsConfigurable.
   $forms = array();
   $forms['FeedsImporter_feeds_config_form']['callback'] = 'feeds_config_form';
   $plugins = feeds_get_plugins();
   foreach ($plugins as $plugin) {
-    // See feeds_get_config_form().
     $forms[$plugin['handler']['class'] .'_feeds_config_form']['callback'] = 'feeds_config_form';
   }
   return $forms;
