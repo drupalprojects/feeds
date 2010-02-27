@@ -68,8 +68,8 @@ class FeedsImporter extends FeedsConfigurable {
    *   given, internal processor settings will be used.
    *
    * @return
-   *   FEEDS_BATCH_COMPLETE if complete, a float between 0 and 1 indicating
-   *   progress otherwise.
+   *   FEEDS_BATCH_COMPLETE if the expiry process finished. A decimal between
+   *   0.0 and 0.9 periodic if expiry is still in progress.
    *
    * @throws
    *   Throws Exception if an error occurs when expiring items.
