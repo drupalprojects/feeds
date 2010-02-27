@@ -138,14 +138,18 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    * Override sourceSave() - subscribe to hub.
    */
   public function sourceSave(FeedsSource $source) {
-    $this->subscribe($source);
+    if ($this->config['use_pubsubhubbub']) {
+      $this->subscribe($source);
+    }
   }
 
   /**
    * Override sourceDelete() - unsubscribe from hub.
    */
   public function sourceDelete(FeedsSource $source) {
-    $this->unsubscribe($source);
+    if ($this->config['use_pubsubhubbub']) {
+      $this->unsubscribe($source);
+    }
   }
 
   /**
