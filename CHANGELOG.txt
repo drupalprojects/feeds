@@ -4,6 +4,8 @@
 Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
 ----------------------------------
 
+- #711664 neclimdul: guarantee compatibility with CTools 1.4  by declaring that
+  Feeds uses hooks to define plugins via hook_ctools_plugin_plugins().
 - #718460 jerdavis: In FeedsNodeProcessor, clear items only for the current
   importer id.
 - #718474 jerdavis: In FeedsNodeProcessor, check for duplicate items within
