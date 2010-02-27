@@ -70,7 +70,7 @@ class FeedsTermProcessor extends FeedsProcessor {
       drupal_set_message(t('There are no new terms.'));
     }
 
-    return FEEDS_NODE_BATCH_SIZE;
+    return FEEDS_BATCH_COMPLETE;
   }
 
   /**
