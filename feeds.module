@@ -19,7 +19,9 @@ define('FEEDS_EXPIRE_NEVER', -1);
 define('FEEDS_EXPORT_NONE', 0x0);
 // The Drupal Queue FeedsScheduler may use for scheduling importing or expiry.
 define('FEEDS_SCHEDULER_QUEUE', 'feeds_queue');
-
+// Status of batched operations.
+define('FEEDS_BATCH_COMPLETE', 1);
+define('FEEDS_BATCH_ACTIVE', 0);
 
 /**
  * @defgroup hooks Hook and callback implementations
