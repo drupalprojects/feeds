@@ -4,8 +4,9 @@
 Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
 ----------------------------------
 
+- #728854 Scott Reynolds: Fix $queue->createItem() fails.
 - #707098 alex_b: Improve performance of nodeapi and access checks.
-- #726012 alex_b: Fix RSS descriptions not being reset in 
+- #726012 alex_b: Fix RSS descriptions not being reset in
   common_syndication_parser.inc.
 - alex_b: Fix a typo in the return value of process() in FeedsTermProcessor.
 - alex_b: Stop PubSubHubbub from subscribing if it is not enabled.
