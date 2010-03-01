@@ -85,7 +85,8 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       }
     }
     // Will generate the default 200 response.
-    return '';
+    header('HTTP/1.1 200 "OK"', null, 200);
+    exit();
   }
 
   /**
