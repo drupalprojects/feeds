@@ -110,13 +110,21 @@ class FeedsSimplePieParser extends FeedsParser {
       }
       $item['domains'] = $domains;
       $item['tags'] = $tags;
-      // Stick the raw data onto the feed item.
+
+      // Allow parsing to be extended.
+      $this->parseExtensions($item, $simplepie_item);
       $item['raw'] = $simplepie_item->data;
+
       $batch->addItem($item);
     }
     // Release parser.
     unset($parser);
   }
+
+  /**
+   * Allow extension of FeedsSimplePie item parsing.
+   */
+  protected function parseExtensions(&$item, $simplepie_item) {}
 
   /**
    * Return mapping sources.
