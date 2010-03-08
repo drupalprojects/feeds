@@ -37,6 +37,8 @@ Requirements
   http://drupal.org/project/ctools
 - Drupal 6.x
   http://drupal.org/project/drupal
+- PHP safe mode is not supported, depending on your Feeds Importer configuration
+  safe mode may cause no problems though.
 - PHP 5.2.x recommended
 
 Installation
