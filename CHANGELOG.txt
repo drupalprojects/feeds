@@ -4,6 +4,8 @@
 Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
 ----------------------------------
 
+- alex_b: Suppress namespace warnings when parsing feeds for subscription in
+  PuSHSubscriber.inc
 - #724184 ekes: catch failures when parsing for PubSubHubbub hub and self.
 - #706984 lyricnz: Add FeedsSimplePie::parseExtensions() to allow parsing to be
   customized.
