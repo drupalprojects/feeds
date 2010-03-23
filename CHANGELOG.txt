@@ -4,6 +4,8 @@
 Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
 ----------------------------------
 
+- #735444 Doug Preble: PubSubHubbub - Fix "Subscription refused by callback URL"
+  with PHP 5.2.0.
 - alex_b: Suppress namespace warnings when parsing feeds for subscription in
   PuSHSubscriber.inc
 - #724184 ekes: catch failures when parsing for PubSubHubbub hub and self.
