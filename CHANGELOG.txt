@@ -4,6 +4,8 @@
 Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
 ----------------------------------
 
+- #648080 pvhee: FeedsNodeProcessor - static caching of mapping targets makes
+  mapping fail with multiple feed configurations.
 - #735444 Doug Preble: PubSubHubbub - Fix "Subscription refused by callback URL"
   with PHP 5.2.0.
 - alex_b: Suppress namespace warnings when parsing feeds for subscription in
