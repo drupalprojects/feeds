@@ -520,7 +520,7 @@ function _parser_common_syndication_link($links) {
 function _parser_common_syndication_title($title, $body = FALSE) {
   if (empty($title) && !empty($body)) {
     // Explode to words and use the first 3 words.
-    $words = preg_split("/[\s,]+/", $body);
+    $words = preg_split("/[\s,]+/", strip_tags($body));
     $title = $words[0] .' '. $words[1] .' '. $words[2];
   }
   return $title;
