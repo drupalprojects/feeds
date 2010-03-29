@@ -360,7 +360,6 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
       $title = "{$news['title']}";
     }
 
-    $body = '';
     if (isset($news['description'])) {
       $body = "{$news['description']}";
     }
@@ -376,8 +375,8 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
         $body = "{$content['encoded']}";
       }
     }
-    if (empty($body)) {
-      $body = $title;
+    if (!isset($body)) {
+      $body = "{$news['title']}";
     }
 
     if (!empty($news['author'])) {
