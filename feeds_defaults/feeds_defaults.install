@@ -33,4 +33,3 @@ function feeds_defaults_install() {
 function feeds_defaults_uninstall() {
   drupal_uninstall_schema('feeds_defaults');
 }
-
