@@ -85,6 +85,9 @@ class FeedsFileFetcher extends FeedsFetcher {
     elseif (empty($values['source'])) {
       form_set_error('feeds][source', t('Upload a file first.'));
     }
+    // If a file has not been uploaded and $values['source'] is not empty, make
+    // sure that this file is within Drupal's files directory as otherwise
+    // potentially any file that the web server has access could be exposed.
     elseif (!file_check_location($values['source'], file_directory_path())) {
       form_set_error('feeds][source', t('File needs to point to a file in your Drupal file system path.'));
     }
