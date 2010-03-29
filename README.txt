@@ -105,10 +105,8 @@ Note: at the moment, only PubSubHubbub related actions are logged.
 Performance
 ===========
 
-Use Drupal Queue to improve Feeds' performance when scheduling many very active
-feeds. An example for "many very active feeds" would be 300 news feeds with an
-average of four items a day.
-http://drupal.org/project/drupal_queue
+See "The site builder's guide to Feeds":
+http://drupal.org/node/622698
 
 Hidden settings
 ===============
