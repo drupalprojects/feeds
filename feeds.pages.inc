@@ -64,8 +64,6 @@ function feeds_import_form(&$form_state, $importer_id) {
 
 /**
  * Validation handler for node forms and feeds_import_form().
- *
- * Has to live in feeds.module, needs to be callable from node form.
  */
 function feeds_import_form_validate($form, &$form_state) {
   // @todo This may be a problem here, as we don't have a feed_nid at this point.
