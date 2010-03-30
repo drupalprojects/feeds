@@ -193,10 +193,10 @@ class FeedsUserProcessor extends FeedsProcessor {
     foreach ($this->uniqueTargets($source_item) as $target => $value) {
       switch ($target) {
         case 'name':
-          $uid = db_result(db_query('SELECT uid FROM {users} WHERE name = "%s"', $value));
+          $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
           break;
         case 'mail':
-          $uid = db_result(db_query('SELECT uid FROM {users} WHERE mail = "%s"', $value));
+          $uid = db_result(db_query("SELECT uid FROM {users} WHERE mail = '%s'", $value));
           break;
         case 'openid':
           $uid = db_result(db_query("SELECT uid FROM {authmap} WHERE authname = '%s' AND module = 'openid'", $value));

@@ -164,7 +164,7 @@ class FeedsImporter extends FeedsConfigurable {
    * from database, does not delete configuration itself.
    */
   public function delete() {
-    db_query('DELETE FROM {feeds_importer} WHERE id = "%s"', $this->id);
+    db_query("DELETE FROM {feeds_importer} WHERE id = '%s'", $this->id);
   }
 
   /**
