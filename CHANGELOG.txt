@@ -31,6 +31,8 @@ Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
   importer id.
 - #718474 jerdavis: In FeedsNodeProcessor, check for duplicate items within
   same importer id.
+- #740962 Fix FileFetcher Attached to Feed Node, Upload Field Not Saving File
+  Path.
 
 Feeds 6.x 1.0 Alpha 12, 2010-02-23
 ----------------------------------
