@@ -33,6 +33,7 @@ Feeds 6.x 1.0 xxxxx xx, 2010-xx-xx
   same importer id.
 - #740962 Fix FileFetcher Attached to Feed Node, Upload Field Not Saving File
   Path.
+- #705872 Scott Reynolds: Added HTTPFetcher autodiscovery
 
 Feeds 6.x 1.0 Alpha 12, 2010-02-23
 ----------------------------------
