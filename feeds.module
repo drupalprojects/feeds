@@ -292,6 +292,10 @@ function feeds_nodeapi(&$node, $op, $form) {
         break;
       case 'insert':
       case 'update':
+        // A node may not have been validated, make sure $node_feeds is present.
+        if (empty($node_feeds)) {
+          $node_feeds = $node->feeds;
+        }
         // Add configuration to feed source and save.
         $source = feeds_source($importer_id, $node->nid);
         $source->addConfig($node_feeds);
@@ -307,7 +311,7 @@ function feeds_nodeapi(&$node, $op, $form) {
         // Add expiry to schedule, in case this is the first feed of this
         // configuration.
         feeds_scheduler()->add($importer_id, 'expire');
-        unset($node_feeds);
+        $node_feeds = NULL;
         break;
       case 'delete':
         // Remove feed from scheduler and delete source.
