@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxxxx
 ----------------------------------
 
+- #653412 rbrandon: Do not create items older than expiry time.
 - #725392 nicholasThompson: FeedsBatch does not check feeds folder exists before
   uploading.
 - #776972 lyricnz: Messages use plural when describing single item.
