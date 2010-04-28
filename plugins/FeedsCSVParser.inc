@@ -86,7 +86,11 @@ class FeedsCSVParser extends FeedsParser {
       '#type' => 'select',
       '#title' => t('Delimiter'),
       '#description' => t('The character that delimits fields in the CSV file.'),
-      '#options' => drupal_map_assoc(array(',', ';')),
+      '#options'  => array(
+        ',' => ',',
+        ';' => ';',
+        "\t" => 'TAB',
+      ),
       '#default_value' => isset($source_config['delimiter']) ? $source_config['delimiter'] : ',',
     );
     return $form;
@@ -108,7 +112,11 @@ class FeedsCSVParser extends FeedsParser {
       '#type' => 'select',
       '#title' => t('Default delimiter'),
       '#description' => t('Default field delimiter.'),
-      '#options' => drupal_map_assoc(array(',', ';')),
+      '#options' => array(
+        ',' => ',',
+        ';' => ';',
+        "\t" => 'TAB',
+      ),
       '#default_value' => $this->config['delimiter'],
     );
     return $form;
