@@ -42,10 +42,10 @@ class FeedsDataProcessor extends FeedsProcessor {
 
     // Set messages.
     if ($inserted) {
-      drupal_set_message(format_plural($inserted, 'Created !number item.', 'Created !number items.', array('!number' => $inserted)));
+      drupal_set_message(format_plural($inserted, 'Created @number item.', 'Created @number items.', array('@number' => $inserted)));
     }
     elseif ($updated) {
-      drupal_set_message(format_plural($updated, 'Updated !number item.', 'Updated !number items.', array('!number' => $updated)));
+      drupal_set_message(format_plural($updated, 'Updated @number item.', 'Updated @number items.', array('@number' => $updated)));
     }
     else {
       drupal_set_message(t('There are no new items.'));
@@ -64,7 +64,7 @@ class FeedsDataProcessor extends FeedsProcessor {
       'feed_nid' => $source->feed_nid,
     );
     $num = $this->handler()->delete($clause);
-    drupal_set_message(format_plural($num, 'Deleted !number item.', 'Deleted !number items.', array('!number' => $num)));
+    drupal_set_message(format_plural($num, 'Deleted @number item.', 'Deleted @number items.', array('@number' => $num)));
     return FEEDS_BATCH_COMPLETE;
   }
 
@@ -85,7 +85,7 @@ class FeedsDataProcessor extends FeedsProcessor {
       ),
     );
     $num = $this->handler()->delete($clause);
-    drupal_set_message(format_plural($num, 'Expired !number record from !table.', 'Expired !number records from !table.', array('!number' => $num, '!table' => $this->tableName())));
+    drupal_set_message(format_plural($num, 'Expired @number record from @table.', 'Expired @number records from @table.', array('@number' => $num, '@table' => $this->tableName())));
     return FEEDS_BATCH_COMPLETE;
   }
 
