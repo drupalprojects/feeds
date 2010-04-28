@@ -58,13 +58,21 @@ class FeedsTermProcessor extends FeedsProcessor {
     $vocabularies = taxonomy_get_vocabularies();
     $vocabulary = $vocabularies[$this->config['vocabulary']];
     if ($no_name) {
-      drupal_set_message(t('There were !number terms that could not be imported because their name was empty. Check mapping settings on Taxomy term processor.', array('!number' => $no_name)), 'error');
+      drupal_set_message(
+        format_plural(
+          $no_name,
+          'There was !number term that could not be imported because their name was empty. Check mapping settings on Taxomy term processor.',
+          'There were !number terms that could not be imported because their name was empty. Check mapping settings on Taxomy term processor.',
+          array('!number' => $no_name)
+        ),
+        'error'
+      );
     }
     if ($created) {
-      drupal_set_message(t('Created !number terms in !vocabulary.', array('!number' => $created, '!vocabulary' => $vocabulary->name)));
+      drupal_set_message(format_plural($created, 'Created !number term in !vocabulary.', 'Created !number terms in !vocabulary.', array('!number' => $created, '!vocabulary' => $vocabulary->name)));
     }
     elseif ($updated) {
-      drupal_set_message(t('Updated !number terms in !vocabulary.', array('!number' => $updated, '!vocabulary' => $vocabulary->name)));
+      drupal_set_message(format_plural($updated, 'Updated !number term in !vocabulary.', 'Updated !number terms in !vocabulary.', array('!number' => $updated, '!vocabulary' => $vocabulary->name)));
     }
     else {
       drupal_set_message(t('There are no new terms.'));
@@ -90,7 +98,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     $vocabularies = taxonomy_get_vocabularies();
     $vocabulary = $vocabularies[$this->config['vocabulary']];
     if ($deleted) {
-      drupal_set_message(t('Deleted !number terms from !vocabulary.', array('!number' => $deleted, '!vocabulary' => $vocabulary->name)));
+      drupal_set_message(format_plural($deleted, 'Deleted !number term from !vocabulary.', 'Deleted !number terms from !vocabulary.', array('!number' => $deleted, '!vocabulary' => $vocabulary->name)));
     }
     else {
       drupal_set_message(t('No terms to be deleted.'));

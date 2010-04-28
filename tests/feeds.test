@@ -579,7 +579,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
     // Assert result.
     $this->assertText('Created 4 users.');
     // 1 user has an invalid email address.
-    $this->assertText('There were 1 users that could not be imported because either their name or their email was empty or not valid. Check import data and mapping settings on User processor.');
+    $this->assertText('There was 1 user that could not be imported because either their name or their email was empty or not valid. Check import data and mapping settings on User processor.');
     $this->drupalGet('admin/user/user');
     $this->assertText('Morticia');
     $this->assertText('Fester');
