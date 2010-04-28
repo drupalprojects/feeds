@@ -43,6 +43,12 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
    * Test node creation, refreshing/deleting feeds and feed items.
    */
   public function test() {
+    // Set the teaser length to unlimited otherwise tests looking for text on
+    // nodes will fail.
+    $edit = array(
+      'teaser_length' => 0,
+    );
+    $this->drupalPost('admin/content/node-settings', $edit, 'Save configuration');
 
     // Create a feed.
     $this->createFeedConfiguration('Syndication', 'syndication');
