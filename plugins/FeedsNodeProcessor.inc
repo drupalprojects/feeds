@@ -207,7 +207,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       $target_node->feeds_node_item->$target_element = $value;
     }
     elseif ($target_element == 'body') {
-      $target_node->teaser = $value;
+      $target_node->teaser = node_teaser($value);
       $target_node->body = $value;
     }
     elseif (in_array($target_element, array('title', 'status', 'created'))) {
