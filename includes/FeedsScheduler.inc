@@ -107,7 +107,7 @@ class FeedsScheduler implements FeedsSchedulerInterface {
         foreach ($importer->getScheduleCallbacks() as $callback) {
           $period = $importer->getSchedulePeriod($callback);
           if ($period != FEEDS_SCHEDULE_NEVER) {
-            $result = db_query_range('SELECT feed_nid, id, callback, last_executed_time FROM {feeds_schedule} WHERE id = "%s" AND callback = "%s" AND scheduled = 0 AND (last_executed_time < %d OR last_executed_time = 0) ORDER BY last_executed_time ASC', $importer->id, $callback, FEEDS_REQUEST_TIME - $period, 0, $num);
+            $result = db_query_range("SELECT feed_nid, id, callback, last_executed_time FROM {feeds_schedule} WHERE id = '%s' AND callback = '%s' AND scheduled = 0 AND (last_executed_time < %d OR last_executed_time = 0) ORDER BY last_executed_time ASC", $importer->id, $callback, FEEDS_REQUEST_TIME - $period, 0, $num);
             while ($job = db_fetch_array($result)) {
               $this->schedule($job);
               // @todo Add time limit.
