@@ -137,6 +137,8 @@ function feeds_delete_tab_form(&$form_state, $importer_id, $node = NULL) {
 function feeds_delete_tab_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
   feeds_batch_set(t('Deleting'), 'clear', $form['#importer_id'], empty($form['#feed_nid']) ? 0 : $form['#feed_nid']);
+  // Reset import schedule.
+  feeds_scheduler()->add($form['#importer_id'], 'import');
 }
 
 /**
