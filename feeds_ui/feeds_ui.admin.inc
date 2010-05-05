@@ -296,7 +296,8 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       $active_container['body'] = drupal_get_form('feeds_ui_plugin_form', $importer, $active);
       break;
     case 'settings':
-      drupal_add_js(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.js');
+      drupal_add_js(drupal_get_path('module', 'ctools') .'/js/dependent.js');
+      ctools_include('dependent');
       if (empty($plugin_key)) {
         $active_container['title'] = t('Basic settings');
         $active_container['body'] = feeds_get_config_form($importer);
