@@ -120,6 +120,16 @@ function _feeds_feeds_plugins() {
       ),
     );
   }
+  $info['FeedsSitemapParser'] = array(
+    'name' => 'Sitemap parser',
+    'description' => 'Parse Sitemap XML format feeds.',
+    'handler' => array(
+      'parent' => 'FeedsParser',
+      'class' => 'FeedsSitemapParser',
+      'file' => 'FeedsSitemapParser.inc',
+      'path' => $path,
+    ),
+  );
   $info['FeedsNodeProcessor'] = array(
     'name' => 'Node processor',
     'description' => 'Create nodes.',
