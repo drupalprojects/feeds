@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxxxx
 ----------------------------------
 
+- #704236 jerdavis: Support mapping to CCK float field.
 - #783820 klonos: Fix warning: copy() [function.copy]: Filename cannot be empty
   in FeedsParser.inc on line 168.
 - #778416 clemens.tolboom: Better message when plugin is missing.
