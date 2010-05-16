@@ -162,7 +162,7 @@ class FeedsEnclosure extends FeedsElement {
    * @todo This is not concurrency safe.
    */
   public function getFile() {
-    if(!isset($this->file)) {
+    if(!isset($this->file) && $this->getValue()) {
       $dest = file_destination(file_directory_temp() .'/'. get_class($this) .'-'. basename($this->getValue()), FILE_EXISTS_RENAME);
       if (ini_get('allow_url_fopen')) {
         $this->file = copy($this->getValue(), $dest) ? $dest : 0;
