@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxxxx
+Feeds 6.x 1.0 Alpha 15, 2010-05-16
 ----------------------------------
 
 - #791296 B-Prod: Fix Feeds data processor does update id 0.
