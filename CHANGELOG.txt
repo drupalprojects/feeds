@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxxxx
 ----------------------------------
 
+- #755544 Monkey Master: Keep batch processing when mapping fails.
 - alex_b: Reset import schedule after deleting items from feed.
 - #653412 rbrandon: Do not create items older than expiry time.
 - #725392 nicholasThompson: FeedsBatch does not check feeds folder exists before
