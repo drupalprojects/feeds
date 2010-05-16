@@ -2,14 +2,19 @@
 // $Id$
 
 /**
- * A FeedsBatch object holds the state of an import or clear batch. Used in
- * FeedsSource class.
+ * A FeedsBatch object holds the state of an import or clear batch.
+ *
+ * Used in FeedsSource class. Counter variables are public for easier access.
  */
 class FeedsBatch {
-  // Public counters for easier access.
+  // Maximum number of items in this batch. This is not necessarily the current
+  // number of items in this batch
   public $total;
+  // Number of items created.
   public $created;
+  // Number of items updated or replaced.
   public $updated;
+  // Number of items deleted.
   public $deleted;
   public function __construct() {
     $this->total = 0;
