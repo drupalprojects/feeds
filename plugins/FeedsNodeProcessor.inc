@@ -30,22 +30,22 @@ class FeedsNodeProcessor extends FeedsProcessor {
         $node = new stdClass();
         $hash = $this->hash($item);
 
+        // If updating check whether item actually has changed and if so,
+        // retrieve its nid and vid.
         if (!empty($nid)) {
-
-          // If hash of this item is same as existing hash there is no actual
-          // change, skip.
           if ($hash == $this->getHash($nid)) {
             continue;
           }
-
-          // If updating populate nid and vid avoiding an expensive node_load().
           $node->nid = $nid;
           $node->vid = db_result(db_query("SELECT vid FROM {node} WHERE nid = %d", $nid));
+        }
+        else {
+          $node->created = FEEDS_REQUEST_TIME;
         }
 
         // Populate and prepare node object.
         $node->type = $this->config['content_type'];
-        $node->created = FEEDS_REQUEST_TIME;
+        $node->changed = FEEDS_REQUEST_TIME;
         $node->feeds_node_item = new stdClass();
         $node->feeds_node_item->hash = $hash;
         $node->feeds_node_item->id = $this->id;

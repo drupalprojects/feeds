@@ -3,6 +3,8 @@
 Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxxxx
 ----------------------------------
 
+- #774858 rjbrown99: Fix Node Processor updates node "created" time when
+  updating.
 - #704236 jerdavis: Support mapping to CCK float field.
 - #783820 klonos: Fix warning: copy() [function.copy]: Filename cannot be empty
   in FeedsParser.inc on line 168.
