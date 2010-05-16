@@ -133,7 +133,9 @@ class FeedsImportBatch extends FeedsBatch {
    *   removed from the internal array.
    */
   public function shiftItem() {
-    return array_shift($this->items);
+    $item = array_shift($this->items);
+    $this->total = count($this->items);
+    return $item;
   }
 
   /**
@@ -165,7 +167,7 @@ class FeedsImportBatch extends FeedsBatch {
    */
   public function setItems($items) {
     $this->items = $items;
-    $this->total = count($items);
+    $this->total = count($this->items);
   }
 
   /**
@@ -173,5 +175,6 @@ class FeedsImportBatch extends FeedsBatch {
    */
   public function addItem($item) {
     $this->items[] = $item;
+    $this->total = count($this->items);
   }
 }
