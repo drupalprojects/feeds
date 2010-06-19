@@ -60,7 +60,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
         // Populate properties that are set by node_object_prepare().
         $node->log = 'Created/updated by FeedsNodeProcessor';
-        $node->uid = 0;
+        $node->uid = $this->config['author'];
 
         // Map and save nodes. If errors occur don't stop but report them.
         try {
@@ -172,6 +172,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'update_existing' => 0,
       'expire' => FEEDS_EXPIRE_NEVER,
       'mappings' => array(),
+      'author' => 0,
     );
   }
 
@@ -188,6 +189,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#options' => $types,
       '#default_value' => $this->config['content_type'],
     );
+    $author = user_load(array('uid' => $this->config['author']));
+    $form['author'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Author'),
+      '#description' => t('Author to be assigned to created nodes - leave empty to assign "anonymous".'),
+      '#autocomplete_path' => 'user/autocomplete',
+      '#default_value' => empty($author->name) ?  'anonymous' : check_plain($author->name),
+    );
     $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 604800 * 4, 604800 * 12, 604800 * 24, 31536000), 'feeds_format_expire');
     $form['expire'] = array(
       '#type' => 'select',
@@ -203,6 +212,18 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#default_value' => $this->config['update_existing'],
     );
     return $form;
+  }
+
+  /**
+   * Override parent::configFormValidate().
+   */
+  public function configFormValidate(&$values) {
+    if ($author = user_load(array('name' => $values['author']))) {
+      $values['author'] = $author->uid;
+    }
+    else {
+      $values['author'] = 0;
+    }
   }
 
   /**
