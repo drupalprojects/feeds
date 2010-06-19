@@ -5,7 +5,7 @@ table.feeds-admin-importers thead th {
   border: none;
   }
 table.feeds-admin-importers td.disabled {
-  color: #ccc;
+  color: #aaa;
   }
 table.feeds-admin-importers tr.disabled.odd,
 table.feeds-admin-importers tr.disabled.even {
