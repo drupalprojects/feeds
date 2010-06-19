@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXXXX
 ----------------------------------
 
+- #819876 alex_b: Fix field 'url' and 'guid' don't have default values.
 - #623444 mongolito404, pvhee, pdrake, servantleader, alex_b et. al.: Mapper for
   link module.
 - #652180 ronald_istos, rjbrown99, et. al.: Assign author of imported nodes.
