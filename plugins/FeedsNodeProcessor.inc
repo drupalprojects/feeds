@@ -295,26 +295,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
   }
 
   /**
-   * Loads on-behalf implementations from mappers/
-   */
-  protected static function loadMappers() {
-    static $loaded = FALSE;
-
-    if (!$loaded) {
-      $path = drupal_get_path('module', 'feeds') .'/mappers';
-      $files = drupal_system_listing('.*\.inc$', $path, 'name', 0);
-      foreach ($files as $file) {
-        if (strstr($file->filename, '/mappers/')) {
-  	      require_once("./$file->filename");
-        }
-      }
-      // Rebuild cache.
-      module_implements('', FALSE, TRUE);
-    }
-    $loaded = TRUE;
-  }
-
-  /**
    * Create MD5 hash of $item array.
    * @return Always returns a hash, even with empty, NULL, FALSE:
    *  Empty arrays return 40cd750bba9870f18aada2478b24840a
