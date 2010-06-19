@@ -108,6 +108,24 @@ function hook_feeds_after_import(FeedsImporter $importer, FeedsSource $source) {
  */
 
 /**
+ * Alter mapping targets for users. Use this hook to add additional target
+ * options to the mapping form of User processors.
+ *
+ * For an example implementation, see mappers/profile.inc
+ *
+ * @param: &$targets
+ *  Array containing the targets to be offered to the user. Add to this array
+ *  to expose additional options. Remove from this array to suppress options.
+ */
+function hook_feeds_user_processor_targets_alter(&$targets) {
+  $targets['my_user_field'] = array(
+    'name' => t('My custom user field'),
+    'description' => t('Description of what my custom user field does.'),
+    'callback' => 'my_callback',
+  );
+}
+
+/**
  * Alter mapping targets for nodes. Use this hook to add additional target
  * options to the mapping form of Node processors.
  *

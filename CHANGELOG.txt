@@ -1,5 +1,11 @@
 // $Id$
 
+Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXXXX
+----------------------------------
+
+- #783098 elliotttf: Introduce hook_feeds_user_processor_targets_alter(), mapper
+  for user profile fields.
+
 Feeds 6.x 1.0 Alpha 15, 2010-05-16
 ----------------------------------
 
