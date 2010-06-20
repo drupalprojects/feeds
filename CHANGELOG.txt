@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXXXX
+Feeds 6.x 1.0 Alpha 16, 2010-06-19
 ----------------------------------
 
 - #830438 andrewlevine: More secret files in FeedsImportBatch::getFilePath().
