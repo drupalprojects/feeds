@@ -25,7 +25,7 @@ class FeedsMapperFileFieldTestCase extends FeedsMapperTestCase {
    */
   public function setUp() {
     // Call parent setup with the required module
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'content', 'filefield');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'content', 'filefield', 'libraries');
 
     // Create user and login
     $this->drupalLogin($this->drupalCreateUser(
