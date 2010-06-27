@@ -27,7 +27,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
    * Absolute path to Drupal root.
    */
   public function absolute() {
-    return dirname($GLOBALS['_SERVER']['SCRIPT_FILENAME']);
+    return realpath(getcwd());
   }
 
   /**
