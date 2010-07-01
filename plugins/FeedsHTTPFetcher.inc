@@ -30,7 +30,7 @@ class FeedsHTTPBatch extends FeedsImportBatch {
   public function getRaw() {
     feeds_include_library('http_request.inc', 'http_request');
     $result = http_request_get($this->url);
-    if ($result->code != 200) {
+    if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
       throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->url, '!code' => $result->code)));
     }
     return $result->data;
