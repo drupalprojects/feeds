@@ -3,6 +3,8 @@
 Feeds 6.x 1.X XXXX
 ------------------
 
+- #840350 lyricnz: (Optionally) Transliterate enclosure filenames to provide
+  protection from awkward names.
 - #842040 dixon_: Accept all responses from the 2xx status code series.
 - #836982 Steven Merrill: Fix Feeds.module tests do not work when run from the
   command line.
