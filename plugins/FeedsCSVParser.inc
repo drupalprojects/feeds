@@ -26,7 +26,7 @@ class FeedsCSVParser extends FeedsParser {
     // @todo Push this functionality into ParserCSV.
     $header = array_shift($rows);
     foreach ($header as $i => $title) {
-      $header[$i] = drupal_strtolower($title); // Use lower case only.
+      $header[$i] = trim(drupal_strtolower($title)); // Use lower case only.
     }
     $result_rows = array();
     foreach ($rows as $i => $row) {
