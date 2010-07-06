@@ -217,8 +217,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
   /**
    * Return available mapping targets.
-   *
-   * Static cached, may be called multiple times in a page load.
    */
   public function getMappingTargets() {
     $targets = array(
