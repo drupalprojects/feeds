@@ -525,7 +525,7 @@ function feeds_ui_mapping_form(&$form_state, $importer) {
     foreach ($mappings as $i => $mapping) {
 
       $mappings[$i]['source'] = isset($source_options) ? $source_options[$mappings[$i]['source']] : $mappings[$i]['source'];
-      $mappings[$i]['target'] = $target_options[$mappings[$i]['target']];
+      $mappings[$i]['target'] = isset($target_options[$mappings[$i]['target']]) ? $target_options[$mappings[$i]['target']] : $mappings[$i]['target'];
       $param = array(
         'processor' => $importer->processor,
         'mapping' => $mapping,
