@@ -3,6 +3,7 @@
 Feeds 6.x 1.X XXXX
 ------------------
 
+- #624464 lyricnz, alex_b: Fix to "support tabs as delimiters".
 - #840350 lyricnz: (Optionally) Transliterate enclosure filenames to provide
   protection from awkward names.
 - #842040 dixon_: Accept all responses from the 2xx status code series.

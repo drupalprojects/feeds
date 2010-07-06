@@ -16,7 +16,8 @@ class FeedsCSVParser extends FeedsParser {
     $iterator = new ParserCSVIterator(realpath($batch->getFilePath()));
     $source_config = $source->getConfigFor($this);
     $parser = new ParserCSV();
-    $parser->setDelimiter($source_config['delimiter']);
+    $delimiter = $source_config['delimiter'] == 'TAB' ? "\t" : $source_config['delimiter'];
+    $parser->setDelimiter($delimiter);
     $parser->setSkipFirstLine(FALSE);
     $rows = $parser->parse($iterator);
     unset($parser);
@@ -89,7 +90,7 @@ class FeedsCSVParser extends FeedsParser {
       '#options'  => array(
         ',' => ',',
         ';' => ';',
-        "\t" => 'TAB',
+        'TAB' => 'TAB',
       ),
       '#default_value' => isset($source_config['delimiter']) ? $source_config['delimiter'] : ',',
     );
@@ -115,7 +116,7 @@ class FeedsCSVParser extends FeedsParser {
       '#options' => array(
         ',' => ',',
         ';' => ';',
-        "\t" => 'TAB',
+        'TAB' => 'TAB',
       ),
       '#default_value' => $this->config['delimiter'],
     );
