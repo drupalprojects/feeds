@@ -22,6 +22,7 @@ function link_feeds_node_processor_targets_alter($targets, $content_type) {
           'name' => t('!field_name (URL)', array('!field_name' => $name)),
           'callback' => 'link_feeds_set_target',
           'description' => t('The URL for the CCK !name field of the node.', array('!name' => $name)),
+          'real_target' => $field_name,
         );
 
         //Provides a mapping target for the field title if used.
@@ -30,6 +31,7 @@ function link_feeds_node_processor_targets_alter($targets, $content_type) {
             'name' => $name .' (' . t('title').')',
             'callback' => 'link_feeds_set_target',
             'description' => t('The title for the CCK !name field of the node.', array('!name' => $name)),
+            'real_target' => $field_name,
           );
         }
       }

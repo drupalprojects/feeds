@@ -19,6 +19,7 @@ function taxonomy_feeds_node_processor_targets_alter(&$targets, $content_type) {
       'name' => "Taxonomy: ". $vocab->name,
       'callback' => 'taxonomy_feeds_set_target',
       'description' => $description,
+      'real_target' => 'taxonomy',
     );
   }
 }

@@ -95,6 +95,25 @@ abstract class FeedsProcessor extends FeedsPlugin {
       $target_item = array();
     }
 
+    // Many mappers add to existing fields rather than replacing them. Hence we
+    // need to clear target elements of each item before mapping in case we are
+    // mapping on a prepopulated item such as an existing node.
+    if (is_array($target_item)) {
+      $target_item = (object)$target_item;
+      $convert_to_array = TRUE;
+    }
+    foreach ($targets[$this->id] as $target_name => $target) {
+      if (isset($target['real_target']) && isset($target_item->$target['real_target'])) {
+        unset($target_item->$target['real_target']);
+      }
+      else if (isset($target_item->$target_name)) {
+        unset($target_item->$target_name);
+      }
+    }
+    if ($convert_to_array) {
+      $target_item = (array)$target_item;
+    }
+
     /*
     This is where the actual mapping happens: For every mapping we envoke
     the parser's getSourceElement() method to retrieve the value of the source

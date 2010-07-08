@@ -23,11 +23,13 @@ function date_feeds_node_processor_targets_alter(&$targets, $content_type) {
           'name' => $name .': Start',
           'callback' => 'date_feeds_set_target',
           'description' => t('The start date for the !name field. Also use if mapping both start and end.', array('!name' => $name)),
+          'real_target' => $field_name,
         );
         $targets[$field_name .':end'] = array(
           'name' => $name .': End',
           'callback' => 'date_feeds_set_target',
           'description' => t('The end date for the @name field.', array('@name' => $name)),
+          'real_target' => $field_name,
         );
       }
     }
