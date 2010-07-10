@@ -261,7 +261,7 @@ class FeedsImporter extends FeedsConfigurable {
     $form['content_type'] = array(
       '#type' => 'select',
       '#title' => t('Attach to content type'),
-      '#description' => t('If you attach a configuration to a node you can use nodes for creating feeds on your site.'),
+      '#description' => t('If an importer is attached to a content type, content is imported by creating a node. If the standalone form is selected, content is imported by using the standalone form under http://example.com/import.'),
       '#options' => array('' => t('Use standalone form')) + node_get_types('names'),
       '#default_value' => $this->config['content_type'],
     );
