@@ -1,5 +1,10 @@
 // $Id$
 
+Feeds 6.x 1.X XXXX
+------------------
+
+- #647222 cglusky, jeffschuler: Specify input format for feed items.
+
 Feeds 6.x 1.0 Beta 2, 2010-07-10
 --------------------------------
 
