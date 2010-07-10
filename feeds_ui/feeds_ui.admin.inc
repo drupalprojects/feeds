@@ -732,7 +732,11 @@ function theme_feeds_ui_container($container) {
   $output = '<div class="feeds-container'. $class .'"'. $id .'>';
 
   if (isset($container['actions']) && count($container['actions'])) {
-    $output .= theme('item_list', $container['actions'], NULL, 'ul', array('class' => 'container-actions'));
+    $output .= '<ul class="container-actions">';
+    foreach ($container['actions'] as $action) {
+      $output .= '<li>'. $action .'</li>';
+    }
+    $output .= '</ul>';
   }
 
   if (!empty($container['title'])) {
