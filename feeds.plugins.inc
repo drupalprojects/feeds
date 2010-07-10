@@ -132,8 +132,8 @@ function _feeds_feeds_plugins() {
   );
   $info['FeedsNodeProcessor'] = array(
     'name' => 'Node processor',
-    'description' => 'Create nodes.',
-    'help' => 'Create nodes from parsed content.',
+    'description' => 'Create and update nodes.',
+    'help' => 'Create and update nodes from parsed content.',
     'handler' => array(
       'parent' => 'FeedsProcessor',
       'class' => 'FeedsNodeProcessor',
