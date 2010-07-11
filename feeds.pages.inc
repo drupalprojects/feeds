@@ -152,3 +152,32 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
   }
   drupal_access_denied();
 }
+
+/**
+ * Theme upload widget.
+ */
+function theme_feeds_upload($element) {
+  drupal_add_css(drupal_get_path('module', 'feeds') .'/feeds.css');
+  _form_set_class($element, array('form-file'));
+  $output = '';
+  if (!empty($element['#file_info'])) {
+    $info = $element['#file_info'];
+    $output .= '<div class="file-info">';
+    $output .= '<div class="file-name">';
+    $output .= l(basename($info['path']), $info['path']);
+    $output .= '</div>';
+    $output .= '<div class="file-size">';
+    $output .= format_size($info['size']);
+    $output .= '</div>';
+    if ($info['mime']) {
+      $output .= '<div class="file-mime">';
+      $output .= check_plain($info['mime']);
+      $output .= '</div>';
+    }
+    $output .= '</div>';
+  }
+  $output .= '<div class="file-upload">';
+  $output .= '<input type="file" name="'. $element['#name'] .'"'. ($element['#attributes'] ? ' '. drupal_attributes($element['#attributes']) : '') .' id="'. $element['#id'] .'" size="'. $element['#size'] ."\" />\n";
+  $output .= '</div>';
+  return theme('form_element', $element, $output);
+}
