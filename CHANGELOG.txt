@@ -3,6 +3,8 @@
 Feeds 6.x 1.X XXXX
 ------------------
 
+- #850652 alex_b: Make ParserCSV (instead of FeedsCSVParser) populate column
+  names.
 - #850638 alex_b: Introduce FeedsSource::preview().
 - #850298 alex_b: ParserCSV: Support batching (only affects library, full parser
   level batch support to be added later with #744660).
