@@ -54,7 +54,6 @@ class FeedsFileFetcher extends FeedsFetcher {
    */
   public function sourceForm($source_config) {
     $form = array();
-    // When renaming, do not forget feeds_vews_handler_field_source class.
     $form['source'] = array(
       '#type' => 'textfield',
       '#title' => t('File'),
