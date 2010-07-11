@@ -111,6 +111,21 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Preview = fetch and parse a feed.
+   *
+   * @return
+   *   FeedsImportBatch object, fetched and parsed.
+   *
+   * @throws
+   *   Throws Exception if an error occurs when fetching or parsing.
+   */
+  public function preview() {
+    $batch = $this->importer->fetcher->fetch($this);
+    $this->importer->parser->parse($batch, $this);
+    return $batch;
+  }
+
+  /**
    * Import a feed: execute, fetching, parsing and processing stage.
    *
    * Lock a source before importing by using FeedsSource::lock(), after

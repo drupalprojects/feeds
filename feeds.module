@@ -271,10 +271,7 @@ function feeds_nodeapi(&$node, $op, $form) {
         if (trim($node->title) == '') {
           try {
             $source->addConfig($node_feeds);
-            // @todo Too many indirections. Clean up.
-            $batch = $source->importer->fetcher->fetch($source);
-            $source->importer->parser->parse($batch, $source);
-            if (!$last_title = $batch->getTitle()) {
+            if (!$last_title = $source->preview()->getTitle()) {
               throw new Exception();
             }
           }
