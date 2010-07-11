@@ -107,8 +107,8 @@ function feeds_views_data() {
     ),
   );
   $data['feeds_node_item']['url'] = array(
-    'title' => t('Item link'),
-    'help' => t('Contains the link of the feed item.'),
+    'title' => t('Item URL'),
+    'help' => t('Contains the URL of the feed item.'),
     'field' => array(
       'handler' => 'views_handler_field_url',
       'click sortable' => TRUE,
@@ -116,16 +116,16 @@ function feeds_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
       'allow empty' => TRUE,
-      'help' => t('Filter on a Feeds Item\'s link field.'),
+      'help' => t('Filter on a Feeds Item\'s URL field.'),
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
       'numeric' => TRUE,
       'validate type' => 'nid',
-      'help' => t('Argument on a Feeds Item\'s link field.'),
+      'help' => t('Argument on a Feeds Item\'s URL field.'),
     ),
     'sort' => array(
-      'help' => t('Sort on a Feeds Item\'s link field.'),
+      'help' => t('Sort on a Feeds Item\'s URL field.'),
     ),
   );
   $data['feeds_node_item']['guid'] = array(
