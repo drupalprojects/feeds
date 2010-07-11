@@ -151,9 +151,6 @@ function feeds_importer_load($id) {
  */
 function feeds_theme() {
   return array(
-    'feeds_info' => array(
-      'file' => 'feeds.pages.inc',
-    ),
     'feeds_upload' => array(
       'file' => 'feeds.pages.inc',
     ),
