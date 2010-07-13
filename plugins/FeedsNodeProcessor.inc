@@ -199,7 +199,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     );
     $form['update_existing'] = array(
       '#type' => 'radios',
-      '#title' => t('Update existing items'),
+      '#title' => t('Update existing nodes'),
       '#description' => t('Select how existing nodes should be updated. Existing nodes will be determined using mappings that are a "unique target".'),
       '#options' => array(
         FEEDS_SKIP_EXISTING => 'Do not update existing nodes',
