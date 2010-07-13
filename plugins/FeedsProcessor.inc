@@ -1,6 +1,12 @@
 <?php
 // $Id$
 
+
+// Update mode for existing items.
+define('FEEDS_SKIP_EXISTING', 0);
+define('FEEDS_REPLACE_EXISTING', 1);
+define('FEEDS_UPDATE_EXISTING', 2);
+
 /**
  * Abstract class, defines interface for processors.
  */
