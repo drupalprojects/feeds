@@ -9,7 +9,7 @@
 /**
  * Implementation of hook_feeds_node_processor_targets_alter().
  */
-function link_feeds_node_processor_targets_alter($targets, $content_type) {
+function link_feeds_node_processor_targets_alter(&$targets, $content_type) {
   $info = content_types($content_type);
 
   $fields = array();

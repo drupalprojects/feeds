@@ -12,7 +12,7 @@
 /**
  * Implementation of hook_feeds_node_processor_targets_alter()
  */
-function filefield_feeds_node_processor_targets_alter($targets, $content_type) {
+function filefield_feeds_node_processor_targets_alter(&$targets, $content_type) {
   $info = content_types($content_type);
   $fields = array();
   if (isset($info['fields']) && count($info['fields'])) {
