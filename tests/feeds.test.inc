@@ -98,6 +98,8 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     // Assert message and presence of default plugins.
     $this->assertText('Your configuration has been created with default settings.');
     $this->assertPlugins($id, 'FeedsHTTPFetcher', 'FeedsSyndicationParser', 'FeedsNodeProcessor');
+    // Per default attach to page content type.
+    $this->setSettings($id, NULL, array('content_type' => 'page'));
   }
 
   /**
