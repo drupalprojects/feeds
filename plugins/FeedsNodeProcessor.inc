@@ -259,6 +259,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
       );
     }
     $targets += array(
+      'uid' => array(
+        'name' => t('User ID'),
+        'description' => t('The Drupal user ID of the node author.'),
+      ),
       'status' => array(
         'name' => t('Published status'),
         'description' => t('Whether a node is published or not. 1 stands for published, 0 for not published.'),
