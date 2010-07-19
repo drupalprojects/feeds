@@ -1,7 +1,7 @@
 // $Id$
 
-Feeds 6.x 1.X XXXX
-------------------
+Feeds 6.x 1.0 Beta 3, 2010-07-18
+--------------------------------
 
 - #854628 DanielJohnston, alex_b: Fix user processor assigns all roles.
 - #838018 infojunkie: Mapper for Formatted Number CCK field.
