@@ -1,5 +1,11 @@
 // $Id$
 
+Feeds XXX
+---------
+
+- #838018-12 Remove Formatted Number CCK mapper, cannot be properly tested, see
+  #857928.
+
 Feeds 6.x 1.0 Beta 3, 2010-07-18
 --------------------------------
 
