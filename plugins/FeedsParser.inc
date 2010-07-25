@@ -155,14 +155,15 @@ class FeedsEnclosure extends FeedsElement {
 
   /**
    * @return
-   *   The file path to the downloaded resource referenced by the enclosure.
-   *   Downloads resource if not downloaded yet.
+   *   A temporary file path to the downloaded resource referenced by the
+   *   enclosure. Downloads resource if not downloaded yet. The file path is
+   *   valid for the time of the page load.
    *
    * @todo Get file extension from mime_type.
    * @todo This is not concurrency safe.
    */
   public function getFile() {
-    if(!isset($this->file) && $this->getValue()) {
+    if(empty($this->file) && $this->getValue()) {
       $filename = basename($this->getValue());
       if (module_exists('transliteration')) {
         require_once (drupal_get_path('module', 'transliteration') . '/transliteration.inc');
