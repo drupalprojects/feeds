@@ -82,8 +82,6 @@ class FeedsTermProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('There are no new terms.'));
     }
-
-    return FEEDS_BATCH_COMPLETE;
   }
 
   /**
@@ -108,7 +106,6 @@ class FeedsTermProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('No terms to be deleted.'));
     }
-    return FEEDS_BATCH_COMPLETE;
   }
 
   /**

@@ -80,8 +80,6 @@ class FeedsUserProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('There are no new users.'));
     }
-
-    return FEEDS_BATCH_COMPLETE;
   }
 
   /**

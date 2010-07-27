@@ -20,10 +20,6 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   The current feed import data passed in from the parsing stage.
    * @param FeedsSource $source
    *   Source information about this import.
-   *
-   * @return
-   *   FEEDS_BATCH_COMPLETE if all items have been processed, a float between 0
-   *   and 0.99* indicating progress otherwise.
    */
   public abstract function process(FeedsImportBatch $batch, FeedsSource $source);
 
@@ -40,10 +36,6 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   item pertains to a certain souce is by using $source->feed_nid. It is the
    *   processor's responsibility to store the feed_nid of an imported item in
    *   the processing stage.
-   *
-   * @return
-   *   FEEDS_BATCH_COMPLETE if all items have been processed, a float between 0
-   *   and 0.99* indicating progress otherwise.
    */
   public abstract function clear(FeedsBatch $batch, FeedsSource $source);
 

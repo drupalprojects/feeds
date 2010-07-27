@@ -60,8 +60,6 @@ class FeedsDataProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('There are no new items.'));
     }
-
-    return FEEDS_BATCH_COMPLETE;
   }
 
   /**
@@ -75,7 +73,6 @@ class FeedsDataProcessor extends FeedsProcessor {
     );
     $num = $this->handler()->delete($clause);
     drupal_set_message(format_plural($num, 'Deleted @number item.', 'Deleted @number items.', array('@number' => $num)));
-    return FEEDS_BATCH_COMPLETE;
   }
 
   /**

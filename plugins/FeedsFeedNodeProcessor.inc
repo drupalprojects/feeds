@@ -53,8 +53,6 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('There is no new content.'));
     }
-
-    return FEEDS_BATCH_COMPLETE;
   }
 
   /**

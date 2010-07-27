@@ -141,7 +141,8 @@ class FeedsSource extends FeedsConfigurable {
         $this->batch = $this->importer->fetcher->fetch($this);
         $this->importer->parser->parse($this->batch, $this);
       }
-      $result = $this->importer->processor->process($this->batch, $this);
+      $this->importer->processor->process($this->batch, $this);
+      $result = $this->batch->getProgress();
       if ($result == FEEDS_BATCH_COMPLETE) {
         unset($this->batch);
         module_invoke_all('feeds_after_import', $this->importer, $this);
@@ -170,10 +171,11 @@ class FeedsSource extends FeedsConfigurable {
     try {
       $this->importer->fetcher->clear($this);
       $this->importer->parser->clear($this);
-      if (!$this->batch) {
-        $this->batch = new FeedsBatch();
+      if (!$this->batch || !($this->batch instanceof FeedsClearBatch)) {
+        $this->batch = new FeedsClearBatch();
       }
-      $result = $this->importer->processor->clear($this->batch, $this);
+      $this->importer->processor->clear($this->batch, $this);
+      $result = $this->batch->getProgress();
       if ($result == FEEDS_BATCH_COMPLETE) {
         unset($this->batch);
       }
