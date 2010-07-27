@@ -22,6 +22,9 @@ class FeedsCSVParser extends FeedsParser {
     // Get first line and use it for column names, convert them to lower case.
     $parser->setLineLimit(1);
     $rows = $parser->parse($iterator);
+    if (!count($rows)) {
+      return;
+    }
     $header = array_shift($rows);
     foreach ($header as $i => $title) {
       $header[$i] = trim(drupal_strtolower($title));

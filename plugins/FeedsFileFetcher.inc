@@ -32,6 +32,9 @@ class FeedsFileBatch extends FeedsImportBatch {
    * Implementation of FeedsImportBatch::getFilePath().
    */
   public function getFilePath() {
+    if (!file_exists($this->file_path)) {
+      throw new Exception(t('File @filepath is not accessible.', array('@filepath' => $this->file_path)));
+    }
     return $this->file_path;
   }
 }
