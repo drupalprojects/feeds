@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #862444 pounard: Do not name files after their enclosure class.
 - #851570 morningtime: Avoid trailing slashes when passing file paths to
   file_check_directory().
 - #836090 andrewlevine, alex_b: Include mapping configuration in hash.
