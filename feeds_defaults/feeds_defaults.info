@@ -1,8 +1,0 @@
-; $Id$
-core = "6.x"
-name = "Feeds Defaults"
-package = "Feeds"
-description = "Get started: useful default configurations for Feeds: RSS/Atom aggregation, OPML import, node import and user import."
-project = "Feeds"
-dependencies[] = "feeds"
-php = 5.2
