@@ -28,6 +28,7 @@ class FeedsParserCSVTest extends DrupalWebTestCase  {
    * Test method.
    */
   public function test() {
+    drupal_load('module', 'feeds');
     feeds_include_library('ParserCSV.inc', 'ParserCSV');
 
     $this->_testSimple();

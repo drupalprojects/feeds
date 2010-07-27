@@ -22,7 +22,7 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
   public function setUp() {
     // Call parent setup with the required module
     parent::setUp(
-      'devel', 'feeds', 'feeds_ui', 'ctools', 'content', 'link'
+      'feeds', 'feeds_ui', 'ctools', 'content', 'link'
     );
 
     // Create user and login
@@ -32,7 +32,6 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
           'administer feeds',
           'administer nodes',
           'administer site configuration',
-          'access devel information'
         )
     ));
   }

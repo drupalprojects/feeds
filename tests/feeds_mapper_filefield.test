@@ -15,7 +15,7 @@ class FeedsMapperFileFieldTestCase extends FeedsMapperTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Mapper: FileField'),
-      'description' => t('Test Feeds Mapper support for FileField CCK fields. <strong>Requires CCK and filefield module</strong>.'),
+      'description' => t('Test Feeds Mapper support for FileField CCK fields. <strong>Requires CCK and filefield module; requires SimplePie library</strong>.'),
       'group' => t('Feeds'),
     );
   }
