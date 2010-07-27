@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #853156 alex_b: Support real updates of terms.
 - #858684 alex_b: Fix notices when file not found.
 
 Feeds 6.x 1.0 Beta 4, 2010-07-25
