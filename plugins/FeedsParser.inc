@@ -133,6 +133,15 @@ class FeedsEnclosure extends FeedsElement {
   }
 
   /**
+   * Destructor, clean up any temporary files.
+   */
+  public function __destruct() {
+    if (!empty($this->file)) {
+      file_delete($this->file);
+    }
+  }
+
+  /**
    * @return
    *   MIME type of return value of getValue().
    */
