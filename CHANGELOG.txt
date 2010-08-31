@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #885052 Hanno: Fix small typo in access rights.
 - #863494 ekes, alex_b: Delete temporary enclosures file.
 - #849986 lyricnz, alex_b: Cleaner batch support.
 - #866492 lyricnz: Clean up tests.
