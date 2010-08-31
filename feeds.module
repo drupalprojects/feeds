@@ -513,7 +513,7 @@ function _feeds_importer_digest() {
     else {
       $importers = array();
       foreach (feeds_importer_load_all() as $importer) {
-        $importers[$importer->id] = $importer->config['content_type'];
+        $importers[$importer->id] = isset($importer->config['content_type']) ? $importer->config['content_type'] : '';
       }
       cache_set(__FUNCTION__, $importers);
     }
