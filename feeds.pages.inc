@@ -169,7 +169,7 @@ function theme_feeds_upload($element) {
     $output .= '<div class="file-size">';
     $output .= format_size($info['size']);
     $output .= '</div>';
-    if ($info['mime']) {
+    if (isset($info['mime'])) {
       $output .= '<div class="file-mime">';
       $output .= check_plain($info['mime']);
       $output .= '</div>';
