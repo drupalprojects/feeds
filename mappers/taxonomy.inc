@@ -58,6 +58,7 @@ function taxonomy_feeds_set_target(&$node, $key, $terms) {
 
   if ($vocab->tags) {
     // Simply add a comma separated list to the node for a "tags" vocabulary.
+    $terms = array_merge($terms, drupal_explode_tags($node->taxonomy['tags'][$vocab->vid]));
     $node->taxonomy['tags'][$vocab->vid] = implode(',', $terms);
   }
   else {
