@@ -982,6 +982,7 @@ class FeedsSitemapParserTestCase extends FeedsWebTestCase {
     $result = db_query('SELECT * FROM {feeds_node_item} WHERE feed_nid = %d ORDER BY nid', $nid);
 
     // Check first item.
+    date_default_timezone_set('GMT');
     $item = db_fetch_object($result);
     $node = node_load($item->nid);
     $this->assertEqual($node->title, 'monthly', 'Feed item 1 changefreq is correct.');

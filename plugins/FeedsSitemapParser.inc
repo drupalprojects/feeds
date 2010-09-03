@@ -9,6 +9,9 @@ class FeedsSitemapParser extends FeedsParser {
    * Implementation of FeedsParser::parse().
    */
   public function parse(FeedsImportBatch $batch, FeedsSource $source) {
+    // Set time zone to GMT for parsing dates with strtotime().
+    $tz = date_default_timezone_get();
+    date_default_timezone_set('GMT');
     // Yes, using a DOM parser is a bit inefficient, but will do for now
     $xml = new SimpleXMLElement($batch->getRaw());
     foreach ($xml->url as $url) {
@@ -24,6 +27,7 @@ class FeedsSitemapParser extends FeedsParser {
       }
       $batch->addItem($item);
     }
+    date_default_timezone_set($tz);
   }
 
   /**
