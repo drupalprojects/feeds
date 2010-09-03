@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #878528 Sutharsan: Don't show file in UI if file does not exist.
 - #901798 alex_b: Fix time off in SitemapParser.
 - #885724 eliotttf: Avoid array_flip() on non scalars.
 - #885052 Hanno: Fix small typo in access rights.
