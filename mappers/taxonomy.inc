@@ -57,7 +57,7 @@ function taxonomy_feeds_get_source(FeedsImportBatch $batch, $key) {
  */
 function taxonomy_feeds_node_processor_targets_alter(&$targets, $content_type) {
   foreach (taxonomy_get_vocabularies($content_type) as $vocabulary) {
-    $description = t('The !name vocabulary of the node. If this is a "Tags" vocabulary, any new terms will be created on import. Otherwise only existing terms will be used. If this is not a "Tags" vocabulary and not a "Multiple select" vocabulary, only the first available term will be created. See !settings.', array('!name' => $vocabulary->name, '!settings' => l(t('vocabulary settings'), 'admin/content/taxonomy/edit/vocabulary/'. $vocabulary->vid, array('query' => 'destination='. $_GET['q']))));
+    $description = t('The @name vocabulary of the node. If this is a "Tags" vocabulary, any new terms will be created on import. Otherwise only existing terms will be used. If this is not a "Tags" vocabulary and not a "Multiple select" vocabulary, only the first available term will be created. See !settings.', array('@name' => $vocabulary->name, '!settings' => l(t('vocabulary settings'), 'admin/content/taxonomy/edit/vocabulary/'. $vocabulary->vid, array('query' => 'destination='. $_GET['q']))));
 
     $targets['taxonomy:'. taxonomy_vocabulary_id($vocabulary)] = array(
       'name' => "Taxonomy: ". $vocabulary->name,
