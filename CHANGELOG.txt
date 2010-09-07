@@ -3,6 +3,8 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #889196 David Goode: Support for non-numeric vocabulary IDs for feature-based
+  vocabularies.
 - #632920 nickbits, dixon_, David Goode, alex_b et al: Inherit OG, taxonomy,
   language, user properties from parent feed node. Note: Signatures of
   FeedsProcessor::map(), existingItemId(), FeedsParser::getSourceElement()
