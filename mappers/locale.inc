@@ -39,7 +39,7 @@ function locale_feeds_node_processor_targets_alter(&$targets, $content_type) {
   if (variable_get('language_content_type_'. $content_type, FALSE)) {
     $targets['language'] = array(
       'name' => t('Language'),
-      'callback' => 'language_feeds_set_target',
+      'callback' => 'locale_feeds_set_target',
       'description' => t('The language of the node.'),
     );
   }
@@ -48,6 +48,6 @@ function locale_feeds_node_processor_targets_alter(&$targets, $content_type) {
 /**
  * Callback for mapping.
  */
-function language_feeds_set_target($node, $key, $language) {
+function locale_feeds_set_target($node, $key, $language) {
   $node->language = $language;
 }
