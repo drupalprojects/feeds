@@ -116,11 +116,9 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
   $parsed_source['items'] = array();
 
   foreach ($feed_XML->entry as $news) {
+
     $original_url = NULL;
-
     $guid = !empty($news->id) ? "{$news->id}" : NULL;
-
-    // I don't know how standard this is, but sometimes the id is the URL.
     if (valid_url($guid, TRUE)) {
       $original_url = $guid;
     }
@@ -144,7 +142,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     }
 
     $additional_taxonomies = array();
-
     if (isset($news->category)) {
       $additional_taxonomies['ATOM Categories'] = array();
       $additional_taxonomies['ATOM Domains'] = array();
@@ -161,6 +158,7 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
         $additional_taxonomies['ATOM Categories'][] = "{$category['term']}";
       }
     }
+
     $title = "{$news->title}";
 
     $body = '';
@@ -185,7 +183,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     }
 
     $author_found = FALSE;
-
     if (!empty($news->source->author->name)) {
       $original_author = "{$news->source->author->name}";
       $author_found = TRUE;
@@ -194,7 +191,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
       $original_author = "{$news->author->name}";
       $author_found = TRUE;
     }
-
     if (!empty($feed_XML->author->name) && !$author_found) {
       $original_author = "{$feed_XML->author->name}";
     }
@@ -217,7 +213,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     else {
       $item['guid'] = $item['url'];
     }
-
     $item['geolocations'] = array();
     if ($lat && $lon) {
       $item['geolocations'] = array(
@@ -228,7 +223,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
         ),
       );
     }
-
     $item['tags'] = isset($additional_taxonomies['ATOM Categories']) ? $additional_taxonomies['ATOM Categories'] : array();
     $item['domains'] = isset($additional_taxonomies['ATOM Domains']) ? $additional_taxonomies['ATOM Domains'] : array();
     $parsed_source['items'][] = $item;
