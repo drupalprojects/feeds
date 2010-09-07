@@ -59,6 +59,10 @@ class FeedsSyndicationParser extends FeedsParser {
         'name' => t('Categories'),
         'description' => t('An array of categories that have been assigned to the feed item.'),
       ),
+      'geolocations' => array(
+        'name' => t('Geo Locations'),
+        'description' => t('An array of geographic locations with a name and a position.'),
+      ),
      ) + parent::getMappingSources();
   }
 }
