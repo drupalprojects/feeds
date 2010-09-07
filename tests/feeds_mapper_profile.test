@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Test suite for the feeds profile mapper.
+ * Test suite for profile mapper mappers/profile.inc.
  */
 
 require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper_test.inc');

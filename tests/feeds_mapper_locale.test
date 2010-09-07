@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Test case for locale mapper mappers/locale.inc.
+ * Test case for locale (language) mapper mappers/locale.inc.
  */
 
 require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper_test.inc');

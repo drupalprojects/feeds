@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Test case for taxonomy field mapper mappers/taxonomy.inc.
+ * Test case for taxonomy mapper mappers/taxonomy.inc.
  */
 
 require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper_test.inc');
