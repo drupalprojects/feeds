@@ -74,8 +74,6 @@ abstract class FeedsParser extends FeedsPlugin {
    *   FeedsImportBatch object containing the sources to be mapped from.
    * @param $element_key
    *   The key identifying the element that should be retrieved from $source
-   * @param $feed_nid
-   *   The feed node's nid if the importer is attached to a content type.
    *
    * @return
    *   The source element from $item identified by $element_key.

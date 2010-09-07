@@ -115,7 +115,7 @@ function hook_feeds_after_import(FeedsImporter $importer, FeedsSource $source) {
  *
  * my_callback(FeedsImportBatch $batch, $key)
  *
- * @see my_source_callback().
+ * @see my_source_get_source().
  * @see locale_feeds_parser_sources_alter().
  */
 function hook_feeds_parser_sources_alter(&$sources, $content_type) {

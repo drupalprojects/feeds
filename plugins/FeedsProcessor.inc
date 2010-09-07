@@ -76,6 +76,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @ingroup mappingapi
    *
+   * @see hook_feeds_parser_sources_alter()
    * @see hook_feeds_data_processor_targets_alter()
    * @see hook_feeds_node_processor_targets_alter()
    * @see hook_feeds_term_processor_targets_alter()
