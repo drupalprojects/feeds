@@ -183,7 +183,7 @@ class FeedsSimplePieParser extends FeedsParser {
         'name' => t('Enclosures'),
         'description' => t('An array of enclosures attached to the feed item.'),
       ),
-     );
+     ) + parent::getMappingSources();
   }
 
   /**

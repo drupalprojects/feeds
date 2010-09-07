@@ -41,11 +41,17 @@ class FeedsCSVParser extends FeedsParser {
   }
 
   /**
+   * Override parent::getMappingSources().
+   */
+  public function getMappingSources() {
+    return FALSE;
+  }
+
+  /**
    * Override parent::getSourceElement() to use only lower keys.
    */
-  public function getSourceElement($item, $element_key) {
-    $element_key = drupal_strtolower($element_key);
-    return isset($item[$element_key]) ? $item[$element_key] : '';
+  public function getSourceElement(FeedsImportBatch $batch, $element_key) {
+    return parent::getSourceElement($batch, drupal_strtolower($element_key));
   }
 
   /**

@@ -34,6 +34,6 @@ class FeedsOPMLParser extends FeedsParser {
         'name' => t('Feed URL'),
         'description' => t('URL of the feed.'),
       ),
-    );
+    ) + parent::getMappingSources();
   }
 }

@@ -51,6 +51,6 @@ class FeedsSitemapParser extends FeedsParser {
         'name' => t('Priority'),
         'description' => t('The priority of this URL relative to other URLs on the site.'),
       ),
-    );
+    ) + parent::getMappingSources();
   }
 }

@@ -59,6 +59,6 @@ class FeedsSyndicationParser extends FeedsParser {
         'name' => t('Categories'),
         'description' => t('An array of categories that have been assigned to the feed item.'),
       ),
-     );
+     ) + parent::getMappingSources();
   }
 }
