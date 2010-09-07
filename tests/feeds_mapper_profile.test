@@ -58,8 +58,8 @@ class FeedsMapperProfileTestCase extends FeedsMapperTestCase {
     );
     $name = $this->drupalPost('admin/user/profile/add/selection', $edit, t('Save field'));
 
-    // Create a feed.
-    $this->createFeedConfiguration('Profile import', 'profile_import');
+    // Create an importer.
+    $this->createImporterConfiguration('Profile import', 'profile_import');
 
     // Set and configure plugins.
     $this->setPlugin('profile_import', 'FeedsFileFetcher');

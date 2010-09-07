@@ -54,7 +54,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
     ));
 
     // Create and configure importer.
-    $this->createFeedConfiguration('Date RSS', 'daterss');
+    $this->createImporterConfiguration('Date RSS', 'daterss');
     $this->setSettings('daterss', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER,));
     $this->setPlugin('daterss', 'FeedsFileFetcher');
     $this->setPlugin('daterss', 'FeedsSyndicationParser');
