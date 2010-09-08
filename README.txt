@@ -24,8 +24,8 @@ Features
 -- Additional fetchers/parsers or processors can be added by an object oriented
    plugin system.
 -- Granular mapping of parsed data to content elements.
-- Import configurations can be piggy backed on nodes, thus using nodes as
-  importers ("feed as node" approach) or they can be used on a standalone form.
+- Import configurations can be piggy backed on nodes (thus using nodes to track
+  subscriptions to feeds) or they can be used on a standalone form.
 - Unlimited number of import configurations.
 - Export import configurations to code.
 - Optional libraries module support.
