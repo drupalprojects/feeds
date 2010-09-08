@@ -208,6 +208,10 @@ Default:     50
              The number of nodes feed node processor creates or deletes in one
              page load.
 
+Name:        http_request_timeout
+Default:     15
+Description: Timeout in seconds to wait for an HTTP get request to finish.
+
 Glossary
 ========
 
