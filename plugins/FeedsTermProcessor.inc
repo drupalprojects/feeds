@@ -218,7 +218,7 @@ class FeedsTermProcessor extends FeedsProcessor {
    * effort to use the vocabulary.module field as machine name to make
    * vocabularies exportable.
    */
-  protected function vocabulary() {
+  public function vocabulary() {
     $vocabularies = taxonomy_get_vocabularies();
     if (is_numeric($this->config['vocabulary'])) {
       return $vocabularies[$this->config['vocabulary']];
