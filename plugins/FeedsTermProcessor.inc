@@ -33,7 +33,7 @@ class FeedsTermProcessor extends FeedsProcessor {
           $term = (array) taxonomy_get_term($tid, TRUE);
           $term = module_invoke_all('feeds_taxonomy_load', $term);
         }
-        $term = $this->map($item, $term, $source->feed_nid);
+        $term = $this->map($batch, $term, $source->feed_nid);
 
         // Check if term name is set, otherwise continue.
         if (empty($term['name'])) {
