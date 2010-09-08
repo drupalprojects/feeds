@@ -209,9 +209,7 @@ class FeedsDataProcessor extends FeedsProcessor {
       return;
     }
     if (strpos($target_element, '.')) {
-
       /**
-
       Add field in FeedsDataHandler format.
 
       This is the tricky part, FeedsDataHandler expects an *array* of records
