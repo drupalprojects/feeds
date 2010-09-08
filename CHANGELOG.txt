@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #671538 mburak: Use CURLOPT_TIMEOUT to limit download time of feeds.
 - #878002 Will White, David Goode: Support multiple sources per mapping target
   in FeedsDataProcessor.
 - #904804 alex_b: Support exportable vocabularies.
