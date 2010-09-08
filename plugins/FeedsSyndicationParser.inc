@@ -18,7 +18,14 @@ class FeedsSyndicationParser extends FeedsParser {
     $batch->setDescription($result['description']);
     $batch->setLink($result['link']);
     if (is_array($result['items'])) {
-      $batch->setItems($result['items']);
+      foreach ($result['items'] as $item) {
+        if (isset($item['geolocations'])) {
+          foreach ($item['geolocations'] as $k => $v) {
+            $item['geolocations'][$k] = new FeedsGeoTermElement($v);
+          }
+        }
+        $batch->addItem($item);
+      }
     }
   }
 
