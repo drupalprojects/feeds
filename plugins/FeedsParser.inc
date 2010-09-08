@@ -134,6 +134,23 @@ class FeedsElement {
 }
 
 /**
+ * Encapsulates a taxonomy style term object.
+ */
+class FeedsTermElement extends FeedsElement {
+  public $tid, $vid;
+
+  /**
+   * @param $term
+   *   A stdClass object that is a Drupal taxonomy term.
+   */
+  public function __construct($term) {
+    parent::__construct($term->name);
+    $this->tid = $term->tid;
+    $this->vid = $term->vid;
+  }
+}
+
+/**
  * Enclosure element, can be part of the result array.
  */
 class FeedsEnclosure extends FeedsElement {

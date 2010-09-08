@@ -7,18 +7,6 @@
  */
 
 /**
- * Encapsulates a taxonomy style term object.
- */
-class FeedsTermElement extends FeedsElement {
-  public $tid, $vid;
-  public function __construct($term) {
-    parent::__construct($term->name);
-    $this->tid = $term->tid;
-    $this->vid = $term->vid;
-  }
-}
-
-/**
  * Implementation of hook_feeds_parser_sources_alter().
  */
 function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
