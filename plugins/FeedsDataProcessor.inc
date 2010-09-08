@@ -72,7 +72,7 @@ class FeedsDataProcessor extends FeedsProcessor {
       'feed_nid' => $source->feed_nid,
     );
     $num = $this->handler()->delete($clause);
-    drupal_set_message(format_plural($num, 'Deleted @number item.', 'Deleted @number items.', array('@number' => $num)));
+    drupal_set_message('All items of this feed have been deleted.');
   }
 
   /**
