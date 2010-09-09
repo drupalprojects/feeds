@@ -178,6 +178,7 @@ class FeedsSource extends FeedsConfigurable {
       $result = $this->batch->getProgress();
       if ($result == FEEDS_BATCH_COMPLETE) {
         unset($this->batch);
+        module_invoke_all('feeds_after_clear', $this->importer, $this);
       }
     }
     catch (Exception $e) {
