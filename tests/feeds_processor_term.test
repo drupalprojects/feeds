@@ -89,5 +89,18 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     // Import again.
     $this->importFile('term_import', $this->absolutePath() .'/tests/feeds/users.csv');
     $this->assertText('There are no new terms.');
+
+    // Add a term manually, delete all terms, this term should still stand.
+    $edit = array(
+      'name' => 'Cousin Itt',
+    );
+    $this->drupalPost('admin/content/taxonomy/1/add/term', $edit, t('Save'));
+    $this->drupalPost('import/term_import/delete-items', array(), t('Delete'));
+    $this->drupalGet('admin/content/taxonomy/1');
+    $this->assertText('Cousin Itt');
+    $this->assertNoText('Morticia');
+    $this->assertNoText('Fester');
+    $this->assertNoText('Gomez');
+    $this->assertNoText('Pugsley');
   }
 }

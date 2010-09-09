@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
 --------------------------------
 
+- #907064 alex_b: Track imported terms.
 - #906720 alex_b: Introduce a hook_feeds_after_clear().
 - #905820 tristan.oneil: Adjust delete message in FeedsDataProcessor to avoid
   misleading total numbers.
