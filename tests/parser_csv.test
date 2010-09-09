@@ -13,7 +13,7 @@
  * Not inheriting from Feeds base class as ParserCSV should be moved out of
  * Feeds at some time.
  */
-class FeedsParserCSVTest extends DrupalWebTestCase  {
+class ParserCSVTest extends DrupalWebTestCase  {
   /**
    * Describe this test.
    */

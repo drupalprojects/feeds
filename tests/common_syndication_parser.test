@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * Test cases for common syndication parser.
+ * Test cases for common syndication parser library.
  *
  * @todo Break out into Drupal independent test framework.
  * @todo Could I use DrupalUnitTestCase here?
