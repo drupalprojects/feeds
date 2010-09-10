@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
+Feeds 6.x 1.0 Beta 5, 2010-09-10
 --------------------------------
 
 - #849840 adityakg, rbayliss, alex_b: Submit full mapping on every submission.
