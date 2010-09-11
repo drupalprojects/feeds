@@ -165,9 +165,6 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     // There should be 200 story nodes in the database.
     $count = db_result(db_query("SELECT COUNT(*) FROM {node} WHERE type = 'story' AND status = 1"));
     $this->assertEqual($count, 200, 'The total of 200 story nodes has not changed.');
-
-    // @todo Use debug time feature in FeedsScheduler and test behavior in future.
-    // @todo How do I call an API function on the test system from the test script?
   }
 
   /**
