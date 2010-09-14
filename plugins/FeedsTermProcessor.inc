@@ -119,7 +119,7 @@ class FeedsTermProcessor extends FeedsProcessor {
       $target_term = array();
     }
     if (!$vocabulary = $this->vocabulary()) {
-      throw new Exception(t('No vocabulary specified for term processor.'));
+      throw new Exception(t('No vocabulary specified for term processor'));
     }
     $target_term['vid'] = $vocabulary->vid;
     $target_term = parent::map($batch, $target_term);
