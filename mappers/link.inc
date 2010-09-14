@@ -50,6 +50,7 @@ function link_feeds_node_processor_targets_alter(&$targets, $content_type) {
  *   The value to assign to the CCK field.
  */
 function link_feeds_set_target($node, $target, $value) {
+  module_load_include('inc', 'link');
   if (!empty($value)) {
     static $defaults = array();
     list($field_name, $sub_field) = split(':', $target);
