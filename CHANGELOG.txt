@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #663860 funkmasterjones, infojunkie, alex_b et. al.: hook_feeds_after_parse().
 - #755556 Monkey Master, andrewlevine, alex_b: Support saving local files in
   filefields.
 - #891982 bangpound, twistor: Support Link 2.x.
