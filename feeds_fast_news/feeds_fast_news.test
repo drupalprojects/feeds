@@ -18,7 +18,7 @@ class FeedsExamplesFastFeedTestCase extends FeedsWebTestCase {
    * Set up test.
    */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'features', 'feeds_fast_news', 'data', 'data_ui', 'views', 'views_ui');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'features', 'feeds_fast_news', 'data', 'data_ui', 'views', 'views_ui');
 
     $this->drupalLogin(
       $this->drupalCreateUser(

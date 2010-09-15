@@ -29,7 +29,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
    */
   public function setUp() {
     // Call parent setup with the required module.
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'content', 'date_api', 'date');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'content', 'date_api', 'date');
 
     // Create user and login.
     $this->drupalLogin($this->drupalCreateUser(

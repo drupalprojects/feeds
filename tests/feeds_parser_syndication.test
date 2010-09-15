@@ -29,7 +29,7 @@ class FeedsSyndicationParserTestCase extends FeedsWebTestCase {
    * Set up test.
    */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'libraries');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'libraries');
 
     $this->drupalLogin(
       $this->drupalCreateUser(

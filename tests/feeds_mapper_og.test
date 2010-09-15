@@ -26,7 +26,7 @@ class FeedsMapperOGTestCase extends FeedsMapperTestCase {
    */
   function setUp() {
     // Call parent setup with required modules.
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'og');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'og');
 
     // Create user and login.
     $this->drupalLogin($this->drupalCreateUser(

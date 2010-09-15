@@ -260,6 +260,16 @@ class FeedsDataProcessor extends FeedsProcessor {
   }
 
   /**
+   * Reschedule if expiry time changes.
+   */
+  public function configFormSubmit(&$values) {
+    if ($this->config['expire'] != $values['expire']) {
+      feeds_reschedule($this->id);
+    }
+    parent::configFormSubmit(&$values);
+  }
+
+  /**
    * Return the data table name for this feed.
    */
   protected function tableName() {

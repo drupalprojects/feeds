@@ -18,7 +18,7 @@ class FeedsExamplesNodeTestCase extends FeedsWebTestCase {
    * Set up test.
    */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'feeds_import');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'feeds_import');
 
     $this->drupalLogin(
       $this->drupalCreateUser(
@@ -133,7 +133,7 @@ class FeedsExamplesUserTestCase extends FeedsWebTestCase {
    * Set up test.
    */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'feeds_import');
+    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'feeds_import');
 
     $this->drupalLogin(
       $this->drupalCreateUser(

@@ -27,7 +27,7 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
   public function setUp() {
     // Call parent setup with the required module
     parent::setUp(
-      'feeds', 'feeds_ui', 'ctools', 'content', 'link'
+      'feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'content', 'link'
     );
 
     // Create user and login
