@@ -193,6 +193,15 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   }
 
   /**
+   * Implement FeedsFetcher::importPeriod().
+   */
+  public function importPeriod(FeedsSource $source) {
+    if ($this->subscriber($source->feed_nid)->subscribed()) {
+      return 259200; // Delay for three days if there is a successful subscription.
+    }
+  }
+
+  /**
    * Convenience method for instantiating a subscriber object.
    */
   protected function subscriber($subscriber_id) {
