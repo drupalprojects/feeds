@@ -245,6 +245,16 @@ class FeedsEnclosure extends FeedsElement {
    */
   public function getFile() {
     if(empty($this->file) && $this->getValue()) {
+      // Check if this enclosure contains a local file.
+      if (!parse_url($this->getValue(), PHP_URL_SCHEME)) {
+        if (file_check_location($this->getValue(), file_directory_path())) {
+          if (file_exists($this->getValue())) {
+            $this->file = $this->getValue();
+            return $this->file;
+          }
+        }
+        throw new Exception(t('Invalid enclosure %enclosure', array('%enclosure' => $this->getValue())));
+      }
       $filename = basename($this->getValue());
       if (module_exists('transliteration')) {
         require_once (drupal_get_path('module', 'transliteration') . '/transliteration.inc');
