@@ -3,6 +3,8 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #908582 XiaN Vizjereij, alex_b: Fix "Cannot use object of type stdClass as
+  array" error in mappers/taxonomy.inc.
 - #906654 alex_b: Fix phantom subscriptions.
 - #867892 alex_b: PubSubHubbub - slow down import frequency of feeds that are
   subscribed to hub.
