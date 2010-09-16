@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
+Feeds 6.x 1.0 Beta 6, 2010-09-16
 --------------------------------
 
 - Branched to DRUPAL-6--1.
