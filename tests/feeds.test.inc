@@ -11,6 +11,14 @@
  */
 class FeedsWebTestCase extends DrupalWebTestCase {
 
+  public function __construct($test_id = NULL) {
+    parent::__construct($test_id);
+    // Force the feeds test profile. This unfortunately an either-or decision:
+    // either Feeds tests run in feeds_test profile or they run in another
+    // profile. Both is not possible. See http://drupal.org/node/911354
+    $this->profile = 'feeds_test';
+  }
+
   /**
    * Debug utility. Shows current screen.
    */
