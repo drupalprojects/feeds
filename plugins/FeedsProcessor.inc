@@ -48,7 +48,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @param $time
    *   If implemented, all items produced by this configuration that are older
-   *   than FEEDS_REQUEST_TIME - $time should be deleted.
+   *   than REQUEST_TIME - $time should be deleted.
    *   If $time === NULL processor should use internal configuration.
    *
    * @return

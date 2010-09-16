@@ -163,19 +163,6 @@ function _feeds_feeds_plugins() {
       'path' => $path,
     ),
   );
-  if (module_exists('data')) {
-    $info['FeedsDataProcessor'] = array(
-      'name' => 'Data processor',
-      'description' => 'Create data table records.',
-      'help' => 'Create data table records from parsed content.',
-      'handler' => array(
-        'parent' => 'FeedsProcessor',
-        'class' => 'FeedsDataProcessor',
-        'file' => 'FeedsDataProcessor.inc',
-        'path' => $path,
-      ),
-    );
-  }
   if (module_exists('taxonomy')) {
     $info['FeedsTermProcessor'] = array(
       'name' => 'Taxonomy term processor',
