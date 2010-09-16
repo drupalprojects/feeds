@@ -258,7 +258,10 @@ class PuSHSubscription implements PuSHSubscriptionInterface {
    * Delete a subscription.
    */
   public function delete() {
-    db_query("DELETE FROM {feeds_push_subscriptions} WHERE domain = '%s' AND subscriber_id = %d", $this->domain, $this->subscriber_id);
+    db_delete('feeds_push_subscriptions')
+      ->condition('domain', $this->domain)
+      ->condition('subscriber_id', $this->subscriber_id)
+      ->execute();
   }
 }
 
