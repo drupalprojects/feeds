@@ -29,7 +29,7 @@ function feeds_page() {
       }
       $rows[] = array(
         l($title, $link),
-        $importer->config['description'],
+        check_plain($importer->config['description']),
       );
     }
   }

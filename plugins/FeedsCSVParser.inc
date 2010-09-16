@@ -75,9 +75,9 @@ class FeedsCSVParser extends FeedsParser {
     $mappings = feeds_importer($this->id)->processor->config['mappings'];
     $sources = $uniques = array();
     foreach ($mappings as $mapping) {
-      $sources[] = $mapping['source'];
+      $sources[] = check_plain($mapping['source']);
       if ($mapping['unique']) {
-        $uniques[] = $mapping['source'];
+        $uniques[] = check_plain($mapping['source']);
       }
     }
 
