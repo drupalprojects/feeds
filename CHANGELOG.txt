@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #623432 Alex UA, dixon_, pvhee, cglusky, alex_b et al.: Mapper for emfield.
 - #913672 andrewlevine: Break out CSV Parser into submethods so it is more
   easily overridable
 - #853974 snoldak924, alex_b: Fix XSS vulnerabilities in module.
