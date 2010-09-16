@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #887846 ekes: Make FeedsSimplePieEnclosure (un)serialization safe.
 - #908582 XiaN Vizjereij, alex_b: Fix "Cannot use object of type stdClass as
   array" error in mappers/taxonomy.inc.
 - #906654 alex_b: Fix phantom subscriptions.
