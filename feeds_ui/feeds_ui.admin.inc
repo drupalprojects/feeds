@@ -796,7 +796,7 @@ function theme_feeds_ui_mapping_form($form) {
     drupal_render($form['add']),
   );
   $output = '<div class="help feeds-admin-ui""'. drupal_render($form['help']) .'</div>';
-  $output .= theme('table', $header, $rows);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows));
 
   // Build the help table that explains available sources.
   $legend = '';
@@ -809,7 +809,7 @@ function theme_feeds_ui_mapping_form($form) {
   }
   if (count($rows)) {
     $legend .= '<h4>'. t('Sources') .'</h4>';
-    $legend .= theme('table', array(t('Name'), t('Description')), $rows);
+    $legend .= theme('table', array('header' => array(t('Name'), t('Description')), 'rows' => $rows));
   }
 
   // Build the help table that explains available targets.
@@ -821,7 +821,7 @@ function theme_feeds_ui_mapping_form($form) {
     );
   }
   $legend .= '<h4>'. t('Targets') .'</h4>';
-  $legend .= theme('table', array(t('Name'), t('Description')), $rows);
+  $legend .= theme('table', array('header' => array(t('Name'), t('Description')), 'rows' => $rows));
 
   // Stick tables into collapsible fieldset.
   $form['legendset']['legend'] = array(

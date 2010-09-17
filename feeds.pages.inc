@@ -37,7 +37,7 @@ function feeds_page() {
     t('Import'),
     t('Description'),
   );
-  return theme('table', $header, $rows);
+  return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
 /**
