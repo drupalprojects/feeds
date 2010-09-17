@@ -4,5 +4,6 @@ description = Administrative UI for Feeds module.
 package = Feeds
 dependencies[] = feeds
 files[] = feeds_ui.module
+configure = admin/build/feeds
 core = 7.x
 php = 5.2
