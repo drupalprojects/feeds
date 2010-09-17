@@ -88,7 +88,7 @@ class FeedsFileFetcher extends FeedsFetcher {
    */
   public function sourceFormValidate(&$values) {
     $feed_dir = file_directory_path() .'/feeds';
-    file_check_directory($feed_dir, TRUE);
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
 
     // If there is a file uploaded, save it, otherwise validate input on
     // file.

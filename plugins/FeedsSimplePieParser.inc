@@ -212,7 +212,7 @@ class FeedsSimplePieParser extends FeedsParser {
    */
   protected function cacheDirectory() {
     $directory = file_directory_path() .'/simplepie';
-    file_check_directory($directory, TRUE);
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     return $directory;
   }
 
