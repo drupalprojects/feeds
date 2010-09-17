@@ -307,7 +307,7 @@ class FeedsDateTimeElement extends FeedsElement {
   }
 
   /**
-   * Implementation of toString magic php method.
+   * Implements toString magic php method.
    */
   public function __toString() {
     $val = $this->getValue();

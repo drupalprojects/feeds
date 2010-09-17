@@ -10,7 +10,7 @@
  */
 
 /**
- * Implementation of hook_feeds_node_processor_targets_alter()
+ * Implements hook_feeds_node_processor_targets_alter()
  */
 function filefield_feeds_node_processor_targets_alter(&$targets, $content_type) {
   $info = content_types($content_type);
@@ -30,7 +30,7 @@ function filefield_feeds_node_processor_targets_alter(&$targets, $content_type) 
 }
 
 /**
- * Implementation of hook_feeds_set_target().
+ * Implements hook_feeds_set_target().
  *
  * @param $node
  *   The target node.

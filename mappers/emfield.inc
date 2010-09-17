@@ -8,7 +8,7 @@
  */
 
 /**
- * Implementation of hook_feeds_node_processor_targets_alter().
+ * Implements hook_feeds_node_processor_targets_alter().
  *
  * @see FeedsNodeProcessor::getMappingTargets().
  */

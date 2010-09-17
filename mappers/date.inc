@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_feeds_node_processor_targets_alter().
+ * Implements hook_feeds_node_processor_targets_alter().
  *
  * @see FeedsNodeProcessor::getMappingTargets().
  *
@@ -37,7 +37,7 @@ function date_feeds_node_processor_targets_alter(&$targets, $content_type) {
 }
 
 /**
- * Implementation of hook_feeds_set_target().
+ * Implements hook_feeds_set_target().
  *
  * @param $node
  *   The target node.

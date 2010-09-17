@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_feeds_parser_sources_alter().
+ * Implements hook_feeds_parser_sources_alter().
  *
  * Declare the language of the feed node as a mapping source. This will most
  * commonly be used for having feed item nodes inherit the language
@@ -33,7 +33,7 @@ function locale_feeds_get_source(FeedsImportBatch $batch, $key) {
 }
 
 /**
- * Implementation of hook_feeds_node_processor_targets_alter().
+ * Implements hook_feeds_node_processor_targets_alter().
  */
 function locale_feeds_node_processor_targets_alter(&$targets, $content_type) {
   if (variable_get('language_content_type_'. $content_type, FALSE)) {

@@ -43,7 +43,7 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   }
 
   /**
-   * Implementation of FeedsSourceInterface::sourceDefaults().
+   * Implements FeedsSourceInterface::sourceDefaults().
    */
   public function sourceDefaults() {
     $values = array_flip(array_keys($this->sourceForm(array())));

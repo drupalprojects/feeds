@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_feeds_parser_sources_alter().
+ * Implements hook_feeds_parser_sources_alter().
  */
 function og_feeds_parser_sources_alter(&$sources, $content_type) {
   if (!empty($content_type)) {
@@ -36,7 +36,7 @@ function og_feeds_get_source(FeedsImportBatch $batch, $key) {
 }
 
 /**
- * Implementation of hook_feeds_node_processor_targets_alter().
+ * Implements hook_feeds_node_processor_targets_alter().
  */
 function og_feeds_node_processor_targets_alter(&$targets, $content_type) {
   if (in_array($content_type, og_get_types('group_post'))) {

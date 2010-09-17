@@ -13,7 +13,7 @@
 class FeedsFeedNodeProcessor extends FeedsProcessor {
 
   /**
-   * Implementation of FeedsProcessor::process().
+   * Implements FeedsProcessor::process().
    */
   public function process(FeedsImportBatch $batch, FeedsSource $source) {
     while ($item = $batch->shiftItem()) {
@@ -56,7 +56,7 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
   }
 
   /**
-   * Implementation of FeedsProcessor::clear().
+   * Implements FeedsProcessor::clear().
    */
   public function clear(FeedsBatch $batch, FeedsSource $source) {
     // Do not support deleting imported items as we would have to delete all

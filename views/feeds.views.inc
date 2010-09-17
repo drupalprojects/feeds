@@ -9,7 +9,7 @@
  */
 
 /**
- * Implementation of hook_views_data().
+ * Implements hook_views_data().
  */
 function feeds_views_data() {
   $data = array();
@@ -175,7 +175,7 @@ function feeds_views_data() {
 }
 
 /**
- * Implementation of hook_views_handlers().
+ * Implements hook_views_handlers().
  */
 function feeds_views_handlers() {
   return array(

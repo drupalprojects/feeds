@@ -141,7 +141,7 @@ abstract class FeedsConfigurable {
   }
 
   /**
-   * Implementation of getConfig().
+   * Implements getConfig().
    */
   public function getConfig() {
     return $this->config;

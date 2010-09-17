@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_feeds_node_processor_targets_alter().
+ * Implements hook_feeds_node_processor_targets_alter().
  */
 function link_feeds_node_processor_targets_alter(&$targets, $content_type) {
   $info = content_types($content_type);

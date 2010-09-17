@@ -7,7 +7,7 @@
 class FeedsCSVParser extends FeedsParser {
 
   /**
-   * Implementation of FeedsParser::parse().
+   * Implements FeedsParser::parse().
    */
   public function parse(FeedsImportBatch $batch, FeedsSource $source) {
 

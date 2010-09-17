@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of feeds_user_processor_target_alter().
+ * Implements feeds_user_processor_target_alter().
  */
 function profile_feeds_user_processor_targets_alter(&$targets) {
   if (module_exists('profile')) {
