@@ -96,7 +96,7 @@ class FeedsMapperProfileTestCase extends FeedsMapperTestCase {
       'content_type' => '',
       'import_period' => FEEDS_SCHEDULE_NEVER,
     );
-    $this->drupalPost('admin/build/feeds/edit/profile_import/settings', $edit, 'Save');
+    $this->drupalPost('admin/structure/feeds/edit/profile_import/settings', $edit, 'Save');
 
     // Import CSV file.
     $this->importFile('profile_import', $this->absolutePath() .'/tests/feeds/profile.csv');
