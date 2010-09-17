@@ -178,7 +178,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     }
   }
   else {
-    $result = drupal_http_request($url, $headers);
+    $result = drupal_http_request($url, array('headers' => $headers));
   }
 
   $result->code = isset($result->code) ? $result->code : 200;
