@@ -171,7 +171,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#default_value' => $this->config['content_type'],
     );
     $format_options = array(FEEDS_NODE_DEFAULT_FORMAT => t('Default format'));
-    $formats = filter_formats();
+    global $user;
+    $formats = filter_formats($user);
       foreach ($formats as $format) {
         $format_options[$format->format] = check_plain($format->name);
       }
