@@ -227,7 +227,7 @@ function feeds_get_form($configurable, $form_method) {
  * @param $form_method
  *   The $form_method that should be rendered.
  */
-function feeds_form(&$form_state, $configurable, $form_method) {
+function feeds_form($form, &$form_state, $configurable, $form_method) {
   $form = $configurable->$form_method($form_state);
   $form['#configurable'] = $configurable;
   $form['#feeds_form_method'] = $form_method;

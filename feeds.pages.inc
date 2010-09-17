@@ -117,7 +117,7 @@ function feeds_import_tab_form_submit($form, &$form_state) {
  * Used on both node pages and configuration pages.
  * Therefore $node may be missing.
  */
-function feeds_delete_tab_form(&$form_state, $importer_id, $node = NULL) {
+function feeds_delete_tab_form($form, &$form_state, $importer_id, $node = NULL) {
   if (empty($node)) {
     $form['#redirect'] = 'import/'. $importer_id;
   }
