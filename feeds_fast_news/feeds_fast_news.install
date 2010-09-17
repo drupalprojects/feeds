@@ -41,6 +41,6 @@ function feeds_fast_news_install() {
 /**
  * Implementation of hook_uninstall();
  */
-function feeds_defaults_uninstall() {
+function feeds_fast_news_uninstall() {
   drupal_uninstall_schema('feeds_fast_news');
 }
