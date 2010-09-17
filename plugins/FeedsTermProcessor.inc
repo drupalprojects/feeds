@@ -89,14 +89,18 @@ class FeedsTermProcessor extends FeedsProcessor {
   public function clear(FeedsBatch $batch, FeedsSource $source) {
     $deleted = 0;
     $vocabulary = $this->vocabulary();
-    $result = db_query("SELECT td.tid
+    $terms = db_query("SELECT td.tid
                         FROM {term_data} td
                         JOIN {feeds_term_item} ft ON td.tid = ft.tid
-                        WHERE td.vid = %d
-                        AND ft.id = '%s'
-                        AND ft.feed_nid = %d",
-                        $vocabulary->vid, $this->id, $source->feed_nid);
-    while ($term = db_fetch_object($result)) {
+                        WHERE td.vid = :vid
+                        AND ft.id = :id
+                        AND ft.feed_nid = :feed_nid",
+                        array(
+                          ':vid' => $vocabulary->vid,
+                          ':id' => $this->id,
+                          ':feed_nid' => $source->feed_nid,
+                        ));
+    foreach ($terms as $term) {
       if (taxonomy_del_term($term->tid) == SAVED_DELETED) {
         $deleted++;
       }
