@@ -272,7 +272,7 @@ class FeedsImporter extends FeedsConfigurable {
     if ($this->config['import_period'] != $values['import_period']) {
       feeds_reschedule($this->id);
     }
-    parent::configFormSubmit(&$values);
+    parent::configFormSubmit($values);
   }
 }
 
