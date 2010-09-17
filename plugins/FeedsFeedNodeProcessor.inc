@@ -116,7 +116,7 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
     $types = array();
     foreach ($feeds as $feed) {
       if ($feed->id != $this->id && !empty($feed->config['content_type'])) {
-        $types[$feed->config['content_type']] = node_get_types('name', $feed->config['content_type']);
+        $types[$feed->config['content_type']] = check_plain(node_type_get_name($feed->config['content_type']));
       }
     }
     if (empty($types)) {

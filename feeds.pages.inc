@@ -25,7 +25,7 @@ function feeds_page() {
       }
       elseif (user_access('create '. $importer->config['content_type'] .' content')) {
         $link = 'node/add/'. str_replace('_', '-', $importer->config['content_type']);
-        $title = node_get_types('name', $importer->config['content_type']);
+        $title = node_types_get('name', $importer->config['content_type']);
       }
       $rows[] = array(
         l($title, $link),
