@@ -43,7 +43,7 @@ function feeds_page() {
 /**
  * Render a feeds import form on import/[config] pages.
  */
-function feeds_import_form(&$form_state, $importer_id) {
+function feeds_import_form($form, &$form_state, $importer_id) {
   $source = feeds_source($importer_id, empty($form['nid']['#value']) ? 0 : $form['nid']['#value']);
 
   $form = array();
@@ -93,7 +93,7 @@ function feeds_import_form_submit($form, &$form_state) {
 /**
  * Render a feeds import form on node/id/import pages.
  */
-function feeds_import_tab_form(&$form_state, $node) {
+function feeds_import_tab_form($form, &$form_state, $node) {
   $importer_id = feeds_get_importer_id($node->type);
 
   $form = array();
