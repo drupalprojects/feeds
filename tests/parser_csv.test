@@ -82,6 +82,6 @@ class ParserCSVTest extends DrupalWebTestCase  {
    * Absolute path to feeds.
    */
   public function absolutePath() {
-    return realpath(getcwd()) .'/'. drupal_get_path('module', 'feeds');
+    return DRUPAL_ROOT .'/'. drupal_get_path('module', 'feeds');
   }
 }
