@@ -242,7 +242,7 @@ class FeedsSource extends FeedsConfigurable {
       'source' => $source,
       'batch' => isset($this->batch) ? $this->batch : FALSE,
     );
-    if (db_query_range("SELECT 1 FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", array(':id' => $this->id, ':nid' => $this->feed_nid), 0, 1)->fetchField()) {
+    if (db_query_range("SELECT 1 FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", 0, 1, array(':id' => $this->id, ':nid' => $this->feed_nid))->fetchField()) {
       drupal_write_record('feeds_source', $object, array('id', 'feed_nid'));
     }
     else {
