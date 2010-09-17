@@ -219,7 +219,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     foreach ($this->uniqueTargets($batch) as $target => $value) {
       if ($target == 'name') {
         $vocabulary = $this->vocabulary();
-        if ($tid = db_result(db_query("SELECT tid FROM {term_data} WHERE name = '%s' AND vid = %d", $value, $vocabulary->vid))) {
+        if ($tid = db_query("SELECT tid FROM {term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $vocabulary->vid))->fetchField()) {
           return $tid;
         }
       }

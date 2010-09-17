@@ -204,13 +204,13 @@ class FeedsUserProcessor extends FeedsProcessor {
     foreach ($this->uniqueTargets($batch) as $target => $value) {
       switch ($target) {
         case 'name':
-          $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $value));
+          $uid = db_query("SELECT uid FROM {users} WHERE name = :name", array(':name' => $value))->fetchField();
           break;
         case 'mail':
-          $uid = db_result(db_query("SELECT uid FROM {users} WHERE mail = '%s'", $value));
+          $uid = db_query("SELECT uid FROM {users} WHERE mail = :mail", array(':mail' => $value))->fetchField();
           break;
         case 'openid':
-          $uid = db_result(db_query("SELECT uid FROM {authmap} WHERE authname = '%s' AND module = 'openid'", $value));
+          $uid = db_query("SELECT uid FROM {authmap} WHERE authname = :authname AND module = 'openid'", array(':authname' => $value))->fetchField();
           break;
       }
       if ($uid) {
