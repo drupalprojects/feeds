@@ -546,7 +546,7 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
     }
   }
 
-  if ($source_options) {
+  if (isset($source_options)) {
     $form['source'] = array(
       '#type' => 'select',
       '#options' => array('' => t('Select a source')) + $source_options,
