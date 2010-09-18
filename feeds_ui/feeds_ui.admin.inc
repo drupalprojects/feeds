@@ -730,9 +730,9 @@ function theme_feeds_ui_edit_page($variables) {
 function theme_feeds_ui_container($variables) {
   $container = $variables['container'];
 
-  $class = empty($container['class']) ? array('plain') : $container['class'];
+  $class = array_merge(array('feeds-container'), empty($container['class']) ? array('plain') : $container['class']);
   $id = empty($container['id']) ? '': ' id="'. $container['id'] .'"';
-  $output = '<div class="feeds-container'. implode(' ', $class) .'"'. $id .'>';
+  $output = '<div class="'. implode(' ', $class) .'"'. $id .'>';
 
   if (isset($container['actions']) && count($container['actions'])) {
     $output .= '<ul class="container-actions">';
