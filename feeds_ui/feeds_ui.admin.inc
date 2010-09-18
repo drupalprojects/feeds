@@ -471,7 +471,7 @@ function theme_feeds_ui_plugin_form($variables) {
     $output .= theme('feeds_ui_container', array('container' => $container));
   }
 
-  $output .= drupal_render($form);
+  $output .= drupal_render_children($form);
   return $output;
 }
 
@@ -845,6 +845,6 @@ function theme_feeds_ui_mapping_form($variables) {
 
   $output .= drupal_render($form['legendset']);
 
-  $output .= drupal_render($form);
+  $output .= drupal_render_children($form);
   return $output;
 }
