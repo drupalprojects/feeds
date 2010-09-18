@@ -461,7 +461,7 @@ function theme_feeds_ui_plugin_form($variables) {
     // Assemble container, render form elements.
     $container = array(
       'title' => $form['plugin_key'][$key]['#title'],
-      'body' => $form['plugin_key'][$key]['#description'],
+      'body' => isset($form['plugin_key'][$key]['#description']) ? $form['plugin_key'][$key]['#description'] : '',
     );
     $form['plugin_key'][$key]['#title'] = t('Select');
     $form['plugin_key'][$key]['#attributes']['class'] = array('feeds-ui-radio-link');
