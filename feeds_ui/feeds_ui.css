@@ -58,6 +58,7 @@ div.feeds-container.plain {
     margin: 0;
     }
     div.feeds-container-body div.item-list ul li {
+      list-style-type: none;
       margin: 0;
       padding: 0;
       background-image: none;
@@ -68,6 +69,7 @@ div.feeds-container.plain {
     margin: 0;
     }
     ul.container-actions li {
+      list-style-type: none;
       text-align: right;
       background-image: none;
       margin: 0;
