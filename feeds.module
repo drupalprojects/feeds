@@ -800,6 +800,8 @@ function feeds_get_plugins_by_type($type) {
 /**
  * Gets an instance of a class for a given plugin and id.
  *
+ * @todo Collapse into FeedsPlugin::instance().
+ *
  * @param $plugin
  *   A string that is the key of the plugin to load.
  * @param $id
