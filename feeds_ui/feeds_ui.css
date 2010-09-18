@@ -49,6 +49,8 @@ div.feeds-container.plain {
   }
   div.feeds-container.plain h4 {
     font-size: 1.0em;
+    margin: 0;
+    padding: 0;
     }
   div.feeds-container-body p {
     padding: 5px 0;
