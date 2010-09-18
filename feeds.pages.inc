@@ -155,7 +155,7 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
  */
 function theme_feeds_upload($variables) {
   $element = $variables['element'];
-  drupal_add_css(array('file' => drupal_get_path('module', 'feeds') .'/feeds.css'));
+  drupal_add_css('file' => drupal_get_path('module', 'feeds') .'/feeds.css');
   _form_set_class($element, array('form-file'));
   $description = '';
   if (!empty($element['#file_info'])) {
