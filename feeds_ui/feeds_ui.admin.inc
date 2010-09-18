@@ -468,7 +468,7 @@ function theme_feeds_ui_plugin_form($variables) {
     unset($form['plugin_key'][$key]['#description']);
     $container['actions'] = array(drupal_render($form['plugin_key'][$key]));
 
-    $output .= theme_feeds_ui_container($container);
+    $output .= theme('feeds_ui_container', array('container' => $container));
   }
 
   $output .= drupal_render($form);
