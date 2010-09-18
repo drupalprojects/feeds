@@ -99,7 +99,7 @@ class FeedsImporter extends FeedsConfigurable {
     $save = new stdClass();
     $save->id = $this->id;
     $save->config = $this->getConfig();
-    if (db_query_range("SELECT 1 FROM {feeds_importer} WHERE id = '%s'", 0, 1, array(':id' => $this->id))->fetchField()) {
+    if (db_query_range("SELECT 1 FROM {feeds_importer} WHERE id = :id", 0, 1, array(':id' => $this->id))->fetchField()) {
       drupal_write_record('feeds_importer', $save, 'id');
     }
     else {
