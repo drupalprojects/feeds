@@ -208,7 +208,6 @@ abstract class FeedsConfigurable {
  *   Config form array if available. NULL otherwise.
  */
 function feeds_get_form($configurable, $form_method) {
-  $form_state = array();
   if (method_exists($configurable, $form_method)) {
     return drupal_get_form(get_class($configurable) .'_feeds_form', $configurable, $form_method);
   }
