@@ -178,5 +178,8 @@ function theme_feeds_upload($variables) {
   $description .= '<input type="file" name="'. $element['#name'] .'"'. ($element['#attributes'] ? ' '. drupal_attributes($element['#attributes']) : '') .' id="'. $element['#id'] .'" size="'. $element['#size'] ."\" />\n";
   $description .= '</div>';
   $element['#description'] = $description;
+
+  // For some reason not unsetting #title leads to printing the title twice.
+  unset($element['#title']);
   return theme('form_element', $element);
 }
