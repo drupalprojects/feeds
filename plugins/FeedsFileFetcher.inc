@@ -15,15 +15,15 @@ class FeedsFileBatch extends FeedsImportBatch {
    * Constructor.
    */
   public function __construct($file_path, $feed_nid = 0) {
-    $this->file_path = $file_path;
     parent::__construct('', $feed_nid);
+    $this->file_path = $file_path;
   }
 
   /**
    * Implements FeedsImportBatch::getRaw();
    */
   public function getRaw() {
-    return file_get_contents(realpath($this->file_path));
+    return file_get_contents($this->file_path);
   }
 
   /**
