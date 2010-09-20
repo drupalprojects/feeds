@@ -255,14 +255,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Return available mapping targets.
    */
   public function getMappingTargets() {
-    $targets = array(
-      'title' => array(
+    $type = node_type_get_type($this->config['content_type']);
+    $targets = array();
+    if ($type->has_title) {
+      $targets['title'] = array(
         'name' => t('Title'),
         'description' => t('The title of the node.'),
-       ),
-     );
-    // Include body field only if available.
-    $type = node_type_get_type($this->config['content_type']);
+      );
+    }
     $targets += array(
       'nid' => array(
         'name' => t('Node ID'),
