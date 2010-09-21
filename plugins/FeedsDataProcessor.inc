@@ -266,7 +266,7 @@ class FeedsDataProcessor extends FeedsProcessor {
     if ($this->config['expire'] != $values['expire']) {
       feeds_reschedule($this->id);
     }
-    parent::configFormSubmit(&$values);
+    parent::configFormSubmit($values);
   }
 
   /**
