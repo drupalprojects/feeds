@@ -45,6 +45,9 @@ function emfield_feeds_set_target(&$node, $target, $value) {
   if (is_array($value)) {
     $i = 0;
     foreach ($value as $v) {
+      if ($v instanceof FeedsElement) {
+        $field[$i]['embed'] = (string)$v;
+      }
       if (!is_array($v) && !is_object($v)) {
         $field[$i]['embed'] = $v;
       }
