@@ -41,21 +41,21 @@ function emfield_feeds_node_processor_targets_alter(&$targets, $content_type) {
 function emfield_feeds_set_target(&$node, $target, $value) {
   $field = isset($node->$target) ? $node->$target : array();
 
-  // Handle multiple value fields.
-  if (is_array($value)) {
-    $i = 0;
-    foreach ($value as $v) {
-      if ($v instanceof FeedsElement) {
-        $field[$i]['embed'] = (string)$v;
-      }
-      if (!is_array($v) && !is_object($v)) {
-        $field[$i]['embed'] = $v;
-      }
+  // Handle non-multiple value fields.
+  if (!is_array($value)) {
+    $value = array($value);
+  }
+
+  $i = 0;
+  foreach ($value as $v) {
+    if ($v instanceof FeedsElement) {
+      $field[$i]['embed'] = (string)$v;
       $i++;
     }
-  }
-  else {
-    $field[0]['embed'] = $value;
+    elseif (!is_array($v) && !is_object($v)) {
+      $field[$i]['embed'] = $v;
+      $i++;
+    }
   }
 
   $node->$target = $field;
