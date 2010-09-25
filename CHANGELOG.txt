@@ -3,6 +3,7 @@
 Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #916962 alex_b: Fix undefined feeds_reschedule() when upgrading.
 - #919172 andrewlevine, alex_b: Fix enclosure source files deleted.
 - Fix emfield mapper not handling single values properly.
 - Fix emfield mapper not accepting FeedsElement objects.
