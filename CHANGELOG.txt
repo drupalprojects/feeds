@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 6.x 1.0 xxxxxxxxxxxxxxxxxx
+Feeds 6.x 1.0 Beta 8, 2010-09-25
 --------------------------------
 
 - #625196 mstrelan, alex_b: Fix array_merge(), array_intersect_key() warnings.
