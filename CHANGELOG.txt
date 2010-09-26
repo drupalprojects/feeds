@@ -1,5 +1,11 @@
 // $Id$
 
+Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
+--------------------------------
+
+- #923318 alex_b: Fix "Fatal error: Call to a member function import() on a
+  non-object" occuring on cron.
+
 Feeds 6.x 1.0 Beta 8, 2010-09-25
 --------------------------------
 
