@@ -35,6 +35,8 @@ Requirements
 
 - CTools 1.x
   http://drupal.org/project/ctools
+- Job Scheduler 1.x
+  http://drupal.org/project/job_scheduler
 - Drupal 6.x
   http://drupal.org/project/drupal
 - PHP safe mode is not supported, depending on your Feeds Importer configuration
