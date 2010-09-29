@@ -8,6 +8,8 @@
 
 /**
  * Implements hook_feeds_parser_sources_alter().
+ *
+ * @todo: Upgrade to 7.
  */
 function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
   if (!empty($content_type)) {
@@ -24,8 +26,8 @@ function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
 /**
  * Callback, returns taxonomy from feed node.
  */
-function taxonomy_feeds_get_source(FeedsImportBatch $batch, $key) {
-  if ($node = $batch->feedNode()) {
+function taxonomy_feeds_get_source(FeedsSource $source, FeedsParserResult $result, $key) {
+  if ($node = node_load($source->feed_nid)) {
     $terms = taxonomy_node_get_terms($node);
     $vocabularies = taxonomy_vocabulary_load_multiple(array(), array('machine_name' => str_replace('parent:taxonomy:', '', $key)));
     $vocabulary = array_shift($vocabularies);
@@ -42,8 +44,8 @@ function taxonomy_feeds_get_source(FeedsImportBatch $batch, $key) {
 /**
  * Implements hook_feeds_processor_targets_alter().
  */
-function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $content_type) {
-  foreach (field_info_instances($entity_type, $content_type) as $name => $instance) {
+function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
+  foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
     if ($info['type'] == 'taxonomy_term_reference') {
       $targets[$name] = array(

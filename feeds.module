@@ -36,24 +36,37 @@ function feeds_cron() {
       }
     }
     feeds_reschedule(FALSE);
-    return;
   }
 }
 
 /**
- * Implements hook_cron_queue_info().
+ * Implements hook_cron_job_scheduler_info().
  *
- * Invoked by drupal_queue module if present.
+ * Compare queue names with key names in feeds_cron_queue_info().
+ */
+function feeds_cron_job_scheduler_info() {
+  $info = array();
+  $info['feeds_source_import'] = array(
+    'queue name' => 'feeds_source_import',
+  );
+  $info['feeds_importer_expire'] = array(
+    'queue name' => 'feeds_importer_expire',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_cron_queue_info().
  */
 function feeds_cron_queue_info() {
   $queues = array();
   $queues['feeds_source_import'] = array(
     'worker callback' => 'feeds_source_import',
-    'time' => variable_get('feeds_worker_time', 15),
+    'time' => 15,
   );
   $queues['feeds_importer_expire'] = array(
     'worker callback' => 'feeds_importer_expire',
-    'time' => variable_get('feeds_worker_time', 15),
+    'time' => 15,
   );
   return $queues;
 }
@@ -129,15 +142,11 @@ function feeds_permission() {
     ),
   );
   foreach (feeds_importer_load_all() as $importer) {
-    $perms[] = array(
-      "import $importer->id feeds" => array(
-        'title' => t('Import @name feeds', array('@name' => $importer->config['name'])),
-      ),
+    $perms["import $importer->id feeds"] = array(
+      'title' => t('Import @name feeds', array('@name' => $importer->config['name'])),
     );
-    $perms[] = array(
-      "clear $importer->id feeds" => array(
-        'title' => t('Delete items from @name feeds', array('@name' => $importer->config['name'])),
-      ),
+    $perms["clear $importer->id feeds"] = array(
+      'title' => t('Delete items from @name feeds', array('@name' => $importer->config['name'])),
     );
   }
   return $perms;
@@ -212,6 +221,14 @@ function feeds_menu() {
       );
     }
     $items += $importer->fetcher->menuItem();
+    $items['import/' . $importer->id .'/template'] = array(
+      'page callback' => 'feeds_importer_template',
+      'page arguments' => array(1),
+      'access callback' => 'feeds_access',
+      'access arguments' => array('import', $importer->id),
+      'file' => 'feeds.pages.inc',
+      'type' => MENU_CALLBACK,
+    );
   }
   if (count($items)) {
     $items['import'] = array(

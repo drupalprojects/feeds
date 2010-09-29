@@ -78,18 +78,36 @@ class FeedsImporter extends FeedsConfigurable {
    */
   public function schedule() {
     $job = array(
-      'callback' => 'feeds_importer_expire',
       'type' => $this->id,
       'period' => 0,
       'periodic' => TRUE,
     );
     if (FEEDS_EXPIRE_NEVER != $this->processor->expiryTime()) {
       $job['period'] = 3600;
-      job_scheduler()->set($job);
+      JobScheduler::get('feeds_importer_expire')->set($job);
     }
     else {
-      job_scheduler()->remove($job);
+      JobScheduler::get('feeds_importer_expire')->remove($job);
     }
+  }
+
+  /**
+   * Report how many items *should* be created on one page load by this
+   * importer.
+   *
+   * Note:
+   *
+   * It depends on whether parser implements batching if this limit is actually
+   * respected. Further, if no limit is reported it doesn't mean that the
+   * number of items that can be created on one page load is actually without
+   * limit.
+   *
+   * @return
+   *   A positive number defining the number of items that can be created on
+   *   one page load. 0 if this number is unlimited.
+   */
+  public function getLimit() {
+    return $this->processor->getLimit();
   }
 
   /**
@@ -133,7 +151,6 @@ class FeedsImporter extends FeedsConfigurable {
       ->condition('id', $this->id)
       ->execute();
     $job = array(
-      'callback' => 'feeds_importer_expire',
       'type' => $this->id,
       'id' => 0,
     );
@@ -141,7 +158,7 @@ class FeedsImporter extends FeedsConfigurable {
       feeds_reschedule($this->id);
     }
     else {
-      job_scheduler()->remove($job);
+      JobScheduler::get('feeds_importer_expire')->remove($job);
     }
   }
 

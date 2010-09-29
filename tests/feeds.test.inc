@@ -10,21 +10,90 @@
  * Test basic Data API functionality.
  */
 class FeedsWebTestCase extends DrupalWebTestCase {
-  // Force the feeds test profile. This unfortunately an either-or decision:
-  // either Feeds tests run in feeds_test profile or they run in another
-  // profile. Both is not possible. See http://drupal.org/node/911354
-  protected $profile = 'feeds_test';
+  protected $profile = 'testing';
 
   /**
-   * Debug utility. Shows current screen.
+   * This override of setUp requires that modules are passed as an array, also
+   * please don't pass duplicates of what is defined below!
    */
-  public function show($path = NULL) {
-    if ($path !== NULL) {
-      $this->drupalGet($path);
+  function setUp($add_modules = array()) {
+    parent::setUp();
+    $modules = array(
+      'image',
+      'file',
+      'field',
+      'field_ui',
+      'taxonomy',
+      'ctools',
+      'job_scheduler',
+      'feeds',
+      'feeds_ui',
+    );
+    foreach ($add_modules as $m) {
+      $modules[] =  $m;
     }
-    // Use error, this will make sure we don't forget accidental calls to show()
-    // in our tests.
-    $this->error($this->content);
+    module_enable($modules, TRUE);
+    $this->resetAll();
+
+    // Add text formats Directly.
+    $filtered_html_format = array(
+      'name' => 'Filtered HTML',
+      'weight' => 0,
+      'filters' => array(
+        // URL filter.
+        'filter_url' => array(
+          'weight' => 0,
+          'status' => 1,
+        ),
+        // HTML filter.
+        'filter_html' => array(
+          'weight' => 1,
+          'status' => 1,
+        ),
+        // Line break filter.
+        'filter_autop' => array(
+          'weight' => 2,
+          'status' => 1,
+        ),
+        // HTML corrector filter.
+        'filter_htmlcorrector' => array(
+          'weight' => 10,
+          'status' => 1,
+        ),
+      ),
+    );
+    $filtered_html_format = (object) $filtered_html_format;
+    filter_format_save($filtered_html_format);
+
+    // Create a user and log her in for node type config.
+    $this->admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer site configuration',
+      'administer feeds',
+      'administer nodes',
+      'administer content types',
+      'bypass node access',
+    ));
+    $this->drupalLogin($this->admin_user);
+
+    $types = array(
+      array(
+        'type' => 'page',
+        'name' => 'Basic page',
+        'node_options[status]' => 1,
+        'node_options[promote]' => 0,
+      ),
+      array(
+        'type' => 'article',
+        'name' => 'Article',
+        'node_options[status]' => 1,
+        'node_options[promote]' => 1,
+      ),
+    );
+    foreach ($types as $type) {
+      $this->drupalPost('admin/structure/types/add', $type, 'Save content type');
+      $this->assertText("The content type " . $type['name'] . " has been added.");
+    }
   }
 
   /**
@@ -261,9 +330,9 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
 
     // Check whether feed got properly added to scheduler.
-    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND callback = 'feeds_source_import' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
+    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_import' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
     // There must be only one entry for callback 'expire' - no matter what the feed_nid is.
-    $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND callback = 'feeds_importer_expire' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
+    $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND name = 'feeds_importer_expire' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
   }
 
   /**

@@ -7,6 +7,10 @@ define('FEEDS_SKIP_EXISTING', 0);
 define('FEEDS_REPLACE_EXISTING', 1);
 define('FEEDS_UPDATE_EXISTING', 2);
 
+// Default limit for creating items on a page load, not respected by all
+// processors.
+define('FEEDS_PROCESS_LIMIT', 50);
+
 /**
  * Abstract class, defines interface for processors.
  */
@@ -16,20 +20,17 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Process the result of the parser or previous processors.
    * Extending classes must implement this method.
    *
-   * @param FeedsImportBatch $batch
-   *   The current feed import data passed in from the parsing stage.
    * @param FeedsSource $source
    *   Source information about this import.
+   * @param FeedsParserResult $parser_result
+   *   The result of the parsing stage.
    */
-  public abstract function process(FeedsImportBatch $batch, FeedsSource $source);
+  public abstract function process(FeedsSource $source, FeedsParserResult $parser_result);
 
   /**
    * Remove all stored results or stored results up to a certain time for this
    * configuration/this source.
    *
-   * @param FeedsBatch $batch
-   *   A FeedsBatch object for tracking information such as how many
-   *   items have been deleted total between page loads.
    * @param FeedsSource $source
    *   Source information for this expiry. Implementers should only delete items
    *   pertaining to this source. The preferred way of determining whether an
@@ -37,7 +38,23 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   processor's responsibility to store the feed_nid of an imported item in
    *   the processing stage.
    */
-  public abstract function clear(FeedsBatch $batch, FeedsSource $source);
+  public abstract function clear(FeedsSource $source);
+
+  /*
+   * Report number of items that can be processed per call.
+   *
+   * 0 means 'unlimited'.
+   *
+   * If a number other than 0 is given, Feeds parsers that support batching
+   * will only deliver this limit to the processor.
+   *
+   * @see FeedsSource::getLimit()
+   * @see FeedsCSVParser::parse()
+   * @see FeedsNodeProcessor::getLimit()
+   */
+  public function getLimit() {
+    return 0;
+  }
 
   /**
    * Delete feed items younger than now - $time. Do not invoke expire on a
@@ -82,7 +99,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @see hook_feeds_term_processor_targets_alter()
    * @see hook_feeds_user_processor_targets_alter()
    */
-  protected function map(FeedsImportBatch $batch, $target_item = NULL) {
+  protected function map(FeedsSource $source, FeedsParserResult $result, $target_item = NULL) {
 
     // Static cache $targets as getMappingTargets() may be an expensive method.
     static $sources;
@@ -126,10 +143,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
           isset($sources[$this->id][$mapping['source']]['callback']) &&
           function_exists($sources[$this->id][$mapping['source']]['callback'])) {
         $callback = $sources[$this->id][$mapping['source']]['callback'];
-        $value = $callback($batch, $mapping['source']);
+        $value = $callback($source, $result, $mapping['source']);
       }
       else {
-        $value = $parser->getSourceElement($batch, $mapping['source']);
+        $value = $parser->getSourceElement($source, $result, $mapping['source']);
       }
 
       // Map the source element's value to the target.
@@ -196,12 +213,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @ingroup mappingapi
    *
-   * @param $batch
-   *   A FeedsImportBatch object.
    * @param FeedsSource $source
    *   The source information about this import.
+   * @param $result
+   *   A FeedsParserResult object.
    */
-  protected function existingItemId(FeedsImportBatch $batch, FeedsSource $source) {
+  protected function existingItemId(FeedsSource $source, FeedsParserResult $result) {
     return 0;
   }
 
@@ -216,14 +233,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   An array where the keys are target field names and the values are the
    *   elements from the source item mapped to these targets.
    */
-  protected function uniqueTargets(FeedsImportBatch $batch) {
+  protected function uniqueTargets(FeedsSource $source, FeedsParserResult $result) {
     $parser = feeds_importer($this->id)->parser;
     $targets = array();
     foreach ($this->config['mappings'] as $mapping) {
       if ($mapping['unique']) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
-        $targets[$mapping['target']] = $parser->getSourceElement($batch, $mapping['source']);
+        $targets[$mapping['target']] = $parser->getSourceElement($source, $result, $mapping['source']);
       }
     }
     return $targets;

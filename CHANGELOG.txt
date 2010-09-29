@@ -1,5 +1,27 @@
 // $Id$
 
+Feeds 7.x 2.0 Alpha 1, 2010-09-29
+--------------------------------
+
+- #925842 alex_b: Support batching through directories on disk.
+- #625196 mstrelan, alex_b: Fix array_merge(), array_intersect_key() warnings.
+- Remove hidden setting feeds_worker_time. Use hook_cron_queue_info_alter() to
+  modify this setting.
+- #744660-80 alex_b: Expand batch support to fetchers and parsers.
+ - Removed FeedsBatch classes in favor of FeedsResult classes.
+ - Variable 'feeds_node_batch_size' is now called 'feeds_process_limit'.
+ - Signature of FeedsParser::getSourceElement() changed.
+ - Signature of FeedsProcessor::uniqueTargets() changed.
+ - Signature of FeedsProcessor::existingItemId() changed.
+ - Sigature for callbacks registered by hook_feeds_parser_sources_alter()
+   changed.
+ - Return value of FeedsFetcher::fetch() changed.
+ - Signature and return value of FeedsParser::parse() changed.
+ - Signature of FeedsProcessor::process() changed.
+ - Signature of hook_feeds_after_parse() changed.
+ - Signature of hook_feeds_after_import() changed.
+ - Signature of hook_feeds_after_clear() changed.
+
 Feeds 7.x 1.0 Alpha 1, 2010-09-21
 ---------------------------------
 

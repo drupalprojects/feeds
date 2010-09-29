@@ -15,10 +15,11 @@
  *
  * @see FeedsNodeProcessor::getMappingTargets().
  */
-function field_feeds_processor_targets_alter(&$targets, $entity_type, $content_type) {
-  foreach (field_info_instances($entity_type, $content_type) as $name => $instance) {
+function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
+  foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
     $allowed_types = array(
+      'list_boolean',
       'number_integer',
       'number_decimal',
       'number_float',

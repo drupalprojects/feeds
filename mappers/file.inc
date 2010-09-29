@@ -16,8 +16,8 @@
  *
  * @see FeedsNodeProcessor::getMappingTargets().
  */
-function file_feeds_processor_targets_alter(&$targets, $entity_type, $content_type = '') {
-  foreach (field_info_instances($entity_type, $content_type) as $name => $instance) {
+function file_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
+  foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
 
     if (in_array($info['type'], array('file', 'image'))) {
@@ -66,7 +66,7 @@ function file_feeds_set_target($entity, $target, $value) {
   $info = field_info_field($target);
   $bundle_name = $entity->entity_type == 'node' ? $entity->type : $entity->entity_type;
   $instance_info = field_info_instance($entity->entity_type, $target, $bundle_name);
-  $account = $entity->uid ? user_load($entity->uid) : NULL;
+  $account = !empty($entity->uid) ? user_load($entity->uid) : NULL;
   $destination = file_field_widget_uri($info, $instance_info, $account);
 
   // Populate entity.

@@ -14,17 +14,17 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Implements FeedsProcessor::process().
    */
-  public function process(FeedsImportBatch $batch, FeedsSource $source) {
+  public function process(FeedsSource $source, FeedsParserResult $parser_result) {
 
     // Count number of created and updated nodes.
     $created  = $updated = $failed = 0;
 
-    while ($item = $batch->shiftItem()) {
+    while ($item = $parser_result->shiftItem()) {
 
-      if (!($uid = $this->existingItemId($batch, $source)) || $this->config['update_existing']) {
+      if (!($uid = $this->existingItemId($source, $parser_result)) || $this->config['update_existing']) {
 
         // Map item to a term.
-        $account = $this->map($batch);
+        $account = $this->map($source, $parser_result);
 
         // Check if user name and mail are set, otherwise continue.
         if (empty($account->name) || empty($account->mail) || !valid_email_address($account->mail)) {
@@ -85,7 +85,7 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Implements FeedsProcessor::clear().
    */
-  public function clear(FeedsBatch $batch, FeedsSource $source) {
+  public function clear(FeedsSource $source) {
     // Do not support deleting users as we have no way of knowing which ones we
     // imported.
     throw new Exception(t('User processor does not support deleting users.'));
@@ -94,7 +94,7 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Execute mapping on an item.
    */
-  protected function map(FeedsImportBatch $batch) {
+  protected function map(FeedsSource $source, FeedsParserResult $result) {
     // Prepare term object.
     $target_account = new stdClass();
     $target_account->uid = 0;
@@ -103,7 +103,7 @@ class FeedsUserProcessor extends FeedsProcessor {
     $target_account->status = $this->config['status'];
 
     // Have parent class do the iterating.
-    return parent::map($batch, $target_account);
+    return parent::map($source, $result, $target_account);
   }
 
   /**
@@ -190,7 +190,7 @@ class FeedsUserProcessor extends FeedsProcessor {
 
     // Let other modules expose mapping targets.
     self::loadMappers();
-    feeds_alter('feeds_processor_targets', $targets, 'user');
+    feeds_alter('feeds_processor_targets', $targets, 'user', 'user');
 
     return $targets;
   }
@@ -198,11 +198,11 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Get id of an existing feed item term if available.
    */
-  protected function existingItemId(FeedsImportBatch $batch, FeedsSource $source) {
+  protected function existingItemId(FeedsSource $source, FeedsParserResult $result) {
 
     // Iterate through all unique targets and try to find a user for the
     // target's value.
-    foreach ($this->uniqueTargets($batch) as $target => $value) {
+    foreach ($this->uniqueTargets($source, $result) as $target => $value) {
       switch ($target) {
         case 'name':
           $uid = db_query("SELECT uid FROM {users} WHERE name = :name", array(':name' => $value))->fetchField();
