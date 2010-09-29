@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 6.x 1.0 XXXXXXXXXXXXXXXXXX
+Feeds 6.x 1.0 Beta 9, 2010-09-26
 --------------------------------
 
 - #923318 alex_b: Fix "Fatal error: Call to a member function import() on a
