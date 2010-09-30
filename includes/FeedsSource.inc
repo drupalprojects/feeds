@@ -422,6 +422,7 @@ class FeedsSource extends FeedsConfigurable {
       $this->importer->existing();
       return parent::existing();
     }
+    throw new FeedsNotExistingException(t('Source configuration not valid.'));
   }
 
   /**

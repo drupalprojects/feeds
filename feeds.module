@@ -79,6 +79,7 @@ function feeds_source_import($job) {
   try {
     $source->existing()->import();
   }
+  catch (FeedsNotExistingException $e) {}
   catch (Exception $e) {
     watchdog('feeds_source_import()', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
@@ -93,6 +94,7 @@ function feeds_importer_expire($job) {
   try {
     $importer->existing()->expire();
   }
+  catch (FeedsNotExistingException $e) {}
   catch (Exception $e) {
     watchdog('feeds_importer_expire()', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
