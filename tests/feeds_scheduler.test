@@ -63,7 +63,7 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
       'import_on_create' => FALSE,
     );
     $this->drupalPost('admin/structure/feeds/edit/syndication/settings', $edit, 'Save');
-    $this->assertText('Do not import on create');
+    $this->assertText('Do not import on submission');
 
     $nids = $this->createFeedNodes();
     // This implicitly tests the import_on_create node setting being 0.

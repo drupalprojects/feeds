@@ -328,7 +328,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
     $import_period = t('every !interval', array('!interval' => format_interval($importer->config['import_period'])));
   }
   $items[] = t('Refresh: !import_period', array('!import_period' => $import_period));
-  $items[] = $importer->config['import_on_create'] ? t('Import on create') : t('Do not import on create');
+  $items[] = $importer->config['import_on_create'] ? t('Import on submission') : t('Do not import on submission');
 
   $info['title'] = t('Basic settings');
   $info['body'] = array(
