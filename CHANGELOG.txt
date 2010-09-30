@@ -1,7 +1,12 @@
 // $Id$
 
+Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
+---------------------------------
+
+- Clean up basic settings form.
+
 Feeds 7.x 2.0 Alpha 1, 2010-09-29
---------------------------------
+---------------------------------
 
 - #925842 alex_b: Support batching through directories on disk.
 - #625196 mstrelan, alex_b: Fix array_merge(), array_intersect_key() warnings.
