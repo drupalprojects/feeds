@@ -4,6 +4,7 @@ Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
 - Clean up basic settings form.
+- Make getConfig() include configuration defaults.
 
 Feeds 7.x 2.0 Alpha 1, 2010-09-29
 ---------------------------------
