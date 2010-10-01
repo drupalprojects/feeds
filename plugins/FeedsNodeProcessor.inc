@@ -99,7 +99,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('There is no content to be deleted.'));
     }
-    $state->progress = FEEDS_BATCH_COMPLETE;
+    $state->finished();
   }
 
   /**
