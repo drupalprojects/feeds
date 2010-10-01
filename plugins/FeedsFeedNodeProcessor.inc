@@ -16,7 +16,7 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
    * Implements FeedsProcessor::process().
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result) {
-    $state = $source->state($this);
+    $state = $source->state(FEEDS_PROCESS);
     while ($item = $parser_result->shiftItem()) {
 
       // If the target item does not exist OR if update_existing is enabled,

@@ -54,7 +54,7 @@ class FeedsFileFetcher extends FeedsFetcher {
     }
 
     // Batch if this is a directory.
-    $state = $source->state($this);
+    $state = $source->state(FEEDS_FETCH);
     $files = array();
     if (!isset($state->files)) {
       $state->files = $this->listFiles($source_config['source']);

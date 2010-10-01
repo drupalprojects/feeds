@@ -3,6 +3,8 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #928728: Track source states by stage, not by plugin. Note: call signature of
+  FeedsSource::state() has changed.
 - #923318: Fix Fatal error: Call to a member function import() on a non-object
   occuring on cron.
 - Clean up basic settings form.

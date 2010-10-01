@@ -11,7 +11,7 @@ class FeedsCSVParser extends FeedsParser {
    */
   public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
     $source_config = $source->getConfigFor($this);
-    $state = $source->state($this);
+    $state = $source->state(FEEDS_PARSE);
 
     // Load and configure parser.
     feeds_include_library('ParserCSV.inc', 'ParserCSV');
