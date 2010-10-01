@@ -160,6 +160,7 @@ function feeds_importer_template($importer) {
   }
   return drupal_not_found();
 }
+
 /**
  * Theme upload widget.
  */
