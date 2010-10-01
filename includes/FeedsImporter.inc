@@ -282,7 +282,7 @@ class FeedsImporter extends FeedsConfigurable {
     $form['import_on_create'] = array(
       '#type' => 'checkbox',
       '#title' => t('Import on submission'),
-      '#description' => t('Check if import should be started at the moment of standalone form or node form submission.'),
+      '#description' => t('Check if import should be started at the moment a standalone form or node form is submitted.'),
       '#default_value' => $config['import_on_create'],
     );
     return $form;
