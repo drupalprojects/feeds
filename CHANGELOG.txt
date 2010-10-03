@@ -3,6 +3,9 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #927892 alex_b: Add "Process in background" feature. Allows one-off imports to
+  be processed in the background rather than using Batch API. Useful for very
+  large imports.
 - #929058 alex_b: Report status of source on import and delete forms, track
   last updated time on a source level.
 - #928836: Set progress floating point directly. Note: fetchers and parsers
