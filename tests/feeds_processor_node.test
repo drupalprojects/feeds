@@ -95,7 +95,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->drupalGet('node');
     $this->assertRaw('<span class="username">Anonymous (not verified)</span>');
     $this->assertDevseedFeedContent();
-    
+
     // Assert DB status.
     $count = db_query("SELECT COUNT(*) FROM {node} n INNER JOIN {feeds_node_item} fn ON n.nid = fn.nid")->fetchField();
     $this->assertEqual($count, 10, 'Accurate number of items in database.');
@@ -315,7 +315,6 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
     $edit = array(
       'allowed_extensions' => 'rss2',
-      'direct' => 1,
     );
     $this->drupalPost('admin/structure/feeds/edit/syndication_standalone/settings/FeedsFileFetcher', $edit, 'Save');
 
