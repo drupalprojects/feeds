@@ -84,7 +84,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Counts the number of items imported by this processor.
    */
   public function itemCount(FeedsSource $source) {
-    return db_query("SELECT count(*) FROM {feeds_item} WHERE entity_type = :entity_type AND feed_nid = :feed_nid", array(':entity_type' => $this->entity_type, ':feed_nid' => $source->feed_nid))->fetchField();
+    return db_query("SELECT count(*) FROM {feeds_item} WHERE id = :id AND entity_type = :entity_type AND feed_nid = :feed_nid", array(':id' => $this->id, ':entity_type' => $this->entity_type, ':feed_nid' => $source->feed_nid))->fetchField();
   }
 
   /**
