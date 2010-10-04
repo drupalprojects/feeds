@@ -503,7 +503,7 @@ class FeedsDateTimeElement extends FeedsElement {
       if (!date_timezone_is_valid($use_start->getTimezone()->getName())) {
         $use_start->setTimezone(new DateTimeZone("UTC"));
       }
-      $db_tz = date_get_timezone_db($info['setting']['tz_handling'], $use_start->getTimezone()->getName());
+      $db_tz = date_get_timezone_db($info['settings']['tz_handling'], $use_start->getTimezone()->getName());
     }
     if ($use_end) {
       $use_end = $use_end->merge($temp);

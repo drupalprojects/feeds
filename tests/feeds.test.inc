@@ -320,7 +320,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     }
     $edit = array(
       'feeds[FeedsHTTPFetcher][source]' => $feed_url,
-      );
+    );
     $nid = $this->drupalPost('import/'. $id, $edit, 'Import');
 
     // Check whether feed got recorded in feeds_source table.

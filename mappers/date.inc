@@ -48,7 +48,7 @@ function date_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  * @todo Support array of values for dates.
  */
 function date_feeds_set_target($entity, $target, $feed_element) {
-  list($field_name, $sub_field) = split(':', $target);
+  list($field_name, $sub_field) = explode(':', $target, 2);
   if (!($feed_element instanceof FeedsDateTimeElement)) {
     if (is_array($feed_element)) {
       $feed_element = $feed_element[0];

@@ -36,7 +36,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
    */
   public function test() {
     $this->drupalGet('admin/config/regional/settings');
-    return;
+
     // Create content type.
     $typename = $this->createContentType(NULL, array(
       'date' => 'date',
@@ -71,7 +71,6 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
 
     $edit = array(
       'allowed_extensions' => 'rss2',
-      'direct' => 1,
     );
     $this->drupalPost('admin/structure/feeds/edit/daterss/settings/FeedsFileFetcher', $edit, 'Save');
 
