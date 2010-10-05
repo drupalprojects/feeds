@@ -40,12 +40,6 @@ class FeedsUserProcessor extends FeedsProcessor {
         }
         $account = $this->map($source, $parser_result, $account);
 
-        // Check if user name and mail are set, otherwise continue.
-        if (empty($account->name) || empty($account->mail) || !valid_email_address($account->mail)) {
-          $failed++;
-          continue;
-        }
-
         // Save the user.
         user_save($account, (array) $account);
         if ($account->uid && $account->openid) {

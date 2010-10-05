@@ -3,6 +3,8 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- Remove check for present name and mail. Needs to be solved on a more pluggable
+  level.
 - FeedsTermProcessor: Do not filter taxonomy_term_data table by vid when
   clearing.
 - #932572 alex_b: FeedsTermProcessor: Batch term processing.
