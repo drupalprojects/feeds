@@ -189,7 +189,7 @@ class FeedsFileFetcher extends FeedsFetcher {
    */
   public function configDefaults() {
     return array(
-      'allowed_extensions' => 'txt csv tsv xml',
+      'allowed_extensions' => 'txt csv tsv xml opml',
       'direct' => FALSE,
     );
   }
