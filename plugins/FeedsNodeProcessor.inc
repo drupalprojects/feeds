@@ -357,7 +357,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
           break;
         case 'feeds_source':
-          if ($id = feeds_get_importer_id($this->importer->config['content_type'])) {
+          if ($id = feeds_get_importer_id($this->config['content_type'])) {
             $nid = db_query("SELECT fs.feed_nid FROM {node} n JOIN {feeds_source} fs ON n.nid = fs.feed_nid WHERE fs.id = :id AND fs.source = :source", array(':id' => $id, ':source' => $value))->fetchField();
           }
           break;

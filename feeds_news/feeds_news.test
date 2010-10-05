@@ -115,7 +115,7 @@ class FeedsExamplesOPMLTestCase extends FeedsWebTestCase {
     // Import OPML and assert.
     $file = $this->generateOPML();
     $this->importFile('opml', $file);
-    $this->assertText('Created 3 feed nodes.');
+    $this->assertText('Created 3 Feed nodes.');
     $count = db_query("SELECT COUNT(*) FROM {feeds_source}")->fetchField();
     $this->assertEqual($count, 4, 'Found correct number of items.');
 
