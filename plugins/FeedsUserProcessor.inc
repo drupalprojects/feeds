@@ -42,6 +42,7 @@ class FeedsUserProcessor extends FeedsProcessor {
 
         // Save the user.
         if (!$this->validateUser($account)) {
+          $failed++;
           continue;
         }
         user_save($account, (array) $account);
