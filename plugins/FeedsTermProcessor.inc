@@ -40,6 +40,9 @@ class FeedsTermProcessor extends FeedsProcessor {
         // Save the term.
         $term->feeds_importer_id = $this->id;
         $term->feed_nid = $source->feed_nid;
+        if (!$this->validateTerm($term)) {
+          continue;
+        }
         taxonomy_term_save($term);
         if ($tid) {
           $state->updated++;
@@ -249,5 +252,15 @@ class FeedsTermProcessor extends FeedsProcessor {
       $this->newItemInfo($term, $source->feed_nid);
     }
     return $term;
+  }
+
+  /**
+   * Validates a term.
+   */
+  protected function validateTerm($term) {
+    if (!isset($term->name)) {
+      return FALSE;
+    }
+    return TRUE;
   }
 }

@@ -41,6 +41,9 @@ class FeedsUserProcessor extends FeedsProcessor {
         $account = $this->map($source, $parser_result, $account);
 
         // Save the user.
+        if (!$this->validateUser($account)) {
+          continue;
+        }
         user_save($account, (array) $account);
         if ($account->uid && $account->openid) {
           $authmap = array(
@@ -228,5 +231,15 @@ class FeedsUserProcessor extends FeedsProcessor {
       $this->newItemInfo($account, $source->feed_nid);
     }
     return $account;
+  }
+
+  /**
+   * Validates a user account.
+   */
+  protected function validateUser($account) {
+    if (empty($account->name) || empty($account->mail) || !valid_email_address($account->mail)) {
+      return FALSE;
+    }
+    return TRUE;
   }
 }

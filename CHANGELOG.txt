@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- Move term and user validation into a validate() method.
 - Remove check for present name and mail. Needs to be solved on a more pluggable
   level.
 - FeedsTermProcessor: Do not filter taxonomy_term_data table by vid when
