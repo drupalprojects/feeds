@@ -21,8 +21,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
   protected $entity_type;
 
   /**
-   * Process the result of the parser or previous processors.
-   * Extending classes must implement this method.
+   * Process the result of the parsing stage.
    *
    * @param FeedsSource $source
    *   Source information about this import.
@@ -32,8 +31,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
   public abstract function process(FeedsSource $source, FeedsParserResult $parser_result);
 
   /**
-   * Remove all stored results or stored results up to a certain time for this
-   * configuration/this source.
+   * Remove all stored results or stored results up to a certain time for a
+   * source.
    *
    * @param FeedsSource $source
    *   Source information for this expiry. Implementers should only delete items
