@@ -18,7 +18,6 @@ class FeedsTermProcessor extends FeedsProcessor {
     $this->entity_type = 'taxonomy_term';
   }
 
-
   /**
    * Implements FeedsProcessor::process().
    */
@@ -27,7 +26,6 @@ class FeedsTermProcessor extends FeedsProcessor {
     $created  = $updated = $no_name = 0;
 
     while ($item = $parser_result->shiftItem()) {
-
       if (!($tid = $this->existingItemId($source, $parser_result)) || $this->config['update_existing'] != FEEDS_SKIP_EXISTING) {
 
         // Map item to a term.
