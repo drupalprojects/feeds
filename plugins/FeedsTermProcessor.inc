@@ -23,11 +23,6 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Implements FeedsProcessor::process().
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result) {
-
-    if (empty($this->config['vocabulary'])) {
-      throw new Exception(t('You must define a vocabulary for Taxonomy term processor before importing.'));
-    }
-
     // Count number of created and updated nodes.
     $created  = $updated = $no_name = 0;
 
@@ -223,24 +218,12 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Return vocabulary to map to.
    */
   public function vocabulary() {
-    // Legacy handling for old feeds importers.
-    if (is_numeric($this->config['vocabulary'])) {
-      $vocabularies = taxonomy_get_vocabularies();
-      return isset($vocabularies[$this->config['vocabulary']]) ? $vocabularies[$this->config['vocabulary']] : NULL;
-    }
-    else {
+    if (isset($this->config['vocabulary'])) {
       if ($vocabulary = taxonomy_vocabulary_machine_name_load($this->config['vocabulary'])) {
         return $vocabulary;
       }
-      else {
-        $vocabularies = taxonomy_get_vocabularies();
-        foreach ($vocabularies as $vocabulary) {
-          if ($vocabulary->module == $this->config['vocabulary']) {
-            return $vocabulary;
-          }
-        }
-      }
     }
+    throw new Exception(t('No vocabulary defined for Taxonomy Term processor.'));
   }
 
   /**
