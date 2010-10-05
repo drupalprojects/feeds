@@ -37,11 +37,6 @@ class FeedsTermProcessor extends FeedsProcessor {
         }
         $term = $this->map($source, $parser_result, $term);
 
-        // Add term id if available.
-        if (!empty($tid)) {
-          $term->tid = $tid;
-        }
-
         // Save the term.
         $term->feeds_importer_id = $this->id;
         $term->feed_nid = $source->feed_nid;
