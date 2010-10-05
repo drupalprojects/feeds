@@ -193,10 +193,11 @@ class FeedsTermProcessor extends FeedsProcessor {
        ),
     );
     // Let implementers of hook_feeds_term_processor_targets() add their targets.
-    if ($vocabulary = $this->vocabulary()) {
+    try {
       self::loadMappers();
-      feeds_alter('feeds_processor_targets', $targets, 'taxonomy_term', $vocabulary->machine_name);
+      feeds_alter('feeds_processor_targets', $targets, 'taxonomy_term', $this->vocabulary()->machine_name);
     }
+    catch (Exception $e) {}
     return $targets;
   }
 
