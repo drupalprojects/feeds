@@ -76,6 +76,6 @@ class FeedsFileFetcherTestCase extends FeedsWebTestCase {
       'feeds[FeedsFileFetcher][source]' => $dir,
     );
     $this->drupalPost('import/node', $edit, t('Import'));
-    $this->assertText('Created 18 Article nodes.');
+    $this->assertText('Created 18 nodes');
   }
 }

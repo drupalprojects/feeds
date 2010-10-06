@@ -75,7 +75,7 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
 
     // Import and assert.
     $this->importFile('term_import', $this->absolutePath() .'/tests/feeds/users.csv');
-    $this->assertText('Created 5 terms in Addams vocabulary.');
+    $this->assertText('Created 5 terms');
     $this->drupalGet('admin/structure/taxonomy/addams');
     $this->assertText('Morticia');
     $this->assertText('Fester');
