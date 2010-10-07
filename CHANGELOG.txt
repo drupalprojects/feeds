@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- Fix entity inspection in file fetcher.
 - #932772 alex_b: FeedsProcessor: Consolidate process() and clear().
   FeedsProcessor now implements the process() and clear() methods for creating
   and deleting entities. The extending processors FeedsNodeProcessor,
