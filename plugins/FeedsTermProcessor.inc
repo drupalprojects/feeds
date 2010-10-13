@@ -47,7 +47,7 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Validates a term.
    */
   protected function entityValidate($term) {
-    if (!isset($term->name)) {
+    if (empty($term->name)) {
       throw new FeedsValidationException(t('Term name missing.'));
     }
   }
