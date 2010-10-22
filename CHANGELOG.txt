@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #949236 Ian Ward: Allow mapping empty values to fields.
 - Allow for mapping to list_number field types.
 - Fix entity inspection in file fetcher.
 - #932772 alex_b: FeedsProcessor: Consolidate process() and clear().

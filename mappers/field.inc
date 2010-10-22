@@ -46,10 +46,6 @@ function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_na
  * element the user has picked as a source.
  */
 function field_feeds_set_target($entity, $target, $value) {
-  if (empty($value)) {
-    return;
-  }
-
   // Handle non-multiple value fields.
   if (!is_array($value)) {
     $value = array($value);
