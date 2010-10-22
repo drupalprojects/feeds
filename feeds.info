@@ -20,5 +20,6 @@ files[] = tests/feeds_processor_term.test
 files[] = tests/feeds_processor_user.test
 files[] = tests/feeds_scheduler.test
 files[] = tests/parser_csv.test
+files[] = views/feeds_views_handler_field_source.inc
 core = 7.x
 php = 5.2
