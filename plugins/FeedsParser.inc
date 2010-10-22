@@ -734,3 +734,28 @@ class FeedsDateTime extends DateTime {
     return array('year' => $this->format('Y'), 'month' => $this->format('m'), 'day' => $this->format('d'), 'hour' => $this->format('H'), 'minute' => $this->format('i'), 'second' => $this->format('s'), 'zone' => $this->format('e'));
   }
 }
+
+/**
+ * Converts to UNIX time.
+ *
+ * @param $date
+ *   A date that is either a string, a FeedsDateTimeElement or a UNIX timestamp.
+ * @param $default_value
+ *   A default UNIX timestamp to return if $date could not be parsed.
+ *
+ * @return
+ *   $date as UNIX time if conversion was successful, $dfeault_value otherwise.
+ */
+function feeds_to_unixtime($date, $default_value) {
+  if (is_numeric($date)) {
+    return $date;
+  }
+  elseif (is_string($date)) {
+    $date = new FeedsDateTimeElement($date);
+    return $date->getValue();
+  }
+  elseif ($date instanceof FeedsDateTimeElement) {
+    return $date->getValue();
+  }
+  return $default_value;
+}

@@ -124,6 +124,20 @@ class FeedsUserProcessor extends FeedsProcessor {
   }
 
   /**
+   * Override setTargetElement to operate on a target item that is a node.
+   */
+  public function setTargetElement($target_user, $target_element, $value) {
+    switch ($target_element) {
+      case 'created':
+        $target_user->created = feeds_to_unixtime($value, REQUEST_TIME);
+        break;
+      default:
+        parent::setTargetElement($target_user, $target_element, $value);
+        break;
+    }
+  }
+
+  /**
    * Return available mapping targets.
    */
   public function getMappingTargets() {

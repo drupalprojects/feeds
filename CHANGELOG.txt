@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #949916 alex_b: Convert values mapped to user->created.
 - #949236 Ian Ward: Allow mapping empty values to fields.
 - Allow for mapping to list_number field types.
 - Fix entity inspection in file fetcher.

@@ -210,17 +210,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
   public function setTargetElement($target_node, $target_element, $value) {
     switch ($target_element) {
       case 'created':
-        $target_node->created = REQUEST_TIME;
-        if (is_numeric($value)) {
-          $target_node->created = $value;
-        }
-        elseif (is_string($value)) {
-          $value = new FeedsDateTimeElement($value);
-          $value->created = $value->getValue();
-        }
-        elseif ($value instanceof FeedsDateTimeElement) {
-          $target_node->created = $value->getValue();
-        }
+        $target_node->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
       case 'feeds_source':
         // Get the class of the feed node importer's fetcher and set the source
