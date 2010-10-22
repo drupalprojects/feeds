@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- Allow for mapping to list_number field types.
 - Fix entity inspection in file fetcher.
 - #932772 alex_b: FeedsProcessor: Consolidate process() and clear().
   FeedsProcessor now implements the process() and clear() methods for creating

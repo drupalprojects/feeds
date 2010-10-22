@@ -20,6 +20,7 @@ function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_na
     $info = field_info_field($name);
     $allowed_types = array(
       'list_boolean',
+      'list_number',
       'number_integer',
       'number_decimal',
       'number_float',
