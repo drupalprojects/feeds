@@ -258,7 +258,7 @@ class FeedsEnclosure extends FeedsElement {
     if(empty($this->file) && $this->getValue()) {
       // Check if this enclosure contains a local file.
       if (!parse_url($this->getValue(), PHP_URL_SCHEME)) {
-        if (file_check_location($this->getValue(), file_directory_path())) {
+        if (file_check_location($this->getValue(), file_directory_path()) || file_check_location($this->getValue(), file_directory_temp())) {
           if (file_exists($this->getValue())) {
             $this->file = $this->getValue();
             return $this->file;
