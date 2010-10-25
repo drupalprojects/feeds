@@ -5,11 +5,11 @@
  * A result of a parsing stage.
  */
 class FeedsParserResult extends FeedsResult {
-  protected $title;
-  protected $description;
-  protected $link;
-  protected $items;
-  protected $current_item;
+  public $title;
+  public $description;
+  public $link;
+  public $items;
+  public $current_item;
 
   /**
    * Constructor.
@@ -19,31 +19,6 @@ class FeedsParserResult extends FeedsResult {
     $this->description = '';
     $this->link = '';
     $this->items = $items;
-  }
-
-  /**
-   * @return
-   *   A string that is the feed's title.
-   */
-  public function getTitle() {
-    return $this->title;
-  }
-
-  /**
-   * @return
-   *   A string that is the feed's description.
-   */
-  public function getDescription() {
-    return $this->description;
-  }
-
-  /**
-   * @return
-   *   A string that is the link to the feed's site (not the actual URL of the
-   *   feed). Falls back to URL if not available.
-   */
-  public function getLink() {
-    return $this->link;
   }
 
   /**
@@ -66,51 +41,6 @@ class FeedsParserResult extends FeedsResult {
    */
   public function currentItem() {
     return empty($this->current_item) ? NULL : $this->current_item;
-  }
-
-  /**
-   * Set title.
-   */
-  public function setTitle($title) {
-    $this->title = $title;
-  }
-
-  /**
-   * Set description.
-   */
-  public function setDescription($description) {
-    $this->description = $description;
-  }
-
-  /**
-   * Set link.
-   */
-  public function setLink($link) {
-    $this->link = $link;
-  }
-
-  /**
-   * Set items.
-   *
-   * @param $items
-   *   An array of the items in the feed. Cannot be NULL.
-   */
-  public function setItems($items) {
-    $this->items = $items;
-  }
-
-  /**
-   * Add an item.
-   */
-  public function addItem($item) {
-    $this->items[] = $item;
-  }
-
-  /**
-   * Get number of items.
-   */
-  public function getItemCount() {
-    return count($this->items);
   }
 }
 

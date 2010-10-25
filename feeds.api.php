@@ -96,7 +96,7 @@ function hook_feeds_plugins() {
  */
 function hook_feeds_after_parse(FeedsSource $source, FeedsParserResult $result) {
   // For example, set title of imported content:
-  $result->setTitle('Import number ' . my_module_import_id());
+  $result->title = 'Import number ' . my_module_import_id();
 }
 
 /**

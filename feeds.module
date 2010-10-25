@@ -424,7 +424,7 @@ function feeds_node_validate($node, $form, &$form_state) {
   if (trim($node->title) == '') {
     try {
       $source->addConfig($last_feeds);
-      if (!$last_title = $source->preview()->getTitle()) {
+      if (!$last_title = $source->preview()->title) {
         throw new Exception();
       }
     }
