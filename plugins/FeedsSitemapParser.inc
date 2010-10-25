@@ -20,10 +20,10 @@ class FeedsSitemapParser extends FeedsParser {
         $item['lastmod'] = strtotime($url->lastmod);
       }
       if ($url->changefreq) {
-        $item['changefreq'] = $url->changefreq;
+        $item['changefreq'] = (string) $url->changefreq;
       }
       if ($url->priority) {
-        $item['priority'] = $url->priority;
+        $item['priority'] = (string) $url->priority;
       }
       $batch->addItem($item);
     }
