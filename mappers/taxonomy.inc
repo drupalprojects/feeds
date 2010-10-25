@@ -25,7 +25,7 @@ function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
  * Callback, returns taxonomy from feed node.
  */
 function taxonomy_feeds_get_source(FeedsImportBatch $batch, $key) {
-  if ($node = $batch->feedNode()) {
+  if ($node = node_load($batch->feed_nid)) {
     $terms = taxonomy_node_get_terms($node);
     $vocabulary = taxonomy_get_vocabulary(str_replace('parent:taxonomy:', '', $key));
     $result = array();

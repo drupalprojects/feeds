@@ -25,7 +25,7 @@ class FeedsSitemapParser extends FeedsParser {
       if ($url->priority) {
         $item['priority'] = (string) $url->priority;
       }
-      $batch->addItem($item);
+      $batch->items[] = $item;
     }
     date_default_timezone_set($tz);
   }

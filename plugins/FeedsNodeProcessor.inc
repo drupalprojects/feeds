@@ -28,7 +28,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     // Keep track of processed items in this pass, set total number of items.
     $processed = 0;
     if (!$batch->getTotal(FEEDS_PROCESSING)) {
-      $batch->setTotal(FEEDS_PROCESSING, $batch->getItemCount());
+      $batch->setTotal(FEEDS_PROCESSING, count($batch->items));
     }
 
     while ($item = $batch->shiftItem()) {

@@ -74,9 +74,9 @@ class FeedsSimplePieParser extends FeedsParser {
     $parser->init();
 
     // Construct the standard form of the parsed feed
-    $batch->setTitle(html_entity_decode(($title = $parser->get_title()) ? $title : $this->createTitle($parser->get_description())));
-    $batch->setDescription($parser->get_description());
-    $batch->setLink(html_entity_decode($parser->get_link()));
+    $batch->title = html_entity_decode(($title = $parser->get_title()) ? $title : $this->createTitle($parser->get_description()));
+    $batch->description = $parser->get_description();
+    $batch->link = html_entity_decode($parser->get_link());
 
     $items_num = $parser->get_item_quantity();
     for ($i = 0; $i < $items_num; $i++) {
@@ -136,7 +136,7 @@ class FeedsSimplePieParser extends FeedsParser {
       $this->parseExtensions($item, $simplepie_item);
       $item['raw'] = $simplepie_item->data;
 
-      $batch->addItem($item);
+      $batch->items[] = $item;
     }
     // Release parser.
     unset($parser);

@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx 
 --------------------------------
 
+- #912630 twistor: FeedsImportBatch: make items accessible for modification.
 - #946822 twistor: FeedsSitemapParser broken: Serialization of
   'SimpleXMLElement' is not allowed.
 - #933306 alex_b: Fix Feeds creates subscriptions for not existing importers.

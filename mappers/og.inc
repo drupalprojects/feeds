@@ -23,7 +23,7 @@ function og_feeds_parser_sources_alter(&$sources, $content_type) {
  * Callback, returns OG of feed node.
  */
 function og_feeds_get_source(FeedsImportBatch $batch, $key) {
-  if ($node = $batch->feedNode()) {
+  if ($node = node_load($batch->feed_nid)) {
     if (in_array($node->type, og_get_types('group'))) {
       return array(
         $node->nid => $node->nid,

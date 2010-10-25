@@ -82,7 +82,7 @@ abstract class FeedsParser extends FeedsPlugin {
    * @see FeedsCSVParser::getSourceElement().
    */
   public function getSourceElement(FeedsImportBatch $batch, $element_key) {
-    if (($node = $batch->feedNode()) && $element_key == 'parent:uid') {
+    if (($node = node_load($batch->feed_nid)) && $element_key == 'parent:uid') {
       return $node->uid;
     }
     $item = $batch->currentItem();

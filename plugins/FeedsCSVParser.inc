@@ -26,14 +26,14 @@ class FeedsCSVParser extends FeedsParser {
     $parser->setColumnNames($header);
 
     // Populate batch.
-    $batch->setItems($this->parseItems($parser, $iterator));
+    $batch->items = $this->parseItems($parser, $iterator);
   }
 
   /**
    * Get first line and use it for column names, convert them to lower case.
    * Be aware that the $parser and iterator objects can be modified in this
    * function since they are passed in by reference
-   * 
+   *
    * @param ParserCSV $parser
    * @param ParserCSVIterator $iterator
    * @return
