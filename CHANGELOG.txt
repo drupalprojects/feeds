@@ -3,6 +3,11 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #953538 yhahn: Remove BOM from UTF-8 files.
+  Adds sanitizeFile() and sanitizeRaw() methods to FeedsFetcherResult.
+  Extending classes that override either the getRaw() or getFilePath() methods
+  should call these sanitization methods to ensure that the returned output /
+  file has been cleaned for parsing.
 - #606612 alex_b: More detailed log.
 - #949236 Ian Ward, alex_b: Allow mapping empty values to fields.
 - #912630 twistor, alex_b: FeedsParserResult: make items accessible for
