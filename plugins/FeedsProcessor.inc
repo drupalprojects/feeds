@@ -139,7 +139,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
         catch (Exception $e) {
           $state->failed++;
           drupal_set_message($e->getMessage(), 'warning');
-          watchdog('feeds', $e->getMessage(), array(), WATCHDOG_WARNING);
+          $message = $e->getMessage();
+          $message .= '<h3>Original item</h3>';
+          $message .= '<pre>' . var_export($item, true) . '</pre>';
+          $message .= '<h3>Entity</h3>';
+          $message .= '<pre>' . var_export($entity, true) . '</pre>';
+          $source->log('import', $message, array(), WATCHDOG_ERROR);
         }
       }
     }
@@ -183,6 +188,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     }
     foreach ($messages as $message) {
       drupal_set_message($message);
+      $source->log('import', $message, array(), WATCHDOG_INFO);
     }
   }
 
@@ -249,6 +255,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
             '@entities' => strtolower($info['label plural']),
           )
         );
+        $source->log('clear', $message, array(), WATCHDOG_INFO);
         drupal_set_message($message);
       }
       else {

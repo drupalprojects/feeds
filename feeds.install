@@ -222,6 +222,76 @@ function feeds_schema() {
       'timestamp' => array('timestamp'),
     ),
   );
+  $schema['feeds_log'] = array(
+    'description' => 'Table that contains logs of feeds events.',
+    'fields' => array(
+      'flid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique feeds event ID.',
+      ),
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The id of the importer that logged the event.',
+      ),
+      'feed_nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Node id of the source, if available.',
+      ),
+      'log_time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of when event occurred.',
+      ),
+      'request_time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of the request when the event occurred.',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of log message, for example "feeds_import"."',
+      ),
+      'message' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Text of log message to be passed into the t() function.',
+      ),
+      'variables' => array(
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Serialized array of variables that match the message string and that is passed into the t() function.',
+      ),
+      'severity' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The severity level of the event; ranges from 0 (Emergency) to 7 (Debug)',
+      ),
+    ),
+    'primary key' => array('flid'),
+    'indexes' => array(
+      'id' => array('id'),
+      'id_feed_nid' => array('id', 'feed_nid'),
+      'request_time' => array('request_time'),
+      'log_time' => array('log_time'),
+      'type' => array('type'),
+    ),
+  );
   return $schema;
 }
 
@@ -336,4 +406,81 @@ function feeds_update_7202(&$sandbox) {
   db_query($insert . " SELECT 'taxonomy_term', tid, id, feed_nid, 0, '', '', '' FROM {feeds_term_item}");
   db_drop_table('feeds_node_item');
   db_drop_table('feeds_term_item');
+}
+
+/**
+ * Add feeds_log table.
+ */
+function feeds_update_7203(&$sandbox) {
+  $schema = array(
+    'description' => 'Table that contains logs of feeds events.',
+    'fields' => array(
+      'flid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique feeds event ID.',
+      ),
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The id of the importer that logged the event.',
+      ),
+      'feed_nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Node id of the source, if available.',
+      ),
+      'log_time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of when event occurred.',
+      ),
+      'request_time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of the request when the event occurred.',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of log message, for example "feeds_import"."',
+      ),
+      'message' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Text of log message to be passed into the t() function.',
+      ),
+      'variables' => array(
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Serialized array of variables that match the message string and that is passed into the t() function.',
+      ),
+      'severity' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The severity level of the event; ranges from 0 (Emergency) to 7 (Debug)',
+      ),
+    ),
+    'primary key' => array('flid'),
+    'indexes' => array(
+      'id' => array('id'),
+      'id_feed_nid' => array('id', 'feed_nid'),
+      'request_time' => array('request_time'),
+      'log_time' => array('log_time'),
+      'type' => array('type'),
+    ),
+  );
+  db_create_table('feeds_log', $schema);
 }

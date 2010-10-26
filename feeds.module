@@ -37,6 +37,10 @@ function feeds_cron() {
     }
     feeds_reschedule(FALSE);
   }
+  // Expire old log entries.
+  db_delete('feeds_log')
+    ->condition('request_time', REQUEST_TIME - 604800, '<')
+    ->execute();
 }
 
 /**
@@ -88,7 +92,7 @@ function feeds_source_import($job) {
   }
   catch (FeedsNotExistingException $e) {}
   catch (Exception $e) {
-    watchdog('feeds_source_import()', $e->getMessage(), array(), WATCHDOG_ERROR);
+    $source->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
   $source->scheduleImport();
 }
@@ -103,7 +107,7 @@ function feeds_source_clear($job) {
   }
   catch (FeedsNotExistingException $e) {}
   catch (Exception $e) {
-    watchdog('feeds_source_clear()', $e->getMessage(), array(), WATCHDOG_ERROR);
+    $source->log('clear', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
   $source->scheduleClear();
 }
@@ -118,7 +122,7 @@ function feeds_importer_expire($job) {
   }
   catch (FeedsNotExistingException $e) {}
   catch (Exception $e) {
-    watchdog('feeds_importer_expire()', $e->getMessage(), array(), WATCHDOG_ERROR);
+    $importer->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
   $importer->scheduleExpire();
 }
@@ -218,72 +222,68 @@ function feeds_forms() {
  * Implements hook_menu().
  */
 function feeds_menu() {
-  // Register a callback for all feed configurations that are not attached to a content type.
   $items = array();
+  $items['import'] = array(
+    'title' => 'Import',
+    'page callback' => 'feeds_page',
+    'access callback' => 'feeds_page_access',
+    'file' => 'feeds.pages.inc',
+  );
+  $items['import/%'] = array(
+    'title callback' => 'feeds_importer_title',
+    'title arguments' => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_import_form', 1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('import', 1),
+    'file' => 'feeds.pages.inc',
+  );
+  $items['import/%/import'] = array(
+    'title' => 'Import',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['import/%/delete-items'] = array(
+    'title' => 'Delete items',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_delete_tab_form', 1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('clear', 1),
+    'file' => 'feeds.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['import/%feeds_importer/template'] = array(
+    'page callback' => 'feeds_importer_template',
+    'page arguments' => array(1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('import', 1),
+    'file' => 'feeds.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['node/%node/import'] = array(
+    'title' => 'Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_import_tab_form', 1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('import', 1),
+    'file' => 'feeds.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+  $items['node/%node/delete-items'] = array(
+    'title' => 'Delete items',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_delete_tab_form', NULL, 1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('clear', 1),
+    'file' => 'feeds.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+  );
+  // @todo Eliminate this step and thus eliminate clearing menu cache when
+  // manipulating importers.
   foreach (feeds_importer_load_all() as $importer) {
-    if (empty($importer->config['content_type'])) {
-      $items['import/'. $importer->id] = array(
-        'title' => $importer->config['name'],
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('feeds_import_form', 1),
-        'access callback' => 'feeds_access',
-        'access arguments' => array('import', $importer->id),
-        'file' => 'feeds.pages.inc',
-      );
-      $items['import/'. $importer->id .'/import'] = array(
-        'title' => 'Import',
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-        'weight' => -10,
-      );
-      $items['import/'. $importer->id .'/delete-items'] = array(
-        'title' => 'Delete items',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('feeds_delete_tab_form', 1),
-        'access callback' => 'feeds_access',
-        'access arguments' => array('clear', $importer->id),
-        'file' => 'feeds.pages.inc',
-        'type' => MENU_LOCAL_TASK,
-      );
-    }
-    else {
-      $items['node/%node/import'] = array(
-        'title' => 'Import',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('feeds_import_tab_form', 1),
-        'access callback' => 'feeds_access',
-        'access arguments' => array('import', 1),
-        'file' => 'feeds.pages.inc',
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 10,
-      );
-      $items['node/%node/delete-items'] = array(
-        'title' => 'Delete items',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('feeds_delete_tab_form', NULL, 1),
-        'access callback' => 'feeds_access',
-        'access arguments' => array('clear', 1),
-        'file' => 'feeds.pages.inc',
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 11,
-      );
-    }
     $items += $importer->fetcher->menuItem();
-    $items['import/' . $importer->id .'/template'] = array(
-      'page callback' => 'feeds_importer_template',
-      'page arguments' => array(1),
-      'access callback' => 'feeds_access',
-      'access arguments' => array('import', $importer->id),
-      'file' => 'feeds.pages.inc',
-      'type' => MENU_CALLBACK,
-    );
-  }
-  if (count($items)) {
-    $items['import'] = array(
-      'title' => 'Import',
-      'page callback' => 'feeds_page',
-      'access callback' => 'feeds_page_access',
-      'file' => 'feeds.pages.inc',
-    );
   }
   return $items;
 }
@@ -293,6 +293,14 @@ function feeds_menu() {
  */
 function feeds_importer_load($id) {
   return feeds_importer($id);
+}
+
+/**
+ * Title callback.
+ */
+function feeds_importer_title($id) {
+  $importer = feeds_importer($id);
+  return $importer->config['name'];
 }
 
 /**
@@ -354,6 +362,15 @@ function feeds_page_access() {
     }
   }
   return FALSE;
+}
+
+/**
+ * Implements hook_exit().
+ */
+function feeds_exit() {
+  if (drupal_static('feeds_log_error', FALSE)) {
+    watchdog('feeds', 'Feeds reported errors, visit the Feeds log for details.', array(), WATCHDOG_ERROR, 'admin/reports/dblog/feeds');
+  }
 }
 
 /**
@@ -498,7 +515,10 @@ function feeds_node_delete($node) {
     ->condition('entity_id', $node->nid)
     ->execute();
   // Source attached to node.
-  if ($importer_id = feeds_get_importer_id($node->type)) {
+  // Make sure we don't leave any orphans behind: Do not use
+  // feeds_get_importer_id() to determine importer id as the importer may have
+  // been deleted.
+  if ($importer_id = db_query("SELECT id FROM {feeds_source} WHERE feed_nid = :nid", array(':nid' => $node->nid))->fetchField()) {
     feeds_source($importer_id, $node->nid)->delete();
   }
 }
@@ -550,6 +570,7 @@ function feeds_user_delete($account) {
     ->condition('entity_id', $account->uid)
     ->execute();
 }
+
 /**
  * Implements hook_form_alter().
  */
@@ -692,6 +713,28 @@ function feeds_dbg($msg) {
     fwrite($handle, date('c') ."\t$msg\n");
     fclose($handle);
   }
+}
+
+/**
+ * Writes to feeds log.
+ */
+function feeds_log($importer_id, $feed_nid, $type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
+  if ($severity < WATCHDOG_NOTICE) {
+    $error = &drupal_static('feeds_log_error', FALSE);
+    $error = TRUE;
+  }
+  db_insert('feeds_log')
+    ->fields(array(
+      'id' => $importer_id,
+      'feed_nid' => $feed_nid,
+      'log_time' => time(),
+      'request_time' => REQUEST_TIME,
+      'type' => $type,
+      'message' => $message,
+      'variables' => serialize($variables),
+      'severity' => $severity,
+    ))
+    ->execute();
 }
 
 /**

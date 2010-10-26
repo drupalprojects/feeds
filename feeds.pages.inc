@@ -33,6 +33,9 @@ function feeds_page() {
       );
     }
   }
+  if (empty($rows)) {
+    drupal_set_message(t('There are no importers, go to !importers to create one or enable an existing one.', array('!importers' => l(t('Feeds importers'), 'admin/structure/feeds'))));
+  }
   $header = array(
     t('Import'),
     t('Description'),

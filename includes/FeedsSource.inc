@@ -626,6 +626,13 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Writes to feeds log.
+   */
+  public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
+    feeds_log($this->id, $this->feed_nid, $type, $message, $variables, $severity);
+  }
+
+  /**
    * Background job helper. Starts a background job using Job Scheduler.
    *
    * Execute the first batch chunk of a background job on the current page load,
