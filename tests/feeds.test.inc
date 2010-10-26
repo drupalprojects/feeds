@@ -38,6 +38,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
     // Add text formats Directly.
     $filtered_html_format = array(
+      'format' => 'filtered_html',
       'name' => 'Filtered HTML',
       'weight' => 0,
       'filters' => array(
