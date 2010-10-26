@@ -23,7 +23,7 @@ class FeedsFetcherResult extends FeedsResult {
    *   Extending classes MAY throw an exception if a problem occurred.
    */
   public function getRaw() {
-    return $this->raw;
+    return $this->sanitizeRaw($this->raw);
   }
 
   /**
@@ -54,7 +54,48 @@ class FeedsFetcherResult extends FeedsResult {
         throw new Exception(t('Cannot write content to %dest', array('%dest' => $destination)));
       }
     }
-    return $this->file_path;
+    return $this->sanitizeFile($this->file_path);
+  }
+
+  /**
+   * Sanitize the raw content string. Currently supported sanitizations:
+   *
+   * - Remove BOM header from UTF-8 files.
+   *
+   * @param string $raw
+   *   The raw content string to be sanitized.
+   * @return
+   *   The sanitized content as a string.
+   */
+  public function sanitizeRaw($raw) {
+    if (substr($raw, 0,3) == pack('CCC',0xef,0xbb,0xbf)) {
+      $raw = substr($raw, 3);
+    }
+    return $raw;
+  }
+
+  /**
+   * Sanitize the file in place. Currently supported sanitizations:
+   *
+   * - Remove BOM header from UTF-8 files.
+   *
+   * @param string $filepath
+   *   The file path of the file to be sanitized.
+   * @return
+   *   The file path of the sanitized file.
+   */
+  public function sanitizeFile($filepath) {
+    $handle = fopen($filepath, 'r');
+    $line = fgets($handle);
+    fclose($handle);
+    // If BOM header is present, read entire contents of file and overwrite
+    // the file with corrected contents.
+    if (substr($line, 0,3) == pack('CCC',0xef,0xbb,0xbf)) {
+      $contents = file_get_contents($filepath);
+      $contents = substr($contents, 3);
+      file_put_contents($filepath, $contents);
+    }
+    return $filepath;
   }
 }
 

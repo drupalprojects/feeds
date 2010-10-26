@@ -23,7 +23,7 @@ class FeedsFileFetcherResult extends FeedsFetcherResult {
    * Overrides parent::getRaw();
    */
   public function getRaw() {
-    return file_get_contents($this->file_path);
+    return $this->sanitizeRaw(file_get_contents($this->file_path));
   }
 
   /**
@@ -33,7 +33,7 @@ class FeedsFileFetcherResult extends FeedsFetcherResult {
     if (!file_exists($this->file_path)) {
       throw new Exception(t('File @filepath is not accessible.', array('@filepath' => $this->file_path)));
     }
-    return $this->file_path;
+    return $this->sanitizeFile($this->file_path);
   }
 }
 

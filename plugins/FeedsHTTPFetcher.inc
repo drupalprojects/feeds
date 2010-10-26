@@ -32,7 +32,7 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
     if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
       throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->url, '!code' => $result->code)));
     }
-    return $result->data;
+    return $this->sanitizeRaw($result->data);
   }
 }
 
