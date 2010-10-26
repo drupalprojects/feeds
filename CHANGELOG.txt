@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #949236 Ian Ward, alex_b: Allow mapping empty values to fields.
 - #912630 twistor, alex_b: FeedsParserResult: make items accessible for
   modification.
 - #933306 alex_b: Fix Feeds creates subscriptions for not existing importers.

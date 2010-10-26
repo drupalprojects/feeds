@@ -16,25 +16,46 @@
  * @see FeedsNodeProcessor::getMappingTargets().
  */
 function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
+  $numeric_types = array(
+    'list',
+    'list_boolean',
+    'list_number',
+    'number_integer',
+    'number_decimal',
+    'number_float',
+  );
+  $string_types = array(
+    'text',
+    'text_long',
+    'text_with_summary',
+  );
   foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
-    $allowed_types = array(
-      'list_boolean',
-      'list_number',
-      'number_integer',
-      'number_decimal',
-      'number_float',
-      'text',
-      'text_long',
-      'text_with_summary',
-    );
-    if (in_array($info['type'], $allowed_types)) {
+    unset($callback);
+    if (in_array($info['type'], $numeric_types)) {
+      $callback = 'field_feeds_set_target_numeric';
+    }
+    if (in_array($info['type'], $string_types)) {
+      $callback = 'field_feeds_set_target';
+    }
+    if (isset($callback)) {
       $targets[$name] = array(
         'name' => $instance['label'],
-        'callback' => 'field_feeds_set_target',
+        'callback' => $callback,
         'description' => t('The @label field of the node.', array('@label' => $instance['label'])),
       );
     }
+  }
+}
+
+/**
+ * Callback for mapping numerics.
+ *
+ * Ensure that $value is a numeric to avoid database errors.
+ */
+function field_feeds_set_target_numeric($entity, $target, $value) {
+  if (is_numeric($value)) {
+    field_feeds_set_target($entity, $target, $value);
   }
 }
 
