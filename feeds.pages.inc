@@ -201,8 +201,8 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
 /**
  * Template generation
  */
-function feeds_importer_template($importer) {
-  $importer = feeds_importer_load($importer);
+function feeds_importer_template($importer_id) {
+  $importer = feeds_importer($importer_id);
   if ($importer->parser instanceof FeedsCSVParser) {
     return $importer->parser->getTemplate();
   }
