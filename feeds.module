@@ -872,6 +872,8 @@ function feeds_include_library($file, $library) {
       require libraries_get_path($library) ."/$file";
     }
     else {
+      // @todo: Throws "Deprecated function: Assigning the return value of new
+      // by reference is deprecated."
       require DRUPAL_ROOT . '/' . drupal_get_path('module', 'feeds') . "/libraries/$file";
     }
   }

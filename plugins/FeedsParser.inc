@@ -240,10 +240,14 @@ class FeedsGeoTermElement extends FeedsTermElement {
  */
 class FeedsEnclosure extends FeedsElement {
   protected $mime_type;
-  protected $file;
 
   /**
    * Constructor, requires MIME type.
+   *
+   * @param $value
+   *   A path to a local file or a URL to a remote document.
+   * @param $mimetype
+   *   The mime type of the resource.
    */
   public function __construct($value, $mime_type) {
     parent::__construct($value);
@@ -276,34 +280,30 @@ class FeedsEnclosure extends FeedsElement {
    *
    * @param $destination
    *   The path or uri specifying the target directory in which the file is
-   *   expected. If not given, a previously defined directory will be assumed.
-   *   The default directory is tmp.
+   *   expected.
    *
    * @return
-   *   A file path to the enclosed resource.
+   *   A Drupal file object of the enclosed resource. The file object is
+   *   permanent.
    *
-   * @todo file_destination(*, FILE_EXISTS_RENAME) is not concurrency safe.
+   * @throws Exception
+   *   If file object could not be created.
    */
   public function getFile($destination) {
 
-    if (empty($this->file) && $this->getValue()) {
-
-      // File is in the right place, nothing to do.
-      if (strpos($this->getValue(), $destination) === 0) {
-        $this->file = $this->getValue();
-        return $this->file;
-      }
-
+    if ($this->getValue()) {
       // Prepare destination directory.
       file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
 
-      // Copy or save file depending its location.
+      // Copy or save file depending on whether it is remote or local.
       if (drupal_realpath($this->getValue())) {
         $file         = new stdClass();
         $file->uid    = $user->uid;
         $file->status = FILE_STATUS_PERMANENT;
         $file->uri    = $this->getValue();
-        $this->file = file_copy($file, $destination);
+        if (strpos($file->uri, $destination) !== 0) {
+          $file = file_copy($file, $destination);
+        }
       }
       else {
         $filename = basename($this->getValue());
@@ -311,15 +311,15 @@ class FeedsEnclosure extends FeedsElement {
           require_once (drupal_get_path('module', 'transliteration') . '/transliteration.inc');
           $filename = transliteration_clean_filename($filename);
         }
-        $this->file = file_save_data($this->getContent(), "$destination/$filename");
+        $file = file_save_data($this->getContent(), "$destination/$filename");
       }
 
       // We couldn't make sense of this enclosure, throw an exception.
-      if (!$this->file) {
+      if (!$file) {
         throw new Exception(t('Invalid enclosure %enclosure', array('%enclosure' => $this->getValue())));
       }
     }
-    return $this->file;
+    return $file;
   }
 }
 
