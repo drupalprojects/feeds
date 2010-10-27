@@ -84,7 +84,7 @@ class FeedsFileFetcher extends FeedsFetcher {
     $files = array();
     if ($items = scandir($dir)) {
       foreach ($items as $item) {
-        if (is_file("$dir/$item")) {
+        if (is_file("$dir/$item") && strpos($item, '.') !== 0) {
           $files[] = "$dir/$item";
         }
       }
