@@ -280,11 +280,10 @@ class FeedsEnclosure extends FeedsElement {
    *
    * @param $destination
    *   The path or uri specifying the target directory in which the file is
-   *   expected.
+   *   expected. Don't use trailing slashes unless it's a streamwrapper scheme.
    *
    * @return
-   *   A Drupal file object of the enclosed resource. The file object is
-   *   permanent.
+   *   A Drupal temporary file object of the enclosed resource.
    *
    * @throws Exception
    *   If file object could not be created.
@@ -294,15 +293,18 @@ class FeedsEnclosure extends FeedsElement {
     if ($this->getValue()) {
       // Prepare destination directory.
       file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
-
       // Copy or save file depending on whether it is remote or local.
       if (drupal_realpath($this->getValue())) {
-        $file         = new stdClass();
-        $file->uid    = $user->uid;
-        $file->status = FILE_STATUS_PERMANENT;
-        $file->uri    = $this->getValue();
-        if (strpos($file->uri, $destination) !== 0) {
+        $file           = new stdClass();
+        $file->uid      = 0;
+        $file->uri      = $this->getValue();
+        $file->filemime = $this->mime_type;
+        $file->filename = basename($file->uri);
+        if (dirname($file->uri) != $destination) {
           $file = file_copy($file, $destination);
+        }
+        else {
+          file_save($file);
         }
       }
       else {

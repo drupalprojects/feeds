@@ -3,8 +3,8 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
-- alex_b: Fix file mapper, add file mapper tests, make flickr.xml point to
-  local assets.
+- alex_b: Fix file mapper, add file mapper tests, generate flickr.xml and
+  files.csv dynamically.
 - #953538 yhahn: Remove BOM from UTF-8 files.
   Adds sanitizeFile() and sanitizeRaw() methods to FeedsFetcherResult.
   Extending classes that override either the getRaw() or getFilePath() methods

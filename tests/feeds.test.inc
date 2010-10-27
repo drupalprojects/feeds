@@ -409,4 +409,16 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     }
     return $nid;
   }
+
+  /**
+   * Copies a directory.
+   */
+  public function copyDir($source, $dest) {
+    $result = file_prepare_directory($dest, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    foreach (scandir($source) as $file) {
+      if (is_file("$source/$file")) {
+        $file = file_unmanaged_copy("$source/$file", "$dest/$file");
+      }
+    }
+  }
 }

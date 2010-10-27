@@ -60,14 +60,8 @@ class FeedsFileFetcherTestCase extends FeedsWebTestCase {
 
     // Verify batching through directories.
     // Copy directory of files.
-    $source_dir = $this->absolutePath() . '/tests/feeds/batch';
     $dir = 'public://batchtest';
-    $result = file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-    foreach (scandir($source_dir) as $file) {
-      if (is_file("$source_dir/$file")) {
-        file_unmanaged_copy("$source_dir/$file", "$dir/$file");
-      }
-    }
+    $this->copyDir($this->absolutePath() . '/tests/feeds/batch', $dir);
 
     // Ingest directory of files. Set limit to 5 to force processor to batch,
     // too.
