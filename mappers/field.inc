@@ -62,33 +62,42 @@ function field_feeds_set_target_numeric($source, $entity, $target, $value) {
       unset($value[$k]);
     }
   }
-  field_feeds_set_target($source, $entity, $target, $value, FALSE);
+  _field_feeds_set_target($source, $entity, $target, $value, FALSE);
 }
 
+/**
+ * Callback for mapping text fields.
+ */
 function field_feeds_set_target_text($source, $entity, $target, $value) {
   if (!is_array($value)) {
     $value = array($value);
   }
-  field_feeds_set_target($source, $entity, $target, $value, TRUE);
+  _field_feeds_set_target($source, $entity, $target, $value, TRUE);
 }
 
 /**
- * Callback for mapping. Here is where the actual mapping happens.
+ * Helper for mapping.
  *
  * When the callback is invoked, $target contains the name of the field the
  * user has decided to map to and $value contains the value of the feed item
  * element the user has picked as a source.
+ *
+ * @param $source
+ *   A FeedsSource object.
+ * @param $entity
+ *   The entity to map to.
+ * @param $target
+ *   The target key on $entity to map to.
+ * @param $value
+ *   The value to map. MUST be an array.
+ * @param $input_format
+ *   TRUE if an input format should be applied.
  */
-function field_feeds_set_target($source, $entity, $target, $value, $input_format = FALSE) {
-  // @param $value must be an array, and not empty.
+function _field_feeds_set_target($source, $entity, $target, $value, $input_format = FALSE) {
   if (empty($value)) {
     return;
   }
-  // Handle non-multiple value fields.
-  if (!is_array($value)) {
-    $value = array($value);
-  }
-  
+
   if ($input_format) {
     if (isset($source->importer->processor->config['input_format'])) {
       $format = $source->importer->processor->config['input_format'];
