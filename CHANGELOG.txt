@@ -3,6 +3,9 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #857216 derhasi: Set Date to empty if no date is present.
+  Note: previously date mapper would set date to the current date if no date
+  was present.
 - #637334 mongolito404, elliotttf et. al.: Mapper for Content Taxonomy.
 - #953638 joshuajabbour: FeedsTermProcessor looks for feed_nid in wrong object.
 - #954080 mlsamuelson: mimedetect_mime() expects a file object.
