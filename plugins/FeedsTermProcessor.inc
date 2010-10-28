@@ -124,7 +124,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     $target_term['vid'] = $vocabulary->vid;
     $target_term = parent::map($batch, $target_term);
     // Taxonomy module expects synonyms to be supplied as a single string.
-    if (isset($target_term['synonyms']) && is_array(isset($target_term['synonyms']))) {
+    if (isset($target_term['synonyms']) && is_array($target_term['synonyms'])) {
       $target_term['synonyms'] = implode("\n", $target_term['synonyms']);
     }
     return $target_term;
