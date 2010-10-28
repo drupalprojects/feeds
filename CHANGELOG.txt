@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #883342 Steven Jones: Don't force usage of cURL.
 - #776854 imclean et. al.: Support parsing CSV files without column headers.
 - #857216 derhasi: Set Date to empty if no date is present.
   Note: previously date mapper would set date to the current date if no date

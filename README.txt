@@ -198,6 +198,11 @@ Name:        http_request_timeout
 Default:     15
 Description: Timeout in seconds to wait for an HTTP get request to finish.
 
+Name:        feeds_never_use_curl
+Default:     FALSE
+Description: Flag to stop feeds from using its cURL for http requests. See
+             http_request_use_curl().
+
 Glossary
 ========
 

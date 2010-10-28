@@ -218,6 +218,12 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
  *   TRUE if curl is available, FALSE otherwise.
  */
 function http_request_use_curl() {
+  // Allow site administrators to choose to not use cURL.
+  if (variable_get('feeds_never_use_curl', FALSE)) {
+    return FALSE;
+  }
+
+  // Check availability of cURL on the system.
   $basedir = ini_get("open_basedir");
   return function_exists('curl_init') && !ini_get('safe_mode') && empty($basedir);
 }
