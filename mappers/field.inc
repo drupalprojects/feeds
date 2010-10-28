@@ -54,12 +54,21 @@ function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_na
  * Ensure that $value is a numeric to avoid database errors.
  */
 function field_feeds_set_target_numeric($source, $entity, $target, $value) {
-  if (is_numeric($value)) {
-    field_feeds_set_target($source, $entity, $target, $value, FALSE);
+  if (!is_array($value)) {
+    $value = array($value);
   }
+  foreach ($value as $k => $v) {
+    if (!is_numeric($v)) {
+      unset($value[$k]);
+    }
+  }
+  field_feeds_set_target($source, $entity, $target, $value, FALSE);
 }
 
 function field_feeds_set_target_text($source, $entity, $target, $value) {
+  if (!is_array($value)) {
+    $value = array($value);
+  }
   field_feeds_set_target($source, $entity, $target, $value, TRUE);
 }
 
@@ -71,6 +80,10 @@ function field_feeds_set_target_text($source, $entity, $target, $value) {
  * element the user has picked as a source.
  */
 function field_feeds_set_target($source, $entity, $target, $value, $input_format = FALSE) {
+  // @param $value must be an array, and not empty.
+  if (empty($value)) {
+    return;
+  }
   // Handle non-multiple value fields.
   if (!is_array($value)) {
     $value = array($value);
