@@ -63,7 +63,9 @@ class FeedsFileFetcher extends FeedsFetcher {
         'size' => filesize(realpath($source_config['source'])),
       );
       if (module_exists('mimedetect')) {
-        $info['mime'] = mimedetect_mime(realpath($source_config['source']));
+        $file = new stdClass;
+        $file->filepath = realpath($source_config['source']);
+        $info['mime'] = mimedetect_mime($file);
       }
     }
     $form['source'] = array(
