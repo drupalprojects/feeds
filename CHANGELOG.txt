@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- Ian Ward: ensure that arrays of numerics are handled correctly.
 - #953728 tristanoneil: Upgrade text formats, use on all processors.
 - alex_b: Fix file mapper, add file mapper tests, generate flickr.xml and
   files.csv dynamically.
