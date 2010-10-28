@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #925264 alex_b: Don't allow commas in tag names.
 - #935908 njbooher: FeedsTermProcessor: Synonyms array not joined.
 - #883342 Steven Jones: Don't force usage of cURL.
 - #776854 imclean et. al.: Support parsing CSV files without column headers.

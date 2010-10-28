@@ -88,6 +88,10 @@ function taxonomy_feeds_set_target(&$node, $key, $terms) {
   }
 
   if ($vocabulary->tags) {
+    foreach ($terms as $k => $v) {
+      // Make sure there aren't any terms with a comma (=tag delimiter) in it.
+      $terms[$k] = preg_replace('/\s*,\s*/', ' ', $v);
+    }
     // Simply add a comma separated list to the node for a "tags" vocabulary.
     $terms = array_merge($terms, drupal_explode_tags($node->taxonomy['tags'][$vocabulary->vid]));
     $node->taxonomy['tags'][$vocabulary->vid] = implode(',', $terms);
