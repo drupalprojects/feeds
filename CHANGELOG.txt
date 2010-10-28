@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #883342 Steven Jones: Don't force usage of cURL.
 - #776854 imclean et. al.: Support parsing CSV files without column headers.
 - Ian Ward: ensure that arrays of numerics are handled correctly.
 - #953728 tristanoneil: Upgrade text formats, use on all processors.
