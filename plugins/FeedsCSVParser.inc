@@ -20,11 +20,14 @@ class FeedsCSVParser extends FeedsParser {
     $parser->setDelimiter($delimiter);
 
     $iterator = new ParserCSVIterator($fetcher_result->getFilePath());
-    $header = $this->parseHeader($parser, $iterator);
-    if (!$header) {
-      return;
+    if ($source_config['no_headers'] < 1) {
+      // Get first line and use it for column names, convert them to lower case.
+      $header = $this->parseHeader($parser, $iterator);
+      if (!$header) {
+        return;
+      }
+      $parser->setColumnNames($header);
     }
-    $parser->setColumnNames($header);
 
     // Determine section to parse, parse.
     $start = $state->pointer ? $state->pointer : $parser->lastLinePos();
@@ -99,6 +102,7 @@ class FeedsCSVParser extends FeedsParser {
   public function sourceDefaults() {
     return array(
       'delimiter' => $this->config['delimiter'],
+      'no_headers' => $this->config['no_headers'],
     );
   }
 
@@ -136,6 +140,12 @@ class FeedsCSVParser extends FeedsParser {
       ),
       '#default_value' => isset($source_config['delimiter']) ? $source_config['delimiter'] : ',',
     );
+    $form['no_headers'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('No Headers'),
+      '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
+      '#default_value' => isset($source_config['no_headers']) ? $source_config['no_headers'] : 0,
+    );
     return $form;
   }
 
@@ -143,7 +153,10 @@ class FeedsCSVParser extends FeedsParser {
    * Define default configuration.
    */
   public function configDefaults() {
-    return array('delimiter' => ',');
+    return array(
+      'delimiter' => ',',
+      'no_headers' => 0,
+    );
   }
 
   /**
@@ -161,6 +174,12 @@ class FeedsCSVParser extends FeedsParser {
         'TAB' => 'TAB',
       ),
       '#default_value' => $this->config['delimiter'],
+    );
+    $form['no_headers'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('No headers'),
+      '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
+      '#default_value' => $this->config['no_headers'],
     );
     return $form;
   }
