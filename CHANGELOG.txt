@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #953728 tristanoneil: Upgrade text formats, use on all processors.
 - alex_b: Fix file mapper, add file mapper tests, generate flickr.xml and
   files.csv dynamically.
 - #953538 yhahn: Remove BOM from UTF-8 files.

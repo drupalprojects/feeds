@@ -62,7 +62,7 @@ function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle
  *
  * @todo Do not create new terms for non-autotag fields.
  */
-function taxonomy_feeds_set_target($entity, $target, $terms) {
+function taxonomy_feeds_set_target($source, $entity, $target, $terms) {
   if (empty($terms)) {
     return;
   }

@@ -37,7 +37,7 @@ function file_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  * user has decided to map to and $value contains the value of the feed item
  * element the user has picked as a source.
  */
-function file_feeds_set_target($entity, $target, $value) {
+function file_feeds_set_target($source, $entity, $target, $value) {
   if (empty($value)) {
     return;
   }

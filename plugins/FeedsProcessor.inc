@@ -384,10 +384,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
           isset($targets[$this->id][$mapping['target']]['callback']) &&
           function_exists($targets[$this->id][$mapping['target']]['callback'])) {
         $callback = $targets[$this->id][$mapping['target']]['callback'];
-        $callback($target_item, $mapping['target'], $value);
+        $callback($source, $target_item, $mapping['target'], $value);
       }
       else {
-        $this->setTargetElement($target_item, $mapping['target'], $value);
+        $this->setTargetElement($source, $target_item, $mapping['target'], $value);
       }
     }
     return $target_item;
@@ -408,6 +408,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     return array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
+      'input_format' => NULL
     );
   }
 
@@ -428,6 +429,19 @@ abstract class FeedsProcessor extends FeedsPlugin {
         FEEDS_UPDATE_EXISTING => t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->config['update_existing'],
+    );
+    global $user;
+    $formats = filter_formats($user);
+      foreach ($formats as $format) {
+        $format_options[$format->format] = check_plain($format->name);
+      }
+    $form['input_format'] = array(
+      '#type' => 'select',
+      '#title' => t('Text format'),
+      '#description' => t('Select the input format for the body field of the nodes to be created.'),
+      '#options' => $format_options,
+      '#default_value' => isset($this->config['input_format']) ? $this->config['input_format'] : 'plain_text',
+      '#required' => TRUE,
     );
     return $form;
   }
@@ -469,7 +483,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @ingroup mappingapi
    */
-  public function setTargetElement($target_item, $target_element, $value) {
+  public function setTargetElement(FeedsSource $source, $target_item, $target_element, $value) {
     switch ($target_element) {
       case 'url':
       case 'guid':

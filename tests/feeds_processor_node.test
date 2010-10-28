@@ -162,7 +162,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->setSettings('syndication', 'FeedsNodeProcessor', array('author' => $this->auth_user->name));
 
     // Change input format.
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('input_format' => -1));
+    $this->setSettings('syndication', 'FeedsNodeProcessor', array('input_format' => 'plain_text'));
 
     // Import again.
     $this->drupalPost('node/'. $nid .'/import', array(), 'Import');

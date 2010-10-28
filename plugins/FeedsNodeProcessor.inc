@@ -6,9 +6,6 @@
  * Class definition of FeedsNodeProcessor.
  */
 
-// "Use the present default format"
-define('FEEDS_NODE_DEFAULT_FORMAT', -1);
-
 /**
  * Creates nodes from feed items.
  */
@@ -36,7 +33,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
     $node = new stdClass();
     $node->type = $this->config['content_type'];
     $node->changed = REQUEST_TIME;
-    $node->format = ($this->config['input_format'] == FEEDS_NODE_DEFAULT_FORMAT) ? filter_fallback_format() : $this->config['input_format'];
     $node->created = REQUEST_TIME;
     node_object_prepare($node);
     // Populate properties that are set by node_object_prepare().
@@ -125,7 +121,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
     $type = isset($types['article']) ? 'article' : key($types);
     return array(
       'content_type' => $type,
-      'input_format' => FEEDS_NODE_DEFAULT_FORMAT,
       'expire' => FEEDS_EXPIRE_NEVER,
       'author' => 0,
     ) + parent::configDefaults();
@@ -144,19 +139,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#description' => t('Select the content type for the nodes to be created. <strong>Note:</strong> Users with "import !feed_id feeds" permissions will be able to <strong>import</strong> nodes of the content type selected here regardless of the node level permissions. Further, users with "clear !feed_id permissions" will be able to <strong>delete</strong> imported nodes regardless of their node level permissions.', array('!feed_id' => $this->id)),
       '#options' => $types,
       '#default_value' => $this->config['content_type'],
-    );
-    $format_options = array(FEEDS_NODE_DEFAULT_FORMAT => t('Default format'));
-    global $user;
-    $formats = filter_formats($user);
-      foreach ($formats as $format) {
-        $format_options[$format->format] = check_plain($format->name);
-      }
-    $form['input_format'] = array(
-      '#type' => 'select',
-      '#title' => t('Input format'),
-      '#description' => t('Select the input format for the body field of the nodes to be created.'),
-      '#options' => $format_options,
-      '#default_value' => $this->config['input_format'],
     );
     $author = user_load($this->config['author']);
     $form['author'] = array(
@@ -207,7 +189,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
   /**
    * Override setTargetElement to operate on a target item that is a node.
    */
-  public function setTargetElement($target_node, $target_element, $value) {
+  public function setTargetElement(FeedsSource $source, $target_node, $target_element, $value) {
     switch ($target_element) {
       case 'created':
         $target_node->created = feeds_to_unixtime($value, REQUEST_TIME);
@@ -224,7 +206,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
         }
         break;
       default:
-        parent::setTargetElement($target_node, $target_element, $value);
+        parent::setTargetElement($source, $target_node, $target_element, $value);
         break;
     }
   }

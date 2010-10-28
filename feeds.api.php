@@ -163,7 +163,7 @@ function hook_feeds_parser_sources_alter(&$sources, $content_type) {
  * @see hook_feeds_parser_sources_alter().
  * @see locale_feeds_get_source().
  */
-function my_source_get_source(FeedsSource $source, FeedsParserResult $result, $key) {
+function my_source_get_source($source, FeedsParserResult $result, $key) {
   $item = $result->currentItem();
   return my_source_parse_images($item['description']);
 }
@@ -205,6 +205,8 @@ function hook_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
 /**
  * Example callback specified in hook_feeds_processor_targets_alter().
  *
+ * @param $source
+ *   Field mapper source settings.
  * @param $entity
  *   An entity object, for instance a node object.
  * @param $target
@@ -213,8 +215,12 @@ function hook_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  *   The value to populate the target with.
  *
  */
-function my_module_set_target($entity, $target, $value) {
+function my_module_set_target($source, $entity, $target, $value) {
   $entity->$target['und'][0]['value'] = $value;
+  if (isset($source->importer->processor->config['input_format'])) {
+    $entity->$target['und'][0]['format'] =
+      $source->importer->processor->config['input_format'];
+  }
 }
 
 /**

@@ -29,7 +29,7 @@ function profile_feeds_user_processor_targets_alter(&$targets) {
 /**
  * Set the user profile target after import.
  */
-function profile_feeds_set_target($account, $target, $value) {
+function profile_feeds_set_target($source, $account, $target, $value) {
   $account->{$target} = $value;
   return $account;
 }

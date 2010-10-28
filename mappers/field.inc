@@ -36,7 +36,7 @@ function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_na
       $callback = 'field_feeds_set_target_numeric';
     }
     if (in_array($info['type'], $string_types)) {
-      $callback = 'field_feeds_set_target';
+      $callback = 'field_feeds_set_target_text';
     }
     if (isset($callback)) {
       $targets[$name] = array(
@@ -53,10 +53,14 @@ function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_na
  *
  * Ensure that $value is a numeric to avoid database errors.
  */
-function field_feeds_set_target_numeric($entity, $target, $value) {
+function field_feeds_set_target_numeric($source, $entity, $target, $value) {
   if (is_numeric($value)) {
-    field_feeds_set_target($entity, $target, $value);
+    field_feeds_set_target($source, $entity, $target, $value, FALSE);
   }
+}
+
+function field_feeds_set_target_text($source, $entity, $target, $value) {
+  field_feeds_set_target($source, $entity, $target, $value, TRUE);
 }
 
 /**
@@ -66,10 +70,16 @@ function field_feeds_set_target_numeric($entity, $target, $value) {
  * user has decided to map to and $value contains the value of the feed item
  * element the user has picked as a source.
  */
-function field_feeds_set_target($entity, $target, $value) {
+function field_feeds_set_target($source, $entity, $target, $value, $input_format = FALSE) {
   // Handle non-multiple value fields.
   if (!is_array($value)) {
     $value = array($value);
+  }
+  
+  if ($input_format) {
+    if (isset($source->importer->processor->config['input_format'])) {
+      $format = $source->importer->processor->config['input_format'];
+    }
   }
 
   $info = field_info_field($target);
@@ -80,6 +90,11 @@ function field_feeds_set_target($entity, $target, $value) {
   foreach ($value as $v) {
     if (!is_array($v) && !is_object($v)) {
       $field['und'][$i]['value'] = $v;
+    }
+    if ($input_format) {
+      if (isset($format)) {
+        $field['und'][$i]['format'] = $format;
+      }
     }
     if ($info['cardinality'] == 1) {
       break;

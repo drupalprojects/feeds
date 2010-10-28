@@ -52,7 +52,7 @@ function feeds_import_feeds_importer_default() {
             'unique' => 1,
           ),
         ),
-        'input_format' => 0,
+        'input_format' => 'plain_text',
         'author' => 0,
       ),
     ),
