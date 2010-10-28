@@ -1,8 +1,9 @@
 // $Id$
 
-Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx 
+Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #608844 Will White: Optionally delete data items with feed nodes.
 - #926616 Mark Trapp: FeedsEnclosure::getFile() should allow files to exist in
   the temp directory.
 - #912630 twistor: FeedsImportBatch: make items accessible for modification.
