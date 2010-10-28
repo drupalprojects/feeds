@@ -48,7 +48,7 @@ class FeedsTermProcessor extends FeedsProcessor {
 
         // Save the term.
         $term['importer_id'] = $this->id;
-        $term['feed_nid'] = $this->feed_nid;
+        $term['feed_nid'] = $source->feed_nid;
         taxonomy_save_term($term);
         if ($tid) {
           $updated++;
