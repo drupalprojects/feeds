@@ -3,6 +3,7 @@
 Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
 --------------------------------
 
+- #637334 mongolito404, elliotttf et. al.: Mapper for Content Taxonomy.
 - #953638 joshuajabbour: FeedsTermProcessor looks for feed_nid in wrong object.
 - #954080 mlsamuelson: mimedetect_mime() expects a file object.
 - #608844 Will White: Optionally delete data items with feed nodes.
