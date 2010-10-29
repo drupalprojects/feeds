@@ -160,35 +160,44 @@ abstract class FeedsProcessor extends FeedsPlugin {
     );
     $messages = array();
     if ($state->created) {
-      $messages[] = format_plural(
-        $state->created,
-        'Created @number @entity',
-        'Created @number @entities',
-        array('@number' => $state->created) + $tokens
+      $messages[] = array(
+       'message' => format_plural(
+          $state->created,
+          'Created @number @entity',
+          'Created @number @entities',
+          array('@number' => $state->created) + $tokens
+        ),
       );
     }
     if ($state->updated) {
-      $messages[] = format_plural(
-        $state->updated,
-        'Updated @number @entity',
-        'Updated @number @entities',
-        array('@number' => $state->updated) + $tokens
+      $messages[] = array(
+       'message' => format_plural(
+          $state->updated,
+          'Updated @number @entity',
+          'Updated @number @entities',
+          array('@number' => $state->updated) + $tokens
+        ),
       );
     }
     if ($state->failed) {
-      $messages[] = format_plural(
-        $state->failed,
-        'Failed importing @number @entity',
-        'Failed importing @number @entities',
-        array('@number' => $state->failed) + $tokens
+      $messages[] = array(
+       'message' => format_plural(
+          $state->failed,
+          'Failed importing @number @entity',
+          'Failed importing @number @entities',
+          array('@number' => $state->failed) + $tokens
+        ),
+        'level' => WATCHDOG_ERROR,
       );
     }
     if (empty($messages)) {
-      $messages[] = t('There are no new @entities.', array('@entities' => strtolower($info['label plural'])));
+      $messages[] = array(
+        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label plural']))),
+      );
     }
     foreach ($messages as $message) {
-      drupal_set_message($message);
-      $source->log('import', $message, array(), WATCHDOG_INFO);
+      drupal_set_message($message['message']);
+      $source->log('import', $message, array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
     }
   }
 
