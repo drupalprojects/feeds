@@ -93,7 +93,10 @@ class FeedsFetcherResult extends FeedsResult {
     if (substr($line, 0,3) == pack('CCC',0xef,0xbb,0xbf)) {
       $contents = file_get_contents($filepath);
       $contents = substr($contents, 3);
-      file_put_contents($filepath, $contents);
+      $status = file_put_contents($filepath, $contents);
+      if ($status === FALSE) {
+        throw new Exception(t('File @filepath is not writeable.', array('@filepath' => $filepath)));
+      }
     }
     return $filepath;
   }
