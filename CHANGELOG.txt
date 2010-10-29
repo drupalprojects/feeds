@@ -1,7 +1,7 @@
 // $Id$
 
-Feeds 6.x xxxxxxxxxxxxxxxxxxxxxx
---------------------------------
+Feeds 6.x 1.0 Beta 10, 2010-10-29
+---------------------------------
 
 - #925264 alex_b: Don't allow commas in tag names.
 - #935908 njbooher: FeedsTermProcessor: Synonyms array not joined.
