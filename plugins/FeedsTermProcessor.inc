@@ -33,6 +33,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     $vocabulary = $this->vocabulary();
     $term = new stdClass();
     $term->vid = $vocabulary->vid;
+    $term->vocabulary_machine_name = $vocabulary->machine_name;
     return $term;
   }
 
