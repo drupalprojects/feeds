@@ -19,7 +19,7 @@ class FeedsCSVParser extends FeedsParser {
     $delimiter = $source_config['delimiter'] == 'TAB' ? "\t" : $source_config['delimiter'];
     $parser->setDelimiter($delimiter);
 
-    if ($source_config['no_headers'] < 1) {
+    if (empty($source_config['no_headers'])) {
       // Get first line and use it for column names, convert them to lower case.
       $header = $this->parseHeader($parser, $iterator);
       if (!$header) {
