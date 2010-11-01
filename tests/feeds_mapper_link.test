@@ -16,7 +16,7 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Mapper: Link'),
-      'description' => t('Test Feeds Mapper support for Link CCK fields. <strong>Requires CCK and Link module</strong>.'),
+      'description' => t('Test Feeds Mapper support for Link fields. <strong>Requires Link module</strong>.'),
       'group' => t('Feeds'),
     );
   }
