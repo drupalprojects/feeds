@@ -25,7 +25,7 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
     'emaudio' => 'emaudio_textfields',
     'filefield' => 'filefield_widget',
     'image' => 'imagefield_widget',
-    'link' => 'link',
+    'link_field' => 'link_field',
     'number_float' => 'number',
     'number_integer' => 'number',
     'nodereference' => 'nodereference_select',

@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
 ---------------------------------
 
+- #944986 tristanoneil: Link Mapper Upgrade.
 - #959066 tristanoneil: Remove old mappers and tests.
 - #883342 Steven Jones: Don't force usage of cURL.
 - #776854 imclean et. al.: Support parsing CSV files without column headers.

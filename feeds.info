@@ -20,6 +20,7 @@ files[] = tests/feeds_processor_node.test
 files[] = tests/feeds_processor_term.test
 files[] = tests/feeds_processor_user.test
 files[] = tests/feeds_scheduler.test
+files[] = tests/feeds_mapper_link.test
 files[] = tests/parser_csv.test
 files[] = views/feeds.views_default.inc
 files[] = views/feeds_views_handler_argument_importer_id.inc
