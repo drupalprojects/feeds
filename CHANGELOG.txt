@@ -1,7 +1,8 @@
 // $Id$
 
-Feeds 7.x 2.0 XXXXXXXXXXXXXXXXXXX
+Feeds 7.x 2.0 Alpha 2, 2010-11-02
 ---------------------------------
+
 - #940866 tristanoneil: PHP 5.3 FeedsImporter::copy function must be compatible.
 - #944986 tristanoneil: Link Mapper Upgrade.
 - #959066 tristanoneil: Remove old mappers and tests.
