@@ -1,5 +1,8 @@
 // $Id$
 
+- #791316 B-Prod: fix messages are not properly displayed by Feeds data
+  processor plugin.
+
 Feeds 6.x 1.0 Beta 10, 2010-10-29
 ---------------------------------
 

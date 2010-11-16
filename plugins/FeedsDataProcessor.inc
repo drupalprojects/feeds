@@ -54,10 +54,10 @@ class FeedsDataProcessor extends FeedsProcessor {
     if ($inserted) {
       drupal_set_message(format_plural($inserted, 'Created @number item.', 'Created @number items.', array('@number' => $inserted)));
     }
-    elseif ($updated) {
+    if ($updated) {
       drupal_set_message(format_plural($updated, 'Updated @number item.', 'Updated @number items.', array('@number' => $updated)));
     }
-    else {
+    if (!$inserted && !$updated) {
       drupal_set_message(t('There are no new items.'));
     }
   }
