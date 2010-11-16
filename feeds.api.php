@@ -2,9 +2,8 @@
 // $Id$
 
 /**
- * @mainpage
- *
- * @verbinclude README.txt
+ * @file
+ * Documentation of Feeds hooks.
  */
 
 /**
