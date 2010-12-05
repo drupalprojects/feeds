@@ -119,6 +119,7 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms) {
  *   A term id.
  */
 function taxonomy_term_check_term($name, $vid) {
+  $name = trim($name);
   $terms = taxonomy_term_load_multiple(array(), array('name' => $name, 'vid' => $vid));
   if (empty($terms)) {
     $term = new stdClass();
