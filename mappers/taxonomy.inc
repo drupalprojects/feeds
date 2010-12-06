@@ -120,14 +120,25 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms) {
  */
 function taxonomy_term_check_term($name, $vid) {
   $name = trim($name);
-  $terms = taxonomy_term_load_multiple(array(), array('name' => $name, 'vid' => $vid));
-  if (empty($terms)) {
+  $term = taxonomy_term_lookup_term($name, $vid);
+  if (empty($term)) {
     $term = new stdClass();
     $term->name = $name;
     $term->vid = $vid;
     taxonomy_term_save($term);
     return $term->tid;
   }
-  $term = reset($terms);
   return $term->tid;
+}
+
+/**
+ * Looks up a term, assumes SQL storage backend.
+ */
+function taxonomy_term_lookup_term($name, $vid) {
+  return db_select('taxonomy_term_data', 'td')
+    ->fields('td', array('tid', 'name'))
+    ->condition('name', $name)
+    ->condition('vid', $vid)
+    ->execute()
+    ->fetchObject();
 }
