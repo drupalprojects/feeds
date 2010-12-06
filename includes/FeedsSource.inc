@@ -14,6 +14,7 @@ class FeedsLockException extends Exception {}
 /**
  * Denote a import or clearing stage. Used for multi page processing.
  */
+define('FEEDS_START', 'start_time');
 define('FEEDS_FETCH', 'fetch');
 define('FEEDS_PARSE', 'parse');
 define('FEEDS_PROCESS', 'process');
@@ -329,6 +330,11 @@ class FeedsSource extends FeedsConfigurable {
   public function import() {
     $this->acquireLock();
     try {
+      // If fetcher result is empty, we are starting a new import, log.
+      if (empty($this->fetcher_result)) {
+        $this->state[FEEDS_START] = time();
+      }
+
       // Fetch.
       if (empty($this->fetcher_result) || FEEDS_BATCH_COMPLETE == $this->progressParsing()) {
         $this->fetcher_result = $this->importer->fetcher->fetch($this);
@@ -350,7 +356,8 @@ class FeedsSource extends FeedsConfigurable {
     $result = $this->progressImporting();
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
       module_invoke_all('feeds_after_import', $this);
-      $this->imported = REQUEST_TIME;
+      $this->imported = time();
+      $this->log('import', 'Imported in !s s', array('!s' => $this->imported - $this->state[FEEDS_START]), WATCHDOG_INFO);
       unset($this->fetcher_result, $this->state);
     }
     $this->save();
