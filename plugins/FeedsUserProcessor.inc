@@ -57,6 +57,9 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Save a user account.
    */
   protected function entitySave($account) {
+    if ($this->config['defuse_mail']) {
+      $account->mail = $account->mail . '_test';
+    }
     user_save($account, (array) $account);
     if ($account->uid && $account->openid) {
       $authmap = array(
@@ -86,6 +89,7 @@ class FeedsUserProcessor extends FeedsProcessor {
     return array(
       'roles' => array(),
       'status' => 1,
+      'defuse_mail' => FALSE,
     ) + parent::configDefaults();
   }
 
@@ -119,6 +123,12 @@ class FeedsUserProcessor extends FeedsProcessor {
       '#title' => t('Replace existing users'),
       '#description' => t('If an existing user is found for an imported user, replace it. Existing users will be determined using mappings that are a "unique target".'),
       '#default_value' => $this->config['update_existing'],
+    );
+    $form['defuse_mail'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Defuse e-mail addresses'),
+      '#description' => t('This appends _test to all imported e-mail addresses to ensure they cannot be as recipients.'),
+      '#default_value' => $this->config['defuse_mail'],
     );
     return $form;
   }

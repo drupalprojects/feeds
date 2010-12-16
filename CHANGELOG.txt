@@ -1,5 +1,10 @@
 // $Id$
 
+Feeds 7.x 2.0 xxxxxxxxxxxxxxxxxxx
+---------------------------------
+
+- #994026 tristanoneil: Optionally defuse email addresses.
+
 Feeds 7.x 2.0 Alpha 2, 2010-11-02
 ---------------------------------
 
