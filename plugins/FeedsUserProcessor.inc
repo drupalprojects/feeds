@@ -127,7 +127,7 @@ class FeedsUserProcessor extends FeedsProcessor {
     $form['defuse_mail'] = array(
       '#type' => 'checkbox',
       '#title' => t('Defuse e-mail addresses'),
-      '#description' => t('This appends _test to all imported e-mail addresses to ensure they cannot be as recipients.'),
+      '#description' => t('This appends _test to all imported e-mail addresses to ensure they cannot be used as recipients.'),
       '#default_value' => $this->config['defuse_mail'],
     );
     return $form;
