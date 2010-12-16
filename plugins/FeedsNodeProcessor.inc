@@ -34,6 +34,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     $node->type = $this->config['content_type'];
     $node->changed = REQUEST_TIME;
     $node->created = REQUEST_TIME;
+    $node->language = LANGUAGE_NONE;
     node_object_prepare($node);
     // Populate properties that are set by node_object_prepare().
     $node->log = 'Created by FeedsNodeProcessor';
