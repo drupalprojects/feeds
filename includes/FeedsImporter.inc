@@ -204,8 +204,8 @@ class FeedsImporter extends FeedsConfigurable {
        // Instantiate new fetcher, parser and processor and initialize their
        // configurations.
        foreach ($this->plugin_types as $plugin_type) {
-         $this->setPlugin($importer->config[$plugin_type]['plugin_key']);
-         $this->$plugin_type->setConfig($importer->config[$plugin_type]['config']);
+         $this->setPlugin($configurable->config[$plugin_type]['plugin_key']);
+         $this->$plugin_type->setConfig($configurable->config[$plugin_type]['config']);
        }
      }
    }
