@@ -120,8 +120,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
           }
           else {
             $entity = $this->entityLoad($source, $entity_id);
-            if ($this->loadItemInfo($entity)) {
+            // If an existing item info can't be loaded, create one.
+            if (!$this->loadItemInfo($entity)) {
               $this->newItemInfo($entity, $source->feed_nid, $hash);
+              $entity->feeds_item->entity_id = $entity_id;
             }
           }
           $this->map($source, $parser_result, $entity);

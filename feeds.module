@@ -495,7 +495,7 @@ function feeds_node_insert($node) {
  */
 function feeds_node_update($node) {
   // Node produced by source.
-  feeds_item_info_update($node, $node->nid);
+  feeds_item_info_save($node, $node->nid);
 
   // Source attached to node.
   if ($importer_id = feeds_get_importer_id($node->type)) {
@@ -534,7 +534,7 @@ function feeds_taxonomy_term_insert($term) {
  * Implements hook_taxonomy_term_update().
  */
 function feeds_taxonomy_term_update($term) {
-  feeds_item_info_update($term, $term->tid);
+  feeds_item_info_save($term, $term->tid);
 }
 
 /**
@@ -558,7 +558,7 @@ function feeds_user_insert(&$edit, $account, $category) {
  * Implements hook_user_update().
  */
 function feeds_user_update(&$edit, $account, $category) {
-  feeds_item_info_update($account, $account->uid);
+  feeds_item_info_save($account, $account->uid);
 }
 
 /**
@@ -764,12 +764,17 @@ function feeds_item_info_insert($entity, $entity_id) {
 }
 
 /**
- * Updates an item info object in he feeds_item table.
+ * Inserts or updates an item info object in he feeds_item table.
  */
-function feeds_item_info_update($entity, $entity_id) {
+function feeds_item_info_save($entity, $entity_id) {
   if (isset($entity->feeds_item)) {
     $entity->feeds_item->entity_id = $entity_id;
-    drupal_write_record('feeds_item', $entity->feeds_item, array('entity_type', 'entity_id'));
+    if (feeds_item_info_load($entity->feeds_item->entity_type, $entity_id)) {
+      drupal_write_record('feeds_item', $entity->feeds_item, array('entity_type', 'entity_id'));
+    }
+    else {
+      feeds_item_info_insert($entity, $entity_id);
+    }
   }
 }
 
