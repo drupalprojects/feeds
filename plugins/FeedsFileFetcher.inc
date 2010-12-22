@@ -82,7 +82,7 @@ class FeedsFileFetcher extends FeedsFetcher {
   protected function listFiles($dir) {
     $dir = file_stream_wrapper_uri_normalize($dir);
     $files = array();
-    if ($items = scandir($dir)) {
+    if ($items = @scandir($dir)) {
       foreach ($items as $item) {
         if (is_file("$dir/$item") && strpos($item, '.') !== 0) {
           $files[] = "$dir/$item";
