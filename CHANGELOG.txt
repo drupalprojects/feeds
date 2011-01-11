@@ -3,6 +3,7 @@
 Feeds 7.x 2.0 xxxxxxxxxxxxxxxxxxx
 ---------------------------------
 
+- Add index for looking up by entity_type + url/ guid to feeds_item table.
 - #994026 tristanoneil: Optionally defuse email addresses.
 
 Feeds 7.x 2.0 Alpha 2, 2010-11-02
