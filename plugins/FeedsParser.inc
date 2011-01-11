@@ -125,7 +125,9 @@ abstract class FeedsParser extends FeedsPlugin {
    * @see FeedsCSVParser::getSourceElement().
    */
   public function getSourceElement(FeedsSource $source, FeedsParserResult $result, $element_key) {
-    if (($node = node_load($source->feed_nid)) && $element_key == 'parent:uid') {
+    if ($element_key == 'parent:uid' &&
+        $source->feed_nid &&
+        ($node = node_load($source->feed_nid))) {
       return $node->uid;
     }
     $item = $result->currentItem();
