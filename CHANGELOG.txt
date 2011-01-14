@@ -1,6 +1,6 @@
 // $Id$
 
-Feeds 7.x 2.0 xxxxxxxxxxxxxxxxxxx
+Feeds 7.x 2.0 Alpha 3, 2011-01-14
 ---------------------------------
 
 - Add index for looking up by entity_type + url/ guid to feeds_item table.
