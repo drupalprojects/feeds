@@ -1,4 +1,3 @@
-// $Id$
 
 Drupal.behaviors.feeds = function() {
 

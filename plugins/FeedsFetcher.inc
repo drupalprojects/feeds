@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Abstract class, defines shared functionality between fetchers.

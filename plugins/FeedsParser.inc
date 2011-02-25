@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Abstract class, defines interface for parsers.

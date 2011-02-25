@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Class definition for Common Syndication Parser.

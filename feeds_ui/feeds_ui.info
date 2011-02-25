@@ -1,4 +1,3 @@
-;$Id$
 name = Feeds Admin UI
 description = Administrative UI for Feeds module.
 package = Feeds

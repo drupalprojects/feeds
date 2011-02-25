@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Contains CSV Parser.

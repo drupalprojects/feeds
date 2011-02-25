@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Test cases for common syndication parser library.

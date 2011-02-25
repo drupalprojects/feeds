@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 // Update mode for existing items.

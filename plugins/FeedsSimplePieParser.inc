@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Adapter to present SimplePie_Enclosure as FeedsEnclosure object.
