@@ -1,4 +1,3 @@
-// $Id$
 
 - #718414 pvhee, twistor: Mapper for email field.
 - #791316 B-Prod: fix messages are not properly displayed by Feeds data

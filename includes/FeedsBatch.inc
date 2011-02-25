@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 // Batch stages.
 define('FEEDS_FETCHING', 'fetching');
