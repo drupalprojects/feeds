@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Base class for all fetcher results.

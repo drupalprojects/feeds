@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * A parser for the Sitemap specification http://www.sitemaps.org/protocol.php
