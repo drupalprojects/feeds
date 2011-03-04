@@ -16,14 +16,15 @@
  */
 function field_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
   $numeric_types = array(
-    'list',
+    'list_integer',
+    'list_float',
     'list_boolean',
-    'list_number',
     'number_integer',
     'number_decimal',
     'number_float',
   );
   $string_types = array(
+    'list_text',
     'text',
     'text_long',
     'text_with_summary',
