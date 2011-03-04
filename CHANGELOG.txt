@@ -1,3 +1,4 @@
+- #967018 jcarlson34, David Goode, alex_b: Mapping to String lists not supported
 
 Feeds 7.x 2.0 Alpha 3, 2011-01-14
 ---------------------------------
