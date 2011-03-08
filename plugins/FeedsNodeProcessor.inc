@@ -46,6 +46,18 @@ class FeedsNodeProcessor extends FeedsProcessor {
         // Map and save node. If errors occur don't stop but report them.
         try {
           $this->map($batch, $node);
+          if ($this->config['authorize']) {
+            if (empty($node->nid)) {
+              $op = 'create';
+            }
+            else {
+              $op = 'update';
+            }
+            $account = user_load($node->uid);
+            if (!node_access($op, $node, $account)) {
+              throw new Exception('User ' . $account->uid . ' not authorized to ' . $op . ' content type ' . $node->type);
+            }
+          }
           node_save($node);
           if (!empty($nid)) {
             $batch->updated++;
@@ -149,6 +161,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'expire' => FEEDS_EXPIRE_NEVER,
       'mappings' => array(),
       'author' => 0,
+      'authorize' => 0,
     );
   }
 
@@ -184,6 +197,12 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
       '#default_value' => empty($author->name) ?  'anonymous' : check_plain($author->name),
+    );
+    $form['authorize'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Authorize'),
+      '#description' => t('Check that the author has permission to create the node.'),
+      '#default_value' => $this->config['authorize'],
     );
     $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 604800 * 4, 604800 * 12, 604800 * 24, 31536000), 'feeds_format_expire');
     $form['expire'] = array(
