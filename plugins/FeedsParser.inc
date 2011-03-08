@@ -144,7 +144,7 @@ class FeedsElement {
  * @endcode
  */
 class FeedsTermElement extends FeedsElement {
-  public $tid, $vid, $name;
+  public $tid, $vid, $name, $description, $weight;
 
   /**
    * @param $term
