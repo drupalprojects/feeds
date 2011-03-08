@@ -162,11 +162,30 @@ function feeds_schema() {
         'not null' => TRUE,
         'description' => t("Node id of the owner feed, if available."),
       ),
+      'imported' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('Import date of the feed item, as a Unix timestamp.'),
+      ),
+      'url' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => t('Link to the feed item.'),
+      ),
+      'guid' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => t('Unique identifier for the feed item.'),
+      ),
     ),
     'primary key' => array('tid'),
     'indexes' => array(
-      'id_feed_nid' => array('id', 'feed_nid'),
+      'id' => array('id'),
       'feed_nid' => array('feed_nid'),
+      'imported' => array('imported'),
+      'url' => array(array('url', 255)),
+      'guid' => array(array('guid', 255)),
     ),
   );
   $schema['feeds_push_subscriptions'] = array(
@@ -565,4 +584,46 @@ function feeds_update_6013() {
   // users of Feeds.
   variable_set('feeds_reschedule', TRUE);
   return array();
+}
+
+/**
+ * Update feeds_term_item to match feeds_node_item.
+ */
+function feeds_update_6014() {
+  $ret = array();
+
+  // Define new fields.
+  $fields = array(
+    'imported' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+      'description' => t('Import date of the feed item, as a Unix timestamp.'),
+    ),
+    'url' => array(
+      'type' => 'text',
+      'not null' => TRUE,
+      'description' => t('Link to the feed item.'),
+    ),
+    'guid' => array(
+      'type' => 'text',
+      'not null' => TRUE,
+      'description' => t('Unique identifier for the feed item.'),
+    ),
+  );
+
+  // Add new fields.
+  foreach ($fields as $field => $data) {
+    db_add_field($ret, 'feeds_term_item', $field, $data);
+  }
+
+  // Add new indexes, drop id_feed_nid.
+  db_drop_index($ret, 'feeds_term_item', 'id_feed_nid');
+
+  db_add_index($ret, 'feeds_term_item', 'id', array('id'));
+  db_add_index($ret, 'feeds_term_item', 'imported', array('imported'));
+  db_add_index($ret, 'feeds_term_item', 'url', array(array('url', 255)));
+  db_add_index($ret, 'feeds_term_item', 'guid', array(array('guid', 255)));
+
+  return $ret;
 }

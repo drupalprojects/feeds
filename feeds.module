@@ -429,19 +429,19 @@ function _feeds_nodeapi_node_processor($node, $op) {
  * Implementation of hook_taxonomy().
  */
 function feeds_taxonomy($op = NULL, $type = NULL, $term = NULL) {
-  if ($type =='term' && $term['tid']) {
+  if ($type == 'term' && !empty($term['tid'])) {
     switch ($op) {
       case 'delete':
         db_query("DELETE FROM {feeds_term_item} WHERE tid = %d", $term['tid']);
         break;
       case 'update':
-        if (isset($term['importer_id'])) {
+        if (isset($term['feeds_term_item'])) {
           db_query("DELETE FROM {feeds_term_item} WHERE tid = %d", $term['tid']);
         }
       case 'insert':
-        if (isset($term['importer_id'])) {
-          $term['id'] = $term['importer_id'];
-          drupal_write_record('feeds_term_item', $term);
+        if (isset($term['feeds_term_item'])) {
+          $term['feeds_term_item']['tid'] = $term['tid'];
+          drupal_write_record('feeds_term_item', $term['feeds_term_item']);
         }
         break;
     }
