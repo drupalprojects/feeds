@@ -119,11 +119,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
           }
           else {
             $entity = $this->entityLoad($source, $entity_id);
-            // If an existing item info can't be loaded, create one.
-            if (!$this->loadItemInfo($entity)) {
-              $this->newItemInfo($entity, $source->feed_nid, $hash);
-              $entity->feeds_item->entity_id = $entity_id;
-            }
+            // The feeds_item table is always updated with the info for the most recently processed entity.
+            // The only carryover is the entity_id.
+            $this->newItemInfo($entity, $source->feed_nid, $hash);
+            $entity->feeds_item->entity_id = $entity_id;
           }
           $this->map($source, $parser_result, $entity);
           $this->entityValidate($entity);
