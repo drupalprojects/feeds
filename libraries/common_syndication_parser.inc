@@ -455,6 +455,9 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
     if (isset($news['pubDate'])) {
       $item['timestamp'] = _parser_common_syndication_parse_date($news['pubDate']);
     }
+    elseif (isset($dc['date'])) {
+      $item['timestamp'] = _parser_common_syndication_parse_date($dc['date']);
+    }
     else {
       $item['timestamp'] = time();
     }
