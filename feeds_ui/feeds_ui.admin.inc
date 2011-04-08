@@ -612,10 +612,10 @@ function feeds_ui_mapping_form_submit($form, &$form_state) {
     foreach ($form_state['values']['remove_flags'] as $k => $v) {
       if ($v) {
         unset($mappings[$k]);
-        // Keep our keys clean.
-        $mappings = array_values($mappings);
       }
     }
+    // Keep our keys clean.
+    $mappings = array_values($mappings);
   }
   $processor->addConfig(array('mappings' => $mappings));
   $processor->save();
