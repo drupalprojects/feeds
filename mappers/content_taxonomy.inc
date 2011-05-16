@@ -51,7 +51,7 @@ function content_taxonomy_feeds_set_target(&$node, $field_name, $terms) {
 
   // Parse string for multiple tags (comma separated)
   if(is_string($terms)) {
-    $terms = split(',', $terms);
+    $terms = explode(',', $terms);
   }
 
   // Return if there are no or empty terms.

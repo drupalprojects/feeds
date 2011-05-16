@@ -52,7 +52,7 @@ function link_feeds_set_target($node, $target, $value) {
   module_load_include('inc', 'link');
   if (!empty($value)) {
     static $defaults = array();
-    list($field_name, $sub_field) = split(':', $target);
+    list($field_name, $sub_field) = explode(':', $target);
 
     if (!isset($defaults[$node->type][$field_name])) {
       $field = content_fields($field_name, $node->type);
