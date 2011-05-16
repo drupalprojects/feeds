@@ -15,14 +15,11 @@
 class FeedsDateTimeTest extends DrupalWebTestCase  {
   protected $profile = 'testing';
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('FeedsDateTime unit tests'),
-      'description' => t('Unit tests for Feeds date handling.'),
-      'group' => t('Feeds'),
+      'name' => 'FeedsDateTime unit tests',
+      'description' => 'Unit tests for Feeds date handling.',
+      'group' => 'Feeds',
     );
   }
 

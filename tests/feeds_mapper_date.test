@@ -15,9 +15,10 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => t('Mapper: Date'),
-      'description' => t('Test Feeds Mapper support for CCK Date fields. <strong>Requires CCK and Date module</strong>.'),
-      'group' => t('Feeds'),
+      'name' => 'Mapper: Date',
+      'description' => 'Test Feeds Mapper support for CCK Date fields.',
+      'group' => 'Feeds',
+      'dependencies' => array('date'),
     );
   }
 

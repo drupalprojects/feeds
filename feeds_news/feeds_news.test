@@ -9,14 +9,12 @@
  * Test Feed configuration.
  */
 class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: Feed'),
-      'description' => t('Test "Feed" default configuration.'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: Feed',
+      'description' => 'Test "Feed" default configuration.',
+      'group' => 'Feeds',
     );
   }
 
@@ -88,14 +86,12 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
  * Test OPML import configuration.
  */
 class FeedsExamplesOPMLTestCase extends FeedsWebTestCase {
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: OPML import'),
-      'description' => t('Test "OPML import" default configuration.'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: OPML import',
+      'description' => 'Test "OPML import" default configuration.',
+      'group' => 'Feeds',
     );
   }
 

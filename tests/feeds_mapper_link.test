@@ -5,8 +5,6 @@
  * Test case for CCK link mapper mappers/date.inc.
  */
 
-require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper_test.inc');
-
 /**
  * Class for testing Feeds <em>link</em> mapper.
  */
@@ -14,9 +12,10 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => t('Mapper: Link'),
-      'description' => t('Test Feeds Mapper support for Link fields. <strong>Requires Link module</strong>.'),
-      'group' => t('Feeds'),
+      'name' => 'Mapper: Link',
+      'description' => 'Test Feeds Mapper support for Link fields.',
+      'group' => 'Feeds',
+      'dependencies' => array('link'),
     );
   }
 

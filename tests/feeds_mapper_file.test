@@ -16,9 +16,9 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => t('Mapper: File field'),
-      'description' => t('Test Feeds Mapper support for file fields. <strong>Requires SimplePie library</strong>.'),
-      'group' => t('Feeds'),
+      'name' => 'Mapper: File field',
+      'description' => 'Test Feeds Mapper support for file fields. <strong>Requires SimplePie library</strong>.',
+      'group' => 'Feeds',
     );
   }
 

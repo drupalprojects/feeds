@@ -10,14 +10,11 @@
  */
 class FeedsCSVtoTermsTest extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('CSV import to taxonomy'),
-      'description' => t('Tests a standalone import configuration that uses file fetcher and CSV parser to import taxonomy terms from a CSV file.'),
-      'group' => t('Feeds'),
+      'name' => 'CSV import to taxonomy',
+      'description' => 'Tests a standalone import configuration that uses file fetcher and CSV parser to import taxonomy terms from a CSV file.',
+      'group' => 'Feeds',
     );
   }
 

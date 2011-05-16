@@ -10,14 +10,11 @@
  */
 class FeedsFileFetcherTestCase extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('File fetcher'),
-      'description' => t('Tests for file fetcher plugin.'),
-      'group' => t('Feeds'),
+      'name' => 'File fetcher',
+      'description' => 'Tests for file fetcher plugin.',
+      'group' => 'Feeds',
     );
   }
 

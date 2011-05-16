@@ -12,9 +12,9 @@ class FeedsMapperFieldTestCase extends FeedsMapperTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => t('Mapper: Fields'),
-      'description' => t('Test Feeds Mapper support for fields.'),
-      'group' => t('Feeds'),
+      'name' => 'Mapper: Fields',
+      'description' => 'Test Feeds Mapper support for fields.',
+      'group' => 'Feeds',
     );
   }
 

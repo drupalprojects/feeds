@@ -5,9 +5,6 @@
  * Helper class with auxiliary functions for feeds mapper module tests.
  */
 
-// Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test.inc');
-
 /**
  * Base class for implementing Feeds Mapper test cases.
  */

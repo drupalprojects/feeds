@@ -15,14 +15,11 @@
 class ParserCSVTest extends DrupalWebTestCase  {
   protected $profile = 'testing';
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('CSV Parser unit tests'),
-      'description' => t('Base level test for Feeds\' built in CSV parser.'),
-      'group' => t('Feeds'),
+      'name' => 'CSV Parser unit tests',
+      'description' => 'Base level test for Feeds\' built in CSV parser.',
+      'group' => 'Feeds',
     );
   }
 

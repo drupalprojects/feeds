@@ -5,22 +5,16 @@
  * Tests for Feeds Admin UI module.
  */
 
-// Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/../../tests/feeds.test.inc');
-
 /**
  * Test basic Feeds UI functionality.
  */
 class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Feeds UI user interface'),
-      'description' => t('Tests Feeds Admin UI module\'s GUI.'),
-      'group' => t('Feeds'),
+      'name' => 'Feeds UI user interface',
+      'description' => 'Tests Feeds Admin UI module\'s GUI.',
+      'group' => 'Feeds',
     );
   }
 
