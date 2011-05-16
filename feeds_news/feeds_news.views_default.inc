@@ -16,7 +16,7 @@ function feeds_news_views_default_views() {
   $view->is_cacheable = FALSE;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
-  
+
 /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->display->display_options['access']['type'] = 'perm';
@@ -127,10 +127,14 @@ function feeds_news_views_default_views() {
   $handler->display->display_options['arguments']['nid']['table'] = 'node';
   $handler->display->display_options['arguments']['nid']['field'] = 'nid';
   $handler->display->display_options['arguments']['nid']['relationship'] = 'feed_nid_1';
-  $handler->display->display_options['arguments']['nid']['default_action'] = 'empty';
+  $handler->display->display_options['arguments']['nid']['default_action'] = 'not found';
   $handler->display->display_options['arguments']['nid']['style_plugin'] = 'default_summary';
   $handler->display->display_options['arguments']['nid']['title'] = 'Articles from %1';
   $handler->display->display_options['arguments']['nid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['nid']['validate_type'] = 'node';
+  $handler->display->display_options['arguments']['nid']['validate_options']['types'] = array(
+    'feed' => 'feed',
+  );
   $handler->display->display_options['arguments']['nid']['break_phrase'] = 0;
   $handler->display->display_options['arguments']['nid']['not'] = 0;
   /* Filter: Node: Type */
@@ -141,7 +145,7 @@ function feeds_news_views_default_views() {
     'feed_item' => 'feed_item',
   );
   $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
-  
+
 /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');
   $handler->display->display_options['path'] = 'node/%/feed-items';
