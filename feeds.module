@@ -413,6 +413,45 @@ function feeds_feeds_plugins() {
 }
 
 /**
+ * Implements hook_entity_load().
+ */
+function feeds_entity_load($entities, $type) {
+  $feed_nids = db_query("SELECT entity_id, feed_nid FROM {feeds_item} WHERE entity_type = :type AND entity_id IN (:ids)", array(':type' => $type, ':ids' => array_keys($entities)))->fetchAllKeyed();
+  foreach ($feed_nids as $id => $feed_nid) {
+    $entities[$id]->feed_nid = $feed_nid;
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function feeds_entity_insert($entity, $type) {
+  list($id) = entity_extract_ids($type, $entity);
+  feeds_item_info_insert($entity, $id);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function feeds_entity_update($entity, $type) {
+  list($id) = entity_extract_ids($type, $entity);
+  feeds_item_info_save($entity, $id);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function feeds_entity_delete($entity, $type) {
+  list($id) = entity_extract_ids($type, $entity);
+
+  // Delete any imported items produced by the source.
+  db_delete('feeds_item')
+    ->condition('entity_type', $type)
+    ->condition('entity_id', $id)
+    ->execute();
+}
+
+/**
  * Implements hook_node_validate().
  */
 function feeds_node_validate($node, $form, &$form_state) {
@@ -472,9 +511,6 @@ function feeds_node_presave($node) {
  * Implements hook_node_insert().
  */
 function feeds_node_insert($node) {
-  // Node produced by source.
-  feeds_item_info_insert($node, $node->nid);
-
   // Source attached to node.
   feeds_node_update($node);
   if ($importer_id = feeds_get_importer_id($node->type)) {
@@ -493,9 +529,6 @@ function feeds_node_insert($node) {
  * Implements hook_node_update().
  */
 function feeds_node_update($node) {
-  // Node produced by source.
-  feeds_item_info_save($node, $node->nid);
-
   // Source attached to node.
   if ($importer_id = feeds_get_importer_id($node->type)) {
     $source = feeds_source($importer_id, $node->nid);
@@ -508,11 +541,6 @@ function feeds_node_update($node) {
  * Implements hook_node_delete().
  */
 function feeds_node_delete($node) {
-  // Node produced by source.
-  db_delete('feeds_item')
-    ->condition('entity_type', 'node')
-    ->condition('entity_id', $node->nid)
-    ->execute();
   // Source attached to node.
   // Make sure we don't leave any orphans behind: Do not use
   // feeds_get_importer_id() to determine importer id as the importer may have
@@ -520,54 +548,6 @@ function feeds_node_delete($node) {
   if ($importer_id = db_query("SELECT id FROM {feeds_source} WHERE feed_nid = :nid", array(':nid' => $node->nid))->fetchField()) {
     feeds_source($importer_id, $node->nid)->delete();
   }
-}
-
-/**
- * Implements hook_taxonomy_term_insert().
- */
-function feeds_taxonomy_term_insert($term) {
-  feeds_item_info_insert($term, $term->tid);
-}
-
-/**
- * Implements hook_taxonomy_term_update().
- */
-function feeds_taxonomy_term_update($term) {
-  feeds_item_info_save($term, $term->tid);
-}
-
-/**
- * Implements hook_taxonomy_delete().
- */
-function feeds_taxonomy_term_delete($term) {
-  db_delete('feeds_item')
-    ->condition('entity_type', 'taxonomy_term')
-    ->condition('entity_id', $term->tid)
-    ->execute();
-}
-
-/**
- * Implements hook_user_insert().
- */
-function feeds_user_insert(&$edit, $account, $category) {
-  feeds_item_info_insert($account, $account->uid);
-}
-
-/**
- * Implements hook_user_update().
- */
-function feeds_user_update(&$edit, $account, $category) {
-  feeds_item_info_save($account, $account->uid);
-}
-
-/**
- * Implements hook_user_delete().
- */
-function feeds_user_delete($account) {
-  db_delete('feeds_item')
-    ->condition('entity_type', 'user')
-    ->condition('entity_id', $account->uid)
-    ->execute();
 }
 
 /**
@@ -763,7 +743,7 @@ function feeds_item_info_insert($entity, $entity_id) {
 }
 
 /**
- * Inserts or updates an item info object in he feeds_item table.
+ * Inserts or updates an item info object in the feeds_item table.
  */
 function feeds_item_info_save($entity, $entity_id) {
   if (isset($entity->feeds_item)) {
