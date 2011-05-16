@@ -6,7 +6,7 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/../tests/feeds.test.inc');
+require_once(dirname(__FILE__) .'/../tests/feeds.test');
 
 /**
  * Test Feed fast configuration.
@@ -28,14 +28,12 @@ class FeedsExamplesFastFeedTestCase extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: Fast feed'),
-      'description' => t('Test "Fast feed" default configuration <strong>Requires Data, Features and Views.</strong>'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: Fast feed',
+      'description' => 'Test "Fast feed" default configuration.',
+      'group' => 'Feeds',
+      'dependencies' => array('data', 'features', 'views'),
     );
   }
 

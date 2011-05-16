@@ -6,21 +6,18 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test.inc');
+require_once(dirname(__FILE__) .'/feeds.test');
 
 /**
  * Test Sitemap parser.
  */
 class FeedsSitemapParserTestCase extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Sitemap parser'),
-      'description' => t('Regression tests for Sitemap XML format parser.'),
-      'group' => t('Feeds'),
+      'name' => 'Sitemap parser',
+      'description' => 'Regression tests for Sitemap XML format parser.',
+      'group' => 'Feeds',
     );
   }
 

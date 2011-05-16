@@ -6,21 +6,18 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test.inc');
+require_once(dirname(__FILE__) .'/feeds.test');
 
 /**
  * Test cron scheduling.
  */
 class FeedsSchedulerTestCase extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Scheduler'),
-      'description' => t('Tests for feeds scheduler.'),
-      'group' => t('Feeds'),
+      'name' => 'Scheduler',
+      'description' => 'Tests for feeds scheduler.',
+      'group' => 'Feeds',
     );
   }
 

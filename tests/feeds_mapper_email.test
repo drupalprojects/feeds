@@ -5,7 +5,7 @@
  * Test case for simple CCK field mapper mappers/email.inc.
  */
 
-require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper_test.inc');
+require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper.test');
 
 /**
  * Class for testing Feeds <em>email</em> mapper.
@@ -14,9 +14,10 @@ class FeedsMapperEmailTestCase extends FeedsMapperTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => t('Mapper: Email'),
-      'description' => t('Test Feeds Mapper support for Email CCK fields. <strong>Requires CCK module and Email module</strong>.'),
-      'group' => t('Feeds'),
+      'name' => 'Mapper: Email',
+      'description' => 'Test Feeds Mapper support for Email CCK fields.',
+      'group' => 'Feeds',
+      'dependencies' => array('content', 'email'),
     );
   }
 

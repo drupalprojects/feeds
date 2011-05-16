@@ -6,7 +6,7 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/../tests/feeds.test.inc');
+require_once(dirname(__FILE__) .'/../tests/feeds.test');
 
 /**
  * Test Feed configuration.
@@ -28,14 +28,11 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: Feed'),
-      'description' => t('Test "Feed" default configuration. <strong>Requires Features.</strong>'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: Feed',
+      'description' => 'Test "Feed" default configuration. <strong>Requires Features.</strong>',
+      'group' => 'Feeds',
     );
   }
 
@@ -116,14 +113,11 @@ class FeedsExamplesOPMLTestCase extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: OPML import'),
-      'description' => t('Test "OPML import" default configuration.'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: OPML import',
+      'description' => 'Test "OPML import" default configuration.',
+      'group' => 'Feeds',
     );
   }
 

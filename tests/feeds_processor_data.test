@@ -6,21 +6,19 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test.inc');
+require_once(dirname(__FILE__) .'/feeds.test');
 
 /**
  * Test aggregating a feed as data records.
  */
 class FeedsRSStoDataTest extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('RSS import to data records'),
-      'description' => t('Tests a feed configuration that is attached to a content type, uses common syndication parser and a node processor. <strong>Requires Data module and Views module</strong>.'),
-      'group' => t('Feeds'),
+      'name' => 'RSS import to data records',
+      'description' => 'Tests a feed configuration that is attached to a content type, uses common syndication parser and a node processor.',
+      'group' => 'Feeds',
+      'dependencies' => array('data', 'views'),
     );
   }
 

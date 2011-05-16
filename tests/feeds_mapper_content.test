@@ -5,7 +5,7 @@
  * Test case for simple CCK field mapper mappers/content.inc.
  */
 
-require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper_test.inc');
+require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper.test');
 
 /**
  * Class for testing Feeds <em>content</em> mapper.
@@ -14,9 +14,10 @@ class FeedsMapperContentTestCase extends FeedsMapperTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => t('Mapper: Content'),
-      'description' => t('Test Feeds Mapper support for CCK fields. <strong>Requires CCK module</strong>.'),
-      'group' => t('Feeds'),
+      'name' => 'Mapper: Content',
+      'description' => 'Test Feeds Mapper support for CCK fields.',
+      'group' => 'Feeds',
+      'dependencies' => array('content'),
     );
   }
 

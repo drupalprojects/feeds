@@ -7,14 +7,12 @@
  * @todo Could I use DrupalUnitTestCase here?
  */
 class CommonSyndicationParserTestCase extends DrupalWebTestCase {
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+
+  public static function getInfo() {
     return array(
-      'name' => t('Common Syndication Parser'),
-      'description' => t('Unit tests for Common Syndication Parser.'),
-      'group' => t('Feeds'),
+      'name' => 'Common Syndication Parser',
+      'description' => 'Unit tests for Common Syndication Parser.',
+      'group' => 'Feeds',
     );
   }
 

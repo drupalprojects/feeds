@@ -6,7 +6,7 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test.inc');
+require_once(dirname(__FILE__) .'/feeds.test');
 
 /**
  * Base class for implementing Feeds Mapper test cases.

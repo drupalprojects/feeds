@@ -6,7 +6,7 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/../tests/feeds.test.inc');
+require_once(dirname(__FILE__) .'/../tests/feeds.test');
 
 /**
  * Test Node import configuration.
@@ -28,14 +28,11 @@ class FeedsExamplesNodeTestCase extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: Node import'),
-      'description' => t('Test "Node import" default configuration.'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: Node import',
+      'description' => 'Test "Node import" default configuration.',
+      'group' => 'Feeds',
     );
   }
 
@@ -143,14 +140,11 @@ class FeedsExamplesUserTestCase extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('Feature: User import'),
-      'description' => t('Test "User import" default configuration.'),
-      'group' => t('Feeds'),
+      'name' => 'Feature: User import',
+      'description' => 'Test "User import" default configuration.',
+      'group' => 'Feeds',
     );
   }
 

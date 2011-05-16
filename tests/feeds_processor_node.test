@@ -6,21 +6,18 @@
  */
 
 // Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test.inc');
+require_once(dirname(__FILE__) .'/feeds.test');
 
 /**
  * Test aggregating a feed as node items.
  */
 class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
-  /**
-   * Describe this test.
-   */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
-      'name' => t('RSS import to nodes'),
-      'description' => t('Tests a feed configuration that is attached to a content type, uses HTTP fetcher, common syndication parser and a node processor. Repeats the same test for an importer configuration that is not attached to a content type and for a configuration that is attached to a content type and uses the file fetcher.'),
-      'group' => t('Feeds'),
+      'name' => 'RSS import to nodes',
+      'description' => 'Tests a feed configuration that is attached to a content type, uses HTTP fetcher, common syndication parser and a node processor. Repeats the same test for an importer configuration that is not attached to a content type and for a configuration that is attached to a content type and uses the file fetcher.',
+      'group' => 'Feeds',
     );
   }
 
