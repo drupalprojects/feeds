@@ -551,7 +551,7 @@ class FeedsDateTime extends DateTime {
    * In order to set a timezone for a datetime that doesn't have such
    * granularity, merge() it with one that does.
    */
-  public function setTimezone(DateTimeZone $tz, $force = FALSE) {
+  public function setTimezone($tz, $force = FALSE) {
     // PHP 5.2.6 has a fatal error when setting a date's timezone to itself.
     // http://bugs.php.net/bug.php?id=45038
     if (version_compare(PHP_VERSION, '5.2.7', '<') && $tz == $this->getTimezone()) {
