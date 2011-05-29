@@ -23,7 +23,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Implementation of FeedsProcessor::process().
    */
   public function process(FeedsImportBatch $batch, FeedsSource $source) {
-    dpm(__LINE__);
 
     // Keep track of processed items in this pass, set total number of items.
     $processed = 0;
@@ -75,7 +74,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
       $processed++;
       if ($processed >= variable_get('feeds_node_batch_size', FEEDS_NODE_BATCH_SIZE)) {
-        dpm(__LINE__);
         $batch->setProgress(FEEDS_PROCESSING, $batch->created + $batch->updated);
         return;
       }
@@ -91,7 +89,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
     else {
       drupal_set_message(t('There is no new content.'));
     }
-    dpm(__LINE__);
     $batch->setProgress(FEEDS_PROCESSING, FEEDS_BATCH_COMPLETE);
   }
 

@@ -47,7 +47,6 @@ class FeedsBatch {
    *   page load.
    */
   public function setProgress($stage, $progress) {
-    //dpm(var_export($progress, TRUE), $stage);
     $this->progress[$stage] = $progress;
   }
 
@@ -60,8 +59,6 @@ class FeedsBatch {
    */
   public function getProgress($stage = NULL) {
     if ($stage) {
-      dpm($this->total);
-      dpm($this->progress);
       $progress = $this->progress[$stage];
       if ($progress == FEEDS_BATCH_COMPLETE) {
         return FEEDS_BATCH_COMPLETE;
@@ -75,9 +72,6 @@ class FeedsBatch {
         $progress += $p;
         $complete &= $p == FEEDS_BATCH_COMPLETE;
       }
-      dpm($this->total);
-      dpm($this->progress);
-      dpm(debug_backtrace());
       if ($complete) {
         return FEEDS_BATCH_COMPLETE;
       }
