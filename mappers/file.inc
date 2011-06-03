@@ -65,8 +65,11 @@ function file_feeds_set_target($source, $entity, $target, $value) {
   list($entity_id, $vid, $bundle_name) = entity_extract_ids($entity->feeds_item->entity_type, $entity);
   $instance_info = field_info_instance($entity->feeds_item->entity_type, $target, $bundle_name);
   $info = field_info_field($target);
-  $account = !empty($entity->uid) ? user_load($entity->uid) : NULL;
-  $destination = file_field_widget_uri($info, $instance_info, $account);
+  $data = array();
+  if (!empty($entity->uid)) {
+    $data[$entity->feeds_item->entity_type] = $entity;
+  }
+  $destination = file_field_widget_uri($info, $instance_info, $data);
 
   // Populate entity.
   $i = 0;
