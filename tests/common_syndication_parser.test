@@ -7,7 +7,6 @@
  * @todo Could I use DrupalUnitTestCase here?
  */
 class CommonSyndicationParserTestCase extends DrupalWebTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Common Syndication Parser',
@@ -16,11 +15,8 @@ class CommonSyndicationParserTestCase extends DrupalWebTestCase {
     );
   }
 
-  /**
-   * Set up.
-   */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler');
+    parent::setUp(array('feeds', 'feeds_ui', 'ctools', 'job_scheduler'));
     feeds_include_library('common_syndication_parser.inc', 'common_syndication_parser');
   }
 

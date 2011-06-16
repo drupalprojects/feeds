@@ -1,12 +1,10 @@
 <?php
+module_load_include('test', 'feeds', 'test/feeds');
 
 /**
  * @file
  * Helper class with auxiliary functions for feeds mapper module tests.
  */
-
-// Require FeedsWebTestCase class definition.
-require_once(dirname(__FILE__) .'/feeds.test');
 
 /**
  * Base class for implementing Feeds Mapper test cases.

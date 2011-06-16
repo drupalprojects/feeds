@@ -100,6 +100,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     // Many mappers add to existing fields rather than replacing them. Hence we
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
+    $convert_to_array = FALSE;
     if (is_array($target_item)) {
       $target_item = (object)$target_item;
       $convert_to_array = TRUE;
