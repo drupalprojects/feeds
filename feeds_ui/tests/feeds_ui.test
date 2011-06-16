@@ -19,21 +19,6 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
   }
 
   /**
-   * Set up test.
-   */
-  public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler');
-
-    $this->drupalLogin(
-      $this->drupalCreateUser(
-        array(
-          'administer feeds', 'create article content', 'create page content',
-        )
-      )
-    );
-  }
-
-  /**
    * UI functionality tests on
    * feeds_ui_overview(),
    * feeds_ui_create_form(),

@@ -18,9 +18,6 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Enable feeds_news feature.
-   */
   public function setUp() {
     parent::setUp(array('features', 'views', 'feeds_news'));
   }
