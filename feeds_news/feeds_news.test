@@ -9,12 +9,12 @@
  * Test Feed configuration.
  */
 class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Feature: Feed',
       'description' => 'Test "Feed" default configuration.',
       'group' => 'Feeds',
+      'dependencies' => array('features', 'views'),
     );
   }
 
@@ -22,7 +22,7 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
    * Enable feeds_news feature.
    */
   public function setUp() {
-    parent::setUp(array('feeds_news'));
+    parent::setUp(array('features', 'views', 'feeds_news'));
   }
 
   /**
@@ -30,6 +30,13 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
    */
   public function test() {
     $nid = $this->createFeedNode('feed', NULL, '', 'feed');
+
+    // Assert menu tabs for feed nodes does not show up on non-feed nodes.
+    $this->drupalGet("node/{$nid}/feed-items");
+    $this->assertResponse(200);
+    $not_feed_node = $this->drupalCreateNode();
+    $this->drupalGet("node/{$not_feed_node->nid}/feed-items");
+    $this->assertResponse(404);
 
     // Assert results.
     $count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'feed_item'")->fetchField();
