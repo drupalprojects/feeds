@@ -17,11 +17,14 @@ class FeedsMapperFieldTestCase extends FeedsMapperTestCase {
     );
   }
 
+  public function setUp() {
+    parent::setUp(array('number'));
+  }
+
   /**
    * Basic test loading a double entry CSV file.
    */
   function test() {
-
     // Create content type.
     $typename = $this->createContentType(NULL, array(
       'alpha' => 'text',
