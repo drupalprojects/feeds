@@ -33,7 +33,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
     $this->drupalGet('admin/config/regional/settings');
 
     // Create content type.
-    $typename = $this->createContentType(NULL, array(
+    $typename = $this->createContentType(array(), array(
       'date' => 'date',
       'datestamp' => 'datestamp',
       //'datetime' => 'datetime', // REMOVED because the field is broken ATM.

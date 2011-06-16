@@ -25,7 +25,7 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
    * Basic test loading a single entry CSV file.
    */
   public function test() {
-    $typename = $this->createContentType(NULL, array('files' => 'file'));
+    $typename = $this->createContentType(array(), array('files' => 'file'));
 
     // 1) Test mapping remote resources to file field.
 
