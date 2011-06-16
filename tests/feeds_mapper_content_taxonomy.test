@@ -6,7 +6,6 @@ require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper.test');
  * Class for testing Feeds <em>content</em> mapper.
  */
 class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Content Taxonomy',
@@ -16,25 +15,8 @@ class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up test.
-   */
   public function setUp() {
-    // Call parent setup with the required module
-    parent::setUp(
-      'feeds', 'feeds_ui', 'job_scheduler', 'ctools', 'content',
-      'taxonomy', 'content_taxonomy', 'content_taxonomy_autocomplete', 'content_taxonomy_options'
-    );
-
-    // Create user and login
-    $this->drupalLogin($this->drupalCreateUser(
-      array(
-        'administer content types',
-        'administer feeds',
-        'administer nodes',
-        'administer site configuration',
-      )
-    ));
+    parent::setUp(array('content', 'content_taxonomy', 'content_taxonomy_autocomplete', 'content_taxonomy_options'));
   }
 
   /**

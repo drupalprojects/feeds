@@ -25,27 +25,20 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
    * Set up test.
    */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler');
-    $this->drupalLogin(
-      $this->drupalCreateUser(
-        array(
-          'administer feeds', 'administer nodes', 'administer content types',
-        )
-      )
-    );
+    parent::setUp();
+
+    // Set the front page to show 20 nodes so we can easily see what is aggregated.
+    variable_set('default_nodes_main', 20);
+
+    // Set the teaser length display to unlimited otherwise tests looking for
+    // text on nodes will fail.
+    variable_set('teaser_length', 0);
   }
 
   /**
    * Test node creation, refreshing/deleting feeds and feed items.
    */
   public function test() {
-    // Set the teaser length to unlimited otherwise tests looking for text on
-    // nodes will fail.
-    $edit = array(
-      'teaser_length' => 0,
-    );
-    $this->drupalPost('admin/content/node-settings', $edit, 'Save configuration');
-
     // Create an importer configuration.
     $this->createImporterConfiguration('Syndication', 'syndication');
     $this->addMappings('syndication',
@@ -79,6 +72,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     );
 
     $nid = $this->createFeedNode();
+
     // Assert 10 items aggregated after creation of the node.
     $this->assertText('Created 10 Story nodes.');
 

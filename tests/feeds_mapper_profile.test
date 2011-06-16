@@ -11,7 +11,6 @@ require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper.test');
  * Class for testing Feeds <em>content</em> mapper.
  */
 class FeedsMapperProfileTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Profile',
@@ -20,21 +19,9 @@ class FeedsMapperProfileTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up the test.
-   */
   function setUp() {
     // Call parent setup with required modules.
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'profile');
-
-    // Create user and login.
-    $this->drupalLogin($this->drupalCreateUser(
-        array(
-          'administer users',
-          'administer feeds',
-          'administer site configuration'
-        )
-    ));
+    parent::setUp(array('profile'));
   }
 
   /**

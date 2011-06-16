@@ -15,7 +15,6 @@ require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper.test');
  * @todo Add a test for enclosures using local file
  */
 class FeedsMapperFileFieldTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: FileField',
@@ -25,22 +24,8 @@ class FeedsMapperFileFieldTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up the
-   */
   public function setUp() {
-    // Call parent setup with the required module
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'content', 'filefield', 'libraries');
-
-    // Create user and login
-    $this->drupalLogin($this->drupalCreateUser(
-        array(
-          'administer content types',
-          'administer feeds',
-          'administer nodes',
-          'administer site configuration',
-        )
-    ));
+    parent::setUp(array('content', 'filefield', 'libraries'));
   }
 
   /**

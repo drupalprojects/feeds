@@ -12,45 +12,50 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
   public function setUp() {
     $args = func_get_args();
-    if (isset($args[0]) && is_array($args[0])) {
-      $modules = $args[0];
-    }
-    elseif (count($args) > 1) {
-      $modules = $args;
+
+    // Build the list of required modules which can be altered by passing in an
+    // array of module names to setUp().
+    if (isset($args[0])) {
+      if (is_array($args[0])) {
+        $modules = $args[0];
+      }
+      else {
+        $modules = $args;
+      }
     }
     else {
       $modules = array();
     }
 
+    $modules[] = 'taxonomy';
     $modules[] = 'feeds';
     $modules[] = 'feeds_ui';
+    //$modules[] = 'feeds_tests';
     $modules[] = 'ctools';
     $modules[] = 'job_scheduler';
     $modules = array_unique($modules);
     parent::setUp($modules);
 
-    // Create an admin user and log in.
-    $this->admin_user = $this->drupalCreateUser(array(
-      'access content',
-      'administer site configuration',
-      'administer feeds',
-      'administer nodes',
-      'administer content types',
-      'administer users',
-    ));
-    $this->drupalLogin($this->admin_user);
-  }
-
-  /**
-   * Debug utility. Shows current screen.
-   */
-  public function show($path = NULL) {
-    if ($path !== NULL) {
-      $this->drupalGet($path);
+    // Build the list of required administration permissions. Additional
+    // permissions can be passed as an array into setUp()'s second parameter.
+    if (isset($args[1]) && is_array($args[1])) {
+      $permissions = $args[1];
     }
-    // Use error, this will make sure we don't forget accidental calls to show()
-    // in our tests.
-    $this->error($this->content);
+    else {
+      $permissions = array();
+    }
+
+    $permissions[] = 'access content';
+    $permissions[] = 'administer site configuration';
+    $permissions[] = 'administer content types';
+    $permissions[] = 'administer nodes';
+    $permissions[] = 'administer taxonomy';
+    $permisisons[] = 'administer users';
+    $permissions[] = 'administer feeds';
+
+    // Create an admin user and log in.
+    $this->admin_user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->admin_user);
   }
 
   /**

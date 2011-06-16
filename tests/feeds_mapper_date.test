@@ -14,7 +14,6 @@ require_once(drupal_get_path('module', 'feeds') . '/tests/feeds_mapper.test');
  * @todo: Add test method for end date
  */
 class FeedsMapperDateTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Date',
@@ -24,22 +23,9 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up the test.
-   */
   public function setUp() {
     // Call parent setup with the required module.
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'content', 'date_api', 'date');
-
-    // Create user and login.
-    $this->drupalLogin($this->drupalCreateUser(
-        array(
-          'administer content types',
-          'administer feeds',
-          'administer nodes',
-          'administer site configuration',
-        )
-    ));
+    parent::setUp(array('content', 'date_api', 'date'));
   }
 
   /**

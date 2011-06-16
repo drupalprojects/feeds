@@ -23,7 +23,7 @@ define('FEEDS_BATCH_ACTIVE', 0);
  */
 
 /**
- * Implementation of hook_cron().
+ * Implements hook_cron().
  */
 function feeds_cron() {
   if ($importers = feeds_reschedule()) {
@@ -879,7 +879,7 @@ function feeds_include_library($file, $library) {
       require libraries_get_path($library) ."/$file";
     }
     else {
-      require './'. drupal_get_path('module', 'feeds') ."/libraries/$file";
+      require './' . drupal_get_path('module', 'feeds') . "/libraries/$file";
     }
   }
   $included[$file] = TRUE;
@@ -899,7 +899,7 @@ function feeds_library_exists($file, $library) {
   if (module_exists('libraries') && file_exists(libraries_get_path($library) ."/$file")) {
     return TRUE;
   }
-  elseif (file_exists(drupal_get_path('module', 'feeds') ."/libraries/$file")) {
+  elseif (file_exists('./' . drupal_get_path('module', 'feeds') . "/libraries/$file")) {
     return TRUE;
   }
   return FALSE;

@@ -12,7 +12,6 @@ require_once(dirname(__FILE__) .'/feeds.test');
  * Test aggregating a feed as data records.
  */
 class FeedsRSStoDataTest extends FeedsWebTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'RSS import to data records',
@@ -22,18 +21,8 @@ class FeedsRSStoDataTest extends FeedsWebTestCase {
     );
   }
 
-  /**
-   * Set up test.
-   */
   public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'data', 'data_ui', 'views');
-    $this->drupalLogin(
-      $this->drupalCreateUser(
-        array(
-          'administer feeds', 'create page content',
-        )
-      )
-    );
+    parent::setUp(array('data', 'data_ui', 'views'));
   }
 
   /**
