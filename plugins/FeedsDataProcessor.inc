@@ -259,7 +259,7 @@ class FeedsDataProcessor extends FeedsProcessor {
     $form['delete_with_source'] = array(
       '#type' => 'checkbox',
       '#title' => t('Delete items with source'),
-      '#description' => t('If enabled, any feed items associated with a source node will removed along with the node. Not available for standalone importers.'),
+      '#description' => t('If enabled, any feed items associated with a source node will be removed along with the node. Not available for standalone importers.'),
       '#default_value' => $this->config['delete_with_source'],
       '#disabled' => empty(feeds_importer($this->id)->config['content_type']) ? TRUE : FALSE,
     );

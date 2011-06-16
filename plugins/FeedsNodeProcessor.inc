@@ -432,11 +432,11 @@ class FeedsNodeProcessor extends FeedsProcessor {
  * Used for batch deletion.
  */
 function _feeds_node_delete($nid) {
+  $node = node_load($nid, NULL, TRUE);
 
-  $node = node_load($nid);
-
-  db_query("DELETE FROM {node} WHERE nid = %d", $node->nid);
-  db_query("DELETE FROM {node_revisions} WHERE nid = %d", $node->nid);
+  db_query('DELETE FROM {node} WHERE nid = %d', $node->nid);
+  db_query('DELETE FROM {node_revisions} WHERE nid = %d', $node->nid);
+  db_query('DELETE FROM {node_access} WHERE nid = %d', $node->nid);
 
   // Call the node-specific callback (if any):
   node_invoke($node, 'delete');
