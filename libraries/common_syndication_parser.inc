@@ -400,7 +400,7 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
     if (!empty($news['author'])) {
       $original_author = "{$news['author']}";
     }
-    elseif (isset($dc["creator"])) {
+    elseif (!empty($dc["creator"])) {
       $original_author = (string)$dc["creator"];
     }
 
@@ -409,11 +409,11 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
       $guid = $original_url;
     }
 
-    if (isset($news['guid'])) {
+    if (!empty($news['guid'])) {
       $guid = "{$news['guid']}";
     }
 
-    if (isset($georss['featureName'])) {
+    if (!empty($georss['featureName'])) {
       $geoname = "{$georss['featureName']}";
     }
 
@@ -421,7 +421,7 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
     $lon =
     $latlon =
     $geoname = NULL;
-    if (isset($georss['point'])) {
+    if (!empty($georss['point'])) {
       $latlon = explode(' ', $georss['point']);
       $lat = "{$latlon[0]}";
       $lon = "{$latlon[1]}";
@@ -452,7 +452,7 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
     $item['title'] = _parser_common_syndication_title($title, $body);
     $item['description'] = $body;
     $item['author_name'] = $original_author;
-    if (isset($news['pubDate'])) {
+    if (!empty($news['pubDate'])) {
       $item['timestamp'] = _parser_common_syndication_parse_date($news['pubDate']);
     }
     else {
