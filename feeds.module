@@ -551,26 +551,24 @@ function feeds_node_delete($node) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_BASE_FORM_ID_alter().
  */
-function feeds_form_alter(&$form, $form_state, $form_id) {
-  if (!empty($form['#node_edit_form'])) {
-    if ($importer_id = feeds_get_importer_id($form['type']['#value'])) {
-      // Set title to not required, try to retrieve it from feed.
-      $form['title']['#required'] = FALSE;
-      // Enable uploads.
-      $form['#attributes']['enctype'] = 'multipart/form-data';
+function feeds_form_node_form_alter(&$form, $form_state) {
+  if ($importer_id = feeds_get_importer_id($form['#node']->type)) {
+    // Set title to not required, try to retrieve it from feed.
+    $form['title']['#required'] = FALSE;
+    // Enable uploads.
+    $form['#attributes']['enctype'] = 'multipart/form-data';
 
-      // Build form.
-      $source = feeds_source($importer_id, empty($form['nid']['#value']) ? 0 : $form['nid']['#value']);
-      $form['feeds'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Feed'),
-        '#tree' => TRUE,
-      );
-      $form['feeds'] += $source->configForm($form_state);
-      $form['#feed_id'] = $importer_id;
-    }
+    // Build form.
+    $source = feeds_source($importer_id, empty($form['#node']->nid) ? 0 : $form['#node']->nid);
+    $form['feeds'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Feed'),
+      '#tree' => TRUE,
+    );
+    $form['feeds'] += $source->configForm($form_state);
+    $form['#feed_id'] = $importer_id;
   }
 }
 
