@@ -12,28 +12,17 @@ require_once(dirname(__FILE__) .'/../tests/feeds.test');
  * Test Feed configuration.
  */
 class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
-
-  /**
-   * Set up test.
-   */
-  public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'features', 'feeds_news');
-
-    $this->drupalLogin(
-      $this->drupalCreateUser(
-        array(
-          'administer feeds', 'administer nodes',
-        )
-      )
-    );
-  }
-
   public static function getInfo() {
     return array(
       'name' => 'Feature: Feed',
-      'description' => 'Test "Feed" default configuration. <strong>Requires Features.</strong>',
+      'description' => 'Test "Feed" default configuration.',
       'group' => 'Feeds',
+      'dependencies' => array('features', 'views'),
     );
+  }
+
+  public function setUp() {
+    parent::setUp(array('features', 'views', 'feeds_news'));
   }
 
   /**
@@ -41,6 +30,13 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
    */
   public function test() {
     $nid = $this->createFeedNode('feed', NULL, '', 'feed');
+
+    // Assert menu tabs for feed nodes does not show up on non-feed nodes.
+    $this->drupalGet("node/{$nid}/feed-items");
+    $this->assertResponse(200);
+    $not_feed_node = $this->drupalCreateNode();
+    $this->drupalGet("node/{$not_feed_node->nid}/feed-items");
+    $this->assertResponse(404);
 
     // Assert results.
     $count = db_result(db_query("SELECT COUNT(*) FROM {node} WHERE type = 'feed_item'"));
