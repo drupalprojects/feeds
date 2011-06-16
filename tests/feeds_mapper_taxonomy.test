@@ -9,7 +9,6 @@
  * Class for testing Feeds <em>content</em> mapper.
  */
 class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Taxonomy',
@@ -18,23 +17,8 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up the test.
-   */
   function setUp() {
-    // Call parent setup with required modules.
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler', 'taxonomy');
-
-    // Create user and login.
-    $this->drupalLogin($this->drupalCreateUser(
-        array(
-          'administer content types',
-          'administer feeds',
-          'administer nodes',
-          'administer site configuration',
-          'administer taxonomy',
-        )
-    ));
+    parent::setUp();
 
     // Add a new taxonomy vocabulary, add to article content type.
     $edit = array(

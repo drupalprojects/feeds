@@ -9,7 +9,6 @@
  * Class for testing Feeds <em>link</em> mapper.
  */
 class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Link',
@@ -19,22 +18,8 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up the test.
-   */
   public function setUp() {
-    // Call parent setup with the required module
     parent::setUp(array('link'));
-
-    // Create user and login
-    $this->drupalLogin($this->drupalCreateUser(
-        array(
-          'administer content types',
-          'administer feeds',
-          'bypass node access',
-          'administer site configuration',
-        )
-    ));
   }
 
   /**

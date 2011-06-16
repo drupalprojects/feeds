@@ -25,8 +25,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     parent::setUp();
 
     // Set the front page to show 20 nodes so we can easily see what is aggregated.
-    $edit = array('default_nodes_main' => 20);
-    $this->drupalPost('admin/config/system/site-information', $edit, 'Save configuration');
+    variable_set('default_nodes_main', 20);
 
     // Set the teaser length display to unlimited otherwise tests looking for
     // text on nodes will fail.

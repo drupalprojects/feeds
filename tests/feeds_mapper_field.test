@@ -9,32 +9,12 @@
  * Class for testing Feeds field mapper.
  */
 class FeedsMapperFieldTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Fields',
       'description' => 'Test Feeds Mapper support for fields.',
       'group' => 'Feeds',
     );
-  }
-
-  /**
-   * Set up the test.
-   */
-  function setUp() {
-    // Call parent setup with required modules.
-    parent::setUp();
-
-    // Create user and login.
-    $this->drupalLogin($this->drupalCreateUser(array(
-      'access content',
-      'administer content types',
-      'administer feeds',
-      'administer nodes',
-      'administer site configuration',
-      'administer permissions',
-      'bypass node access',
-    )));
   }
 
   /**

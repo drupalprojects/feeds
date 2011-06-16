@@ -33,7 +33,7 @@ function feeds_page() {
     }
   }
   if (empty($rows)) {
-    drupal_set_message(t('There are no importers, go to !importers to create one or enable an existing one.', array('!importers' => l(t('Feeds importers'), 'admin/structure/feeds'))));
+    drupal_set_message(t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => url('admin/structure/feeds'))));
   }
   $header = array(
     t('Import'),

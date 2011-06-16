@@ -13,21 +13,12 @@
  *   b) needs to be copied from one location to another.
  */
 class FeedsMapperFileTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: File field',
       'description' => 'Test Feeds Mapper support for file fields. <strong>Requires SimplePie library</strong>.',
       'group' => 'Feeds',
     );
-  }
-
-  /**
-   * Set up the
-   */
-  public function setUp() {
-    // Call parent setup with the required module
-    parent::setUp(array('file', 'feeds_tests'));
   }
 
   /**

@@ -9,26 +9,12 @@
  * Test aggregating a feed as data records.
  */
 class FeedsCSVtoTermsTest extends FeedsWebTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'CSV import to taxonomy',
       'description' => 'Tests a standalone import configuration that uses file fetcher and CSV parser to import taxonomy terms from a CSV file.',
       'group' => 'Feeds',
     );
-  }
-
-  /**
-   * Set up test.
-   */
-  public function setUp() {
-    parent::setUp();
-
-    $this->drupalLogin($this->drupalCreateUser(array(
-      'access content',
-      'administer feeds',
-      'administer taxonomy',
-    )));
   }
 
   /**

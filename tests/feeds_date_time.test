@@ -24,13 +24,6 @@ class FeedsDateTimeTest extends DrupalWebTestCase  {
   }
 
   /**
-   * Set up.
-   */
-  public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler');
-  }
-
-  /**
    * Dispatch tests, only use one entry point method testX to save time.
    */
   public function test() {

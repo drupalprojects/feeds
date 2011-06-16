@@ -257,21 +257,4 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     $this->cronRun();
     $this->assertEqual(84, db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article'")->fetchField());
   }
-
-  /**
-   * Helper, log in as an admin user.
-   */
-  protected function loginAdmin() {
-    $this->drupalLogin($this->admin_user);
-  }
-
-  /**
-   * Print schedule as notice.
-   */
-  protected function showSchedule() {
-    $jobs = db_query("SELECT * FROM {job_schedule}");
-    foreach ($jobs as $job) {
-      $this->error('<pre>' . print_r($job, true) . '</pre>');
-    }
-  }
 }

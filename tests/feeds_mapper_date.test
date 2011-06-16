@@ -12,7 +12,6 @@
  * @todo: Add test method for end date
  */
 class FeedsMapperDateTestCase extends FeedsMapperTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Date',
@@ -22,11 +21,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
     );
   }
 
-  /**
-   * Set up the test.
-   */
   public function setUp() {
-    // Call parent setup with the required module.
     parent::setUp(array('date_api', 'date'));
     variable_set('date_default_timezone', 'UTC');
   }
