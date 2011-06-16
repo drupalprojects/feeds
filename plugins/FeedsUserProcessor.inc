@@ -166,6 +166,10 @@ class FeedsUserProcessor extends FeedsProcessor {
         'name' => t('Created date'),
         'description' => t('The created (e. g. joined) data of the user.'),
        ),
+      'pass' => array(
+        'name' => t('Unencrypted Password'),
+        'description' => t('The unencrypted user password.'),
+      ),
     );
     if (module_exists('openid')) {
       $targets['openid'] = array(

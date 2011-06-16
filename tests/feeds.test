@@ -16,28 +16,29 @@ class FeedsWebTestCase extends DrupalWebTestCase {
    * please don't pass duplicates of what is defined below!
    */
   function setUp() {
-    // We ensure the taxonomy module is enabled first to prevent issues later
-    // on where plugins aren't available.
-    parent::setUp(array('taxonomy'));
-    $modules = array(
-      'image',
-      'file',
-      'field',
-      'field_ui',
-      'ctools',
-      'job_scheduler',
-      'feeds',
-      'feeds_ui',
-    );
 
     $args = func_get_args();
-    if (!empty($args[0]) && is_array($args[0])) {
-      foreach ($args[0] as $m) {
-        $modules[] =  $m;
-      }
+    if (isset($args[0]) && is_array($args[0])) {
+      $modules = $args[0];
     }
-    module_enable($modules, TRUE);
-    $this->resetAll();
+    elseif (count($args) > 1) {
+      $modules = $args;
+    }
+    else {
+      $modules = array();
+    }
+
+    $modules[] = 'taxonomy';
+    $modules[] = 'image';
+    $modules[] = 'file';
+    $modules[] = 'field';
+    $modules[] = 'field_ui';
+    $modules[] = 'feeds';
+    $modules[] = 'feeds_ui';
+    $modules[] = 'ctools';
+    $modules[] = 'job_scheduler';
+    $modules = array_unique($modules);
+    parent::setUp($modules);
 
     // Add text formats Directly.
     $filtered_html_format = array(
@@ -78,6 +79,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       'administer nodes',
       'administer content types',
       'bypass node access',
+      'administer users',
     ));
     $this->drupalLogin($this->admin_user);
 

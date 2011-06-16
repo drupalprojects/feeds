@@ -1,10 +1,11 @@
 name = Feeds
 description = Aggregates RSS/Atom/RDF feeds, imports CSV files and more.
 package = Feeds
+core = 7.x
+
 dependencies[] = ctools
 dependencies[] = job_scheduler
-files[] = feeds.module
-files[] = feeds.install
+
 files[] = includes/FeedsConfigurable.inc
 files[] = includes/FeedsImporter.inc
 files[] = includes/FeedsSource.inc
@@ -28,5 +29,3 @@ files[] = views/feeds_views_handler_field_log_message.inc
 files[] = views/feeds_views_handler_field_severity.inc
 files[] = views/feeds_views_handler_field_source.inc
 files[] = views/feeds_views_handler_filter_severity.inc
-core = 7.x
-php = 5.2
