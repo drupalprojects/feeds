@@ -90,37 +90,31 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    * Create a new content-type, and add a field to it. Mostly copied from
    * cck/tests/content.crud.test ContentUICrud::testAddFieldUI
    *
-   * @param $typename
-   *   (Optional) the name of the content-type to create, defaults to a random name.
+   * @param $settings
+   *   (Optional) An array of settings to pass through to
+   *   drupalCreateContentType().
    * @param $fields
    *   (Optional) an keyed array of $field_name => $field_type used to add additional
    *   fields to the new content type.
    *
    * @return
-   *   The name of the new typename.
+   *   The machine name of the new content type.
+   *
+   * @see DrupalWebTestCase::drupalCreateContentType()
    */
-  final protected function createContentType($typename = NULL, $fields = array()) {
-    if ($typename == NULL) {
-      $typename = 'content_type_'. mt_rand();
-    }
-
-    // Create the content type.
-    $edit = array(
-      'type' => $typename,
-      'name' => $typename,
-    );
-    $this->drupalPost('admin/content/types/add', $edit, 'Save content type');
-    $this->assertText('The content type ' . $typename . ' has been added', 'Content type created');
+  final protected function createContentType(array $settings = array(), array $fields = array()) {
+    $type = $this->drupalCreateContentType($settings);
+    $typename = $type->type;
 
     $admin_type_url = 'admin/content/node-type/'. str_replace('_', '-', $typename);
 
     // Create the fields
     foreach ($fields as $field_name => $options) {
-    	if(is_string($options)) {
-    		$options = array('type' => $options);
-    	}
-    	$field_type = isset($options['type']) ? $options['type'] : 'text';
-    	$field_widget = isset($options['widget']) ? $options['widget'] : $this->selectFieldWidget($field_name, $field_type);
+      if(is_string($options)) {
+        $options = array('type' => $options);
+      }
+      $field_type = isset($options['type']) ? $options['type'] : 'text';
+      $field_widget = isset($options['widget']) ? $options['widget'] : $this->selectFieldWidget($field_name, $field_type);
       $this->assertTrue($field_widget !== NULL, "Field type $field_type supported");
       $label = $field_name . '_' . $field_type . '_label';
       $edit = array(

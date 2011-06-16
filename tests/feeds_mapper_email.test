@@ -30,7 +30,7 @@ class FeedsMapperEmailTestCase extends FeedsMapperTestCase {
   function test() {
 
   	// Create content type.
-  	$typename = $this->createContentType(NULL, array(
+  	$typename = $this->createContentType(array(), array(
       'email' => 'email',
     ));
 

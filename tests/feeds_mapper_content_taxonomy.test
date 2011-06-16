@@ -72,7 +72,7 @@ class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
     }
 
     // Create content type
-    $typename = $this->createContentType(NULL, array(
+    $typename = $this->createContentType(array(), array(
       'tags' => array(
         'type' => 'content_taxonomy',
         'widget' => 'content_taxonomy_autocomplete',

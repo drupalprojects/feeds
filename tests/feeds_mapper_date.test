@@ -33,7 +33,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
    */
   public function test() {
     // Create content type.
-  	$typename = $this->createContentType(NULL, array(
+  	$typename = $this->createContentType(array(), array(
       'date' => 'date',
       'datestamp' => 'datestamp',
       'datetime' => 'datetime',

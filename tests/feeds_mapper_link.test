@@ -31,7 +31,7 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
     $static_title = $this->randomName();
 
     // Create content type.
-    $typename = $this->createContentType(NULL, array(
+    $typename = $this->createContentType(array(), array(
       'alpha' => array(
         'type' => 'link',
         'settings' => array(

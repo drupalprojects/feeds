@@ -34,7 +34,7 @@ class FeedsMapperFileFieldTestCase extends FeedsMapperTestCase {
   public function test() {
     $static_title = $this->randomName();
     //Create content type
-    $typename = $this->createContentType(NULL, array(
+    $typename = $this->createContentType(array(), array(
       'files' => array(
         'type' => 'filefield',
         'settings' => array(
