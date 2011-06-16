@@ -1,7 +1,8 @@
 name = Feeds
 description = Aggregates RSS/Atom/RDF feeds, imports CSV files and more.
 package = Feeds
-dependencies[] = ctools
-dependencies[] = job_scheduler
 core = 6.x
 php = 5.2
+
+dependencies[] = ctools
+dependencies[] = job_scheduler

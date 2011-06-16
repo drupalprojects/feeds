@@ -139,7 +139,7 @@ class FeedsTermProcessor extends FeedsProcessor {
    */
   protected function map(FeedsImportBatch $batch, $target_term = NULL) {
     // Prepare term object.
-    if (!$target_term) {
+    if (empty($target_term)) {
       $target_term = array();
     }
 
