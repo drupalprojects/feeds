@@ -450,15 +450,15 @@ function feeds_taxonomy($op = NULL, $type = NULL, $term = NULL) {
  * Implementation of hook_form_alter().
  */
 function feeds_form_alter(&$form, $form_state, $form_id) {
-  if ($form['#id'] == 'node-form') {
-    if ($importer_id = feeds_get_importer_id($form['type']['#value'])) {
+  if (isset($form['#node']->type) && $form['#node']->type . '_node_form' == $form_id) {
+    if ($importer_id = feeds_get_importer_id($form['#node']->type)) {
       // Set title to not required, try to retrieve it from feed.
       $form['title']['#required'] = FALSE;
       // Enable uploads.
       $form['#attributes']['enctype'] = 'multipart/form-data';
 
       // Build form.
-      $source = feeds_source($importer_id, empty($form['nid']['#value']) ? 0 : $form['nid']['#value']);
+      $source = feeds_source($importer_id, empty($form['#node']->nid) ? 0 : $form['#node']->nid);
       $form['feeds'] = array(
         '#type' => 'fieldset',
         '#title' => t('Feed'),
