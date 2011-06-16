@@ -12,7 +12,6 @@ require_once(dirname(__FILE__) .'/feeds.test');
  * Test aggregating a feed as data records.
  */
 class FeedsCSVtoUsersTest extends FeedsWebTestCase {
-
   public static function getInfo() {
     return array(
       'name' => 'CSV import to users',
@@ -22,25 +21,9 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
   }
 
   /**
-   * Set up test.
-   */
-  public function setUp() {
-    parent::setUp('feeds', 'feeds_ui', 'ctools', 'job_scheduler');
-
-    $this->drupalLogin(
-      $this->drupalCreateUser(
-        array(
-          'administer feeds', 'administer users',
-        )
-      )
-    );
-  }
-
-  /**
    * Test node creation, refreshing/deleting feeds and feed items.
    */
   public function test() {
-
     // Create an importer.
     $this->createImporterConfiguration('User import', 'user_import');
 
@@ -65,6 +48,11 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
         'source' => 'since',
         'target' => 'created',
         'unique' => FALSE,
+      ),
+      '3' => array(
+        'source' => 'password',
+        'target' => 'pass',
+        'unique' => 0,
       ),
     );
     $this->addMappings('user_import', $mappings);
@@ -103,5 +91,12 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
     $this->assertEqual($count, 0, t('No imported user was assigned the administrator role.'));
 
     // @todo Test status setting, update existing and role settings.
+
+    // Attempt to log in as one of the imported users.
+    $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = 'Morticia'"));
+    $account = user_load($uid);
+    $this->assertTrue($account, 'Imported user account loaded.');
+    $account->pass_raw = 'mort';
+    $this->drupalLogin($account);
   }
 }
