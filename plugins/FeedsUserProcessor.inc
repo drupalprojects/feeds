@@ -60,7 +60,7 @@ class FeedsUserProcessor extends FeedsProcessor {
       $account->mail = $account->mail . '_test';
     }
     user_save($account, (array) $account);
-    if ($account->uid && $account->openid) {
+    if ($account->uid && !empty($account->openid)) {
       $authmap = array(
         'uid' => $account->uid,
         'module' => 'openid',
