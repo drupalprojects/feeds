@@ -729,7 +729,7 @@ function feeds_item_info_load($entity_type, $entity_id) {
     ->condition('entity_type', $entity_type)
     ->condition('entity_id', $entity_id)
     ->execute()
-    ->fetch();
+    ->fetchObject();
 }
 
 /**

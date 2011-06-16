@@ -71,7 +71,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $filtered_html_format = (object) $filtered_html_format;
     filter_format_save($filtered_html_format);
 
-    // Create a user and log her in for node type config.
+    // Create an admin user and log in.
     $this->admin_user = $this->drupalCreateUser(array(
       'access content',
       'administer site configuration',
@@ -267,7 +267,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       ->condition('s.id', $id, '=')
       ->condition('s.feed_nid', $nid, '=')
       ->fields('s', array('config'))
-      ->execute()->fetch();
+      ->execute()->fetchObject();
     $config = unserialize($source->config);
     $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
     return $nid;
@@ -293,11 +293,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $this->assertText('has been updated.');
 
     // Check that the URL was updated in the feeds_source table.
-    //$source = db_query("SELECT * FROM {feeds_source} WHERE feed_nid = :nid", array(':nid' => $nid))->fetch();
-    $source = db_select('feeds_source', 's')
-      ->condition('s.feed_nid', $nid, '=')
-      ->fields('s', array('config'))
-      ->execute()->fetch();
+    $source = db_query("SELECT * FROM {feeds_source} WHERE feed_nid = :nid", array(':nid' => $nid))->fetchObject();
     $config = unserialize($source->config);
     $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
   }
@@ -331,7 +327,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
     // Check whether feed got recorded in feeds_source table.
     $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {feeds_source} WHERE id = :id AND feed_nid = 0", array(':id' => $id))->fetchField());
-    $source = db_query("SELECT * FROM {feeds_source} WHERE id = :id AND feed_nid = 0",  array(':id' => $id))->fetch();
+    $source = db_query("SELECT * FROM {feeds_source} WHERE id = :id AND feed_nid = 0",  array(':id' => $id))->fetchObject();
     $config = unserialize($source->config);
     $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
 

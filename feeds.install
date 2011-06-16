@@ -73,7 +73,6 @@ function feeds_schema() {
         'type' => 'text',
         'size' => 'big',
         'not null' => FALSE,
-        'description' => 'Cache for batching.',
         'description' => 'State of import or clearing batches.',
         'serialize' => TRUE,
       ),
