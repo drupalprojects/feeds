@@ -10,6 +10,37 @@
  */
 class FeedsWebTestCase extends DrupalWebTestCase {
 
+  public function setUp() {
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $modules = $args[0];
+    }
+    elseif (count($args) > 1) {
+      $modules = $args;
+    }
+    else {
+      $modules = array();
+    }
+
+    $modules[] = 'feeds';
+    $modules[] = 'feeds_ui';
+    $modules[] = 'ctools';
+    $modules[] = 'job_scheduler';
+    $modules = array_unique($modules);
+    parent::setUp($modules);
+
+    // Create an admin user and log in.
+    $this->admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer site configuration',
+      'administer feeds',
+      'administer nodes',
+      'administer content types',
+      'administer users',
+    ));
+    $this->drupalLogin($this->admin_user);
+  }
+
   /**
    * Debug utility. Shows current screen.
    */
@@ -152,9 +183,11 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     if (empty($feed_url)) {
       $feed_url = $GLOBALS['base_url'] .'/'. drupal_get_path('module', 'feeds') .'/tests/feeds/developmentseed.rss2';
     }
+
     // If content type not given, retrieve it.
     if (!$content_type) {
-      $config = unserialize(db_result(db_query("SELECT config FROM {feeds_importer} WHERE id = '%s'", $id)));
+      $result = (db_query("SELECT config FROM {feeds_importer} WHERE id = '%s'", $id);
+      $config = unserialize(db_result($result));
       $content_type = $config['content_type'];
       $this->assertFalse(empty($content_type), 'Valid content type found: '. $content_type);
     }
@@ -171,7 +204,9 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $nid = $this->getNid($this->getUrl());
 
     // Check whether feed got recorded in feeds_source table.
-    $this->assertEqual(1, db_result(db_query("SELECT COUNT(*) FROM {feeds_source} WHERE id = '%s' AND feed_nid = %d", $id, $nid)));
+    $result = db_result(db_query("SELECT COUNT(*) FROM {feeds_source} WHERE id = '%s' AND feed_nid = %d", $id, $nid));
+    $this->assertEqual(1, $result);
+
     $source = db_fetch_object(db_query("SELECT * FROM {feeds_source} WHERE id = '%s' AND feed_nid = %d", $id, $nid));
     $config = unserialize($source->config);
     $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));

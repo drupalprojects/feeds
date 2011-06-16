@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Documentation of Feeds hooks.
  */
 

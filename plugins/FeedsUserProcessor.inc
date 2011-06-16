@@ -93,9 +93,12 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Execute mapping on an item.
    */
-  protected function map(FeedsImportBatch $batch) {
-    // Prepare term object.
-    $target_account = new stdClass();
+  protected function map(FeedsImportBatch $batch, $target_account = NULL) {
+    // Prepare user account object.
+    if (empty($target_account)) {
+      $target_account = new stdClass();
+    }
+
     $target_account->uid = 0;
     $target_account->roles = array_filter($this->config['roles']);
     $target_account->status = $this->config['status'];
