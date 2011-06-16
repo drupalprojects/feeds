@@ -418,9 +418,7 @@ function _feeds_nodeapi_node_processor($node, $op) {
       }
       break;
     case 'delete':
-      if (isset($node->feeds_node_item)) {
-        db_query("DELETE FROM {feeds_node_item} WHERE nid = %d", $node->nid);
-      }
+      db_query("DELETE FROM {feeds_node_item} WHERE nid = %d", $node->nid);
       break;
   }
 }
