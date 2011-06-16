@@ -186,7 +186,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
     // If content type not given, retrieve it.
     if (!$content_type) {
-      $result = (db_query("SELECT config FROM {feeds_importer} WHERE id = '%s'", $id);
+      $result = db_query("SELECT config FROM {feeds_importer} WHERE id = '%s'", $id);
       $config = unserialize(db_result($result));
       $content_type = $config['content_type'];
       $this->assertFalse(empty($content_type), 'Valid content type found: '. $content_type);
