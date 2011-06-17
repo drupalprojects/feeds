@@ -22,9 +22,12 @@ function feeds_page() {
         $link = 'import/'. $importer->id;
         $title = $importer->config['name'];
       }
-      elseif (user_access('create '. $importer->config['content_type'] .' content')) {
+      elseif (node_access('create', $importer->config['content_type'])) {
         $link = 'node/add/'. str_replace('_', '-', $importer->config['content_type']);
         $title = node_get_types('name', $importer->config['content_type']);
+      }
+      else {
+        continue;
       }
       $rows[] = array(
         l($title, $link),
