@@ -89,7 +89,9 @@ function feeds_source_import($job) {
   try {
     $source->existing()->import();
   }
-  catch (FeedsNotExistingException $e) {}
+  catch (FeedsNotExistingException $e) {
+    // Do nothing.
+  }
   catch (Exception $e) {
     $source->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
@@ -104,7 +106,9 @@ function feeds_source_clear($job) {
   try {
     $source->existing()->clear();
   }
-  catch (FeedsNotExistingException $e) {}
+  catch (FeedsNotExistingException $e) {
+    // Do nothing.
+  }
   catch (Exception $e) {
     $source->log('clear', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
@@ -119,7 +123,9 @@ function feeds_importer_expire($job) {
   try {
     $importer->existing()->expire();
   }
-  catch (FeedsNotExistingException $e) {}
+  catch (FeedsNotExistingException $e) {
+    // Do nothing.
+  }
   catch (Exception $e) {
     $importer->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
@@ -212,7 +218,7 @@ function feeds_forms() {
   $forms['FeedsImporter_feeds_form']['callback'] = 'feeds_form';
   $plugins = FeedsPlugin::all();
   foreach ($plugins as $plugin) {
-    $forms[$plugin['handler']['class'] .'_feeds_form']['callback'] = 'feeds_form';
+    $forms[$plugin['handler']['class'] . '_feeds_form']['callback'] = 'feeds_form';
   }
   return $forms;
 }
@@ -327,11 +333,18 @@ function feeds_theme() {
  * Menu access callback.
  *
  * @param $action
- *   One of 'import' or 'clear'.
+ *   The action to be performed. Possible values are:
+ *   - import
+ *   - clear
  * @param $param
  *   Node object or FeedsImporter id.
  */
 function feeds_access($action, $param) {
+  if (!in_array($action, array('import', 'clear'))) {
+    // If $action is not one of the supported actions, we return access denied.
+    return FALSE;
+  }
+
   if (is_string($param)) {
     $importer_id = $param;
   }
@@ -341,7 +354,7 @@ function feeds_access($action, $param) {
 
   // Check for permissions if feed id is present, otherwise return FALSE.
   if ($importer_id) {
-    if (user_access('administer feeds') || user_access($action .' '. $importer_id .' feeds')) {
+    if (user_access('administer feeds') || user_access("{$action} {$importer_id} feeds")) {
       return TRUE;
     }
   }
@@ -377,8 +390,8 @@ function feeds_exit() {
  */
 function feeds_views_api() {
   return array(
-    'api' => '2.0',
-    'path' => drupal_get_path('module', 'feeds') .'/views',
+    'api' => 3,
+    'path' => drupal_get_path('module', 'feeds') . '/views',
   );
 }
 
@@ -699,16 +712,16 @@ function feeds_export($importer_id, $indent = '') {
 }
 
 /**
- * Logs to a file like /mytmp/feeds_my_domain_org.log in temporary directory.
+ * Logs to a file like /tmp/feeds_my_domain_org.log in temporary directory.
  */
 function feeds_dbg($msg) {
-  if (variable_get('feeds_debug', false)) {
+  if (variable_get('feeds_debug', FALSE)) {
     if (!is_string($msg)) {
-      $msg = var_export($msg, true);
+      $msg = var_export($msg, TRUE);
     }
     $filename = trim(str_replace('/', '_', $_SERVER['HTTP_HOST'] . base_path()), '_');
-    $handle = fopen(file_directory_temp() ."/feeds_$filename.log", 'a');
-    fwrite($handle, date('c') ."\t$msg\n");
+    $handle = fopen("temporary://feeds_$filename.log", 'a');
+    fwrite($handle, gmdate('c') . "\t$msg\n");
     fclose($handle);
   }
 }
@@ -835,10 +848,10 @@ function feeds_plugin($plugin, $id) {
   if ($class = ctools_plugin_load_class('feeds', 'plugins', $plugin, 'handler')) {
     return FeedsConfigurable::instance($class, $id);
   }
-  $args = array( '%plugin' => $plugin);
+  $args = array('%plugin' => $plugin, '@id' => $id);
   if (user_access('administer feeds')) {
-    $args['!link'] = l($id, 'admin/structure/feeds/edit/' . $id);
-    drupal_set_message(t('Missing Feeds plugin %plugin. See !link. Check whether all required libraries and modules are installed properly.', $args), 'warning');
+    $args['@link'] = url('admin/structure/feeds/edit/' . $id);
+    drupal_set_message(t('Missing Feeds plugin %plugin. See <a href="@link">@id</a>. Check whether all required libraries and modules are installed properly.', $args), 'warning');
   }
   else {
     drupal_set_message(t('Missing Feeds plugin %plugin. Please contact your site administrator.', $args), 'warning');
@@ -872,7 +885,7 @@ function feeds_include_library($file, $library) {
     // Try first whether libraries module is present and load the file from
     // there. If this fails, require the library from the local path.
     if (module_exists('libraries') && file_exists(libraries_get_path($library) . "/$file")) {
-      require libraries_get_path($library) ."/$file";
+      require libraries_get_path($library) . "/$file";
     }
     else {
       // @todo: Throws "Deprecated function: Assigning the return value of new
@@ -918,7 +931,7 @@ function feeds_alter($type, &$data) {
   $args = array_merge($args, $additional_args);
 
   foreach (module_list() as $module) {
-    $function = $module .'_'. $type .'_alter';
+    $function = "{$module}_{$type}_alter";
     if (function_exists($function)) {
       call_user_func_array($function, $args);
     }

@@ -81,7 +81,7 @@ class CommonSyndicationParserTestCase extends DrupalWebTestCase {
    * Helper to read a feed.
    */
   protected function readFeed($filename) {
-    $feed = dirname(__FILE__) .'/feeds/'. $filename;
+    $feed = dirname(__FILE__) . '/feeds/' . $filename;
     $handle = fopen($feed, 'r');
     $string = fread($handle, filesize($feed));
     fclose($handle);

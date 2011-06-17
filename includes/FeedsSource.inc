@@ -348,7 +348,9 @@ class FeedsSource extends FeedsConfigurable {
       // Process.
       $this->importer->processor->process($this, $parser_result);
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+      // Do nothing.
+    }
     $this->releaseLock();
 
     // Clean up.
@@ -387,7 +389,9 @@ class FeedsSource extends FeedsConfigurable {
       $this->importer->parser->clear($this);
       $this->importer->processor->clear($this);
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+      // Do nothing.
+    }
     $this->releaseLock();
 
     // Clean up.

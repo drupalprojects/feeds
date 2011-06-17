@@ -15,15 +15,15 @@ function feeds_page() {
       if ($importer->disabled) {
         continue;
       }
-      if (!(user_access('import '. $importer->id .' feeds') || user_access('administer feeds'))) {
+      if (!(user_access('import ' . $importer->id . ' feeds') || user_access('administer feeds'))) {
         continue;
       }
       if (empty($importer->config['content_type'])) {
-        $link = 'import/'. $importer->id;
+        $link = 'import/' . $importer->id;
         $title = $importer->config['name'];
       }
-      elseif (user_access('create '. $importer->config['content_type'] .' content')) {
-        $link = 'node/add/'. str_replace('_', '-', $importer->config['content_type']);
+      elseif (user_access('create ' . $importer->config['content_type'] . ' content')) {
+        $link = 'node/add/' . str_replace('_', '-', $importer->config['content_type']);
         $title = node_type_get_name($importer->config['content_type']);
       }
       $rows[] = array(
@@ -115,14 +115,14 @@ function feeds_import_tab_form($form, &$form_state, $node) {
   $form = array();
   $form['#feed_nid'] = $node->nid;
   $form['#importer_id'] = $importer_id;
-  $form['#redirect'] = 'node/'. $node->nid;
+  $form['#redirect'] = 'node/' . $node->nid;
   $form['source_status'] = array(
     '#type' => 'fieldset',
     '#title' => t('Status'),
     '#tree' => TRUE,
     '#value' => feeds_source_status($source),
   );
-  $form = confirm_form($form, t('Import all content from source?'), 'node/'. $node->nid, '', t('Import'), t('Cancel'), 'confirm feeds update');
+  $form = confirm_form($form, t('Import all content from source?'), 'node/' . $node->nid, '', t('Import'), t('Cancel'), 'confirm feeds update');
   $progress = $source->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
@@ -192,7 +192,9 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
     try {
       return $importer->fetcher->request($feed_nid);
     }
-    catch(Exception $e) {}
+    catch (Exception $e) {
+      // Do nothing.
+    }
   }
   drupal_access_denied();
 }
@@ -263,7 +265,7 @@ function theme_feeds_source_status($v) {
  */
 function theme_feeds_upload($variables) {
   $element = $variables['element'];
-  drupal_add_css(drupal_get_path('module', 'feeds') .'/feeds.css');
+  drupal_add_css(drupal_get_path('module', 'feeds') . '/feeds.css');
   _form_set_class($element, array('form-file'));
   $description = '';
   if (!empty($element['#file_info'])) {
@@ -282,7 +284,7 @@ function theme_feeds_upload($variables) {
     $description .= '</div>';
   }
   $description .= '<div class="file-upload">';
-  $description .= '<input type="file" name="'. $element['#name'] .'"'. ($element['#attributes'] ? ' '. drupal_attributes($element['#attributes']) : '') .' id="'. $element['#id'] .'" size="'. $element['#size'] ."\" />\n";
+  $description .= '<input type="file" name="' . $element['#name'] . '"' . ($element['#attributes'] ? ' ' . drupal_attributes($element['#attributes']) : '') . ' id="' . $element['#id'] . '" size="' . $element['#size'] . "\" />\n";
   $description .= '</div>';
   $element['#description'] = $description;
 

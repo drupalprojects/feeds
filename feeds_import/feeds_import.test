@@ -30,7 +30,7 @@ class FeedsExamplesNodeTestCase extends FeedsWebTestCase {
    */
   public function test() {
     // Import file.
-    $this->importFile('node', $this->absolutePath() .'/tests/feeds/nodes.csv');
+    $this->importFile('node', $this->absolutePath() . '/tests/feeds/nodes.csv');
 
     // Assert returning page.
     $this->assertText('Created 8 nodes');
@@ -83,11 +83,11 @@ class FeedsExamplesNodeTestCase extends FeedsWebTestCase {
     // Import a similar file with changes in 4 records. Feeds should report 6
     // Updated Article nodes (4 changed records, 2 records sharing a GUID
     // subsequently being updated).
-    $this->importFile('node', $this->absolutePath() .'/tests/feeds/nodes_changes.csv');
+    $this->importFile('node', $this->absolutePath() . '/tests/feeds/nodes_changes.csv');
     $this->assertText('Updated 6 nodes');
 
     // Import a larger file with more records.
-    $this->importFile('node', $this->absolutePath() .'/tests/feeds/many_nodes.csv');
+    $this->importFile('node', $this->absolutePath() . '/tests/feeds/many_nodes.csv');
     $this->assertText('Created 71 nodes');
 
     // Remove all nodes.
@@ -102,7 +102,7 @@ class FeedsExamplesNodeTestCase extends FeedsWebTestCase {
     // Import a tab separated file.
     $this->drupalPost('import/node/delete-items', array(), 'Delete');
     $edit = array(
-      'files[feeds]' => $this->absolutePath() .'/tests/feeds/nodes.tsv',
+      'files[feeds]' => $this->absolutePath() . '/tests/feeds/nodes.tsv',
       'feeds[FeedsCSVParser][delimiter]' => "TAB",
     );
     $this->drupalPost('import/node', $edit, 'Import');
@@ -131,7 +131,7 @@ class FeedsExamplesUserTestCase extends FeedsWebTestCase {
    */
   public function test() {
     // Import CSV file.
-    $this->importFile('user', $this->absolutePath() .'/tests/feeds/users.csv');
+    $this->importFile('user', $this->absolutePath() . '/tests/feeds/users.csv');
 
     // Assert result.
     $this->assertText('Created 4 users');

@@ -56,13 +56,13 @@ function link_feeds_set_target($source, $entity, $target, $value) {
   foreach ($value as $v) {
     if (!is_array($v) && !is_object($v)) {
       if (strstr($target, 'url')) {
-        if(isset($entity->{$field_name}['und'][$i]['title'])) {
+        if (isset($entity->{$field_name}['und'][$i]['title'])) {
           $field['und'][$i]['title'] = $entity->{$field_name}['und'][$i]['title'];
         }
         $field['und'][$i]['url'] = $v;
       }
       elseif (strstr($target, 'title')) {
-        if(isset($entity->{$field_name}['und'][$i]['url'])) {
+        if (isset($entity->{$field_name}['und'][$i]['url'])) {
           $field['und'][$i]['url'] = $entity->{$field_name}['und'][$i]['url'];
         }
         $field['und'][$i]['title'] = $v;

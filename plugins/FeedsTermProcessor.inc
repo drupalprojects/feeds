@@ -126,7 +126,9 @@ class FeedsTermProcessor extends FeedsProcessor {
       self::loadMappers();
       feeds_alter('feeds_processor_targets', $targets, 'taxonomy_term', $this->vocabulary()->machine_name);
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+      // Do nothing.
+    }
     return $targets;
   }
 

@@ -55,8 +55,8 @@ class FeedsSitemapParserTestCase extends FeedsWebTestCase {
     );
 
 
-    $path = $GLOBALS['base_url'] .'/'. drupal_get_path('module', 'feeds') .'/tests/feeds/';
-    $nid = $this->createFeedNode('sitemap', $path .'sitemap-example.xml', 'Testing Sitemap Parser');
+    $path = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/';
+    $nid = $this->createFeedNode('sitemap', $path . 'sitemap-example.xml', 'Testing Sitemap Parser');
     $this->assertText('Created 5 nodes');
 
     // Assert DB status.

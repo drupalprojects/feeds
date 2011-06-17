@@ -68,7 +68,7 @@ function feeds_ui_overview_form($form, &$form_status) {
     }
     else {
       if (!$importer->disabled) {
-        $importer_form['attached']['#markup'] = l(node_type_get_name($importer->config['content_type']), 'node/add/'. str_replace('_', '-', $importer->config['content_type']));
+        $importer_form['attached']['#markup'] = l(node_type_get_name($importer->config['content_type']), 'node/add/' . str_replace('_', '-', $importer->config['content_type']));
       }
       else {
         $importer_form['attached']['#markup'] = node_type_get_name($importer->config['content_type']);
@@ -80,12 +80,12 @@ function feeds_ui_overview_form($form, &$form_status) {
       $edit = t('Override');
       $delete = '';
     }
-    else if ($importer->export_type == EXPORT_IN_DATABASE) {
+    elseif ($importer->export_type == EXPORT_IN_DATABASE) {
       $status = t('Normal');
       $edit = t('Edit');
       $delete = t('Delete');
     }
-    else if ($importer->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
+    elseif ($importer->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
       $status = t('Overridden');
       $edit = t('Edit');
       $delete = t('Revert');
@@ -96,10 +96,10 @@ function feeds_ui_overview_form($form, &$form_status) {
     if (!$importer->disabled) {
       $importer_form['operations'] = array(
         '#markup' =>
-          l($edit, 'admin/structure/feeds/edit/'. $importer->id) .' | '.
-          l(t('Export'), 'admin/structure/feeds/export/'. $importer->id) .' | '.
-          l(t('Clone'), 'admin/structure/feeds/clone/'. $importer->id) .
-          (empty($delete) ? '' :  ' | '. l($delete, 'admin/structure/feeds/delete/'. $importer->id)),
+          l($edit, 'admin/structure/feeds/edit/' . $importer->id) . ' | ' .
+          l(t('Export'), 'admin/structure/feeds/export/' . $importer->id) . ' | ' .
+          l(t('Clone'), 'admin/structure/feeds/clone/' . $importer->id) .
+          (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/delete/' . $importer->id)),
       );
     }
     else {
@@ -150,7 +150,7 @@ function feeds_ui_overview_form_submit($form, &$form_state) {
  *   of $from_importer.
  */
 function feeds_ui_create_form($form, &$form_state, $from_importer = NULL) {
-  drupal_add_js(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.js');
+  drupal_add_js(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js');
   $form = array();
   $form['#from_importer'] = $from_importer;
   $form['name'] = array(
@@ -212,9 +212,9 @@ function feeds_ui_create_form_submit($form, &$form_state) {
     drupal_set_message(t('Your configuration has been created with default settings. If they do not fit your use case you can adjust them here.'));
   }
   else {
-    drupal_set_message(t('A clone of the !name configuration has been created.', array('!name' => $form['#from_importer']->config['name'])));
+    drupal_set_message(t('A clone of the @name configuration has been created.', array('@name' => $form['#from_importer']->config['name'])));
   }
-  $form_state['redirect'] = 'admin/structure/feeds/edit/'. $importer->id;
+  $form_state['redirect'] = 'admin/structure/feeds/edit/' . $importer->id;
   feeds_cache_clear();
 }
 
@@ -272,7 +272,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $plugins = FeedsPlugin::all();
   $config = $importer->config;
   // Base path for changing the active container.
-  $path = 'admin/structure/feeds/edit/'. $importer->id;
+  $path = 'admin/structure/feeds/edit/' . $importer->id;
 
   $active_container = array(
     'class' => array('active-container'),
@@ -281,7 +281,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   switch ($active) {
     case 'help':
       $active_container['title'] = t('Getting started');
-      $active_container['body'] = '<div class="help feeds-admin-ui">'. feeds_ui_edit_help() .'</div>';
+      $active_container['body'] = '<div class="help feeds-admin-ui">' . feeds_ui_edit_help() . '</div>';
       unset($active_container['actions']);
       break;
     case 'fetcher':
@@ -291,7 +291,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       $active_container['body'] = drupal_get_form('feeds_ui_plugin_form', $importer, $active);
       break;
     case 'settings':
-      drupal_add_js(drupal_get_path('module', 'ctools') .'/js/dependent.js');
+      drupal_add_js(drupal_get_path('module', 'ctools') . '/js/dependent.js');
       ctools_include('dependent');
       if (empty($plugin_key)) {
         $active_container['title'] = t('Basic settings');
@@ -333,7 +333,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $info['body'] = array(
     array(
       'body' => theme('item_list', array('items' => $items)),
-      'actions' => array(l(t('Settings'), $path .'/settings')),
+      'actions' => array(l(t('Settings'), $path . '/settings')),
     ),
   );
   $config_info[] = $info;
@@ -342,7 +342,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $fetcher = $plugins[$config['fetcher']['plugin_key']];
   $actions = array();
   if (feeds_get_form($importer->fetcher, 'configForm')) {
-    $actions = array(l(t('Settings'), $path .'/settings/'. $config['fetcher']['plugin_key']));
+    $actions = array(l(t('Settings'), $path . '/settings/' . $config['fetcher']['plugin_key']));
   }
   $info['title'] = t('Fetcher');
   $info['body'] = array(
@@ -352,14 +352,14 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       'actions' => $actions,
     ),
   );
-  $info['actions'] = array(l(t('Change'), $path .'/fetcher'));
+  $info['actions'] = array(l(t('Change'), $path . '/fetcher'));
   $config_info[] = $info;
 
   // Parser.
   $parser = $plugins[$config['parser']['plugin_key']];
   $actions = array();
   if (feeds_get_form($importer->parser, 'configForm')) {
-    $actions = array(l(t('Settings'), $path .'/settings/'. $config['parser']['plugin_key']));
+    $actions = array(l(t('Settings'), $path . '/settings/' . $config['parser']['plugin_key']));
   }
   $info['title'] = t('Parser');
   $info['body'] = array(
@@ -369,16 +369,16 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       'actions' => $actions,
     )
   );
-  $info['actions'] = array(l(t('Change'), $path .'/parser'));
+  $info['actions'] = array(l(t('Change'), $path . '/parser'));
   $config_info[] = $info;
 
   // Processor.
   $processor = $plugins[$config['processor']['plugin_key']];
   $actions = array();
   if (feeds_get_form($importer->processor, 'configForm')) {
-    $actions[] = l(t('Settings'), $path .'/settings/'. $config['processor']['plugin_key']);
+    $actions[] = l(t('Settings'), $path . '/settings/' . $config['processor']['plugin_key']);
   }
-  $actions[] = l(t('Mapping'), $path .'/mapping');
+  $actions[] = l(t('Mapping'), $path . '/mapping');
   $info['title'] = t('Processor');
   $info['body'] = array(
     array(
@@ -387,7 +387,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       'actions' => $actions,
     )
   );
-  $info['actions'] = array(l(t('Change'), $path .'/processor'));
+  $info['actions'] = array(l(t('Change'), $path . '/processor'));
   $config_info[] = $info;
 
   return theme('feeds_ui_edit_page', array(
@@ -420,8 +420,8 @@ function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
     $form['plugin_key'][$key] = array(
       '#type' => 'radio',
       '#parents' => array('plugin_key'),
-      '#title' => $plugin['name'],
-      '#description' => isset($plugin['help']) ? $plugin['help'] : $plugin['description'],
+      '#title' => check_plain($plugin['name']),
+      '#description' => filter_xss(isset($plugin['help']) ? $plugin['help'] : $plugin['description']),
       '#return_value' => $key,
       '#default_value' => ($plugin['handler']['class'] == get_class($importer->$type)) ? $key : '',
     );
@@ -441,7 +441,7 @@ function feeds_ui_plugin_form_submit($form, &$form_state) {
   // Set the plugin and save feed.
   $form['#importer']->setPlugin($form_state['values']['plugin_key']);
   $form['#importer']->save();
-  drupal_set_message(t('Changed !type plugin.', array('!type' => $form['#plugin_type'])));
+  drupal_set_message(t('Changed @type plugin.', array('!type' => $form['#plugin_type'])));
 }
 
 /**
@@ -449,7 +449,7 @@ function feeds_ui_plugin_form_submit($form, &$form_state) {
  */
 function theme_feeds_ui_plugin_form($variables) {
   $form = $variables['form'];
-  drupal_add_js(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.js');
+  drupal_add_js(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js');
   $output = '';
 
   foreach (element_children($form['plugin_key']) as $key) {
@@ -479,7 +479,7 @@ function theme_feeds_ui_plugin_form($variables) {
  *   FeedsProcessor, a flag can tell whether mapping is supported or not.
  */
 function feeds_ui_mapping_form($form, &$form_state, $importer) {
-  drupal_add_js(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.js');
+  drupal_add_js(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js');
 
   $form = array();
   $form['#importer'] = $importer;
@@ -648,8 +648,8 @@ function _feeds_ui_format_options($options) {
  */
 function theme_feeds_ui_overview_form($variables) {
   $form = $variables['form'];
-  drupal_add_js(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.js');
-  drupal_add_css(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.css');
+  drupal_add_js(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js');
+  drupal_add_css(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.css');
 
   // Iterate through all importers and build a table.
   $rows = array();
@@ -684,7 +684,7 @@ function theme_feeds_ui_overview_form($variables) {
 function theme_feeds_ui_edit_page($variables) {
   $config_info = $variables['info'];
   $active_container = $variables['active'];
-  drupal_add_css(drupal_get_path('module', 'feeds_ui') .'/feeds_ui.css');
+  drupal_add_css(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.css');
 
   // Outer wrapper.
   $output = '<div class="feeds-settings clear-block">';
@@ -729,13 +729,13 @@ function theme_feeds_ui_container($variables) {
   $container = $variables['container'];
 
   $class = array_merge(array('feeds-container'), empty($container['class']) ? array('plain') : $container['class']);
-  $id = empty($container['id']) ? '': ' id="'. $container['id'] .'"';
-  $output = '<div class="'. implode(' ', $class) .'"'. $id .'>';
+  $id = empty($container['id']) ? '': ' id="' . $container['id'] . '"';
+  $output = '<div class="' . implode(' ', $class) . '"' . $id . '>';
 
   if (isset($container['actions']) && count($container['actions'])) {
     $output .= '<ul class="container-actions">';
     foreach ($container['actions'] as $action) {
-      $output .= '<li>'. $action .'</li>';
+      $output .= '<li>' . $action . '</li>';
     }
     $output .= '</ul>';
   }
@@ -809,7 +809,7 @@ function theme_feeds_ui_mapping_form($variables) {
     '',
     drupal_render($form['add']),
   );
-  $output = '<div class="help feeds-admin-ui""'. drupal_render($form['help']) .'</div>';
+  $output = '<div class="help feeds-admin-ui""' . drupal_render($form['help']) . '</div>';
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
 
   // Build the help table that explains available sources.
@@ -822,7 +822,7 @@ function theme_feeds_ui_mapping_form($variables) {
     );
   }
   if (count($rows)) {
-    $legend .= '<h4>'. t('Sources') .'</h4>';
+    $legend .= '<h4>' . t('Sources') . '</h4>';
     $legend .= theme('table', array('header' => array(t('Name'), t('Description')), 'rows' => $rows));
   }
 
@@ -834,12 +834,12 @@ function theme_feeds_ui_mapping_form($variables) {
       check_plain(drupal_render($form['legendset']['legend']['targets'][$k]['description'])),
     );
   }
-  $legend .= '<h4>'. t('Targets') .'</h4>';
+  $legend .= '<h4>' . t('Targets') . '</h4>';
   $legend .= theme('table', array('header' => array(t('Name'), t('Description')), 'rows' => $rows));
 
   // Stick tables into collapsible fieldset.
   $form['legendset']['legend'] = array(
-    '#markup' => '<div>'. $legend .'</div>',
+    '#markup' => '<div>' . $legend . '</div>',
   );
 
   $output .= drupal_render($form['legendset']);

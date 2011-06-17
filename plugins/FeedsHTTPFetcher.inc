@@ -78,12 +78,12 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       }
       catch (Exception $e) {
         // In case of an error, respond with a 503 Service (temporary) unavailable.
-        header('HTTP/1.1 503 "Not Found"', null, 503);
+        header('HTTP/1.1 503 "Not Found"', NULL, 503);
         exit();
       }
     }
     // Will generate the default 200 response.
-    header('HTTP/1.1 200 "OK"', null, 200);
+    header('HTTP/1.1 200 "OK"', NULL, 200);
     exit();
   }
 
@@ -120,7 +120,6 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       '#title' => t('Designated hub'),
       '#description' => t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
       '#default_value' => $this->config['designated_hub'],
-//      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-use-pubsubhubbub' => array(1),
       ),

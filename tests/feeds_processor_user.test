@@ -70,7 +70,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
     $this->setSettings('user_import', 'FeedsUserProcessor', $edit);
 
     // Import CSV file.
-    $this->importFile('user_import', $this->absolutePath() .'/tests/feeds/users.csv');
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
 
     // Assert result.
     $this->assertText('Created 4 users');

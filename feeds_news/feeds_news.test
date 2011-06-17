@@ -61,15 +61,15 @@ class FeedsExamplesFeedTestCase extends FeedsWebTestCase {
     $this->assertEqual($count, 1, 'Found feed_node_item record.');
 
     // Remove all items
-    $this->drupalPost('node/'. $nid .'/delete-items', array(), 'Delete');
+    $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
     $this->assertText('Deleted 10 nodes');
 
     // Import again.
-    $this->drupalPost('node/'. $nid .'/import', array(), 'Import');
+    $this->drupalPost("node/$nid/import", array(), 'Import');
     $this->assertText('Created 10 nodes');
 
     // Delete and assert all items gone.
-    $this->drupalPost('node/'. $nid .'/delete-items', array(), 'Delete');
+    $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
 
     $count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'feed_item'")->fetchField();
     $this->assertEqual($count, 0, 'Found the correct number of feed item nodes in database.');

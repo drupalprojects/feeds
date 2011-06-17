@@ -92,16 +92,16 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     foreach ($rows as $row) {
       $schedule[$row->id] = $row;
     }
-    $this->assertEqual(count($schedule), 20, '20 feeds refreshed on cron.'. $count);
+    $this->assertEqual(count($schedule), 20, '20 feeds refreshed on cron.' . $count);
 
     // There should be 200 article nodes in the database.
     $count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article' AND status = 1")->fetchField();
-    $this->assertEqual($count, 200, 'There are 200 article nodes aggregated.'. $count);
+    $this->assertEqual($count, 200, 'There are 200 article nodes aggregated.' . $count);
 
     // There shouldn't be any items with scheduled = 1 now, if so, this would
     // mean they are stuck.
     $count = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE scheduled = 1")->fetchField();
-    $this->assertEqual($count, 0, 'All items are unscheduled (schedule flag = 0).'. $count);
+    $this->assertEqual($count, 0, 'All items are unscheduled (schedule flag = 0).' . $count);
 
     // Hit cron again twice.
     $this->cronRun();
@@ -218,7 +218,7 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     $this->addMappings('node', $mappings);
 
     // Verify that there are 86 nodes total.
-    $this->importFile('node', $this->absolutePath() .'/tests/feeds/many_nodes.csv');
+    $this->importFile('node', $this->absolutePath() . '/tests/feeds/many_nodes.csv');
     $this->assertText('Created 86 nodes');
 
     // Run batch twice with two different process limits.

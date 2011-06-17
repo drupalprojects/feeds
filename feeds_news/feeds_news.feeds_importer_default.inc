@@ -33,7 +33,7 @@ function feeds_news_feeds_importer_default() {
       'plugin_key' => 'FeedsNodeProcessor',
       'config' => array(
         'content_type' => 'feed_item',
-        'update_existing' => 0,
+        'update_existing' => '0',
         'expire' => '-1',
         'mappings' => array(
           0 => array(
@@ -62,7 +62,7 @@ function feeds_news_feeds_importer_default() {
             'unique' => FALSE,
           ),
         ),
-        'input_format' => 0,
+        'input_format' => 'filtered_html',
         'author' => 0,
       ),
     ),

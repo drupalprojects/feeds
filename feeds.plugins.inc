@@ -9,7 +9,7 @@
  * Break out for feeds_feed_plugins().
  */
 function _feeds_feeds_plugins() {
-  $path = drupal_get_path('module', 'feeds') .'/plugins';
+  $path = drupal_get_path('module', 'feeds') . '/plugins';
 
   $info = array();
   $info['FeedsPlugin'] = array(
