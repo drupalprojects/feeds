@@ -556,7 +556,10 @@ function feeds_node_delete($node) {
 function feeds_form_node_form_alter(&$form, $form_state) {
   if ($importer_id = feeds_get_importer_id($form['#node']->type)) {
     // Set title to not required, try to retrieve it from feed.
-    $form['title']['#required'] = FALSE;
+    if (isset($form['#title'])) {
+      $form['title']['#required'] = FALSE;
+    }
+
     // Enable uploads.
     $form['#attributes']['enctype'] = 'multipart/form-data';
 
@@ -566,10 +569,28 @@ function feeds_form_node_form_alter(&$form, $form_state) {
       '#type' => 'fieldset',
       '#title' => t('Feed'),
       '#tree' => TRUE,
+      '#weight' => 0,
     );
     $form['feeds'] += $source->configForm($form_state);
     $form['#feed_id'] = $importer_id;
   }
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function feeds_field_extra_fields() {
+  $extras = array();
+  foreach (node_type_get_names() as $type => $name) {
+    if (feeds_get_importer_id($type)) {
+      $extras['node'][$type]['form']['feeds'] = array(
+        'label' => t('Feed'),
+        'description' => t('Feeds module form elements'),
+        'weight' => 0,
+      );
+    }
+  }
+  return $extras;
 }
 
 /**
