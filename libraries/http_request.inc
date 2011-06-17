@@ -32,10 +32,10 @@ class HRCurlException extends Exception {}
  *    no feeds.
  */
 function http_request_get_common_syndication($url, $settings = NULL) {
-  if (valid_url($url, TRUE)) {
+  $password = $username = NULL;
+  if (feeds_valid_url($url, TRUE)) {
     // Handle password protected feeds.
     $url_parts = parse_url($url);
-    $password = $username = NULL;
     if (!empty($url_parts['user'])) {
       $password = $url_parts['pass'];
       $username = $url_parts['user'];
