@@ -7,4 +7,3 @@ features[feeds_importer][] = "user"
 files[] = feeds_import.test
 name = "Feeds Import"
 package = "Feeds"
-project = "Feeds"
