@@ -350,7 +350,7 @@ function feeds_nodeapi(&$node, $op, $form) {
           }
           catch (Exception $e) {
             drupal_set_message($e->getMessage(), 'error');
-            form_set_error('title', t('Could not retrieve title from feed.'), 'error');
+            form_set_error('title', t('Could not retrieve title from feed.'));
           }
         }
         break;
@@ -453,7 +453,7 @@ function feeds_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['#node']->type) && $form['#node']->type . '_node_form' == $form_id) {
     if ($importer_id = feeds_get_importer_id($form['#node']->type)) {
       // Set title to not required, try to retrieve it from feed.
-      if (isset($form['#title'])) {
+      if (isset($form['title'])) {
         $form['title']['#required'] = FALSE;
       }
 
