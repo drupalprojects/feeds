@@ -180,9 +180,9 @@ class FeedsNodeProcessor extends FeedsProcessor {
     );
     $format_options = array(FILTER_FORMAT_DEFAULT => t('Default format'));
     $formats = filter_formats();
-      foreach ($formats as $format) {
-        $format_options[$format->format] = $format->name;
-      }
+    foreach ($formats as $format) {
+      $format_options[$format->format] = $format->name;
+    }
     $form['input_format'] = array(
       '#type' => 'select',
       '#title' => t('Input format'),
