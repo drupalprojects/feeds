@@ -48,7 +48,7 @@ function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle
     $info = field_info_field($name);
     if ($info['type'] == 'taxonomy_term_reference') {
       $targets[$name] = array(
-        'name' => $instance['label'],
+        'name' => check_plain($instance['label']),
         'callback' => 'taxonomy_feeds_set_target',
         'description' => t('The @label field of the node.', array('@label' => $instance['label'])),
       );

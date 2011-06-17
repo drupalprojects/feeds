@@ -21,7 +21,7 @@ function file_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
 
     if (in_array($info['type'], array('file', 'image'))) {
       $targets[$name] = array(
-        'name' => $instance['label'],
+        'name' => check_plain($instance['label']),
         'callback' => 'file_feeds_set_target',
         'description' => t('The @label field of the node.', array('@label' => $instance['label'])),
       );

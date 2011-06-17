@@ -17,14 +17,13 @@ function date_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
     $info = field_info_field($name);
     if (in_array($info['type'], array('date', 'datestamp', 'datetime'))) {
       $targets[$name . ':start'] = array(
-        'name' => $instance['label'] . ': Start',
+        'name' => t('@name: Start', array('@name' => $instance['label'])),
         'callback' => 'date_feeds_set_target',
-        'description' => t('The start date for the @name field. Also use if mapping both start and end.',
-          array('@name' => $instance['label'])),
+        'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $instance['label'])),
         'real_target' => $name,
       );
       $targets[$name . ':end'] = array(
-        'name' => $instance['label'] . ': End',
+        'name' => t('@name: End', array('@name' => $instance['label'])),
         'callback' => 'date_feeds_set_target',
         'description' => t('The end date for the @name field.', array('@name' => $instance['label'])),
         'real_target' => $name,

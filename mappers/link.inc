@@ -16,14 +16,14 @@ function link_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
     if ($info['type'] == 'link_field') {
       if (array_key_exists('url', $info['columns'])) {
         $targets[$name . ':url'] = array(
-          'name' => $instance['label'] . ' URL',
+          'name' => t('@name URL', array('@name' => $instance['label'])),
           'callback' => 'link_feeds_set_target',
           'description' => t('The @label field of the node.', array('@label' => $instance['label'])),
         );
       }
       if (array_key_exists('title', $info['columns'])) {
         $targets[$name . ':title'] = array(
-          'name' => $instance['label'] . ' Title',
+          'name' => t('@name Title', array('@name' => $instance['label'])),
           'callback' => 'link_feeds_set_target',
           'description' => t('The @label field of the node.', array('@label' => $instance['label'])),
         );
