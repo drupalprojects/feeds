@@ -12,7 +12,7 @@
  * Not inheriting from Feeds base class as ParserCSV should be moved out of
  * Feeds at some time.
  */
-class FeedsDateTimeTest extends DrupalWebTestCase  {
+class FeedsDateTimeTest extends FeedsWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'FeedsDateTime unit tests',
@@ -21,9 +21,6 @@ class FeedsDateTimeTest extends DrupalWebTestCase  {
     );
   }
 
-  /**
-   * Set up.
-   */
   public function setUp() {
     parent::setUp();
 
