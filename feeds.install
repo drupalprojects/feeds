@@ -495,17 +495,11 @@ function feeds_update_6009() {
 }
 
 /**
- * Enable all Feeds News, Feeds Import and Feeds fast news features.
+ * Show a message about Feeds News, Feeds Import and Feeds fast news features.
  */
 function feeds_update_6010() {
-  drupal_install_modules(array('feeds_news', 'feeds_import'));
-  if (module_exists('data')) {
-    drupal_install_modules(array('feeds_fast_news'));
-    drupal_set_message(t('Installed Feeds News, Feeds Fast News and Feeds Import as replacement for Feeds Defaults module. If you were not using Feeds Defaults then you can safely disable Feeds News and Feeds Import.'));
-  }
-  else {
-    drupal_set_message(t('Installed Feeds News and Feeds Import as replacement for Feeds Defaults module. If you were not using Feeds Defaults then you can safely disable Feeds News and Feeds Import.'));
-  }
+  drupal_set_message(t('You may install Feeds News and Feeds Import as replacement for Feeds Defaults module.'));
+
   if (module_exists('features')) {
     drupal_set_message(t('<strong>Review enabled state of importer configurations on admin/build/feeds and features on admin/build/features.</strong>'));
   }
