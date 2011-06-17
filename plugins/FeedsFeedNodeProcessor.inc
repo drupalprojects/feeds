@@ -67,15 +67,18 @@ class FeedsFeedNodeProcessor extends FeedsProcessor {
   /**
    * Execute mapping on an item.
    */
-  protected function map(FeedsImportBatch $batch) {
-
-    // Prepare node object.
+  protected function map(FeedsImportBatch $batch, $target_node = NULL) {
     static $included;
     if (!$included) {
       module_load_include('inc', 'node', 'node.pages');
       $included = TRUE;
     }
-    $target_node = new stdClass();
+
+    // Prepare node object.
+    if (!isset($target_node)) {
+      $target_node = new stdClass();
+    }
+
     $target_node->type = $this->config['content_type'];
     $target_node->feeds = array();
     // Suppress auto import, we may be creating many feeds
