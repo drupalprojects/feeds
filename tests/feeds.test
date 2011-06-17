@@ -87,7 +87,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $permissions[] = 'administer nodes';
     $permissions[] = 'bypass node access';
     $permissions[] = 'administer taxonomy';
-    $permisisons[] = 'administer users';
+    $permissions[] = 'administer users';
     $permissions[] = 'administer feeds';
 
     // Create an admin user and log in.
