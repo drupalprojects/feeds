@@ -43,7 +43,7 @@ class FeedsDataHandler extends DataHandler {
     $this->joined_tables = array();
     $tables = data_get_all_tables();
     foreach ($tables as $join_table) {
-      if($join_table->get('name') == $this->table) {
+      if ($join_table->get('name') == $this->table) {
         // don't bother with joins on the same table...
         continue;
       }

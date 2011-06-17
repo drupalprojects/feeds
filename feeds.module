@@ -65,7 +65,9 @@ function feeds_source_import($job) {
   try {
     $source->existing()->import();
   }
-  catch (FeedsNotExistingException $e) {}
+  catch (FeedsNotExistingException $e) {
+    // Do nothing.
+  }
   catch (Exception $e) {
     watchdog('feeds_source_import()', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
@@ -80,7 +82,9 @@ function feeds_importer_expire($job) {
   try {
     $importer->existing()->expire();
   }
-  catch (FeedsNotExistingException $e) {}
+  catch (FeedsNotExistingException $e) {
+    // Do nothing.
+  }
   catch (Exception $e) {
     watchdog('feeds_importer_expire()', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
@@ -234,11 +238,18 @@ function feeds_theme() {
  * Menu access callback.
  *
  * @param $action
- *   One of 'import' or 'clear'.
+ *   The action to be performed. Possible values are:
+ *   - import
+ *   - clear
  * @param $param
  *   Node object or FeedsImporter id.
  */
 function feeds_access($action, $param) {
+  if (!in_array($action, array('import', 'clear'))) {
+    // If $action is not one of the supported actions, we return access denied.
+    return FALSE;
+  }
+
   if (is_string($param)) {
     $importer_id = $param;
   }
@@ -653,9 +664,9 @@ function feeds_export($importer_id, $indent = '') {
  * Logs to a file like /mytmp/feeds_my_domain_org.log in temporary directory.
  */
 function feeds_dbg($msg) {
-  if (variable_get('feeds_debug', false)) {
+  if (variable_get('feeds_debug', FALSE)) {
     if (!is_string($msg)) {
-      $msg = var_export($msg, true);
+      $msg = var_export($msg, TRUE);
     }
     $filename = trim(str_replace('/', '_', $_SERVER['HTTP_HOST'] . base_path()), '_');
     $handle = fopen(file_directory_temp() ."/feeds_$filename.log", 'a');
@@ -787,10 +798,10 @@ function feeds_plugin_instance($plugin, $id) {
   if ($class = ctools_plugin_load_class('feeds', 'plugins', $plugin, 'handler')) {
     return FeedsConfigurable::instance($class, $id);
   }
-  $args = array( '%plugin' => $plugin);
+  $args = array( '%plugin' => $plugin, '@id' => $id);
   if (user_access('administer feeds')) {
-    $args['!link'] = l($id, 'admin/build/feeds/edit/' . $id);
-    drupal_set_message(t('Missing Feeds plugin %plugin. See !link. Check whether all required libraries and modules are installed properly.', $args), 'warning');
+    $args['@link'] = url('admin/build/feeds/edit/' . $id);
+    drupal_set_message(t('Missing Feeds plugin %plugin. See <a href="@link">@id</a>. Check whether all required libraries and modules are installed properly.', $args), 'warning');
   }
   else {
     drupal_set_message(t('Missing Feeds plugin %plugin. Please contact your site administrator.', $args), 'warning');

@@ -28,14 +28,14 @@ class FeedsMapperEmailTestCase extends FeedsMapperTestCase {
    */
   function test() {
 
-  	// Create content type.
-  	$typename = $this->createContentType(array(), array(
+    // Create content type.
+    $typename = $this->createContentType(array(), array(
       'email' => 'email',
     ));
 
     // Create and configure importer.
     $this->createImporterConfiguration('Email CSV', 'csv');
-    $this->setSettings('csv', NULL, array('content_type' => '','import_period' => FEEDS_SCHEDULE_NEVER,));
+    $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
     $this->setPlugin('csv', 'FeedsFileFetcher');
     $this->setPlugin('csv', 'FeedsCSVParser');
     $this->setSettings('csv', 'FeedsNodeProcessor', array('content_type' => $typename));

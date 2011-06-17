@@ -72,7 +72,7 @@ function feeds_ui_overview_form(&$form_status) {
         $importer_form['attached']['#value'] = l(node_get_types('name', $importer->config['content_type']), 'node/add/'. str_replace('_', '-', $importer->config['content_type']));
       }
       else {
-        $importer_form['attached']['#value'] = node_get_types('name', $importer->config['content_type']);
+        $importer_form['attached']['#value'] = check_plain(node_get_types('name', $importer->config['content_type']));
       }
     }
 
@@ -81,18 +81,18 @@ function feeds_ui_overview_form(&$form_status) {
       $edit = t('Override');
       $delete = '';
     }
-    else if ($importer->export_type == EXPORT_IN_DATABASE) {
+    elseif ($importer->export_type == EXPORT_IN_DATABASE) {
       $status = t('Normal');
       $edit = t('Edit');
       $delete = t('Delete');
     }
-    else if ($importer->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
+    elseif ($importer->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
       $status = t('Overridden');
       $edit = t('Edit');
       $delete = t('Revert');
     }
     $importer_form['status'] = array(
-      '#value' => $status,
+      '#value' => check_plain($status),
     );
     if (!$importer->disabled) {
       $importer_form['operations'] = array(
@@ -213,7 +213,7 @@ function feeds_ui_create_form_submit($form, &$form_state) {
     drupal_set_message(t('Your configuration has been created with default settings. If they do not fit your use case you can adjust them here.'));
   }
   else {
-    drupal_set_message(t('A clone of the !name configuration has been created.', array('!name' => $form['#from_importer']->config['name'])));
+    drupal_set_message(t('A clone of the @name configuration has been created.', array('@name' => $form['#from_importer']->config['name'])));
   }
   $form_state['redirect'] = 'admin/build/feeds/edit/'. $importer->id;
   feeds_cache_clear();
@@ -421,8 +421,8 @@ function feeds_ui_plugin_form(&$form_state, $importer, $type) {
     $form['plugin_key'][$key] = array(
       '#type' => 'radio',
       '#parents' => array('plugin_key'),
-      '#title' => $plugin['name'],
-      '#description' => isset($plugin['help']) ? $plugin['help'] : $plugin['description'],
+      '#title' => check_plain($plugin['name']),
+      '#description' => filter_xss(isset($plugin['help']) ? $plugin['help'] : $plugin['description']),
       '#return_value' => $key,
       '#default_value' => ($plugin['handler']['class'] == get_class($importer->$type)) ? $key : '',
     );
@@ -442,7 +442,7 @@ function feeds_ui_plugin_form_submit($form, &$form_state) {
   // Set the plugin and save feed.
   $form['#importer']->setPlugin($form_state['values']['plugin_key']);
   $form['#importer']->save();
-  drupal_set_message(t('Changed !type plugin.', array('!type' => $form['#plugin_type'])));
+  drupal_set_message(t('Changed @type plugin.', array('@type' => $form['#plugin_type'])));
 }
 
 /**
@@ -826,7 +826,7 @@ function theme_feeds_ui_mapping_form($form) {
 
   // Stick tables into collapsible fieldset.
   $form['legendset']['legend'] = array(
-    '#value' => '<div>'. $legend .'</div>',
+    '#value' => '<div>'. filter_xss($legend) .'</div>',
   );
 
   $output .= drupal_render($form['legendset']);

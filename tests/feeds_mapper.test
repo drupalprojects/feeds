@@ -45,12 +45,12 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    * @see FeedsMapperTestCase::getFormFieldsValues()
    */
   protected function assertCCKFieldValue($field_name, $value, $index = 0) {
-  	$names = $this->getFormFieldsNames($field_name, $index);
-  	$values = $this->getFormFieldsValues($field_name, $value);
-  	foreach($names as $k => $name){
-  		$value = $values[$k];
-  		$this->assertFieldByName($name, $value, t('Found form field %name for %field_name with the expected value.', array('%name' => $name, '%field_name' => $field_name)));
-  	}
+    $names = $this->getFormFieldsNames($field_name, $index);
+    $values = $this->getFormFieldsValues($field_name, $value);
+    foreach ($names as $k => $name) {
+      $value = $values[$k];
+      $this->assertFieldByName($name, $value, t('Found form field %name for %field_name with the expected value.', array('%name' => $name, '%field_name' => $field_name)));
+    }
   }
 
   /**
@@ -67,7 +67,7 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    *   An array of form field names.
    */
   protected function getFormFieldsNames($field_name, $index) {
-  	return array("field_{$field_name}[{$index}][value]");
+    return array("field_{$field_name}[{$index}][value]");
   }
 
   /**
@@ -81,7 +81,7 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    * @return An array of form field values.
    */
   protected function getFormFieldsValues($field_name, $value) {
-  	return array((string)$value);
+    return array((string)$value);
   }
 
   /**
@@ -108,7 +108,7 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
 
     // Create the fields
     foreach ($fields as $field_name => $options) {
-      if(is_string($options)) {
+      if (is_string($options)) {
         $options = array('type' => $options);
       }
       $field_type = isset($options['type']) ? $options['type'] : 'text';

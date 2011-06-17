@@ -19,13 +19,13 @@ function date_feeds_node_processor_targets_alter(&$targets, $content_type) {
       if (in_array($field['type'], array('date', 'datestamp', 'datetime'))) {
         $name = isset($field['widget']['label']) ? $field['widget']['label'] : $field_name;
         $targets[$field_name .':start'] = array(
-          'name' => $name .': Start',
+          'name' => t('@name: Start', array('@name' => $name)),
           'callback' => 'date_feeds_set_target',
-          'description' => t('The start date for the !name field. Also use if mapping both start and end.', array('!name' => $name)),
+          'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $name)),
           'real_target' => $field_name,
         );
         $targets[$field_name .':end'] = array(
-          'name' => $name .': End',
+          'name' => t('@name: End', array('@name' => $name)),
           'callback' => 'date_feeds_set_target',
           'description' => t('The end date for the @name field.', array('@name' => $name)),
           'real_target' => $field_name,

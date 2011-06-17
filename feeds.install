@@ -563,7 +563,7 @@ function feeds_update_6012() {
     }
   }
   else {
-    drupal_set_message(t('NOTE: Please install new dependency of Feeds: !job_scheduler module.', array('!job_scheduler' => l(t('Job Scheduler'), 'http://drupal.org/project/job_scheduler'))), 'warning');
+    drupal_set_message(t('NOTE: Please install new dependency of Feeds: <a href="@job-scheduler-link">Job scheduler module</a>.', array('@job-scheduler-link' => url('http://drupal.org/project/job_scheduler'))), 'warning');
   }
   db_drop_table($ret, 'feeds_schedule');
   return $ret;

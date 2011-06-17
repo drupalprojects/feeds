@@ -39,7 +39,7 @@ class FeedsMapperContentTestCase extends FeedsMapperTestCase {
 
     // Create and configure importer.
     $this->createImporterConfiguration('Content CSV', 'csv');
-    $this->setSettings('csv', NULL, array('content_type' => '','import_period' => FEEDS_SCHEDULE_NEVER,));
+    $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
     $this->setPlugin('csv', 'FeedsFileFetcher');
     $this->setPlugin('csv', 'FeedsCSVParser');
     $this->setSettings('csv', 'FeedsNodeProcessor', array('content_type' => $typename));

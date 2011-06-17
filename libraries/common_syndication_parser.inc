@@ -167,7 +167,7 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
       }
       $body .= "{$news->content}";
     }
-    else if (!empty($news->summary)) {
+    elseif (!empty($news->summary)) {
       foreach ($news->summary->children() as $child)  {
         $body .= $child->asXML();
       }
@@ -186,7 +186,7 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
       $original_author = "{$news->source->author->name}";
       $author_found = TRUE;
     }
-    else if (!empty($news->author->name)) {
+    elseif (!empty($news->author->name)) {
       $original_author = "{$news->author->name}";
       $author_found = TRUE;
     }
@@ -346,10 +346,10 @@ function _parser_common_syndication_RDF10_item($rdf_data, $mappings) {
  */
 function _parser_common_syndication_RSS20_parse($feed_XML) {
 
-  $ns = array (
+  $ns = array(
     "content" => "http://purl.org/rss/1.0/modules/content/",
-     "dc" => "http://purl.org/dc/elements/1.1/",
-     "georss" => "http://www.georss.org/georss",
+    "dc" => "http://purl.org/dc/elements/1.1/",
+    "georss" => "http://www.georss.org/georss",
   );
 
   $parsed_source = array();

@@ -129,7 +129,7 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
    * Override parent::getFormFieldsNames().
    */
   protected function getFormFieldsNames($field_name, $index) {
-    if(in_array($field_name, array('alpha', 'beta', 'gamma', 'omega'))) {
+    if (in_array($field_name, array('alpha', 'beta', 'gamma', 'omega'))) {
       $fields = array("field_{$field_name}[{$index}][url]");
       if (in_array($field_name, array('alpha', 'gamma'))) {
         $fields[] = "field_{$field_name}[{$index}][title]";

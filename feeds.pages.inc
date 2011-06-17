@@ -150,7 +150,9 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
     try {
       return $importer->fetcher->request($feed_nid);
     }
-    catch(Exception $e) {}
+    catch (Exception $e) {
+      // Do nothing.
+    }
   }
   drupal_access_denied();
 }

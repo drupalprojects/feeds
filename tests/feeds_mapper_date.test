@@ -32,7 +32,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
    */
   public function test() {
     // Create content type.
-  	$typename = $this->createContentType(array(), array(
+    $typename = $this->createContentType(array(), array(
       'date' => 'date',
       'datestamp' => 'datestamp',
       'datetime' => 'datetime',
@@ -40,7 +40,7 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
 
     // Create and configure importer.
     $this->createImporterConfiguration('Date RSS', 'daterss');
-    $this->setSettings('daterss', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER,));
+    $this->setSettings('daterss', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
     $this->setPlugin('daterss', 'FeedsFileFetcher');
     $this->setPlugin('daterss', 'FeedsSyndicationParser');
     $this->setSettings('daterss', 'FeedsNodeProcessor', array('content_type' => $typename));

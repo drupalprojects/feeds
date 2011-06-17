@@ -123,7 +123,7 @@ class FeedsFileFetcher extends FeedsFetcher {
   public function configForm(&$form_state) {
     $form = array();
     $form['direct'] = array(
-      '#type' =>'checkbox',
+      '#type' => 'checkbox',
       '#title' => t('Supply path to file directly'),
       '#description' => t('For experts. If checked users can specify a path to a file when importing rather than uploading a file. This is useful when files to be imported are already present on server.'),
       '#default_value' => $this->config['direct'],

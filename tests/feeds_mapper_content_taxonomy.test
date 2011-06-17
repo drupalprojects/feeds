@@ -27,11 +27,11 @@ class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
     $vocabularies = array(
       'tags' => array(
         'name' => $this->randomName(),
-        'tags' => true,
+        'tags' => TRUE,
       ),
       'categories' => array(
         'name' => $this->randomName(),
-        'tags' => false,
+        'tags' => FALSE,
       )
     );
     foreach ($vocabularies as &$vocabulary) {
@@ -93,7 +93,7 @@ class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
 
     // Create importer configuration
     $this->createImporterConfiguration('Content Taxonomy CSV', 'csv'); // Create a default importer configuration
-    $this->setSettings('csv', NULL, array('content_type' => '','import_period' => FEEDS_SCHEDULE_NEVER,)); // Importer setting
+    $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER)); // Importer setting
     $this->setPlugin('csv', 'FeedsFileFetcher'); //Set fetcher
     $this->setPlugin('csv', 'FeedsCSVParser'); //Set parser
     $this->setSettings('csv', 'FeedsNodeProcessor', array('content_type' => $typename)); // Processor settings
@@ -139,7 +139,8 @@ class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
   protected function selectFieldWidget($field_name, $field_type) {
     if ($field_type == 'content_taxonomy') {
       return 'content_taxonomy_select';
-    } else {
+    }
+    else {
       return parent::selectFieldWidget($field_name, $field_type);
     }
   }
@@ -156,7 +157,7 @@ class FeedsMapperContentTaxonomyTestCase extends FeedsMapperTestCase {
   }
 
   protected function getFormFieldsValues($field_name, $value) {
-    switch($field_name) {
+    switch ($field_name) {
       case 'tags':
         if (is_array($value)) {
           // @todo sort tags by weight before joining

@@ -385,10 +385,10 @@ class FeedsDataProcessor extends FeedsProcessor {
           if (!isset($schema['fields'][$field_name])) {
             $mapping['target'] = $this->table()->addField($field_name, $type);
             // Let the user know.
-            drupal_set_message(t('Created new field "!name".', array('!name' => $field_name)));
+            drupal_set_message(t('Created new field "@name".', array('@name' => $field_name)));
           }
           else {
-            throw new Exception(t('Field !field_name already exists as a mapping target. Remove it from mapping if you would like to map another source to it. Remove it from !data_table table if you would like to change its definition.', array('!field_name' => $field_name, '!data_table' => l($this->table()->get('name'), 'admin/content/data'))));
+            throw new Exception(t('Field @field_name already exists as a mapping target. Remove it from mapping if you would like to map another source to it. Remove it from !data_table table if you would like to change its definition.', array('@field_name' => $field_name, '!data_table' => l($this->table()->get('name'), 'admin/content/data'))));
           }
         }
       }

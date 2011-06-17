@@ -254,7 +254,7 @@ class FeedsEnclosure extends FeedsElement {
    * @todo This is not concurrency safe.
    */
   public function getFile() {
-    if(empty($this->file) && $this->getValue()) {
+    if (empty($this->file) && $this->getValue()) {
       // Check if this enclosure contains a local file.
       if (!parse_url($this->getValue(), PHP_URL_SCHEME)) {
         if (file_check_location($this->getValue(), file_directory_path()) || file_check_location($this->getValue(), file_directory_temp())) {
@@ -267,7 +267,7 @@ class FeedsEnclosure extends FeedsElement {
       }
       $filename = basename($this->getValue());
       if (module_exists('transliteration')) {
-        require_once (drupal_get_path('module', 'transliteration') . '/transliteration.inc');
+        require_once drupal_get_path('module', 'transliteration') . '/transliteration.inc';
         $filename = transliteration_clean_filename($filename);
       }
       $dest = file_destination(file_directory_temp() .'/'. $filename, FILE_EXISTS_RENAME);
@@ -464,7 +464,7 @@ class FeedsDateTime extends DateTime {
    *
    * Ref: http://bugs.php.net/41334, http://bugs.php.net/39821
    */
-  public function __sleep(){
+  public function __sleep() {
     $this->_serialized_time = $this->format('c');
     $this->_serialized_timezone = $this->getTimezone()->getName();
     return array('_serialized_time', '_serialized_timezone');

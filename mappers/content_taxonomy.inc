@@ -16,12 +16,12 @@ function content_taxonomy_feeds_node_processor_targets_alter(&$targets, $content
   $fields = array();
   if (isset($info['fields']) && count($info['fields'])) {
     foreach ($info['fields'] as $field_name => $field) {
-      if(in_array($field['type'], array('content_taxonomy'))) {
+      if (in_array($field['type'], array('content_taxonomy'))) {
         $name = isset($field['widget']['label']) ? $field['widget']['label'] : $field_name;
         $targets[$field_name] = array(
-          'name' => $name,
+          'name' => check_plain($name),
           'callback' => 'content_taxonomy_feeds_set_target',
-          'description' => t('The CCK %name field of the node (!type).', array('%name' => $name, '!type' => $field['type'])),
+          'description' => t('The CCK @name field of the node (@type).', array('@name' => $name, '@type' => $field['type'])),
         );
       }
     }
@@ -50,7 +50,7 @@ function content_taxonomy_feeds_set_target(&$node, $field_name, $terms) {
   $field = content_fields($field_name, $node->type);
 
   // Parse string for multiple tags (comma separated)
-  if(is_string($terms)) {
+  if (is_string($terms)) {
     $terms = explode(',', $terms);
   }
 
@@ -66,8 +66,8 @@ function content_taxonomy_feeds_set_target(&$node, $field_name, $terms) {
    $term_name = trim($term_name);
     if ($terms_found = content_taxonomy_get_term_by_name_vid($term_name, $field['vid'])) {
       // If any terms are found add them to the field by found tid.
-      foreach($terms_found as $term_found) {
-        if(!is_array($node->$field_name)) $node->$field_name = array();
+      foreach ($terms_found as $term_found) {
+        if (!is_array($node->$field_name)) $node->$field_name = array();
         array_push($node->$field_name, array('value' => $term_found['tid']));
         if ($multiple != 0 && count($node->$field_name) >= $multiple) {
           // If the vocab is not for multiple tags break after the first hit.
@@ -75,7 +75,7 @@ function content_taxonomy_feeds_set_target(&$node, $field_name, $terms) {
         }
       }
     }
-    else if ($tags) {
+    elseif ($tags) {
       // If the field is configured for free tagging, create a new term
       $edit = array('vid' => $field['vid'], 'name' => $term_name);
       if ($field['widget']['extra_parent']) {

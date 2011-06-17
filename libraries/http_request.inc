@@ -302,7 +302,7 @@ function http_request_find_feeds($html) {
     foreach ($attributes as $attribute) {
       // Find the key value pairs, attribute[1] is key and attribute[2] is the
       // value.
-      if(!empty($attribute[1]) && !empty($attribute[2])) {
+      if (!empty($attribute[1]) && !empty($attribute[2])) {
         $candidate[drupal_strtolower($attribute[1])] = drupal_strtolower(decode_entities($attribute[2]));
       }
     }
@@ -353,13 +353,13 @@ function http_request_create_absolute_url($url, $base_url) {
     else {
       // Backtracking from the existing path.
       $cparts = array_merge(array_filter(explode("/", $path)), array_filter(explode("/", $url)));
-      foreach($cparts as $i => $part) {
-        if($part == '.') {
-          $cparts[$i] = null;
+      foreach ($cparts as $i => $part) {
+        if ($part == '.') {
+          $cparts[$i] = NULL;
         }
-        if($part == '..') {
-          $cparts[$i - 1] = null;
-          $cparts[$i] = null;
+        if ($part == '..') {
+          $cparts[$i - 1] = NULL;
+          $cparts[$i] = NULL;
         }
       }
       $cparts = array_filter($cparts);

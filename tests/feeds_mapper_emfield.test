@@ -28,17 +28,17 @@ class FeedsMapperEmfieldTestCase extends FeedsMapperTestCase {
    */
   function test() {
 
-  	// Create content type.
-  	$typename = $this->createContentType(array(), array(
+    // Create content type.
+    $typename = $this->createContentType(array(), array(
       'video' => array(
         'type' => 'emvideo',
-  	    'widget' => 'emvideo_textfields',
-  	  ),
+        'widget' => 'emvideo_textfields',
+      ),
     ));
 
     // Create and configure importer.
     $this->createImporterConfiguration('Emfield CSV', 'csv');
-    $this->setSettings('csv', NULL, array('content_type' => '','import_period' => FEEDS_SCHEDULE_NEVER,));
+    $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
     $this->setPlugin('csv', 'FeedsFileFetcher');
     $this->setPlugin('csv', 'FeedsCSVParser');
     $this->setSettings('csv', 'FeedsNodeProcessor', array('content_type' => $typename));

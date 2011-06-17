@@ -22,9 +22,9 @@ function email_feeds_node_processor_targets_alter(&$targets, $content_type) {
   }
   foreach ($fields as $k => $name) {
     $targets[$k] = array(
-      'name' => $name,
+      'name' => check_plain($name),
       'callback' => 'email_feeds_set_target',
-      'description' => t('The CCK Email !name field of the node.', array('!name' => $name)),
+      'description' => t('The CCK Email @name field of the node.', array('@name' => $name)),
     );
   }
 }

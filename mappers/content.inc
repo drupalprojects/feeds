@@ -22,9 +22,9 @@ function content_feeds_node_processor_targets_alter(&$targets, $content_type) {
   }
   foreach ($fields as $k => $name) {
     $targets[$k] = array(
-      'name' => $name,
+      'name' => check_plain($name),
       'callback' => 'content_feeds_set_target',
-      'description' => t('The CCK !name field of the node.', array('!name' => $name)),
+      'description' => t('The CCK @name field of the node.', array('@name' => $name)),
     );
   }
 }
