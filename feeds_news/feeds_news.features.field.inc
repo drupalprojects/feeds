@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * feeds_news.features.field.inc
+ */
 
 /**
  * Implementation of hook_field_default_fields().
@@ -14,9 +18,17 @@ function feeds_news_field_default_fields() {
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_feed_item_description',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
       'indexes' => array(
         'format' => array(
-          '0' => 'format',
+          0 => 'format',
         ),
       ),
       'module' => 'text',
@@ -63,6 +75,7 @@ function feeds_news_field_default_fields() {
       'settings' => array(
         'display_summary' => 0,
         'text_processing' => '1',
+        'user_register_form' => FALSE,
       ),
       'widget' => array(
         'active' => 1,
@@ -76,6 +89,10 @@ function feeds_news_field_default_fields() {
       ),
     ),
   );
+
+  // Translatables
+  // Included for use with string extractors like potx.
+  t('Description');
 
   return $fields;
 }
