@@ -71,7 +71,7 @@ function feeds_ui_overview_form($form, &$form_status) {
         $importer_form['attached']['#markup'] = l(node_type_get_name($importer->config['content_type']), 'node/add/' . str_replace('_', '-', $importer->config['content_type']));
       }
       else {
-        $importer_form['attached']['#markup'] = node_type_get_name($importer->config['content_type']);
+        $importer_form['attached']['#markup'] = check_plain(node_type_get_name($importer->config['content_type']));
       }
     }
 
@@ -231,7 +231,13 @@ function feeds_ui_delete_form($form, &$form_state, $importer) {
     $title = t('Would you really like to delete the importer @importer?', array('@importer' => $importer->config['name']));
     $button_label = t('Delete');
   }
-  return confirm_form($form, $title, 'admin/structure/feeds', t('This action cannot be undone.'), $button_label);
+  return confirm_form(
+    $form,
+    $title,
+    'admin/structure/feeds',
+    t('This action cannot be undone.'),
+    $button_label
+  );
 }
 
 /**
@@ -245,7 +251,6 @@ function feeds_ui_delete_form_submit($form, &$form_state) {
 
   // Clear cache, deleting a configuration may have an affect on menu tree.
   feeds_cache_clear();
-
 }
 
 /**
@@ -441,7 +446,7 @@ function feeds_ui_plugin_form_submit($form, &$form_state) {
   // Set the plugin and save feed.
   $form['#importer']->setPlugin($form_state['values']['plugin_key']);
   $form['#importer']->save();
-  drupal_set_message(t('Changed @type plugin.', array('!type' => $form['#plugin_type'])));
+  drupal_set_message(t('Changed @type plugin.', array('@type' => $form['#plugin_type'])));
 }
 
 /**
