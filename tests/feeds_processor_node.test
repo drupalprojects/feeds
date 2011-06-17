@@ -31,12 +31,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     // text on nodes will fail.
     $edit = array('fields[body][type]' => 'text_default');
     $this->drupalPost('admin/structure/types/manage/article/display/teaser', $edit, 'Save');
-  }
 
-  /**
-   * Test node creation, refreshing/deleting feeds and feed items.
-   */
-  public function test() {
     // Create an importer configuration.
     $this->createImporterConfiguration('Syndication', 'syndication');
     $this->addMappings('syndication',
@@ -68,7 +63,12 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
         ),
       )
     );
+  }
 
+  /**
+   * Test node creation, refreshing/deleting feeds and feed items.
+   */
+  public function test() {
     $nid = $this->createFeedNode();
 
     // Assert 10 items aggregated after creation of the node.
@@ -81,9 +81,6 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
     // Navigate to a non-feed node, there should be no Feeds tabs visible.
     $article_nid = db_query_range("SELECT nid FROM {node} WHERE type = 'article'", 0, 1)->fetchField();
-    $this->drupalGet('node/'. $article_nid);
-    $this->assertNoRaw('node/'. $article_nid .'/import');
-    $this->assertNoRaw('node/'. $article_nid .'/delete-items');
     $this->assertEqual("Created by FeedsNodeProcessor", db_query("SELECT nr.log FROM {node} n JOIN {node_revision} nr ON n.vid = nr.vid WHERE n.nid = :nid", array(':nid' => $article_nid))->fetchField());
 
     // Assert accuracy of aggregated information.
@@ -364,5 +361,49 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->assertText('Scaling the Open Atrium UI');
     $this->assertText('Fri, 09/18/2009');
     $this->assertText('The first major change is switching');
+  }
+
+  /**
+   * Test validation of feed URLs.
+   */
+  function testFeedURLValidation() {
+    $edit['feeds[FeedsHTTPFetcher][source]'] = 'invalid://url';
+    $this->drupalPost('node/add/page', $edit, 'Save');
+    $this->assertText('The URL invalid://url is invalid.');
+  }
+
+  /**
+   * Test using non-normal URLs like feed:// and webcal://.
+   */
+  function testOddFeedSchemes() {
+    $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') .'/tests/feeds/developmentseed.rss2';
+
+    $schemes = array('feed', 'webcal');
+    $item_count = 0;
+    foreach ($schemes as $scheme) {
+      $feed_url = strtr($url, array('http://' => $scheme . '://', 'https://' => $scheme . '://'));
+
+      $edit['feeds[FeedsHTTPFetcher][source]'] = $feed_url;
+      $this->drupalPost('node/add/page', $edit, 'Save');
+      $this->assertText('Basic page Development Seed - Technological Solutions for Progressive Organizations has been created.');
+      $this->assertText('Created 10 nodes.');
+      $this->assertFeedItemCount($item_count + 10);
+      $item_count += 10;
+    }
+  }
+
+  /**
+   * Test that feed elements and links are not found on non-feed nodes.
+   */
+  function testNonFeedNodeUI() {
+    // There should not be feed links on an article node.
+    $non_feed_node = $this->drupalCreateNode(array('type' => 'article'));
+    $this->drupalGet('node/'. $non_feed_node->nid);
+    $this->assertNoLink('Import');
+    $this->assertNoLink('Delete items');
+
+    // Navigat to a non-feed node form, there should be no Feed field visible.
+    $this->drupalGet('node/add/article');
+    $this->assertNoFieldByName('feeds[FeedsHTTPFetcher][source]');
   }
 }

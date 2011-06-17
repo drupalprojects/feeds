@@ -121,20 +121,36 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     }
   }
 
+  // Support the 'feed' and 'webcal' schemes by converting them into 'http'.
+  $url = strtr($url, array('feed://' => 'http://', 'webcal://' => 'http://'));
+
   if ($curl) {
     $headers[] = 'User-Agent: Drupal (+http://drupal.org/)';
     $result = new stdClass();
 
-    // Only download via cURL if we can validate the scheme to be either http or
-    // https.
-    // Validate in PHP, CURLOPT_PROTOCOLS is only supported with cURL 7.19.4
+    // Parse the URL and make sure we can handle the schema.
+    // cURL can only support either http:// or https://.
+    // CURLOPT_PROTOCOLS is only supported with cURL 7.19.4
     $uri = parse_url($url);
-    if (isset($uri['scheme']) && $uri['scheme'] != 'http' && $uri['scheme'] != 'https') {
-      $result->error = 'invalid schema '. $uri['scheme'];
-      $result->code = -1003; // This corresponds to drupal_http_request()
+    if (!isset($uri['scheme'])) {
+      $result->error = 'missing schema';
+      $result->code = -1002;
     }
     else {
+      switch ($uri['scheme']) {
+        case 'http':
+        case 'https':
+          // Valid scheme.
+          break;
+        default:
+          $result->error = 'invalid schema ' . $uri['scheme'];
+          $result->code = -1003;
+          break;
+      }
+    }
 
+    // If the scheme was valid, continue to request the feed using cURL.
+    if (empty($result->error)) {
       $download = curl_init($url);
       curl_setopt($download, CURLOPT_FOLLOWLOCATION, TRUE);
       if (!empty($username)) {

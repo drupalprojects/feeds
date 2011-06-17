@@ -163,8 +163,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
       $messages[] = array(
        'message' => format_plural(
           $state->created,
-          'Created @number @entity',
-          'Created @number @entities',
+          'Created @number @entity.',
+          'Created @number @entities.',
           array('@number' => $state->created) + $tokens
         ),
       );
@@ -173,8 +173,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
       $messages[] = array(
        'message' => format_plural(
           $state->updated,
-          'Updated @number @entity',
-          'Updated @number @entities',
+          'Updated @number @entity.',
+          'Updated @number @entities.',
           array('@number' => $state->updated) + $tokens
         ),
       );
@@ -183,8 +183,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
       $messages[] = array(
        'message' => format_plural(
           $state->failed,
-          'Failed importing @number @entity',
-          'Failed importing @number @entities',
+          'Failed importing @number @entity.',
+          'Failed importing @number @entities.',
           array('@number' => $state->failed) + $tokens
         ),
         'level' => WATCHDOG_ERROR,
@@ -443,9 +443,9 @@ abstract class FeedsProcessor extends FeedsPlugin {
     );
     global $user;
     $formats = filter_formats($user);
-      foreach ($formats as $format) {
-        $format_options[$format->format] = check_plain($format->name);
-      }
+    foreach ($formats as $format) {
+      $format_options[$format->format] = check_plain($format->name);
+    }
     $form['input_format'] = array(
       '#type' => 'select',
       '#title' => t('Text format'),
