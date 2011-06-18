@@ -23,6 +23,21 @@ define('FEEDS_BATCH_ACTIVE', 0.0);
  */
 
 /**
+ * Implements hook_hook_info().
+ */
+function feeds_hook_info() {
+  $hooks = array(
+    'feeds_after_parse',
+    'feeds_after_import',
+    'feeds_after_clear',
+    'feeds_processor_targets_alter',
+    'feeds_parser_sources_alter',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'feeds'));
+}
+
+/**
  * Implements hook_cron().
  */
 function feeds_cron() {
