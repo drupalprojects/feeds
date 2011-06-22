@@ -97,7 +97,8 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     "georss" => "http://www.georss.org/georss",
   );
 
-  $base = (string) array_shift($feed_XML->xpath("@base"));
+  $base = $feed_XML->xpath("@base");
+  $base = (string) array_shift($base);
   if (!valid_url($base, TRUE)) {
     $base = FALSE;
   }
