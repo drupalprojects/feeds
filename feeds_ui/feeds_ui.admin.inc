@@ -826,7 +826,7 @@ function theme_feeds_ui_mapping_form($form) {
 
   // Stick tables into collapsible fieldset.
   $form['legendset']['legend'] = array(
-    '#value' => '<div>'. filter_xss($legend) .'</div>',
+    '#value' => '<div>' . $legend . '</div>',
   );
 
   $output .= drupal_render($form['legendset']);
