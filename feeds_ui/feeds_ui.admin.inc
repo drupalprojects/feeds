@@ -197,8 +197,10 @@ function feeds_ui_importer_machine_name_exists($id) {
  * Validation handler for feeds_build_create_form().
  */
 function feeds_ui_create_form_validate($form, &$form_state) {
-  $importer = feeds_importer($form_state['values']['id']);
-  $importer->configFormValidate($form_state['values']);
+  if (!empty($form_state['values']['id'])) {
+    $importer = feeds_importer($form_state['values']['id']);
+    $importer->configFormValidate($form_state['values']);
+  }
 }
 
 /**
