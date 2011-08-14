@@ -670,11 +670,21 @@ function theme_feeds_ui_overview_form($form) {
       }
     }
   }
-  $output = '';
-  if (count($rows)) {
-    $output .= theme('table', $form['#header'], $rows, array('class' => 'feeds-admin-importers'));
+
+  $is_empty = empty($rows);
+  if ($is_empty) {
+    $rows[] = array(array(
+      'data' => t('No importers available.'),
+      'colspan' => 6,
+    ));
   }
-  $output .= drupal_render($form);
+
+  $output = theme('table', $form['#header'], $rows, array('class' => 'feeds-admin-importers'));
+
+  if (!$is_empty) {
+    $output .= drupal_render($form);
+  }
+
   return $output;
 }
 
