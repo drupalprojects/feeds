@@ -396,7 +396,7 @@ function feeds_nodeapi(&$node, $op, $form) {
         break;
       case 'delete':
         $source = feeds_source($importer_id, $node->nid);
-        if ($source->importer->processor->config['delete_with_source']) {
+        if (!empty($source->importer->processor->config['delete_with_source'])) {
           feeds_batch_set(t('Deleting'), 'clear', $importer_id, $node->nid);
         }
         // Remove attached source.
