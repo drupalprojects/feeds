@@ -871,7 +871,7 @@ function feeds_plugin($plugin, $id) {
   }
   $args = array('%plugin' => $plugin, '@id' => $id);
   if (user_access('administer feeds')) {
-    $args['@link'] = url('admin/structure/feeds/edit/' . $id);
+    $args['@link'] = url('admin/structure/feeds/' . $id);
     drupal_set_message(t('Missing Feeds plugin %plugin. See <a href="@link">@id</a>. Check whether all required libraries and modules are installed properly.', $args), 'warning');
   }
   else {

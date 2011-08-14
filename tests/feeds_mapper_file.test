@@ -88,7 +88,7 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
     $edit = array(
       'content_type' => '',
     );
-    $this->drupalPost('admin/structure/feeds/edit/node/settings', $edit, 'Save');
+    $this->drupalPost('admin/structure/feeds/node/settings', $edit, 'Save');
 
     // Import.
     $edit = array(

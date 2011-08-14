@@ -7,7 +7,7 @@
  */
 
 /**
- * Introductory help for admin/structure/feeds/edit/config page
+ * Introductory help for admin/structure/feeds/%feeds_importer page
  */
 function feeds_ui_edit_help() {
   return t('
@@ -96,10 +96,10 @@ function feeds_ui_overview_form($form, &$form_status) {
     if (!$importer->disabled) {
       $importer_form['operations'] = array(
         '#markup' =>
-          l($edit, 'admin/structure/feeds/edit/' . $importer->id) . ' | ' .
-          l(t('Export'), 'admin/structure/feeds/export/' . $importer->id) . ' | ' .
-          l(t('Clone'), 'admin/structure/feeds/clone/' . $importer->id) .
-          (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/delete/' . $importer->id)),
+          l($edit, 'admin/structure/feeds/' . $importer->id) . ' | ' .
+          l(t('Export'), 'admin/structure/feeds/' . $importer->id . '/export') . ' | ' .
+          l(t('Clone'), 'admin/structure/feeds/' . $importer->id . '/clone') .
+          (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/' . $importer->id . '/delete')),
       );
     }
     else {
@@ -214,7 +214,7 @@ function feeds_ui_create_form_submit($form, &$form_state) {
   else {
     drupal_set_message(t('A clone of the @name configuration has been created.', array('@name' => $form['#from_importer']->config['name'])));
   }
-  $form_state['redirect'] = 'admin/structure/feeds/edit/' . $importer->id;
+  $form_state['redirect'] = 'admin/structure/feeds/' . $importer->id;
   feeds_cache_clear();
 }
 
@@ -277,7 +277,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $plugins = FeedsPlugin::all();
   $config = $importer->config;
   // Base path for changing the active container.
-  $path = 'admin/structure/feeds/edit/' . $importer->id;
+  $path = 'admin/structure/feeds/' . $importer->id;
 
   $active_container = array(
     'class' => array('active-container'),

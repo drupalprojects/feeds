@@ -58,7 +58,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
     $edit = array(
       'content_type' => '',
     );
-    $this->drupalPost('admin/structure/feeds/edit/user_import/settings', $edit, 'Save');
+    $this->drupalPost('admin/structure/feeds/user_import/settings', $edit, 'Save');
 
     // Create roles and assign one of them to the users to be imported.
     $manager_rid = $this->drupalCreateRole(array('access content'), 'manager');
