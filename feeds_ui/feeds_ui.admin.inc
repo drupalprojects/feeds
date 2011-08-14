@@ -150,8 +150,7 @@ function feeds_ui_overview_form_submit($form, &$form_state) {
  *   of $from_importer.
  */
 function feeds_ui_create_form($form, &$form_state, $from_importer = NULL) {
-  drupal_add_js(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js');
-  $form = array();
+  $form['#attached']['js'][] = drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js';
   $form['#from_importer'] = $from_importer;
   $form['name'] = array(
     '#type' => 'textfield',
@@ -159,15 +158,14 @@ function feeds_ui_create_form($form, &$form_state, $from_importer = NULL) {
     '#description' => t('A natural name for this configuration. Example: RSS Feed. You can always change this name later.'),
     '#required' => TRUE,
     '#maxlength' => 128,
-    '#attributes' => array('class' => array('feed-name')),
   );
   $form['id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Machine name'),
-    '#description' => t('A unique identifier for this configuration. Example: rss_feed. Must only contain lower case characters, numbers and underscores.'),
+    '#type' => 'machine_name',
     '#required' => TRUE,
     '#maxlength' => 128,
-    '#attributes' => array('class' => array('feed-id')),
+    '#machine_name' => array(
+      'exists' => 'feeds_ui_importer_machine_name_exists',
+    ),
   );
   $form['description'] = array(
     '#type' => 'textfield',
@@ -182,14 +180,24 @@ function feeds_ui_create_form($form, &$form_state, $from_importer = NULL) {
 }
 
 /**
+ * Validation callback for the importer machine name field.
+ */
+function feeds_ui_importer_machine_name_exists($id) {
+  if ($id == 'create') {
+    // Create is a reserved path for the add importer form.
+    return TRUE;
+  }
+  ctools_include('export');
+  if (ctools_export_load_object('feeds_importer', 'conditions', array('id' => $id))) {
+    return TRUE;
+  }
+}
+
+/**
  * Validation handler for feeds_build_create_form().
  */
 function feeds_ui_create_form_validate($form, &$form_state) {
-  ctools_include('export');
   $importer = feeds_importer($form_state['values']['id']);
-  if (ctools_export_load_object('feeds_importer', 'conditions', array('id' => $form_state['values']['id']))) {
-    form_set_error('id', t('Id is taken.'));
-  }
   $importer->configFormValidate($form_state['values']);
 }
 
