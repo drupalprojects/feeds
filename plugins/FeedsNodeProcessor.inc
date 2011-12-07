@@ -71,6 +71,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Save a node.
    */
   public function entitySave($entity) {
+    // If nid is set and a node with that id doesn't exist, flag as new.
+    if (!empty($entity->nid) && !node_load($entity->nid)) {
+      $entity->is_new = TRUE;
+    }
     node_save($entity);
   }
 
