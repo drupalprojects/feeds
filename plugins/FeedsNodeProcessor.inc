@@ -225,6 +225,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       $targets['title'] = array(
         'name' => t('Title'),
         'description' => t('The title of the node.'),
+        'optional_unique' => TRUE,
       );
     }
     $targets['nid'] = array(
@@ -301,6 +302,9 @@ class FeedsNodeProcessor extends FeedsProcessor {
       switch ($target) {
         case 'nid':
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
+          break;
+        case 'title':
+          $nid = db_query("SELECT nid FROM {node} WHERE title = :title", array(':title' => $value))->fetchField();
           break;
         case 'feeds_source':
           if ($id = feeds_get_importer_id($this->config['content_type'])) {
