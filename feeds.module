@@ -902,7 +902,14 @@ function feeds_plugin($plugin, $id) {
  */
 function feeds_include_library($file, $library) {
   static $included = array();
+  static $ignore_deprecated = array('simplepie');
   if (!isset($included[$file])) {
+    // Disable deprecated warning for libraries known for throwing them
+    if (in_array($library, $ignore_deprecated)) {
+       $level = error_reporting();
+       // We can safely use E_DEPRECATED since Drupal 7 requires PHP 5.3+
+       error_reporting($level & ~E_DEPRECATED);
+    }
     // Try first whether libraries module is present and load the file from
     // there. If this fails, require the library from the local path.
     if (module_exists('libraries') && file_exists(libraries_get_path($library) . "/$file")) {
@@ -912,6 +919,10 @@ function feeds_include_library($file, $library) {
       // @todo: Throws "Deprecated function: Assigning the return value of new
       // by reference is deprecated."
       require DRUPAL_ROOT . '/' . drupal_get_path('module', 'feeds') . "/libraries/$file";
+    }
+    // Restore error reporting level
+    if (isset($level)) {
+      error_reporting($level);
     }
   }
   $included[$file] = TRUE;

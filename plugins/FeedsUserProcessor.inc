@@ -140,6 +140,9 @@ class FeedsUserProcessor extends FeedsProcessor {
       case 'created':
         $target_user->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
+      case 'language':
+        $target_user->language = strtolower($value);
+        break;
       default:
         parent::setTargetElement($source, $target_user, $target_element, $value);
         break;
@@ -169,6 +172,10 @@ class FeedsUserProcessor extends FeedsProcessor {
       'pass' => array(
         'name' => t('Unencrypted Password'),
         'description' => t('The unencrypted user password.'),
+      ),
+      'language' => array(
+        'name' => t('User language'),
+        'description' => t('Default language for the user.'),
       ),
     );
     if (module_exists('openid')) {
