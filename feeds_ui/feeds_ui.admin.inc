@@ -655,6 +655,7 @@ function _feeds_ui_format_options($options) {
       $result[$k] = $v;
     }
   }
+  asort($result);
   return $result;
 }
 
