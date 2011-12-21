@@ -173,6 +173,10 @@ class FeedsUserProcessor extends FeedsProcessor {
         'name' => t('Unencrypted Password'),
         'description' => t('The unencrypted user password.'),
       ),
+      'status' => array(
+        'name' => t('Account status'),
+        'description' => t('Whether a user is active or not. 1 stands for active, 0 for blocked.'),
+      ),
       'language' => array(
         'name' => t('User language'),
         'description' => t('Default language for the user.'),
