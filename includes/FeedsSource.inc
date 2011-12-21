@@ -202,6 +202,13 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Returns the FeedsImporter object that this source is expected to be used with.
+   */
+  public function importer() {
+    return $this->importer;
+  }
+
+  /**
    * Preview = fetch and parse a feed.
    *
    * @return
