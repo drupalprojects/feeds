@@ -172,14 +172,15 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
           )), curl_errno($download)
         );
       }
+
       $header_size = curl_getinfo($download, CURLINFO_HEADER_SIZE);
       $header = substr($data, 0, $header_size - 1);
-
       $result->data = substr($data, $header_size);
-      $header_lines = preg_split("/\r\n|\n|\r/", $header);
-
+      $headers = preg_split("/(\r\n){2}/", $header);
+      $header_lines = preg_split("/\r\n|\n|\r/", end($headers));
       $result->headers = array();
       array_shift($header_lines); // skip HTTP response status
+
       while ($line = trim(array_shift($header_lines))) {
         list($header, $value) = explode(':', $line, 2);
         // Normalize the headers.
