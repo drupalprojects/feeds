@@ -229,9 +229,9 @@ function hook_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  *
  */
 function my_module_set_target($source, $entity, $target, $value) {
-  $entity->$target['und'][0]['value'] = $value;
+  $entity->{$target}[$entity->language][0]['value'] = $value;
   if (isset($source->importer->processor->config['input_format'])) {
-    $entity->$target['und'][0]['format'] =
+    $entity->{$target}[$entity->language][0]['format'] = 
       $source->importer->processor->config['input_format'];
   }
 }
