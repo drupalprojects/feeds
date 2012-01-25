@@ -453,7 +453,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     global $user;
     $formats = filter_formats($user);
     foreach ($formats as $format) {
-      $format_options[$format->format] = check_plain($format->name);
+      $format_options[$format->format] = $format->name;
     }
     $form['input_format'] = array(
       '#type' => 'select',
