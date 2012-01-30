@@ -164,7 +164,15 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    */
   public function sourceSave(FeedsSource $source) {
     if ($this->config['use_pubsubhubbub']) {
-      $this->subscribe($source);
+      // If this is a feeds node we want to delay the subscription to
+      // feeds_exit() to avoid transaction race conditions.
+      if ($source->feed_nid) {
+        $job = array('fetcher' => $this, 'source' => $source);
+        feeds_set_subscription_job($job);
+      }
+      else {
+        $this->subscribe($source);
+      }
     }
   }
 
