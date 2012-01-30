@@ -73,6 +73,9 @@ function feeds_cron_job_scheduler_info() {
   $info['feeds_importer_expire'] = array(
     'queue name' => 'feeds_importer_expire',
   );
+  $info['feeds_push_unsubscribe'] = array(
+    'queue name' => 'feeds_push_unsubscribe',
+  );
   return $info;
 }
 
@@ -91,6 +94,10 @@ function feeds_cron_queue_info() {
   );
   $queues['feeds_importer_expire'] = array(
     'worker callback' => 'feeds_importer_expire',
+    'time' => 15,
+  );
+  $queues['feeds_push_unsubscribe'] = array(
+    'worker callback' => 'feeds_push_unsubscribe',
     'time' => 15,
   );
   return $queues;
@@ -145,6 +152,15 @@ function feeds_importer_expire($job) {
     $importer->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
   $importer->scheduleExpire();
+}
+
+/**
+ * Scheduler callback for unsubscribing from PuSH hubs.
+ */
+function feeds_push_unsubscribe($job) {
+  $source = feeds_source($job['type'], $job['id']);
+  $fetcher = feeds_plugin('FeedsHTTPFetcher', $source->importer->id);
+  $fetcher->unsubscribe($source);
 }
 
 /**

@@ -181,7 +181,20 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    */
   public function sourceDelete(FeedsSource $source) {
     if ($this->config['use_pubsubhubbub']) {
-      $this->unsubscribe($source);
+      // If we're in a feed node, queue the unsubscribe,
+      // else process immediately.
+      if ($source->feed_nid) {
+        $job = array(
+          'type' => $source->id,
+          'id' => $source->feed_nid,
+          'period' => 0,
+          'periodic' => FALSE,
+        );
+        JobScheduler::get('feeds_push_unsubscribe')->set($job);
+      }
+      else {
+        $this->unsubscribe($source);
+      }
     }
   }
 
