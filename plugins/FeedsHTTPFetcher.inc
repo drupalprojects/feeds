@@ -79,12 +79,12 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       catch (Exception $e) {
         // In case of an error, respond with a 503 Service (temporary) unavailable.
         header('HTTP/1.1 503 "Not Found"', NULL, 503);
-        exit();
+        drupal_exit();
       }
     }
     // Will generate the default 200 response.
     header('HTTP/1.1 200 "OK"', NULL, 200);
-    exit();
+    drupal_exit();
   }
 
   /**
