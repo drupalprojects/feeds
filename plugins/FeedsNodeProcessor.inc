@@ -64,7 +64,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     if (!empty($node->menu)) {
       // If the node has a menu item(with a valid mlid) it must be flagged
       // 'enabled'.
-      $node->menu['link']['enabled'] = (int) (bool) $node->menu['link']['mlid'];
+      $node->menu['enabled'] = (int) (bool) $node->menu['mlid'];
     }
 
     // Populate properties that are set by node_object_prepare().
