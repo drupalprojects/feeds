@@ -219,6 +219,17 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $target_node->feeds['suppress_import'] = TRUE;
         }
         break;
+      case 'path_alias':
+        $target_node->path = array();
+
+        // Check for existing aliases.
+        if (!empty($target_node->nid)) {
+          if ($path = path_load('node/' . $target_node->nid)) {
+            $target_node->path = $path;
+          }
+        }
+        $target_node->path['alias'] = $value;
+        break;
       default:
         parent::setTargetElement($source, $target_node, $target_element, $value);
         break;
@@ -280,6 +291,13 @@ class FeedsNodeProcessor extends FeedsProcessor {
       );
     }
 
+    // If path is enabled expose path alias.
+    if (module_exists('path')) {
+      $targets['path_alias'] = array(
+        'name' => t('Path alias'),
+        'description' => t('URL path alias of the node.'),
+      );
+    }
 
     // If the target content type is a Feed node, expose its source field.
     if ($id = feeds_get_importer_id($this->config['content_type'])) {
