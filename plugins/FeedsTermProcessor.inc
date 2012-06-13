@@ -123,31 +123,29 @@ class FeedsTermProcessor extends FeedsProcessor {
     }
   }
 
-
- /**
-  * Override setTargetElement to operate on a target item that is a term.
-  */
-  public function setTargetElement(FeedsSource $source, $target_node, $target_element, $value) {
-
+   /**
+   * Override setTargetElement to operate on a target item that is a taxonomy term.
+   */
+  public function setTargetElement(FeedsSource $source, $target_term, $target_element, $value) {
     switch ($target_element) {
       case 'parent':
         if (!empty($value)) {
           $terms = taxonomy_get_term_by_name($value);
           $parent_tid = '';
           foreach ($terms as $term) {
-            if ($term->vid == $target_node->vid) {
+            if ($term->vid == $target_term->vid) {
               $parent_tid = $term->tid;
             }
           }
           if (!empty($parent_tid)) {
-            $target_node->parent[] = $parent_tid;
+            $target_term->parent[] = $parent_tid;
           }
           else {
-            $target_node->parent[] = 0;
+            $target_term->parent[] = 0;
           }
         }
         else {
-          $target_node->parent[] = 0;
+          $target_term->parent[] = 0;
         }
         break;
       case 'parentguid':
@@ -156,7 +154,7 @@ class FeedsTermProcessor extends FeedsProcessor {
           ->fields('feeds_item', array('entity_id'))
           ->condition('entity_type', $this->entityType());
         $parent_tid = $query->condition('guid', $value)->execute()->fetchField();
-        $target_node->parent[] = ($parent_tid) ? $parent_tid : 0;
+        $target_term->parent[] = ($parent_tid) ? $parent_tid : 0;
 
         break;
       case 'weight':
@@ -166,19 +164,8 @@ class FeedsTermProcessor extends FeedsProcessor {
         else {
           $weight = 0;
         }
-        $target_node->weight = $weight;
+        $target_term->weight = $weight;
         break;
-      default:
-        parent::setTargetElement($source, $target_node, $target_element, $value);
-        break;
-    }
-  }
-
-   /**
-   * Override setTargetElement to operate on a target item that is a taxonomy term.
-   */
-  public function setTargetElement(FeedsSource $source, $target_term, $target_element, $value) {
-    switch ($target_element) {
       case 'path_alias':
         $target_term->path = array();
 
