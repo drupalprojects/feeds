@@ -349,8 +349,8 @@ class FeedsEnclosure extends FeedsElement {
           require_once drupal_get_path('module', 'transliteration') . '/transliteration.inc';
           $filename = transliteration_clean_filename($filename);
         }
-        if(file_uri_target($destination)) {
-          $destination .= trim($destination, '/') . '/';
+        if (file_uri_target($destination)) {
+          $destination = trim($destination, '/') . '/';
         }
         $file = file_save_data($this->getContent(), $destination . $filename);
       }
