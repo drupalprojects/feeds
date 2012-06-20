@@ -230,6 +230,16 @@ class FeedsNodeProcessor extends FeedsProcessor {
         }
         $target_node->path['alias'] = $value;
         break;
+      case 'user_name':
+        if ($user = user_load_by_name($value)) {
+          $target_node->uid = $user->uid;
+        }
+        break;
+      case 'user_mail':
+        if ($user = user_load_by_mail($value)) {
+          $target_node->uid = $user->uid;
+        }
+        break;
       default:
         parent::setTargetElement($source, $target_node, $target_element, $value);
         break;
@@ -257,6 +267,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
     $targets['uid'] = array(
       'name' => t('User ID'),
       'description' => t('The Drupal user ID of the node author.'),
+    );
+    $targets['user_name'] = array(
+      'name' => t('Username'),
+      'description' => t('The Drupal username of the node author.'),
+    );
+    $targets['user_mail'] = array(
+      'name' => t('User email'),
+      'description' => t('The email address of the node author.'),
     );
     $targets['status'] = array(
       'name' => t('Published status'),
