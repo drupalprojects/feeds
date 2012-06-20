@@ -235,6 +235,10 @@ function feeds_permission() {
     $perms["clear $importer->id feeds"] = array(
       'title' => t('Delete items from @name feeds', array('@name' => $importer->config['name'])),
     );
+    $perms["unlock $importer->id feeds"] = array(
+      'title' => t('Unlock imports from @name feeds', array('@name' => $importer->config['name'])),
+      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock them.')
+    );
   }
   return $perms;
 }
@@ -288,6 +292,15 @@ function feeds_menu() {
     'file' => 'feeds.pages.inc',
     'type' => MENU_LOCAL_TASK,
   );
+  $items['import/%/unlock'] = array(
+    'title' => 'Unlock',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_unlock_tab_form', 1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('unlock', 1),
+    'file' => 'feeds.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
   $items['import/%/template'] = array(
     'page callback' => 'feeds_importer_template',
     'page arguments' => array(1),
@@ -312,6 +325,16 @@ function feeds_menu() {
     'page arguments' => array('feeds_delete_tab_form', NULL, 1),
     'access callback' => 'feeds_access',
     'access arguments' => array('clear', 1),
+    'file' => 'feeds.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+  );
+  $items['node/%node/unlock'] = array(
+    'title' => 'Unlock',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('feeds_unlock_tab_form', NULL, 1),
+    'access callback' => 'feeds_access',
+    'access arguments' => array('unlock', 1),
     'file' => 'feeds.pages.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 11,
@@ -367,11 +390,12 @@ function feeds_theme() {
  *   The action to be performed. Possible values are:
  *   - import
  *   - clear
+ *   - unlock
  * @param $param
  *   Node object or FeedsImporter id.
  */
 function feeds_access($action, $param) {
-  if (!in_array($action, array('import', 'clear'))) {
+  if (!in_array($action, array('import', 'clear', 'unlock'))) {
     // If $action is not one of the supported actions, we return access denied.
     return FALSE;
   }
