@@ -1088,3 +1088,29 @@ function feeds_set_subscription_job(array $job = NULL) {
 function feeds_get_subscription_jobs() {
   return feeds_set_subscription_job();
 }
+
+/**
+ * Implements hook_entity_property_info_alter().
+ */
+function feeds_entity_property_info_alter(&$info) {
+  // Gather entities supported by Feeds processors.
+  $processors = FeedsPlugin::byType('processor');
+  $supported_entities = array();
+  foreach ($processors as $processor) {
+    $instance = feeds_plugin($processor['handler']['class'], '__none__');
+    if (method_exists($instance, 'entityType')) {
+      $supported_entities[] = $instance->entityType();
+    }
+  }
+  // Feeds processors can fake the entity info. Only set the property for
+  // defined entities.
+  $supported_entities = array_intersect(array_keys($info), $supported_entities);
+
+  foreach ($supported_entities as $entity_type) {
+    $info[$entity_type]['properties']['feed_nid'] = array(
+      'label' => 'Feed NID',
+      'type' => 'integer',
+      'description' => t('Nid of the Feed Node that imported this entity.'),
+    );
+  }
+}
