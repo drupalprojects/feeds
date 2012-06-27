@@ -219,13 +219,12 @@ function feeds_unlock_tab_form($form, &$form_state, $importer_id, $node = NULL) 
     '#value' => feeds_source_status($source),
   );
   $form = confirm_form($form, t('Unlock this importer?'), $form['#redirect'], '', t('Delete'), t('Cancel'), 'confirm feeds update');
-  $progress = $source->progressClearing();
-  if ($progress == FEEDS_BATCH_COMPLETE) {
+  if ($source->progressImporting() == FEEDS_BATCH_COMPLETE && $source->progressClearing() == FEEDS_BATCH_COMPLETE) {
     $form['source_locked'] = array(
       '#type' => 'markup',
       '#title' => t('Not Locked'),
       '#tree' => TRUE,
-      '#markup' => t('This Importer is not locked, therefor it cannot be unlocked.'),
+      '#markup' => t('This importer is not locked, therefore it cannot be unlocked.'),
     );
     $form['actions']['submit']['#disabled'] = TRUE;
     $form['actions']['submit']['#value'] = t('Unlock (disabled)');
