@@ -174,7 +174,7 @@ class FeedsDataProcessor extends FeedsProcessor {
    * Set target element, bring element in a FeedsDataHandler format.
    */
   public function setTargetElement(&$target_item, $target_element, $value) {
-    if (empty($value)) {
+    if ($value === NULL) {
       return;
     }
     if (strpos($target_element, '.')) {
