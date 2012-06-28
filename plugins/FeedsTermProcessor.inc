@@ -196,12 +196,12 @@ class FeedsTermProcessor extends FeedsProcessor {
        ),
       'parent' => array(
         'name' => t('Parent: Term name'),
-        'description' => t('Name of the parent term.'),
+        'description' => t('The name of the parent taxonomy term.'),
         'optional_unique' => TRUE,
       ),
       'parentguid' => array(
         'name' => t('Parent: GUID'),
-        'description' => t("The GUID of the item's parent term."),
+        'description' => t('The GUID of the parent taxonomy term.'),
         'optional_unique' => TRUE,
       ),
       'weight' => array(
