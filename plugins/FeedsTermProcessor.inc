@@ -219,11 +219,17 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Override setTargetElement to operate on a target item that is a term.
    */
   public function setTargetElement(&$target_item, $target_element, $value) {
-    if (in_array($target_element, array('url', 'guid'))) {
-      $target_item['feeds_term_item'][$target_element] = $value;
-    }
-    else {
-      parent::setTargetElement($target_item, $target_element, $value);
+    switch ($target_element) {
+      case 'url':
+      case 'guid':
+        $target_item['feeds_term_item'][$target_element] = $value;
+        break;
+      case 'weight':
+        $target_item['weight'] = (int) $value;
+        break;
+      default:
+        parent::setTargetElement($target_item, $target_element, $value);
+        break;
     }
   }
 
@@ -244,6 +250,10 @@ class FeedsTermProcessor extends FeedsProcessor {
       'synonyms' => array(
         'name' => t('Term synonyms'),
         'description' => t('One synonym or an array of synonyms of the taxonomy term.'),
+      ),
+      'weight' => array(
+        'name' => t('Term weight'),
+        'description' => t('Weight of the taxonomy term.'),
       ),
       'url' => array(
         'name' => t('URL'),
