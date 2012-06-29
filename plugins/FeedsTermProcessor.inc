@@ -268,7 +268,9 @@ class FeedsTermProcessor extends FeedsProcessor {
     );
     // Let implementers of hook_feeds_term_processor_targets() add their targets.
     $vocabulary = $this->vocabulary();
-    drupal_alter('feeds_term_processor_targets', $targets, $vocabulary->vid);
+    if ($vocabulary) {
+      drupal_alter('feeds_term_processor_targets', $targets, $vocabulary->vid);
+    }
     return $targets;
   }
 
@@ -305,8 +307,12 @@ class FeedsTermProcessor extends FeedsProcessor {
    * vocabularies exportable.
    */
   public function vocabulary() {
+    // The default value is 0.
+    if (!$this->config['vocabulary']) {
+      return;
+    }
     $vocabularies = taxonomy_get_vocabularies();
-    if (is_numeric($this->config['vocabulary'])) {
+    if ($this->config['vocabulary'] && is_numeric($this->config['vocabulary'])) {
       return $vocabularies[$this->config['vocabulary']];
     }
     else {

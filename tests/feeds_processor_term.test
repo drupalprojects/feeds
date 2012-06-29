@@ -59,10 +59,11 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->importFile('term_import', $this->absolutePath() .'/tests/feeds/users.csv');
     $this->assertText('Created 5 terms in Addams vocabulary.');
     $this->drupalGet('admin/content/taxonomy/1');
-    $this->assertText('Morticia');
     $this->assertText('Fester');
     $this->assertText('Gomez');
+    $this->assertText('Morticia');
     $this->assertText('Pugsley');
+    $this->assertText('Wednesday');
 
     // Import again.
     $this->importFile('term_import', $this->absolutePath() .'/tests/feeds/users.csv');
@@ -80,5 +81,6 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->assertNoText('Fester');
     $this->assertNoText('Gomez');
     $this->assertNoText('Pugsley');
+    $this->assertNoText('Wednesday');
   }
 }
