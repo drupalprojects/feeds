@@ -225,11 +225,11 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     // Set next time to 0 to simulate updates.
     db_query("UPDATE {job_schedule} SET next = 0");
     // Hit cron 3 times, assert correct number of story nodes.
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 1; $i <= 3; $i++) {
       $this->cronRun();
       sleep(1);
       // 50 == FEEDS_NODE_BATCH_SIZE
-      $this->assertEqual(50 * ($i + 1), db_result(db_query("SELECT COUNT(*) FROM {node} WHERE type = 'story'")));
+      $this->assertEqual(50 * $i, db_result(db_query("SELECT COUNT(*) FROM {node} WHERE type = 'story'")));
       $this->assertEqual(0, db_result(db_query("SELECT period FROM {job_schedule} WHERE type = 'syndication' AND id = %d", $nid)));
     }
     // Run one more time to cause the batch to reset, check period back to 1800.

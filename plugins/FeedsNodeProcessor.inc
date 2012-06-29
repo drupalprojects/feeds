@@ -26,6 +26,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
     // Keep track of processed items in this pass, set total number of items.
     $processed = 0;
+    $batch_size = variable_get('feeds_node_batch_size', FEEDS_NODE_BATCH_SIZE);
     if (!$batch->getTotal(FEEDS_PROCESSING)) {
       $batch->setTotal(FEEDS_PROCESSING, count($batch->items));
     }
@@ -73,8 +74,9 @@ class FeedsNodeProcessor extends FeedsProcessor {
       }
 
       $processed++;
-      if ($processed >= variable_get('feeds_node_batch_size', FEEDS_NODE_BATCH_SIZE)) {
-        $batch->setProgress(FEEDS_PROCESSING, $batch->created + $batch->updated);
+      if ($processed >= $batch_size) {
+        $total = $batch->getTotal(FEEDS_PROCESSING);
+        $batch->setProgress(FEEDS_PROCESSING, $total - count($batch->items));
         return;
       }
     }
@@ -83,10 +85,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
     if ($batch->created) {
       drupal_set_message(format_plural($batch->created, 'Created @number @type node.', 'Created @number @type nodes.', array('@number' => $batch->created, '@type' => node_get_types('name', $this->config['content_type']))));
     }
-    elseif ($batch->updated) {
+    if ($batch->updated) {
       drupal_set_message(format_plural($batch->updated, 'Updated @number @type node.', 'Updated @number @type nodes.', array('@number' => $batch->updated, '@type' => node_get_types('name', $this->config['content_type']))));
     }
-    else {
+    if (!$batch->created && !$batch->updated) {
       drupal_set_message(t('There is no new content.'));
     }
     $batch->setProgress(FEEDS_PROCESSING, FEEDS_BATCH_COMPLETE);

@@ -78,7 +78,7 @@ class FeedsBatch {
       $total = array_sum($this->total);
     }
     $progress = (1.0 / $total) * $progress;
-    return $progress == FEEDS_BATCH_COMPLETE ? 0.999 : $progress;
+    return $progress >= FEEDS_BATCH_COMPLETE ? 0.999 : $progress;
   }
 }
 
