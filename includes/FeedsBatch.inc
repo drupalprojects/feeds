@@ -157,6 +157,11 @@ class FeedsImportBatch extends FeedsBatch {
       FEEDS_PARSING => FEEDS_BATCH_COMPLETE,
       FEEDS_PROCESSING => FEEDS_BATCH_COMPLETE,
     );
+    $this->total = array(
+      FEEDS_FETCHING => 0,
+      FEEDS_PARSING => 0,
+      FEEDS_PROCESSING => 0,
+    );
     $this->title = '';
     $this->description = '';
     $this->link = '';
@@ -352,6 +357,9 @@ class FeedsClearBatch extends FeedsBatch {
     parent::__construct();
     $this->progress = array(
       FEEDS_CLEARING => FEEDS_BATCH_COMPLETE,
+    );
+    $this->total = array(
+      FEEDS_CLEARING => 0,
     );
     $this->deleted = 0;
   }
