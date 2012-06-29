@@ -86,24 +86,33 @@ function taxonomy_feeds_set_target(&$node, $key, $terms) {
     $terms = array($terms);
   }
 
+  if (!isset($node->taxonomy)) {
+    $node->taxonomy = array();
+  }
+
   if ($vocabulary->tags) {
+    if (!isset($node->taxonomy['tags'])) {
+      $node->taxonomy['tags'] = array();
+    }
     foreach ($terms as $k => $v) {
       // Make sure there aren't any terms with a comma (=tag delimiter) in it.
       $terms[$k] = preg_replace('/\s*,\s*/', ' ', $v);
     }
     // Simply add a comma separated list to the node for a "tags" vocabulary.
-    $terms = array_merge($terms, drupal_explode_tags($node->taxonomy['tags'][$vocabulary->vid]));
+    if (isset($node->taxonomy['tags'][$vocabulary->vid])) {
+      $terms = array_merge($terms, drupal_explode_tags($node->taxonomy['tags'][$vocabulary->vid]));
+    }
     $node->taxonomy['tags'][$vocabulary->vid] = implode(',', $terms);
   }
   else {
     foreach ($terms as $term) {
       if ($term instanceof FeedsTermElement) {
-        $node->taxonomy[$term->tid] = (object)$term;
+        $node->taxonomy[$term->tid] = (object) $term;
       }
       // Check if a term already exists.
       elseif ($terms_found = taxonomy_get_term_by_name_vid($term, $vocabulary->vid)) {
         // If any terms are found add them to the node's taxonomy by found tid.
-        foreach ($terms_found AS $term_found) {
+        foreach ($terms_found as $term_found) {
           $node->taxonomy[$term_found->tid] = $term_found;
           if (!$vocabulary->multiple) {
             break;
