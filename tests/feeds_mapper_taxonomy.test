@@ -208,6 +208,6 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
    */
   public function assertTaxonomyTerm($term) {
     $term = check_plain($term);
-    $this->assertPattern('/<a href="(.*?)\/taxonomy\/term\/([0-9]*?)"(.*)>'. $term .'<\/a>/', 'Found '. $term);
+    $this->assertPattern('/<a href="\/.*taxonomy\/term\/[0-9]+">' . $term . '<\/a>/', 'Found ' . $term);
   }
 }
