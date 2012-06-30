@@ -30,6 +30,7 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
     // site before running the test, it will work fine. Since it is truly screwy, lets just
     // force it to use drupal_http_request for this test case.
     variable_set('feeds_never_use_curl', TRUE);
+    variable_set('clean_url', TRUE);
 
     // Only download simplepie if the plugin doesn't already exist somewhere.
     // People running tests locally might have it.
