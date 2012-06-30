@@ -62,6 +62,10 @@ class FeedsSimplePieParser extends FeedsParser {
   public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
     feeds_include_library('simplepie.inc', 'simplepie');
 
+    // Please be quiet SimplePie.
+    $level = error_reporting();
+    error_reporting($level ^ E_DEPRECATED ^ E_STRICT);
+
     // Initialize SimplePie.
     $parser = new SimplePie();
     $parser->set_raw_data($fetcher_result->getRaw());
@@ -140,6 +144,8 @@ class FeedsSimplePieParser extends FeedsParser {
     }
     // Release parser.
     unset($parser);
+    // Set error reporting back to its previous value.
+    error_reporting($level);
     return $result;
   }
 
