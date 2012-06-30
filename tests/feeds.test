@@ -433,6 +433,62 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       }
     }
   }
+
+  /**
+   * Download and extract SimplePIE.
+   *
+   * Sets the 'feeds_simplepie_library_dir' variable to the directory where
+   * SimplePie is downloaded.
+   *
+   * @param $version
+   *   The SimplePie version number to download and extract.
+   */
+  function downloadExtractSimplePie($version) {
+    $url = "https://github.com/simplepie/simplepie/tarball/$version";
+    $filename = "SimplePIE-$version.tar.gz";
+
+    // Avoid downloading the file dozens of times
+    $library_dir = $this->originalFileDirectory . '/simpletest/feeds';
+    $simplepie_library_dir = $library_dir . '/simplepie';
+
+    if (!file_exists($library_dir)) {
+      mkdir($library_dir, '0777', TRUE);
+    }
+
+    // Local archive name.
+    $local_archive = $library_dir . '/' . $filename;
+
+    // Begin single threaded code.
+    if (function_exists('sem_get')) {
+      $semaphore = sem_get(ftok(__FILE__, 1));
+      sem_acquire($semaphore);
+    }
+
+    // Download and extact the archive, but only in one thread.
+    if (!file_exists($local_archive)) {
+      $local_archive = system_retrieve_file($url, $local_archive, FALSE, FILE_EXISTS_REPLACE);
+    }
+
+    if (!file_exists($library_dir)) {
+      // Extract the files.
+      $archiver = archiver_get_archiver($local_archive);
+      $archiver->extract($library_dir);
+      $dirs = glob($library_dir . '/simplepie*', GLOB_ONLYDIR);
+      $dir = reset($dirs);
+      rename($dir, $simplepie_library_dir);
+    }
+
+    if (function_exists('sem_get')) {
+      sem_release($semaphore);
+    }
+    // End single threaded code.
+
+    // Verify that files were successfully extracted.
+    $this->assertTrue(file_exists($simplepie_library_dir . '/simplepie.inc'), t('simpletest.inc found in @library_dir.', array('library_dir' => $library_dir)));
+
+    // Set the simpletest library directory.
+    variable_set('feeds_library_dir', $library_dir);
+  }
 }
 
 /**
