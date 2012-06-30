@@ -952,17 +952,23 @@ function feeds_plugin($plugin, $id) {
 function feeds_include_library($file, $library) {
   static $included = array();
   static $ignore_deprecated = array('simplepie');
+
   if (!isset($included[$file])) {
     // Disable deprecated warning for libraries known for throwing them
     if (in_array($library, $ignore_deprecated)) {
        $level = error_reporting();
        // We can safely use E_DEPRECATED since Drupal 7 requires PHP 5.3+
-       error_reporting($level & ~E_DEPRECATED);
+       error_reporting($level ^ E_DEPRECATED ^ E_STRICT);
     }
     // Try first whether libraries module is present and load the file from
     // there. If this fails, require the library from the local path.
+    $library_dir = variable_get('feeds_library_dir', FALSE);
+
     if (module_exists('libraries') && file_exists(libraries_get_path($library) . "/$file")) {
       require libraries_get_path($library) . "/$file";
+    }
+    elseif ($library_dir && file_exists("$library_dir/$library/$file")) {
+      require "$library_dir/$library/$file";
     }
     else {
       // @todo: Throws "Deprecated function: Assigning the return value of new
@@ -988,12 +994,21 @@ function feeds_include_library($file, $library) {
  *   libraries module.
  */
 function feeds_library_exists($file, $library) {
+
   if (module_exists('libraries') && file_exists(libraries_get_path($library) . "/$file")) {
     return TRUE;
   }
+
   elseif (file_exists(DRUPAL_ROOT . '/' . drupal_get_path('module', 'feeds') . "/libraries/$file")) {
     return TRUE;
   }
+
+  elseif ($library_dir = variable_get('feeds_library_dir', FALSE)) {
+    if (file_exists("$library_dir/$library/$file")) {
+      return TRUE;
+    }
+  }
+
   return FALSE;
 }
 
