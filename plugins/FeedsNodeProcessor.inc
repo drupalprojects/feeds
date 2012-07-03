@@ -228,6 +228,11 @@ class FeedsNodeProcessor extends FeedsProcessor {
             $target_node->path = $path;
           }
         }
+
+        // Prevent Pathauto (http://drupal.org/project/pathauto) from
+        // overwriting the alias.
+        $target_node->path['pathauto'] = FALSE;
+
         $target_node->path['alias'] = $value;
         break;
       case 'user_name':

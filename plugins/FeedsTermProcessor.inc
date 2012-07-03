@@ -175,6 +175,11 @@ class FeedsTermProcessor extends FeedsProcessor {
             $target_term->path = $path;
           }
         }
+
+        // Prevent Pathauto (http://drupal.org/project/pathauto) from
+        // overwriting the alias.
+        $target_term->path['pathauto'] = FALSE;
+
         $target_term->path['alias'] = $value;
         break;
       default:
