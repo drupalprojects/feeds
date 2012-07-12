@@ -15,12 +15,14 @@ function feeds_rules_event_info() {
     $config = $importer->getConfig();
     $processor = feeds_plugin($config['processor']['plugin_key'], $importer->id);
     $entity_type = $processor->entityType();
+    $label = isset($entity_info[$entity_type]['label']) ? $entity_info[$entity_type]['label'] : $entity_type;
+    
     $info['feeds_import_'. $importer->id] = array(
       'label' => t('Before saving an item imported via @name.', array('@name' => $importer->config['name'])),
       'group' => t('Feeds'),
       'variables' => array(
         $entity_type => array(
-          'label' => t('Imported @label', array('@label' => $entity_info[$entity_type]['label'])),
+          'label' => t('Imported @label', array('@label' => $label)),
           'type' => $entity_type,
           // Saving is handled by feeds anyway (unless the skip action is used).
           'skip save' => TRUE,
