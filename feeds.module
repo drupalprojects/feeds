@@ -490,19 +490,19 @@ function feeds_feeds_plugins() {
 }
 
 /**
- * Implements hook_entity_load().
+ * Gets the feed_nid for a single entity.
+ *
+ * @param int $entity_id
+ *   The entity id.
+ * @param string $entity_type
+ *   The type of entity.
+ *
+ * @return int|bool
+ *   The feed_nid of the entity, or FALSE if the entity doesn't belong to a
+ *   feed.
  */
-function feeds_entity_load($entities, $type) {
-  try {
-    $feed_nids = db_query("SELECT entity_id, feed_nid FROM {feeds_item} WHERE entity_type = :type AND entity_id IN (:ids)", array(':type' => $type, ':ids' => array_keys($entities)))->fetchAllKeyed();
-    foreach ($feed_nids as $id => $feed_nid) {
-      $entities[$id]->feed_nid = $feed_nid;
-    }
-  }
-  catch (Exception $e) {
-    watchdog_exception('feeds', $e);
-    // Do not re-throw $e.
-  }
+function feeds_get_feed_nid($entity_id, $entity_type) {
+  return db_query("SELECT feed_nid FROM {feeds_item} WHERE entity_type = :type AND entity_id = :id", array(':type' => $entity_type, ':id' => $entity_id))->fetchField();
 }
 
 /**
@@ -1126,6 +1126,21 @@ function feeds_entity_property_info_alter(&$info) {
       'label' => 'Feed NID',
       'type' => 'integer',
       'description' => t('Nid of the Feed Node that imported this entity.'),
+      'getter callback' => 'feeds_get_feed_nid_entity_callback',
     );
   }
+}
+
+/**
+ * Gets the feed_nid for an entity for use in entity metadata.
+ */
+function feeds_get_feed_nid_entity_callback($entity, array $options, $name, $entity_type) {
+  list($entity_id, , ) = entity_extract_ids($entity_type, $entity);
+
+  $feed_nid = feeds_get_feed_nid($entity_id, $entity_type);
+
+  if ($feed_nid === FALSE) {
+    return NULL;
+  }
+  return $feed_nid;
 }
