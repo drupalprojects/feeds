@@ -11,9 +11,17 @@
 function feeds_rules_event_info() {
   $info = array();
   $entity_info = entity_get_info();
+
   foreach (feeds_importer_load_all() as $importer) {
     $config = $importer->getConfig();
     $processor = feeds_plugin($config['processor']['plugin_key'], $importer->id);
+    
+    // It's possible to get FeedsMissingPlugin here which will break things
+    // since it doesn't implement FeedsProcessor::entityType().
+    if (!$processor instanceof FeedsProcessor) {
+      continue;
+    }
+    
     $entity_type = $processor->entityType();
     $label = isset($entity_info[$entity_type]['label']) ? $entity_info[$entity_type]['label'] : $entity_type;
     
