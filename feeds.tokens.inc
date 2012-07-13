@@ -24,15 +24,14 @@ function feeds_token_info() {
  */
 function feeds_tokens($type, $tokens, array $data, array $options) {
   $replacements = array();
-  
+
   if ($type == 'node' && !empty($data['node'])) {
 
     $sanitize = !empty($options['sanitize']);
 
     $feed_nid = feeds_get_feed_nid($data['node']->nid, 'node');
-    $feed_source = node_load($feed_nid);
 
-    if ($feed_source) {
+    if ($feed_nid && $feed_source = node_load($feed_nid)) {
       foreach ($tokens as $name => $original) {
         switch ($name) {
           case 'feed-source':
