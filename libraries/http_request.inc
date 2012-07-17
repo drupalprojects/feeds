@@ -27,9 +27,14 @@ class HRCurlException extends Exception {}
  * Discover RSS or atom feeds at the given URL. If document in given URL is an
  * HTML document, function attempts to discover RSS or Atom feeds.
  *
- * @return
- *  string - the discovered feed, FALSE - if the URL is not reachable or there
- *    no feeds.
+ * @param string $url
+ *   The url of the feed to retrieve.
+ * @param array $settings
+ *   An optional array of settings. Valid options are: accept_invalid_cert.
+ *
+ * @return bool|string
+ *   The discovered feed, or FALSE if the URL is not reachable or there was an
+ *   error.
  */
 function http_request_get_common_syndication($url, $settings = NULL) {
   $password = $username = NULL;
@@ -56,7 +61,7 @@ function http_request_get_common_syndication($url, $settings = NULL) {
   // @see http_request_get.
   $downloaded_string = $download->data;
   // If this happens to be a feed then just return the url.
-  if (http_request_is_feed($download->headers['Content-Type'], $downloaded_string)) {
+  if (http_request_is_feed($download->headers['content-type'], $downloaded_string)) {
     return $url;
   }
 
@@ -73,51 +78,52 @@ function http_request_get_common_syndication($url, $settings = NULL) {
 /**
  * Get the content from the given URL.
  *
- * @param $url
- *  A valid URL (not only web URLs).
- * @param $username
- *  If the URL use authentication, here you can supply the username for this.
- * @param $password
- *  If the URL use authentication, here you can supply the password for this.
- * @return
- *  A stdClass object that describes the data downloaded from $url. The object's
- *  data property contains the actual document at the URL.
+ * @param string $url
+ *   A valid URL (not only web URLs).
+ * @param string $username
+ *   If the URL uses authentication, supply the username.
+ * @param string $password
+ *   If the URL uses authentication, supply the password.
+ * @param bool $accept_invalid_cert
+ *   Whether to accept invalid certificates.
+
+ * @return stdClass
+ *   An object that describes the data downloaded from $url.
  */
 function http_request_get($url, $username = NULL, $password = NULL, $accept_invalid_cert = FALSE) {
-  // Intra-pagedownload cache, avoid to download the same content twice within one page download (it's possible, compatible and parse calls).
+  // Intra-pagedownload cache, avoid to download the same content twice within
+  // one page download (it's possible, compatible and parse calls).
   static $download_cache = array();
   if (isset($download_cache[$url])) {
     return $download_cache[$url];
   }
-  $has_etag = FALSE;
   $curl = http_request_use_curl();
 
   // Only download and parse data if really needs refresh.
   // Based on "Last-Modified" and "If-Modified-Since".
   $headers = array();
-  if ($cache = cache_get('feeds_http_download_'. md5($url))) {
+  if ($cache = cache_get('feeds_http_download_' . md5($url))) {
     $last_result = $cache->data;
-    $last_headers = $last_result->headers;
+    $last_headers = array_change_key_case($last_result->headers);
 
-    $has_etag = TRUE;
-    if (!empty($last_headers['ETag'])) {
+    if (!empty($last_headers['etag'])) {
       if ($curl) {
-        $headers[] = 'If-None-Match: '. $last_headers['ETag'];
+        $headers[] = 'If-None-Match: ' . $last_headers['etag'];
       }
       else {
-        $headers['If-None-Match'] = $last_headers['ETag'];
+        $headers['If-None-Match'] = $last_headers['etag'];
       }
     }
-    if (!empty($last_headers['Last-Modified'])) {
+    if (!empty($last_headers['last-modified'])) {
       if ($curl) {
-        $headers[] = 'If-Modified-Since: '. $last_headers['Last-Modified'];
+        $headers[] = 'If-Modified-Since: ' . $last_headers['last-modified'];
       }
       else {
-        $headers['If-Modified-Since'] = $last_headers['Last-Modified'];
+        $headers['If-Modified-Since'] = $last_headers['last-modified'];
       }
     }
     if (!empty($username) && !$curl) {
-      $headers['Authorization'] = 'Basic '. base64_encode("$username:$password");
+      $headers['Authorization'] = 'Basic ' . base64_encode("$username:$password");
     }
   }
 
@@ -167,21 +173,32 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
       $header = '';
       $data = curl_exec($download);
       if (curl_error($download)) {
-        throw new HRCurlException(t('cURL error (@code) @error for @url', array('@code' => curl_errno($download), '@error' => curl_error($download), '@url' => $url)), curl_errno($download));
+        throw new HRCurlException(
+          t('cURL error (@code) @error for @url', array(
+            '@code' => curl_errno($download),
+            '@error' => curl_error($download),
+            '@url' => $url
+          )), curl_errno($download)
+        );
       }
+
       $header_size = curl_getinfo($download, CURLINFO_HEADER_SIZE);
       $header = substr($data, 0, $header_size - 1);
       $result->data = substr($data, $header_size);
-      $header_lines = preg_split("/\r\n|\n|\r/", $header);
-
+      $headers = preg_split("/(\r\n){2}/", $header);
+      $header_lines = preg_split("/\r\n|\n|\r/", end($headers));
       $result->headers = array();
       array_shift($header_lines); // skip HTTP response status
+
       while ($line = trim(array_shift($header_lines))) {
         list($header, $value) = explode(':', $line, 2);
-        if (isset($result->headers[$header]) && $header == 'Set-Cookie') {
+        // Normalize the headers.
+        $header = strtolower($header);
+
+        if (isset($result->headers[$header]) && $header == 'set-cookie') {
           // RFC 2109: the Set-Cookie response header comprises the token Set-
           // Cookie:, followed by a comma-separated list of one or more cookies.
-          $result->headers[$header] .= ','. trim($value);
+          $result->headers[$header] .= ',' . trim($value);
         }
         else {
           $result->headers[$header] = trim($value);
@@ -208,19 +225,13 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     else {
       // It's a tragedy, this file must exist and contain good data.
       // In this case, clear cache and repeat.
-      cache_clear_all('feeds_http_download_'. md5($url), 'cache');
+      cache_clear_all('feeds_http_download_' . md5($url), 'cache');
       return http_request_get($url, $username, $password);
     }
   }
 
-  if (!isset($result->headers) || !isset($result->headers['ETag']) || !isset($result->headers['Last-Modified'])) {
-    $result->headers = isset($result->headers) ? $result->headers : array();
-    $result->headers['ETag'] = isset($result->headers['ETag']) ? $result->headers['ETag'] : '';
-    $result->headers['Last-Modified'] = isset($result->headers['Last-Modified']) ? $result->headers['Last-Modified'] : '';
-  }
-
   // Set caches.
-  cache_set('feeds_http_download_'. md5($url), $result);
+  cache_set('feeds_http_download_' . md5($url), $result);
   $download_cache[$url] = $result;
 
   return $result;
@@ -247,7 +258,7 @@ function http_request_use_curl() {
  * Clear cache for a specific URL.
  */
 function http_request_clear_cache($url) {
-  cache_clear_all('feeds_http_download_'. md5($url), 'cache');
+  cache_clear_all('feeds_http_download_' . md5($url), 'cache');
 }
 
 /**
@@ -290,7 +301,6 @@ function http_request_find_feeds($html) {
   $matches = array();
   preg_match_all(HTTP_REQUEST_PCRE_LINK_TAG, $html, $matches);
   $links = $matches[1];
-  $candidates = array();
   $valid_links = array();
 
   // Build up all the links information.
@@ -324,13 +334,12 @@ function http_request_find_feeds($html) {
  * Create an absolute url.
  *
  * @param string $url
- *  The href to transform.
- *
- * @param $base_url
- *  The url to be used as the base for a relative $url.
+ *   The href to transform.
+ * @param string $base_url
+ *   The url to be used as the base for a relative $url.
  *
  * @return string
- *  an absolute url
+ *   An absolute url
  */
 function http_request_create_absolute_url($url, $base_url) {
   $url = trim($url);
@@ -341,7 +350,8 @@ function http_request_create_absolute_url($url, $base_url) {
 
   // Turn relative url into absolute.
   if (valid_url($url, FALSE)) {
-    // Produces variables $scheme, $host, $user, $pass, $path, $query and $fragment.
+    // Produces variables $scheme, $host, $user, $pass, $path, $query and
+    // $fragment.
     $parsed_url = parse_url($base_url);
 
     $path = dirname($parsed_url['path']);
