@@ -254,15 +254,32 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Override setTargetElement to operate on a target item that is a node.
    */
   public function setTargetElement(&$target_node, $target_element, $value) {
-    if (in_array($target_element, array('url', 'guid'))) {
-      $target_node->feeds_node_item->$target_element = $value;
-    }
-    elseif ($target_element == 'body') {
-      $target_node->teaser = node_teaser($value);
-      $target_node->body = $value;
-    }
-    elseif (in_array($target_element, array('title', 'status', 'created', 'nid', 'uid'))) {
-      $target_node->$target_element = $value;
+    switch ($target_element) {
+      case 'url':
+      case 'guid':
+        $target_node->feeds_node_item->$target_element = $value;
+        break;
+      case 'body':
+        $target_node->teaser = node_teaser($value);
+        $target_node->body = $value;
+        break;
+      case 'title':
+      case 'status':
+      case 'created':
+      case 'nid':
+      case 'uid':
+        $target_node->$target_element = $value;
+        break;
+      case 'user_name':
+        if ($user = user_load(array('name' => $value))) {
+          $target_node->uid = $user->uid;
+        }
+        break;
+      case 'user_mail':
+        if ($user = user_load(array('mail' => $value))) {
+          $target_node->uid = $user->uid;
+        }
+        break;
     }
   }
 
@@ -294,6 +311,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'uid' => array(
         'name' => t('User ID'),
         'description' => t('The Drupal user ID of the node author.'),
+      ),
+      'user_name' => array(
+        'name' => t('Username'),
+        'description' => t('The Drupal username of the node author.'),
+      ),
+      'user_mail' => array(
+        'name' => t('User email'),
+        'description' => t('The email address of the node author.'),
       ),
       'status' => array(
         'name' => t('Published status'),
