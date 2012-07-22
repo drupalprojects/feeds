@@ -581,7 +581,8 @@ class FeedsSource extends FeedsConfigurable {
    *   An array stored for $client.
    */
   public function getConfigFor(FeedsSourceInterface $client) {
-    return $this->config[get_class($client)];
+    $class = get_class($client);
+    return isset($this->config[$class]) ? $this->config[$class] : $client->sourceDefaults();
   }
 
   /**
