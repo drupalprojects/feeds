@@ -31,18 +31,9 @@ class HRCurlException extends Exception {}
  * @return bool|string string - the discovered feed, FALSE - if the URL is not reachable or there
  */
 function http_request_get_common_syndication($url, $settings = NULL) {
-  $password = $username = NULL;
-  if (feeds_valid_url($url, TRUE)) {
-    // Handle password protected feeds.
-    $url_parts = parse_url($url);
-    if (!empty($url_parts['user'])) {
-      $password = $url_parts['pass'];
-      $username = $url_parts['user'];
-    }
-  }
 
   $accept_invalid_cert = isset($settings['accept_invalid_cert']) ? $settings['accept_invalid_cert'] : FALSE;
-  $download = http_request_get($url, $username, $password, $accept_invalid_cert);
+  $download = http_request_get($url, NULL, NULL, $accept_invalid_cert);
 
   // Cannot get the feed, return.
   // http_request_get() always returns 200 even if its 304.
@@ -82,6 +73,15 @@ function http_request_get_common_syndication($url, $settings = NULL) {
  * @return object A stdClass object that describes the data downloaded from $url. The object's
  */
 function http_request_get($url, $username = NULL, $password = NULL, $accept_invalid_cert = FALSE) {
+  if (!$username && valid_url($url, TRUE)) {
+    // Handle password protected feeds.
+    $url_parts = parse_url($url);
+    if (!empty($url_parts['user'])) {
+      $password = $url_parts['pass'];
+      $username = $url_parts['user'];
+    }
+  }
+
   // Intra-pagedownload cache, avoid to download the same content twice within one page download
   // (it's possible, compatible and parse calls).
   static $download_cache = array();
@@ -152,6 +152,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
       curl_setopt($download, CURLOPT_FOLLOWLOCATION, TRUE);
       if (!empty($username)) {
         curl_setopt($download, CURLOPT_USERPWD, "{$username}:{$password}");
+        curl_setopt($download, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
       }
       curl_setopt($download, CURLOPT_HTTPHEADER, $headers);
       curl_setopt($download, CURLOPT_HEADER, TRUE);
