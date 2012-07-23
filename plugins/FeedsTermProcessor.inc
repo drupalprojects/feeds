@@ -44,6 +44,10 @@ class FeedsTermProcessor extends FeedsProcessor {
           if ($feeds_term_item = db_fetch_array(db_query("SELECT imported, guid, url, feed_nid FROM {feeds_term_item} WHERE tid = %d", $term['tid']))) {
             $term['feeds_term_item'] = $feeds_term_item;
           }
+          // Initialize default values.
+          else {
+            $term['feeds_term_item'] = array('url' => '', 'guid' => '');
+          }
 
           // Allow other modules to act.
           // @todo this breaks if hooks don't exist, or hooks don't return the term
