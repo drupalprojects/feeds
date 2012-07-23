@@ -469,7 +469,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       $local_archive = system_retrieve_file($url, $local_archive, FALSE, FILE_EXISTS_REPLACE);
     }
 
-    if (!file_exists($library_dir)) {
+    if (!file_exists($simplepie_library_dir)) {
       // Extract the files.
       $archiver = archiver_get_archiver($local_archive);
       $archiver->extract($library_dir);
@@ -484,7 +484,8 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     // End single threaded code.
 
     // Verify that files were successfully extracted.
-    $this->assertTrue(file_exists($simplepie_library_dir . '/simplepie.inc'), t('simpletest.inc found in @library_dir.', array('library_dir' => $library_dir)));
+    $file = $simplepie_library_dir . '/simplepie.inc';
+    $this->assertTrue(file_exists($file), t('@file found.', array('@file' => $file)));
 
     // Set the simpletest library directory.
     variable_set('feeds_library_dir', $library_dir);
