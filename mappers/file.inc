@@ -49,7 +49,7 @@ function file_feeds_set_target($source, $entity, $target, $value) {
   foreach ($value as $k => $v) {
     if (!($v instanceof FeedsEnclosure)) {
       if (is_string($v)) {
-        $value[$k] = new FeedsEnclosure($v, 'application/octet-stream');
+        $value[$k] = new FeedsEnclosure($v, file_get_mimetype($v));
       }
       else {
         unset($value[$k]);
