@@ -380,8 +380,9 @@ class FeedsNodeProcessor extends FeedsProcessor {
   protected function buildNode($nid, $feed_nid) {
     $populate = FALSE;
     $node = new stdClass();
+    $node->created = FEEDS_REQUEST_TIME;
+
     if (empty($nid)) {
-      $node->created = FEEDS_REQUEST_TIME;
       $populate = TRUE;
     }
     else {
