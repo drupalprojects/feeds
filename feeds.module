@@ -1045,7 +1045,7 @@ function feeds_alter($type, &$data) {
  *
  * @see valid_url().
  *
- * @todo Replace with valid_url() when http://drupal.org/node/1191252 is fixed.
+ * @todo Replace with valid_url() when http://drupal.org/node/295021 is fixed.
  */
 function feeds_valid_url($url, $absolute = FALSE) {
   if ($absolute) {
@@ -1062,7 +1062,7 @@ function feeds_valid_url($url, $absolute = FALSE) {
       )
       (?::[0-9]+)?                                            # Server port number (optional)
       (?:[\/|\?]
-        (?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})   # The path and query (optional)
+        (?:[|\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})   # The path and query (optional)
       *)?
     $/xi", $url);
   }
