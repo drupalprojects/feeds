@@ -242,7 +242,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
 /**
  * Decides if it's possible to use cURL or not.
  *
- * @return
+ * @return bool
  *   TRUE if curl is available, FALSE otherwise.
  */
 function http_request_use_curl() {
@@ -272,7 +272,7 @@ function http_request_clear_cache($url) {
  * @param string $data
  *  The actual data from the http request.
  *
- * @return boolean
+ * @return bool
  *  Returns TRUE if this is a parsable feed.
  */
 function http_request_is_feed($content_type, $data) {
@@ -296,7 +296,7 @@ function http_request_is_feed($content_type, $data) {
  * @param string $html
  *  The html string to search.
  *
- * @return array()
+ * @return array
  *  An array of href to feeds.
  */
 function http_request_find_feeds($html) {
