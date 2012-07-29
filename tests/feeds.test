@@ -416,9 +416,10 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $matches = array();
     preg_match('/node\/(\d+?)$/', $url, $matches);
     $nid = $matches[1];
-    if (!is_numeric($nid)) {
-      $this->error(t('Could not find node id, found @nid instead.', array('@nid' => $nid)));
-    }
+
+    // Test for actual integerness.
+    $this->assertTrue($nid === (string) (int) $nid, 'Node id is an integer.');
+
     return $nid;
   }
 
