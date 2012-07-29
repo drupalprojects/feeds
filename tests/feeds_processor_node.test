@@ -91,11 +91,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->assertEqual($count, 10, 'Accurate number of items in database.');
 
     // Assert default input format on first imported feed node.
-/*
-// NEEDS update.
-    $format = db_query_range("SELECT nr.format FROM {feeds_node_item} fi JOIN {node} n ON fi.nid = n.nid JOIN {node_revision} nr ON n.vid = nr.vid", 0, 1)->fetchField();
-    $this->assertEqual($format, filter_fallback_format(), 'Using default Input format.');
-*/
+
+    // NEEDS update.
+    // $format = db_query_range("SELECT nr.format FROM {feeds_node_item} fi JOIN {node} n ON fi.nid = n.nid JOIN {node_revision} nr ON n.vid = nr.vid", 0, 1)->fetchField();
+    // $this->assertEqual($format, filter_fallback_format(), 'Using default Input format.');
 
     // Import again.
     $this->drupalPost("node/$nid/import", array(), 'Import');
@@ -165,11 +164,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->assertEqual($count, 10, 'Accurate number of items in database.');
 
     // Assert input format.
-/*
-// NEEDS update.
-    $format = db_query_range("SELECT nr.format FROM {feeds_node_item} fi JOIN {node} n ON fi.nid = n.nid JOIN {node_revision} nr ON n.vid = nr.vid", 0, 1)->fetchField();
-    $this->assertEqual($format, filter_fallback_format() + 1, 'Set non-default Input format.');
-*/
+
+    // NEEDS update.
+    // $format = db_query_range("SELECT nr.format FROM {feeds_node_item} fi JOIN {node} n ON fi.nid = n.nid JOIN {node_revision} nr ON n.vid = nr.vid", 0, 1)->fetchField();
+    // $this->assertEqual($format, filter_fallback_format() + 1, 'Set non-default Input format.');
 
     // Set to update existing, remove authorship of above nodes and import again.
     $this->setSettings('syndication', 'FeedsNodeProcessor', array('update_existing' => 2));

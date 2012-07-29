@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file
+ * Contains FeedsProcessor and related classes.
+ */
 
 // Update mode for existing items.
 define('FEEDS_SKIP_EXISTING', 0);

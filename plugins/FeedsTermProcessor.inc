@@ -198,7 +198,7 @@ class FeedsTermProcessor extends FeedsProcessor {
         'name' => t('Term name'),
         'description' => t('Name of the taxonomy term.'),
         'optional_unique' => TRUE,
-       ),
+      ),
       'parent' => array(
         'name' => t('Parent: Term name'),
         'description' => t('The name of the parent taxonomy term.'),
@@ -217,7 +217,7 @@ class FeedsTermProcessor extends FeedsProcessor {
       'description' => array(
         'name' => t('Term description'),
         'description' => t('Description of the taxonomy term.'),
-       ),
+      ),
     );
 
     // If path is enabled expose path alias.
@@ -254,7 +254,8 @@ class FeedsTermProcessor extends FeedsProcessor {
         if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $vocabulary->vid))->fetchField()) {
           return $tid;
         }
-      } else if($target == 'guid') {
+      }
+      elseif ($target == 'guid') {
         $query = db_select('feeds_item')
           ->fields('feeds_item', array('entity_id'))
           ->condition('entity_type', 'taxonomy_term');
@@ -283,9 +284,10 @@ class FeedsTermProcessor extends FeedsProcessor {
    * @return string
    */
   protected function getHash($entity_id) {
-    if($this->config['force_update']) {
+    if ($this->config['force_update']) {
       return ''; // dummy to always update
-    } else {
+    }
+    else {
       return parent::getHash($entity_id);
     }
   }

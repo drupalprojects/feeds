@@ -15,16 +15,16 @@ function feeds_rules_event_info() {
   foreach (feeds_importer_load_all() as $importer) {
     $config = $importer->getConfig();
     $processor = feeds_plugin($config['processor']['plugin_key'], $importer->id);
-    
+
     // It's possible to get FeedsMissingPlugin here which will break things
     // since it doesn't implement FeedsProcessor::entityType().
     if (!$processor instanceof FeedsProcessor) {
       continue;
     }
-    
+
     $entity_type = $processor->entityType();
     $label = isset($entity_info[$entity_type]['label']) ? $entity_info[$entity_type]['label'] : $entity_type;
-    
+
     $info['feeds_import_'. $importer->id] = array(
       'label' => t('Before saving an item imported via @name.', array('@name' => $importer->config['name'])),
       'group' => t('Feeds'),
@@ -69,8 +69,8 @@ function feeds_rules_action_info() {
  */
 function feeds_action_skip_item($entity_wrapper) {
   $entity = $entity_wrapper->value();
-  if(isset($entity->feeds_item)) {
-     $entity->feeds_item->skip = TRUE;
+  if (isset($entity->feeds_item)) {
+    $entity->feeds_item->skip = TRUE;
   }
 }
 

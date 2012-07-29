@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains FeedsParser and related classes.
+ */
+
+/**
  * A result of a parsing stage.
  */
 class FeedsParserResult extends FeedsResult {
@@ -121,7 +126,7 @@ abstract class FeedsParser extends FeedsPlugin {
    *   The source element from $item identified by $element_key.
    *
    * @see FeedsProcessor::map()
-   * @see FeedsCSVParser::getSourceElement().
+   * @see FeedsCSVParser::getSourceElement()
    */
   public function getSourceElement(FeedsSource $source, FeedsParserResult $result, $element_key) {
     if ($element_key == 'parent:uid' &&
@@ -523,7 +528,7 @@ class FeedsDateTimeElement extends FeedsElement {
  * This class is a Drupal independent extension of the >= PHP 5.2 DateTime
  * class.
  *
- * @see FeedsDateTimeElement class
+ * @see FeedsDateTimeElement
  */
 class FeedsDateTime extends DateTime {
   public $granularity = array();

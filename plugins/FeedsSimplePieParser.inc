@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains FeedsSimplePieParser and related classes.
+ */
+
+/**
  * Adapter to present SimplePie_Enclosure as FeedsEnclosure object.
  */
 class FeedsSimplePieEnclosure extends FeedsEnclosure {
@@ -30,8 +35,8 @@ class FeedsSimplePieEnclosure extends FeedsEnclosure {
    * Ensure that the simplepie class definitions are loaded for the enclosure when unserializing.
    */
    public function __wakeup() {
-    feeds_include_library('simplepie.inc', 'simplepie');
-    $this->simplepie_enclosure = unserialize($this->_serialized_simplepie_enclosure);
+     feeds_include_library('simplepie.inc', 'simplepie');
+     $this->simplepie_enclosure = unserialize($this->_serialized_simplepie_enclosure);
   }
 
   /**
@@ -211,7 +216,7 @@ class FeedsSimplePieParser extends FeedsParser {
         'name' => t('Enclosures'),
         'description' => t('An array of enclosures attached to the feed item.'),
       ),
-     ) + parent::getMappingSources();
+    ) + parent::getMappingSources();
   }
 
   /**

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Helper module for Feeds tests.
+ */
+
+/**
  * Implements hook_menu().
  */
 function feeds_tests_menu() {
