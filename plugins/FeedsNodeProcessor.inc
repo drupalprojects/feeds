@@ -55,7 +55,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     }
     else {
       // We're replacing the existing node. Only save the absolutely necessary.
-      $node = db_query("SELECT created, nid, vid, type FROM {node} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
+      $node = db_query("SELECT created, nid, vid, type, status FROM {node} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
       $node->uid = $this->config['author'];
     }
     node_object_prepare($node);
