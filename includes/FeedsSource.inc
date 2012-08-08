@@ -305,18 +305,19 @@ class FeedsSource extends FeedsConfigurable {
    * Schedule background clearing tasks.
    */
   public function scheduleClear() {
-    // Schedule as soon as possible if batch is not complete.
-    if ($this->progressClearing() !== FEEDS_BATCH_COMPLETE) {
-      $job = array(
-        'type' => $this->id,
-        'id' => $this->feed_nid,
-        'period' => 0,
-        'periodic' => TRUE,
-      );
-      JobScheduler::get('feeds_source_clear')->set($job);
-    }
-    else {
+    $job = array(
+      'type' => $this->id,
+      'id' => $this->feed_nid,
+      'period' => 0,
+      'periodic' => TRUE,
+    );
+    // Remove job if batch is complete.
+    if ($this->progressClearing() === FEEDS_BATCH_COMPLETE) {
       JobScheduler::get('feeds_source_clear')->remove($job);
+    }
+    // Schedule as soon as possible if batch is not complete.
+    else {
+      JobScheduler::get('feeds_source_clear')->set($job);
     }
   }
 
