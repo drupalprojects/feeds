@@ -104,6 +104,10 @@ abstract class FeedsParser extends FeedsPlugin {
       'name' => t('Feed node: User ID'),
       'description' => t('The feed node author uid.'),
     );
+    $sources['parent:nid'] = array(
+      'name' => t('Feed node: Node ID'),
+      'description' => t('The feed node nid.'),
+    );
     return $sources;
   }
 
@@ -129,11 +133,18 @@ abstract class FeedsParser extends FeedsPlugin {
    * @see FeedsCSVParser::getSourceElement()
    */
   public function getSourceElement(FeedsSource $source, FeedsParserResult $result, $element_key) {
-    if ($element_key == 'parent:uid' &&
-        $source->feed_nid &&
-        ($node = node_load($source->feed_nid))) {
-      return $node->uid;
+
+    switch ($element_key) {
+
+      case 'parent:uid':
+        if ($source->feed_nid && $node = node_load($source->feed_nid)) {
+          return $node->uid;
+        }
+        break;
+      case 'parent:nid':
+        return $source->feed_nid;
     }
+
     $item = $result->currentItem();
     return isset($item[$element_key]) ? $item[$element_key] : '';
   }
