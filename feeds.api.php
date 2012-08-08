@@ -104,8 +104,10 @@ function hook_feeds_after_parse(FeedsSource $source, FeedsParserResult $result) 
  *  FeedsSource object that describes the source that is being imported.
  * @param $entity
  *   The entity object.
+ * @param $item
+ *   The parser result for this entity.
  */
-function hook_feeds_presave(FeedsSource $source, $entity) {
+function hook_feeds_presave(FeedsSource $source, $entity, $item) {
   if ($entity->feeds_item->entity_type == 'node') {
     // Skip saving this entity.
     $entity->feeds_item->skip = TRUE;
