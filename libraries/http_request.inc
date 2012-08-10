@@ -77,7 +77,7 @@ function http_request_get_common_syndication($url, $settings = NULL) {
  *   If the URL uses authentication, supply the password.
  * @param bool $accept_invalid_cert
  *   Whether to accept invalid certificates.
-
+ *
  * @return stdClass
  *   An object that describes the data downloaded from $url.
  */
