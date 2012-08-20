@@ -355,7 +355,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
           break;
         case 'title':
-          $nid = db_query("SELECT nid FROM {node} WHERE title = :title", array(':title' => $value))->fetchField();
+          $nid = db_query("SELECT nid FROM {node} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->config['content_type']))->fetchField();
           break;
         case 'feeds_source':
           if ($id = feeds_get_importer_id($this->config['content_type'])) {
