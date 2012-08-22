@@ -75,7 +75,13 @@ function file_feeds_set_target($source, $entity, $target, $value) {
   $i = 0;
   $field = isset($entity->$target) ? $entity->$target : array();
   foreach ($value as $v) {
-    if ($file = $v->getFile($destination)) {
+    try {
+      $file = $v->getFile($destination);
+    }
+    catch (Exception $e) {
+      watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
+    }
+    if ($file) {
       $field['und'][$i] = (array)$file;
       $field['und'][$i]['display'] = 1; // @todo: Figure out how to properly populate this field.
       if ($info['cardinality'] == 1) {

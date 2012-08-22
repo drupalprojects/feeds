@@ -368,7 +368,12 @@ class FeedsEnclosure extends FeedsElement {
         if (file_uri_target($destination)) {
           $destination = trim($destination, '/') . '/';
         }
-        $file = file_save_data($this->getContent(), $destination . $filename);
+        try {
+          $file = file_save_data($this->getContent(), $destination . $filename);
+        }
+        catch (Exception $e) {
+          watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
+        }
       }
 
       // We couldn't make sense of this enclosure, throw an exception.
