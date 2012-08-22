@@ -76,6 +76,13 @@ abstract class FeedsConfigurable {
   }
 
   /**
+   * Override magic method __isset(). This is needed due to overriding __get().
+   */
+  public function __isset($name) {
+    return isset($this->$name) ? TRUE : FALSE;
+  }
+
+  /**
    * Determine whether this object is persistent and enabled. I. e. it is
    * defined either in code or in the database and it is enabled.
    */

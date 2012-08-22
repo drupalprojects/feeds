@@ -379,10 +379,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
    */
   protected function buildNode($nid, $feed_nid) {
     $populate = FALSE;
-    $node = new stdClass();
-    $node->created = FEEDS_REQUEST_TIME;
 
     if (empty($nid)) {
+      $node = new stdClass();
+      $node->created = FEEDS_REQUEST_TIME;
       $populate = TRUE;
     }
     else {
@@ -390,8 +390,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
         $node = node_load($nid, NULL, TRUE);
       }
       else {
-        $node->nid = $nid;
-        $node->vid = db_result(db_query("SELECT vid FROM {node} WHERE nid = %d", $nid));
+        $node = db_fetch_object(db_query("SELECT created, nid, vid, status FROM {node} WHERE nid = %d", $nid));
         $populate = TRUE;
       }
     }
