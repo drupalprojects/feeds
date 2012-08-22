@@ -149,6 +149,8 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    * Override parent::sourceFormValidate().
    */
   public function sourceFormValidate(&$values) {
+    $values['source'] = trim($values['source']);
+
     if (!feeds_valid_url($values['source'], TRUE)) {
       $form_key = 'feeds][' . get_class($this) . '][source';
       form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $values['source'])));

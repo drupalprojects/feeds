@@ -91,6 +91,8 @@ class FeedsFileFetcher extends FeedsFetcher {
     $feed_dir = file_directory_path() .'/feeds';
     file_check_directory($feed_dir, TRUE);
 
+    $values['source'] = trim($values['source']);
+
     // If there is a file uploaded, save it, otherwise validate input on
     // file.
     if ($file = file_save_upload('feeds', array(), $feed_dir)) {
