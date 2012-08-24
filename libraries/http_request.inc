@@ -168,7 +168,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
       curl_setopt($download, CURLOPT_HEADER, TRUE);
       curl_setopt($download, CURLOPT_RETURNTRANSFER, TRUE);
       curl_setopt($download, CURLOPT_ENCODING, '');
-      curl_setopt($download, CURLOPT_TIMEOUT, variable_get('http_request_timeout', 15));
+      curl_setopt($download, CURLOPT_TIMEOUT, variable_get('http_request_timeout', 30));
       if ($accept_invalid_cert) {
         curl_setopt($download, CURLOPT_SSL_VERIFYPEER, 0);
       }
@@ -212,7 +212,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     }
   }
   else {
-    $result = drupal_http_request($url, $headers);
+    $result = drupal_http_request($url, $headers, 'GET', NULL, 3, variable_get('http_request_timeout', 30));
   }
 
   $result->code = isset($result->code) ? $result->code : 200;
