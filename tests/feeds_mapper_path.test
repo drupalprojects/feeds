@@ -87,9 +87,6 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
     $this->setPlugin('path_test', 'FeedsCSVParser');
     $this->setPlugin('path_test', 'FeedsTermProcessor');
 
-    // Turn on update existing.
-    $this->setSettings('path_test', 'FeedsTermProcessor', array('update_existing' => 2));
-
     // Create vocabulary.
     $edit = array(
       'name' => 'Addams vocabulary',
@@ -98,6 +95,9 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
     $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
 
     $this->setSettings('path_test', 'FeedsTermProcessor', array('vocabulary' => 'addams'));
+    
+    // Turn on update existing.
+    $this->setSettings('path_test', 'FeedsTermProcessor', array('update_existing' => 2));
 
     // Add mappings.
     $this->addMappings('path_test', array(
