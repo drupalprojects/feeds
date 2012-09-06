@@ -446,18 +446,15 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $filename = 'simplepie.mini.php';
 
     // Avoid downloading the file dozens of times
-    $library_dir = $this->originalFileDirectory . '/simpletest/feeds';
+    $library_dir = DRUPAL_ROOT . '/' . $this->originalFileDirectory . '/simpletest/feeds';
     $simplepie_library_dir = $library_dir . '/simplepie';
 
     if (!file_exists($library_dir)) {
-      mkdir($library_dir, '0777', TRUE);
-    }
-    else {
-      drupal_chmod($library_dir, '0777');
+      drupal_mkdir($library_dir);
     }
 
     if (!file_exists($simplepie_library_dir)) {
-      mkdir($simplepie_library_dir, '0777', TRUE);
+      drupal_mkdir($simplepie_library_dir);
     }
 
     // Local file name.
