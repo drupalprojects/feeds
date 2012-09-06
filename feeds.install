@@ -172,13 +172,11 @@ function feeds_schema() {
         'type' => 'text',
         'not null' => TRUE,
         'description' => 'Link to the feed item.',
-        'default' => '',
       ),
       'guid' => array(
         'type' => 'text',
         'not null' => TRUE,
         'description' => 'Unique identifier for the feed item.',
-        'default' => '',
       ),
     ),
     'primary key' => array('tid'),

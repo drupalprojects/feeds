@@ -64,7 +64,12 @@ class FeedsTermProcessor extends FeedsProcessor {
         if (!isset($term['feeds_term_item']['imported'])) {
           $term['feeds_term_item']['imported'] = FEEDS_REQUEST_TIME;
         }
-
+        if (!isset($term['feeds_term_item']['url'])) {
+          $term['feeds_term_item']['url'] = '';
+        }
+        if (!isset($term['feeds_term_item']['guid'])) {
+          $term['feeds_term_item']['guid'] = '';
+        }
         // Map targets.
         $term = $this->map($batch, $term);
 
