@@ -35,7 +35,7 @@ class FeedsSimplePieEnclosure extends FeedsEnclosure {
    * Ensure that the simplepie class definitions are loaded for the enclosure when unserializing.
    */
    public function __wakeup() {
-     feeds_include_library('simplepie.inc', 'simplepie');
+     feeds_include_simplepie();
      $this->simplepie_enclosure = unserialize($this->_serialized_simplepie_enclosure);
   }
 
@@ -65,7 +65,7 @@ class FeedsSimplePieParser extends FeedsParser {
    * Implements FeedsParser::parse().
    */
   public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
-    feeds_include_library('simplepie.inc', 'simplepie');
+    feeds_include_simplepie();
 
     // Please be quiet SimplePie.
     $level = error_reporting();

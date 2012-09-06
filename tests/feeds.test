@@ -148,7 +148,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 <body>
   <outline text="Feeds test group" >
     <outline title="Development Seed - Technological Solutions for Progressive Organizations" text="" xmlUrl="' . $path . 'developmentseed.rss2" type="rss" />
-    <outline title="Magyar Nemzet Online - H’rek" text="" xmlUrl="' . $path . 'feed_without_guid.rss2" type="rss" />
+    <outline title="Magyar Nemzet Online - H?rek" text="" xmlUrl="' . $path . 'feed_without_guid.rss2" type="rss" />
     <outline title="Drupal planet" text="" type="rss" xmlUrl="' . $path . 'drupalplanet.rss2" />
   </outline>
 </body>
@@ -440,13 +440,10 @@ class FeedsWebTestCase extends DrupalWebTestCase {
    *
    * Sets the 'feeds_simplepie_library_dir' variable to the directory where
    * SimplePie is downloaded.
-   *
-   * @param $version
-   *   The SimplePie version number to download and extract.
    */
   function downloadExtractSimplePie($version) {
-    $url = "https://github.com/simplepie/simplepie/tarball/$version";
-    $filename = "SimplePIE-$version.tar.gz";
+    $url = "http://simplepie.org/downloads/simplepie_$version.mini.php";
+    $filename = 'simplepie.mini.php';
 
     // Avoid downloading the file dozens of times
     $library_dir = $this->originalFileDirectory . '/simpletest/feeds';
@@ -456,8 +453,12 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       mkdir($library_dir, '0777', TRUE);
     }
 
-    // Local archive name.
-    $local_archive = $library_dir . '/' . $filename;
+    if (!file_exists($simplepie_library_dir)) {
+      mkdir($simplepie_library_dir, '0777', TRUE);
+    }
+
+    // Local file name.
+    $local_file = $simplepie_library_dir . '/' . $filename;
 
     // Begin single threaded code.
     if (function_exists('sem_get')) {
@@ -466,17 +467,8 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     }
 
     // Download and extact the archive, but only in one thread.
-    if (!file_exists($local_archive)) {
-      $local_archive = system_retrieve_file($url, $local_archive, FALSE, FILE_EXISTS_REPLACE);
-    }
-
-    if (!file_exists($simplepie_library_dir)) {
-      // Extract the files.
-      $archiver = archiver_get_archiver($local_archive);
-      $archiver->extract($library_dir);
-      $dirs = glob($library_dir . '/simplepie*', GLOB_ONLYDIR);
-      $dir = reset($dirs);
-      rename($dir, $simplepie_library_dir);
+    if (!file_exists($local_file)) {
+      $local_file = system_retrieve_file($url, $local_file, FALSE, FILE_EXISTS_REPLACE);
     }
 
     if (function_exists('sem_get')) {
@@ -485,8 +477,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     // End single threaded code.
 
     // Verify that files were successfully extracted.
-    $file = $simplepie_library_dir . '/simplepie.inc';
-    $this->assertTrue(file_exists($file), t('@file found.', array('@file' => $file)));
+    $this->assertTrue(file_exists($local_file), t('@file found.', array('@file' => $local_file)));
 
     // Set the simpletest library directory.
     variable_set('feeds_library_dir', $library_dir);

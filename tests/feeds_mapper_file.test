@@ -34,9 +34,9 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
 
     // Only download simplepie if the plugin doesn't already exist somewhere.
     // People running tests locally might have it.
-    if (!feeds_library_exists('simplepie.inc', 'simplepie')) {
-      $this->downloadExtractSimplePie('1.2.1');
-      $this->assertTrue(feeds_library_exists('simplepie.inc', 'simplepie'));
+    if (!feeds_simplepie_exists()) {
+      $this->downloadExtractSimplePie('1.3');
+      $this->assertTrue(feeds_simplepie_exists());
       // Reset all the caches!
       $this->resetAll();
     }
