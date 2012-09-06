@@ -24,7 +24,7 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
   /**
    * Basic test loading a single entry CSV file.
    */
-  public function _testNodeAlias() {
+  public function testNodeAlias() {
 
     // Create importer configuration.
     $this->createImporterConfiguration($this->randomName(), 'path_test');
