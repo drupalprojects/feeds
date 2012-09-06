@@ -219,22 +219,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $target_node->feeds['suppress_import'] = TRUE;
         }
         break;
-      case 'path_alias':
-        $target_node->path = array();
-
-        // Check for existing aliases.
-        if (!empty($target_node->nid)) {
-          if ($path = path_load('node/' . $target_node->nid)) {
-            $target_node->path = $path;
-          }
-        }
-
-        // Prevent Pathauto (http://drupal.org/project/pathauto) from
-        // overwriting the alias.
-        $target_node->path['pathauto'] = FALSE;
-
-        $target_node->path['alias'] = $value;
-        break;
       case 'user_name':
         if ($user = user_load_by_name($value)) {
           $target_node->uid = $user->uid;
@@ -311,14 +295,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
       $targets['comment'] = array(
         'name' => t('Comments'),
         'description' => t('Whether comments are allowed on this node: 0 = no, 1 = read only, 2 = read/write.'),
-      );
-    }
-
-    // If path is enabled expose path alias.
-    if (module_exists('path')) {
-      $targets['path_alias'] = array(
-        'name' => t('Path alias'),
-        'description' => t('URL path alias of the node.'),
       );
     }
 

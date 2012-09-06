@@ -166,22 +166,6 @@ class FeedsTermProcessor extends FeedsProcessor {
         }
         $target_term->weight = $weight;
         break;
-      case 'path_alias':
-        $target_term->path = array();
-
-        // Check for existing aliases.
-        if (!empty($target_term->tid)) {
-          if ($path = path_load('taxonomy/term/' . $target_term->tid)) {
-            $target_term->path = $path;
-          }
-        }
-
-        // Prevent Pathauto (http://drupal.org/project/pathauto) from
-        // overwriting the alias.
-        $target_term->path['pathauto'] = FALSE;
-
-        $target_term->path['alias'] = $value;
-        break;
       default:
         parent::setTargetElement($source, $target_term, $target_element, $value);
         break;
@@ -219,14 +203,6 @@ class FeedsTermProcessor extends FeedsProcessor {
         'description' => t('Description of the taxonomy term.'),
       ),
     );
-
-    // If path is enabled expose path alias.
-    if (module_exists('path')) {
-      $targets['path_alias'] = array(
-        'name' => t('Path alias'),
-        'description' => t('URL path alias for the taxonomy term.'),
-      );
-    }
 
     // Let implementers of hook_feeds_term_processor_targets() add their targets.
     try {
