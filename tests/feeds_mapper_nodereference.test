@@ -17,6 +17,7 @@ class FeedsMapperNodereferenceTestCase extends FeedsMapperTestCase {
       'name' => t('Mapper: Nodereference'),
       'description' => t('Test Feeds Mapper support for Nodereference CCK fields. <strong>Requires CCK module</strong>.'),
       'group' => t('Feeds'),
+      'dependencies' => array('cck'),
     );
   }
 
@@ -25,7 +26,7 @@ class FeedsMapperNodereferenceTestCase extends FeedsMapperTestCase {
    */
   function setUp() {
     // Call parent setup with required modules.
-    parent::setUp('ctools', 'job_scheduler', 'feeds', 'feeds_ui', 'content', 'text', 'optionwidgets', 'nodereference');
+    parent::setUp('content', 'text', 'optionwidgets', 'nodereference');
 
     // Create user and login.
     $this->drupalLogin($this->drupalCreateUser(

@@ -92,7 +92,7 @@ class FeedsMapperLocaleTestCase extends FeedsMapperTestCase {
     );
     $this->drupalPost("node/$nid/edit", $edit, t('Save'));
     $this->drupalPost('node/'. $nid .'/import', array(), 'Import');
-    $count = db_result(db_query("SELECT COUNT(*) FROM {node} WHERE language = 'zh-hans'", $nid));
+    $count = db_result(db_query("SELECT COUNT(*) FROM {node} WHERE language = 'zh-hans'"));
     $this->assertEqual(11, $count, 'Found correct number of nodes.');
   }
 }

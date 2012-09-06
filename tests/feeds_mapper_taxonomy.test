@@ -31,6 +31,7 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     $this->drupalPost('admin/content/taxonomy/add/vocabulary', $edit, 'Save');
     // Create an importer configuration with basic mapping.
     $this->createImporterConfiguration('Syndication', 'syndication');
+
     $this->addMappings('syndication',
       array(
         array(
@@ -208,6 +209,6 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
    */
   public function assertTaxonomyTerm($term) {
     $term = check_plain($term);
-    $this->assertPattern('/<a href="\/.*taxonomy\/term\/[0-9]+">' . $term . '<\/a>/', 'Found ' . $term);
+    $this->assertPattern('/<a href="\/.*taxonomy\/term\/[0-9]+"[^>].*>' . $term . '<\/a>/', 'Found ' . $term);
   }
 }

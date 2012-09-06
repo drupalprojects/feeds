@@ -179,13 +179,13 @@ class FeedsDataProcessor extends FeedsProcessor {
     }
     if (strpos($target_element, '.')) {
       /**
-      Add field in FeedsDataHandler format.
-
-      This is the tricky part, FeedsDataHandler expects an *array* of records
-      at #[joined_table_name]. We need to iterate over the $value that has
-      been mapped to this element and create a record array from each of
-      them.
-      */
+       *  Add field in FeedsDataHandler format.
+       *
+       *  This is the tricky part, FeedsDataHandler expects an *array* of records
+       *  at #[joined_table_name]. We need to iterate over the $value that has
+       *  been mapped to this element and create a record array from each of
+       *  them.
+       */
       list($table, $field) = explode('.', $target_element);
 
       $values = array();
@@ -204,7 +204,9 @@ class FeedsDataProcessor extends FeedsProcessor {
       }
     }
     else {
-      if (is_array($target_item[$target_element]) && is_array($value)) {
+      if (isset($target_item[$target_element]) && 
+        is_array($target_item[$target_element]) &&
+        is_array($value)) {
         $target_item[$target_element] = array_merge($target_item[$target_element], $value);
       }
       else {
