@@ -452,6 +452,9 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     if (!file_exists($library_dir)) {
       mkdir($library_dir, '0777', TRUE);
     }
+    else {
+      drupal_chmod($library_dir, '0777');
+    }
 
     if (!file_exists($simplepie_library_dir)) {
       mkdir($simplepie_library_dir, '0777', TRUE);
