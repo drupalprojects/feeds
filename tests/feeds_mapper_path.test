@@ -86,6 +86,20 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
     $this->setPlugin('path_test', 'FeedsFileFetcher');
     $this->setPlugin('path_test', 'FeedsCSVParser');
     $this->setPlugin('path_test', 'FeedsTermProcessor');
+
+    // Turn on update existing.
+    $this->setSettings('path_test', 'FeedsTermProcessor', array('update_existing' => 2));
+
+    // Create vocabulary.
+    $edit = array(
+      'name' => 'Addams vocabulary',
+      'machine_name' => 'addams',
+    );
+    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
+
+    $this->setSettings('path_test', 'FeedsTermProcessor', array('vocabulary' => 'addams'));
+
+    // Add mappings.
     $this->addMappings('path_test', array(
       array(
         'source' => 'Title',
@@ -101,18 +115,6 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
         'unique' => TRUE,
       ),
     ));
-
-    // Turn on update existing.
-    $this->setSettings('path_test', 'FeedsTermProcessor', array('update_existing' => 2));
-
-    // Create vocabulary.
-    $edit = array(
-      'name' => 'Addams vocabulary',
-      'machine_name' => 'addams',
-    );
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
-
-    $this->setSettings('path_test', 'FeedsTermProcessor', array('vocabulary' => 'addams'));
 
     // Import RSS file.
     $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
