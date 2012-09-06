@@ -44,12 +44,10 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
       2 => array(
         'source' => 'since',
         'target' => 'created',
-        'unique' => FALSE,
       ),
       3 => array(
         'source' => 'password',
         'target' => 'pass',
-        'unique' => 0,
       ),
     );
     $this->addMappings('user_import', $mappings);

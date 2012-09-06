@@ -34,12 +34,10 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
         1 => array(
           'source' => 'description',
           'target' => 'body',
-          'unique' => FALSE,
         ),
         2 => array(
           'source' => 'timestamp',
           'target' => 'created',
-          'unique' => FALSE,
         ),
         3 => array(
           'source' => 'url',

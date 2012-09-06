@@ -88,17 +88,14 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
         0 => array(
           'source' => 'title',
           'target' => 'title',
-          'unique' => FALSE,
         ),
         1 => array(
           'source' => 'description',
           'target' => 'body',
-          'unique' => FALSE,
         ),
         2 => array(
           'source' => 'timestamp',
           'target' => 'created',
-          'unique' => FALSE,
         ),
         3 => array(
           'source' => 'url',

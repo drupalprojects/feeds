@@ -44,12 +44,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
         2 => array(
           'source' => 'description',
           'target' => 'body',
-          'unique' => FALSE,
         ),
         3 => array(
           'source' => 'timestamp',
           'target' => 'created',
-          'unique' => FALSE,
         ),
         4 => array(
           'source' => 'url',
