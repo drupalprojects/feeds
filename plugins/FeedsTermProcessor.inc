@@ -46,7 +46,7 @@ class FeedsTermProcessor extends FeedsProcessor {
           }
           // Initialize default values.
           else {
-            $term['feeds_term_item'] = array('url' => '', 'guid' => '');
+            $term['feeds_term_item'] = array();
           }
 
           // Allow other modules to act.
@@ -58,18 +58,15 @@ class FeedsTermProcessor extends FeedsProcessor {
 
         // Add feeds_term_item data.
         $term['feeds_term_item']['id'] = $this->id;
-        if (!isset($term['feeds_term_item']['feed_nid'])) {
-          $term['feeds_term_item']['feed_nid'] = $source->feed_nid;
-        }
-        if (!isset($term['feeds_term_item']['imported'])) {
-          $term['feeds_term_item']['imported'] = FEEDS_REQUEST_TIME;
-        }
-        if (!isset($term['feeds_term_item']['url'])) {
-          $term['feeds_term_item']['url'] = '';
-        }
-        if (!isset($term['feeds_term_item']['guid'])) {
-          $term['feeds_term_item']['guid'] = '';
-        }
+
+        // Set some defaults.
+        $term['feeds_term_item'] += array(
+          'feed_nid' => $source->feed_nid,
+          'imported' => FEEDS_REQUEST_TIME,
+          'url' => '',
+          'guid' => '',
+        );
+
         // Map targets.
         $term = $this->map($batch, $term);
 
