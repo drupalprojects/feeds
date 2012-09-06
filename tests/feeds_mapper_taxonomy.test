@@ -127,7 +127,6 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
         array(
           'source' => 'parent:taxonomy:tags',
           'target' => 'field_tags',
-          'unique' => FALSE,
         ),
       )
     );

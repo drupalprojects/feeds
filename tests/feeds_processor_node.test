@@ -41,20 +41,20 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
           'target' => 'title',
           'unique' => FALSE,
         ),
-        2 => array(
+        1 => array(
           'source' => 'description',
           'target' => 'body',
         ),
-        3 => array(
+        2 => array(
           'source' => 'timestamp',
           'target' => 'created',
         ),
-        4 => array(
+        3 => array(
           'source' => 'url',
           'target' => 'url',
           'unique' => TRUE,
         ),
-        5 => array(
+        4 => array(
           'source' => 'guid',
           'target' => 'guid',
           'unique' => TRUE,
@@ -189,7 +189,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     // should now be assigned to feed node author.
     $this->addMappings('syndication',
       array(
-        6 => array(
+        5 => array(
           'source' => 'parent:uid',
           'target' => 'uid',
         ),
@@ -234,12 +234,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
         1 => array(
           'source' => 'description',
           'target' => 'body',
-          'unique' => FALSE,
         ),
         2 => array(
           'source' => 'timestamp',
           'target' => 'created',
-          'unique' => FALSE,
         ),
         3 => array(
           'source' => 'url',
