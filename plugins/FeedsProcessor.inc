@@ -408,10 +408,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
           isset($targets[$this->id][$mapping['target']]['callback']) &&
           function_exists($targets[$this->id][$mapping['target']]['callback'])) {
         $callback = $targets[$this->id][$mapping['target']]['callback'];
-        $callback($source, $target_item, $mapping['target'], $value);
+        $callback($source, $target_item, $mapping['target'], $value, $mapping);
       }
       else {
-        $this->setTargetElement($source, $target_item, $mapping['target'], $value);
+        $this->setTargetElement($source, $target_item, $mapping['target'], $value, $mapping);
       }
     }
     return $target_item;

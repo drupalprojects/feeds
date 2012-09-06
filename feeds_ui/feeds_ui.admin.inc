@@ -500,6 +500,8 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
   $form['#importer'] = $importer;
   $form['#mappings'] = $mappings = $importer->processor->getMappings();
   $form['help']['#markup'] = feeds_ui_mapping_help();
+  $form['#prefix'] = '<div id="feeds-ui-mapping-form-wrapper">';
+  $form['#suffix'] = '</div>';
 
   // Get mapping sources from parsers and targets from processor, format them
   // for output.
@@ -531,23 +533,16 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
   );
   $form['legendset']['legend'] = $legend;
 
-  // Add unique and remove forms to mappings.
-  $form['unique_flags'] = $form['remove_flags'] = array(
+  // Add config forms and remove flags to mappings.
+  $form['config'] = $form['remove_flags'] = array(
     '#tree' => TRUE,
   );
   if (is_array($mappings)) {
     foreach ($mappings as $i => $mapping) {
-      $param = array(
-        'processor' => $importer->processor,
-        'mapping' => $mapping,
-      );
-      if (isset($targets[$mapping['target']]['optional_unique']) && $targets[$mapping['target']]['optional_unique'] === TRUE) {
-        $form['unique_flags'][$i] = array(
-          '#type' => 'checkbox',
-          '#default_value' => !empty($mapping['unique']),
-          '#attributes' => array('class' => array('feeds-ui-trigger-submit')),
-        );
+      if (isset($targets[$mapping['target']])) {
+        $form['config'][$i] = feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targets[$mapping['target']]);
       }
+
       $form['remove_flags'][$i] = array(
         '#type' => 'checkbox',
         '#title' => t('Remove'),
@@ -579,6 +574,7 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
     '#type' => 'submit',
     '#value' => t('Add'),
     '#submit' => array('feeds_ui_mapping_form_add_submit'),
+    '#validate' => array('feeds_ui_mapping_form_add_validate'),
   );
   $form['save'] = array(
     '#type' => 'submit',
@@ -586,6 +582,139 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
     '#attributes' => array('class' => array('feeds-ui-hidden-submit')),
   );
   return $form;
+}
+
+/**
+ * Per mapper configuration form that is a part of feeds_ui_mapping_form().
+ */
+function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $target) {
+  $form_state += array(
+    'mapping_settings_edit' => NULL,
+    'mapping_settings' => array(),
+  );
+
+  $base_button = array(
+    '#submit' => array('feeds_ui_mapping_form_multistep_submit'),
+    '#ajax' => array(
+      'callback' => 'feeds_ui_mapping_settings_form_callback',
+      'wrapper' => 'feeds-ui-mapping-form-wrapper',
+      'effect' => 'fade',
+      'progress' => 'none',
+    ),
+    '#i' => $i,
+  );
+
+
+  if (isset($form_state['mapping_settings'][$i])) {
+    $mapping = $form_state['mapping_settings'][$i] + $mapping;
+  }
+
+  if ($form_state['mapping_settings_edit'] === $i) {
+    // Build the form.
+    if (isset($target['form_callback'])) {
+      $settings_form = call_user_func($target['form_callback'], $mapping, $target, $form, $form_state);
+    }
+    else {
+      $settings_form = array();
+    }
+
+    // Merge in the optional unique form.
+    $settings_form += feeds_ui_mapping_settings_optional_unique_form($mapping, $target, $form, $form_state);
+
+    return array(
+      '#type' => 'container',
+      'settings' => $settings_form,
+      'save_settings' => $base_button + array(
+        '#type' => 'submit',
+        '#name' => 'mapping_settings_update_' . $i,
+        '#value' => t('Update'),
+        '#op' => 'update',
+      ),
+      'cancel_settings' => $base_button + array(
+        '#type' => 'submit',
+        '#name' => 'mapping_settings_cancel_' . $i,
+        '#value' => t('Cancel'),
+        '#op' => 'cancel',
+      ),
+    );
+  }
+  else {
+    // Build the summary.
+    if (isset($target['summary_callback'])) {
+      $summary = call_user_func($target['summary_callback'], $mapping, $target, $form, $form_state);
+    }
+    else {
+      $summary = '';
+    }
+
+    // Append the optional unique summary.
+    if ($optional_unique_summary = feeds_ui_mapping_settings_optional_unique_summary($mapping, $target, $form, $form_state)) {
+      $summary .= ' ' . $optional_unique_summary;
+    }
+
+    if ($summary) {
+      return array(
+        'summary' => array(
+          '#prefix' => '<div>',
+          '#markup' => $summary,
+          '#suffix' => '</div>',
+        ),
+       'edit_settings' => $base_button + array(
+          '#type' => 'image_button',
+          '#name' => 'mapping_settings_edit_' . $i,
+          '#src' => 'misc/configure.png',
+          '#attributes' => array('alt' => t('Edit')),
+          '#op' => 'edit',
+          '#value' => t('Edit'),
+        ),
+      );
+    }
+  }
+}
+
+/**
+ * Submit callback for a per mapper configuration form. Switches between edit
+ * and summary mode.
+ */
+function feeds_ui_mapping_form_multistep_submit($form, &$form_state) {
+  $trigger = $form_state['triggering_element'];
+
+  switch ($trigger['#op']) {
+    case 'edit':
+      $form_state['mapping_settings_edit'] = $trigger['#i'];
+      break;
+
+    case 'update':
+      $values = $form_state['values']['config'][$trigger['#i']]['settings'];
+      $form_state['mapping_settings'][$trigger['#i']] = $values;
+      unset($form_state['mapping_settings_edit']);
+      break;
+
+    case 'cancel':
+      unset($form_state['mapping_settings_edit']);
+      break;
+  }
+
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * AJAX callback that returns the whole feeds_ui_mapping_form().
+ */
+function feeds_ui_mapping_settings_form_callback($form, $form_state) {
+  return $form;
+}
+
+/**
+ * Validation for source and target selection.
+ */
+function feeds_ui_mapping_form_add_validate($form, &$form_state) {
+  if ($form_state['values']['source'] == '') {
+    form_set_error('source', t('You must select a mapping source.'));
+  }
+  if ($form_state['values']['target'] == '') {
+    form_set_error('target', t('You must select a mapping target.'));
+  }
 }
 
 /**
@@ -601,7 +730,7 @@ function feeds_ui_mapping_form_add_submit($form, &$form_state) {
       'unique' => FALSE,
     );
     $importer->processor->addConfig(array('mappings' => $mappings));
-    $importer->processor->save();
+    $importer->save();
     drupal_set_message(t('Mapping has been added.'));
   }
   catch (Exception $e) {
@@ -613,14 +742,28 @@ function feeds_ui_mapping_form_add_submit($form, &$form_state) {
  * Submit handler for save button on feeds_ui_mapping_form().
  */
 function feeds_ui_mapping_form_submit($form, &$form_state) {
-  $processor = $form['#importer']->processor;
-  // We may set some unique flags to mappings that we remove in the subsequent
+  $importer = feeds_importer($form['#importer']->id);
+  $processor = $importer->processor;
+
+  $form_state += array(
+    'mapping_settings' => array(),
+    'mapping_settings_edit' => NULL,
+  );
+
+  // If an item is in edit mode, prepare it for saving.
+  if ($form_state['mapping_settings_edit'] !== NULL) {
+    $values = $form_state['values']['config'][$form_state['mapping_settings_edit']]['settings'];
+    $form_state['mapping_settings'][$form_state['mapping_settings_edit']] = $values;
+  }
+
+  // We may set some settings to mappings that we remove in the subsequent
   // step, that's fine.
   $mappings = $form['#mappings'];
-  if (isset($form_state['values']['unique_flags'])) {
-    foreach ($form_state['values']['unique_flags'] as $k => $v) {
-      $mappings[$k]['unique'] = $v;
-    }
+  foreach ($form_state['mapping_settings'] as $k => $v) {
+    $mappings[$k] = array(
+      'source' => $mappings[$k]['source'],
+      'target' => $mappings[$k]['target'],
+    ) + $v;
   }
 
   if (!empty($form_state['values']['remove_flags'])) {
@@ -633,7 +776,7 @@ function feeds_ui_mapping_form_submit($form, &$form_state) {
     $mappings = array_values($mappings);
   }
   $processor->addConfig(array('mappings' => $mappings));
-  $processor->save();
+  $importer->save();
   drupal_set_message(t('Your changes have been saved.'));
 }
 
@@ -657,6 +800,38 @@ function _feeds_ui_format_options($options) {
   }
   asort($result);
   return $result;
+}
+
+/**
+ * Per mapping settings summary callback. Shows whether a mapping is used as
+ * unique or not.
+ */
+function feeds_ui_mapping_settings_optional_unique_summary($mapping, $target, $form, $form_state) {
+  if (!empty($target['optional_unique'])) {
+    if ($mapping['unique']) {
+      return t('Used as <strong>unique</strong>.');
+    } else {
+      return t('Not used as unique.');
+    }
+  }
+}
+
+/**
+ * Per mapping settings form callback. Lets the user choose if a target is as
+ * unique or not.
+ */
+function feeds_ui_mapping_settings_optional_unique_form($mapping, $target, $form, $form_state) {
+  $settings_form = array();
+
+  if (!empty($target['optional_unique'])) {
+    $settings_form['unique'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Unique'),
+      '#default_value' => !empty($mapping['unique']),
+    );
+  }
+
+  return $settings_form;
 }
 
 /**
@@ -801,7 +976,7 @@ function theme_feeds_ui_mapping_form($variables) {
   $header = array(
     t('Source'),
     t('Target'),
-    t('Unique target'),
+    t('Target configuration'),
     '&nbsp;',
   );
   $rows = array();
@@ -813,7 +988,7 @@ function theme_feeds_ui_mapping_form($variables) {
       $rows[] = array(
         check_plain($source),
         $target,
-        drupal_render($form['unique_flags'][$i]),
+        drupal_render($form['config'][$i]),
         drupal_render($form['remove_flags'][$i]),
       );
     }
@@ -832,7 +1007,7 @@ function theme_feeds_ui_mapping_form($variables) {
     '',
     drupal_render($form['add']),
   );
-  $output = '<div class="help feeds-admin-ui""' . drupal_render($form['help']) . '</div>';
+  $output = '<div class="help feeds-admin-ui">' . drupal_render($form['help']) . '</div>';
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
 
   // Build the help table that explains available sources.

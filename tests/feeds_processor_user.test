@@ -31,22 +31,22 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
 
     // Go to mapping page and create a couple of mappings.
     $mappings = array(
-      '0' => array(
+      0 => array(
         'source' => 'name',
         'target' => 'name',
         'unique' => 0,
       ),
-      '1' => array(
+      1 => array(
         'source' => 'mail',
         'target' => 'mail',
         'unique' => 1,
       ),
-      '2' => array(
+      2 => array(
         'source' => 'since',
         'target' => 'created',
         'unique' => FALSE,
       ),
-      '3' => array(
+      3 => array(
         'source' => 'password',
         'target' => 'pass',
         'unique' => 0,

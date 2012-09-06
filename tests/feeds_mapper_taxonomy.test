@@ -85,27 +85,27 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     $this->createImporterConfiguration('Syndication', 'syndication');
     $this->addMappings('syndication',
       array(
-        array(
+        0 => array(
           'source' => 'title',
           'target' => 'title',
           'unique' => FALSE,
         ),
-        array(
+        1 => array(
           'source' => 'description',
           'target' => 'body',
           'unique' => FALSE,
         ),
-        array(
+        2 => array(
           'source' => 'timestamp',
           'target' => 'created',
           'unique' => FALSE,
         ),
-        array(
+        3 => array(
           'source' => 'url',
           'target' => 'url',
           'unique' => TRUE,
         ),
-        array(
+        4 => array(
           'source' => 'guid',
           'target' => 'guid',
           'unique' => TRUE,

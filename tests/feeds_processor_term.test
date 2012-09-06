@@ -30,7 +30,7 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->setPlugin('term_import', 'FeedsCSVParser');
     $this->setPlugin('term_import', 'FeedsTermProcessor');
     $mappings = array(
-      '0' => array(
+      0 => array(
         'source' => 'name',
         'target' => 'name',
         'unique' => 1,

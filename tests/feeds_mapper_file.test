@@ -49,15 +49,15 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
     $this->setPlugin('syndication', 'FeedsSimplePieParser');
     $this->setSettings('syndication', 'FeedsNodeProcessor', array('content_type' => $typename));
     $this->addMappings('syndication', array(
-      array(
+      0 => array(
         'source' => 'title',
         'target' => 'title'
       ),
-      array(
+      1 => array(
         'source' => 'timestamp',
         'target' => 'created'
       ),
-      array(
+      2 => array(
         'source' => 'enclosures',
         'target' => 'field_files'
       ),
@@ -92,11 +92,11 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
     $this->setPlugin('node', 'FeedsCSVParser');
     $this->setSettings('node', 'FeedsNodeProcessor', array('content_type' => $typename));
     $this->addMappings('node', array(
-      array(
+      0 => array(
         'source' => 'title',
         'target' => 'title'
       ),
-      array(
+      1 => array(
         'source' => 'file',
         'target' => 'field_files'
       ),

@@ -31,15 +31,15 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
     $this->setPlugin('path_test', 'FeedsFileFetcher');
     $this->setPlugin('path_test', 'FeedsCSVParser');
     $this->addMappings('path_test', array(
-      array(
+      0 => array(
         'source' => 'Title',
         'target' => 'title',
       ),
-      array(
+      1 => array(
         'source' => 'path',
         'target' => 'path_alias',
       ),
-      array(
+      2 => array(
         'source' => 'GUID',
         'target' => 'guid',
         'unique' => TRUE,
@@ -63,7 +63,7 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
 
     // Adding a mapping will force update.
     $this->addMappings('path_test', array(
-      array(
+      3 => array(
         'source' => 'fake',
         'target' => 'body',
       ),
@@ -101,15 +101,15 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
 
     // Add mappings.
     $this->addMappings('path_test', array(
-      array(
+      0 => array(
         'source' => 'Title',
         'target' => 'name',
       ),
-      array(
+      1 => array(
         'source' => 'path',
         'target' => 'path_alias',
       ),
-      array(
+      2 => array(
         'source' => 'GUID',
         'target' => 'guid',
         'unique' => TRUE,
@@ -130,7 +130,7 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
 
     // Adding a mapping will force update.
     $this->addMappings('path_test', array(
-      array(
+      3 => array(
         'source' => 'fake',
         'target' => 'description',
       ),

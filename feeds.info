@@ -18,6 +18,7 @@ files[] = tests/feeds_mapper_field.test
 files[] = tests/feeds_mapper_file.test
 files[] = tests/feeds_mapper_path.test
 files[] = tests/feeds_mapper.test
+files[] = tests/feeds_mapper_config.test
 files[] = tests/feeds_fetcher_file.test
 files[] = tests/feeds_processor_node.test
 files[] = tests/feeds_processor_term.test

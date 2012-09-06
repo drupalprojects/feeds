@@ -393,18 +393,25 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     // Iterate through all mappings and add the via the form.
     foreach ($mappings as $i => $mapping) {
 
-      // Get unique flag and unset it - otherwise drupalPost will complain that
-      // there is no form element named "unique".
-      $unique = !empty($mapping['unique']);
-      unset($mapping['unique']);
+      // Split up config and mapping.
+      $config = $mapping;
+      unset($config['source'], $config['target']);
+      $mapping = array('source' => $mapping['source'], 'target' => $mapping['target']);
+
+      // Add mapping.
       $this->drupalPost($path, $mapping, t('Add'));
 
-      // If unique was set, set the last mapping's unique flag.
-      if ($unique) {
-        $edit = array(
-          'unique_flags[' . $i . ']' => 1,
-        );
-        $this->drupalPost($path, $edit, t('Save'));
+      // If there are other configuration options, set them.
+      if ($config) {
+        $this->drupalPostAJAX(NULL, array(), 'mapping_settings_edit_' . $i);
+
+        // Set some settings.
+        $edit = array();
+        foreach ($config as $key => $value) {
+          $edit["config[$i][settings][$key]"] = $value;
+        }
+        $this->drupalPostAJAX(NULL, $edit, 'mapping_settings_update_' . $i);
+        $this->drupalPost(NULL, array(), t('Save'));
       }
     }
   }
