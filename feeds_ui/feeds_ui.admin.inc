@@ -232,7 +232,7 @@ function feeds_ui_create_form_submit($form, &$form_state) {
  * Delete configuration form.
  */
 function feeds_ui_delete_form($form, &$form_state, $importer) {
-  $form['#importer'] = $importer;
+  $form['#importer'] = $importer->id;
   if ($importer->export_type & EXPORT_IN_CODE) {
     $title = t('Would you really like to revert the importer @importer?', array('@importer' => $importer->config['name']));
     $button_label = t('Revert');
@@ -257,7 +257,7 @@ function feeds_ui_delete_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/feeds';
 
   // Remove importer.
-  $form['#importer']->delete();
+  feeds_importer($form['#importer'])->delete();
 
   // Clear cache, deleting a configuration may have an affect on menu tree.
   feeds_cache_clear();
@@ -428,7 +428,7 @@ function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
   $plugins = FeedsPlugin::byType($type);
 
   $form = array();
-  $form['#importer'] = $importer;
+  $form['#importer'] = $importer->id;
   $form['#plugin_type'] = $type;
 
   foreach ($plugins as $key => $plugin) {
@@ -454,8 +454,9 @@ function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
  */
 function feeds_ui_plugin_form_submit($form, &$form_state) {
   // Set the plugin and save feed.
-  $form['#importer']->setPlugin($form_state['values']['plugin_key']);
-  $form['#importer']->save();
+  $importer = feeds_importer($form['#importer']);
+  $importer->setPlugin($form_state['values']['plugin_key']);
+  $importer->save();
   drupal_set_message(t('Changed @type plugin.', array('@type' => $form['#plugin_type'])));
 }
 
@@ -497,7 +498,7 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
   drupal_add_js(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.js');
 
   $form = array();
-  $form['#importer'] = $importer;
+  $form['#importer'] = $importer->id;
   $form['#mappings'] = $mappings = $importer->processor->getMappings();
   $form['help']['#markup'] = feeds_ui_mapping_help();
   $form['#prefix'] = '<div id="feeds-ui-mapping-form-wrapper">';
@@ -534,7 +535,7 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
   $form['legendset']['legend'] = $legend;
 
   // Add config forms and remove flags to mappings.
-  $form['config'] = $form['remove_flags'] = array(
+  $form['config'] = $form['remove_flags'] = $form['mapping_weight'] = array(
     '#tree' => TRUE,
   );
   if (is_array($mappings)) {
@@ -548,6 +549,18 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
         '#title' => t('Remove'),
         '#prefix' => '<div class="feeds-ui-checkbox-link">',
         '#suffix' => '</div>',
+      );
+
+      $form['mapping_weight'][$i] = array(
+        '#type' => 'weight',
+        '#title' => '',
+        '#default_value' => $i,
+        '#delta' => 10,
+        '#attributes' => array(
+          'class' => array(
+            'feeds-ui-mapping-weight'
+          ),
+        ),
       );
     }
   }
@@ -721,7 +734,7 @@ function feeds_ui_mapping_form_add_validate($form, &$form_state) {
  * Submit handler for add button on feeds_ui_mapping_form().
  */
 function feeds_ui_mapping_form_add_submit($form, &$form_state) {
-  $importer = $form['#importer'];
+  $importer = feeds_importer($form['#importer']);
   try {
     $mappings = $form['#mappings'];
     $mappings[] = array(
@@ -742,7 +755,7 @@ function feeds_ui_mapping_form_add_submit($form, &$form_state) {
  * Submit handler for save button on feeds_ui_mapping_form().
  */
 function feeds_ui_mapping_form_submit($form, &$form_state) {
-  $importer = feeds_importer($form['#importer']->id);
+  $importer = feeds_importer($form['#importer']);
   $processor = $importer->processor;
 
   $form_state += array(
@@ -756,8 +769,8 @@ function feeds_ui_mapping_form_submit($form, &$form_state) {
     $form_state['mapping_settings'][$form_state['mapping_settings_edit']] = $values;
   }
 
-  // We may set some settings to mappings that we remove in the subsequent
-  // step, that's fine.
+  // We may set some settings to mappings that we remove in the subsequent step,
+  // that's fine.
   $mappings = $form['#mappings'];
   foreach ($form_state['mapping_settings'] as $k => $v) {
     $mappings[$k] = array(
@@ -767,14 +780,21 @@ function feeds_ui_mapping_form_submit($form, &$form_state) {
   }
 
   if (!empty($form_state['values']['remove_flags'])) {
-    foreach ($form_state['values']['remove_flags'] as $k => $v) {
-      if ($v) {
-        unset($mappings[$k]);
-      }
+    $remove_flags = array_keys(array_filter($form_state['values']['remove_flags']));
+    
+    foreach ($remove_flags as $k) {
+      unset($mappings[$k]);
+      unset($form_state['values']['mapping_weight'][$k]);
     }
-    // Keep our keys clean.
-    $mappings = array_values($mappings);
   }
+
+  // Keep our keys clean.
+  $mappings = array_values($mappings);
+
+  if (!empty($mappings)) {
+    array_multisort($form_state['values']['mapping_weight'], $mappings);
+  }
+
   $processor->addConfig(array('mappings' => $mappings));
   $importer->save();
   drupal_set_message(t('Your changes have been saved.'));
@@ -978,6 +998,7 @@ function theme_feeds_ui_mapping_form($variables) {
     t('Target'),
     t('Target configuration'),
     '&nbsp;',
+    t('Weight'),
   );
   $rows = array();
   if (is_array($form['#mappings'])) {
@@ -986,17 +1007,21 @@ function theme_feeds_ui_mapping_form($variables) {
       $source = isset($form['source']['#options'][$mapping['source']]) ? $form['source']['#options'][$mapping['source']] : $mapping['source'];
       $target = isset($form['target']['#options'][$mapping['target']]) ? check_plain($form['target']['#options'][$mapping['target']]) : '<em>' . t('Missing') . '</em>';
       $rows[] = array(
-        check_plain($source),
-        $target,
-        drupal_render($form['config'][$i]),
-        drupal_render($form['remove_flags'][$i]),
+        'data' => array(
+          check_plain($source),
+          $target,
+          drupal_render($form['config'][$i]),
+          drupal_render($form['remove_flags'][$i]),
+          drupal_render($form['mapping_weight'][$i]),
+        ),
+        'class' => array('draggable', 'tabledrag-leaf'),
       );
     }
   }
   if (!count($rows)) {
     $rows[] = array(
       array(
-        'colspan' => 4,
+        'colspan' => 5,
         'data' => t('No mappings defined.'),
       ),
     );
@@ -1006,9 +1031,10 @@ function theme_feeds_ui_mapping_form($variables) {
     drupal_render($form['target']),
     '',
     drupal_render($form['add']),
+    '',
   );
   $output = '<div class="help feeds-admin-ui">' . drupal_render($form['help']) . '</div>';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'feeds-ui-mapping-overview')));
 
   // Build the help table that explains available sources.
   $legend = '';
@@ -1041,7 +1067,8 @@ function theme_feeds_ui_mapping_form($variables) {
   );
 
   $output .= drupal_render($form['legendset']);
-
   $output .= drupal_render_children($form);
+
+  drupal_add_tabledrag('feeds-ui-mapping-overview', 'order', 'sibling', 'feeds-ui-mapping-weight');
   return $output;
 }
