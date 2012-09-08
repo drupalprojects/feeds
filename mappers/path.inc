@@ -67,7 +67,6 @@ function path_feeds_set_target($source, $entity, $target, $value, $mapping) {
   else {
     $entity->path['alias'] = ltrim($value, '/');
   }
-  debug($entity);
 }
 
 /**

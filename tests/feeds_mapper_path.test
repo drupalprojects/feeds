@@ -229,14 +229,11 @@ class FeedsMapperPathPathautoTestCase extends FeedsMapperTestCase {
   }
 
   public function assertAliasCount($aliases) {
-    debug($aliases);
     $in_db = db_select('url_alias', 'a')
       ->fields('a')
       ->condition('a.alias', $aliases)
       ->execute()
       ->fetchAll();
-
-    debug($in_db);
 
     $this->assertEqual(count($in_db), count($aliases), 'Correct number of aliases in db.');
   }
