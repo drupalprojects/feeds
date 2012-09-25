@@ -69,7 +69,10 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->assertText('There are no new terms.');
 
     // Force update.
-    $this->setSettings('term_import', 'FeedsTermProcessor', array('skip_hash_check' => TRUE));
+    $this->setSettings('term_import', 'FeedsTermProcessor', array(
+      'skip_hash_check' => TRUE,
+      'update_existing' => FEEDS_UPDATE_EXISTING,
+    ));
     $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv');
     $this->assertText('Updated 5 terms.');
 
