@@ -148,7 +148,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 <body>
   <outline text="Feeds test group" >
     <outline title="Development Seed - Technological Solutions for Progressive Organizations" text="" xmlUrl="' . $path . 'developmentseed.rss2" type="rss" />
-    <outline title="Magyar Nemzet Online - H?rek" text="" xmlUrl="' . $path . 'feed_without_guid.rss2" type="rss" />
+    <outline title="Magyar Nemzet Online - H\'rek" text="" xmlUrl="' . $path . 'feed_without_guid.rss2" type="rss" />
     <outline title="Drupal planet" text="" type="rss" xmlUrl="' . $path . 'drupalplanet.rss2" />
   </outline>
 </body>
