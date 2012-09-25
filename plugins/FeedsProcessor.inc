@@ -432,7 +432,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
     return array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
-      'input_format' => NULL
+      'input_format' => NULL,
+      'skip_hash_check' => FALSE,
     );
   }
 
@@ -459,6 +460,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
     foreach ($formats as $format) {
       $format_options[$format->format] = $format->name;
     }
+    $form['skip_hash_check'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Skip hash check'),
+      '#description' => t('Force update of items even if item source data did not change.'),
+      '#default_value' => $this->config['skip_hash_check'],
+    );
     $form['input_format'] = array(
       '#type' => 'select',
       '#title' => t('Text format'),
@@ -643,10 +650,18 @@ abstract class FeedsProcessor extends FeedsPlugin {
   }
 
   /**
-   * Retrieve MD5 hash of $entity_id from DB.
-   * @return Empty string if no item is found, hash otherwise.
+   * Retrieves the MD5 hash of $entity_id from the database.
+   *
+   * When "skip hash check" is set to TRUE, returns dummy md5.
+   *
+   * @return string
+   *   Empty string if no item is found, hash otherwise.
    */
   protected function getHash($entity_id) {
+    if ($this->config['skip_hash_check']) {
+      return '00000000000000000000000000000000';
+    }
+
     if ($hash = db_query("SELECT hash FROM {feeds_item} WHERE entity_type = :type AND entity_id = :id", array(':type' => $this->entityType(), ':id' => $entity_id))->fetchField()) {
       // Return with the hash.
       return $hash;
