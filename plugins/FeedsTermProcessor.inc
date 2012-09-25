@@ -85,7 +85,6 @@ class FeedsTermProcessor extends FeedsProcessor {
   public function configDefaults() {
     return array(
       'vocabulary' => 0,
-      'force_update' => TRUE,
     ) + parent::configDefaults();
   }
 
@@ -104,12 +103,6 @@ class FeedsTermProcessor extends FeedsProcessor {
       '#description' => t('Choose the vocabulary to import into. <strong>CAUTION:</strong> when deleting terms through the "Delete items" tab, Feeds will delete <em>all</em> terms from this vocabulary.'),
       '#options' => $options,
       '#default_value' => $this->config['vocabulary'],
-    );
-    $form['force_update'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Force update'),
-      '#description' => t('Force update of imported terms even if no data change. For import of <strong>term parents</strong> you need to import twice and set this in the second pass.'),
-      '#default_value' => $this->config['force_update'],
     );
     return $form;
   }
@@ -252,19 +245,5 @@ class FeedsTermProcessor extends FeedsProcessor {
       }
     }
     throw new Exception(t('No vocabulary defined for Taxonomy Term processor.'));
-  }
-
-  /**
-   * Override getHash()
-   *
-   * @return string
-   */
-  protected function getHash($entity_id) {
-    if ($this->config['force_update']) {
-      return ''; // dummy to always update
-    }
-    else {
-      return parent::getHash($entity_id);
-    }
   }
 }
