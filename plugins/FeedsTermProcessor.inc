@@ -201,7 +201,9 @@ class FeedsTermProcessor extends FeedsProcessor {
     // Let implementers of hook_feeds_term_processor_targets() add their targets.
     try {
       self::loadMappers();
-      feeds_alter('feeds_processor_targets', $targets, 'taxonomy_term', $this->vocabulary()->machine_name);
+      $entity_type = $this->entityType();
+      $bundle = $this->vocabulary()->machine_name;
+      drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
     }
     catch (Exception $e) {
       // Do nothing.

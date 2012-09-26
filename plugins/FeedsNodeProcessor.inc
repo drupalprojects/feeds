@@ -310,7 +310,9 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
     // Let other modules expose mapping targets.
     self::loadMappers();
-    feeds_alter('feeds_processor_targets', $targets, 'node', $this->config['content_type']);
+    $entity_type = $this->entityType();
+    $bundle = $this->config['content_type'];
+    drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
 
     return $targets;
   }
