@@ -109,9 +109,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
       if (!($entity_id = $this->existingEntityId($source, $parser_result)) ||
            ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)) {
 
-        // Only proceed if item has actually changed.
+        // Only proceed if item previously exists and forced updating is not
+        // enabled.
         $hash = $this->hash($item);
-        if (!empty($entity_id) && $hash == $this->getHash($entity_id)) {
+        if ($entity_id && !$this->config['skip_hash_check'] && $hash == $this->getHash($entity_id)) {
           continue;
         }
 
@@ -652,15 +653,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
   /**
    * Retrieves the MD5 hash of $entity_id from the database.
    *
-   * When "skip hash check" is set to TRUE, returns dummy md5.
-   *
    * @return string
    *   Empty string if no item is found, hash otherwise.
    */
   protected function getHash($entity_id) {
-    if ($this->config['skip_hash_check']) {
-      return '00000000000000000000000000000000';
-    }
 
     if ($hash = db_query("SELECT hash FROM {feeds_item} WHERE entity_type = :type AND entity_id = :id", array(':type' => $this->entityType(), ':id' => $entity_id))->fetchField()) {
       // Return with the hash.
