@@ -308,7 +308,7 @@ class PuSHEnvironment implements PuSHSubscriberEnvironmentInterface {
    * Implements PuSHSubscriberEnvironmentInterface::msg().
    */
   public function msg($msg, $level = 'status') {
-    drupal_set_message($msg, $level);
+    drupal_set_message(check_plain($msg), $level);
   }
 
   /**

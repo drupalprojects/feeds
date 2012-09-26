@@ -781,7 +781,7 @@ function feeds_ui_mapping_form_submit($form, &$form_state) {
 
   if (!empty($form_state['values']['remove_flags'])) {
     $remove_flags = array_keys(array_filter($form_state['values']['remove_flags']));
-    
+
     foreach ($remove_flags as $k) {
       unset($mappings[$k]);
       unset($form_state['values']['mapping_weight'][$k]);
@@ -830,7 +830,8 @@ function feeds_ui_mapping_settings_optional_unique_summary($mapping, $target, $f
   if (!empty($target['optional_unique'])) {
     if ($mapping['unique']) {
       return t('Used as <strong>unique</strong>.');
-    } else {
+    }
+    else {
       return t('Not used as unique.');
     }
   }
