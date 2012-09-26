@@ -23,7 +23,7 @@ function text_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
     if (in_array($info['type'], $text_types)) {
       $targets[$name] = array(
         'name' => check_plain($instance['label']),
-        'callback' => 'field_feeds_set_target_text',
+        'callback' => 'text_feeds_set_target',
         'description' => t('The @label field of the entity.', array('@label' => $instance['label'])),
       );
     }
@@ -33,7 +33,7 @@ function text_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
 /**
  * Callback for mapping text fields.
  */
-function field_feeds_set_target_text($source, $entity, $target, $value) {
+function text_feeds_set_target($source, $entity, $target, $value) {
   if (empty($value)) {
     return;
   }
