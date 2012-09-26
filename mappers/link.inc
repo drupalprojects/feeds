@@ -54,6 +54,9 @@ function link_feeds_set_target($source, $entity, $target, $value) {
   $info = field_info_field($target);
   list($field_name, $sub_field) = explode(':', $target);
   foreach ($value as $v) {
+    if (is_object($v) && ($v instanceof FeedsElement)) {
+      $v = $v->getValue();
+    }
     if (!is_array($v) && !is_object($v)) {
       if (strstr($target, 'url')) {
         if (isset($entity->{$field_name}['und'][$i]['title'])) {

@@ -110,6 +110,9 @@ function _field_feeds_set_target($source, $entity, $target, $value, $input_forma
   $i = 0;
   $field = isset($entity->$target) ? $entity->$target : array();
   foreach ($value as $v) {
+    if (is_object($v) && ($v instanceof FeedsElement)) {
+      $v = $v->getValue();
+    }
     if (!is_array($v) && !is_object($v)) {
       $field['und'][$i]['value'] = $v;
     }
