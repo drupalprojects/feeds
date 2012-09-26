@@ -33,6 +33,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     $term = new stdClass();
     $term->vid = $vocabulary->vid;
     $term->vocabulary_machine_name = $vocabulary->machine_name;
+    $term->format = isset($this->config['input_format']) ? $this->config['input_format'] : filter_fallback_format();
     return $term;
   }
 
