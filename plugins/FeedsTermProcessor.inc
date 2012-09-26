@@ -224,13 +224,6 @@ class FeedsTermProcessor extends FeedsProcessor {
           return $tid;
         }
       }
-      elseif ($target == 'guid') {
-        $query = db_select('feeds_item')
-          ->fields('feeds_item', array('entity_id'))
-          ->condition('entity_type', 'taxonomy_term');
-        $tid = $query->condition('guid', $value)->execute()->fetchField();
-        return ($tid) ? $tid : 0;
-      }
     }
     return 0;
   }
