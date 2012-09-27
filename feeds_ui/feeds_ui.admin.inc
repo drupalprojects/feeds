@@ -617,7 +617,6 @@ function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targe
     '#i' => $i,
   );
 
-
   if (isset($form_state['mapping_settings'][$i])) {
     $mapping = $form_state['mapping_settings'][$i] + $mapping;
   }
@@ -678,7 +677,6 @@ function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targe
           '#src' => 'misc/configure.png',
           '#attributes' => array('alt' => t('Edit')),
           '#op' => 'edit',
-          '#value' => t('Edit'),
         ),
       );
     }
