@@ -746,7 +746,7 @@ function feeds_to_unixtime($date, $default_value) {
   if (is_numeric($date)) {
     return $date;
   }
-  elseif (is_string($date)) {
+  elseif (is_string($date) && !empty($date)) {
     $date = new FeedsDateTimeElement($date);
     return $date->getValue();
   }
