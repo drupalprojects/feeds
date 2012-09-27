@@ -38,9 +38,9 @@ function number_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_n
  * Ensure that $value is a numeric to avoid database errors.
  */
 function number_feeds_set_target($source, $entity, $target, $value) {
-  if (empty($value)) {
-    return;
-  }
+
+  // Do not perform the regular empty() check here. 0 is a valid value. That's
+  // really just a performance thing anyway.
 
   if (!is_array($value)) {
     $value = array($value);
