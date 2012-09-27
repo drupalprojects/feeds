@@ -117,7 +117,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       }
 
       $hash = $this->hash($item);
-      $changed = ($hash == $this->getHash($entity_id));
+      $changed = ($hash !== $this->getHash($entity_id));
       $force_update = $this->config['skip_hash_check'];
 
       // Do not proceed if the item exists, has not changed, and we're not
