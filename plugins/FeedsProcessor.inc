@@ -106,60 +106,81 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $state = $source->state(FEEDS_PROCESS);
 
     while ($item = $parser_result->shiftItem()) {
-      if (!($entity_id = $this->existingEntityId($source, $parser_result)) ||
-           ($this->config['update_existing'] != FEEDS_SKIP_EXISTING)) {
 
-        // Only proceed if item previously exists and forced updating is not
-        // enabled.
-        $hash = $this->hash($item);
-        if ($entity_id && !$this->config['skip_hash_check'] && $hash == $this->getHash($entity_id)) {
+      // Check if this item already exists.
+      $entity_id = $this->existingEntityId($source, $parser_result);
+      $update = $this->config['update_existing'] != FEEDS_SKIP_EXISTING;
+
+      // If it exists, and we are not updating, pass onto the next item.
+      if ($entity_id && !$update) {
+        continue;
+      }
+
+      $hash = $this->hash($item);
+      $changed = $hash == $this->getHash($entity_id);
+      $force_update = $this->config['skip_hash_check'];
+
+      // Do not proceed if the item exists, has not changed, and we're not
+      // forcing the update.
+      if ($entity_id && !$changed && !$force_update) {
+        continue;
+      }
+
+      try {
+
+        if (empty($entity_id)) {
+
+          // Build a new entity.
+          $entity = $this->newEntity($source);
+          $this->newItemInfo($entity, $source->feed_nid, $hash);
+        }
+        else {
+
+          // Load an existing entity.
+          $entity = $this->entityLoad($source, $entity_id);
+
+          // The feeds_item table is always updated with the info for the most recently processed entity.
+          // The only carryover is the entity_id.
+          $this->newItemInfo($entity, $source->feed_nid, $hash);
+          $entity->feeds_item->entity_id = $entity_id;
+        }
+
+        // Set property and field values.
+        $this->map($source, $parser_result, $entity);
+        $this->entityValidate($entity);
+
+        // Allow modules to alter the entity before saving.
+        module_invoke_all('feeds_presave', $source, $entity, $item);
+        if (module_exists('rules')) {
+          rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
+        }
+
+        // Enable modules to skip saving at all.
+        if (!empty($entity->feeds_item->skip)) {
           continue;
         }
 
-        try {
-          // Assemble node, map item to it, save.
-          if (empty($entity_id)) {
-            $entity = $this->newEntity($source);
-            $this->newItemInfo($entity, $source->feed_nid, $hash);
-          }
-          else {
-            $entity = $this->entityLoad($source, $entity_id);
-            // The feeds_item table is always updated with the info for the most recently processed entity.
-            // The only carryover is the entity_id.
-            $this->newItemInfo($entity, $source->feed_nid, $hash);
-            $entity->feeds_item->entity_id = $entity_id;
-          }
-          $this->map($source, $parser_result, $entity);
-          $this->entityValidate($entity);
+        $this->entitySave($entity);
 
-          // Allow modules to alter the entity before saving.
-          module_invoke_all('feeds_presave', $source, $entity, $item);
-          if (module_exists('rules')) {
-            rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
-          }
+        // Track progress.
+        if (empty($entity_id)) {
+          $state->created++;
+        }
+        else {
+          $state->updated++;
+        }
+      }
 
-          // Enable modules to skip saving at all.
-          if (empty($entity->feeds_item->skip)) {
-            $this->entitySave($entity);
-            // Track progress.
-            if (empty($entity_id)) {
-              $state->created++;
-            }
-            else {
-              $state->updated++;
-            }
-          }
-        }
-        catch (Exception $e) {
-          $state->failed++;
-          drupal_set_message($e->getMessage(), 'warning');
-          $message = $e->getMessage();
-          $message .= '<h3>Original item</h3>';
-          $message .= '<pre>' . var_export($item, TRUE) . '</pre>';
-          $message .= '<h3>Entity</h3>';
-          $message .= '<pre>' . var_export($entity, TRUE) . '</pre>';
-          $source->log('import', $message, array(), WATCHDOG_ERROR);
-        }
+      // Something bad happened, log it.
+      catch (Exception $e) {
+        $state->failed++;
+        drupal_set_message($e->getMessage(), 'warning');
+        $message = $e->getMessage();
+        $message .= '<h3>Original item</h3>';
+        $message .= '<pre>' . var_export($item, TRUE) . '</pre>';
+        $message .= '<h3>Entity</h3>';
+        $message .= '<pre>' . var_export($entity, TRUE) . '</pre>';
+        $source->log('import', $message, array(), WATCHDOG_ERROR);
       }
     }
 
