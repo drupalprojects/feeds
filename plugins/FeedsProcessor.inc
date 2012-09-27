@@ -109,15 +109,15 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
       // Check if this item already exists.
       $entity_id = $this->existingEntityId($source, $parser_result);
-      $update = $this->config['update_existing'] != FEEDS_SKIP_EXISTING;
+      $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
 
       // If it exists, and we are not updating, pass onto the next item.
-      if ($entity_id && !$update) {
+      if ($entity_id && $skip_existing) {
         continue;
       }
 
       $hash = $this->hash($item);
-      $changed = $hash == $this->getHash($entity_id);
+      $changed = ($hash == $this->getHash($entity_id));
       $force_update = $this->config['skip_hash_check'];
 
       // Do not proceed if the item exists, has not changed, and we're not
@@ -128,15 +128,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
       try {
 
+        // Build a new entity.
         if (empty($entity_id)) {
-
-          // Build a new entity.
           $entity = $this->newEntity($source);
           $this->newItemInfo($entity, $source->feed_nid, $hash);
         }
-        else {
 
-          // Load an existing entity.
+        // Load an existing entity.
+        else {
           $entity = $this->entityLoad($source, $entity_id);
 
           // The feeds_item table is always updated with the info for the most recently processed entity.
