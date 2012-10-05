@@ -40,7 +40,10 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Loads an existing user.
    */
   protected function entityLoad(FeedsSource $source, $uid) {
-    return user_load($uid);
+    // Copy the password so that we can compare it again at save.
+    $user = user_load($uid);
+    $user->feeds_original_pass = $user->pass;
+    return $user;
   }
 
   /**
@@ -59,7 +62,15 @@ class FeedsUserProcessor extends FeedsProcessor {
     if ($this->config['defuse_mail']) {
       $account->mail = $account->mail . '_test';
     }
-    user_save($account, (array) $account);
+
+    $edit = (array) $account;
+
+    // Remove pass from $edit if the password is unchanged.
+    if (isset($account->feeds_original_pass) && $account->pass == $account->feeds_original_pass) {
+      unset($edit['pass']);
+    }
+
+    user_save($account, $edit);
     if ($account->uid && !empty($account->openid)) {
       $authmap = array(
         'uid' => $account->uid,
