@@ -122,14 +122,13 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     $this->assertText('Do not import on submission');
 
     // Map feed node's taxonomy to feed item node's taxonomy.
-    $this->addMappings('syndication',
-      array(
-        array(
-          'source' => 'parent:taxonomy:tags',
-          'target' => 'field_tags',
-        ),
-      )
+    $mappings = array(
+      5 => array(
+        'source' => 'parent:taxonomy:tags',
+        'target' => 'field_tags',
+      ),
     );
+    $this->addMappings('syndication', $mappings);
 
     // Create feed node and add term term1.
     $langcode = LANGUAGE_NONE;
