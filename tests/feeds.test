@@ -377,22 +377,30 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($config['processor']['plugin_key'], $processor, 'Correct processor');
   }
 
-  /**
-   * Add mappings to a given configuration.
-   *
-   * @param $mappings
-   *   An array of mapping arrays. Each mapping array must have a source and
-   *   an target key and can have a unique key.
-   *
-   * @see FeedsRSStoDataTest class.
-   */
-  public function addMappings($id, $mappings) {
+   /**
+    * Adds mappings to a given configuration.
+    *
+    * @param string $id
+    *   ID of the importer.
+    * @param array $mappings
+    *   An array of mapping arrays. Each mapping array must have a source and
+    *   an target key and can have a unique key.
+    * @param bool $test_mappings
+    *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
+    */
+  public function addMappings($id, $mappings, $test_mappings = TRUE) {
 
-    $path = 'admin/structure/feeds/' . $id . '/mapping';
+    $path = "admin/structure/feeds/$id/mapping";
 
-    // Iterate through all mappings and add the via the form.
+    // Iterate through all mappings and add the mapping via the form.
     foreach ($mappings as $i => $mapping) {
 
+      if ($test_mappings) {
+        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
+        $this->assertEqual($current_mapping_key, -1, 'Mapping does not exist before addition.');
+      }
+
+      // Get unique flag and unset it. Otherwise, drupalPost will complain that
       // Split up config and mapping.
       $config = $mapping;
       unset($config['source'], $config['target']);
@@ -413,7 +421,104 @@ class FeedsWebTestCase extends DrupalWebTestCase {
         $this->drupalPostAJAX(NULL, $edit, 'mapping_settings_update_' . $i);
         $this->drupalPost(NULL, array(), t('Save'));
       }
+
+      if ($test_mappings) {
+        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
+        $this->assertTrue($current_mapping_key >= 0, 'Mapping exists after addition.');
+      }
     }
+  }
+
+  /**
+   * Remove mappings from a given configuration.
+   *
+   * This function mimicks the Javascript behavior in feeds_ui.js
+   *
+   * @param array $mappings
+   *   An array of mapping arrays. Each mapping array must have a source and
+   *   a target key and can have a unique key.
+   * @param bool $test_mappings
+   *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
+   */
+  public function removeMappings($id, $mappings, $test_mappings = TRUE) {
+    $path = "admin/structure/feeds/$id/mapping";
+
+    $current_mappings = $this->getCurrentMappings($id);
+
+    // Iterate through all mappings and remove via the form.
+    foreach ($mappings as $i => $mapping) {
+
+      if ($test_mappings) {
+        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
+        $this->assertEqual($current_mapping_key, $i, 'Mapping exists before removal.');
+      }
+
+      $remove_mapping = array("remove_flags[$i]" => 1);
+
+      $this->drupalPost($path, $remove_mapping, t('Save'));
+
+      $this->assertText('Your changes have been saved.');
+
+      if ($test_mappings) {
+        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
+        $this->assertEqual($current_mapping_key, -1, 'Mapping does not exist after removal.');
+      }
+    }
+  }
+
+  /**
+   * Gets an array of current mappings from the feeds_importer config.
+   *
+   * @param string $id
+   *   ID of the importer.
+   *
+   * @return bool|array
+   *   FALSE if the importer has no mappings, or an an array of mappings.
+   */
+  public function getCurrentMappings($id) {
+    $config = db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $id))->fetchField();
+
+    $config = unserialize($config);
+
+    // We are very specific here. 'mappings' can either be an array or not
+    // exist.
+    if (array_key_exists('mappings', $config['processor']['config'])) {
+      $this->assertTrue(is_array($config['processor']['config']['mappings']), 'Mappings is an array.');
+
+      return $config['processor']['config']['mappings'];
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Determines if a mapping exists for a given importer.
+   *
+   * @param string $id
+   *   ID of the importer.
+   * @param integer $i
+   *   The key of the mapping.
+   * @param string $source
+   *   The source field.
+   * @param string $target
+   *   The target field.
+   *
+   * @return integer
+   *   -1 if the mapping doesn't exist, the key of the mapping otherwise.
+   */
+  public function mappingExists($id, $i, $source, $target) {
+
+    $current_mappings = $this->getCurrentMappings($id);
+
+    if ($current_mappings) {
+      foreach ($current_mappings as $key => $mapping) {
+        if ($mapping['source'] == $source && $mapping['target'] == $target && $key == $i) {
+          return $key;
+        }
+      }
+    }
+
+    return -1;
   }
 
   /**
