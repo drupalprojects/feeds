@@ -43,14 +43,13 @@ function feeds_hook_info() {
 function feeds_cron() {
   if ($importers = feeds_reschedule()) {
     foreach ($importers as $id) {
-      feeds_importer($id)->schedule();
       $rows = db_query("SELECT feed_nid FROM {feeds_source} WHERE id = :id", array(':id' => $id));
       foreach ($rows as $row) {
         feeds_source($id, $row->feed_nid)->schedule();
       }
     }
-    feeds_reschedule(FALSE);
   }
+
   // Expire old log entries.
   db_delete('feeds_log')
     ->condition('request_time', REQUEST_TIME - 604800, '<')
@@ -190,31 +189,37 @@ function feeds_batch($method, $importer_id, $feed_nid = 0, &$context) {
   }
 }
 
-/**
- * Reschedule one or all importers.
- *
- * @param $importer_id
- *   If TRUE, all importers will be rescheduled, if FALSE, no importers will
- *   be rescheduled, if an importer id, only importer of that id will be
- *   rescheduled.
- *
- * @return
- *   TRUE if all importers need rescheduling. FALSE if no rescheduling is
- *   required. An array of importers that need rescheduling.
- */
-function feeds_reschedule($importer_id = NULL) {
-  $reschedule = variable_get('feeds_reschedule', FALSE);
-  if ($importer_id === TRUE || $importer_id === FALSE) {
-    $reschedule = $importer_id;
+ /**
+  * Reschedules an importer's sources.
+  *
+  * The importers designated to be rescheduled wil have their sources
+  * rescheduled on the next cron run.
+  *
+  * @param string $importer_id
+  *   (Optional) If an importer id, that importer will be added to the list
+  *   for rescheduling. If NULL, the list of importers will be reset.
+  *
+  * @return array
+  *   The list of importers that need to have their sources rescheduled.
+  *
+  * @see feeds_cron()
+  */
+ function feeds_reschedule($importer_id = NULL) {
+
+  // Get a list of importers.
+  $reschedule = variable_get('feeds_reschedule', array());
+
+  // We are adding one to the list.
+  if ($importer_id) {
+    $reschedule[] = $importer_id;
+    $reschedule = array_unique($reschedule);
+    variable_set('feeds_reschedule', $reschedule);
   }
-  elseif (is_string($importer_id) && $reschedule !== TRUE) {
-    $reschedule = is_array($reschedule) ? $reschedule : array();
-    $reschedule[$importer_id] = $importer_id;
+
+  else {
+    variable_del('feeds_reschedule');
   }
-  variable_set('feeds_reschedule', $reschedule);
-  if ($reschedule === TRUE) {
-    return feeds_enabled_importers();
-  }
+
   return $reschedule;
 }
 

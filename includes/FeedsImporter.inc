@@ -95,6 +95,7 @@ class FeedsImporter extends FeedsConfigurable {
     else {
       JobScheduler::get('feeds_importer_expire')->remove($job);
     }
+    debug($job);
   }
 
   /**
@@ -126,12 +127,19 @@ class FeedsImporter extends FeedsConfigurable {
 
     if ($config = db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $this->id))->fetchField()) {
       drupal_write_record('feeds_importer', $save, 'id');
+
       // Only rebuild menu if content_type has changed. Don't worry about
       // rebuilding menus when creating a new importer since it will default
       // to the standalone page.
       $config = unserialize($config);
+
       if ($config['content_type'] != $save->config['content_type']) {
         variable_set('menu_rebuild_needed', TRUE);
+      }
+
+      // Reschedule this importer's sources if the import period changed.
+      if ($config['import_period'] != $save->config['import_period']) {
+        feeds_reschedule($this->id);
       }
     }
     else {
@@ -168,6 +176,7 @@ class FeedsImporter extends FeedsConfigurable {
     );
     if ($this->export_type & EXPORT_IN_CODE) {
       feeds_reschedule($this->id);
+      $this->schedule();
     }
     else {
       JobScheduler::get('feeds_importer_expire')->remove($job);
@@ -309,16 +318,6 @@ class FeedsImporter extends FeedsConfigurable {
       '#default_value' => $config['process_in_background'],
     );
     return $form;
-  }
-
-  /**
-   * Reschedule if import period changes.
-   */
-  public function configFormSubmit(&$values) {
-    if ($this->config['import_period'] != $values['import_period']) {
-      feeds_reschedule($this->id);
-    }
-    parent::configFormSubmit($values);
   }
 }
 
