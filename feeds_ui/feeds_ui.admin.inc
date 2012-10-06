@@ -539,6 +539,9 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
     '#tree' => TRUE,
   );
   if (is_array($mappings)) {
+
+    $delta = count($mappings) + 2;
+
     foreach ($mappings as $i => $mapping) {
       if (isset($targets[$mapping['target']])) {
         $form['config'][$i] = feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targets[$mapping['target']]);
@@ -555,7 +558,7 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
         '#type' => 'weight',
         '#title' => '',
         '#default_value' => $i,
-        '#delta' => 10,
+        '#delta' => $delta,
         '#attributes' => array(
           'class' => array(
             'feeds-ui-mapping-weight'
