@@ -20,6 +20,11 @@ define('FEEDS_PROCESS_LIMIT', 50);
 class FeedsValidationException extends Exception {}
 
 /**
+ * Thrown if a an access check fails.
+ */
+class FeedsAccessException extends Exception {}
+
+/**
  * Abstract class, defines interface for processors.
  */
 abstract class FeedsProcessor extends FeedsPlugin {
@@ -65,10 +70,21 @@ abstract class FeedsProcessor extends FeedsPlugin {
   protected function entityValidate($entity) {}
 
   /**
+   * Access check for saving an enity.
+   *
+   * @param $entity
+   *   Entity to be saved.
+   *
+   * @throws FeedsAccessException $e
+   *   If the access check fails.
+   */
+  protected function entitySaveAccess($entity) {}
+
+  /**
    * Save an entity.
    *
    * @param $entity
-   *   Entity to b saved.
+   *   Entity to be saved.
    */
   protected abstract function entitySave($entity);
 
@@ -159,6 +175,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
           continue;
         }
 
+        // This will throw an exception on failure.
+        $this->entitySaveAccess($entity);
         $this->entitySave($entity);
 
         // Track progress.

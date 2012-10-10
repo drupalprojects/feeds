@@ -78,6 +78,39 @@ class FeedsNodeProcessor extends FeedsProcessor {
   }
 
   /**
+   * Check that the user has permission to save a node.
+   */
+  protected function entitySaveAccess($entity) {
+
+    // The check will be skipped for anonymous nodes.
+    if ($this->config['authorize'] && !empty($entity->uid)) {
+
+      $author = user_load($entity->uid);
+
+      // If the uid was mapped directly, rather than by email or username, it 
+      // could be invalid.
+      if (!$author) {
+        $message = 'User %uid is not a valid user.';
+        throw new FeedsAccessException(t($message, array('%uid' => $entity->uid)));
+      }
+
+      if (empty($entity->nid) || !empty($entity->is_new)) {
+        $op = 'create';
+        $access = node_access($op, $entity->type, $author);
+      }
+      else {
+        $op = 'update';
+        $access = node_access($op, $entity, $author);
+      }
+
+      if (!$access) {
+        $message = 'User %name is not authorized to %op content type %content_type.';
+        throw new FeedsAccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->type)));
+      }
+    }
+  }
+
+  /**
    * Save a node.
    */
   public function entitySave($entity) {
@@ -137,6 +170,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'content_type' => $type,
       'expire' => FEEDS_EXPIRE_NEVER,
       'author' => 0,
+      'authorize' => TRUE,
     ) + parent::configDefaults();
   }
 
@@ -161,6 +195,12 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
       '#default_value' => empty($author->name) ?  'anonymous' : check_plain($author->name),
+    );
+    $form['authorize'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Authorize'),
+      '#description' => t('Check that the author has permission to create the node.'),
+      '#default_value' => $this->config['authorize'],
     );
     $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), 'feeds_format_expire');
     $form['expire'] = array(
