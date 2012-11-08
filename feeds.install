@@ -6,6 +6,13 @@
  */
 
 /**
+  * Implement hook_uninstall()
+  */
+function feeds_uninstall() {
+  variable_del('http_request_timeout');
+}
+
+/**
  * Implements hook_schema().
  */
 function feeds_schema() {
