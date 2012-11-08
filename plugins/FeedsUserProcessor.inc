@@ -88,9 +88,7 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Delete multiple user accounts.
    */
   protected function entityDeleteMultiple($uids) {
-    foreach ($uids as $uid) {
-      user_delete($uid);
-    }
+    user_delete_multiple($uids);
   }
 
   /**
