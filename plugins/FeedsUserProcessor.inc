@@ -40,8 +40,9 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Loads an existing user.
    */
   protected function entityLoad(FeedsSource $source, $uid) {
+    $user = parent::entityLoad($source, $uid);
+
     // Copy the password so that we can compare it again at save.
-    $user = user_load($uid);
     $user->feeds_original_pass = $user->pass;
     return $user;
   }
@@ -127,13 +128,6 @@ class FeedsUserProcessor extends FeedsProcessor {
         '#options' => $roles,
       );
     }
-    // @todo Implement true updating.
-    $form['update_existing'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Replace existing users'),
-      '#description' => t('If an existing user is found for an imported user, replace it. Existing users will be determined using mappings that are a "unique target".'),
-      '#default_value' => $this->config['update_existing'],
-    );
     $form['defuse_mail'] = array(
       '#type' => 'checkbox',
       '#title' => t('Defuse e-mail addresses'),

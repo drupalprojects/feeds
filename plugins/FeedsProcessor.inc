@@ -58,8 +58,25 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @return
    *   A new entity object.
+   *
+   * @todo We should be able to batch load these, if we found all of the
+   *   existing ids first.
    */
-  protected abstract function entityLoad(FeedsSource $source, $entity_id);
+  protected function entityLoad(FeedsSource $source, $entity_id) {
+    if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
+      $entities = entity_load($this->entityType(), array($entity_id));
+      return reset($entities);
+    }
+
+    $info = $this->entityInfo();
+
+    $args = array(':entity_id' => $entity_id);
+
+    $table = db_escape_table($info['base table']);
+    $key = db_escape_field($info['entity keys']['id']);
+
+    return db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
+  }
 
   /**
    * Validate an entity.
@@ -490,6 +507,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
         t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
       '#options' => array(
         FEEDS_SKIP_EXISTING => t('Do not update existing @entities', $tokens),
+        FEEDS_REPLACE_EXISTING => t('Replace existing @entities', $tokens),
         FEEDS_UPDATE_EXISTING => t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->config['update_existing'],

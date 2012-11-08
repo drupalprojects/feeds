@@ -50,14 +50,12 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * @todo Reevaluate the use of node_object_prepare().
    */
   protected function entityLoad(FeedsSource $source, $nid) {
-    if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
-      $node = node_load($nid, NULL, TRUE);
-    }
-    else {
-      // We're replacing the existing node. Only save the absolutely necessary.
-      $node = db_query("SELECT created, nid, vid, type, status FROM {node} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
+    $node = parent::entityLoad($source, $nid);
+
+    if ($this->config['update_existing'] != FEEDS_UPDATE_EXISTING) {
       $node->uid = $this->config['author'];
     }
+
     node_object_prepare($node);
 
     // Workaround for issue #1247506. See #1245094 for backstory.
@@ -87,7 +85,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
       $author = user_load($entity->uid);
 
-      // If the uid was mapped directly, rather than by email or username, it 
+      // If the uid was mapped directly, rather than by email or username, it
       // could be invalid.
       if (!$author) {
         $message = 'User %uid is not a valid user.';
@@ -209,11 +207,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#options' => $period,
       '#description' => t('Select after how much time nodes should be deleted. The node\'s published date will be used for determining the node\'s age, see Mapping settings.'),
       '#default_value' => $this->config['expire'],
-    );
-    $form['update_existing']['#options'] = array(
-      FEEDS_SKIP_EXISTING => 'Do not update existing nodes',
-      FEEDS_REPLACE_EXISTING => 'Replace existing nodes',
-      FEEDS_UPDATE_EXISTING => 'Update existing nodes (slower than replacing them)',
     );
     return $form;
   }

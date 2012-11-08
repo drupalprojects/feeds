@@ -38,13 +38,6 @@ class FeedsTermProcessor extends FeedsProcessor {
   }
 
   /**
-   * Loads an existing term.
-   */
-  protected function entityLoad(FeedsSource $source, $tid) {
-    return taxonomy_term_load($tid);
-  }
-
-  /**
    * Validates a term.
    */
   protected function entityValidate($term) {
