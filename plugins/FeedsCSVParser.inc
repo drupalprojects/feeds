@@ -141,6 +141,8 @@ class FeedsCSVParser extends FeedsParser {
         ',' => ',',
         ';' => ';',
         'TAB' => 'TAB',
+        '|' => '|',
+        '+' => '+',
       ),
       '#default_value' => isset($source_config['delimiter']) ? $source_config['delimiter'] : ',',
     );
@@ -176,6 +178,8 @@ class FeedsCSVParser extends FeedsParser {
         ',' => ',',
         ';' => ';',
         'TAB' => 'TAB',
+        '|' => '|',
+        '+' => '+',
       ),
       '#default_value' => $this->config['delimiter'],
     );
