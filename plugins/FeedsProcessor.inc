@@ -137,6 +137,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result) {
     $state = $source->state(FEEDS_PROCESS);
+    $entity_info = $this->entityInfo();
+    $id_key = $entity_info['entity keys']['id'];
 
     while ($item = $parser_result->shiftItem()) {
 
@@ -161,8 +163,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
       try {
 
+        $replace_existing = $this->config['update_existing'] == FEEDS_REPLACE_EXISTING;
+
         // Build a new entity.
-        if (empty($entity_id)) {
+        if (!$entity_id || $replace_existing) {
           $entity = $this->newEntity($source);
           $this->newItemInfo($entity, $source->feed_nid, $hash);
         }
@@ -171,10 +175,15 @@ abstract class FeedsProcessor extends FeedsPlugin {
         else {
           $entity = $this->entityLoad($source, $entity_id);
 
-          // The feeds_item table is always updated with the info for the most recently processed entity.
-          // The only carryover is the entity_id.
+          // The feeds_item table is always updated with the info for the most
+          // recently processed entity. The only carryover is the entity_id.
           $this->newItemInfo($entity, $source->feed_nid, $hash);
           $entity->feeds_item->entity_id = $entity_id;
+        }
+
+        if ($entity_id && $replace_existing) {
+          $entity->is_new = FALSE;
+          $entity->$id_key = $entity_id;
         }
 
         // Set property and field values.
