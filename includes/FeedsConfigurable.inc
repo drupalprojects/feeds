@@ -265,6 +265,8 @@ function feeds_form_submit($form, &$form_state) {
 
 /**
  * Helper for Feeds validate and submit callbacks.
+ *
+ * @todo This is all terrible. Remove.
  */
 function _feeds_form_helper($form, &$form_state, $action) {
   $method = $form['#feeds_form_method'] . $action;
@@ -277,7 +279,6 @@ function _feeds_form_helper($form, &$form_state, $action) {
   // This will re-initialize all of the plugins anyway, causing some tricky
   // saving issues in certain cases.
   // See http://drupal.org/node/1672880.
-
   if ($class == variable_get('feeds_importer_class', 'FeedsImporter')) {
     $form['#configurable'] = feeds_importer($id);
   }

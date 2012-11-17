@@ -30,6 +30,14 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   }
 
   /**
+   * Returns the type of plugin.
+   *
+   * @return string
+   *   One of either 'fetcher', 'parser', or 'processor'.
+   */
+  abstract public static function pluginType();
+
+  /**
    * Save changes to the configuration of this object.
    * Delegate saving to parent (= Feed) which will collect
    * information from this object by way of getConfig() and store it.

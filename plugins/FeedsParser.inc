@@ -58,6 +58,13 @@ abstract class FeedsParser extends FeedsPlugin {
   }
 
   /**
+   * Implements FeedsPlugin::pluginType().
+   */
+  public static function pluginType() {
+    return 'parser';
+  }
+
+  /**
    * Parse content fetched by fetcher.
    *
    * Extending classes must implement this method.
