@@ -137,8 +137,6 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result) {
     $state = $source->state(FEEDS_PROCESS);
-    $entity_info = $this->entityInfo();
-    $id_key = $entity_info['entity keys']['id'];
 
     while ($item = $parser_result->shiftItem()) {
 
@@ -162,8 +160,6 @@ abstract class FeedsProcessor extends FeedsPlugin {
       }
 
       try {
-
-        $replace_existing = $this->config['update_existing'] == FEEDS_REPLACE_EXISTING;
 
         // Load an existing entity.
         if ($entity_id) {
