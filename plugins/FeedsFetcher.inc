@@ -113,6 +113,10 @@ class FeedsFetcherResult extends FeedsResult {
  */
 abstract class FeedsFetcher extends FeedsPlugin {
 
+  public function pluginType() {
+    return 'fetcher';
+  }
+
   /**
    * Fetch content from a source and return it.
    *

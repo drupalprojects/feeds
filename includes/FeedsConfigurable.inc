@@ -136,7 +136,7 @@ abstract class FeedsConfigurable {
   }
 
   /**
-   * Override magic method __get(). Make sure that $this->config goes through 
+   * Override magic method __get(). Make sure that $this->config goes through
    * getConfig().
    */
   public function __get($name) {
@@ -282,7 +282,9 @@ function _feeds_form_helper($form, &$form_state, $action) {
     $form['#configurable'] = feeds_importer($id);
   }
   else {
-    $form['#configurable'] = feeds_plugin($class, $id);
+    $importer = feeds_importer($id);
+    $plugin_key = $importer->config[$form['#configurable']->pluginType()]['plugin_key'];
+    $form['#configurable'] = feeds_plugin($plugin_key, $id);
   }
 
   if (method_exists($form['#configurable'], $method)) {

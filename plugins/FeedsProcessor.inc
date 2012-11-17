@@ -127,6 +127,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @}
    */
 
+  public function pluginType() {
+    return 'processor';
+  }
+
   /**
    * Process the result of the parsing stage.
    *

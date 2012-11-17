@@ -34,3 +34,4 @@ files[] = views/feeds_views_handler_field_log_message.inc
 files[] = views/feeds_views_handler_field_severity.inc
 files[] = views/feeds_views_handler_field_source.inc
 files[] = views/feeds_views_handler_filter_severity.inc
+files[] = plugins/FeedsEntityProcessor.inc

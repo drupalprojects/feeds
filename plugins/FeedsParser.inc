@@ -53,6 +53,10 @@ class FeedsParserResult extends FeedsResult {
  */
 abstract class FeedsParser extends FeedsPlugin {
 
+  public function pluginType() {
+    return 'parser';
+  }
+
   /**
    * Parse content fetched by fetcher.
    *

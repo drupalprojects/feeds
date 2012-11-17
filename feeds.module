@@ -1142,20 +1142,8 @@ function feeds_get_subscription_jobs() {
  * Implements hook_entity_property_info_alter().
  */
 function feeds_entity_property_info_alter(&$info) {
-  // Gather entities supported by Feeds processors.
-  $processors = FeedsPlugin::byType('processor');
-  $supported_entities = array();
-  foreach ($processors as $processor) {
-    $instance = feeds_plugin($processor['handler']['class'], '__none__');
-    if (method_exists($instance, 'entityType')) {
-      $supported_entities[] = $instance->entityType();
-    }
-  }
-  // Feeds processors can fake the entity info. Only set the property for
-  // defined entities.
-  $supported_entities = array_intersect(array_keys($info), $supported_entities);
 
-  foreach ($supported_entities as $entity_type) {
+  foreach ($info as $entity_type => $entity_info) {
     $info[$entity_type]['properties']['feed_nid'] = array(
       'label' => 'Feed NID',
       'type' => 'integer',
@@ -1177,4 +1165,76 @@ function feeds_get_feed_nid_entity_callback($entity, array $options, $name, $ent
     return NULL;
   }
   return $feed_nid;
+}
+
+function node_form_feedsentityprocessor_feeds_form_alter(&$form, &$form_state) {
+  if ($form['#configurable']->entityType() == 'node') {
+    unset($form['values']['title']);
+    $form['values']['author']['#required'] = FALSE;
+    $form['values']['author']['#autocomplete_path'] = 'user/autocomplete';
+    array_unshift($form['#validate'], 'node_form_feedsentityprocessor_feeds_form_validate');
+    if (is_numeric($form['values']['author']['#default_value']) &&
+      $account = user_load($form['values']['author']['#default_value'])) {
+      $form['values']['author']['#default_value'] = $account->name;
+    }
+  }
+}
+
+function node_form_feedsentityprocessor_feeds_form_validate(&$form, &$form_state) {
+  if (empty($form_state['values']['values']['author'])) {
+    form_set_value($form['values']['author'], 0, $form_state);
+  }
+  else {
+    $account = user_load_by_name($form_state['values']['values']['author']);
+    if ($account) {
+      form_set_value($form['values']['author'], $account->uid, $form_state);
+    }
+  }
+}
+
+function node_feeds_processor_targets_alter(&$targets, $entity_type, $bundle) {
+  if ($entity_type == 'node') {
+    $targets['nid']['name'] = t('Node id');
+    $targets['nid']['description'] = t('The nid of the node. NOTE: use this feature with care, node ids are usually assigned by Drupal.');
+  }
+}
+
+function user_form_feedsentityprocessor_feeds_form_alter(&$form, &$form_state) {
+  if ($form['#configurable']->entityType() == 'user') {
+    unset($form['values']['name']);
+    $form['values']['mail']['#required'] = FALSE;
+  }
+}
+
+function taxonomy_form_feedsentityprocessor_feeds_form_alter(&$form, &$form_state) {
+  if ($form['#configurable']->entityType() == 'taxonomy_term') {
+    unset($form['values']['name']);
+    if (empty($form['values']['weight']['#default_value'])) {
+      $form['values']['weight']['#default_value']= '';
+    }
+    array_unshift($form['#validate'], 'taxonomy_form_feedsentityprocessor_feeds_form_validate');
+    unset($form['values']['parent']);
+    $form['values']['machine_name'] = $form['values']['vocabulary'];
+    $form['values']['vocabulary']['#access'] = FALSE;
+  }
+  elseif ($form['#configurable']->entityType() == 'taxonomy_vocabulary') {
+    unset($form['values']['name']);
+    unset($form['values']['machine_name']);
+    unset($form['values']['vid']);
+  }
+}
+
+function taxonomy_form_feedsentityprocessor_feeds_form_validate(&$form, &$form_state) {
+  if (empty($form_state['values']['values']['weight'])) {
+    form_set_value($form['values']['weight'], 0, $form_state);
+  }
+  form_set_value($form['values']['vocabulary'], $form_state['values']['values']['machine_name'], $form_state);
+}
+
+function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle) {
+  if ($entity_type == 'taxonomy_term') {
+    $targets['tid']['name'] = t('Term id');
+    $targets['tid']['description'] = t('The tid of the taxonomy term. NOTE: use this feature with care, node ids are usually assigned by Drupal.');
+    unset($targets['vocabulary']);
+  }
 }
