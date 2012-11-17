@@ -28,6 +28,14 @@ class FeedsAccessException extends Exception {}
  * Abstract class, defines interface for processors.
  */
 abstract class FeedsProcessor extends FeedsPlugin {
+
+  /**
+   * Implements FeedsPlugin::pluginType().
+   */
+  public static function pluginType() {
+    return 'processor';
+  }
+
   /**
    * @defgroup entity_api_wrapper Entity API wrapper.
    */
