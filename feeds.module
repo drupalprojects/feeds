@@ -1230,11 +1230,3 @@ function taxonomy_form_feedsentityprocessor_feeds_form_validate(&$form, &$form_s
   }
   form_set_value($form['values']['vocabulary'], $form_state['values']['values']['machine_name'], $form_state);
 }
-
-function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle) {
-  if ($entity_type == 'taxonomy_term') {
-    $targets['tid']['name'] = t('Term id');
-    $targets['tid']['description'] = t('The tid of the taxonomy term. NOTE: use this feature with care, node ids are usually assigned by Drupal.');
-    unset($targets['vocabulary']);
-  }
-}

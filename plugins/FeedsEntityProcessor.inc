@@ -10,16 +10,10 @@
 class FeedsEntityProcessor extends FeedsProcessor {
 
   /**
-   * Returns the plugin definition.
-   */
-  protected function pluginDefinition() {
-    $importer = feeds_importer($this->id);
-    $plugin_key = $importer->config['processor']['plugin_key'];
-    return ctools_get_plugins('feeds', 'plugins', $plugin_key);
-  }
-
-  /**
-   * Define entity type.
+   * Returns the entity type.
+   *
+   * @return string
+   *   The type of entity this processor will create.
    */
   public function entityType() {
     $plugin_info = $this->pluginDefinition();
@@ -27,13 +21,31 @@ class FeedsEntityProcessor extends FeedsProcessor {
   }
 
   /**
-   * Implements parent::entityInfo().
+   * Returns the bundle.
+   *
+   * @return string
+   *   The bundle of the entities this processor will create.
+   */
+  public function bundle() {
+    $entity_info = $this->entityInfo();
+    $bundle = $this->entityType();
+    if (isset($entity_info['bundle keys']['bundle'])) {
+      if (isset($this->config['values'][$entity_info['bundle keys']['bundle']])) {
+        $bundle = $this->config['values'][$entity_info['bundle keys']['bundle']];
+      }
+      else {
+        $bundle = NULL;
+      }
+    }
+
+    return $bundle;
+  }
+
+  /**
+   * Overrides parent::entityInfo().
    */
   protected function entityInfo() {
     $info = parent::entityInfo();
-    $importer = feeds_importer($this->id);
-    $plugin_key = $importer->config['processor']['plugin_key'];
-    $plugin_info = $this->pluginDefinition();
     if (isset($info['label plural'])) {
       $plural = $info['label plural'];
     }
@@ -54,6 +66,47 @@ class FeedsEntityProcessor extends FeedsProcessor {
   }
 
   /**
+   * Check that the user has permission to save an entity.
+   *
+   * @todo Is checking the uid safe? A quick glance through core and some
+   *   contrib seems to say yes.
+   */
+  protected function entitySaveAccess($entity) {
+
+    // The check will be skipped for anonymous users.
+    if ($this->config['authorize'] && !empty($entity->uid)) {
+
+      $author = user_load($entity->uid);
+
+      // If the uid was mapped directly, rather than by email or username, it
+      // could be invalid.
+      if (!$author) {
+        $message = 'User %uid is not a valid user.';
+        throw new FeedsAccessException(t($message, array('%uid' => $entity->uid)));
+      }
+
+      if (!empty($entity->is_new)) {
+        $op = 'create';
+        $access = entity_access($op, $this->entityType(), $author);
+      }
+      else {
+        $op = 'update';
+        $access = entity_access($op, $this->entityType(), $author);
+      }
+
+      if (!$access) {
+        $message = 'User %name is not authorized to %op entity %entity.';
+        $args = array(
+          '%name' => $author->name,
+          '%op' => $op,
+          '%entity' => $this->entityType(),
+        );
+        throw new FeedsAccessException(t($message, $args));
+      }
+    }
+  }
+
+  /**
    * Save a entity.
    */
   public function entitysave($entity) {
@@ -66,6 +119,7 @@ class FeedsEntityProcessor extends FeedsProcessor {
   protected function entityDeleteMultiple($ids) {
     entity_delete_multiple($this->entityType(), $ids);
   }
+
   /**
    * Override parent::configDefaults().
    */
@@ -161,19 +215,13 @@ class FeedsEntityProcessor extends FeedsProcessor {
   }
 
   /**
-   * Return available mapping targets.
+   * Returns available mapping targets.
    */
   public function getMappingTargets() {
     // Get a wrapper with the right bundle info.
 
     $targets = parent::getMappingTargets();
-
-    $entity_info = $this->entityInfo();
-    $bundle = $this->entityType();
-    if (isset($entity_info['bundle keys']['bundle'])) {
-      $bundle = $this->config['values'][$entity_info['bundle keys']['bundle']];
-    }
-    $info = array('bundle' => $bundle);
+    $info = array('bundle' => $this->bundle());
 
     $wrapper = entity_metadata_wrapper($this->entityType(), NULL, $info);
     // @todo: maybe restrict to data types feeds can deal with.
@@ -185,6 +233,8 @@ class FeedsEntityProcessor extends FeedsProcessor {
         );
       }
     }
+
+    $entity_info = $this->entityInfo();
     $targets[$entity_info['entity keys']['id']]['optional_unique'] = TRUE;
 
     // Remove the bundle target.

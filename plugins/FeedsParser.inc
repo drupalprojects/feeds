@@ -53,10 +53,6 @@ class FeedsParserResult extends FeedsResult {
  */
 abstract class FeedsParser extends FeedsPlugin {
 
-  public function pluginType() {
-    return 'parser';
-  }
-
   /**
    * Implements FeedsPlugin::pluginType().
    */
@@ -67,7 +63,7 @@ abstract class FeedsParser extends FeedsPlugin {
   /**
    * Parse content fetched by fetcher.
    *
-   * Extending classes must implement this method.
+   * `Extending classes must implement this method.
    *
    * @param FeedsSource $source
    *   Source information.

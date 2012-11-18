@@ -32,10 +32,28 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   /**
    * Returns the type of plugin.
    *
+   * Would be abstract but static functions cannot be abstract.
+   *
    * @return string
    *   One of either 'fetcher', 'parser', or 'processor'.
+   *
+   * @todo Interfaces!
    */
-  abstract public static function pluginType();
+  public static function pluginType() {}
+
+  /**
+   * Returns the plugin definition.
+   *
+   * @return array
+   *   The plugin definition array.
+   *
+   * @see ctools_get_plugins()
+   */
+  public function pluginDefinition() {
+    $importer = feeds_importer($this->id);
+    $plugin_key = $importer->config[$this->pluginType()]['plugin_key'];
+    return ctools_get_plugins('feeds', 'plugins', $plugin_key);
+  }
 
   /**
    * Save changes to the configuration of this object.
@@ -211,6 +229,13 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
  * Used when a plugin is missing.
  */
 class FeedsMissingPlugin extends FeedsPlugin {
+  /**
+   * Implements FeedsPlugin::pluginType().
+   */
+  public static function pluginType() {
+    return 'missing';
+  }
+
   public function menuItem() {
     return array();
   }

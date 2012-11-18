@@ -113,10 +113,6 @@ class FeedsFetcherResult extends FeedsResult {
  */
 abstract class FeedsFetcher extends FeedsPlugin {
 
-  public function pluginType() {
-    return 'fetcher';
-  }
-
   /**
    * Implements FeedsPlugin::pluginType().
    */
