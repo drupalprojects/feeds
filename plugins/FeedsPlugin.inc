@@ -35,7 +35,7 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    * @return string
    *   One of either 'fetcher', 'parser', or 'processor'.
    */
-  abstract public static function pluginType();
+  abstract public function pluginType();
 
   /**
    * Save changes to the configuration of this object.
@@ -211,6 +211,9 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
  * Used when a plugin is missing.
  */
 class FeedsMissingPlugin extends FeedsPlugin {
+  public function pluginType() {
+    return 'missing';
+  }
   public function menuItem() {
     return array();
   }

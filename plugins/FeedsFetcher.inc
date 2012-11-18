@@ -116,7 +116,7 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Implements FeedsPlugin::pluginType().
    */
-  public static function pluginType() {
+  public function pluginType() {
     return 'fetcher';
   }
 

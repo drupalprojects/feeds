@@ -56,7 +56,7 @@ abstract class FeedsParser extends FeedsPlugin {
   /**
    * Implements FeedsPlugin::pluginType().
    */
-  public static function pluginType() {
+  public function pluginType() {
     return 'parser';
   }
 
