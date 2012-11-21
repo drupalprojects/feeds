@@ -188,7 +188,7 @@ function hook_feeds_parser_sources_alter(&$sources, $content_type) {
  * @see hook_feeds_parser_sources_alter()
  * @see locale_feeds_get_source()
  */
-function my_source_get_source($source, FeedsParserResult $result, $key) {
+function my_source_get_source(FeedsSource $source, FeedsParserResult $result, $key) {
   $item = $result->currentItem();
   return my_source_parse_images($item['description']);
 }
