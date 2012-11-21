@@ -237,6 +237,7 @@ class FeedsSource extends FeedsConfigurable {
    *   method may throw the same exceptions as FeedsSource::import().
    */
   public function startImport() {
+    module_invoke_all('feeds_before_import', $this);
     $config = $this->importer->getConfig();
     if ($config['process_in_background']) {
       $this->startBackgroundJob('import');

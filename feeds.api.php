@@ -115,6 +115,16 @@ function hook_feeds_presave(FeedsSource $source, $entity, $item) {
 }
 
 /**
+ * Invoked before a feed source import starts.
+ *
+ * @param $source
+ *  FeedsSource object that describes the source that is going to be imported.
+ */
+function hook_feeds_before_import(FeedsSource $source) {
+  // See feeds_rules module's implementation for an example.
+}
+
+/**
  * Invoked after a feed source has been imported.
  *
  * @param $source
@@ -175,8 +185,8 @@ function hook_feeds_parser_sources_alter(&$sources, $content_type) {
  * @return
  *   The value to be extracted from the source.
  *
- * @see hook_feeds_parser_sources_alter().
- * @see locale_feeds_get_source().
+ * @see hook_feeds_parser_sources_alter()
+ * @see locale_feeds_get_source()
  */
 function my_source_get_source($source, FeedsParserResult $result, $key) {
   $item = $result->currentItem();
@@ -240,7 +250,7 @@ function hook_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
 function my_module_set_target($source, $entity, $target, $value, $mapping) {
   $entity->{$target}[$entity->language][0]['value'] = $value;
   if (isset($source->importer->processor->config['input_format'])) {
-    $entity->{$target}[$entity->language][0]['format'] = 
+    $entity->{$target}[$entity->language][0]['format'] =
       $source->importer->processor->config['input_format'];
   }
 }
@@ -280,11 +290,11 @@ function my_module_summary_callback($mapping, $target, $form, $form_state) {
  *
  * The arguments are the same that my_module_summary_callback() gets.
  *
- * @see my_module_summary_callback()
- *
  * @return
  *   The per mapping configuration form. Once the form is saved, $mapping will
  *   be populated with the form values.
+ *
+ * @see my_module_summary_callback()
  */
 function my_module_form_callback($mapping, $target, $form, $form_state) {
   return array(
