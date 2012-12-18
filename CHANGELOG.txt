@@ -1,3 +1,42 @@
+Feeds 6.x 1.0 Beta 13, 2012-12-18
+---------------------------------
+
+- Issue #1017538 by joshuajabbour: Added support for mapping taxonomy term
+  weights.
+- Issue #925716 by tmcw: Fixed Zero values imported as NULL from CSVs using
+  Feeds.
+- Back-port of common_syndication_parser.inc from 7.x to 6.x.
+- Issue #1087622 by Dane Powell | IRuslan: Fixed Notice: Undefined index:
+  processing in FeedsBatch->getTotal().
+- Issue #1567878 by Dane Powell: Fixed Notice: Undefined property: stdClass::.
+- Tests should pass.
+- Issue #1241754 by twistor, Robin Monks | j0e: Added targets for author name
+  and email in node processor.
+- Issue #1372074 by twistor, emackn: Fixed feeds_http_request() does not cache
+  when using drupal_http_request().
+- Issue #1271502 by twistor | oobie11: Fixed Im getting an error when I run
+  cron.
+- Issue #724536 by joshuajabbour, twistor, jeffschuler, milesw, victormoya,
+  alex_b, tauno, Nephele | katsikas: Added Mapper for nodereference field in
+  Drupal 6.
+- Issue #1688294 by twistor | Rob_Feature: Fixed Invalid URL (even though it's
+  valid).
+- Issue #1112876 by chx: Added Support digest auth.
+- Issue #1070604 by Bob�k: Added Feed's nid in mappings.
+- Issue #1742740 by Staratel: Fixed Add magic method __isset() to
+  FeedsConfigurable to use default entity wrapping.
+- Issue #1736976 by Chaulky: Added Trim feed urls to remove accidental spaces.
+- Issue #1724200 by balazs.hegedus: Added Support for drupal_http_request()
+  timeout.
+- Issue #1792318 by psynaptic: Fixed Invalid multibyte sequence in
+  tests/feeds.test.
+- Issue #1420360 by anarchocoder: Fixed Common Syndication Parser sometimes
+  creates php warning when feed item title is empty.
+- Issue #1191498 by dooug, twistor: Set drupal_set_message() to not repeat
+  'Missing Feeds plugin...'.
+- Issue #912682 by alex_b, snyderp, dman | dwhogg: Added CSV Parser: Support
+  Mac-style line endings.
+
 Feeds 6.x 1.0 Beta 12, 2012-05-08
 ---------------------------------
 
@@ -6,71 +45,71 @@ Feeds 6.x 1.0 Beta 12, 2012-05-08
 - Issue #996808 by twistor, marcvangend, joshuajabbour: Fixed Update existing
   doesn't reset targets that have real_target set.
 - Issue #712304 by derhasi, twistor, jerdavis, alex_b, rjbrown99, rbayliss |
-  ManyNancy: Fixed Batch import does not continue where it left off, instead 
+  ManyNancy: Fixed Batch import does not continue where it left off, instead
   starts from the beginning.
 - Issue #1035684 by mikejoconnor: Source / Target sort order
-- Issue #1382208 by slcp: Fixed FeedsSource.inc sourceSave() and sourceDelete() 
+- Issue #1382208 by slcp: Fixed FeedsSource.inc sourceSave() and sourceDelete()
   function descriptions are the wrong way round.
-- Issue #1298326 by twistor, Dave Reid, emackn: Fixed Only execute 
+- Issue #1298326 by twistor, Dave Reid, emackn: Fixed Only execute
   rebuild_menu() when necessary.  Port for D6
-- Issue #1248712: Show an empty row result and hide the Save button if no 
+- Issue #1248712: Show an empty row result and hide the Save button if no
   importers are available.
-- Issue #1197646: Skip importer config form validation if a machine name was not 
+- Issue #1197646: Skip importer config form validation if a machine name was not
   provided.
 - Issue #1248682: Fixed failures in scheduler tests.
-- Issue #1248648 by twistor, Dave Reid: Fixed bugs and inconsistencies in 
+- Issue #1248648 by twistor, Dave Reid: Fixed bugs and inconsistencies in
   FeedsRSStoNodesTest.
 - Issue #1203578: Fixed wrong path to test files after test directory rename.
-- Issue #1230538: Removed unnecessary filter_xss() from 
+- Issue #1230538: Removed unnecessary filter_xss() from
   theme_feeds_ui_mapping_form().
-- Issue #1161810: Fixed declaration of FeedsSource::instance() should be 
+- Issue #1161810: Fixed declaration of FeedsSource::instance() should be
   compatible with that of FeedsConfigurable::instance().
 - Fixing PHP strict error in _parser_common_syndication_atom10_parse().
 - Issue #1191554: Fixed failures in FeedsUIUserInterfaceTestCase.
 - Issue #1191564: Use FeedsWebTestCase for FeedsDateTimeTest.
-- Issue #1191494 by twistor, Dave Reid: Fixed link to node type feed importer 
+- Issue #1191494 by twistor, Dave Reid: Fixed link to node type feed importer
   did not use node_access().
-- Fixed coder violations and standards. Fixed possible XSS with field labels in 
+- Fixed coder violations and standards. Fixed possible XSS with field labels in
   Feed importer mapping settings.
-- Fixed strict notice: definition of FeedsFeedNodeProcessor::map() did not match 
+- Fixed strict notice: definition of FeedsFeedNodeProcessor::map() did not match
   FeedsProcessor::map().
-- Issue #963842 by ceardach: Fixed feeds_update_6010() should not enable 
+- Issue #963842 by ceardach: Fixed feeds_update_6010() should not enable
   non-essential modules.
 - Issue #723548: Added support for feed URLs with feed:// and webcal://.
 - Re-exported features with latest code.
-- Fixed error when calling form_set_error() and title field on follow-up to fix 
+- Fixed error when calling form_set_error() and title field on follow-up to fix
   feed node title fields not actually un-required.
-- Issue #1191210: Added feeds_content_extra_fields() so the 'Feed' fieldset can 
+- Issue #1191210: Added feeds_content_extra_fields() so the 'Feed' fieldset can
   be re-ordered through the CCK field UI.
-- Issue #1191194: Fixed test failure in FeedsCSVtoUsersTest due to lack of 
+- Issue #1191194: Fixed test failure in FeedsCSVtoUsersTest due to lack of
   'administer users' permission.
-- Use module_load_include() for test files and fix PHP notice in 
+- Use module_load_include() for test files and fix PHP notice in
   FeedsProcessor.inc.
-- Issue #1066286: Added test to ensure 'Feed items' doesn't display on non-feed 
+- Issue #1066286: Added test to ensure 'Feed items' doesn't display on non-feed
   nodes.
 - Cleanup feeds_form_alter().
-- Simplify FeedsMapperTestCase::createContentType() using 
+- Simplify FeedsMapperTestCase::createContentType() using
   DrupalWebTestCase::drupalCreateContentType().
-- Issue #743528 by Souvent22, Dave Reid: Fixed _feeds_node_delete() fails if the 
+- Issue #743528 by Souvent22, Dave Reid: Fixed _feeds_node_delete() fails if the
   node does not load or exist.
 - Fixed _feeds_node_delete() wasn't exactly a copy of node_delete().
 - Fixes and cleanups to tests.
 - Issue #914210 by jyee, Dave Reid: Added mapper for user raw password.
-- Backports from Drupal 7: Removed t() from feeds_schema(). Cleanups for 
+- Backports from Drupal 7: Removed t() from feeds_schema(). Cleanups for
   documentation and tests.
-- Issue #797228 by alex_b: Fixed records not removed from {feeds_node_item} when 
+- Issue #797228 by alex_b: Fixed records not removed from {feeds_node_item} when
   a feed node is deleted.
-- Issue #769084: Fixed use of isset() rather than !empty() causes import 
+- Issue #769084: Fixed use of isset() rather than !empty() causes import
   problems with _parser_common_syndication_RSS20_parse().
 - Fixed various PHP notices and strict errors.
-- Issue #974494: Fixed PHP notice 'Undefined property: stdClass::$openid in 
+- Issue #974494: Fixed PHP notice 'Undefined property: stdClass::$openid in
   FeedsUserProcessor->entitySave()'.
 - Issue #1170714: Fixed debugging functions left in code.
-- Issue #1055582: Fixed strict notice that FeedsDateTime::setTimezone() is not 
+- Issue #1055582: Fixed strict notice that FeedsDateTime::setTimezone() is not
   compatible with DateTime::setTimezone().
 - Issue #1085194: Not all selected mappings are removed.
 - Issue #1152694: Fixed use of deprecated split() with explode().
-- Issue #1066822: Fixed bugs and inconsistencies with test files and getInfo() 
+- Issue #1066822: Fixed bugs and inconsistencies with test files and getInfo()
   declarations.
 
 Feeds 6.x 1.0 Beta 11, 2011-06-28
