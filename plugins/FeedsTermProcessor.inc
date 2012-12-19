@@ -86,28 +86,9 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Override parent::configForm().
    */
   public function configForm(&$form_state) {
-    $options = array(0 => t('Select a vocabulary'));
-    foreach (taxonomy_get_vocabularies() as $vocab) {
-      $options[$vocab->machine_name] = $vocab->name;
-    }
     $form = parent::configForm($form_state);
-    $form['vocabulary'] = array(
-      '#type' => 'select',
-      '#title' => t('Import to vocabulary'),
-      '#description' => t('Choose the vocabulary to import into. <strong>CAUTION:</strong> when deleting terms through the "Delete items" tab, Feeds will delete <em>all</em> terms from this vocabulary.'),
-      '#options' => $options,
-      '#default_value' => $this->config['vocabulary'],
-    );
+    $form['bundle']['#title'] = t('Vocabulary');
     return $form;
-  }
-
-  /**
-   * Override parent::configFormValidate().
-   */
-  public function configFormValidate(&$values) {
-    if (empty($values['vocabulary'])) {
-      form_set_error('vocabulary', t('Choose a vocabulary'));
-    }
   }
 
   /**
@@ -228,10 +209,8 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Return vocabulary to map to.
    */
   public function vocabulary() {
-    if (isset($this->config['vocabulary'])) {
-      if ($vocabulary = taxonomy_vocabulary_machine_name_load($this->config['vocabulary'])) {
-        return $vocabulary;
-      }
+    if ($vocabulary = taxonomy_vocabulary_machine_name_load($this->bundle())) {
+      return $vocabulary;
     }
     throw new Exception(t('No vocabulary defined for Taxonomy Term processor.'));
   }

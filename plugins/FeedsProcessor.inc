@@ -46,6 +46,37 @@ abstract class FeedsProcessor extends FeedsPlugin {
   public abstract function entityType();
 
   /**
+   * Bundle type this processor operates on.
+   *
+   * Defaults to the entity type for entities that do not define bundles.
+   *
+   * @return string|NULL
+   *   The bundle type this processor operates on, or NULL if it is undefined.
+   */
+  public function bundle() {
+    return $this->config['bundle'];
+  }
+
+  /**
+   * Provides a list of bundle options for use in select lists.
+   *
+   * @return array
+   *   A keyed array of bundle => label.
+   */
+  public function bundleOptions() {
+    $options = array();
+    foreach (field_info_bundles($this->entityType()) as $bundle => $info) {
+      if (!empty($info['label'])) {
+        $options[$bundle] = $info['label'];
+      }
+      else {
+        $options[$bundle] = $bundle;
+      }
+    }
+    return $options;
+  }
+
+  /**
    * Create a new entity.
    *
    * @param $source
@@ -493,11 +524,17 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Declare default configuration.
    */
   public function configDefaults() {
+    $info = $this->entityInfo();
+    $bundle = NULL;
+    if (empty($info['entity keys']['bundle'])) {
+      $bundle = $this->entityType();
+    }
     return array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
       'input_format' => NULL,
       'skip_hash_check' => FALSE,
+      'bundle' => $bundle,
     );
   }
 
@@ -507,7 +544,25 @@ abstract class FeedsProcessor extends FeedsPlugin {
   public function configForm(&$form_state) {
     $info = $this->entityInfo();
     $form = array();
+
+    if (!empty($info['entity keys']['bundle'])) {
+      $form['bundle'] = array(
+        '#type' => 'select',
+        '#options' => $this->bundleOptions(),
+        '#title' => t('Bundle'),
+        '#required' => TRUE,
+        '#default_value' => $this->bundle(),
+      );
+    }
+    else {
+      $form['bundle'] = array(
+        '#type' => 'value',
+        '#value' => $this->entityType(),
+      );
+    }
+
     $tokens = array('@entities' => strtolower($info['label plural']));
+
     $form['update_existing'] = array(
       '#type' => 'radios',
       '#title' => t('Update existing @entities', $tokens),
@@ -539,6 +594,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       '#default_value' => isset($this->config['input_format']) ? $this->config['input_format'] : 'plain_text',
       '#required' => TRUE,
     );
+
     return $form;
   }
 
@@ -646,7 +702,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $parser = feeds_importer($this->id)->parser;
     $targets = array();
     foreach ($this->config['mappings'] as $mapping) {
-      if ($mapping['unique']) {
+      if (!empty($mapping['unique'])) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
         $targets[$mapping['target']] = $parser->getSourceElement($source, $result, $mapping['source']);
@@ -729,3 +785,5 @@ abstract class FeedsProcessor extends FeedsPlugin {
     return '';
   }
 }
+
+class FeedsProcessorBundleNotDefined extends Exception {}

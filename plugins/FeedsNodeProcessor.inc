@@ -9,6 +9,7 @@
  * Creates nodes from feed items.
  */
 class FeedsNodeProcessor extends FeedsProcessor {
+
   /**
    * Define entity type.
    */
@@ -30,7 +31,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
    */
   protected function newEntity(FeedsSource $source) {
     $node = new stdClass();
-    $node->type = $this->config['content_type'];
+    $node->type = $this->bundle();
     $node->changed = REQUEST_TIME;
     $node->created = REQUEST_TIME;
     $node->language = LANGUAGE_NONE;
@@ -159,10 +160,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Override parent::configDefaults().
    */
   public function configDefaults() {
-    $types = node_type_get_names();
-    $type = isset($types['article']) ? 'article' : key($types);
     return array(
-      'content_type' => $type,
       'expire' => FEEDS_EXPIRE_NEVER,
       'author' => 0,
       'authorize' => TRUE,
@@ -173,16 +171,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Override parent::configForm().
    */
   public function configForm(&$form_state) {
-    $types = node_type_get_names();
-    array_walk($types, 'check_plain');
     $form = parent::configForm($form_state);
-    $form['content_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Content type'),
-      '#description' => t('Select the content type for the nodes to be created. <strong>Note:</strong> Users with "import !feed_id feeds" permissions will be able to <strong>import</strong> nodes of the content type selected here regardless of the node level permissions. Further, users with "clear !feed_id permissions" will be able to <strong>delete</strong> imported nodes regardless of their node level permissions.', array('!feed_id' => $this->id)),
-      '#options' => $types,
-      '#default_value' => $this->config['content_type'],
-    );
+
+    $form['bundle']['#title'] = t('Content type');
+
     $author = user_load($this->config['author']);
     $form['author'] = array(
       '#type' => 'textfield',
@@ -241,7 +233,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       case 'feeds_source':
         // Get the class of the feed node importer's fetcher and set the source
         // property. See feeds_node_update() how $node->feeds gets stored.
-        if ($id = feeds_get_importer_id($this->config['content_type'])) {
+        if ($id = feeds_get_importer_id($this->bundle())) {
           $class = get_class(feeds_importer($id)->fetcher);
           $target_node->feeds[$class]['source'] = $value;
           // This effectively suppresses 'import on submission' feature.
@@ -269,7 +261,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Return available mapping targets.
    */
   public function getMappingTargets() {
-    $type = node_type_get_type($this->config['content_type']);
+    $type = node_type_get_type($this->bundle());
+
     $targets = parent::getMappingTargets();
     if ($type->has_title) {
       $targets['title'] = array(
@@ -329,7 +322,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     }
 
     // If the target content type is a Feed node, expose its source field.
-    if ($id = feeds_get_importer_id($this->config['content_type'])) {
+    if ($id = feeds_get_importer_id($this->bundle())) {
       $name = feeds_importer($id)->config['name'];
       $targets['feeds_source'] = array(
         'name' => t('Feed source'),
@@ -341,7 +334,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     // Let other modules expose mapping targets.
     self::loadMappers();
     $entity_type = $this->entityType();
-    $bundle = $this->config['content_type'];
+    $bundle = $this->bundle();
     drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
 
     return $targets;
@@ -363,10 +356,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
           break;
         case 'title':
-          $nid = db_query("SELECT nid FROM {node} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->config['content_type']))->fetchField();
+          $nid = db_query("SELECT nid FROM {node} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->bundle()))->fetchField();
           break;
         case 'feeds_source':
-          if ($id = feeds_get_importer_id($this->config['content_type'])) {
+          if ($id = feeds_get_importer_id($this->bundle())) {
             $nid = db_query("SELECT fs.feed_nid FROM {node} n JOIN {feeds_source} fs ON n.nid = fs.feed_nid WHERE fs.id = :id AND fs.source = :source", array(':id' => $id, ':source' => $value))->fetchField();
           }
           break;
