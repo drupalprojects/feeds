@@ -568,3 +568,51 @@ function feeds_update_7207() {
     'serialize' => TRUE,
   ));
 }
+
+/**
+ * Update to use generic bundle handling.
+ */
+function feeds_update_7208(&$sandbox) {
+
+  if (!isset($sandbox['importers'])) {
+    // Get all importers.
+    $sandbox['importers'] = db_query("SELECT id FROM {feeds_importer}")->fetchCol();
+    $sandbox['total'] = count($sandbox['importers']);
+  }
+
+  $importer = array_pop($sandbox['importers']);
+  $config = db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $importer))->fetchField();
+
+  if ($config) {
+    $config = unserialize($config);
+
+    switch ($config['processor']['plugin_key']) {
+      case 'FeedsNodeProcessor':
+        $config_key = 'content_type';
+        break;
+
+      case 'FeedsTermProcessor':
+        $config_key = 'vocabulary';
+        break;
+
+      default:
+        $config_key = FALSE;
+        break;
+    }
+
+    if ($config_key && isset($config['processor']['config'][$config_key])) {
+      $config['processor']['config']['bundle'] = $config['processor']['config'][$config_key];
+      unset($config['processor']['config'][$config_key]);
+
+      // Update databse.
+      db_update('feeds_importer')
+        ->fields(array(
+          'config' => serialize($config),
+        ))
+        ->condition('id', $importer)
+        ->execute();
+    }
+  }
+
+  $sandbox['#finished'] = 1 - count($sandbox['importers']) / $sandbox['total'];
+}
