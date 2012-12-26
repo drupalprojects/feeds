@@ -19,12 +19,7 @@
  *  stdClass The structured datas extracted from the feed.
  */
 function common_syndication_parser_parse($string) {
-  if (!defined('LIBXML_VERSION') || (version_compare(phpversion(), '5.1.0', '<'))) {
-    @ $xml = simplexml_load_string($string, NULL);
-  }
-  else {
-    @ $xml = simplexml_load_string($string, NULL, LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOCDATA);
-  }
+  @ $xml = simplexml_load_string($string, NULL, LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOCDATA);
 
   // Got a malformed XML.
   if ($xml === FALSE || is_null($xml)) {
@@ -262,9 +257,8 @@ function _parser_common_syndication_RDF10_parse($feed_XML) {
     'rss'      => 'http://purl.org/rss/1.0/',
   );
 
-  // Get all namespaces declared in the feed element, with special handling
-  // for PHP versions prior to 5.1.2 as they don't handle namespaces.
-  $namespaces = version_compare(phpversion(), '5.1.2', '<') ? array() : $feed_XML->getNamespaces(TRUE);
+  // Get all namespaces declared in the feed element.
+  $namespaces = $feed_XML->getNamespaces(TRUE);
 
   // Process the <rss:channel> resource containing feed metadata:
   foreach ($feed_XML->children($canonical_namespaces['rss'])->channel as $rss_channel) {
@@ -379,11 +373,9 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
 
     $category = $news->xpath('category');
     // Get children for current namespace.
-    if (version_compare(phpversion(), '5.1.2', '>')) {
-      $content = (array)$news->children($ns["content"]);
-      $dc      = (array)$news->children($ns["dc"]);
-      $georss  = (array)$news->children($ns["georss"]);
-    }
+    $content = (array)$news->children($ns["content"]);
+    $dc      = (array)$news->children($ns["dc"]);
+    $georss  = (array)$news->children($ns["georss"]);
     $news = (array) $news;
     $news['category'] = $category;
 
