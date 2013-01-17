@@ -123,7 +123,7 @@ class FeedsCSVParser extends FeedsParser {
     $sources = $uniques = array();
     foreach ($mappings as $mapping) {
       $sources[] = check_plain($mapping['source']);
-      if ($mapping['unique']) {
+      if (!empty($mapping['unique'])) {
         $uniques[] = check_plain($mapping['source']);
       }
     }
@@ -208,7 +208,7 @@ class FeedsCSVParser extends FeedsParser {
     $mappings = feeds_importer($this->id)->processor->config['mappings'];
     $sources = $uniques = array();
     foreach ($mappings as $mapping) {
-      if ($mapping['unique']) {
+      if (!empty($mapping['unique'])) {
         $uniques[] = check_plain($mapping['source']);
       }
       else {
