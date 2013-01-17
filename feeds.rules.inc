@@ -52,8 +52,7 @@ function feeds_rules_event_info() {
     );
     // Add bundle information if the node processor is used.
     if ($processor instanceof FeedsNodeProcessor) {
-      $config = $processor->getConfig();
-      $info['feeds_import_'. $importer->id]['variables'][$entity_type]['bundle'] = $config['bundle'];
+      $info['feeds_import_'. $importer->id]['variables'][$entity_type]['bundle'] = $processor->bundle();
     }
   }
   return $info;
