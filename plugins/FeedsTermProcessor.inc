@@ -176,7 +176,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     try {
       self::loadMappers();
       $entity_type = $this->entityType();
-      $bundle = $this->vocabulary()->machine_name;
+      $bundle = $this->bundle();
       drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
     }
     catch (Exception $e) {
