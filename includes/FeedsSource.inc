@@ -527,6 +527,9 @@ class FeedsSource extends FeedsConfigurable {
       if (!empty($record->state)) {
         $this->state = unserialize($record->state);
       }
+      if (!is_array($this->state)) {
+        $this->state = array();
+      }
       if (!empty($record->fetcher_result)) {
         $this->fetcher_result = unserialize($record->fetcher_result);
       }
