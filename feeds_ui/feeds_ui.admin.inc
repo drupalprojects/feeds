@@ -431,14 +431,17 @@ function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
   $form['#importer'] = $importer->id;
   $form['#plugin_type'] = $type;
 
+  $importer_key = $importer->config[$type]['plugin_key'];
+
   foreach ($plugins as $key => $plugin) {
+
     $form['plugin_key'][$key] = array(
       '#type' => 'radio',
       '#parents' => array('plugin_key'),
       '#title' => check_plain($plugin['name']),
       '#description' => filter_xss(isset($plugin['help']) ? $plugin['help'] : $plugin['description']),
       '#return_value' => $key,
-      '#default_value' => ($plugin['handler']['class'] == get_class($importer->$type)) ? $key : '',
+      '#default_value' => ($key == $importer_key) ? $key : '',
     );
   }
   $form['submit'] = array(
