@@ -111,6 +111,15 @@ class FeedsNodeProcessor extends FeedsProcessor {
   }
 
   /**
+   * Validates a node.
+   */
+  protected function entityValidate($entity) {
+    if (empty($entity->uid)) {
+       $entity->uid = $this->config['author'];
+    }
+  }
+
+  /**
    * Save a node.
    */
   public function entitySave($entity) {
