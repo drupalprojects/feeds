@@ -763,11 +763,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *  Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
    */
   protected function hash($item) {
-    static $serialized_mappings;
-    if (!$serialized_mappings) {
-      $serialized_mappings = serialize($this->config['mappings']);
-    }
-    return hash('md5', serialize($item) . $serialized_mappings);
+    return hash('md5', serialize($item) . serialize($this->config['mappings']));
   }
 
   /**
