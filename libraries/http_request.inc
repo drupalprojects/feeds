@@ -139,6 +139,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   if ($curl) {
     $headers[] = 'User-Agent: Drupal (+http://drupal.org/)';
     $result = new stdClass();
+    $result->headers = array();
 
     // Parse the URL and make sure we can handle the schema.
     // cURL can only support either http:// or https://.
@@ -194,7 +195,6 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
       $result->data = substr($data, $header_size);
       $headers = preg_split("/(\r\n){2}/", $header);
       $header_lines = preg_split("/\r\n|\n|\r/", end($headers));
-      $result->headers = array();
       array_shift($header_lines); // skip HTTP response status
 
       while ($line = trim(array_shift($header_lines))) {
@@ -218,6 +218,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   }
   else {
     $result = drupal_http_request($url, array('headers' => $headers, 'timeout' => $request_timeout));
+    $result->headers = isset($result->headers) ? $result->headers : array();
   }
 
   $result->code = isset($result->code) ? $result->code : 200;
