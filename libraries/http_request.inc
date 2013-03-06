@@ -24,8 +24,10 @@ define('HTTP_REQUEST_PCRE_TAG_ATTRIBUTES', '/[\x09\x0A\x0B\x0C\x0D\x20]+([^\x09\
 class HRCurlException extends Exception {}
 
 /**
- * Discover RSS or atom feeds at the given URL. If document in given URL is an
- * HTML document, function attempts to discover RSS or Atom feeds.
+ * Discovers RSS or atom feeds at the given URL.
+ *
+ * If document in given URL is an HTML document, function attempts to discover
+ * RSS or Atom feeds.
  *
  * @param string $url
  *   The url of the feed to retrieve.
@@ -155,6 +157,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
         case 'https':
           // Valid scheme.
           break;
+
         default:
           $result->error = 'invalid schema ' . $uri['scheme'];
           $result->code = -1003;
@@ -185,7 +188,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
           t('cURL error (@code) @error for @url', array(
             '@code' => curl_errno($download),
             '@error' => curl_error($download),
-            '@url' => $url
+            '@url' => $url,
           )), curl_errno($download)
         );
       }
@@ -195,7 +198,8 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
       $result->data = substr($data, $header_size);
       $headers = preg_split("/(\r\n){2}/", $header);
       $header_lines = preg_split("/\r\n|\n|\r/", end($headers));
-      array_shift($header_lines); // skip HTTP response status
+      // Skip HTTP response status.
+      array_shift($header_lines);
 
       while ($line = trim(array_shift($header_lines))) {
         list($header, $value) = explode(':', $line, 2);
@@ -249,7 +253,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
  * Decides if it's possible to use cURL or not.
  *
  * @return bool
- *   TRUE if curl is available, FALSE otherwise.
+ *   TRUE if cURL is available, FALSE otherwise.
  */
 function http_request_use_curl() {
   // Allow site administrators to choose to not use cURL.
@@ -273,13 +277,13 @@ function http_request_clear_cache($url) {
  * Returns if the provided $content_type is a feed.
  *
  * @param string $content_type
- *  The Content-Type header.
+ *   The Content-Type header.
  *
  * @param string $data
- *  The actual data from the http request.
+ *   The actual data from the http request.
  *
  * @return bool
- *  Returns TRUE if this is a parsable feed.
+ *   Returns TRUE if this is a parsable feed.
  */
 function http_request_is_feed($content_type, $data) {
   $pos = strpos($content_type, ';');
@@ -300,10 +304,10 @@ function http_request_is_feed($content_type, $data) {
  * Finds potential feed tags in the HTML document.
  *
  * @param string $html
- *  The html string to search.
+ *   The html string to search.
  *
  * @return array
- *  An array of href to feeds.
+ *   An array of href to feeds.
  */
 function http_request_find_feeds($html) {
   $matches = array();
