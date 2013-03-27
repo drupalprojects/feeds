@@ -1178,3 +1178,43 @@ function feeds_get_feed_nid_entity_callback($entity, array $options, $name, $ent
   }
   return $feed_nid;
 }
+
+/**
+ * Implements hook_file_download().
+ */
+function feeds_file_download($uri) {
+  $id = db_query("SELECT id FROM {feeds_source} WHERE source = :uri", array(':uri' => $uri))->fetchField();
+
+  if (!$id) {
+    // File is not associated with a feed.
+    return;
+  }
+
+   // Get the file record based on the URI. If not in the database just return.
+  $files = file_load_multiple(array(), array('uri' => $uri));
+  foreach ($files as $item) {
+    // Since some database servers sometimes use a case-insensitive comparison
+    // by default, double check that the filename is an exact match.
+    if ($item->uri === $uri) {
+      $file = $item;
+      break;
+    }
+  }
+  if (!isset($file)) {
+    return;
+  }
+
+  // Check if this file belongs to Feeds.
+  $usage_list = file_usage_list($file);
+  if (!isset($usage_list['feeds'])) {
+    return;
+  }
+
+  if (!feeds_access('import', $id)) {
+    // User does not have permission to import this feed.
+    return -1;
+  }
+
+  // Return file headers.
+  return file_get_content_headers($file);
+}
