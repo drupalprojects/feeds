@@ -235,6 +235,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
         $this->entitySaveAccess($entity);
         $this->entitySave($entity);
 
+        // Allow modules to perform operations using the saved entity data.
+        // $entity contains the updated entity after saving.
+        module_invoke_all('feeds_after_save', $source, $entity, $item);
+
         // Track progress.
         if (empty($entity_id)) {
           $state->created++;
