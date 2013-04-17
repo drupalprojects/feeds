@@ -1080,7 +1080,7 @@ function theme_feeds_ui_mapping_form($variables) {
 }
 
 /**
- * Page callback to import a feeds importer.
+ * Page callback to import a Feeds importer.
  */
 function feeds_ui_importer_import($form, &$form_state) {
   $form['id'] = array(
@@ -1132,7 +1132,7 @@ function feeds_ui_importer_import_validate($form, &$form_state) {
   ob_end_clean();
 
   if (!is_object($feeds_importer)) {
-    return form_error($form['importer'], t('Unable to interpret feeds importer code.'));
+    return form_error($form['importer'], t('Unable to interpret Feeds importer code.'));
   }
 
   if (empty($feeds_importer->api_version) || $feeds_importer->api_version < 1) {
