@@ -11,6 +11,7 @@ table.feeds-admin-importers tr.disabled.odd,
 table.feeds-admin-importers tr.disabled.even {
   border-color: #eee;
 }
+
 table.feeds-admin-importers tr.disabled.odd {
   background-color: #f5f5f5;
 }
@@ -88,6 +89,7 @@ ul.container-actions li {
   background-image: none;
   margin: 0;
   padding: 0;
+  position: relative; /* Fix for IE 7 compatability mode. */
 }
 
 ul.container-actions .form-item,
