@@ -32,7 +32,7 @@ function feeds_hook_info() {
     'feeds_before_import',
     'feeds_before_update',
     'feeds_presave',
-    'feeds_after_save'
+    'feeds_after_save',
     'feeds_after_import',
     'feeds_after_clear',
     'feeds_processor_targets_alter',
