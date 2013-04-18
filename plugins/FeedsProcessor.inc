@@ -210,6 +210,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
           // recently processed entity. The only carryover is the entity_id.
           $this->newItemInfo($entity, $source->feed_nid, $hash);
           $entity->feeds_item->entity_id = $entity_id;
+          $entity->feeds_item->is_new = FALSE;
         }
 
         // Build a new entity.
@@ -725,6 +726,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function newItemInfo($entity, $feed_nid, $hash = '') {
     $entity->feeds_item = new stdClass();
+    $entity->feeds_item->is_new = TRUE;
     $entity->feeds_item->entity_id = 0;
     $entity->feeds_item->entity_type = $this->entityType();
     $entity->feeds_item->id = $this->id;
