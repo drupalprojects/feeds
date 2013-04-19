@@ -360,9 +360,9 @@ function _parser_common_syndication_RDF10_item($rdf_data, $mappings) {
 function _parser_common_syndication_RSS20_parse($feed_XML) {
 
   $ns = array(
-    "content" => "http://purl.org/rss/1.0/modules/content/",
-    "dc" => "http://purl.org/dc/elements/1.1/",
-    "georss" => "http://www.georss.org/georss",
+    'content' => 'http://purl.org/rss/1.0/modules/content/',
+    'dc' => 'http://purl.org/dc/elements/1.1/',
+    'georss' => 'http://www.georss.org/georss',
   );
 
   $parsed_source = array();
@@ -505,12 +505,25 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
  */
 function _parser_common_syndication_parse_date($date_str) {
   // PHP < 5.3 doesn't like the GMT- notation for parsing timezones.
-  $date_str = str_replace("GMT-", "-", $date_str);
-  $date_str = str_replace("GMT+", "+", $date_str);
+  $date_str = str_replace('GMT-', '-', $date_str);
+  $date_str = str_replace('GMT+', '+', $date_str);
   $parsed_date = strtotime($date_str);
+
   if ($parsed_date === FALSE || $parsed_date == -1) {
     $parsed_date = _parser_common_syndication_parse_w3cdtf($date_str);
   }
+
+  if (($parsed_date === FALSE || $parsed_date == -1)) {
+    // PHP does not support the UT timezone. Fake it. The system that generated
+    // this, Google Groups, probably meant UTC.
+    $date_str = strtolower(trim($date_str));
+    $last_three = substr($date_str, strlen($date_str) - 3, 3);
+
+    if ($last_three == ' ut') {
+      $parsed_date = strtotime($date_str . 'c');
+    }
+  }
+
   return $parsed_date === FALSE ? time() : $parsed_date;
 }
 
