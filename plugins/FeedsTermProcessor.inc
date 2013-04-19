@@ -42,7 +42,7 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Validates a term.
    */
   protected function entityValidate($term) {
-    if (empty($term->name)) {
+    if (drupal_strlen($term->name) == 0) {
       throw new FeedsValidationException(t('Term name missing.'));
     }
   }
