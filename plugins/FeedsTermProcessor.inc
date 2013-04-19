@@ -22,6 +22,7 @@ class FeedsTermProcessor extends FeedsProcessor {
   protected function entityInfo() {
     $info = parent::entityInfo();
     $info['label plural'] = t('Terms');
+    $info['bundle name'] = t('Vocabulary');
     return $info;
   }
 
@@ -80,15 +81,6 @@ class FeedsTermProcessor extends FeedsProcessor {
     return array(
       'vocabulary' => 0,
     ) + parent::configDefaults();
-  }
-
-  /**
-   * Override parent::configForm().
-   */
-  public function configForm(&$form_state) {
-    $form = parent::configForm($form_state);
-    $form['bundle']['#title'] = t('Vocabulary');
-    return $form;
   }
 
   /**
