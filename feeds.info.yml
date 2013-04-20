@@ -1,0 +1,4 @@
+name: Feeds
+description: 'Aggregates RSS/Atom/RDF feeds, imports CSV files and more.'
+package: Feeds
+core: 8.x
