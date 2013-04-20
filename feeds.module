@@ -87,27 +87,39 @@ function feeds_cron_job_scheduler_info() {
 }
 
 /**
- * Implements hook_cron_queue_info().
+ * Implements hook_queue_info().
  */
-function feeds_cron_queue_info() {
-  $queues = array();
-  $queues['feeds_source_import'] = array(
-    'worker callback' => 'feeds_source_import',
-    'time' => 15,
+function feeds_queue_info() {
+  return array(
+    'feeds_source_import' => array(
+      'title' => t('Feeds source import'),
+      'worker callback' => 'feeds_source_import',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
+    'feeds_source_clear' => array(
+      'title' => t('Feeds source clear'),
+      'worker callback' => 'feeds_source_clear',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
+    'feeds_source_expire' => array(
+      'title' => t('Feeds source expire'),
+      'worker callback' => 'feeds_source_expire',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
+    'feeds_push_unsubscribe' => array(
+      'title' => t('Feeds push unsubscribe'),
+      'worker callback' => 'feeds_push_unsubscribe',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
   );
-  $queues['feeds_source_clear'] = array(
-    'worker callback' => 'feeds_source_clear',
-    'time' => 15,
-  );
-  $queues['feeds_source_expire'] = array(
-    'worker callback' => 'feeds_source_expire',
-    'time' => 15,
-  );
-  $queues['feeds_push_unsubscribe'] = array(
-    'worker callback' => 'feeds_push_unsubscribe',
-    'time' => 15,
-  );
-  return $queues;
 }
 
 /**
