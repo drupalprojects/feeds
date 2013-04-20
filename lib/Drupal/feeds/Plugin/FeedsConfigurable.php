@@ -5,10 +5,12 @@
  * FeedsConfigurable and helper functions.
  */
 
+namespace Drupal\feeds\Plugin;
+
 /**
  * Used when an object does not exist in the DB or code but should.
  */
-class FeedsNotExistingException extends Exception {
+class FeedsNotExistingException extends \Exception {
 }
 
 /**

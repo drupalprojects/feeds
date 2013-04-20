@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\feeds\Plugin;
+
 /**
  * @file
  * Contains FeedsProcessor and related classes.

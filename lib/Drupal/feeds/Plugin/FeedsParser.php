@@ -5,6 +5,8 @@
  * Contains FeedsParser and related classes.
  */
 
+namespace Drupal\feeds\Plugin;
+
 /**
  * A result of a parsing stage.
  */

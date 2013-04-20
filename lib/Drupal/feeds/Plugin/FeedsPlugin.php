@@ -5,10 +5,15 @@
  * Definition of FeedsPlugin class.
  */
 
+namespace Drupal\feeds\Plugin;
+
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsSourceInterface;
+
 /**
  * Base class for a fetcher, parser or processor result.
  */
-class FeedsResult {}
+// class FeedsResult {}
 
 /**
  * Implement source interface for all plugins.
@@ -116,19 +121,36 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    * Get all available plugins.
    */
   public static function all() {
-    ctools_include('plugins');
-    $plugins = ctools_get_plugins('feeds', 'plugins');
-
+    $fetchers = \Drupal::service('plugin.manager.feeds.fetcher')->getDefinitions();
+    $parsers = \Drupal::service('plugin.manager.feeds.parser')->getDefinitions();
+    $processors = \Drupal::service('plugin.manager.feeds.processor')->getDefinitions();
     $result = array();
-    foreach ($plugins as $key => $info) {
+
+    foreach ($fetchers as $key => $info) {
       if (!empty($info['hidden'])) {
         continue;
       }
       $result[$key] = $info;
     }
 
+    foreach ($parsers as $key => $info) {
+      if (!empty($info['hidden'])) {
+        continue;
+      }
+      $result[$key] = $info;
+    }
+
+    foreach ($processors as $key => $info) {
+      if (!empty($info['hidden'])) {
+        continue;
+      }
+      $result[$key] = $info;
+    }
+
+    dpm($result);
+
     // Sort plugins by name and return.
-    uasort($result, 'feeds_plugin_compare');
+    // uasort($result, 'feeds_plugin_compare');
     return $result;
   }
 
@@ -210,14 +232,14 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
 /**
  * Used when a plugin is missing.
  */
-class FeedsMissingPlugin extends FeedsPlugin {
-  public function pluginType() {
-    return 'missing';
-  }
-  public function menuItem() {
-    return array();
-  }
-}
+// class FeedsMissingPlugin extends FeedsPlugin {
+//   public function pluginType() {
+//     return 'missing';
+//   }
+//   public function menuItem() {
+//     return array();
+//   }
+// }
 
 /**
  * Sort callback for FeedsPlugin::all().

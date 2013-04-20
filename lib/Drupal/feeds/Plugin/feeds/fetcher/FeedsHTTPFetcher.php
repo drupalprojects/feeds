@@ -2,50 +2,25 @@
 
 /**
  * @file
- * Home of the FeedsHTTPFetcher and related classes.
+ * Contains \Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher.
  */
 
-feeds_include_library('PuSHSubscriber.inc', 'PuSHSubscriber');
+namespace Drupal\feeds\Plugin\feeds\fetcher;
+
+use Drupal\feeds\Plugin\FeedsFetcher;
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
 
 /**
- * Result of FeedsHTTPFetcher::fetch().
- */
-class FeedsHTTPFetcherResult extends FeedsFetcherResult {
-  protected $url;
-  protected $file_path;
-  protected $timeout;
-
-  /**
-   * Constructor.
-   */
-  public function __construct($url = NULL) {
-    $this->url = $url;
-    parent::__construct('');
-  }
-
-  /**
-   * Overrides FeedsFetcherResult::getRaw();
-   */
-  public function getRaw() {
-    feeds_include_library('http_request.inc', 'http_request');
-    $result = http_request_get($this->url, NULL, NULL, NULL, $this->timeout);
-    if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
-      throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->url, '!code' => $result->code)));
-    }
-    return $this->sanitizeRaw($result->data);
-  }
-
-  public function getTimeout() {
-    return $this->timeout;
-  }
-
-  public function setTimeout($timeout) {
-    $this->timeout = $timeout;
-  }
-}
-
-/**
- * Fetches data via HTTP.
+ * Defines an HTTP fetcher.
+ *
+ * Uses http_request_get() to download a feed.
+ *
+ * @Plugin(
+ *   id = "http",
+ *   title = @Translation("HTTP fetcher"),
+ *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
+ * )
  */
 class FeedsHTTPFetcher extends FeedsFetcher {
 
@@ -255,103 +230,5 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    */
   protected function subscriber($subscriber_id) {
     return PushSubscriber::instance($this->id, $subscriber_id, 'PuSHSubscription', PuSHEnvironment::instance());
-  }
-}
-
-/**
- * Implement a PuSHSubscriptionInterface.
- */
-class PuSHSubscription implements PuSHSubscriptionInterface {
-  public $domain;
-  public $subscriber_id;
-  public $hub;
-  public $topic;
-  public $status;
-  public $secret;
-  public $post_fields;
-  public $timestamp;
-
-  /**
-   * Load a subscription.
-   */
-  public static function load($domain, $subscriber_id) {
-    if ($v = db_query("SELECT * FROM {feeds_push_subscriptions} WHERE domain = :domain AND subscriber_id = :sid", array(':domain' => $domain, ':sid' => $subscriber_id))->fetchAssoc()) {
-      $v['post_fields'] = unserialize($v['post_fields']);
-      return new PuSHSubscription($v['domain'], $v['subscriber_id'], $v['hub'], $v['topic'], $v['secret'], $v['status'], $v['post_fields'], $v['timestamp']);
-    }
-  }
-
-  /**
-   * Create a subscription.
-   */
-  public function __construct($domain, $subscriber_id, $hub, $topic, $secret, $status = '', $post_fields = '') {
-    $this->domain = $domain;
-    $this->subscriber_id = $subscriber_id;
-    $this->hub = $hub;
-    $this->topic = $topic;
-    $this->status = $status;
-    $this->secret = $secret;
-    $this->post_fields = $post_fields;
-  }
-
-  /**
-   * Save a subscription.
-   */
-  public function save() {
-    $this->timestamp = time();
-    $this->delete($this->domain, $this->subscriber_id);
-    drupal_write_record('feeds_push_subscriptions', $this);
-  }
-
-  /**
-   * Delete a subscription.
-   */
-  public function delete() {
-    db_delete('feeds_push_subscriptions')
-      ->condition('domain', $this->domain)
-      ->condition('subscriber_id', $this->subscriber_id)
-      ->execute();
-  }
-}
-
-/**
- * Provide environmental functions to the PuSHSubscriber library.
- */
-class PuSHEnvironment implements PuSHSubscriberEnvironmentInterface {
-  /**
-   * Singleton.
-   */
-  public static function instance() {
-    static $env;
-    if (empty($env)) {
-      $env = new PuSHEnvironment();
-    }
-    return $env;
-  }
-
-  /**
-   * Implements PuSHSubscriberEnvironmentInterface::msg().
-   */
-  public function msg($msg, $level = 'status') {
-    drupal_set_message(check_plain($msg), $level);
-  }
-
-  /**
-   * Implements PuSHSubscriberEnvironmentInterface::log().
-   */
-  public function log($msg, $level = 'status') {
-    switch ($level) {
-      case 'error':
-        $severity = WATCHDOG_ERROR;
-        break;
-      case 'warning':
-        $severity = WATCHDOG_WARNING;
-        break;
-      default:
-        $severity = WATCHDOG_NOTICE;
-        break;
-    }
-    feeds_dbg($msg);
-    watchdog('FeedsHTTPFetcher', $msg, array(), $severity);
   }
 }

@@ -2,13 +2,24 @@
 
 /**
  * @file
- * Contains FeedsSyndicationParser and related classes.
+ * Contains \Drupal\feeds\Plugin\feeds\parser\FeedsSyndicationParser.
  */
 
+namespace Drupal\feeds\Plugin\feeds\parser;
+
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsParser;
+
 /**
- * Class definition for Common Syndication Parser.
+ * Defines an RSS and Atom feed parser.
  *
- * Parses RSS and Atom feeds.
+ * @Plugin(
+ *   id = "syndication",
+ *   title = @Translation("Syndication parser"),
+ *   description = @Translation("Default parser for RSS, Atom and RDF feeds.")
+ * )
  */
 class FeedsSyndicationParser extends FeedsParser {
 

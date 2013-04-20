@@ -5,6 +5,10 @@
  * FeedsImporter class and related.
  */
 
+namespace Drupal\feeds;
+
+use Drupal\feeds\Plugin\FeedsConfigurable;
+
 /**
  * A FeedsImporter object describes how an external source should be fetched,
  * parsed and processed. Feeds can manage an arbitrary amount of importers.

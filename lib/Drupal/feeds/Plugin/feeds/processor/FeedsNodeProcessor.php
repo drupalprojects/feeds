@@ -2,11 +2,26 @@
 
 /**
  * @file
- * Class definition of FeedsNodeProcessor.
+ * Contains \Drupal\feeds\Plugin\feeds\fetcher\FeedsNodeProcessor.
  */
 
+namespace Drupal\feeds\Plugin\feeds\processor;
+
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsProcessor;
+
 /**
- * Creates nodes from feed items.
+ * Defines a node processor.
+ *
+ * Creates Nodes from feed items.
+ *
+ * @Plugin(
+ *   id = "node",
+ *   title = @Translation("Node processor"),
+ *   description = @Translation("Creates nodes from feed items.")
+ * )
  */
 class FeedsNodeProcessor extends FeedsProcessor {
 
