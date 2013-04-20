@@ -47,12 +47,14 @@ function feeds_hook_info() {
  */
 function feeds_cron() {
   if ($importers = feeds_reschedule()) {
-    foreach ($importers as $id) {
-      feeds_importer($id)->schedule();
-      $rows = db_query("SELECT feed_nid FROM {feeds_source} WHERE id = :id", array(':id' => $id));
-      foreach ($rows as $row) {
-        feeds_source($id, $row->feed_nid)->schedule();
-      }
+    if ($importers === TRUE) {
+      $sources = db_query("SELECT feed_nid, id FROM {feeds_source}");
+    }
+    else {
+      $sources = db_query("SELECT feed_nid, id FROM {feeds_source} WHERE id IN (:ids)", array(':ids' => $importers));
+    }
+    foreach ($sources as $source) {
+      feeds_source($source->id, $source->feed_nid)->schedule();
     }
     feeds_reschedule(FALSE);
   }
@@ -75,8 +77,8 @@ function feeds_cron_job_scheduler_info() {
   $info['feeds_source_clear'] = array(
     'queue name' => 'feeds_source_clear',
   );
-  $info['feeds_importer_expire'] = array(
-    'queue name' => 'feeds_importer_expire',
+  $info['feeds_source_expire'] = array(
+    'queue name' => 'feeds_source_expire',
   );
   $info['feeds_push_unsubscribe'] = array(
     'queue name' => 'feeds_push_unsubscribe',
@@ -97,8 +99,8 @@ function feeds_cron_queue_info() {
     'worker callback' => 'feeds_source_clear',
     'time' => 15,
   );
-  $queues['feeds_importer_expire'] = array(
-    'worker callback' => 'feeds_importer_expire',
+  $queues['feeds_source_expire'] = array(
+    'worker callback' => 'feeds_source_expire',
     'time' => 15,
   );
   $queues['feeds_push_unsubscribe'] = array(
@@ -145,18 +147,18 @@ function feeds_source_clear($job) {
 /**
  * Scheduler callback for expiring content.
  */
-function feeds_importer_expire($job) {
-  $importer = feeds_importer($job['type']);
+function feeds_source_expire($job) {
+  $source = feeds_source($job['type'], $job['id']);
   try {
-    $importer->existing()->expire();
+    $source->existing()->expire();
   }
   catch (FeedsNotExistingException $e) {
     // Do nothing.
   }
   catch (Exception $e) {
-    $importer->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
+    $source->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
-  $importer->scheduleExpire();
+  $source->scheduleExpire();
 }
 
 /**
@@ -617,9 +619,8 @@ function feeds_node_insert($node) {
     if (feeds_importer($importer_id)->config['import_on_create'] && !isset($node->feeds['suppress_import'])) {
       $source->startImport();
     }
-    // Schedule source and importer.
+    // Schedule the source.
     $source->schedule();
-    feeds_importer($importer_id)->schedule();
   }
 }
 

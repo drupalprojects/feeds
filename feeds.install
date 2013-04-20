@@ -665,3 +665,14 @@ function feeds_update_7208(&$sandbox) {
     $sandbox['#finished'] = 1;
   }
 }
+
+/**
+ * Reschedules feeds jobs.
+ */
+function feeds_update_7209() {
+  variable_set('feeds_reschedule', TRUE);
+
+  db_delete('job_schedule')
+    ->condition('name', 'feeds_source_expire')
+    ->execute();
+}
