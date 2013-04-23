@@ -439,16 +439,6 @@ function feeds_access($action, $param) {
 }
 
 /**
- * Access callback to determine if the user can import Feeds importers.
- *
- * Feeds imports require an additional access check because they are PHP
- * code and PHP is more locked down than administer feeds.
- */
-function feeds_importer_import_access() {
-  return user_access('administer feeds') && user_access('use PHP for settings');
-}
-
-/**
  * Menu access callback.
  */
 function feeds_page_access() {
