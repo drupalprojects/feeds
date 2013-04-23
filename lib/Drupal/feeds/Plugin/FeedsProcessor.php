@@ -2,6 +2,9 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsParserResult;
+
 /**
  * @file
  * Contains FeedsProcessor and related classes.
@@ -19,12 +22,12 @@ define('FEEDS_PROCESS_LIMIT', 50);
 /**
  * Thrown if a validation fails.
  */
-class FeedsValidationException extends Exception {}
+class FeedsValidationException extends \Exception {}
 
 /**
  * Thrown if a an access check fails.
  */
-class FeedsAccessException extends Exception {}
+class FeedsAccessException extends \Exception {}
 
 /**
  * Abstract class, defines interface for processors.
@@ -874,7 +877,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @return string
    *   The message to log.
    */
-  protected function createLogMessage(Exception $e, $entity, $item) {
+  protected function createLogMessage(\Exception $e, $entity, $item) {
     include_once DRUPAL_ROOT . '/includes/utility.inc';
     $message = $e->getMessage();
     $message .= '<h3>Original item</h3>';
@@ -886,4 +889,4 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
 }
 
-class FeedsProcessorBundleNotDefined extends Exception {}
+class FeedsProcessorBundleNotDefined extends \Exception {}

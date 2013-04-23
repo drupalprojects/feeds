@@ -6,6 +6,9 @@
  * administrative pages.
  */
 
+use Drupal\feeds\Plugin\FeedsConfigurable;
+use Drupal\feeds\Plugin\FeedsPlugin;
+
 /**
  * Introductory help for admin/structure/feeds/%feeds_importer page
  */
@@ -179,10 +182,8 @@ function feeds_ui_importer_machine_name_exists($id) {
     // Create is a reserved path for the add importer form.
     return TRUE;
   }
-  ctools_include('export');
-  if (ctools_export_load_object('feeds_importer', 'conditions', array('id' => $id))) {
-    return TRUE;
-  }
+
+  return config('feeds.importer')->get($id);
 }
 
 /**
@@ -298,8 +299,6 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       $active_container['body'] = drupal_get_form('feeds_ui_plugin_form', $importer, $active);
       break;
     case 'settings':
-      drupal_add_js(drupal_get_path('module', 'ctools') . '/js/dependent.js');
-      ctools_include('dependent');
       if (empty($plugin_key)) {
         $active_container['title'] = t('Basic settings');
         $active_container['body'] = feeds_get_form($importer, 'configForm');
@@ -354,7 +353,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $info['title'] = t('Fetcher');
   $info['body'] = array(
     array(
-      'title' => $fetcher['name'],
+      'title' => $fetcher['title'],
       'body' => $fetcher['description'],
       'actions' => $actions,
     ),
@@ -371,7 +370,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $info['title'] = t('Parser');
   $info['body'] = array(
     array(
-      'title' => $parser['name'],
+      'title' => $parser['title'],
       'body' => $parser['description'],
       'actions' => $actions,
     )
@@ -389,7 +388,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $info['title'] = t('Processor');
   $info['body'] = array(
     array(
-      'title' => $processor['name'],
+      'title' => $processor['title'],
       'body' => $processor['description'],
       'actions' => $actions,
     )

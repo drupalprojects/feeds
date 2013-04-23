@@ -11,6 +11,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FeedsParserResult;
 
 /**
  * Defines an RSS and Atom feed parser.

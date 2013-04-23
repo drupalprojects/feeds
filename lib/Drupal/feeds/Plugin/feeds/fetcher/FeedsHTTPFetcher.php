@@ -10,6 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\fetcher;
 use Drupal\feeds\Plugin\FeedsFetcher;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\FeedsSource;
 
 /**
  * Defines an HTTP fetcher.

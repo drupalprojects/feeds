@@ -12,7 +12,7 @@ use Drupal\feeds\Plugin\FeedsConfigurable;
 /**
  * Distinguish exceptions occuring when handling locks.
  */
-class FeedsLockException extends Exception {}
+class FeedsLockException extends \Exception {}
 
 /**
  * Denote a import or clearing stage. Used for multi page processing.

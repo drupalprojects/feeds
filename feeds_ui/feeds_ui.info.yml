@@ -1,0 +1,7 @@
+name: 'Feeds Admin UI'
+description: 'Administrative UI for Feeds module.'
+package: Feeds
+core: 8.x
+configure: admin/structure/feeds
+dependencies:
+ - feeds

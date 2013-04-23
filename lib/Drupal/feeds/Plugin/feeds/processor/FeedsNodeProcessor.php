@@ -11,6 +11,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsProcessor;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsParserResult;
 
 /**
  * Defines a node processor.
@@ -267,7 +269,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Return available mapping targets.
    */
   public function getMappingTargets() {
-    $type = node_type_get_type($this->bundle());
+    $type = node_type_load($this->bundle());
 
     $targets = parent::getMappingTargets();
     if ($type && $type->has_title) {

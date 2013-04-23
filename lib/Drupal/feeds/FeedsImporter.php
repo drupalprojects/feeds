@@ -81,7 +81,7 @@ class FeedsImporter extends FeedsConfigurable {
    * Save configuration.
    */
   public function save() {
-    $save = new stdClass();
+    $save = new \stdClass();
     $save->id = $this->id;
     $save->config = $this->getConfig();
 
@@ -104,10 +104,7 @@ class FeedsImporter extends FeedsConfigurable {
    * Load configuration and unpack.
    */
   public function load() {
-    ctools_include('export');
-    if ($config = ctools_export_load_object('feeds_importer', 'conditions', array('id' => $this->id))) {
-      $config = array_shift($config);
-      $this->export_type = $config->export_type;
+    if ($config = config('feeds.importer')->get($this->id)) {
       $this->disabled = isset($config->disabled) ? $config->disabled : FALSE;
       $this->config = $config->config;
       return TRUE;
@@ -188,13 +185,13 @@ class FeedsImporter extends FeedsConfigurable {
       'name' => '',
       'description' => '',
       'fetcher' => array(
-        'plugin_key' => 'FeedsHTTPFetcher',
+        'plugin_key' => 'http',
       ),
       'parser' => array(
-        'plugin_key' => 'FeedsSyndicationParser',
+        'plugin_key' => 'syndication',
       ),
       'processor' => array(
-        'plugin_key' => 'FeedsNodeProcessor',
+        'plugin_key' => 'node',
       ),
       'content_type' => '',
       'update' => 0,

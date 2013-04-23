@@ -5,6 +5,9 @@
  * Feeds - basic API functions and hook implementations.
  */
 
+use Drupal\feeds\Plugin\FeedsPlugin;
+use Drupal\feeds\Plugin\FeedsConfigurable;
+
 // Common request time, use as point of reference and to avoid calls to time().
 define('FEEDS_REQUEST_TIME', time());
 // Do not schedule a feed for refresh.
@@ -178,7 +181,7 @@ function feeds_source_expire($job) {
  */
 function feeds_push_unsubscribe($job) {
   $source = feeds_source($job['type'], $job['id']);
-  $fetcher = feeds_plugin('FeedsHTTPFetcher', $source->importer->id);
+  $fetcher = feeds_plugin('\Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher', $source->importer->id);
   $fetcher->unsubscribe($source);
 }
 
@@ -222,7 +225,7 @@ function feeds_batch($method, $importer_id, $feed_nid = 0, &$context) {
  *   required. An array of importers that need rescheduling.
  */
 function feeds_reschedule($importer_id = NULL) {
-  $reschedule = variable_get('feeds_reschedule', FALSE);
+  $reschedule = state()->get('feeds.reschedule') ?: FALSE;
   if ($importer_id === TRUE || $importer_id === FALSE) {
     $reschedule = $importer_id;
   }
@@ -230,7 +233,7 @@ function feeds_reschedule($importer_id = NULL) {
     $reschedule = is_array($reschedule) ? $reschedule : array();
     $reschedule[$importer_id] = $importer_id;
   }
-  variable_set('feeds_reschedule', $reschedule);
+  state()->set('feeds.reschedule', $reschedule);
   if ($reschedule === TRUE) {
     return feeds_enabled_importers();
   }
@@ -272,7 +275,7 @@ function feeds_forms() {
   $forms['FeedsImporter_feeds_form']['callback'] = 'feeds_form';
   $plugins = FeedsPlugin::all();
   foreach ($plugins as $plugin) {
-    $forms[$plugin['handler']['class'] . '_feeds_form']['callback'] = 'feeds_form';
+    $forms[$plugin['class'] . '_feeds_form']['callback'] = 'feeds_form';
   }
   return $forms;
 }
@@ -287,7 +290,7 @@ function feeds_menu() {
     'page callback' => 'feeds_page',
     'access callback' => 'feeds_page_access',
     'file' => 'feeds.pages.inc',
-  );
+  ) ;
   $items['import/%'] = array(
     'title callback' => 'feeds_importer_title',
     'title arguments' => array(1),
@@ -489,36 +492,6 @@ function feeds_views_api() {
 }
 
 /**
- * Implements hook_ctools_plugin_api().
- */
-function feeds_ctools_plugin_api($owner, $api) {
-  if ($owner == 'feeds' && $api == 'plugins') {
-    return array('version' => 1);
-  }
-}
-
-/**
- * Implements hook_ctools_plugin_type().
- */
-function feeds_ctools_plugin_type() {
-  return array(
-    'plugins' => array(
-      'cache' => TRUE,
-      'use hooks' => TRUE,
-      'classes' => array('handler'),
-    ),
-  );
-}
-
-/**
- * Implements hook_feeds_plugins().
- */
-function feeds_feeds_plugins() {
-  module_load_include('inc', 'feeds', 'feeds.plugins');
-  return _feeds_feeds_plugins();
-}
-
-/**
  * Gets the feed_nid for a single entity.
  *
  * @param int $entity_id
@@ -538,29 +511,29 @@ function feeds_get_feed_nid($entity_id, $entity_type) {
  * Implements hook_entity_insert().
  */
 function feeds_entity_insert($entity, $type) {
-  list($id) = entity_extract_ids($type, $entity);
-  feeds_item_info_insert($entity, $id);
+  // list($id) = entity_extract_ids($type, $entity);
+  // feeds_item_info_insert($entity, $id);
 }
 
 /**
  * Implements hook_entity_update().
  */
 function feeds_entity_update($entity, $type) {
-  list($id) = entity_extract_ids($type, $entity);
-  feeds_item_info_save($entity, $id);
+  // list($id) = entity_extract_ids($type, $entity);
+  // feeds_item_info_save($entity, $id);
 }
 
 /**
  * Implements hook_entity_delete().
  */
 function feeds_entity_delete($entity, $type) {
-  list($id) = entity_extract_ids($type, $entity);
+  // list($id) = entity_extract_ids($type, $entity);
 
-  // Delete any imported items produced by the source.
-  db_delete('feeds_item')
-    ->condition('entity_type', $type)
-    ->condition('entity_id', $id)
-    ->execute();
+  // // Delete any imported items produced by the source.
+  // db_delete('feeds_item')
+  //   ->condition('entity_type', $type)
+  //   ->condition('entity_id', $id)
+  //   ->execute();
 }
 
 /**
@@ -768,34 +741,27 @@ function feeds_get_importer_id($content_type) {
  * Helper function for feeds_get_importer_id() and feeds_enabled_importers().
  */
 function _feeds_importer_digest() {
-  $importers = &drupal_static(__FUNCTION__);
-  if ($importers === NULL) {
-    if ($cache = cache_get(__FUNCTION__)) {
-      $importers = $cache->data;
-    }
-    else {
-      $importers = array();
-      foreach (feeds_importer_load_all() as $importer) {
-        $importers[$importer->id] = isset($importer->config['content_type']) ? $importer->config['content_type'] : '';
-      }
-      cache_set(__FUNCTION__, $importers);
-    }
+  $importers = array();
+  foreach (feeds_importer_load_all() as $importer) {
+    $importers[$importer->id] = isset($importer->config['content_type']) ? $importer->config['content_type'] : '';
   }
   return $importers;
 }
 
 /**
  * Resets importer caches. Call when enabling/disabling importers.
+ *
+ * @todo Re-evaluate this.
  */
 function feeds_cache_clear($rebuild_menu = TRUE) {
-  cache_clear_all('_feeds_importer_digest', 'cache');
-  drupal_static_reset('_feeds_importer_digest');
-  ctools_include('export');
-  ctools_export_load_object_reset('feeds_importer');
-  drupal_static_reset('_node_types_build');
-  if ($rebuild_menu) {
-    menu_rebuild();
-  }
+  // cache_clear_all('_feeds_importer_digest', 'cache');
+  // drupal_static_reset('_feeds_importer_digest');
+  // ctools_include('export');
+  // ctools_export_load_object_reset('feeds_importer');
+  // drupal_static_reset('_node_types_build');
+  // if ($rebuild_menu) {
+//    menu_rebuild();
+  //}
 }
 
 /**
@@ -908,7 +874,7 @@ function feeds_item_info_save($entity, $entity_id) {
  *   per $id system-wide.
  */
 function feeds_importer($id) {
-  return FeedsConfigurable::instance(variable_get('feeds_importer_class', 'FeedsImporter'), $id);
+  return FeedsConfigurable::instance(variable_get('feeds_importer_class', '\Drupal\feeds\FeedsImporter'), $id);
 }
 
 /**
@@ -942,10 +908,13 @@ function feeds_source($importer_id, $feed_nid = 0) {
  *   If plugin can't be instantiated.
  */
 function feeds_plugin($plugin, $id) {
-  ctools_include('plugins');
-  if ($class = ctools_plugin_load_class('feeds', 'plugins', $plugin, 'handler')) {
-    return FeedsConfigurable::instance($class, $id);
+
+  $info = FeedsPlugin::all();
+
+  if (isset($info[$plugin])) {
+    return FeedsConfigurable::instance($info[$plugin]['class'], $id);
   }
+
   $args = array('%plugin' => $plugin, '@id' => $id);
   if (user_access('administer feeds')) {
     $args['@link'] = url('admin/structure/feeds/' . $id);
@@ -1253,4 +1222,118 @@ function feeds_file_download($uri) {
 function feeds_api_version() {
   $version = feeds_ctools_plugin_api('feeds', 'plugins');
   return $version['version'];
+}
+
+/**
+ * Converts to UNIX time.
+ *
+ * @param $date
+ *   A date that is either a string, a FeedsDateTimeElement or a UNIX timestamp.
+ * @param $default_value
+ *   A default UNIX timestamp to return if $date could not be parsed.
+ *
+ * @return
+ *   $date as UNIX time if conversion was successful, $dfeault_value otherwise.
+ */
+function feeds_to_unixtime($date, $default_value) {
+  if (is_numeric($date)) {
+    return $date;
+  }
+  elseif (is_string($date) && !empty($date)) {
+    $date = new FeedsDateTimeElement($date);
+    return $date->getValue();
+  }
+  elseif ($date instanceof FeedsDateTimeElement) {
+    return $date->getValue();
+  }
+  return $default_value;
+}
+
+/**
+ * Config form wrapper. Use to render the configuration form of
+ * a FeedsConfigurable object.
+ *
+ * @param $configurable
+ *   FeedsConfigurable object.
+ * @param $form_method
+ *   The form method that should be rendered.
+ *
+ * @return
+ *   Config form array if available. NULL otherwise.
+ */
+function feeds_get_form($configurable, $form_method) {
+  if (method_exists($configurable, $form_method)) {
+    return drupal_get_form(get_class($configurable) . '_feeds_form', $configurable, $form_method);
+  }
+}
+
+/**
+ * Config form callback. Don't call directly, but use
+ * feeds_get_form($configurable, 'method') instead.
+ *
+ * @param
+ *   FormAPI $form_state.
+ * @param
+ *   FeedsConfigurable object.
+ * @param
+ *   The object to perform the save() operation on.
+ * @param $form_method
+ *   The $form_method that should be rendered.
+ */
+function feeds_form($form, &$form_state, $configurable, $form_method) {
+  $form = $configurable->$form_method($form_state);
+  $form['#configurable'] = $configurable;
+  $form['#feeds_form_method'] = $form_method;
+  $form['#validate'] = array('feeds_form_validate');
+  $form['#submit'] = array('feeds_form_submit');
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 100,
+  );
+  return $form;
+}
+
+/**
+ * Validation handler for feeds_form().
+ */
+function feeds_form_validate($form, &$form_state) {
+  _feeds_form_helper($form, $form_state, 'Validate');
+}
+
+/**
+ * Submit handler for feeds_form().
+ */
+function feeds_form_submit($form, &$form_state) {
+  _feeds_form_helper($form, $form_state, 'Submit');
+}
+
+/**
+ * Helper for Feeds validate and submit callbacks.
+ *
+ * @todo This is all terrible. Remove.
+ */
+function _feeds_form_helper($form, &$form_state, $action) {
+  $method = $form['#feeds_form_method'] . $action;
+  $class = get_class($form['#configurable']);
+  $id = $form['#configurable']->id;
+
+  // Re-initialize the configurable object. Using feeds_importer() and
+  // feeds_plugin() will ensure that we're using the same instance. We can't
+  // reuse the previous form instance because feeds_importer() is used to save.
+  // This will re-initialize all of the plugins anyway, causing some tricky
+  // saving issues in certain cases.
+  // See http://drupal.org/node/1672880.
+  if ($class == variable_get('feeds_importer_class', 'FeedsImporter')) {
+    $form['#configurable'] = feeds_importer($id);
+  }
+  else {
+    $importer = feeds_importer($id);
+    $plugin_key = $importer->config[$form['#configurable']->pluginType()]['plugin_key'];
+    $form['#configurable'] = feeds_plugin($plugin_key, $id);
+  }
+
+  if (method_exists($form['#configurable'], $method)) {
+    $form['#configurable']->$method($form_state['values']);
+  }
 }

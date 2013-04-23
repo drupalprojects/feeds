@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal\feeds\FeedsImporter;
+
 /**
  * Used when an object does not exist in the DB or code but should.
  */
@@ -203,94 +205,5 @@ abstract class FeedsConfigurable {
     $this->save();
     drupal_set_message(t('Your changes have been saved.'));
     feeds_cache_clear(FALSE);
-  }
-}
-
-/**
- * Config form wrapper. Use to render the configuration form of
- * a FeedsConfigurable object.
- *
- * @param $configurable
- *   FeedsConfigurable object.
- * @param $form_method
- *   The form method that should be rendered.
- *
- * @return
- *   Config form array if available. NULL otherwise.
- */
-function feeds_get_form($configurable, $form_method) {
-  if (method_exists($configurable, $form_method)) {
-    return drupal_get_form(get_class($configurable) . '_feeds_form', $configurable, $form_method);
-  }
-}
-
-/**
- * Config form callback. Don't call directly, but use
- * feeds_get_form($configurable, 'method') instead.
- *
- * @param
- *   FormAPI $form_state.
- * @param
- *   FeedsConfigurable object.
- * @param
- *   The object to perform the save() operation on.
- * @param $form_method
- *   The $form_method that should be rendered.
- */
-function feeds_form($form, &$form_state, $configurable, $form_method) {
-  $form = $configurable->$form_method($form_state);
-  $form['#configurable'] = $configurable;
-  $form['#feeds_form_method'] = $form_method;
-  $form['#validate'] = array('feeds_form_validate');
-  $form['#submit'] = array('feeds_form_submit');
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-    '#weight' => 100,
-  );
-  return $form;
-}
-
-/**
- * Validation handler for feeds_form().
- */
-function feeds_form_validate($form, &$form_state) {
-  _feeds_form_helper($form, $form_state, 'Validate');
-}
-
-/**
- * Submit handler for feeds_form().
- */
-function feeds_form_submit($form, &$form_state) {
-  _feeds_form_helper($form, $form_state, 'Submit');
-}
-
-/**
- * Helper for Feeds validate and submit callbacks.
- *
- * @todo This is all terrible. Remove.
- */
-function _feeds_form_helper($form, &$form_state, $action) {
-  $method = $form['#feeds_form_method'] . $action;
-  $class = get_class($form['#configurable']);
-  $id = $form['#configurable']->id;
-
-  // Re-initialize the configurable object. Using feeds_importer() and
-  // feeds_plugin() will ensure that we're using the same instance. We can't
-  // reuse the previous form instance because feeds_importer() is used to save.
-  // This will re-initialize all of the plugins anyway, causing some tricky
-  // saving issues in certain cases.
-  // See http://drupal.org/node/1672880.
-  if ($class == variable_get('feeds_importer_class', 'FeedsImporter')) {
-    $form['#configurable'] = feeds_importer($id);
-  }
-  else {
-    $importer = feeds_importer($id);
-    $plugin_key = $importer->config[$form['#configurable']->pluginType()]['plugin_key'];
-    $form['#configurable'] = feeds_plugin($plugin_key, $id);
-  }
-
-  if (method_exists($form['#configurable'], $method)) {
-    $form['#configurable']->$method($form_state['values']);
   }
 }

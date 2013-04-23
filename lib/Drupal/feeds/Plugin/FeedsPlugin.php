@@ -13,7 +13,6 @@ use Drupal\feeds\FeedsSourceInterface;
 /**
  * Base class for a fetcher, parser or processor result.
  */
-// class FeedsResult {}
 
 /**
  * Implement source interface for all plugins.
@@ -147,8 +146,6 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
       $result[$key] = $info;
     }
 
-    dpm($result);
-
     // Sort plugins by name and return.
     // uasort($result, 'feeds_plugin_compare');
     return $result;
@@ -167,19 +164,10 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    *   FALSE otherwise.
    */
   public static function child($plugin_key, $parent_plugin) {
-    ctools_include('plugins');
-    $plugins = ctools_get_plugins('feeds', 'plugins');
-    $info = $plugins[$plugin_key];
+    $all_info = self::all();
+    $info = $all_info[$plugin_key];
 
-    if (empty($info['handler']['parent'])) {
-      return FALSE;
-    }
-    elseif ($info['handler']['parent'] == $parent_plugin) {
-      return TRUE;
-    }
-    else {
-      return self::child($info['handler']['parent'], $parent_plugin);
-    }
+    return TRUE;
   }
 
   /**
