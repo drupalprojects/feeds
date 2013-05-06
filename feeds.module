@@ -501,30 +501,26 @@ function feeds_get_feed_nid($entity_id, $entity_type) {
 /**
  * Implements hook_entity_insert().
  */
-function feeds_entity_insert($entity, $type) {
-  // list($id) = entity_extract_ids($type, $entity);
-  // feeds_item_info_insert($entity, $id);
+function feeds_entity_insert($entity) {
+  feeds_item_info_insert($entity, $entity->id());
 }
 
 /**
  * Implements hook_entity_update().
  */
-function feeds_entity_update($entity, $type) {
-  // list($id) = entity_extract_ids($type, $entity);
-  // feeds_item_info_save($entity, $id);
+function feeds_entity_update($entity) {
+  feeds_item_info_save($entity, $entity->id());
 }
 
 /**
  * Implements hook_entity_delete().
  */
-function feeds_entity_delete($entity, $type) {
-  // list($id) = entity_extract_ids($type, $entity);
-
+function feeds_entity_delete($entity) {
   // // Delete any imported items produced by the source.
-  // db_delete('feeds_item')
-  //   ->condition('entity_type', $type)
-  //   ->condition('entity_id', $id)
-  //   ->execute();
+  db_delete('feeds_item')
+    ->condition('entity_type', $entity->entityType())
+    ->condition('entity_id', $entity->id())
+    ->execute();
 }
 
 /**
