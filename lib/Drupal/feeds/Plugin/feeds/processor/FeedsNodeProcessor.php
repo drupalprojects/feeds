@@ -47,16 +47,15 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Creates a new node in memory and returns it.
    */
   protected function newEntity(FeedsSource $source) {
-    $node = new stdClass();
-    $node->type = $this->bundle();
-    $node->changed = REQUEST_TIME;
-    $node->created = REQUEST_TIME;
-    $node->language = LANGUAGE_NONE;
-    $node->is_new = TRUE;
-    node_object_prepare($node);
-    // Populate properties that are set by node_object_prepare().
-    $node->log = 'Created by FeedsNodeProcessor';
-    $node->uid = $this->config['author'];
+    $node = entity_create('node', array(
+      'type' => $this->bundle(),
+      'changed' => REQUEST_TIME,
+      'created' => REQUEST_TIME,
+      'language' => LANGUAGE_NONE,
+      'is_new' => TRUE,
+      'log' => 'Created by FeedsNodeProcessor',
+      'uid' => $this->config['author'],
+    ));
     return $node;
   }
 
@@ -75,7 +74,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       $node->uid = $this->config['author'];
     }
 
-    node_object_prepare($node);
+    // node_object_prepare($node);
 
     // Workaround for issue #1247506. See #1245094 for backstory.
     if (!empty($node->menu)) {

@@ -29,7 +29,7 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Creates a new user account in memory and returns it.
    */
   protected function newEntity(FeedsSource $source) {
-    $account = new stdClass();
+    $account = new \stdClass();
     $account->uid = 0;
     $account->roles = array_filter($this->config['roles']);
     $account->status = $this->config['status'];

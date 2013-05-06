@@ -8,11 +8,7 @@
 namespace Drupal\feeds;
 
 use Drupal\feeds\Plugin\FeedsConfigurable;
-
-/**
- * Distinguish exceptions occuring when handling locks.
- */
-class FeedsLockException extends \Exception {}
+use Drupal\job_scheduler\JobScheduler;
 
 /**
  * Denote a import or clearing stage. Used for multi page processing.
@@ -23,77 +19,6 @@ define('FEEDS_PARSE', 'parse');
 define('FEEDS_PROCESS', 'process');
 define('FEEDS_PROCESS_CLEAR', 'process_clear');
 define('FEEDS_PROCESS_EXPIRE', 'process_expire');
-
-/**
- * Status of an import or clearing operation on a source.
- */
-class FeedsState {
-  /**
-   * Floating point number denoting the progress made. 0.0 meaning no progress
-   * 1.0 = FEEDS_BATCH_COMPLETE meaning finished.
-   */
-  public $progress;
-
-  /**
-   * Used as a pointer to store where left off. Must be serializable.
-   */
-  public $pointer;
-
-  /**
-   * Natural numbers denoting more details about the progress being made.
-   */
-  public $total;
-  public $created;
-  public $updated;
-  public $deleted;
-  public $skipped;
-  public $failed;
-
-  /**
-   * Constructor, initialize variables.
-   */
-  public function __construct() {
-    $this->progress = FEEDS_BATCH_COMPLETE;
-    $this->total =
-    $this->created =
-    $this->updated =
-    $this->deleted =
-    $this->skipped =
-    $this->failed = 0;
-  }
-
-  /**
-   * Safely report progress.
-   *
-   * When $total == $progress, the state of the task tracked by this state is
-   * regarded to be complete.
-   *
-   * Handles the following cases gracefully:
-   *
-   * - $total is 0
-   * - $progress is larger than $total
-   * - $progress approximates $total so that $finished rounds to 1.0
-   *
-   * @param $total
-   *   A natural number that is the total to be worked off.
-   * @param $progress
-   *   A natural number that is the progress made on $total.
-   */
-  public function progress($total, $progress) {
-    if ($progress > $total) {
-      $this->progress = FEEDS_BATCH_COMPLETE;
-    }
-    elseif ($total) {
-      $this->progress = $progress / $total;
-      if ($this->progress == FEEDS_BATCH_COMPLETE && $total != $progress) {
-        $this->progress = 0.99;
-      }
-    }
-    else {
-      $this->progress = FEEDS_BATCH_COMPLETE;
-    }
-  }
-}
 
 /**
  * This class encapsulates a source of a feed. It stores where the feed can be
@@ -143,7 +68,7 @@ class FeedsSource extends FeedsConfigurable {
    * directly, use feeds_source() instead.
    */
   public static function instance($importer_id, $feed_nid) {
-    $class = variable_get('feeds_source_class', 'FeedsSource');
+    $class = variable_get('feeds_source_class', 'Drupal\feeds\FeedsSource');
     static $instances = array();
     if (!isset($instances[$class][$importer_id][$feed_nid])) {
       $instances[$class][$importer_id][$feed_nid] = new $class($importer_id, $feed_nid);
@@ -522,15 +447,9 @@ class FeedsSource extends FeedsConfigurable {
 
   /**
    * Load configuration and unpack.
-   *
-   * @todo Patch CTools to move constants from export.inc to ctools.module.
    */
   public function load() {
     if ($record = db_query("SELECT imported, config, state, fetcher_result FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", array(':id' => $this->id, ':nid' => $this->feed_nid))->fetchObject()) {
-      // While FeedsSource cannot be exported, we still use CTool's export.inc
-      // export definitions.
-      ctools_include('export');
-      $this->export_type = EXPORT_IN_DATABASE;
       $this->imported = $record->imported;
       $this->config = unserialize($record->config);
       if (!empty($record->state)) {
@@ -725,7 +644,7 @@ class FeedsSource extends FeedsConfigurable {
    *   If a lock for the requested job could not be acquired.
    */
   protected function acquireLock() {
-    if (!lock_acquire("feeds_source_{$this->id}_{$this->feed_nid}", 60.0)) {
+    if (!lock()->acquire("feeds_source_{$this->id}_{$this->feed_nid}", 60.0)) {
       throw new FeedsLockException(t('Cannot acquire lock for source @id / @feed_nid.', array('@id' => $this->id, '@feed_nid' => $this->feed_nid)));
     }
   }

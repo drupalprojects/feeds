@@ -8,6 +8,7 @@
 namespace Drupal\feeds;
 
 use Drupal\feeds\Plugin\FeedsConfigurable;
+use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
  * A FeedsImporter object describes how an external source should be fetched,
@@ -81,32 +82,21 @@ class FeedsImporter extends FeedsConfigurable {
    * Save configuration.
    */
   public function save() {
-    $save = new \stdClass();
-    $save->id = $this->id;
-    $save->config = $this->getConfig();
 
-    if ($config = db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $this->id))->fetchField()) {
-      drupal_write_record('feeds_importer', $save, 'id');
-      // Only rebuild menu if content_type has changed. Don't worry about
-      // rebuilding menus when creating a new importer since it will default
-      // to the standalone page.
-      $config = unserialize($config);
-      if ($config['content_type'] != $save->config['content_type']) {
-        variable_set('menu_rebuild_needed', TRUE);
-      }
-    }
-    else {
-      drupal_write_record('feeds_importer', $save);
-    }
+    $config = config('feeds.importer.' . $this->id);
+    $config->set('id', $this->id)
+      ->set('config', $this->getConfig())
+      ->save();
   }
 
   /**
    * Load configuration and unpack.
    */
   public function load() {
-    if ($config = config('feeds.importer')->get($this->id)) {
-      $this->disabled = isset($config->disabled) ? $config->disabled : FALSE;
-      $this->config = $config->config;
+    if (config('feeds.importer.' . $this->id)->get('id')) {
+      $config = config('feeds.importer.' . $this->id)->get('config');
+      $this->disabled = isset($config['disabled']) ? $config['disabled'] : FALSE;
+      $this->config = $config;
       return TRUE;
     }
     return FALSE;

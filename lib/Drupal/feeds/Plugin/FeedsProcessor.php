@@ -70,7 +70,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   public function bundleOptions() {
     $options = array();
-    foreach (field_info_bundles($this->entityType()) as $bundle => $info) {
+    foreach (entity_get_bundles($this->entityType()) as $bundle => $info) {
       if (!empty($info['label'])) {
         $options[$bundle] = $info['label'];
       }
@@ -617,11 +617,11 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $info = $this->entityInfo();
     $form = array();
 
-    if (!empty($info['entity keys']['bundle'])) {
+    if (!empty($info['entity_keys']['bundle'])) {
       $form['bundle'] = array(
         '#type' => 'select',
         '#options' => $this->bundleOptions(),
-        '#title' => !empty($info['bundle name']) ? $info['bundle name'] : t('Bundle'),
+        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : t('Bundle'),
         '#required' => TRUE,
         '#default_value' => $this->bundle(),
       );
@@ -804,7 +804,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   The fingerprint of the source item.
    */
   protected function newItemInfo($entity, $feed_nid, $hash = '') {
-    $entity->feeds_item = new stdClass();
+    $entity->feeds_item = new \stdClass();
     $entity->feeds_item->is_new = TRUE;
     $entity->feeds_item->entity_id = 0;
     $entity->feeds_item->entity_type = $this->entityType();

@@ -88,7 +88,7 @@ class FeedsEnclosure extends FeedsElement {
       file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
       // Copy or save file depending on whether it is remote or local.
       if (drupal_realpath($this->getValue())) {
-        $file           = new stdClass();
+        $file           = new \stdClass();
         $file->uid      = 0;
         $file->uri      = $this->getValue();
         $file->filemime = $this->mime_type;

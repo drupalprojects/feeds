@@ -58,7 +58,6 @@ function feeds_ui_overview_form($form, &$form_status) {
     t('Name'),
     t('Description'),
     t('Attached to'),
-    t('Status'),
     t('Operations'),
     t('Enabled'),
   );
@@ -66,40 +65,26 @@ function feeds_ui_overview_form($form, &$form_status) {
     $importer_form = array();
     $importer_form['name']['#markup'] = check_plain($importer->config['name']);
     $importer_form['description']['#markup'] = check_plain($importer->config['description']);
+
+    $content_types = node_type_get_names();
+
     if (empty($importer->config['content_type'])) {
       $importer_form['attached']['#markup'] = '[none]';
     }
     else {
       if (!$importer->disabled) {
-        $importer_form['attached']['#markup'] = l(node_type_get_name($importer->config['content_type']), 'node/add/' . str_replace('_', '-', $importer->config['content_type']));
+        $importer_form['attached']['#markup'] = l($content_types[$importer->config['content_type']], 'node/add/' . str_replace('_', '-', $importer->config['content_type']));
       }
       else {
-        $importer_form['attached']['#markup'] = check_plain(node_type_get_name($importer->config['content_type']));
+        $importer_form['attached']['#markup'] = check_plain($content_types[$importer->config['content_type']]);
       }
     }
 
-    if ($importer->export_type == EXPORT_IN_CODE) {
-      $status = t('Default');
-      $edit = t('Override');
-      $delete = '';
-    }
-    elseif ($importer->export_type == EXPORT_IN_DATABASE) {
-      $status = t('Normal');
-      $edit = t('Edit');
-      $delete = t('Delete');
-    }
-    elseif ($importer->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
-      $status = t('Overridden');
-      $edit = t('Edit');
-      $delete = t('Revert');
-    }
-    $importer_form['status'] = array(
-      '#markup' => $status,
-    );
+    $edit = t('Edit');
+    $delete = t('Delete');
     $importer_form['operations'] = array(
       '#markup' =>
         l($edit, 'admin/structure/feeds/' . $importer->id) . ' | ' .
-        l(t('Export'), 'admin/structure/feeds/' . $importer->id . '/export') . ' | ' .
         l(t('Clone'), 'admin/structure/feeds/' . $importer->id . '/clone') .
         (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/' . $importer->id . '/delete')),
     );
@@ -183,7 +168,7 @@ function feeds_ui_importer_machine_name_exists($id) {
     return TRUE;
   }
 
-  return config('feeds.importer')->get($id);
+  return config('feeds.importer.' . $id)->get('id');
 }
 
 /**
@@ -306,12 +291,12 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       // feeds_plugin() returns a correct result because feed has been
       // instantiated previously.
       elseif (in_array($plugin_key, array_keys($plugins)) && $plugin = feeds_plugin($plugin_key, $importer->id)) {
-        $active_container['title'] = t('Settings for !plugin', array('!plugin' => $plugins[$plugin_key]['name']));
+        $active_container['title'] = t('Settings for !plugin', array('!plugin' => $plugins[$plugin_key]['title']));
         $active_container['body'] = feeds_get_form($plugin, 'configForm');
       }
       break;
     case 'mapping':
-      $active_container['title'] = t('Mapping for !processor', array('!processor' => $plugins[$config['processor']['plugin_key']]['name']));
+      $active_container['title'] = t('Mapping for !processor', array('!processor' => $plugins[$config['processor']['plugin_key']]['title']));
       $active_container['body'] = drupal_get_form('feeds_ui_mapping_form', $importer);
       break;
   }
@@ -322,7 +307,8 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
 
   // Basic information.
   $items = array();
-  $items[] = t('Attached to: @type', array('@type' => $importer->config['content_type'] ? node_type_get_name($importer->config['content_type']) : t('[none]')));
+  $content_types = node_type_get_names();
+  $items[] = t('Attached to: @type', array('@type' => $importer->config['content_type'] ? $content_types[$importer->config['content_type']] : t('[none]')));
   if ($importer->config['import_period'] == FEEDS_SCHEDULE_NEVER) {
     $import_period = t('off');
   }
@@ -428,7 +414,7 @@ function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
     $form['plugin_key'][$key] = array(
       '#type' => 'radio',
       '#parents' => array('plugin_key'),
-      '#title' => check_plain($plugin['name']),
+      '#title' => check_plain($plugin['title']),
       '#description' => filter_xss(isset($plugin['help']) ? $plugin['help'] : $plugin['description']),
       '#return_value' => $key,
       '#default_value' => ($key == $importer_key) ? $key : '',
@@ -674,6 +660,7 @@ function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targe
           '#src' => 'misc/configure.png',
           '#attributes' => array('alt' => t('Edit')),
           '#op' => 'edit',
+          '#src' => 'core/misc/configure-dark.png',
         ),
       );
     }

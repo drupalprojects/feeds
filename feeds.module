@@ -7,6 +7,7 @@
 
 use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\Plugin\FeedsConfigurable;
+use Drupal\feeds\FeedsSource;
 
 // Common request time, use as point of reference and to avoid calls to time().
 define('FEEDS_REQUEST_TIME', time());
@@ -272,7 +273,7 @@ function feeds_permission() {
  */
 function feeds_forms() {
   $forms = array();
-  $forms['FeedsImporter_feeds_form']['callback'] = 'feeds_form';
+  $forms['Drupal\feeds\FeedsImporter_feeds_form']['callback'] = 'feeds_form';
   $plugins = FeedsPlugin::all();
   foreach ($plugins as $plugin) {
     $forms[$plugin['class'] . '_feeds_form']['callback'] = 'feeds_form';
@@ -688,15 +689,11 @@ function feeds_field_extra_fields() {
  */
 function feeds_importer_load_all($load_disabled = FALSE) {
   $feeds = array();
-  // This function can get called very early in install process through
-  // menu_router_rebuild(). Do not try to include CTools if not available.
-  if (function_exists('ctools_include')) {
-    ctools_include('export');
-    $configs = ctools_export_load_object('feeds_importer', 'all');
-    foreach ($configs as $config) {
-      if (!empty($config->id) && ($load_disabled || empty($config->disabled))) {
-        $feeds[$config->id] = feeds_importer($config->id);
-      }
+  foreach (config_get_storage_names_with_prefix('feeds.importer') as $file) {
+    $id = config($file)->get('id');
+    $config = config($file)->get('config');
+    if (!empty($id) && ($load_disabled || empty($config['disabled']))) {
+      $feeds[$id] = feeds_importer($id);
     }
   }
   return $feeds;
@@ -904,17 +901,6 @@ function feeds_plugin($plugin, $id) {
   if (isset($info[$plugin])) {
     return FeedsConfigurable::instance($info[$plugin]['class'], $id);
   }
-
-  $args = array('%plugin' => $plugin, '@id' => $id);
-  if (user_access('administer feeds')) {
-    $args['@link'] = url('admin/structure/feeds/' . $id);
-    drupal_set_message(t('Missing Feeds plugin %plugin. See <a href="@link">@id</a>. Check whether all required libraries and modules are installed properly.', $args), 'warning', FALSE);
-  }
-  else {
-    drupal_set_message(t('Missing Feeds plugin %plugin. Please contact your site administrator.', $args), 'warning', FALSE);
-  }
-  $class = ctools_plugin_load_class('feeds', 'plugins', 'FeedsMissingPlugin', 'handler');
-  return FeedsConfigurable::instance($class, $id);
 }
 
 /**
@@ -1314,7 +1300,7 @@ function _feeds_form_helper($form, &$form_state, $action) {
   // This will re-initialize all of the plugins anyway, causing some tricky
   // saving issues in certain cases.
   // See http://drupal.org/node/1672880.
-  if ($class == variable_get('feeds_importer_class', 'FeedsImporter')) {
+  if ($class == variable_get('feeds_importer_class', 'Drupal\feeds\FeedsImporter')) {
     $form['#configurable'] = feeds_importer($id);
   }
   else {

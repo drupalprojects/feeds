@@ -11,6 +11,8 @@
  * http://github.com/lxbarth/PuSHSubscriber/blob/master/LICENSE.txt
  */
 
+namespace Drupal\feeds;
+
 /**
  * PubSubHubbub subscriber.
  */

@@ -11,6 +11,10 @@ use Drupal\feeds\Plugin\FeedsFetcher;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedsSource;
+use Drupal\feeds\PuSHSubscriber;
+use Drupal\feeds\PuSHEnvironment;
+use Drupal\feeds\FeedsHTTPFetcherResult;
+
 
 /**
  * Defines an HTTP fetcher.
@@ -230,6 +234,6 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    * Convenience method for instantiating a subscriber object.
    */
   protected function subscriber($subscriber_id) {
-    return PushSubscriber::instance($this->id, $subscriber_id, 'PuSHSubscription', PuSHEnvironment::instance());
+    return PushSubscriber::instance($this->id, $subscriber_id, 'Drupal\feeds\PuSHSubscription', PuSHEnvironment::instance());
   }
 }

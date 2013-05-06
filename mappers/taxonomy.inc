@@ -25,13 +25,13 @@ define('FEEDS_TAXONOMY_SEARCH_TERM_GUID', 2);
  */
 function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
   if (!empty($content_type)) {
-    foreach (taxonomy_get_vocabularies($content_type) as $vocabulary) {
-      $sources['parent:taxonomy:' . $vocabulary->machine_name] = array(
-        'name' => t('Feed node: Taxonomy: @vocabulary', array('@vocabulary' => $vocabulary->name)),
-        'description' => t('Taxonomy terms from feed node in given vocabulary.'),
-        'callback' => 'taxonomy_feeds_get_source',
-      );
-    }
+    // foreach (taxonomy_get_vocabularies($content_type) as $vocabulary) {
+    //   $sources['parent:taxonomy:' . $vocabulary->machine_name] = array(
+    //     'name' => t('Feed node: Taxonomy: @vocabulary', array('@vocabulary' => $vocabulary->name)),
+    //     'description' => t('Taxonomy terms from feed node in given vocabulary.'),
+    //     'callback' => 'taxonomy_feeds_get_source',
+    //   );
+    // }
   }
 }
 

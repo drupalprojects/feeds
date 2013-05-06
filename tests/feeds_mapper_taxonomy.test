@@ -230,7 +230,7 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
 
     FeedsPlugin::loadMappers();
 
-    $entity = new stdClass();
+    $entity = new \stdClass();
     $target = 'field_tags';
     $mapping = array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_ID,
@@ -278,7 +278,7 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
 
     FeedsPlugin::loadMappers();
 
-    $entity = new stdClass();
+    $entity = new \stdClass();
     $target = 'field_tags';
     $mapping = array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_GUID,

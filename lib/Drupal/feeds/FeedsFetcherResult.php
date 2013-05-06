@@ -1,6 +1,6 @@
 <?php
 
-namepsace Drupal\feeds;
+namespace Drupal\feeds;
 
 /**
  * Base class for all fetcher results.

@@ -186,15 +186,24 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    *   FALSE otherwise.
    */
   public static function typeOf($plugin_key) {
-    if (self::child($plugin_key, 'FeedsFetcher')) {
+    $fetchers = \Drupal::service('plugin.manager.feeds.fetcher')->getDefinitions();
+
+    if (isset($fetchers[$plugin_key])) {
       return 'fetcher';
     }
-    elseif (self::child($plugin_key, 'FeedsParser')) {
+
+    $parsers = \Drupal::service('plugin.manager.feeds.parser')->getDefinitions();
+
+    if (isset($parsers[$plugin_key])) {
       return 'parser';
     }
-    elseif (self::child($plugin_key, 'FeedsProcessor')) {
+
+    $processors = \Drupal::service('plugin.manager.feeds.processor')->getDefinitions();
+
+    if (isset($processors[$plugin_key])) {
       return 'processor';
     }
+
     return FALSE;
   }
 

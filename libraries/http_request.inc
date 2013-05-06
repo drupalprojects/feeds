@@ -110,7 +110,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   // Only download and parse data if really needs refresh.
   // Based on "Last-Modified" and "If-Modified-Since".
   $headers = array();
-  if ($cache = cache_get('feeds_http_download_' . md5($url))) {
+  if ($cache = cache()->get('feeds_http_download_' . md5($url))) {
     $last_result = $cache->data;
     $last_headers = array_change_key_case($last_result->headers);
 
@@ -140,7 +140,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
 
   if ($curl) {
     $headers[] = 'User-Agent: Drupal (+http://drupal.org/)';
-    $result = new stdClass();
+    $result = new \stdClass();
     $result->headers = array();
 
     // Parse the URL and make sure we can handle the schema.
@@ -243,7 +243,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   }
 
   // Set caches.
-  cache_set('feeds_http_download_' . md5($url), $result);
+  cache()->set('feeds_http_download_' . md5($url), $result);
   $download_cache[$url] = $result;
 
   return $result;
