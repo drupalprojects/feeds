@@ -51,7 +51,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'type' => $this->bundle(),
       'changed' => REQUEST_TIME,
       'created' => REQUEST_TIME,
-      'language' => LANGUAGE_NONE,
       'is_new' => TRUE,
       'log' => 'Created by FeedsNodeProcessor',
       'uid' => $this->config['author'],

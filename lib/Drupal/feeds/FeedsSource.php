@@ -271,6 +271,7 @@ class FeedsSource extends FeedsConfigurable {
 
     // Clean up.
     $result = $this->progressImporting();
+
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
       $this->imported = time();
       $this->log('import', 'Imported in !s s', array('!s' => $this->imported - $this->state[FEEDS_START]), WATCHDOG_INFO);
@@ -632,7 +633,6 @@ class FeedsSource extends FeedsConfigurable {
       'operations' => array(
         array('feeds_batch', array($method, $this->id, $this->feed_nid)),
       ),
-      'progress_message' => '',
     );
     batch_set($batch);
   }
@@ -653,7 +653,7 @@ class FeedsSource extends FeedsConfigurable {
    * Releases a lock for this source.
    */
   protected function releaseLock() {
-    lock_release("feeds_source_{$this->id}_{$this->feed_nid}");
+    lock()->release("feeds_source_{$this->id}_{$this->feed_nid}");
   }
 
 }
