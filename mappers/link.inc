@@ -13,7 +13,7 @@
 function link_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
   foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
-    if ($info['type'] == 'link_field') {
+    if ($info['type'] == 'link') {
       if (array_key_exists('url', $info['columns'])) {
         $targets[$name . ':url'] = array(
           'name' => t('@name: URL', array('@name' => $instance['label'])),
@@ -68,6 +68,12 @@ function link_feeds_set_target($source, $entity, $target, $value) {
     }
 
     if (is_scalar($v)) {
+      if (!isset($field['und'][$delta]['title'])) {
+        $field['und'][$delta]['title'] = '';
+      }
+      if (!isset($field['und'][$delta]['url'])) {
+        $field['und'][$delta]['url'] = '';
+      }
       $field['und'][$delta][$column] = $v;
       $delta++;
     }

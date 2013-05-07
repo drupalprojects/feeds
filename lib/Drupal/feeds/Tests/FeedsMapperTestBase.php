@@ -23,7 +23,7 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
     'emaudio' => 'emaudio_textfields',
     'filefield' => 'filefield_widget',
     'image' => 'imagefield_widget',
-    'link_field' => 'link_field',
+    'link' => 'link_default',
     'number_float' => 'number',
     'number_integer' => 'number',
     'nodereference' => 'nodereference_select',

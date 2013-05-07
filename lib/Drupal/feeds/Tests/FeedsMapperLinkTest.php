@@ -5,98 +5,109 @@
  * Test case for CCK link mapper mappers/date.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Class for testing Feeds <em>link</em> mapper.
  */
-class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
+class FeedsMapperLinkTest extends FeedsMapperTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'field',
+    'field_ui',
+    'link',
+    'job_scheduler',
+    'feeds_ui',
+  );
+
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Link',
       'description' => 'Test Feeds Mapper support for Link fields.',
       'group' => 'Feeds',
-      'dependencies' => array('link'),
     );
-  }
-
-  public function setUp() {
-    parent::setUp(array('link'));
   }
 
   /**
    * Basic test loading a single entry CSV file.
    */
   public function test() {
-    $static_title = $this->randomName();
+    // $static_title = $this->randomName();
 
     // Create content type.
     $typename = $this->createContentType(array(), array(
       'alpha' => array(
-        'type' => 'link_field',
+        'type' => 'link',
         'instance_settings' => array(
-          'instance[settings][title]' => 'required',
+          'instance[settings][title]' => 2,
         ),
       ),
       'beta' => array(
-        'type' => 'link_field',
+        'type' => 'link',
         'instance_settings' => array(
-          'instance[settings][title]' => 'none',
+          'instance[settings][title]' => 0,
         ),
       ),
       'gamma' => array(
-        'type' => 'link_field',
+        'type' => 'link',
         'instance_settings' => array(
-          'instance[settings][title]' => 'optional',
+          'instance[settings][title]' => 1,
         ),
       ),
-      'omega' => array(
-      'type' => 'link_field',
-        'instance_settings' => array(
-          'instance[settings][title]' => 'value',
-          'instance[settings][title_value]' => $static_title,
-        ),
-      ),
+      // 'omega' => array(
+      // 'type' => 'link',
+      //   'instance_settings' => array(
+      //     'instance[settings][title]' => ,
+      //     'instance[settings][title_value]' => $static_title,
+      //   ),
+      // ),
     ));
 
     // Create importer configuration.
-    $this->createImporterConfiguration(); //Create a default importer configuration
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('bundle' => $typename)); //Processor settings
+    $this->createImporterConfiguration();
+    $this->setSettings('syndication', 'node', array('bundle' => $typename));
     $this->addMappings('syndication', array(
       0 => array(
         'source' => 'title',
-        'target' => 'title'
+        'target' => 'title',
       ),
       1 => array(
         'source' => 'timestamp',
-        'target' => 'created'
+        'target' => 'created',
       ),
       2 => array(
         'source' => 'description',
-        'target' => 'body'
+        'target' => 'body',
       ),
       3 => array(
         'source' => 'url',
-        'target' => 'field_alpha:url'
+        'target' => 'field_alpha:url',
       ),
       4 => array(
         'source' => 'title',
-        'target' => 'field_alpha:title'
+        'target' => 'field_alpha:title',
       ),
       5 => array(
         'source' => 'url',
-        'target' => 'field_beta:url'
+        'target' => 'field_beta:url',
       ),
       6 => array(
         'source' => 'url',
-        'target' => 'field_gamma:url'
+        'target' => 'field_gamma:url',
       ),
       7 => array(
         'source' => 'title',
-        'target' => 'field_gamma:title'
+        'target' => 'field_gamma:title',
       ),
-      8 => array(
-        'source' => 'url',
-        'target' => 'field_omega:url'
-      ),
+      // 8 => array(
+      //   'source' => 'url',
+      //   'target' => 'field_omega:url',
+      // ),
     ));
 
     // Import RSS file.
@@ -110,14 +121,13 @@ class FeedsMapperLinkTestCase extends FeedsMapperTestCase {
     $url = 'http://developmentseed.org/blog/2009/oct/06/open-atrium-translation-workflow-two-way-updating';
     $title = 'Open Atrium Translation Workflow: Two Way Translation Updates';
     $this->assertNodeFieldValue('alpha', array('url' => $url, 'static' => $title));
-    $this->assertNodeFieldValue('beta', array('url' =>  $url));
+    $this->assertNodeFieldValue('beta', array('url' => $url));
     $this->assertNodeFieldValue('gamma', array('url' => $url, 'static' => $title));
-    $this->assertNodeFieldValue('omega', array('url' => $url, 'static' => $static_title));
+    // $this->assertNodeFieldValue('omega', array('url' => $url, 'static' => $static_title));
 
     // Test the static title.
-    $this->drupalGet('node/2');
-    $this->assertText($static_title, 'Static title link found.');
-
+    // $this->drupalGet('node/2');
+    // $this->assertText($static_title, 'Static title link found.');
   }
 
   /**
