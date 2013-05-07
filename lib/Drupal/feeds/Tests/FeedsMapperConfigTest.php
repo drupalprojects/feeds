@@ -5,20 +5,28 @@
  * Test cases for Feeds mapping configuration form.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Class for testing basic Feeds ajax mapping configurtaion form behavior.
  */
-class FeedsMapperConfigTestCase extends FeedsMapperTestCase {
+class FeedsMapperConfigTest extends FeedsMapperTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'feeds_tests',
+  );
+
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Config',
       'description' => 'Test the mapper configuration UI.',
       'group' => 'Feeds',
     );
-  }
-
-  public function setUp() {
-    parent::setUp(array('feeds_tests'));
   }
 
   /**
@@ -28,7 +36,7 @@ class FeedsMapperConfigTestCase extends FeedsMapperTestCase {
     // Create importer configuration.
     $this->createImporterConfiguration();
     $this->addMappings('syndication', array(
-      array(
+      0 => array(
         'source' => 'url',
         'target' => 'test_target',
       ),
@@ -61,7 +69,7 @@ class FeedsMapperConfigTestCase extends FeedsMapperTestCase {
     $this->assertText('Select value: Another One');
 
     // Check that settings are in db.
-    $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id='syndication'")->fetchField());
+    $config = config('feeds.importer.syndication')->get('config');
 
     $settings = $config['processor']['config']['mappings'][0];
     $this->assertEqual($settings['checkbox'], 1);
