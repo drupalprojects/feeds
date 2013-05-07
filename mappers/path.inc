@@ -8,7 +8,7 @@
 /**
  * Implements hook_feeds_processor_targets_alter().
  *
- * @see FeedsNodeProcessor::getMappingTargets().
+ * @see FeedsNodeProcessor::getMappingTargets()
  */
 function path_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
   switch ($entity_type) {
@@ -45,12 +45,8 @@ function path_feeds_set_target($source, $entity, $target, $value, $mapping) {
 
   $entity->path = array();
 
-  $entity_type = $source->importer->processor->entityType();
-
-  list($id, , ) = entity_extract_ids($entity_type, $entity);
-
-  if ($id) {
-    $uri = entity_uri($entity_type, $entity);
+  if ($entity->id()) {
+    $uri = $entity->uri();
 
     // Check for existing aliases.
     if ($path = path_load($uri['path'])) {

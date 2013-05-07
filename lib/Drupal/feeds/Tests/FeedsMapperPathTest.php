@@ -5,20 +5,32 @@
  * Test case for path alias mapper path.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Class for testing Feeds <em>path</em> mapper.
  */
-class FeedsMapperPathTestCase extends FeedsMapperTestCase {
+class FeedsMapperPathTest extends FeedsMapperTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'field',
+    'field_ui',
+    'path',
+    'job_scheduler',
+    'feeds_ui',
+  );
+
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Path',
       'description' => 'Test Feeds Mapper support for path aliases.',
       'group' => 'Feeds',
     );
-  }
-
-  public function setUp() {
-    parent::setUp(array('path'));
   }
 
   /**
@@ -28,8 +40,8 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
 
     // Create importer configuration.
     $this->createImporterConfiguration($this->randomName(), 'path_test');
-    $this->setPlugin('path_test', 'FeedsFileFetcher');
-    $this->setPlugin('path_test', 'FeedsCSVParser');
+    $this->setPlugin('path_test', 'file');
+    $this->setPlugin('path_test', 'csv');
     $this->addMappings('path_test', array(
       0 => array(
         'source' => 'Title',
@@ -47,7 +59,7 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
     ));
 
     // Turn on update existing.
-    $this->setSettings('path_test', 'FeedsNodeProcessor', array('update_existing' => 2));
+    $this->setSettings('path_test', 'node', array('update_existing' => 2));
 
     // Import RSS file.
     $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
@@ -79,66 +91,66 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
   /**
    * Test support for term aliases.
    */
-  public function testTermAlias() {
+  // public function testTermAlias() {
 
-    // Create importer configuration.
-    $this->createImporterConfiguration($this->randomName(), 'path_test');
-    $this->setPlugin('path_test', 'FeedsFileFetcher');
-    $this->setPlugin('path_test', 'FeedsCSVParser');
-    $this->setPlugin('path_test', 'FeedsTermProcessor');
+  //   // Create importer configuration.
+  //   $this->createImporterConfiguration($this->randomName(), 'path_test');
+  //   $this->setPlugin('path_test', 'file');
+  //   $this->setPlugin('path_test', 'csv');
+  //   $this->setPlugin('path_test', 'taxonomy_term');
 
-    // Create vocabulary.
-    $edit = array(
-      'name' => 'Addams vocabulary',
-      'machine_name' => 'addams',
-    );
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
+  //   // Create vocabulary.
+  //   $edit = array(
+  //     'name' => 'Addams vocabulary',
+  //     'machine_name' => 'addams',
+  //   );
+  //   $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
 
-    $this->setSettings('path_test', 'FeedsTermProcessor', array('bundle' => 'addams', 'update_existing' => 2));
+  //   $this->setSettings('path_test', 'taxonomy_term', array('bundle' => 'addams', 'update_existing' => 2));
 
-    // Add mappings.
-    $this->addMappings('path_test', array(
-      0 => array(
-        'source' => 'Title',
-        'target' => 'name',
-      ),
-      1 => array(
-        'source' => 'path',
-        'target' => 'path_alias',
-      ),
-      2 => array(
-        'source' => 'GUID',
-        'target' => 'guid',
-        'unique' => TRUE,
-      ),
-    ));
+  //   // Add mappings.
+  //   $this->addMappings('path_test', array(
+  //     0 => array(
+  //       'source' => 'Title',
+  //       'target' => 'name',
+  //     ),
+  //     1 => array(
+  //       'source' => 'path',
+  //       'target' => 'path_alias',
+  //     ),
+  //     2 => array(
+  //       'source' => 'GUID',
+  //       'target' => 'guid',
+  //       'unique' => TRUE,
+  //     ),
+  //   ));
 
-    // Import RSS file.
-    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
-    $this->assertText('Created 9 terms');
+  //   // Import RSS file.
+  //   $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
+  //   $this->assertText('Created 9 terms');
 
-    $aliases = array();
+  //   $aliases = array();
 
-    for ($i = 1; $i <= 9; $i++) {
-      $aliases[] = "path$i";
-    }
+  //   for ($i = 1; $i <= 9; $i++) {
+  //     $aliases[] = "path$i";
+  //   }
 
-    $this->assertAliasCount($aliases);
+  //   $this->assertAliasCount($aliases);
 
-    // Adding a mapping will force update.
-    $this->addMappings('path_test', array(
-      3 => array(
-        'source' => 'fake',
-        'target' => 'description',
-      ),
-    ));
-    // Import RSS file.
-    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
-    $this->assertText('Updated 9 terms');
+  //   // Adding a mapping will force update.
+  //   $this->addMappings('path_test', array(
+  //     3 => array(
+  //       'source' => 'fake',
+  //       'target' => 'description',
+  //     ),
+  //   ));
+  //   // Import RSS file.
+  //   $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
+  //   $this->assertText('Updated 9 terms');
 
-    // Check that duplicate aliases are not created.
-    $this->assertAliasCount($aliases);
-  }
+  //   // Check that duplicate aliases are not created.
+  //   $this->assertAliasCount($aliases);
+  // }
 
   public function assertAliasCount($aliases) {
     $in_db = db_select('url_alias', 'a')
@@ -154,79 +166,79 @@ class FeedsMapperPathTestCase extends FeedsMapperTestCase {
 /**
  * Class for testing Feeds <em>path</em> mapper with pathauto.module.
  */
-class FeedsMapperPathPathautoTestCase extends FeedsMapperTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Mapper: Path with pathauto',
-      'description' => 'Test Feeds Mapper support for path aliases and pathauto.',
-      'group' => 'Feeds',
-      'dependencies' => array('pathauto'),
-    );
-  }
+// class FeedsMapperPathPathautoTestCase extends FeedsMapperTestCase {
+//   public static function getInfo() {
+//     return array(
+//       'name' => 'Mapper: Path with pathauto',
+//       'description' => 'Test Feeds Mapper support for path aliases and pathauto.',
+//       'group' => 'Feeds',
+//       'dependencies' => array('pathauto'),
+//     );
+//   }
 
-  public function setUp() {
-    parent::setUp(array('pathauto'));
-  }
+//   public function setUp() {
+//     parent::setUp(array('pathauto'));
+//   }
 
-  /**
-   * Basic for allowing pathauto to override the alias.
-   */
-  public function test() {
+//   /**
+//    * Basic for allowing pathauto to override the alias.
+//    */
+//   public function test() {
 
-    // Create importer configuration.
-    $this->createImporterConfiguration($this->randomName(), 'path_test');
-    $this->setPlugin('path_test', 'FeedsFileFetcher');
-    $this->setPlugin('path_test', 'FeedsCSVParser');
-    $this->addMappings('path_test', array(
-      0 => array(
-        'source' => 'Title',
-        'target' => 'title',
-        'unique' => FALSE,
-      ),
-      1 => array(
-        'source' => 'does_not_exist',
-        'target' => 'path_alias',
-        'pathauto_override' => TRUE,
-      ),
-      2 => array(
-        'source' => 'GUID',
-        'target' => 'guid',
-        'unique' => TRUE,
-      ),
-    ));
+//     // Create importer configuration.
+//     $this->createImporterConfiguration($this->randomName(), 'path_test');
+//     $this->setPlugin('path_test', 'file');
+//     $this->setPlugin('path_test', 'csv');
+//     $this->addMappings('path_test', array(
+//       0 => array(
+//         'source' => 'Title',
+//         'target' => 'title',
+//         'unique' => FALSE,
+//       ),
+//       1 => array(
+//         'source' => 'does_not_exist',
+//         'target' => 'path_alias',
+//         'pathauto_override' => TRUE,
+//       ),
+//       2 => array(
+//         'source' => 'GUID',
+//         'target' => 'guid',
+//         'unique' => TRUE,
+//       ),
+//     ));
 
-    // Turn on update existing.
-    $this->setSettings('path_test', 'FeedsNodeProcessor', array('update_existing' => 2));
+//     // Turn on update existing.
+//     $this->setSettings('path_test', 'FeedsNodeProcessor', array('update_existing' => 2));
 
-    // Import RSS file.
-    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
-    $this->assertText('Created 9 nodes');
+//     // Import RSS file.
+//     $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
+//     $this->assertText('Created 9 nodes');
 
-    $aliases = array();
+//     $aliases = array();
 
-    for ($i = 1; $i <= 9; $i++) {
-      $aliases[] = "content/pathauto$i";
-    }
+//     for ($i = 1; $i <= 9; $i++) {
+//       $aliases[] = "content/pathauto$i";
+//     }
 
-    $this->assertAliasCount($aliases);
+//     $this->assertAliasCount($aliases);
 
-    // Adding a mapping will force update.
-    $this->addMappings('path_test', array(
-      3 => array(
-        'source' => 'fake',
-        'target' => 'body',
-      ),
-    ));
-    // Import RSS file.
-    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
-    $this->assertText('Updated 9 nodes');
+//     // Adding a mapping will force update.
+//     $this->addMappings('path_test', array(
+//       3 => array(
+//         'source' => 'fake',
+//         'target' => 'body',
+//       ),
+//     ));
+//     // Import RSS file.
+//     $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
+//     $this->assertText('Updated 9 nodes');
 
-    // Check that duplicate aliases are not created.
-    $this->assertAliasCount($aliases);
-  }
+//     // Check that duplicate aliases are not created.
+//     $this->assertAliasCount($aliases);
+//   }
 
-  public function assertAliasCount($aliases) {
-    $in_db = db_query("SELECT * FROM {url_alias} WHERE alias IN (:aliases)", array(':aliases' => $aliases))->fetchAll();
-    $this->assertEqual(count($in_db), count($aliases), 'Correct number of aliases in db.');
-  }
-}
+//   public function assertAliasCount($aliases) {
+//     $in_db = db_query("SELECT * FROM {url_alias} WHERE alias IN (:aliases)", array(':aliases' => $aliases))->fetchAll();
+//     $this->assertEqual(count($in_db), count($aliases), 'Correct number of aliases in db.');
+//   }
+// }
