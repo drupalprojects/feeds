@@ -27,7 +27,7 @@ class FeedsPluginManager extends PluginManagerBase {
    *   keyed by the corresponding namespace to look for plugin implementations.
    */
   public function __construct($type, \Traversable $namespaces) {
-    $this->discovery = new AnnotatedClassDiscovery('feeds', $type, $namespaces);
+    $this->discovery = new AnnotatedClassDiscovery("feeds/$type", $namespaces);
     $this->discovery = new CacheDecorator($this->discovery, "feeds_$type:" . language(LANGUAGE_TYPE_INTERFACE)->langcode);
     $this->factory = new DefaultFactory($this->discovery);
   }
