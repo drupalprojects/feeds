@@ -5,20 +5,32 @@
  * Test case for simple CCK field mapper mappers/content.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Class for testing Feeds field mapper.
  */
-class FeedsMapperFieldTestCase extends FeedsMapperTestCase {
+class FeedsMapperFieldTest extends FeedsMapperTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'field',
+    'field_ui',
+    'number',
+    'job_scheduler',
+    'feeds_ui',
+  );
+
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Fields',
       'description' => 'Test Feeds Mapper support for fields.',
       'group' => 'Feeds',
     );
-  }
-
-  public function setUp() {
-    parent::setUp(array('number'));
   }
 
   /**
@@ -36,9 +48,9 @@ class FeedsMapperFieldTestCase extends FeedsMapperTestCase {
     // Create and configure importer.
     $this->createImporterConfiguration('Content CSV', 'csv');
     $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
-    $this->setPlugin('csv', 'FeedsFileFetcher');
-    $this->setPlugin('csv', 'FeedsCSVParser');
-    $this->setSettings('csv', 'FeedsNodeProcessor', array('bundle' => $typename));
+    $this->setPlugin('csv', 'file');
+    $this->setPlugin('csv', 'csv');
+    $this->setSettings('csv', 'node', array('bundle' => $typename));
     $this->addMappings('csv', array(
       0 => array(
         'source' => 'title',
