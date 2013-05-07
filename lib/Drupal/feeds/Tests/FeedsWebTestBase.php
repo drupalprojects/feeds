@@ -5,44 +5,44 @@
  * Common functionality for all Feeds tests.
  */
 
+namespace Drupal\feeds\Tests;
+
+use Drupal\simpletest\WebTestBase;
+
 /**
  * Test basic Data API functionality.
  */
-class FeedsWebTestCase extends DrupalWebTestCase {
+class FeedsWebTestBase extends WebTestBase {
+
+  /**
+   * The profile to install as a basis for testing.
+   *
+   * @var string
+   */
   protected $profile = 'testing';
 
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'taxonomy',
+    'image',
+    'file',
+    'field',
+    'field_ui',
+    // 'feeds_tests',
+    'job_scheduler',
+    'feeds_ui',
+    'views',
+  );
+
   public function setUp() {
-    $args = func_get_args();
+    parent::setUp();
 
-    // Build the list of required modules which can be altered by passing in an
-    // array of module names to setUp().
-    if (isset($args[0])) {
-      if (is_array($args[0])) {
-      $modules = $args[0];
-    }
-      else {
-      $modules = $args;
-    }
-    }
-    else {
-      $modules = array();
-    }
-
-    $modules[] = 'taxonomy';
-    $modules[] = 'image';
-    $modules[] = 'file';
-    $modules[] = 'field';
-    $modules[] = 'field_ui';
-    $modules[] = 'feeds';
-    $modules[] = 'feeds_ui';
-    $modules[] = 'feeds_tests';
-    $modules[] = 'ctools';
-    $modules[] = 'job_scheduler';
-    $modules = array_unique($modules);
-    parent::setUp($modules);
-
-    // Add text formats Directly.
-    $filtered_html_format = array(
+    // Create text format.
+    $filtered_html_format = entity_create('filter_format', array(
       'format' => 'filtered_html',
       'name' => 'Filtered HTML',
       'weight' => 0,
@@ -68,19 +68,10 @@ class FeedsWebTestCase extends DrupalWebTestCase {
           'status' => 1,
         ),
       ),
-    );
-    $filtered_html_format = (object) $filtered_html_format;
-    filter_format_save($filtered_html_format);
+    ));
+    $filtered_html_format->save();
 
-    // Build the list of required administration permissions. Additional
-    // permissions can be passed as an array into setUp()'s second parameter.
-    if (isset($args[1]) && is_array($args[1])) {
-      $permissions = $args[1];
-    }
-    else {
-      $permissions = array();
-    }
-
+    $permissions = array();
     $permissions[] = 'access content';
     $permissions[] = 'administer site configuration';
     $permissions[] = 'administer content types';
@@ -89,6 +80,8 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $permissions[] = 'administer taxonomy';
     $permissions[] = 'administer users';
     $permissions[] = 'administer feeds';
+    $permissions[] = 'administer node fields';
+    $permissions[] = 'administer node display';
 
     // Create an admin user and log in.
     $this->admin_user = $this->drupalCreateUser($permissions);
@@ -98,20 +91,26 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       array(
         'type' => 'page',
         'name' => 'Basic page',
-        'node_options[status]' => 1,
-        'node_options[promote]' => 0,
       ),
       array(
         'type' => 'article',
         'name' => 'Article',
-        'node_options[status]' => 1,
-        'node_options[promote]' => 1,
       ),
     );
     foreach ($types as $type) {
-      $this->drupalPost('admin/structure/types/add', $type, 'Save content type');
-      $this->assertText("The content type " . $type['name'] . " has been added.");
+      $this->drupalCreateContentType($type);
+      $edit = array(
+        'node_options[status]' => 1,
+        'node_options[promote]' => 1,
+      );
+      $this->drupalPost('admin/structure/types/manage/' . $type['type'], $edit, 'Save content type');
     }
+
+    $display = config('views.view.frontpage')->get('display');
+    $display['default']['display_options']['pager']['options']['items_per_page'] = 500;
+    config('views.view.frontpage')
+      ->set('display', $display)
+      ->save();
   }
 
   /**
@@ -185,11 +184,11 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
     // Assert message and presence of default plugins.
     $this->assertText('Your configuration has been created with default settings.');
-    $this->assertPlugins($id, 'FeedsHTTPFetcher', 'FeedsSyndicationParser', 'FeedsNodeProcessor');
+    $this->assertPlugins($id, 'http', 'syndication', 'node');
     // Per default attach to page content type.
     $this->setSettings($id, NULL, array('content_type' => 'page'));
     // Per default attached to article content type.
-    $this->setSettings($id, 'FeedsNodeProcessor', array('bundle' => 'article'));
+    $this->setSettings($id, 'node', array('bundle' => 'article'));
   }
 
   /**
@@ -209,7 +208,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       $this->drupalPost("admin/structure/feeds/$id/$type", $edit, 'Save');
 
       // Assert actual configuration.
-      $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $id))->fetchField());
+      $config = config('feeds.importer.' . $id)->get('config');
       $this->assertEqual($config[$type]['plugin_key'], $plugin_key, 'Verified correct ' . $type . ' (' . $plugin_key . ').');
     }
   }
@@ -248,11 +247,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
     // If content type not given, retrieve it.
     if (!$content_type) {
-      $result= db_select('feeds_importer', 'f')
-        ->condition('f.id', $id, '=')
-        ->fields('f', array('config'))
-        ->execute();
-      $config = unserialize($result->fetchField());
+      $config = config('feeds.importer.' . $id)->get('config');
       $content_type = $config['content_type'];
       $this->assertFalse(empty($content_type), 'Valid content type found: ' . $content_type);
     }
@@ -260,9 +255,9 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     // Create a feed node.
     $edit = array(
       'title' => $title,
-      'feeds[FeedsHTTPFetcher][source]' => $feed_url,
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $feed_url,
     );
-    $this->drupalPost('node/add/' . str_replace('_', '-', $content_type), $edit, 'Save');
+    $this->drupalPost('node/add/' . str_replace('_', '-', $content_type), $edit, 'Save and publish');
     $this->assertText('has been created.');
 
     // Get the node id from URL.
@@ -282,7 +277,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       ->fields('s', array('config'))
       ->execute()->fetchObject();
     $config = unserialize($source->config);
-    $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
+    $this->assertEqual($config['Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
     return $nid;
   }
 
@@ -299,16 +294,16 @@ class FeedsWebTestCase extends DrupalWebTestCase {
   public function editFeedNode($nid, $feed_url, $title = '') {
     $edit = array(
       'title' => $title,
-      'feeds[FeedsHTTPFetcher][source]' => $feed_url,
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $feed_url,
     );
     // Check that the update was saved.
-    $this->drupalPost('node/' . $nid . '/edit', $edit, 'Save');
+    $this->drupalPost('node/' . $nid . '/edit', $edit, 'Save and keep published');
     $this->assertText('has been updated.');
 
     // Check that the URL was updated in the feeds_source table.
     $source = db_query("SELECT * FROM {feeds_source} WHERE feed_nid = :nid", array(':nid' => $nid))->fetchObject();
     $config = unserialize($source->config);
-    $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
+    $this->assertEqual($config['Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
   }
 
   /**
@@ -327,14 +322,14 @@ class FeedsWebTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Import a URL through the import form. Assumes FeedsHTTPFetcher in place.
+   * Import a URL through the import form. Assumes http in place.
    */
   public function importURL($id, $feed_url = NULL) {
     if (empty($feed_url)) {
       $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2';
     }
     $edit = array(
-      'feeds[FeedsHTTPFetcher][source]' => $feed_url,
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $feed_url,
     );
     $nid = $this->drupalPost('import/' . $id, $edit, 'Import');
 
@@ -342,7 +337,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {feeds_source} WHERE id = :id AND feed_nid = 0", array(':id' => $id))->fetchField());
     $source = db_query("SELECT * FROM {feeds_source} WHERE id = :id AND feed_nid = 0",  array(':id' => $id))->fetchObject();
     $config = unserialize($source->config);
-    $this->assertEqual($config['FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
+    $this->assertEqual($config['Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
 
     // Check whether feed got properly added to scheduler.
     $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_import' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
@@ -377,7 +372,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
    */
   public function assertPlugins($id, $fetcher, $parser, $processor) {
     // Assert actual configuration.
-    $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $id))->fetchField());
+    $config = config('feeds.importer.' . $id)->get('config');
 
     $this->assertEqual($config['fetcher']['plugin_key'], $fetcher, 'Correct fetcher');
     $this->assertEqual($config['parser']['plugin_key'], $parser, 'Correct parser');
@@ -481,9 +476,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
    *   FALSE if the importer has no mappings, or an an array of mappings.
    */
   public function getCurrentMappings($id) {
-    $config = db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $id))->fetchField();
-
-    $config = unserialize($config);
+    $config = config('feeds.importer.' . $id)->get('config');
 
     // We are very specific here. 'mappings' can either be an array or not
     // exist.
@@ -598,82 +591,5 @@ class FeedsWebTestCase extends DrupalWebTestCase {
 
     // Set the simpletest library directory.
     variable_set('feeds_library_dir', $library_dir);
-  }
-}
-
-/**
- * Provides a wrapper for DrupalUnitTestCase for Feeds unit testing.
- */
-class FeedsUnitTestHelper extends DrupalUnitTestCase {
-  public function setUp() {
-    parent::setUp();
-
-    // Manually include the feeds module.
-    // @todo Allow an array of modules from the child class.
-    drupal_load('module', 'feeds');
-  }
-}
-
-class FeedsUnitTestCase extends FeedsUnitTestHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unit tests',
-      'description' => 'Test basic low-level Feeds module functionality.',
-      'group' => 'Feeds',
-    );
-  }
-
-  /**
-   * Test valid absolute urls.
-   *
-   * @see ValidUrlTestCase
-   *
-   * @todo Remove when http://drupal.org/node/1191252 is fixed.
-   */
-  function testFeedsValidURL() {
-    $url_schemes = array('http', 'https', 'ftp', 'feed', 'webcal');
-    $valid_absolute_urls = array(
-      'example.com',
-      'www.example.com',
-      'ex-ample.com',
-      '3xampl3.com',
-      'example.com/paren(the)sis',
-      'example.com/index.html#pagetop',
-      'example.com:8080',
-      'subdomain.example.com',
-      'example.com/index.php?q=node',
-      'example.com/index.php?q=node&param=false',
-      'user@www.example.com',
-      'user:pass@www.example.com:8080/login.php?do=login&style=%23#pagetop',
-      '127.0.0.1',
-      'example.org?',
-      'john%20doe:secret:foo@example.org/',
-      'example.org/~,$\'*;',
-      'caf%C3%A9.example.org',
-      '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html',
-      'graph.asfdasdfasdf.com/blarg/feed?access_token=133283760145143|tGew8jbxi1ctfVlYh35CPYij1eE',
-    );
-
-    foreach ($url_schemes as $scheme) {
-      foreach ($valid_absolute_urls as $url) {
-        $test_url = $scheme . '://' . $url;
-        $valid_url = feeds_valid_url($test_url, TRUE);
-        $this->assertTrue($valid_url, t('@url is a valid url.', array('@url' => $test_url)));
-      }
-    }
-
-    $invalid_ablosule_urls = array(
-      '',
-      'ex!ample.com',
-      'ex%ample.com',
-    );
-
-    foreach ($url_schemes as $scheme) {
-      foreach ($invalid_ablosule_urls as $url) {
-        $test_url = $scheme . '://' . $url;
-        $valid_url = feeds_valid_url($test_url, TRUE);
-        $this->assertFalse($valid_url, t('@url is NOT a valid url.', array('@url' => $test_url)));
-      }
-    }
   }
 }

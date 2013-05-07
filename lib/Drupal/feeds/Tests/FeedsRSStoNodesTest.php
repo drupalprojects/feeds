@@ -5,10 +5,14 @@
  * Tests for plugins/FeedsNodeProcessor.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
+use Drupal\simpletest\WebTestBase;
+
 /**
  * Test aggregating a feed as node items.
  */
-class FeedsRSStoNodesTest extends FeedsWebTestCase {
+class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
   public static function getInfo() {
     return array(
@@ -122,7 +126,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
     // Enable replace existing and import updated feed file.
     $this->drupalPost("node/$nid/import", array(), 'Import');
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('update_existing' => 1));
+    $this->setSettings('syndication', 'node', array('update_existing' => 1));
     $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed_changes.rss2';
     $this->editFeedNode($nid, $feed_url);
     $this->drupalPost("node/$nid/import", array(), 'Import');
@@ -146,10 +150,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
     // Change author and turn off authorization.
     $this->auth_user = $this->drupalCreateUser(array('access content'));
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('author' => $this->auth_user->name, 'authorize' => FALSE));
+    $this->setSettings('syndication', 'node', array('author' => $this->auth_user->name, 'authorize' => FALSE));
 
     // Change input format.
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('input_format' => 'plain_text'));
+    $this->setSettings('syndication', 'node', array('input_format' => 'plain_text'));
 
     // Import again.
     $this->drupalPost("node/$nid/import", array(), 'Import');
@@ -168,7 +172,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     // $this->assertEqual($format, filter_fallback_format() + 1, 'Set non-default Input format.');
 
     // Set to update existing, remove authorship of above nodes and import again.
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('update_existing' => 2));
+    $this->setSettings('syndication', 'node', array('update_existing' => 2));
     $nids = db_query("SELECT nid FROM {node} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id")->fetchCol();
     db_update('node')
       ->fields(array('uid' => 0))
@@ -267,7 +271,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->assertFeedItemCount(10);
 
     // Enable replace existing and import updated feed file.
-    $this->setSettings('syndication_standalone', 'FeedsNodeProcessor', array('update_existing' => 1));
+    $this->setSettings('syndication_standalone', 'node', array('update_existing' => 1));
     $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed_changes.rss2';
     $this->importURL('syndication_standalone', $feed_url);
     $this->assertText('Updated 2 nodes');
@@ -367,8 +371,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
    * Test validation of feed URLs.
    */
   function testFeedURLValidation() {
-    $edit['feeds[FeedsHTTPFetcher][source]'] = 'invalid://url';
-    $this->drupalPost('node/add/page', $edit, 'Save');
+    $edit = array(
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => 'invalid://url',
+    );
+    $this->drupalPost('node/add/page', $edit, 'Save and publish');
     $this->assertText('The URL invalid://url is invalid.');
   }
 
@@ -383,8 +389,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     foreach ($schemes as $scheme) {
       $feed_url = strtr($url, array('http://' => $scheme . '://', 'https://' => $scheme . '://'));
 
-      $edit['feeds[FeedsHTTPFetcher][source]'] = $feed_url;
-      $this->drupalPost('node/add/page', $edit, 'Save');
+      $edit['feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]'] = $feed_url;
+      $this->drupalPost('node/add/page', $edit, 'Save and publish');
       $this->assertText('Basic page Development Seed - Technological Solutions for Progressive Organizations has been created.');
       $this->assertText('Created 10 nodes.');
       $this->assertFeedItemCount($item_count + 10);
@@ -404,7 +410,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
     // Navigate to a non-feed node form, there should be no Feed field visible.
     $this->drupalGet('node/add/article');
-    $this->assertNoFieldByName('feeds[FeedsHTTPFetcher][source]');
+    $this->assertNoFieldByName('feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]');
   }
 
   /**
@@ -413,17 +419,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
    */
   public function testAuthorize() {
 
-    // Create a user with limited permissions. We can't use
-    // $this->drupalCreateUser here because we need to to set a specific user
-    // name.
-    $edit = array(
-      'name' => 'Development Seed',
-      'mail' => 'devseed@example.com',
-      'pass' => user_password(),
-      'status' => 1,
-    );
-
-   $account = user_save(drupal_anonymous_user(), $edit);
+    // Create a user with limited permissions.
+   $account = $this->drupalCreateUser(array(), 'Development Seed');
 
     // Adding a mapping to the user_name will invoke authorization.
     $this->addMappings('syndication',
@@ -444,11 +441,9 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     // We should have 1 node, the feed node.
     $this->assertEqual($node_count, 1, t('Correct number of nodes in the database.'));
 
-    // Give the user our admin powers.
-    $edit = array(
-      'roles' => $this->admin_user->roles,
-    );
-    $account = user_save($account, $edit);
+    // Give the user super admin powers.
+    user_delete($account->uid);
+    $account = $this->drupalCreateUser(array('access content', 'bypass node access'), 'Development Seed');
 
     $this->drupalPost("node/$nid/import", array(), 'Import');
     $this->assertText('Created 10 nodes.');
@@ -462,8 +457,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
   public function testExpiry() {
     // Create importer configuration.
     $this->setSettings('syndication', NULL, array('content_type' => ''));
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array(
-      'expire' => 2592000,
+    $this->setSettings('syndication', 'node', array(
+      'expire' => 10800,
     ));
 
     // Create importer.
@@ -471,11 +466,11 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
 
     // Set date of a few nodes to current date so they don't expire.
     $edit = array(
-      'date' => date('Y-m-d'),
+      'date[date]' => date('Y-m-d'),
     );
-    $this->drupalPost('node/2/edit', $edit, 'Save');
+    $this->drupalPost('node/2/edit', $edit, 'Save and keep published');
     $this->assertText(date('m/d/Y'), 'Found correct date.');
-    $this->drupalPost('node/5/edit', $edit, 'Save');
+    $this->drupalPost('node/5/edit', $edit, 'Save and keep published');
     $this->assertText(date('m/d/Y'), 'Found correct date.');
 
     // Run cron to schedule jobs.

@@ -5,6 +5,8 @@
  * Tests for FeedsDateTime class.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Test FeedsDateTime class.
  *
@@ -12,7 +14,7 @@
  * Not inheriting from Feeds base class as ParserCSV should be moved out of
  * Feeds at some time.
  */
-class FeedsDateTimeTest extends FeedsWebTestCase {
+class FeedsDateTimeTest extends FeedsWebTestBase {
   protected $profile = 'testing';
 
   public static function getInfo() {

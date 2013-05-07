@@ -91,12 +91,12 @@ abstract class FeedsConfigurable {
    * defined either in code or in the database and it is enabled.
    */
   public function existing() {
-    if ($this->export_type == FEEDS_EXPORT_NONE) {
-      throw new FeedsNotExistingException(t('Object is not persistent.'));
-    }
-    if ($this->disabled) {
-      throw new FeedsNotExistingException(t('Object is disabled.'));
-    }
+    // if ($this->export_type == FEEDS_EXPORT_NONE) {
+    //   throw new FeedsNotExistingException(t('Object is not persistent.'));
+    // }
+    // if ($this->disabled) {
+    //   throw new FeedsNotExistingException(t('Object is disabled.'));
+    // }
     return $this;
   }
 

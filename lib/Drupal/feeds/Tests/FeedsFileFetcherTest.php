@@ -5,10 +5,12 @@
  * File fetcher tests.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * File fetcher test class.
  */
-class FeedsFileFetcherTestCase extends FeedsWebTestCase {
+class FeedsFileFetcherTest extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File fetcher',

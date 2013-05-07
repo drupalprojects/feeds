@@ -5,13 +5,15 @@
  * Tests for the common syndication parser.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Test cases for common syndication parser library.
  *
  * @todo Break out into Drupal independent test framework.
  * @todo Could I use DrupalUnitTestCase here?
  */
-class CommonSyndicationParserTestCase extends DrupalWebTestCase {
+class CommonSyndicationParserTest extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
       'name' => 'Common Syndication Parser',
@@ -21,7 +23,7 @@ class CommonSyndicationParserTestCase extends DrupalWebTestCase {
   }
 
   public function setUp() {
-    parent::setUp(array('feeds', 'feeds_ui', 'ctools', 'job_scheduler'));
+    parent::setUp(array('feeds', 'feeds_ui', 'job_scheduler'));
     feeds_include_library('common_syndication_parser.inc', 'common_syndication_parser');
   }
 

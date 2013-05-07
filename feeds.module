@@ -625,7 +625,8 @@ function feeds_node_delete($node) {
  * Implements hook_form_BASE_FORM_ID_alter().
  */
 function feeds_form_node_form_alter(&$form, $form_state) {
-  if ($importer_id = feeds_get_importer_id($form['#node']->type)) {
+  $node = $form_state['controller']->getEntity();
+  if ($importer_id = feeds_get_importer_id($node->type)) {
     // Set title to not required, try to retrieve it from feed.
     if (isset($form['title'])) {
       $form['title']['#required'] = FALSE;
@@ -635,7 +636,7 @@ function feeds_form_node_form_alter(&$form, $form_state) {
     $form['#attributes']['enctype'] = 'multipart/form-data';
 
     // Build form.
-    $source = feeds_source($importer_id, empty($form['#node']->nid) ? 0 : $form['#node']->nid);
+    $source = feeds_source($importer_id, empty($node->nid) ? 0 : $node->nid);
     $form['feeds'] = array(
       '#type' => 'fieldset',
       '#title' => t('Feed'),

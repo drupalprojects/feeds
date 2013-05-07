@@ -4,6 +4,8 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedsSource;
 use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FeedsAccessException;
+use Exception;
 
 /**
  * @file
@@ -22,12 +24,7 @@ define('FEEDS_PROCESS_LIMIT', 50);
 /**
  * Thrown if a validation fails.
  */
-class FeedsValidationException extends \Exception {}
-
-/**
- * Thrown if a an access check fails.
- */
-class FeedsAccessException extends \Exception {}
+class FeedsValidationException extends Exception {}
 
 /**
  * Abstract class, defines interface for processors.
@@ -108,18 +105,23 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function entityLoad(FeedsSource $source, $entity_id) {
     if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
-      $entities = entity_load($this->entityType(), array($entity_id));
-      return reset($entities);
+      return entity_load($this->entityType(), $entity_id);
     }
 
     $info = $this->entityInfo();
 
     $args = array(':entity_id' => $entity_id);
 
-    $table = db_escape_table($info['base table']);
-    $key = db_escape_field($info['entity keys']['id']);
+    $table = db_escape_table($info['base_table']);
+    $key = db_escape_field($info['entity_keys']['id']);
+    $values = db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
 
-    return db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
+    $entity = $this->newEntity($source);
+    foreach ($values as $key => $value) {
+      $entity->$key = $value;
+    }
+
+    return $entity;
   }
 
   /**
@@ -269,6 +271,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if ($source->progressImporting() != FEEDS_BATCH_COMPLETE) {
       return;
     }
+
     $info = $this->entityInfo();
     $tokens = array(
       '@entity' => strtolower($info['label']),
@@ -333,12 +336,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
     // Build base select statement.
     $info = $this->entityInfo();
-    $select = db_select($info['base table'], 'e');
-    $select->addField('e', $info['entity keys']['id'], 'entity_id');
+    $select = db_select($info['base_table'], 'e');
+    $select->addField('e', $info['entity_keys']['id'], 'entity_id');
     $select->join(
       'feeds_item',
       'fi',
-      "e.{$info['entity keys']['id']} = fi.entity_id AND fi.entity_type = '{$this->entityType()}'");
+      "e.{$info['entity_keys']['id']} = fi.entity_id AND fi.entity_type = '{$this->entityType()}'");
     $select->condition('fi.id', $this->id);
     $select->condition('fi.feed_nid', $source->feed_nid);
 
@@ -472,10 +475,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
   protected function expiryQuery(FeedsSource $source, $time) {
     // Build base select statement.
     $info = $this->entityInfo();
-    $id_key = db_escape_field($info['entity keys']['id']);
+    $id_key = db_escape_field($info['entity_keys']['id']);
 
-    $select = db_select($info['base table'], 'e');
-    $select->addField('e', $info['entity keys']['id'], 'entity_id');
+    $select = db_select($info['base_table'], 'e');
+    $select->addField('e', $info['entity_keys']['id'], 'entity_id');
     $select->join(
       'feeds_item',
       'fi',
@@ -598,7 +601,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
   public function configDefaults() {
     $info = $this->entityInfo();
     $bundle = NULL;
-    if (empty($info['entity keys']['bundle'])) {
+    if (empty($info['entity_keys']['bundle'])) {
       $bundle = $this->entityType();
     }
     return array(
@@ -692,7 +695,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     // The bundle has not been selected.
     if (!$this->bundle()) {
       $info = $this->entityInfo();
-      $bundle_name = !empty($info['bundle name']) ? drupal_strtolower($info['bundle name']) : t('bundle');
+      $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : t('bundle');
       $plugin_key = feeds_importer($this->id)->config['processor']['plugin_key'];
       $url = url('admin/structure/feeds/' . $this->id . '/settings/' . $plugin_key);
       drupal_set_message(t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
@@ -827,7 +830,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function loadItemInfo($entity) {
     $entity_info = entity_get_info($this->entityType());
-    $key = $entity_info['entity keys']['id'];
+    $key = $entity_info['entity_keys']['id'];
     if ($item_info = feeds_item_info_load($this->entityType(), $entity->$key)) {
       $entity->feeds_item = $item_info;
       return TRUE;
@@ -877,16 +880,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @return string
    *   The message to log.
    */
-  protected function createLogMessage(\Exception $e, $entity, $item) {
-    include_once DRUPAL_ROOT . '/includes/utility.inc';
+  protected function createLogMessage(Exception $e, $entity, $item) {
+    include_once DRUPAL_ROOT . '/core/includes/utility.inc';
     $message = $e->getMessage();
     $message .= '<h3>Original item</h3>';
     $message .= '<pre>' . drupal_var_export($item). '</pre>';
     $message .= '<h3>Entity</h3>';
-    $message .= '<pre>' . drupal_var_export($entity) . '</pre>';
+    $message .= '<pre>' . drupal_var_export($entity->getValue()) . '</pre>';
     return $message;
   }
 
 }
-
-class FeedsProcessorBundleNotDefined extends \Exception {}

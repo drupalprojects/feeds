@@ -13,6 +13,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsProcessor;
 use Drupal\feeds\FeedsSource;
 use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FeedsAccessException;
 
 /**
  * Defines a node processor.
@@ -47,6 +48,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Creates a new node in memory and returns it.
    */
   protected function newEntity(FeedsSource $source) {
+    $defaults = variable_get('node_options_' . $this->bundle(), array('status', 'promote'));
     $node = entity_create('node', array(
       'type' => $this->bundle(),
       'changed' => REQUEST_TIME,
@@ -54,6 +56,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'is_new' => TRUE,
       'log' => 'Created by FeedsNodeProcessor',
       'uid' => $this->config['author'],
+      'promote' => (int) in_array('promote', $defaults),
+      'status' => (int) in_array('status', $defaults),
     ));
     return $node;
   }

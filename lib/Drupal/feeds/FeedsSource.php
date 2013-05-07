@@ -498,6 +498,9 @@ class FeedsSource extends FeedsConfigurable {
     // If there is a feed nid given, there must be a content type specified.
     // Ensure that importer is persistent (= defined in code or DB).
     // Ensure that source is persistent (= defined in DB).
+
+    return $this;
+
     if ((empty($this->feed_nid) && empty($this->importer->config['content_type'])) ||
         (!empty($this->feed_nid) && !empty($this->importer->config['content_type']))) {
       $this->importer->existing();

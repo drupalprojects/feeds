@@ -237,7 +237,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     else {
       // It's a tragedy, this file must exist and contain good data.
       // In this case, clear cache and repeat.
-      cache_clear_all('feeds_http_download_' . md5($url), 'cache');
+      cache()->delete('feeds_http_download_' . md5($url));
       return http_request_get($url, $username, $password, $accept_invalid_cert, $request_timeout);
     }
   }
@@ -270,7 +270,7 @@ function http_request_use_curl() {
  * Clear cache for a specific URL.
  */
 function http_request_clear_cache($url) {
-  cache_clear_all('feeds_http_download_' . md5($url), 'cache');
+  cache()->delete('feeds_http_download_' . md5($url));
 }
 
 /**
