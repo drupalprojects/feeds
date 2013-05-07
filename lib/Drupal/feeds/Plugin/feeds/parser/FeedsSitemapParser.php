@@ -5,8 +5,24 @@
  * Contains FeedsSitemapParser and related classes.
  */
 
+namespace Drupal\feeds\Plugin\feeds\parser;
+
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FeedsParserResult;
+use SimpleXMLElement;
+
 /**
- * A parser for the Sitemap specification http://www.sitemaps.org/protocol.php
+ * Defines a SitemapXML feed parser.
+ *
+ * @Plugin(
+ *   id = "sitemap",
+ *   title = @Translation("Sitemap parser"),
+ *   description = @Translation("Parse Sitemap XML format feeds.")
+ * )
  */
 class FeedsSitemapParser extends FeedsParser {
   /**

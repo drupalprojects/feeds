@@ -5,10 +5,12 @@
  * Feeds tests.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Test cron scheduling.
  */
-class FeedsSchedulerTestCase extends FeedsWebTestCase {
+class FeedsSchedulerTest extends FeedsWebTestBase {
 
   public static function getInfo() {
     return array(
@@ -24,33 +26,31 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
   public function testScheduling() {
     // Create importer configuration.
     $this->createImporterConfiguration();
-    $this->addMappings('syndication',
-      array(
-        0 => array(
-          'source' => 'title',
-          'target' => 'title',
-          'unique' => FALSE,
-        ),
-        1 => array(
-          'source' => 'description',
-          'target' => 'body',
-        ),
-        2 => array(
-          'source' => 'timestamp',
-          'target' => 'created',
-        ),
-        3 => array(
-          'source' => 'url',
-          'target' => 'url',
-          'unique' => TRUE,
-        ),
-        4 => array(
-          'source' => 'guid',
-          'target' => 'guid',
-          'unique' => TRUE,
-        ),
-      )
-    );
+    $this->addMappings('syndication', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+        'unique' => FALSE,
+      ),
+      1 => array(
+        'source' => 'description',
+        'target' => 'body',
+      ),
+      2 => array(
+        'source' => 'timestamp',
+        'target' => 'created',
+      ),
+      3 => array(
+        'source' => 'url',
+        'target' => 'url',
+        'unique' => TRUE,
+      ),
+      4 => array(
+        'source' => 'guid',
+        'target' => 'guid',
+        'unique' => TRUE,
+      ),
+    ));
 
     // Create 10 feed nodes. Turn off import on create before doing that.
     $edit = array(
@@ -153,7 +153,7 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     $min_last = db_query("SELECT MIN(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_source_import' AND period = 0")->fetchField();
     $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_source_expire'")->fetchField());
     $this->drupalLogin($this->admin_user);
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array('expire' => 86400));
+    $this->setSettings('syndication', 'node', array('expire' => 86400));
     $this->drupalLogout();
     sleep(1);
     $this->cronRun();
@@ -206,15 +206,14 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
       'content_type' => '',
     );
     $this->drupalPost('admin/structure/feeds/node/settings', $edit, 'Save');
-    $this->setPlugin('node', 'FeedsFileFetcher');
-    $this->setPlugin('node', 'FeedsCSVParser');
-    $mappings = array(
+    $this->setPlugin('node', 'file');
+    $this->setPlugin('node', 'csv');
+    $this->addMappings('node', array(
       0 => array(
         'source' => 'title',
         'target' => 'title',
       ),
-    );
-    $this->addMappings('node', $mappings);
+    ));
 
     // Verify that there are 86 nodes total.
     $this->importFile('node', $this->absolutePath() . '/tests/feeds/many_nodes.csv');
