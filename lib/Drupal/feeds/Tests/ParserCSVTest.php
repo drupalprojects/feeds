@@ -5,6 +5,12 @@
  * Tests for ParserCSV library.
  */
 
+namespace Drupal\feeds\Tests;
+
+use Drupal\simpletest\UnitTestBase;
+use Drupal\feeds\ParserCSV;
+use Drupal\feeds\ParserCSVIterator;
+
 /**
  * Test aggregating a feed as node items.
  *
@@ -12,7 +18,7 @@
  * Not inheriting from Feeds base class as ParserCSV should be moved out of
  * Feeds at some time.
  */
-class ParserCSVTest extends DrupalWebTestCase  {
+class ParserCSVTest extends UnitTestBase  {
   protected $profile = 'testing';
 
   public static function getInfo() {
@@ -27,8 +33,6 @@ class ParserCSVTest extends DrupalWebTestCase  {
    * Test method.
    */
   public function test() {
-    drupal_load('module', 'feeds');
-    feeds_include_library('ParserCSV.inc', 'ParserCSV');
 
     $this->_testSimple();
     $this->_testBatching();

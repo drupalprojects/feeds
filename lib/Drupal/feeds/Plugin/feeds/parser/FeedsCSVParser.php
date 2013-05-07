@@ -5,8 +5,25 @@
  * Contains the FeedsCSVParser class.
  */
 
+namespace Drupal\feeds\Plugin\feeds\parser;
+
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserCSVIterator;
+use Drupal\feeds\ParserCSV;
+
 /**
- * Parses a given file as a CSV file.
+ * Defines a CSV feed parser.
+ *
+ * @Plugin(
+ *   id = "csv",
+ *   title = @Translation("CSV parser"),
+ *   description = @Translation("Parse CSV files.")
+ * )
  */
 class FeedsCSVParser extends FeedsParser {
 

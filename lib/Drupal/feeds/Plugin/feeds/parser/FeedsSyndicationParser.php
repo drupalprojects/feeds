@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Plugin\feeds\parser;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsParser;

@@ -28,26 +28,25 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Set and configure plugins and mappings.
     $this->setSettings('node', NULL, array('content_type' => ''));
     $this->setPlugin('node', 'file');
-    $this->setPlugin('node', 'FeedsCSVParser');
-    $mappings = array(
-      '0' => array(
+    $this->setPlugin('node', 'csv');
+
+    $this->addMappings('node', array(
+      0 => array(
         'source' => 'title',
         'target' => 'title',
       ),
-    );
-    $this->addMappings('node', $mappings);
+    ));
     // Straight up upload is covered in other tests, focus on direct mode
     // and file batching here.
-    $settings = array(
+    $this->setSettings('node', 'file', array(
       'direct' => TRUE,
       'directory' => 'public://feeds',
-    );
-    $this->setSettings('node', 'file', $settings);
+    ));
 
     // Verify that invalid paths are not accepted.
     foreach (array('/tmp/') as $path) {
       $edit = array(
-        'feeds[FeedsFileFetcher][source]' => $path,
+        'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsFileFetcher][source]' => $path,
       );
       $this->drupalPost('import/node', $edit, t('Import'));
       $this->assertText("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes:");
@@ -63,8 +62,9 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Ingest directory of files. Set limit to 5 to force processor to batch,
     // too.
     variable_set('feeds_process_limit', 5);
+
     $edit = array(
-      'feeds[FeedsFileFetcher][source]' => $dir,
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsFileFetcher][source]' => $dir,
     );
     $this->drupalPost('import/node', $edit, t('Import'));
     $this->assertText('Created 18 nodes');
@@ -79,7 +79,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Set and configure plugins and mappings.
     $this->setSettings('node', NULL, array('content_type' => ''));
     $this->setPlugin('node', 'file');
-    $this->setPlugin('node', 'FeedsCSVParser');
+    $this->setPlugin('node', 'csv');
     $this->addMappings('node', array(
       0 => array(
         'source' => 'title',
@@ -88,11 +88,10 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     ));
     // Straight up upload is covered in other tests, focus on direct mode
     // and file batching here.
-    $settings = array(
+    $this->setSettings('node', 'file', array(
       'direct' => TRUE,
       'directory' => 'private://feeds',
-    );
-    $this->setSettings('node', 'file', $settings);
+    ));
 
     // Verify batching through directories.
     // Copy directory of files.
@@ -103,7 +102,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // too.
     variable_set('feeds_process_limit', 5);
     $edit = array(
-      'feeds[FeedsFileFetcher][source]' => $dir,
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsFileFetcher][source]' => $dir,
     );
     $this->drupalPost('import/node', $edit, t('Import'));
     $this->assertText('Created 18 nodes');
