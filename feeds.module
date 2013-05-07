@@ -1175,7 +1175,7 @@ function feeds_file_download($uri) {
   }
 
   // Check if this file belongs to Feeds.
-  $usage_list = file_usage_list($file);
+  $usage_list = file_usage()->listUsage($file);
   if (!isset($usage_list['feeds'])) {
     return;
   }

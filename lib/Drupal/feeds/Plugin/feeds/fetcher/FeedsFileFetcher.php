@@ -5,39 +5,26 @@
  * Home of the FeedsFileFetcher and related classes.
  */
 
-/**
- * Definition of the import batch object created on the fetching stage by
- * FeedsFileFetcher.
- */
-class FeedsFileFetcherResult extends FeedsFetcherResult {
-  /**
-   * Constructor.
-   */
-  public function __construct($file_path) {
-    parent::__construct('');
-    $this->file_path = $file_path;
-  }
+namespace Drupal\feeds\Plugin\feeds\fetcher;
 
-  /**
-   * Overrides parent::getRaw().
-   */
-  public function getRaw() {
-    return $this->sanitizeRaw(file_get_contents($this->file_path));
-  }
+use Drupal\feeds\FeedsFileFetcherResult;
+use Drupal\feeds\Plugin\FeedsFetcher;
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\FeedsSource;
+use Exception;
 
-  /**
-   * Overrides parent::getFilePath().
-   */
-  public function getFilePath() {
-    if (!file_exists($this->file_path)) {
-      throw new Exception(t('File @filepath is not accessible.', array('@filepath' => $this->file_path)));
-    }
-    return $this->sanitizeFile($this->file_path);
-  }
-}
 
 /**
- * Fetches data via HTTP.
+ * Defines a file fetcher.
+ *
+ * Upload files or give a directory.
+ *
+ * @Plugin(
+ *   id = "file",
+ *   title = @Translation("File fetcher"),
+ *   description = @Translation("Upload content from a local file.")
+ * )
  */
 class FeedsFileFetcher extends FeedsFetcher {
 
@@ -134,6 +121,11 @@ class FeedsFileFetcher extends FeedsFetcher {
     if (empty($this->config['direct'])) {
 
       $feed_dir = $this->config['directory'];
+      $validators = array(
+        'file_validate_extensions' => array(
+          $this->config['allowed_extensions'],
+        ),
+      );
 
       if (!file_prepare_directory($feed_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
         if (user_access('administer feeds')) {
@@ -147,7 +139,7 @@ class FeedsFileFetcher extends FeedsFetcher {
         watchdog('feeds', 'The upload directory %directory required by a feed could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', array('%directory' => $feed_dir));
       }
       // Validate and save uploaded file.
-      elseif ($file = file_save_upload('feeds', array('file_validate_extensions' => array(0 => $this->config['allowed_extensions'])), $feed_dir)) {
+      elseif ($file = file_save_upload('feeds', $validators, $feed_dir, 0)) {
         $values['source'] = $file->uri;
         $values['file'] = $file;
       }
@@ -185,8 +177,7 @@ class FeedsFileFetcher extends FeedsFetcher {
         $this->deleteFile($source_config['fid'], $source->feed_nid);
       }
       $file->status = FILE_STATUS_PERMANENT;
-      file_save($file);
-      file_usage_add($file, 'feeds', get_class($this), $source->feed_nid);
+      file_usage()->add($file, 'feeds', get_class($this), $source->feed_nid);
 
       $source_config['fid'] = $file->fid;
       unset($source_config['file']);
@@ -316,8 +307,7 @@ class FeedsFileFetcher extends FeedsFetcher {
    */
   protected function deleteFile($fid, $feed_nid) {
     if ($file = file_load($fid)) {
-      file_usage_delete($file, 'feeds', get_class($this), $feed_nid);
-      return file_delete($file);
+      file_usage()->delete($file, 'feeds', get_class($this), $feed_nid);
     }
     return FALSE;
   }
@@ -336,7 +326,7 @@ class FeedsFileFetcher extends FeedsFetcher {
    * Returns available scheme options for use in checkboxes or select list.
    *
    * @return array
-   *   The available scheme array keyed scheme => description
+   *   The available scheme array keyed scheme => description.
    */
   protected function getSchemeOptions() {
     $options = array();

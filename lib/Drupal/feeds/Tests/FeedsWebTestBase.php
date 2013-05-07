@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
  * Test basic Data API functionality.
@@ -341,12 +342,14 @@ class FeedsWebTestBase extends WebTestBase {
 
     // Check whether feed got properly added to scheduler.
     $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_import' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
+
     // Check expire scheduler.
+    $jobs = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_expire'", array(':id' => $id))->fetchField();
     if (feeds_importer($id)->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
-      $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_expire'", array(':id' => $id))->fetchField());
+      $this->assertEqual(0, $jobs);
     }
     else {
-      $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_expire'", array(':id' => $id))->fetchField());
+      $this->assertEqual(1, $jobs);
     }
   }
 

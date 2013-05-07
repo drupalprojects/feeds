@@ -27,7 +27,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
     $this->setSettings('node', NULL, array('content_type' => ''));
-    $this->setPlugin('node', 'FeedsFileFetcher');
+    $this->setPlugin('node', 'file');
     $this->setPlugin('node', 'FeedsCSVParser');
     $mappings = array(
       '0' => array(
@@ -42,7 +42,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
       'direct' => TRUE,
       'directory' => 'public://feeds',
     );
-    $this->setSettings('node', 'FeedsFileFetcher', $settings);
+    $this->setSettings('node', 'file', $settings);
 
     // Verify that invalid paths are not accepted.
     foreach (array('/tmp/') as $path) {
@@ -77,26 +77,22 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $edit = array(
-      'content_type' => '',
-    );
-    $this->drupalPost('admin/structure/feeds/node/settings', $edit, 'Save');
-    $this->setPlugin('node', 'FeedsFileFetcher');
+    $this->setSettings('node', NULL, array('content_type' => ''));
+    $this->setPlugin('node', 'file');
     $this->setPlugin('node', 'FeedsCSVParser');
-    $mappings = array(
-      '0' => array(
+    $this->addMappings('node', array(
+      0 => array(
         'source' => 'title',
         'target' => 'title',
       ),
-    );
-    $this->addMappings('node', $mappings);
+    ));
     // Straight up upload is covered in other tests, focus on direct mode
     // and file batching here.
     $settings = array(
       'direct' => TRUE,
       'directory' => 'private://feeds',
     );
-    $this->setSettings('node', 'FeedsFileFetcher', $settings);
+    $this->setSettings('node', 'file', $settings);
 
     // Verify batching through directories.
     // Copy directory of files.

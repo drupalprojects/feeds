@@ -38,33 +38,31 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
     // Create an importer configuration.
     $this->createImporterConfiguration('Syndication', 'syndication');
-    $this->addMappings('syndication',
-      array(
-        0 => array(
-          'source' => 'title',
-          'target' => 'title',
-          'unique' => FALSE,
-        ),
-        1 => array(
-          'source' => 'description',
-          'target' => 'body',
-        ),
-        2 => array(
-          'source' => 'timestamp',
-          'target' => 'created',
-        ),
-        3 => array(
-          'source' => 'url',
-          'target' => 'url',
-          'unique' => TRUE,
-        ),
-        4 => array(
-          'source' => 'guid',
-          'target' => 'guid',
-          'unique' => TRUE,
-        ),
-      )
-    );
+    $this->addMappings('syndication', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+        'unique' => FALSE,
+      ),
+      1 => array(
+        'source' => 'description',
+        'target' => 'body',
+      ),
+      2 => array(
+        'source' => 'timestamp',
+        'target' => 'created',
+      ),
+      3 => array(
+        'source' => 'url',
+        'target' => 'url',
+        'unique' => TRUE,
+      ),
+      4 => array(
+        'source' => 'guid',
+        'target' => 'guid',
+        'unique' => TRUE,
+      ),
+    ));
   }
 
   /**
@@ -191,14 +189,12 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
     // Map feed node's author to feed item author, update - feed node's items
     // should now be assigned to feed node author.
-    $this->addMappings('syndication',
-      array(
-        5 => array(
-          'source' => 'parent:uid',
-          'target' => 'uid',
-        ),
-      )
-    );
+    $this->addMappings('syndication', array(
+      5 => array(
+        'source' => 'parent:uid',
+        'target' => 'uid',
+      ),
+    ));
     $this->drupalPost("node/$nid/import", array(), 'Import');
     $this->drupalGet('node');
     $this->assertNoPattern('/<span class="username">' . check_plain($this->auth_user->name) . '<\/span>/');
@@ -228,33 +224,31 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
       'content_type' => '',
     );
     $this->drupalPost('admin/structure/feeds/syndication_standalone/settings', $edit, 'Save');
-    $this->addMappings('syndication_standalone',
-      array(
-        0 => array(
-          'source' => 'title',
-          'target' => 'title',
-          'unique' => FALSE,
-        ),
-        1 => array(
-          'source' => 'description',
-          'target' => 'body',
-        ),
-        2 => array(
-          'source' => 'timestamp',
-          'target' => 'created',
-        ),
-        3 => array(
-          'source' => 'url',
-          'target' => 'url',
-          'unique' => TRUE,
-        ),
-        4 => array(
-          'source' => 'guid',
-          'target' => 'guid',
-          'unique' => TRUE,
-        ),
-      )
-    );
+    $this->addMappings('syndication_standalone', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+        'unique' => FALSE,
+      ),
+      1 => array(
+        'source' => 'description',
+        'target' => 'body',
+      ),
+      2 => array(
+        'source' => 'timestamp',
+        'target' => 'created',
+      ),
+      3 => array(
+        'source' => 'url',
+        'target' => 'url',
+        'unique' => TRUE,
+      ),
+      4 => array(
+        'source' => 'guid',
+        'target' => 'guid',
+        'unique' => TRUE,
+      ),
+    ));
 
     // Import, assert 10 items aggregated after creation of the node.
     $this->importURL('syndication_standalone');
@@ -307,13 +301,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Use File Fetcher.
     $this->drupalLogin($this->admin_user);
 
-    $edit = array('plugin_key' => 'FeedsFileFetcher');
-    $this->drupalPost('admin/structure/feeds/syndication_standalone/fetcher', $edit, 'Save');
-
-    $edit = array(
-      'allowed_extensions' => 'rss2',
-    );
-    $this->drupalPost('admin/structure/feeds/syndication_standalone/settings/FeedsFileFetcher', $edit, 'Save');
+    $this->setPlugin('syndication_standalone', 'file');
+    $this->setSettings('syndication_standalone', 'file', array('allowed_extensions' => 'rss2'));
 
     // Create a feed node.
     $edit = array(
@@ -423,14 +412,12 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
    $account = $this->drupalCreateUser(array(), 'Development Seed');
 
     // Adding a mapping to the user_name will invoke authorization.
-    $this->addMappings('syndication',
-      array(
-        5 => array(
-          'source' => 'author_name',
-          'target' => 'user_name',
-        ),
-      )
-    );
+    $this->addMappings('syndication', array(
+      5 => array(
+        'source' => 'author_name',
+        'target' => 'user_name',
+      ),
+    ));
 
     $nid = $this->createFeedNode();
 

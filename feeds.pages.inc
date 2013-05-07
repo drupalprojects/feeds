@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Template\Attribute;
+
 /**
  * @file
  * Menu callbacks, form callbacks and helpers.
@@ -333,7 +335,7 @@ function theme_feeds_source_status($v) {
 function theme_feeds_upload($variables) {
   $element = $variables['element'];
   drupal_add_css(drupal_get_path('module', 'feeds') . '/feeds.css');
-  _form_set_class($element, array('form-file'));
+  _form_set_attributes($element, array('form-file'));
   $description = '';
   if (!empty($element['#file_info'])) {
     $file = $element['#file_info'];
@@ -356,7 +358,7 @@ function theme_feeds_upload($variables) {
     $description .= '</div>';
   }
   $description .= '<div class="file-upload">';
-  $description .= '<input type="file" name="' . $element['#name'] . '"' . ($element['#attributes'] ? ' ' . drupal_attributes($element['#attributes']) : '') . ' id="' . $element['#id'] . '" size="' . $element['#size'] . "\" />\n";
+  $description .= '<input type="file" name="' . $element['#name'] . '"' . ($element['#attributes'] ? ' ' . new Attribute($element['#attributes']) : '') . ' id="' . $element['#id'] . '" size="' . $element['#size'] . "\" />\n";
   $description .= '</div>';
   $element['#description'] = $description;
 
