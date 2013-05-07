@@ -1,6 +1,6 @@
 <?php
 
-namepsace Drupal\feeds;
+namespace Drupal\feeds;
 
 /**
  * Defines an element of a parsed result. Such an element can be a simple type,

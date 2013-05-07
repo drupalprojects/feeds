@@ -109,7 +109,7 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
       $files = drupal_system_listing('/.*\.inc$/', $path, 'name', 0);
       foreach ($files as $file) {
         if (strstr($file->uri, '/mappers/')) {
-          require_once(DRUPAL_ROOT . '/' . $file->uri);
+          require_once DRUPAL_ROOT . '/' . $file->uri;
         }
       }
     }

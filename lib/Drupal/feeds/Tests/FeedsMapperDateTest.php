@@ -1,8 +1,10 @@
 <?php
 
+namespace Drupal\feeds\Tests;
+
 /**
  * @file
- * Test case for CCK date field mapper mappers/date.inc.
+ * Test case for date field mapper mappers/date.inc.
  */
 
 /**
@@ -11,50 +13,59 @@
  * @todo: Add test method iCal
  * @todo: Add test method for end date
  */
-class FeedsMapperDateTestCase extends FeedsMapperTestCase {
+class FeedsMapperDateTest extends FeedsMapperTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'field',
+    'field_ui',
+    'datetime',
+    'job_scheduler',
+    'feeds_ui',
+  );
+
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Date',
-      'description' => 'Test Feeds Mapper support for CCK Date fields.',
+      'description' => 'Test Feeds Mapper support for Date fields.',
       'group' => 'Feeds',
-      'dependencies' => array('date'),
     );
   }
 
-  public function setUp() {
-    parent::setUp(array('date_api', 'date'));
-    variable_set('date_default_timezone', 'UTC');
-  }
+  // public function setUp() {
+  //   parent::setUp(array('date_api', 'date'));
+  //   variable_set('date_default_timezone', 'UTC');
+  // }
 
   /**
    * Basic test loading a single entry CSV file.
    */
   public function test() {
-    $this->drupalGet('admin/config/regional/settings');
-
     // Create content type.
     $typename = $this->createContentType(array(), array(
-      'date' => 'date',
-      'datestamp' => 'datestamp',
-      //'datetime' => 'datetime', // REMOVED because the field is broken ATM.
+      'datetime' => 'datetime',
     ));
 
     // Hack to get date fields to not round to every 15 minutes.
-    foreach (array('date', 'datestamp') as $field) {
-      $field = 'field_' . $field;
-      $edit = array(
-        'widget_type' => 'date_select',
-      );
-      $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
-      $edit = array(
-        'instance[widget][settings][increment]' => 1,
-      );
-      $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field, $edit, 'Save settings');
-      $edit = array(
-        'widget_type' => 'date_text',
-      );
-      $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
-    }
+    // foreach (array('date', 'datestamp') as $field) {
+    //   $field = 'field_' . $field;
+    //   $edit = array(
+    //     'widget_type' => 'date_select',
+    //   );
+    //   $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
+    //   $edit = array(
+    //     'instance[widget][settings][increment]' => 1,
+    //   );
+    //   $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field, $edit, 'Save settings');
+    //   $edit = array(
+    //     'widget_type' => 'date_text',
+    //   );
+    //   $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
+    // }
 
     // Create and configure importer.
     $this->createImporterConfiguration('Date RSS', 'daterss');
@@ -62,8 +73,8 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
       'content_type' => '',
       'import_period' => FEEDS_SCHEDULE_NEVER,
     ));
-    $this->setPlugin('daterss', 'FeedsFileFetcher');
-    $this->setSettings('daterss', 'FeedsNodeProcessor', array(
+    $this->setPlugin('daterss', 'file');
+    $this->setSettings('daterss', 'node', array(
       'bundle' => $typename,
     ));
     $this->addMappings('daterss', array(
@@ -77,18 +88,11 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
       ),
       2 => array(
         'source' => 'timestamp',
-        'target' => 'field_date:start',
-      ),
-      3 => array(
-        'source' => 'timestamp',
-        'target' => 'field_datestamp:start',
+        'target' => 'field_datetime:start',
       ),
     ));
 
-    $edit = array(
-      'allowed_extensions' => 'rss2',
-    );
-    $this->drupalPost('admin/structure/feeds/daterss/settings/FeedsFileFetcher', $edit, 'Save');
+    $this->setSettings('daterss', 'file', array('allowed_extensions' => 'rss2'));
 
     // Import CSV file.
     $this->importFile('daterss', $this->absolutePath() . '/tests/feeds/googlenewstz.rss2');

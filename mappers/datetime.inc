@@ -5,6 +5,8 @@
  * On behalf implementation of Feeds mapping API for date
  */
 
+use Drupal\feeds\FeedsDateTimeElement;
+
 /**
  * Implements hook_feeds_processor_targets_alter().
  *
@@ -12,19 +14,19 @@
  *
  * @todo Only provides "end date" target if field allows it.
  */
-function date_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
-  foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
+function datetime_feeds_processor_targets_alter(&$targets, $entity_type, $bundle) {
+  foreach (field_info_instances($entity_type, $bundle) as $name => $instance) {
     $info = field_info_field($name);
-    if (in_array($info['type'], array('date', 'datestamp', 'datetime'))) {
+    if ($info['type'] === 'datetime') {
       $targets[$name . ':start'] = array(
         'name' => t('@name: Start', array('@name' => $instance['label'])),
-        'callback' => 'date_feeds_set_target',
+        'callback' => 'datetime_feeds_set_target',
         'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $instance['label'])),
         'real_target' => $name,
       );
       $targets[$name . ':end'] = array(
         'name' => t('@name: End', array('@name' => $instance['label'])),
-        'callback' => 'date_feeds_set_target',
+        'callback' => 'datetime_feeds_set_target',
         'description' => t('The end date for the @name field.', array('@name' => $instance['label'])),
         'real_target' => $name,
       );
@@ -44,7 +46,7 @@ function date_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  *   or a FeedsDateTimeElement object.
  *
  */
-function date_feeds_set_target($source, $entity, $target, $feed_element) {
+function datetime_feeds_set_target($source, $entity, $target, $feed_element) {
   list($field_name, $sub_field) = explode(':', $target, 2);
   if (!($feed_element instanceof FeedsDateTimeElement)) {
     if (!is_array($feed_element)) {

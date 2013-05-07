@@ -5,16 +5,18 @@
  * Helper class with auxiliary functions for feeds mapper module tests.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Base class for implementing Feeds Mapper test cases.
  */
-class FeedsMapperTestCase extends FeedsWebTestCase {
+class FeedsMapperTestBase extends FeedsWebTestBase {
 
   // A lookup map to select the widget for each field type.
   private static $field_widgets = array(
-    'date' => 'date_text',
-    'datestamp' => 'date_text',
-    'datetime' => 'date_text',
+    'date' => 'datetime_default',
+    'datestamp' => 'datetime_default',
+    'datetime' => 'datetime_default',
     'number_decimal' => 'number',
     'email' => 'email_textfield',
     'emimage' => 'emimage_textfields',
@@ -40,8 +42,8 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    * @param $index
    *   The index of the field (for q multi-valued field).
    *
-   * @see FeedsMapperTestCase::getFormFieldsNames()
-   * @see FeedsMapperTestCase::getFormFieldsValues()
+   * @see FeedsMapperTestBase::getFormFieldsNames()
+   * @see FeedsMapperTestBase::getFormFieldsValues()
    */
   protected function assertNodeFieldValue($field_name, $value, $index = 0) {
     $names = $this->getFormFieldsNames($field_name, $index);
@@ -80,7 +82,7 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    * @return An array of form field values.
    */
   protected function getFormFieldsValues($field_name, $value) {
-    return array((string)$value);
+    return array((string) $value);
   }
 
   /**
@@ -154,7 +156,7 @@ class FeedsMapperTestCase extends FeedsWebTestCase {
    *   supported by this test class.
    */
   protected function selectFieldWidget($field_name, $field_type) {
-    $field_widgets = FeedsMapperTestCase::$field_widgets;
+    $field_widgets = FeedsMapperTestBase::$field_widgets;
     return isset($field_widgets[$field_type]) ? $field_widgets[$field_type] : NULL;
   }
 }

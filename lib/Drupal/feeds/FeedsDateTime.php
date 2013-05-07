@@ -1,6 +1,8 @@
 <?php
 
-namepsace Drupal\feeds;
+namespace Drupal\feeds;
+
+use DateTime;
 
 /**
  * Extend PHP DateTime class with granularity handling, merge functionality and
@@ -11,7 +13,7 @@ namepsace Drupal\feeds;
  *
  * @see FeedsDateTimeElement
  */
-class FeedsDateTime extends \DateTime {
+class FeedsDateTime extends DateTime {
   public $granularity = array();
   protected static $allgranularity = array('year', 'month', 'day', 'hour', 'minute', 'second', 'zone');
   private $_serialized_time;

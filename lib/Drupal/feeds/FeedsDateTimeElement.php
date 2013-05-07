@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\feeds;
+use DateTimeZone;
 
 /**
  * Defines a date element of a parsed result (including ranges, repeat).
@@ -19,7 +20,7 @@ class FeedsDateTimeElement extends FeedsElement {
    * @param $end
    *   A FeedsDateTime object or a date as accepted by FeedsDateTime.
    * @param $tz
-   *   A PHP \DateTimeZone object.
+   *   A PHP DateTimeZone object.
    */
   public function __construct($start = NULL, $end = NULL, $tz = NULL) {
     $this->start = (!isset($start) || ($start instanceof FeedsDateTime)) ? $start : new FeedsDateTime($start, $tz);
@@ -105,31 +106,18 @@ class FeedsDateTimeElement extends FeedsElement {
     $use_end = $oldfield->end;
 
     // Set timezone if not already in the FeedsDateTime object
-    $to_tz = date_get_timezone($info['settings']['tz_handling'], date_default_timezone());
-    $temp = new FeedsDateTime(NULL, new \DateTimeZone($to_tz));
+    $temp = new FeedsDateTime(NULL, new DateTimeZone(DATETIME_STORAGE_TIMEZONE));
 
-    $db_tz = '';
     if ($use_start) {
       $use_start = $use_start->merge($temp);
-      if (!date_timezone_is_valid($use_start->getTimezone()->getName())) {
-        $use_start->setTimezone(new \DateTimeZone("UTC"));
-      }
-      $db_tz = date_get_timezone_db($info['settings']['tz_handling'], $use_start->getTimezone()->getName());
+      $use_start->setTimezone(new DateTimeZone(DATETIME_STORAGE_TIMEZONE));
     }
     if ($use_end) {
       $use_end = $use_end->merge($temp);
-      if (!date_timezone_is_valid($use_end->getTimezone()->getName())) {
-        $use_end->setTimezone(new \DateTimeZone("UTC"));
-      }
-      if (!$db_tz) {
-        $db_tz = date_get_timezone_db($info['settings']['tz_handling'], $use_end->getTimezone()->getName());
-      }
-    }
-    if (!$db_tz) {
-      return;
+      $use_end->setTimezone(new DateTimeZone(DATETIME_STORAGE_TIMEZONE));
     }
 
-    $db_tz = new \DateTimeZone($db_tz);
+    $db_tz = new DateTimeZone(DATETIME_STORAGE_TIMEZONE);
     if (!isset($entity->{$field_name})) {
       $entity->{$field_name} = array('und' => array());
     }
@@ -144,14 +132,14 @@ class FeedsDateTimeElement extends FeedsElement {
        *   Without this, all granularity info is lost.
        *   $use_start->format(date_type_format($field['type'], $use_start->granularity));
        */
-      $entity->{$field_name}['und'][$delta]['value'] = $use_start->format(date_type_format($info['type']));
+      $entity->{$field_name}['und'][$delta]['value'] = $use_start->format(DATETIME_DATETIME_STORAGE_FORMAT);
     }
     if ($use_end) {
       // Don't ever use end to set timezone (for now)
       $entity->{$field_name}['und'][$delta]['offset2'] = $use_end->getOffset();
       $use_end->setTimezone($db_tz);
       $entity->{$field_name}['und'][$delta]['date2'] = $use_end;
-      $entity->{$field_name}['und'][$delta]['value2'] = $use_end->format(date_type_format($info['type']));
+      $entity->{$field_name}['und'][$delta]['value2'] = $use_end->format(DATETIME_DATETIME_STORAGE_FORMAT);
     }
   }
 }

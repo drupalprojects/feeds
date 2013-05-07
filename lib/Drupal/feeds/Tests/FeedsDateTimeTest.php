@@ -7,6 +7,9 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\FeedsDateTime;
+use Drupal\simpletest\UnitTestBase;
+
 /**
  * Test FeedsDateTime class.
  *
@@ -14,8 +17,7 @@ namespace Drupal\feeds\Tests;
  * Not inheriting from Feeds base class as ParserCSV should be moved out of
  * Feeds at some time.
  */
-class FeedsDateTimeTest extends FeedsWebTestBase {
-  protected $profile = 'testing';
+class FeedsDateTimeTest extends UnitTestBase {
 
   public static function getInfo() {
     return array(
@@ -23,11 +25,6 @@ class FeedsDateTimeTest extends FeedsWebTestBase {
       'description' => 'Unit tests for Feeds date handling.',
       'group' => 'Feeds',
     );
-  }
-
-  public function setUp() {
-    parent::setUp();
-    module_load_include('inc', 'feeds' , 'plugins/FeedsParser');
   }
 
   /**
@@ -41,4 +38,5 @@ class FeedsDateTimeTest extends FeedsWebTestBase {
     $date = new FeedsDateTime('12/3/2009 20:00:10');
     $this->assertTrue(is_numeric($date->format('U')));
   }
+
 }

@@ -5,25 +5,27 @@
  * Tests for plugins/FeedsSyndicationParser.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Test single feeds.
  */
-class FeedsSyndicationParserTestCase extends FeedsWebTestCase {
+class FeedsSyndicationParserTest extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
       'name' => 'Syndication parsers',
       'description' => 'Regression tests for syndication parsers Common syndication and SimplePie. Tests parsers against a set of feeds in the context of Feeds module. <strong>Requires SimplePie parser to be configured correctly.</strong>',
       'group' => 'Feeds',
-      'dependencies' => array('libraries'),
+      // 'dependencies' => array('libraries'),
     );
   }
 
   /**
    * Set up test.
    */
-  public function setUp() {
-    parent::setUp(array('libraries'));
-  }
+  // public function setUp() {
+  //   parent::setUp(array('libraries'));
+  // }
 
   /**
    * Run tests.
@@ -31,7 +33,8 @@ class FeedsSyndicationParserTestCase extends FeedsWebTestCase {
   public function test() {
     $this->createImporterConfiguration('Syndication', 'syndication');
 
-    foreach (array('FeedsSyndicationParser', 'FeedsSimplePieParser') as $parser) {
+    // foreach (array('syndication', 'FeedsSimplePieParser') as $parser) {
+    foreach (array('syndication') as $parser) {
       $this->setPlugin('syndication', $parser);
       foreach ($this->feedUrls() as $url => $assertions) {
         $this->createFeedNode('syndication', $url);
