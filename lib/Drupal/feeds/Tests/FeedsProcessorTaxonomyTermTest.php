@@ -5,10 +5,12 @@
  * Tests for plugins/FeedsTermProcessor.inc
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Test aggregating a feed as data records.
  */
-class FeedsCSVtoTermsTest extends FeedsWebTestCase {
+class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
       'name' => 'CSV import to taxonomy',
@@ -27,18 +29,17 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->createImporterConfiguration('Term import', 'term_import');
 
     // Set and configure plugins and mappings.
-    $this->setPlugin('term_import', 'FeedsFileFetcher');
-    $this->setPlugin('term_import', 'FeedsCSVParser');
-    $this->setPlugin('term_import', 'FeedsTermProcessor');
+    $this->setPlugin('term_import', 'file');
+    $this->setPlugin('term_import', 'csv');
+    $this->setPlugin('term_import', 'taxonomy_term');
 
     // Create vocabulary.
-    $edit = array(
+    entity_create('taxonomy_vocabulary', array(
       'name' => 'Addams vocabulary',
-      'machine_name' => 'addams',
-    );
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
+      'vid' => 'addams',
+    ))->save();
 
-    $this->setSettings('term_import', 'FeedsTermProcessor', array('bundle' => 'addams'));
+    $this->setSettings('term_import', 'taxonomy_term', array('bundle' => 'addams'));
 
     // Use standalone form.
     $this->setSettings('term_import', NULL, array('content_type' => ''));
@@ -49,19 +50,18 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
    */
   public function test() {
 
-    $mappings = array(
+    $this->addMappings('term_import', array(
       0 => array(
         'source' => 'name',
         'target' => 'name',
         'unique' => 1,
       ),
-    );
-    $this->addMappings('term_import', $mappings);
+    ));
 
     // Import and assert.
     $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv');
     $this->assertText('Created 5 terms');
-    $this->drupalGet('admin/structure/taxonomy/addams');
+    $this->drupalGet('admin/structure/taxonomy/manage/addams');
     $this->assertText('Morticia');
     $this->assertText('Fester');
     $this->assertText('Gomez');
@@ -72,7 +72,7 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->assertText('There are no new terms.');
 
     // Force update.
-    $this->setSettings('term_import', 'FeedsTermProcessor', array(
+    $this->setSettings('term_import', 'taxonomy_term', array(
       'skip_hash_check' => TRUE,
       'update_existing' => 2,
     ));
@@ -80,12 +80,12 @@ class FeedsCSVtoTermsTest extends FeedsWebTestCase {
     $this->assertText('Updated 5 terms.');
 
     // Add a term manually, delete all terms, this term should still stand.
-    $edit = array(
+    entity_create('taxonomy_term', array(
       'name' => 'Cousin Itt',
-    );
-    $this->drupalPost('admin/structure/taxonomy/addams/add', $edit, t('Save'));
+      'vid' => 'addams',
+    ))->save();
     $this->drupalPost('import/term_import/delete-items', array(), t('Delete'));
-    $this->drupalGet('admin/structure/taxonomy/addams');
+    $this->drupalGet('admin/structure/taxonomy/manage/addams');
     $this->assertText('Cousin Itt');
     $this->assertNoText('Morticia');
     $this->assertNoText('Fester');

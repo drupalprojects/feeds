@@ -22,11 +22,6 @@ define('FEEDS_UPDATE_EXISTING', 2);
 define('FEEDS_PROCESS_LIMIT', 50);
 
 /**
- * Thrown if a validation fails.
- */
-class FeedsValidationException extends Exception {}
-
-/**
  * Abstract class, defines interface for processors.
  */
 abstract class FeedsProcessor extends FeedsPlugin {

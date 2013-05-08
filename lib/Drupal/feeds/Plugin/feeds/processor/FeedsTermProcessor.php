@@ -5,8 +5,27 @@
  * FeedsTermProcessor class.
  */
 
+namespace Drupal\feeds\Plugin\feeds\processor;
+
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsProcessor;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FeedsAccessException;
+use Drupal\feeds\FeedsValidationException;
+use Exception;
+
 /**
- * Feeds processor plugin. Create taxonomy terms from feed items.
+ * Defines a taxonomy term processor.
+ *
+ * Creates Taxonomy terms from feed items.
+ *
+ * @Plugin(
+ *   id = "taxonomy_term",
+ *   title = @Translation("Taxonomy term processor"),
+ *   description = @Translation("Creates taxonomy terms from feed items.")
+ * )
  */
 class FeedsTermProcessor extends FeedsProcessor {
   /**
@@ -28,21 +47,21 @@ class FeedsTermProcessor extends FeedsProcessor {
 
   /**
    * Creates a new term in memory and returns it.
+   *
+   * @todo Use entityNG.
    */
   protected function newEntity(FeedsSource $source) {
-    $vocabulary = $this->vocabulary();
-    $term = new \stdClass();
-    $term->vid = $vocabulary->vid;
-    $term->vocabulary_machine_name = $vocabulary->machine_name;
-    $term->format = isset($this->config['input_format']) ? $this->config['input_format'] : filter_fallback_format();
-    return $term;
+    return entity_create('taxonomy_term', array(
+      'vid' => $this->bundle(),
+      'format' => isset($this->config['input_format']) ? $this->config['input_format'] : filter_fallback_format(),
+    ))->getBCEntity();
   }
 
   /**
    * Validates a term.
    */
   protected function entityValidate($term) {
-    if (drupal_strlen($term->name) == 0) {
+    if (drupal_strlen($term->label()) == 0) {
       throw new FeedsValidationException(t('Term name missing.'));
     }
   }
@@ -58,20 +77,18 @@ class FeedsTermProcessor extends FeedsProcessor {
       if (is_array($term->parent) && count($term->parent) == 1) {
         $term->parent = reset($term->parent);
       }
-      if (isset($term->tid) && ($term->parent == $term->tid || (is_array($term->parent) && in_array($term->tid, $term->parent)))) {
+      if ($term->id() && ($term->parent == $term->id() || (is_array($term->parent) && in_array($term->id(), $term->parent)))) {
         throw new FeedsValidationException(t("A term can't be its own child. GUID:@guid", array('@guid' => $term->feeds_item->guid)));
       }
     }
-    taxonomy_term_save($term);
+    $term->save();
   }
 
   /**
    * Deletes a series of terms.
    */
   protected function entityDeleteMultiple($tids) {
-    foreach ($tids as $tid) {
-      taxonomy_term_delete($tid);
-    }
+    entity_delete_multiple($this->entityType(), $tids);
   }
 
   /**
@@ -188,8 +205,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     // The only possible unique target is name.
     foreach ($this->uniqueTargets($source, $result) as $target => $value) {
       if ($target == 'name') {
-        $vocabulary = $this->vocabulary();
-        if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $vocabulary->vid))->fetchField()) {
+        if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $this->bundle()))->fetchField()) {
           return $tid;
         }
       }
@@ -197,13 +213,4 @@ class FeedsTermProcessor extends FeedsProcessor {
     return 0;
   }
 
-  /**
-   * Return vocabulary to map to.
-   */
-  public function vocabulary() {
-    if ($vocabulary = taxonomy_vocabulary_machine_name_load($this->bundle())) {
-      return $vocabulary;
-    }
-    throw new Exception(t('No vocabulary defined for Taxonomy Term processor.'));
-  }
 }
