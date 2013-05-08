@@ -5,10 +5,14 @@
  * Test case for taxonomy mapper mappers/taxonomy.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
+use Drupal\feeds\Plugin\FeedsPlugin;
+
 /**
  * Class for testing Feeds <em>content</em> mapper.
  */
-class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
+class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Taxonomy',
@@ -20,18 +24,15 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
   function setUp() {
     parent::setUp();
 
-    // Add Tags vocabulary
-    $edit = array(
+    // Add Tags vocabulary.
+    entity_create('taxonomy_vocabulary', array(
       'name' => 'Tags',
-      'machine_name' => 'tags',
-    );
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, 'Save');
-
-    $edit = array(
-        'name' => 'term1',
-      );
-    $this->drupalPost('admin/structure/taxonomy/tags/add', $edit, t('Save'));
-    $this->assertText('Created new term term1.');
+      'vid' => 'tags',
+    ))->save();
+    entity_create('taxonomy_term', array(
+      'name' => 'term1',
+      'vid' => 'tags',
+    ))->save();
 
     // Create term reference field.
     $field = array(
@@ -81,34 +82,37 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     );
     field_create_instance($this->instance);
 
+    $edit = array(
+      'fields[field_tags][type]' => 'taxonomy_term_reference_link',
+    );
+    $this->drupalPost('admin/structure/types/manage/article/display', $edit, t('Save'));
+
     // Create an importer configuration with basic mapping.
     $this->createImporterConfiguration('Syndication', 'syndication');
-    $this->addMappings('syndication',
-      array(
-        0 => array(
-          'source' => 'title',
-          'target' => 'title',
-        ),
-        1 => array(
-          'source' => 'description',
-          'target' => 'body',
-        ),
-        2 => array(
-          'source' => 'timestamp',
-          'target' => 'created',
-        ),
-        3 => array(
-          'source' => 'url',
-          'target' => 'url',
-          'unique' => TRUE,
-        ),
-        4 => array(
-          'source' => 'guid',
-          'target' => 'guid',
-          'unique' => TRUE,
-        ),
-      )
-    );
+    $this->addMappings('syndication', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+      ),
+      1 => array(
+        'source' => 'description',
+        'target' => 'body',
+      ),
+      2 => array(
+        'source' => 'timestamp',
+        'target' => 'created',
+      ),
+      3 => array(
+        'source' => 'url',
+        'target' => 'url',
+        'unique' => TRUE,
+      ),
+      4 => array(
+        'source' => 'guid',
+        'target' => 'guid',
+        'unique' => TRUE,
+      ),
+    ));
   }
 
   /**
@@ -122,24 +126,21 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     $this->assertText('Do not import on submission');
 
     // Map feed node's taxonomy to feed item node's taxonomy.
-    $mappings = array(
+    $this->addMappings('syndication', array(
       5 => array(
-        'source' => 'parent:taxonomy:tags',
+        'source' => 'parent:taxonomy:field_tags',
         'target' => 'field_tags',
       ),
-    );
-    $this->addMappings('syndication', $mappings);
+    ));
 
     // Create feed node and add term term1.
-    $langcode = LANGUAGE_NONE;
+    $langcode = LANGUAGE_NOT_SPECIFIED;
     $nid = $this->createFeedNode('syndication', NULL, 'Syndication');
-    $term = taxonomy_get_term_by_name('term1');
+    $term = taxonomy_term_load_multiple_by_name('term1');
     $term = reset($term);
-    $edit = array(
-      'field_tags' . '[' . $langcode . '][]' => $term->tid,
-    );
-    $this->drupalPost("node/$nid/edit", $edit, t('Save'));
-    $this->assertTaxonomyTerm($term->name);
+    $node = node_load($nid)->getNGEntity();
+    $node->field_tags = $term->id();
+    $node->save();
 
     // Import nodes.
     $this->drupalPost("node/$nid/import", array(), 'Import');
@@ -155,6 +156,7 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
    * Tests searching taxonomy terms by name.
    */
   public function testSearchByName() {
+
     $terms = array(
       'Drupal',
       'localization',
@@ -166,7 +168,7 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
       'Drupal planet',
     );
 
-    $this->setSettings('syndication', 'FeedsNodeProcessor', array(
+    $this->setSettings('syndication', 'node', array(
       'skip_hash_check' => TRUE,
       'update_existing' => 2,
     ));
@@ -218,30 +220,31 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
    */
   public function testSearchByID() {
     // Create 10 terms. The first one was created in setup.
-    $terms = array(1);
+    $tids = array(1);
     foreach (range(2, 10) as $i) {
-      $term = (object) array(
+      $term = entity_create('taxonomy_term', array(
         'name' => 'term' . $i,
-        'vid' => 1,
-      );
-      taxonomy_term_save($term);
-      $terms[] = $term->tid;
+        'vid' => 'tags',
+      ));
+      $term->save();
+      $tids[] = $term->id();
     }
 
     FeedsPlugin::loadMappers();
 
-    $entity = new \stdClass();
     $target = 'field_tags';
     $mapping = array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_ID,
     );
+    $entityNG = entity_create('node', array('type' => 'article'))->getNGEntity();
+    $entity = $entityNG->getBCEntity();
 
-    taxonomy_feeds_set_target(NULL, $entity, $target, $terms, $mapping);
-    $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
+    taxonomy_feeds_set_target(NULL, $entity, $target, $tids, $mapping);
+    $this->assertEqual(count($entityNG->field_tags), 10);
 
     // Test a second mapping with a bogus term id.
     taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
-    $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
+    $this->assertEqual(count($entityNG->field_tags), 10);
   }
 
   /**
@@ -251,12 +254,12 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
     // Create 10 terms. The first one was created in setup.
     $tids = array(1);
     foreach (range(2, 10) as $i) {
-      $term = (object) array(
+      $term = entity_create('taxonomy_term', array(
         'name' => 'term' . $i,
-        'vid' => 1,
-      );
-      taxonomy_term_save($term);
-      $tids[] = $term->tid;
+        'vid' => 'tags',
+      ));
+      $term->save();
+      $tids[] = $term->id();
     }
 
     // Create a bunch of bogus imported terms.
@@ -278,23 +281,25 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
 
     FeedsPlugin::loadMappers();
 
-    $entity = new \stdClass();
+    $entityNG = entity_create('node', array('type' => 'article'))->getNGEntity();
+    $entity = $entityNG->getBCEntity();
+
     $target = 'field_tags';
     $mapping = array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_GUID,
     );
 
     taxonomy_feeds_set_target(NULL, $entity, $target, $guids, $mapping);
-    $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
-    foreach ($entity->field_tags[LANGUAGE_NONE] as $delta => $values) {
-      $this->assertEqual($tids[$delta], $values['tid'], 'Correct term id foud.');
+    $this->assertEqual(count($entityNG->field_tags), 10);
+    foreach ($entityNG->field_tags as $delta => $values) {
+      $this->assertEqual($tids[$delta], $values->tid, 'Correct term id foud.');
     }
 
     // Test a second mapping with a bogus term id.
     taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
-    $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
-    foreach ($entity->field_tags[LANGUAGE_NONE] as $delta => $values) {
-      $this->assertEqual($tids[$delta], $values['tid'], 'Correct term id foud.');
+    $this->assertEqual(count($entityNG->field_tags), 10);
+    foreach ($entityNG->field_tags as $delta => $values) {
+      $this->assertEqual($tids[$delta], $values->tid, 'Correct term id foud.');
     }
   }
 

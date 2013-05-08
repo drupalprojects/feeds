@@ -5,6 +5,11 @@
  * On behalf implementation of Feeds mapping API for taxonomy.module.
  */
 
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FeedsTermElement;
+use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
+
 /**
  * Search by term name.
  */
@@ -25,13 +30,18 @@ define('FEEDS_TAXONOMY_SEARCH_TERM_GUID', 2);
  */
 function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
   if (!empty($content_type)) {
-    // foreach (taxonomy_get_vocabularies($content_type) as $vocabulary) {
-    //   $sources['parent:taxonomy:' . $vocabulary->machine_name] = array(
-    //     'name' => t('Feed node: Taxonomy: @vocabulary', array('@vocabulary' => $vocabulary->name)),
-    //     'description' => t('Taxonomy terms from feed node in given vocabulary.'),
-    //     'callback' => 'taxonomy_feeds_get_source',
-    //   );
-    // }
+
+    foreach (field_info_instances('node', $content_type) as $name => $instance) {
+    $info = field_info_field($name);
+
+      if ($info['type'] == 'taxonomy_term_reference') {
+        $sources['parent:taxonomy:' . $info->label()] = array(
+          'name' => t('Feed node: Taxonomy: @vocabulary', array('@vocabulary' => $instance->label())),
+          'description' => t('Taxonomy terms from feed node.'),
+          'callback' => 'taxonomy_feeds_get_source',
+        );
+      }
+    }
   }
 }
 
@@ -39,15 +49,13 @@ function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
  * Callback, returns taxonomy from feed node.
  */
 function taxonomy_feeds_get_source(FeedsSource $source, FeedsParserResult $result, $key) {
-  if ($node = node_load($source->feed_nid)) {
-    $terms = taxonomy_feeds_node_get_terms($node);
-    $vocabularies = taxonomy_vocabulary_load_multiple(array(), array('machine_name' => str_replace('parent:taxonomy:', '', $key)));
-    $vocabulary = array_shift($vocabularies);
+  if ($node = node_load($source->feed_nid)->getNGEntity()) {
+
+    list(, , $field) = explode(':', $key, 3);
+
     $result = array();
-    foreach ($terms as $tid => $term) {
-      if ($term->vid == $vocabulary->vid) {
-        $result[] = new FeedsTermElement($term);
-      }
+    foreach ($node->$field as $term) {
+      $result[] = $term;
     }
 
     return $result;
@@ -99,20 +107,23 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
 
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache['allowed_values'][$target])) {
-    $cache['allowed_values'][$target] = taxonomy_allowed_values($info);
+    $instance = field_info_instance($entity->entityType(), $target, $entity->bundle());
+    $cache['allowed_values'][$target] = taxonomy_allowed_values($info, $instance, $entity);
+    debug($cache);
   }
 
   if (!isset($cache['allowed_vocabularies'][$target])) {
     foreach ($info['settings']['allowed_values'] as $tree) {
-      if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
-        $cache['allowed_vocabularies'][$target][$vocabulary->vid] = $vocabulary->machine_name;
+      if ($vocabulary = entity_load('taxonomy_vocabulary', $tree['vocabulary'])) {
+        $cache['allowed_vocabularies'][$target][$vocabulary->id()] = $vocabulary->id();
       }
     }
+    debug($cache);
   }
 
-  $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'taxonomy_term')
-    ->entityCondition('bundle', $cache['allowed_vocabularies'][$target])
+  $query = Drupal::entityQuery('taxonomy_term');
+  $query
+    ->condition('vid', $cache['allowed_vocabularies'][$target])
     ->range(0, 1);
 
 
@@ -131,7 +142,7 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
     $tid = FALSE;
 
     // FeedsTermElement already is a term.
-    if ($term instanceof FeedsTermElement) {
+    if ($term instanceof FeedsTermElement || $term instanceof TaxonomyTermReferenceItem) {
       $tid = $term->tid;
     }
     else {
@@ -140,19 +151,18 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
         // Lookup by name.
         case FEEDS_TAXONOMY_SEARCH_TERM_NAME:
           $name_query = clone $query;
-          if ($tids = $name_query->propertyCondition('name', $term)->execute()) {
-            $tid = key($tids['taxonomy_term']);
+          if ($tids = $name_query->condition('name', $term)->execute()) {
+            $tid = key($tids);
           }
           elseif ($mapping['autocreate']) {
-            $term = (object) array(
+            $term = entity_create('taxonomy_term', array(
               'name' => $term,
               'vid' => key($cache['allowed_vocabularies'][$target]),
-              'vocabulary_machine_name' => reset($cache['allowed_vocabularies'][$target]),
-            );
-            taxonomy_term_save($term);
-            $tid = $term->tid;
+            ));
+            $term->save();
+            $tid = $term->id();
             // Add to the list of allowed values.
-            $cache['allowed_values'][$target][$tid] = $term->name;
+            $cache['allowed_values'][$target][$tid] = $term->label();;
           }
           break;
 
@@ -177,51 +187,6 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
   }
 
   $entity->$target = $field;
-}
-
-/**
- * Finds all terms associated with the given node, within one vocabulary.
- */
-function taxonomy_feeds_node_get_terms($node, $key = 'tid') {
-  $terms = &drupal_static(__FUNCTION__);
-
-  if (!isset($terms[$node->nid][$key])) {
-    // Get tids from all taxonomy_term_reference fields.
-    $tids = array();
-    $fields = field_info_fields();
-    foreach ($fields as $field_name => $field) {
-      if ($field['type'] == 'taxonomy_term_reference' && field_info_instance('node', $field_name, $node->type)) {
-        if (($items = field_get_items('node', $node, $field_name)) && is_array($items)) {
-          $tids = array_merge($tids, array_map('_taxonomy_feeds_extract_tid', $items));
-        }
-      }
-    }
-
-    // Load terms and cache them in static var.
-    $curr_terms = taxonomy_term_load_multiple($tids);
-    $terms[$node->nid][$key] = array();
-    foreach ($curr_terms as $term) {
-      $terms[$node->nid][$key][$term->$key] = $term;
-    }
-  }
-  return $terms[$node->nid][$key];
-}
-
-/**
- * Extracts tid from array item returned by field_get_items().
- *
- * @param array $item
- *   Tid information in the form of a single element array
- *   (key == 'tid', value == tid we're looking for)
- *
- * @return int
- *   Term id extracted from $item.
- *
- * @see taxonomy_feeds_node_get_terms()
- * @see field_get_items()
- */
-function _taxonomy_feeds_extract_tid($item) {
-  return $item['tid'];
 }
 
 /**

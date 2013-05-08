@@ -90,7 +90,7 @@ class FeedsTermProcessor extends FeedsProcessor {
     switch ($target_element) {
       case 'parent':
         if (!empty($value)) {
-          $terms = taxonomy_get_term_by_name($value);
+          $terms = taxonomy_term_load_multiple_by_name($value);
           $parent_tid = '';
           foreach ($terms as $term) {
             if ($term->vid == $target_term->vid) {
