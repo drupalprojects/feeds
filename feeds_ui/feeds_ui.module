@@ -52,15 +52,6 @@ function feeds_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['admin/structure/feeds/%feeds_importer/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_ui_export_form', 3),
-    'access arguments' => array('administer feeds'),
-    'file' => 'feeds_ui.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-  );
   $items['admin/structure/feeds/%feeds_importer/clone'] = array(
     'title' => 'Clone',
     'page callback' => 'drupal_get_form',

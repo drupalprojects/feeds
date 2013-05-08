@@ -236,21 +236,6 @@ function feeds_ui_delete_form_submit($form, &$form_state) {
 }
 
 /**
- * Export a feed configuration.
- */
-function feeds_ui_export_form($form, &$form_state, $importer) {
-  $code = feeds_export($importer->id);
-
-  $form['export'] = array(
-    '#title' => t('Export feed configuration'),
-    '#type' => 'textarea',
-    '#value' => $code,
-    '#rows' => substr_count($code, "\n"),
-  );
-  return $form;
-}
-
-/**
  * Edit feed configuration.
  */
 function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
