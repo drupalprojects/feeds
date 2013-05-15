@@ -1175,12 +1175,14 @@ function feeds_ui_importer_import_validate($form, &$form_state) {
  */
 function feeds_ui_importer_import_submit($form, &$form_state) {
   $importer = $form_state['importer'];
-  $importer = feeds_importer($importer->id);
-  $importer->setConfig($importer->config);
+
+  // Create a copy of the importer to preserve config.
+  $save = feeds_importer($importer->id);
+  $save->setConfig($importer->config);
   foreach (array('fetcher', 'parser', 'processor') as $type) {
-    $importer->$type->setConfig($importer->config[$type]['config']);
+    $save->$type->setConfig($importer->config[$type]['config']);
   }
-  $importer->save();
+  $save->save();
 
   drupal_set_message(t('Successfully imported the %id feeds importer.', array('%id' => $importer->id)));
   $form_state['redirect'] = 'admin/structure/feeds';
