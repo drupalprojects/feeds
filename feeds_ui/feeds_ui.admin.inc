@@ -1148,6 +1148,11 @@ function feeds_ui_importer_import_validate($form, &$form_state) {
       '%api_version' => feeds_api_version())));
   }
 
+  // Change to user-supplied id.
+  if ($form_state['values']['id']) {
+    $feeds_importer->id = $form_state['values']['id'];
+  }
+
   $exists = feeds_ui_importer_machine_name_exists($feeds_importer->id);
 
   if ($exists && !$form_state['values']['id_override']) {
