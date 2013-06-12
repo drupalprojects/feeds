@@ -244,7 +244,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     else {
       // It's a tragedy, this file must exist and contain good data.
       // In this case, clear cache and repeat.
-      cache()->delete('feeds_http_download_' . md5($url));
+      http_request_clear_cache($url);
       return http_request_get($url, $username, $password, $accept_invalid_cert, $request_timeout);
     }
   }
