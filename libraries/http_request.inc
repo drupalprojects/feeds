@@ -135,11 +135,18 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     }
   }
 
+  $test_info = &$GLOBALS['drupal_test_info'];
+  if (!empty($test_info['test_run_id'])) {
+    $headers[] = 'User-Agent: ' . drupal_generate_test_ua($test_info['test_run_id']);
+  }
+  else {
+    $headers[] = 'User-Agent: Drupal (+http://drupal.org/)';
+  }
+
   // Support the 'feed' and 'webcal' schemes by converting them into 'http'.
   $url = strtr($url, array('feed://' => 'http://', 'webcal://' => 'http://'));
 
   if ($curl) {
-    $headers[] = 'User-Agent: Drupal (+http://drupal.org/)';
     $result = new \stdClass();
     $result->headers = array();
 

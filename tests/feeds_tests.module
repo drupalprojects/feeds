@@ -81,6 +81,7 @@ function feeds_tests_files() {
   }
   drupal_add_http_header('Content-Type', 'text/plain; charset=utf-8');
   print theme('feeds_tests_files', array('files' => $images));
+  die();
 }
 
 /**
@@ -100,6 +101,7 @@ function feeds_tests_files_remote() {
   }
   drupal_add_http_header('Content-Type', 'text/plain; charset=utf-8');
   print theme('feeds_tests_files', array('files' => $images));
+  die();
 }
 
 /**

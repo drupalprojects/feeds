@@ -105,8 +105,6 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
     $type = $this->drupalCreateContentType($settings);
     $typename = $type->type;
 
-    $admin_type_url = 'admin/structure/types/manage/' . str_replace('_', '-', $typename);
-
     // Create the fields
     foreach ($fields as $field_name => $options) {
       if (is_string($options)) {
@@ -122,7 +120,7 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
         'fields[_add_new_field][type]' => $field_type,
         'fields[_add_new_field][widget_type]' => $field_widget,
       );
-      $this->drupalPost($admin_type_url . '/fields', $edit, 'Save');
+      $this->drupalPost("admin/structure/types/manage/$typename/fields", $edit, 'Save');
 
       // (Default) Configure the field.
       $edit = isset($options['settings']) ? $options['settings'] : array();
