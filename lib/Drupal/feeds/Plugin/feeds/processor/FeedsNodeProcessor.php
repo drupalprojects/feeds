@@ -136,6 +136,9 @@ class FeedsNodeProcessor extends FeedsProcessor {
     if (!isset($entity->uid) || !is_numeric($entity->uid)) {
        $entity->uid = $this->config['author'];
     }
+    if (drupal_strlen($entity->title) > 255) {
+      $entity->title = drupal_substr($entity->title, 0, 255);
+    }
   }
 
   /**
