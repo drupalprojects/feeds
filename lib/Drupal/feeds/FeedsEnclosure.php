@@ -88,11 +88,12 @@ class FeedsEnclosure extends FeedsElement {
       file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
       // Copy or save file depending on whether it is remote or local.
       if (drupal_realpath($this->getValue())) {
-        $file           = new \stdClass();
-        $file->uid      = 0;
-        $file->uri      = $this->getValue();
-        $file->filemime = $this->mime_type;
-        $file->filename = basename($file->uri);
+        $file = entity_create('file', array(
+          'uid' => 0,
+          'uri' => $this->getValue(),
+          'filemime' => $this->mime_type,
+          'filename' => basename($this->getValue()),
+        ));
         if (dirname($file->uri) != $destination) {
           $file = file_copy($file, $destination);
         }
@@ -106,7 +107,7 @@ class FeedsEnclosure extends FeedsElement {
             $file->fid = $existing->fid;
             $file->filename = $existing->filename;
           }
-          file_save($file);
+          $file->save();
         }
       }
       else {
@@ -131,6 +132,8 @@ class FeedsEnclosure extends FeedsElement {
         throw new Exception(t('Invalid enclosure %enclosure', array('%enclosure' => $this->getValue())));
       }
     }
+
     return $file;
   }
+
 }

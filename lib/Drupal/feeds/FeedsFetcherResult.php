@@ -48,7 +48,7 @@ class FeedsFetcherResult extends FeedsResult {
       $this->file_path = FALSE;
       if ($file = file_save_data($this->getRaw(), $destination . '/' . get_class($this) . REQUEST_TIME)) {
         $file->status = 0;
-        file_save($file);
+        $file->save();
         $this->file_path = $file->uri;
       }
       else {
