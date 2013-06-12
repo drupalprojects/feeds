@@ -14,16 +14,16 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
 
   // A lookup map to select the widget for each field type.
   private static $field_widgets = array(
-    'date' => 'datetime_default',
-    'datestamp' => 'datetime_default',
-    'datetime' => 'datetime_default',
+    'date' => 'date_text',
+    'datestamp' => 'date_text',
+    'datetime' => 'date_text',
+    'number_decimal' => 'number',
     'email' => 'email_textfield',
     'emimage' => 'emimage_textfields',
     'emaudio' => 'emaudio_textfields',
-    'filefield' => 'filefield_widget',
-    'image' => 'imagefield_widget',
-    'link' => 'link_default',
-    'number_decimal' => 'number',
+    'file' => 'file_generic',
+    'image' => 'image_image',
+    'link_field' => 'link_field',
     'number_float' => 'number',
     'number_integer' => 'number',
     'nodereference' => 'nodereference_select',
