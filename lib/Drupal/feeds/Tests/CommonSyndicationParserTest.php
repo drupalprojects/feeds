@@ -88,7 +88,7 @@ class CommonSyndicationParserTest extends FeedsWebTestBase {
    * Helper to read a feed.
    */
   protected function readFeed($filename) {
-    $feed = dirname(__FILE__) . '/feeds/' . $filename;
+    $feed = drupal_get_path('module', 'feeds_tests') . '/feeds/' . $filename;
     $handle = fopen($feed, 'r');
     $string = fread($handle, filesize($feed));
     fclose($handle);
