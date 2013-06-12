@@ -62,6 +62,7 @@ function feeds_cron() {
     }
     feeds_reschedule(FALSE);
   }
+
   // Expire old log entries.
   db_delete('feeds_log')
     ->condition('request_time', REQUEST_TIME - 604800, '<')
@@ -1309,4 +1310,14 @@ function _feeds_form_helper($form, &$form_state, $action) {
   if (method_exists($form['#configurable'], $method)) {
     $form['#configurable']->$method($form_state['values']);
   }
+}
+
+/**
+ * Helper, see FeedsDataProcessor class.
+ */
+function feeds_format_expire($timestamp) {
+  if ($timestamp == FEEDS_EXPIRE_NEVER) {
+    return t('Never');
+  }
+  return t('after !time', array('!time' => format_interval($timestamp)));
 }

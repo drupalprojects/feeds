@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\feeds\Plugin\FeedsConfigurable;
 
 /**
  * Test aggregating a feed as node items.
@@ -37,6 +37,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->drupalPost('admin/structure/types/manage/article/display/teaser', $edit, 'Save');
 
     // Create an importer configuration.
+    FeedsConfigurable::$instances = array();
     $this->createImporterConfiguration('Syndication', 'syndication');
     $this->addMappings('syndication', array(
       0 => array(
@@ -445,7 +446,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Create importer configuration.
     $this->setSettings('syndication', NULL, array('content_type' => ''));
     $this->setSettings('syndication', 'node', array(
-      'expire' => 10800,
+      'expire' => 43200,
     ));
 
     // Create importer.

@@ -263,13 +263,3 @@ class FeedsImporter extends FeedsConfigurable {
     parent::configFormSubmit($values);
   }
 }
-
-/**
- * Helper, see FeedsDataProcessor class.
- */
-function feeds_format_expire($timestamp) {
-  if ($timestamp == FEEDS_EXPIRE_NEVER) {
-    return t('Never');
-  }
-  return t('after !time', array('!time' => format_interval($timestamp)));
-}

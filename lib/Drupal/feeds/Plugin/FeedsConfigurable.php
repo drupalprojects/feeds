@@ -22,6 +22,8 @@ class FeedsNotExistingException extends \Exception {
  */
 abstract class FeedsConfigurable {
 
+  public static $instances = array();
+
   // Holds the actual configuration information.
   protected $config;
 
@@ -58,11 +60,11 @@ abstract class FeedsConfigurable {
     if (empty($id)) {
       throw new Exception(t('Empty configuration identifier.'));
     }
-    static $instances = array();
-    if (!isset($instances[$class][$id])) {
-      $instances[$class][$id] = new $class($id);
+
+    if (!isset(static::$instances[$class][$id])) {
+      static::$instances[$class][$id] = new $class($id);
     }
-    return $instances[$class][$id];
+    return static::$instances[$class][$id];
   }
 
   /**
