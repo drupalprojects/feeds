@@ -5,8 +5,25 @@
  * FeedsUserProcessor class.
  */
 
+namespace Drupal\feeds\Plugin\feeds\processor;
+
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsProcessor;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FeedsValidationException;
+
 /**
- * Feeds processor plugin. Create users from feed items.
+ * Defines a user processor.
+ *
+ * Creates Users from feed items.
+ *
+ * @Plugin(
+ *   id = "user",
+ *   title = @Translation("User processor"),
+ *   description = @Translation("Creates users from feed items.")
+ * )
  */
 class FeedsUserProcessor extends FeedsProcessor {
   /**
@@ -29,11 +46,11 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Creates a new user account in memory and returns it.
    */
   protected function newEntity(FeedsSource $source) {
-    $account = new \stdClass();
-    $account->uid = 0;
-    $account->roles = array_filter($this->config['roles']);
-    $account->status = $this->config['status'];
-    return $account;
+    return entity_create('user', array(
+      'uid' => 0,
+      'roles' => array_filter($this->config['roles']),
+      'status' => $this->config['status'],
+    ));
   }
 
   /**
@@ -64,14 +81,12 @@ class FeedsUserProcessor extends FeedsProcessor {
       $account->mail = $account->mail . '_test';
     }
 
-    $edit = (array) $account;
-
-    // Remove pass from $edit if the password is unchanged.
+    // Remove pass from $account if the password is unchanged.
     if (isset($account->feeds_original_pass) && $account->pass == $account->feeds_original_pass) {
-      unset($edit['pass']);
+      unset($account->pass);
     }
 
-    user_save($account, $edit);
+    $account->save();
     if ($account->uid && !empty($account->openid)) {
       $authmap = array(
         'uid' => $account->uid,
@@ -116,14 +131,18 @@ class FeedsUserProcessor extends FeedsProcessor {
     );
 
     $roles = user_roles(TRUE);
-    unset($roles[2]);
-    if (count($roles)) {
+    unset($roles['authenticated']);
+    $options = array();
+    foreach ($roles as $role) {
+      $options[$role->id] = $role->label();
+    }
+    if ($options) {
       $form['roles'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Additional roles'),
         '#description' => t('Every user is assigned the "authenticated user" role. Select additional roles here.'),
         '#default_value' => $this->config['roles'],
-        '#options' => $roles,
+        '#options' => $options,
       );
     }
     $form['defuse_mail'] = array(

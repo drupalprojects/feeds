@@ -27,9 +27,9 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('User import', 'user_import');
 
     // Set and configure plugins.
-    $this->setPlugin('user_import', 'FeedsFileFetcher');
-    $this->setPlugin('user_import', 'FeedsCSVParser');
-    $this->setPlugin('user_import', 'FeedsUserProcessor');
+    $this->setPlugin('user_import', 'file');
+    $this->setPlugin('user_import', 'csv');
+    $this->setPlugin('user_import', 'user');
 
     // Go to mapping page and create a couple of mappings.
     $mappings = array(
@@ -55,10 +55,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
     $this->addMappings('user_import', $mappings);
 
     // Use standalone form.
-    $edit = array(
-      'content_type' => '',
-    );
-    $this->drupalPost('admin/structure/feeds/user_import/settings', $edit, 'Save');
+    $this->setSettings('user_import', '', array('content_type' => ''));
 
     // Create roles and assign one of them to the users to be imported.
     $manager_rid = $this->drupalCreateRole(array('access content'), 'manager');
@@ -67,7 +64,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
       "roles[$manager_rid]" => TRUE,
       "roles[$admin_rid]" => FALSE,
     );
-    $this->setSettings('user_import', 'FeedsUserProcessor', $edit);
+    $this->setSettings('user_import', 'user', $edit);
 
     // Import CSV file.
     $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
@@ -109,7 +106,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
       ),
     );
     $this->removeMappings('user_import', $mappings);
-    $this->setSettings('user_import', 'FeedsUserProcessor', array('update_existing' => 2));
+    $this->setSettings('user_import', 'user', array('update_existing' => 2));
     $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
     // Assert result.
     $this->assertText('Updated 3 users');
