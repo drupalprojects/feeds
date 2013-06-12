@@ -5,59 +5,26 @@
  * Contains FeedsSimplePieParser and related classes.
  */
 
-/**
- * Adapter to present SimplePie_Enclosure as FeedsEnclosure object.
- */
-class FeedsSimplePieEnclosure extends FeedsEnclosure {
-  protected $simplepie_enclosure;
-  private $_serialized_simplepie_enclosure;
+namespace Drupal\feeds\Plugin\feeds\parser;
 
-  /**
-   * Constructor requires SimplePie enclosure object.
-   */
-  function __construct(SimplePie_Enclosure $enclosure) {
-    $this->simplepie_enclosure = $enclosure;
-  }
-
-  /**
-   * Serialization helper.
-   *
-   * Handle the simplepie enclosure class seperately ourselves.
-   */
-  public function __sleep() {
-    $this->_serialized_simplepie_enclosure = serialize($this->simplepie_enclosure);
-    return array('_serialized_simplepie_enclosure');
-  }
-
-  /**
-   * Unserialization helper.
-   *
-   * Ensure that the simplepie class definitions are loaded for the enclosure when unserializing.
-   */
-   public function __wakeup() {
-     feeds_include_simplepie();
-     $this->simplepie_enclosure = unserialize($this->_serialized_simplepie_enclosure);
-  }
-
-  /**
-   * Override parent::getValue().
-   */
-  public function getValue() {
-    return $this->simplepie_enclosure->get_link();
-  }
-
-  /**
-   * Override parent::getMIMEType().
-   */
-  public function getMIMEType() {
-    return $this->simplepie_enclosure->get_real_type();
-  }
-}
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\FeedsSource;
+use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserCSVIterator;
+use Drupal\feeds\ParserCSV;
+use Drupal\feeds\FeedsSimplePieEnclosure;
 
 /**
- * Class definition for Common Syndication Parser.
+ * Defines a CSV feed parser.
  *
- * Parses RSS and Atom feeds.
+ * @Plugin(
+ *   id = "simplepie",
+ *   title = @Translation("SimplePie parser"),
+ *   description = @Translation("Parse RSS and Atom feeds.")
+ * )
  */
 class FeedsSimplePieParser extends FeedsParser {
 
@@ -67,12 +34,8 @@ class FeedsSimplePieParser extends FeedsParser {
   public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
     feeds_include_simplepie();
 
-    // Please be quiet SimplePie.
-    $level = error_reporting();
-    error_reporting($level ^ E_DEPRECATED ^ E_STRICT);
-
     // Initialize SimplePie.
-    $parser = new SimplePie();
+    $parser = new \SimplePie();
     $parser->set_raw_data($fetcher_result->getRaw());
     $parser->set_stupidly_fast(TRUE);
     $parser->encode_instead_of_strip(FALSE);
@@ -149,8 +112,6 @@ class FeedsSimplePieParser extends FeedsParser {
     }
     // Release parser.
     unset($parser);
-    // Set error reporting back to its previous value.
-    error_reporting($level);
     return $result;
   }
 
