@@ -14,9 +14,7 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
 
   // A lookup map to select the widget for each field type.
   private static $field_widgets = array(
-    'date' => 'date_text',
-    'datestamp' => 'date_text',
-    'datetime' => 'date_text',
+    'datetime' => 'datetime_default',
     'number_decimal' => 'number',
     'email' => 'email_textfield',
     'emimage' => 'emimage_textfields',

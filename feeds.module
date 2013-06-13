@@ -8,6 +8,7 @@
 use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\Plugin\FeedsConfigurable;
 use Drupal\feeds\FeedsSource;
+use Drupal\Core\Datetime\DrupalDateTime;
 
 // Common request time, use as point of reference and to avoid calls to time().
 define('FEEDS_REQUEST_TIME', time());
@@ -1202,7 +1203,7 @@ function feeds_api_version() {
  * Converts to UNIX time.
  *
  * @param $date
- *   A date that is either a string, a FeedsDateTimeElement or a UNIX timestamp.
+ *   A date that is either a string, a DrupalDateTime or a UNIX timestamp.
  * @param $default_value
  *   A default UNIX timestamp to return if $date could not be parsed.
  *
@@ -1214,11 +1215,11 @@ function feeds_to_unixtime($date, $default_value) {
     return $date;
   }
   elseif (is_string($date) && !empty($date)) {
-    $date = new FeedsDateTimeElement($date);
-    return $date->getValue();
+    $date = new DrupalDateTime($date);
+    return $date->format('U');
   }
-  elseif ($date instanceof FeedsDateTimeElement) {
-    return $date->getValue();
+  elseif ($date instanceof DrupalDateTime) {
+    return $date->format('U');
   }
   return $default_value;
 }

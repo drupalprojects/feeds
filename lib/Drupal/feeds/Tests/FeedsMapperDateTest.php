@@ -36,10 +36,14 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
     );
   }
 
-  // public function setUp() {
-  //   parent::setUp(array('date_api', 'date'));
-  //   variable_set('date_default_timezone', 'UTC');
-  // }
+  public function setUp() {
+    parent::setUp();
+
+    config('system.timezone')
+      ->set('default', 'UTC')
+      ->set('user.configurable', FALSE)
+      ->save();
+  }
 
   /**
    * Basic test loading a single entry CSV file.
@@ -88,7 +92,7 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
       ),
       2 => array(
         'source' => 'timestamp',
-        'target' => 'field_datetime:start',
+        'target' => 'field_datetime',
       ),
     ));
 
@@ -99,18 +103,28 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
     $this->assertText('Created 6 nodes');
 
     // Check the imported nodes.
-    $values = array(
-      '01/06/2010 - 19:26',
-      '01/06/2010 - 10:21',
-      '01/06/2010 - 13:42',
-      '01/06/2010 - 06:05',
-      '01/06/2010 - 11:26',
-      '01/07/2010 - 00:26',
+    $dates = array(
+      '2010-01-06',
+      '2010-01-06',
+      '2010-01-06',
+      '2010-01-06',
+      '2010-01-06',
+      '2010-01-07',
     );
+
+    $times = array(
+      '19:26:27',
+      '10:21:20',
+      '13:42:47',
+      '06:05:40',
+      '11:26:39',
+      '00:26:26',
+    );
+
     for ($i = 1; $i <= 6; $i++) {
       $this->drupalGet("node/$i/edit");
-      $this->assertNodeFieldValue('date', $values[$i-1]);
-      $this->assertNodeFieldValue('datestamp', $values[$i-1]);
+      $this->assertNodeFieldValue('datetime', $dates[$i - 1]);
+      $this->assertFieldByName('field_datetime[und][0][value][time]', $times[$i - 1]);
     }
   }
 
