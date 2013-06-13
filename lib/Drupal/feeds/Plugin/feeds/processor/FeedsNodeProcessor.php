@@ -59,7 +59,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'promote' => (int) in_array('promote', $defaults),
       'status' => (int) in_array('status', $defaults),
     ));
-    return $node;
+    return $node->getBCEntity();
   }
 
   /**
