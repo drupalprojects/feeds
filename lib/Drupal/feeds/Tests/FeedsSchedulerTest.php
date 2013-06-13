@@ -197,15 +197,15 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
 
   /**
    * Test batching on cron.
+   *
+   * @todo Figure out why cron needs to be run once before.
    */
   function testBatching() {
+    $this->cronRun();
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $edit = array(
-      'content_type' => '',
-    );
-    $this->drupalPost('admin/structure/feeds/node/settings', $edit, 'Save');
+    $this->setSettings('node', '', array('content_type' => ''));
     $this->setPlugin('node', 'file');
     $this->setPlugin('node', 'csv');
     $this->addMappings('node', array(

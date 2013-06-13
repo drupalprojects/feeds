@@ -26,7 +26,7 @@ function feeds_page() {
       }
       elseif (node_access('create', $importer->config['content_type'])) {
         $link = 'node/add/' . str_replace('_', '-', $importer->config['content_type']);
-        $title = node_type_get_name($importer->config['content_type']);
+        $title = node_type_get_label($importer->config['content_type']);
       }
       else {
         continue;
@@ -106,13 +106,13 @@ function feeds_import_form_submit($form, &$form_state) {
     $source->save();
   }
 
+  // Add to schedule.
+  $source->schedule();
+
   // Refresh feed if import on create is selected.
   if ($source->importer->config['import_on_create']) {
     $source->startImport();
   }
-
-  // Add to schedule, make sure importer is scheduled, too.
-  $source->schedule();
 }
 
 /**

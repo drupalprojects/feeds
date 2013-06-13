@@ -180,11 +180,11 @@ class FeedsSource extends FeedsConfigurable {
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($period != FEEDS_SCHEDULE_NEVER) {
-      JobScheduler::get('feeds_source_import')->set($job);
+    if ($period == FEEDS_SCHEDULE_NEVER) {
+      JobScheduler::get('feeds_source_import')->remove($job);
     }
     else {
-      JobScheduler::get('feeds_source_import')->remove($job);
+      JobScheduler::get('feeds_source_import')->set($job);
     }
   }
 
