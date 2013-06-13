@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\Component\Plugin\PluginManagerBase;
 use Drupal\Component\Plugin\Factory\DefaultFactory;
+use Drupal\Core\Language\Language;
 use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery;
 use Drupal\Core\Plugin\Discovery\CacheDecorator;
 
@@ -28,7 +29,7 @@ class FeedsPluginManager extends PluginManagerBase {
    */
   public function __construct($type, \Traversable $namespaces) {
     $this->discovery = new AnnotatedClassDiscovery("feeds/$type", $namespaces);
-    $this->discovery = new CacheDecorator($this->discovery, "feeds_$type:" . language(LANGUAGE_TYPE_INTERFACE)->langcode);
+    $this->discovery = new CacheDecorator($this->discovery, "feeds_$type:" . language(Language::TYPE_INTERFACE)->langcode);
     $this->factory = new DefaultFactory($this->discovery);
   }
 }

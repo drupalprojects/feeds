@@ -7,6 +7,7 @@
  */
 
 use Drupal\feeds\FeedsEnclosure;
+use Drupal\Core\Language\Language;
 
 /**
  * Implements hook_feeds_processor_targets_alter().
@@ -98,29 +99,29 @@ function file_feeds_set_target($source, $entity, $target, $value) {
   }
 
   // Populate entity.
-  $field = isset($entity->$field_name) ? $entity->$field_name : array(LANGUAGE_NOT_SPECIFIED => array());
+  $field = isset($entity->$field_name) ? $entity->$field_name : array(Language::LANGCODE_NOT_SPECIFIED => array());
   $delta = 0;
   foreach ($value as $v) {
     if ($info['cardinality'] == $delta) {
       break;
     }
 
-    if (!isset($field[LANGUAGE_NOT_SPECIFIED][$delta])) {
-      $field[LANGUAGE_NOT_SPECIFIED][$delta] = array();
+    if (!isset($field[Language::LANGCODE_NOT_SPECIFIED][$delta])) {
+      $field[Language::LANGCODE_NOT_SPECIFIED][$delta] = array();
     }
 
     switch ($sub_field) {
       case 'alt':
       case 'title':
-        $field[LANGUAGE_NOT_SPECIFIED][$delta][$sub_field] = $v;
+        $field[Language::LANGCODE_NOT_SPECIFIED][$delta][$sub_field] = $v;
         break;
 
       case 'uri':
         try {
           $file = $v->getFile($destination);
-          $field[LANGUAGE_NOT_SPECIFIED][$delta] += (array) $file;
+          $field[Language::LANGCODE_NOT_SPECIFIED][$delta] += (array) $file;
           // @todo: Figure out how to properly populate this field.
-          $field[LANGUAGE_NOT_SPECIFIED][$delta]['display'] = 1;
+          $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['display'] = 1;
         }
         catch (Exception $e) {
           watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
