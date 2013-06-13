@@ -5,25 +5,42 @@
  * Test case for CCK date multi-field mapper mappers/date.inc.
  */
 
+namespace Drupal\feeds\Tests;
+
 /**
  * Class for testing Feeds <em>content</em> mapper.
  *
  * @todo: Add test method iCal
  * @todo: Add test method for end date
  */
-class FeedsMapperDateMultipleTestCase extends FeedsMapperTestCase {
+class FeedsMapperDateMultipleTest extends FeedsMapperTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array(
+    'field',
+    'field_ui',
+    'datetime',
+    'job_scheduler',
+    'feeds_ui',
+  );
+
   public static function getInfo() {
     return array(
       'name' => 'Mapper: Date, multi value fields',
       'description' => 'Test Feeds Mapper support for CCK multi valiue Date fields.',
       'group' => 'Feeds',
-      'dependencies' => array('date', 'feeds_xpathparser'),
     );
   }
 
   public function setUp() {
-    parent::setUp(array('date_api', 'date', 'feeds_xpathparser'));
-    variable_set('date_default_timezone', 'UTC');
+    parent::setUp();
+    config('system.timezone')
+      ->set('default', 'UTC')
+      ->save();
   }
 
   /**
@@ -34,14 +51,11 @@ class FeedsMapperDateMultipleTestCase extends FeedsMapperTestCase {
 
     // Create content type.
     $typename = $this->createContentType(array(), array(
-      'date' => 'date',
+      'date' => 'datetime',
+      'settings' => array(
+        'field[container][cardinality]' => -1,
+      ),
     ));
-    // Make the field hold unlimited values
-    $edit = array(
-      'field[cardinality]' => -1,
-    );
-    $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/field_date', $edit, 'Save settings');
-    $this->assertText('Saved date_date_label configuration');
 
     // Create and configure importer.
     $this->createImporterConfiguration('Multi dates', 'multidates');
@@ -115,4 +129,5 @@ class FeedsMapperDateMultipleTestCase extends FeedsMapperTestCase {
       }
     }
   }
+
 }
