@@ -228,7 +228,7 @@ function feeds_batch($method, $importer_id, $feed_nid = 0, &$context) {
  *   required. An array of importers that need rescheduling.
  */
 function feeds_reschedule($importer_id = NULL) {
-  $reschedule = state()->get('feeds.reschedule') ?: FALSE;
+  $reschedule = Drupal::state()->get('feeds.reschedule') ?: FALSE;
   if ($importer_id === TRUE || $importer_id === FALSE) {
     $reschedule = $importer_id;
   }
@@ -236,7 +236,7 @@ function feeds_reschedule($importer_id = NULL) {
     $reschedule = is_array($reschedule) ? $reschedule : array();
     $reschedule[$importer_id] = $importer_id;
   }
-  state()->set('feeds.reschedule', $reschedule);
+  Drupal::state()->set('feeds.reschedule', $reschedule);
   if ($reschedule === TRUE) {
     return feeds_enabled_importers();
   }
