@@ -109,7 +109,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
 
     // Import.
     $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => url('testing/feeds/files.csv', array('absolute' => TRUE)),
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $this->getAbsoluteUrl('testing/feeds/files.csv'),
     );
     $this->drupalPost('import/node', $edit, 'Import');
     $this->assertText('Created 5 nodes');
@@ -136,7 +136,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     );
     $this->drupalPost("admin/structure/types/manage/$typename/fields/node.$typename.field_files", $edit, t('Save settings'));
     $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $GLOBALS['base_url'] . '/testing/feeds/files.csv',
+      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $this->getAbsoluteUrl('testing/feeds/files.csv'),
     );
     $this->drupalPost('import/node', $edit, 'Import');
     $this->assertText('Created 5 nodes');
@@ -152,6 +152,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
       $this->drupalGet('node/' . $entity->entity_id . '/edit');
       $f = new FeedsEnclosure(array_shift($files), NULL);
       $this->assertRaw('images/' . $f->getUrlEncodedValue());
+      $this->assertTrue(is_file('public://images/' . $f->getValue()));
     }
 
     // Deleting all imported items will delete the files from the images/ dir.

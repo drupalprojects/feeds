@@ -48,16 +48,16 @@ class FeedsUserProcessor extends FeedsProcessor {
   protected function newEntity(FeedsSource $source) {
     return entity_create('user', array(
       'uid' => 0,
-      'roles' => array_filter($this->config['roles']),
+      'roles' => array_filter(array_values($this->config['roles'])),
       'status' => $this->config['status'],
-    ));
+    ))->getBCEntity();
   }
 
   /**
    * Loads an existing user.
    */
   protected function entityLoad(FeedsSource $source, $uid) {
-    $user = parent::entityLoad($source, $uid);
+    $user = parent::entityLoad($source, $uid)->getBCEntity();
 
     // Copy the password so that we can compare it again at save.
     $user->feeds_original_pass = $user->pass;
@@ -103,7 +103,7 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Delete multiple user accounts.
    */
   protected function entityDeleteMultiple($uids) {
-    user_delete_multiple($uids);
+    entity_delete_multiple($this->entityType(), $uids);
   }
 
   /**
@@ -134,7 +134,7 @@ class FeedsUserProcessor extends FeedsProcessor {
     unset($roles['authenticated']);
     $options = array();
     foreach ($roles as $role) {
-      $options[$role->id] = $role->label();
+      $options[$role->id()] = $role->label();
     }
     if ($options) {
       $form['roles'] = array(
@@ -162,9 +162,11 @@ class FeedsUserProcessor extends FeedsProcessor {
       case 'created':
         $target_user->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
+
       case 'language':
         $target_user->language = strtolower($value);
         break;
+
       default:
         parent::setTargetElement($source, $target_user, $target_element, $value);
         break;
@@ -236,9 +238,11 @@ class FeedsUserProcessor extends FeedsProcessor {
         case 'name':
           $uid = db_query("SELECT uid FROM {users} WHERE name = :name", array(':name' => $value))->fetchField();
           break;
+
         case 'mail':
           $uid = db_query("SELECT uid FROM {users} WHERE mail = :mail", array(':mail' => $value))->fetchField();
           break;
+
         case 'openid':
           $uid = db_query("SELECT uid FROM {authmap} WHERE authname = :authname AND module = 'openid'", array(':authname' => $value))->fetchField();
           break;

@@ -49,7 +49,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
    */
   protected function newEntity(FeedsSource $source) {
     $defaults = variable_get('node_options_' . $this->bundle(), array('status', 'promote'));
-    $node = entity_create('node', array(
+
+    return entity_create('node', array(
       'type' => $this->bundle(),
       'changed' => REQUEST_TIME,
       'created' => REQUEST_TIME,
@@ -58,8 +59,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'uid' => $this->config['author'],
       'promote' => (int) in_array('promote', $defaults),
       'status' => (int) in_array('status', $defaults),
-    ));
-    return $node->getBCEntity();
+    ))->getBCEntity();
   }
 
   /**
@@ -71,7 +71,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * @todo Reevaluate the use of node_object_prepare().
    */
   protected function entityLoad(FeedsSource $source, $nid) {
-    $node = parent::entityLoad($source, $nid);
+    $node = parent::entityLoad($source, $nid)->getBCEntity();
 
     if ($this->config['update_existing'] != FEEDS_UPDATE_EXISTING) {
       $node->uid = $this->config['author'];
@@ -145,14 +145,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Save a node.
    */
   public function entitySave($entity) {
-    node_save($entity);
+    $entity->save();
   }
 
   /**
    * Delete a series of nodes.
    */
   protected function entityDeleteMultiple($nids) {
-    node_delete_multiple($nids);
+    entity_delete_multiple($this->entityType(), $nids);
   }
 
   /**
