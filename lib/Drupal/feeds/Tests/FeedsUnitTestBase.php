@@ -3,13 +3,15 @@
 /**
  * @file
  * Common functionality for all Feeds tests.
+ *
+ * @todo Convert to PHPUnit.
  */
 
 namespace Drupal\feeds\Tests;
 
 use Drupal\simpletest\UnitTestBase;
 
-class FeedsUnitTestBase extends UnitTestBase {
+class FeedsUnitTestBase extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
       'name' => 'Unit tests',
@@ -79,4 +81,5 @@ class FeedsUnitTestBase extends UnitTestBase {
       }
     }
   }
+
 }
