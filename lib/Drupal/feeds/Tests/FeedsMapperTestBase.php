@@ -27,6 +27,7 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
     'nodereference' => 'nodereference_select',
     'text' => 'text_textfield',
     'userreference' => 'userreference_select',
+    'taxonomy_term_reference' => 'options_select',
    );
 
   /**
@@ -103,34 +104,91 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
     $type = $this->drupalCreateContentType($settings);
     $typename = $type->type;
 
-    // Create the fields
+    // Create the fields.
     foreach ($fields as $field_name => $options) {
       if (is_string($options)) {
         $options = array('type' => $options);
       }
       $field_type = isset($options['type']) ? $options['type'] : 'text';
-      $field_widget = isset($options['widget']) ? $options['widget'] : $this->selectFieldWidget($field_name, $field_type);
-      $this->assertTrue($field_widget !== NULL, "Field type $field_type supported");
-      $label = $field_name . '_' . $field_type . '_label';
-      $edit = array(
-        'fields[_add_new_field][label]' => $label,
-        'fields[_add_new_field][field_name]' => $field_name,
-        'fields[_add_new_field][type]' => $field_type,
-        'fields[_add_new_field][widget_type]' => $field_widget,
-      );
-      $this->drupalPost("admin/structure/types/manage/$typename/fields", $edit, 'Save');
-
-      // (Default) Configure the field.
-      $edit = isset($options['settings']) ? $options['settings'] : array();
-      $this->drupalPost(NULL, $edit, 'Save field settings');
-      $this->assertText('Updated field ' . $label . ' field settings.');
-
-      $edit = isset($options['instance_settings']) ? $options['instance_settings'] : array();
-      $this->drupalPost(NULL, $edit, 'Save settings');
-      $this->assertText('Saved ' . $label . ' configuration.');
+      $field_widget = isset($options['widget']) ? $options['widget'] : NULL;
+      $settings = isset($options['settings']) ? $options['settings'] : array();
+      $instance_settings = isset($options['instance_settings']) ? $options['instance_settings'] : array();
+      $this->createField($typename, $field_name, $field_type, $field_widget, $settings, $instance_settings);
     }
 
     return $typename;
+  }
+
+  /**
+   * Creates a new field and attached it to a content type.
+   *
+   * @param string $content_type
+   *   The content type to attach the field to.
+   * @param string $field_name
+   *   The name of the field.
+   * @param string $field_type
+   *   The type of the field.
+   * @param string $field_widget
+   *   (optional) The field widget to use. If null, a default will be provided.
+   * @param array $settings
+   *   (optional) An array of field settings.
+   * @param array $instance settings
+   *   (optional) An array of field instance settings.
+   */
+  protected function createField($content_type, $field_name, $field_type, $field_widget = NULL, array $settings = array(), array $instance_settings = array()) {
+    if (!$field_widget) {
+      $field_widget = $this->selectFieldWidget($field_name, $field_type);
+    }
+
+    $this->assertTrue($field_widget !== NULL, "Field type $field_type supported");
+    $label = $field_name . '_' . $field_type . '_label';
+    $edit = array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $field_name,
+      'fields[_add_new_field][type]' => $field_type,
+      'fields[_add_new_field][widget_type]' => $field_widget,
+    );
+    $this->drupalPost("admin/structure/types/manage/$content_type/fields", $edit, 'Save');
+
+    // (Default) Configure the field.
+    $this->drupalPost(NULL, $settings, 'Save field settings');
+    $this->assertText('Updated field ' . $label . ' field settings.');
+
+    // Field instance settings.
+    $this->drupalPost(NULL, $instance_settings, 'Save settings');
+    $this->assertText('Saved ' . $label . ' configuration.');
+  }
+
+  /**
+   * Reuses an existing field.
+   *
+   * @param string $content_type
+   *   The content type to attach the field to.
+   * @param string $field_name
+   *   The name of the field.
+   * @param string $field_type
+   *   The type of the field.
+   * @param string $field_widget
+   *   (optional) The field widget to use. If null, a default will be provided.
+   * @param array $instance settings
+   *   (optional) An array of field instance settings.
+   */
+  protected function reuseField($content_type, $field_name, $field_type, $field_widget = NULL, array $instance_settings = array()) {
+    if (!$field_widget) {
+      $field_widget = $this->selectFieldWidget($field_name, $field_type);
+    }
+    $this->assertTrue($field_widget !== NULL, "Field type $field_type supported");
+    $label = $field_name . '_' . $field_type . '_label';
+    $edit = array(
+      'fields[_add_existing_field][label]' => $label,
+      'fields[_add_existing_field][field_name]' => 'field_' . $field_name,
+      'fields[_add_existing_field][widget_type]' => $field_widget,
+    );
+    $this->drupalPost("admin/structure/types/manage/$content_type/fields", $edit, 'Save');
+
+    // Field instance settings.
+    $this->drupalPost(NULL, $instance_settings, 'Save settings');
+    $this->assertText('Saved ' . $label . ' configuration.');
   }
 
   /**

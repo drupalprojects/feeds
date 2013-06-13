@@ -133,7 +133,7 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
   // Iterate over all values.
   foreach ($terms as $term) {
 
-    if ($info['cardinality'] == $delta) {
+    if ($delta >= $info['cardinality'] && $info['cardinality'] > -1) {
       break;
     }
 
