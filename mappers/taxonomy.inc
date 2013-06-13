@@ -109,7 +109,6 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
   if (!isset($cache['allowed_values'][$target])) {
     $instance = field_info_instance($entity->entityType(), $target, $entity->bundle());
     $cache['allowed_values'][$target] = taxonomy_allowed_values($info, $instance, $entity);
-    debug($cache);
   }
 
   if (!isset($cache['allowed_vocabularies'][$target])) {
@@ -118,7 +117,6 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
         $cache['allowed_vocabularies'][$target][$vocabulary->id()] = $vocabulary->id();
       }
     }
-    debug($cache);
   }
 
   $query = Drupal::entityQuery('taxonomy_term');
