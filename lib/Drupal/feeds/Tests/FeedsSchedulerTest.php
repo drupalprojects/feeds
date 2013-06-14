@@ -93,7 +93,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $this->assertEqual(count($schedule), 20, '20 feeds refreshed on cron.' . $count);
 
     // There should be 200 article nodes in the database.
-    $count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article' AND status = 1")->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {node_field_data} WHERE type = 'article' AND status = 1")->fetchField();
     $this->assertEqual($count, 200, 'There are 200 article nodes aggregated.' . $count);
 
     // There shouldn't be any items with scheduled = 1 now, if so, this would
@@ -145,7 +145,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $this->assertFalse($equal, 'Every feed schedule time changed.');
 
     // There should be 200 article nodes in the database.
-    $count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article' AND status = 1")->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {node_field_data} WHERE type = 'article' AND status = 1")->fetchField();
     $this->assertEqual($count, 200, 'The total of 200 article nodes has not changed.');
 
     // Set expire settings, check rescheduling.
