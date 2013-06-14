@@ -184,8 +184,7 @@ function feeds_source_expire($job) {
  */
 function feeds_push_unsubscribe($job) {
   $source = feeds_source($job['type'], $job['id']);
-  $fetcher = feeds_plugin('\Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher', $source->importer->id);
-  $fetcher->unsubscribe($source);
+  $source->importer()->fetcher->unsubscribe($source);
 }
 
 /**
@@ -869,29 +868,6 @@ function feeds_source($importer_id, $feed_nid = 0) {
 }
 
 /**
- * Gets an instance of a class for a given plugin and id.
- *
- * @param $plugin
- *   A string that is the key of the plugin to load.
- * @param $id
- *   A string that is the id of the object.
- *
- * @return
- *   A FeedsPlugin object.
- *
- * @throws Exception
- *   If plugin can't be instantiated.
- */
-function feeds_plugin($plugin, $id) {
-
-  $info = FeedsPlugin::all();
-
-  if (isset($info[$plugin])) {
-    return FeedsConfigurable::instance($info[$plugin]['class'], $id);
-  }
-}
-
-/**
  * @}
  */
 
@@ -1107,7 +1083,7 @@ function feeds_entity_property_info_alter(&$info) {
   $processors = FeedsPlugin::byType('processor');
   $supported_entities = array();
   foreach ($processors as $processor) {
-    $instance = feeds_plugin($processor['handler']['class'], '__none__');
+    $instance = new $processor['handler']['class']('create');
     if (method_exists($instance, 'entityType')) {
       $supported_entities[] = $instance->entityType();
     }
@@ -1282,19 +1258,18 @@ function _feeds_form_helper($form, &$form_state, $action) {
   $class = get_class($form['#configurable']);
   $id = $form['#configurable']->id;
 
-  // Re-initialize the configurable object. Using feeds_importer() and
-  // feeds_plugin() will ensure that we're using the same instance. We can't
-  // reuse the previous form instance because feeds_importer() is used to save.
-  // This will re-initialize all of the plugins anyway, causing some tricky
-  // saving issues in certain cases.
+  // Re-initialize the configurable object. Using feeds_importer() will ensure
+  // that we're using the same instance. We can't reuse the previous form
+  // instance because feeds_importer() is used to save. This will re-initialize
+  // all of the plugins anyway, causing some tricky saving issues in certain
+  // cases.
   // See http://drupal.org/node/1672880.
-  if ($class == variable_get('feeds_importer_class', 'Drupal\feeds\Plugin\Core\Entity\Importer')) {
+  if ($class == 'Drupal\feeds\Plugin\Core\Entity\Importer') {
     $form['#configurable'] = feeds_importer($id);
   }
   else {
     $importer = feeds_importer($id);
-    $plugin_key = $importer->config[$form['#configurable']->pluginType()]['plugin_key'];
-    $form['#configurable'] = feeds_plugin($plugin_key, $id);
+    $form['#configurable'] = $importer->{$form['#configurable']->pluginType()};
   }
   if (method_exists($form['#configurable'], $method)) {
     $form['#configurable']->$method($form_state['values']);

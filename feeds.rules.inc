@@ -25,8 +25,7 @@ function feeds_rules_event_info() {
   // Per importer events definitions.
   $entity_info = entity_get_info();
   foreach (feeds_importer_load_all() as $importer) {
-    $config = $importer->getConfig();
-    $processor = feeds_plugin($config['processor']['plugin_key'], $importer->id);
+    $processor = $importer->processor;
 
     // It's possible to get FeedsMissingPlugin here which will break things
     // since it doesn't implement FeedsProcessor::entityType().

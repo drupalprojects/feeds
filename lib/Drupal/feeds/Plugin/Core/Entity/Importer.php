@@ -86,8 +86,13 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
     // Instantiate fetcher, parser and processor, set their configuration if
     // stored info is available.
+    $info = FeedsPlugin::all();
     foreach ($this->plugin_types as $type) {
-      $plugin = feeds_plugin($this->config[$type]['plugin_key'], $this->id());
+      $plugin_key = $this->config[$type]['plugin_key'];
+
+      if (isset($info[$plugin_key])) {
+        $plugin = new $info[$plugin_key]['class']($this->id());
+      }
       $plugin->importer = $this;
 
       if (isset($this->config[$type]['config'])) {
@@ -139,7 +144,10 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public function setPlugin($plugin_key) {
     // $plugin_type can be either 'fetcher', 'parser' or 'processor'
     if ($plugin_type = FeedsPlugin::typeOf($plugin_key)) {
-      if ($plugin = feeds_plugin($plugin_key, $this->id())) {
+
+      $info = FeedsPlugin::all();
+
+      if (isset($info[$plugin_key]) && $plugin = new $info[$plugin_key]['class']($this->id())) {
         // Unset existing plugin, switch to new plugin.
         unset($this->$plugin_type);
         $this->$plugin_type = $plugin;

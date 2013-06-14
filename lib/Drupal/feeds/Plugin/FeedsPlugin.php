@@ -28,7 +28,7 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    *
    * Initialize class variables.
    */
-  protected function __construct($id) {
+  public function __construct($id) {
     parent::__construct($id);
     $this->source_config = $this->sourceDefaults();
   }

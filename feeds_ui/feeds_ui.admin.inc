@@ -273,10 +273,9 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
         $active_container['title'] = t('Basic settings');
         $active_container['body'] = feeds_get_form($importer, 'configForm');
       }
-      // feeds_plugin() returns a correct result because feed has been
-      // instantiated previously.
-      elseif (in_array($plugin_key, array_keys($plugins)) && $plugin = feeds_plugin($plugin_key, $importer->id)) {
+      elseif (in_array($plugin_key, array_keys($plugins))) {
         $active_container['title'] = t('Settings for !plugin', array('!plugin' => $plugins[$plugin_key]['title']));
+        $plugin = $importer->{FeedsPlugin::typeOf($plugin_key)};
         $active_container['body'] = feeds_get_form($plugin, 'configForm');
       }
       break;
