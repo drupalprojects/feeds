@@ -75,7 +75,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Assert 10 items aggregated after creation of the node.
     $this->assertText('Created 10 nodes');
     $article_nid = db_query_range("SELECT nid FROM {node} WHERE type = 'article'", 0, 1)->fetchField();
-    $this->assertEqual("Created by FeedsNodeProcessor", db_query("SELECT nr.log FROM {node} n JOIN {node_revision} nr ON n.vid = nr.vid WHERE n.nid = :nid", array(':nid' => $article_nid))->fetchField());
+    $this->assertEqual("Created by FeedsNodeProcessor", db_query("SELECT nr.log FROM {node} n JOIN {node_field_revision} nr ON n.vid = nr.vid WHERE n.nid = :nid", array(':nid' => $article_nid))->fetchField());
 
     // Navigate to feed node, there should be Feeds tabs visible.
     $this->drupalGet("node/$nid");
@@ -107,7 +107,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
     // All of the above tests should have produced published nodes, set default
     // to unpublished, import again.
-    $count = db_query("SELECT COUNT(*) FROM {node} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 1")->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {node_field_data} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 1")->fetchField();
     $this->assertEqual($count, 10, 'All items are published.');
     $edit = array(
       'node_options[status]' => FALSE,
@@ -115,7 +115,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
     $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
     $this->drupalPost("node/$nid/import", array(), 'Import');
-    $count = db_query("SELECT COUNT(*) FROM {node} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 0")->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {node_field_data} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 0")->fetchField();
     $this->assertEqual($count, 10, 'No items are published.');
     $edit = array(
       'node_options[status]' => TRUE,
@@ -161,8 +161,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Assert author.
     $this->drupalGet('node');
     $this->assertPattern('/<span class="username">' . check_plain($this->auth_user->name) . '<\/span>/');
-    $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
-    $this->assertEqual($count, 10, 'Accurate number of items in database.');
+    $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node_field_data} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
+    $this->assertEqual($count, 10, t('@count items in database.', array('@count' => $count)));
 
     // Assert input format.
 
@@ -173,20 +173,23 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Set to update existing, remove authorship of above nodes and import again.
     $this->setSettings('syndication', 'node', array('update_existing' => 2));
     $nids = db_query("SELECT nid FROM {node} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id")->fetchCol();
-    db_update('node')
-      ->fields(array('uid' => 0))
-      ->condition('nid', $nids, 'IN')
-      ->execute();
+    foreach (entity_load_multiple('node', $nids) as $node) {
+      $node->uid = 0;
+      $node->save();
+    }
+
     db_update('feeds_item')
       ->fields(array('hash' => ''))
       ->condition('entity_type', 'node')
       ->condition('entity_id', $nids, 'IN')
       ->execute();
+
     $this->drupalPost("node/$nid/import", array(), 'Import');
+
     $this->drupalGet('node');
     $this->assertNoPattern('/<span class="username">' . check_plain($this->auth_user->name) . '<\/span>/');
-    $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
-    $this->assertEqual($count, 0, 'Accurate number of items in database.');
+    $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node_field_data} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
+    $this->assertEqual($count, 0, t('@count items in database.', array('@count' => $count)));
 
     // Map feed node's author to feed item author, update - feed node's items
     // should now be assigned to feed node author.
@@ -199,8 +202,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->drupalPost("node/$nid/import", array(), 'Import');
     $this->drupalGet('node');
     $this->assertNoPattern('/<span class="username">' . check_plain($this->auth_user->name) . '<\/span>/');
-    $uid = db_query("SELECT uid FROM {node} WHERE nid = :nid", array(':nid' => $nid))->fetchField();
-    $count = db_query("SELECT COUNT(*) FROM {node} WHERE uid = :uid", array(':uid' => $uid))->fetchField();
+    $uid = db_query("SELECT uid FROM {node_field_data} WHERE nid = :nid", array(':nid' => $nid))->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {node_field_data} WHERE uid = :uid", array(':uid' => $uid))->fetchField();
     $this->assertEqual($count, 11, 'All feed item nodes are assigned to feed node author.');
 
     // Login with new user with only access content permissions.
@@ -446,7 +449,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Create importer configuration.
     $this->setSettings('syndication', NULL, array('content_type' => ''));
     $this->setSettings('syndication', 'node', array(
-      'expire' => 43200,
+      'expire' => 3600,
     ));
 
     // Create importer.
@@ -455,6 +458,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Set date of a few nodes to current date so they don't expire.
     $edit = array(
       'date[date]' => date('Y-m-d'),
+      'date[time]' => date('H:i:s')
     );
     $this->drupalPost('node/2/edit', $edit, 'Save and keep published');
     $this->assertText(date('m/d/Y'), 'Found correct date.');

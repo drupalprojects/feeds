@@ -93,6 +93,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
     else {
       $node->log = 'Replaced by FeedsNodeProcessor';
     }
+
     return $node;
   }
 
@@ -160,7 +161,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
    */
   protected function expiryQuery(FeedsSource $source, $time) {
     $select = parent::expiryQuery($source, $time);
-    $select->condition('e.created', REQUEST_TIME - $time, '<');
+    $data_table = $select->join('node_field_data', 'nfd', 'e.nid = nfd.nid');
+    $select->condition('nfd.created', REQUEST_TIME - $time, '<');
     return $select;
   }
 
@@ -243,6 +245,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       case 'created':
         $target_node->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
+
       case 'feeds_source':
         // Get the class of the feed node importer's fetcher and set the source
         // property. See feeds_node_update() how $node->feeds gets stored.
@@ -254,16 +257,19 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $target_node->feeds['suppress_import'] = TRUE;
         }
         break;
+
       case 'user_name':
         if ($user = user_load_by_name($value)) {
           $target_node->uid = $user->uid;
         }
         break;
+
       case 'user_mail':
         if ($user = user_load_by_mail($value)) {
           $target_node->uid = $user->uid;
         }
         break;
+
       default:
         parent::setTargetElement($source, $target_node, $target_element, $value);
         break;
@@ -368,9 +374,11 @@ class FeedsNodeProcessor extends FeedsProcessor {
         case 'nid':
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
           break;
+
         case 'title':
-          $nid = db_query("SELECT nid FROM {node} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->bundle()))->fetchField();
+          $nid = db_query("SELECT nid FROM {node_field_data} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->bundle()))->fetchField();
           break;
+
         case 'feeds_source':
           if ($id = feeds_get_importer_id($this->bundle())) {
             $nid = db_query("SELECT fs.feed_nid FROM {node} n JOIN {feeds_source} fs ON n.nid = fs.feed_nid WHERE fs.id = :id AND fs.source = :source", array(':id' => $id, ':source' => $value))->fetchField();
