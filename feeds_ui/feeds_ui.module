@@ -124,5 +124,5 @@ function feeds_ui_admin_menu_map() {
  * Title callback for importers.
  */
 function feeds_ui_importer_title($importer) {
-  return t('@importer', array('@importer' => $importer->config['name']));
+  return t('@importer', array('@importer' => $importer->name));
 }

@@ -198,7 +198,7 @@ function feeds_push_unsubscribe($job) {
  * @param $method
  *   Method to execute on importer; one of 'import' or 'clear'.
  * @param $importer_id
- *   Identifier of a FeedsImporter object.
+ *   Identifier of a Drupal\feeds\Plugin\Core\Entity\Importer object.
  * @param $feed_nid
  *   If importer is attached to content type, feed node id identifying the
  *   source to be imported.
@@ -255,13 +255,13 @@ function feeds_permission() {
   );
   foreach (feeds_importer_load_all() as $importer) {
     $perms["import $importer->id feeds"] = array(
-      'title' => t('Import @name feeds', array('@name' => $importer->config['name'])),
+      'title' => t('Import @name feeds', array('@name' => $importer->name)),
     );
     $perms["clear $importer->id feeds"] = array(
-      'title' => t('Delete items from @name feeds', array('@name' => $importer->config['name'])),
+      'title' => t('Delete items from @name feeds', array('@name' => $importer->name)),
     );
     $perms["unlock $importer->id feeds"] = array(
-      'title' => t('Unlock imports from @name feeds', array('@name' => $importer->config['name'])),
+      'title' => t('Unlock imports from @name feeds', array('@name' => $importer->name)),
       'description' => t('If a feed importation breaks for some reason, users with this permission can unlock them.')
     );
   }
@@ -275,7 +275,7 @@ function feeds_permission() {
  */
 function feeds_forms() {
   $forms = array();
-  $forms['Drupal\feeds\FeedsImporter_feeds_form']['callback'] = 'feeds_form';
+  $forms['Drupal\feeds\Plugin\Core\Entity\Importer_feeds_form']['callback'] = 'feeds_form';
   $plugins = FeedsPlugin::all();
   foreach ($plugins as $plugin) {
     $forms[$plugin['class'] . '_feeds_form']['callback'] = 'feeds_form';
@@ -384,7 +384,7 @@ function feeds_importer_load($id) {
  */
 function feeds_importer_title($id) {
   $importer = feeds_importer($id);
-  return $importer->config['name'];
+  return $importer->name;
 }
 
 /**
@@ -417,7 +417,7 @@ function feeds_theme() {
  *   - clear
  *   - unlock
  * @param $param
- *   Node object or FeedsImporter id.
+ *   Node object or Drupal\feeds\Plugin\Core\Entity\Importer id.
  */
 function feeds_access($action, $param) {
   if (!in_array($action, array('import', 'clear', 'unlock'))) {
@@ -715,8 +715,8 @@ function feeds_enabled_importers() {
  *   A node type string.
  *
  * @return
- *   A FeedsImporter id if there is an importer for the given content type,
- *   FALSE otherwise.
+ *   A Drupal\feeds\Plugin\Core\Entity\Importer id if there is an importer for
+ *   the given content type, FALSE otherwise.
  */
 function feeds_get_importer_id($content_type) {
   $importers = array_flip(_feeds_importer_digest());
@@ -748,17 +748,6 @@ function feeds_cache_clear($rebuild_menu = TRUE) {
   // if ($rebuild_menu) {
 //    menu_rebuild();
   //}
-}
-
-/**
- * Exports a FeedsImporter configuration to code.
- */
-function feeds_export($importer_id, $indent = '') {
-  ctools_include('export');
-  $result = ctools_export_load_object('feeds_importer', 'names', array('id' => $importer_id));
-  if (isset($result[$importer_id])) {
-    return ctools_export_object('feeds_importer', $result[$importer_id], $indent);
-  }
 }
 
 /**
@@ -855,19 +844,19 @@ function feeds_item_info_save($entity, $entity_id) {
  *   The unique id of the importer object.
  *
  * @return
- *   A FeedsImporter object or an object of a class defined by the Drupal
- *   variable 'feeds_importer_class'. There is only one importer object
- *   per $id system-wide.
+ *   A Drupal\feeds\Plugin\Core\Entity\Importer object or an object of a class
+ *   defined by the Drupal variable 'feeds_importer_class'. There is only one
+ *   importer object per $id system-wide.
  */
 function feeds_importer($id) {
-  return FeedsConfigurable::instance(variable_get('feeds_importer_class', '\Drupal\feeds\FeedsImporter'), $id);
+  return entity_load('feeds_importer', $id);
 }
 
 /**
  * Gets an instance of a source object.
  *
  * @param $importer_id
- *   A FeedsImporter id.
+ *   A Drupal\feeds\Plugin\Core\Entity\Importer id.
  * @param $feed_nid
  *   The node id of a feed node if the source is attached to a feed node.
  *
@@ -1299,7 +1288,7 @@ function _feeds_form_helper($form, &$form_state, $action) {
   // This will re-initialize all of the plugins anyway, causing some tricky
   // saving issues in certain cases.
   // See http://drupal.org/node/1672880.
-  if ($class == variable_get('feeds_importer_class', 'Drupal\feeds\FeedsImporter')) {
+  if ($class == variable_get('feeds_importer_class', 'Drupal\feeds\Plugin\Core\Entity\Importer')) {
     $form['#configurable'] = feeds_importer($id);
   }
   else {
@@ -1307,7 +1296,6 @@ function _feeds_form_helper($form, &$form_state, $action) {
     $plugin_key = $importer->config[$form['#configurable']->pluginType()]['plugin_key'];
     $form['#configurable'] = feeds_plugin($plugin_key, $id);
   }
-
   if (method_exists($form['#configurable'], $method)) {
     $form['#configurable']->$method($form_state['values']);
   }

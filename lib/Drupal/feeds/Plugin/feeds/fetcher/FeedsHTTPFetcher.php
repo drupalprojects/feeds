@@ -119,13 +119,13 @@ class FeedsHTTPFetcher extends FeedsFetcher {
     );
    // Per importer override of global http request timeout setting.
    $form['request_timeout'] = array(
-     '#type' => 'textfield',
+     '#type' => 'number',
      '#title' => t('Request timeout'),
      '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>' .
                          '<b>Note:</b> this setting will override the global setting.</br>' .
                          'When left empty, the global value is used.'),
      '#default_value' => $this->config['request_timeout'],
-     '#element_validate' => array('element_validate_integer_positive'),
+     '#min' => 0,
      '#maxlength' => 3,
      '#size'=> 30,
    );

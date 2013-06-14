@@ -8,7 +8,6 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\Plugin\FeedsPlugin;
-use Drupal\Core\Language\Language;
 
 /**
  * Class for testing Feeds <em>content</em> mapper.
@@ -95,13 +94,9 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     ));
 
     // Create feed node and add term term1.
-    $langcode = Language::LANGCODE_NOT_SPECIFIED;
     $nid = $this->createFeedNode('syndication', NULL, 'Syndication');
-    $term = taxonomy_term_load_multiple_by_name('term1');
-    $term = reset($term);
-    $node = node_load($nid)->getNGEntity();
-    $node->field_tags = $term->id();
-    $node->save();
+
+    $this->drupalPost('node/' . $nid . '/edit', array('field_tags[und][]' => 1), t('Save and keep published'));
 
     // Import nodes.
     $this->drupalPost("node/$nid/import", array(), 'Import');
@@ -110,7 +105,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $count = db_query("SELECT COUNT(*) FROM {taxonomy_index}")->fetchField();
 
     // There should be one term for each node imported plus the term on the feed node.
-    $this->assertEqual(11, $count, 'Found correct number of tags for all feed nodes and feed items.');
+    $this->assertEqual(11, $count, t('Found @count tags for all feed nodes and feed items.', array('@count' => $count)));
   }
 
   /**

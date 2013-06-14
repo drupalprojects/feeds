@@ -63,8 +63,8 @@ function feeds_ui_overview_form($form, &$form_status) {
   );
   foreach (feeds_importer_load_all(TRUE) as $importer) {
     $importer_form = array();
-    $importer_form['name']['#markup'] = check_plain($importer->config['name']);
-    $importer_form['description']['#markup'] = check_plain($importer->config['description']);
+    $importer_form['name']['#markup'] = check_plain($importer->name);
+    $importer_form['description']['#markup'] = check_plain($importer->description);
 
     $content_types = node_type_get_names();
 
@@ -127,8 +127,8 @@ function feeds_ui_overview_form_submit($form, &$form_state) {
  * @param $form_state
  *  Form API form state array.
  * @param $from_importer
- *   FeedsImporter object. If given, form will create a new importer as a copy
- *   of $from_importer.
+ *   Drupal\feeds\Plugin\Core\Entity\Importer object. If given, form will create
+ *   a new importer as a copy of $from_importer.
  */
 function feeds_ui_create_form($form, &$form_state, $from_importer = NULL) {
   $form['#from_importer'] = $from_importer;
@@ -176,7 +176,7 @@ function feeds_ui_importer_machine_name_exists($id) {
  */
 function feeds_ui_create_form_validate($form, &$form_state) {
   if (!empty($form_state['values']['id'])) {
-    $importer = feeds_importer($form_state['values']['id']);
+    $importer = entity_create('feeds_importer', array('id' => $form_state['values']['id']));
     $importer->configFormValidate($form_state['values']);
   }
 }
@@ -186,13 +186,17 @@ function feeds_ui_create_form_validate($form, &$form_state) {
  */
 function feeds_ui_create_form_submit($form, &$form_state) {
   // Create feed.
-  $importer = feeds_importer($form_state['values']['id']);
+  $importer = entity_create('feeds_importer', array(
+    'id' => $form_state['values']['id'],
+    'name' => $form_state['values']['name'],
+    'description' => $form_state['values']['description'],
+  ));
+
   // If from_importer is given, copy its configuration.
   if (!empty($form['#from_importer'])) {
     $importer->copy($form['#from_importer']);
   }
   // In any case, we want to set this configuration's title and description.
-  $importer->addConfig($form_state['values']);
   $importer->save();
 
   // Set a message and redirect to settings form.
@@ -211,7 +215,7 @@ function feeds_ui_create_form_submit($form, &$form_state) {
  */
 function feeds_ui_delete_form($form, &$form_state, $importer) {
   $form['#importer'] = $importer->id;
-  $title = t('Would you really like to delete the importer @importer?', array('@importer' => $importer->config['name']));
+  $title = t('Would you really like to delete the importer @importer?', array('@importer' => $importer->name));
   $button_label = t('Delete');
   return confirm_form(
     $form,
@@ -256,12 +260,14 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       $active_container['body'] = '<div class="help feeds-admin-ui">' . feeds_ui_edit_help() . '</div>';
       unset($active_container['actions']);
       break;
+
     case 'fetcher':
     case 'parser':
     case 'processor':
       $active_container['title'] = t('Select a !plugin_type', array('!plugin_type' => $active));
       $active_container['body'] = drupal_get_form('feeds_ui_plugin_form', $importer, $active);
       break;
+
     case 'settings':
       if (empty($plugin_key)) {
         $active_container['title'] = t('Basic settings');
@@ -274,6 +280,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
         $active_container['body'] = feeds_get_form($plugin, 'configForm');
       }
       break;
+
     case 'mapping':
       $active_container['title'] = t('Mapping for !processor', array('!processor' => $plugins[$config['processor']['plugin_key']]['title']));
       $active_container['body'] = drupal_get_form('feeds_ui_mapping_form', $importer);
@@ -373,7 +380,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
  * @param $form_state
  *   Form API form state array.
  * @param $importer
- *   FeedsImporter object.
+ *   Drupal\feeds\Plugin\Core\Entity\Importer object.
  * @param $type
  *   Plugin type. One of 'fetcher', 'parser', 'processor'.
  *

@@ -49,8 +49,8 @@ Installation
   Feeds News, Feeds Import, Feeds Fast News (more info below).
 - Make sure cron is correctly configured http://drupal.org/cron
 - Go to import/ to import data.
-- To use SimplePie parser, download either the compiled or minified SimplePie 
-  and place simplepie_[version].compiled.php into feeds/libraries as 
+- To use SimplePie parser, download either the compiled or minified SimplePie
+  and place simplepie_[version].compiled.php into feeds/libraries as
   simplepie.compiled.php. Recommended version: 1.3.
   http://simplepie.org/
 
@@ -169,7 +169,7 @@ Description: Set to TRUE for enabling debug output to
              /DRUPALTMPDIR/feeds_[sitename].log
 
 Name:        feeds_importer_class
-Default:     'FeedsImporter'
+Default:     'Drupal\feeds\Plugin\Core\Entity\Importer'
 Description: The class to use for importing feeds.
 
 Name:        feeds_source_class

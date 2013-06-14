@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal\feeds\FeedsImporter;
+use Drupal\feeds\Plugin\Core\Entity\Importer;
 
 /**
  * Used when an object does not exist in the DB or code but should.
@@ -33,8 +33,8 @@ abstract class FeedsConfigurable {
   /*
   CTools export type of this object.
 
-  @todo Should live in FeedsImporter. Not all child classes
-  of FeedsConfigurable are exportable. Same goes for $disabled.
+  @todo Should live in Drupal\feeds\Plugin\Core\Entity\Importer. Not all child
+  classes of FeedsConfigurable are exportable. Same goes for $disabled.
 
   Export type can be one of
   FEEDS_EXPORT_NONE - the configurable only exists in memory
@@ -58,7 +58,7 @@ abstract class FeedsConfigurable {
   public static function instance($class, $id) {
     // This is useful at least as long as we're developing.
     if (empty($id)) {
-      throw new Exception(t('Empty configuration identifier.'));
+      throw new \Exception(t('Empty configuration identifier.'));
     }
 
     if (!isset(static::$instances[$class][$id])) {

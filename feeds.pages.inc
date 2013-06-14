@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Template\Attribute;
+use Drupal\feeds\Plugin\Core\Entity\Importer;
 
 /**
  * @file
@@ -22,7 +23,7 @@ function feeds_page() {
       }
       if (empty($importer->config['content_type'])) {
         $link = 'import/' . $importer->id;
-        $title = $importer->config['name'];
+        $title = $importer->name;
       }
       elseif (node_access('create', $importer->config['content_type'])) {
         $link = 'node/add/' . str_replace('_', '-', $importer->config['content_type']);
@@ -33,7 +34,7 @@ function feeds_page() {
       }
       $rows[] = array(
         l($title, $link),
-        check_plain($importer->config['description']),
+        check_plain($importer->description),
       );
     }
   }
@@ -257,7 +258,7 @@ function feeds_unlock_tab_form_submit($form, &$form_state) {
  * Handle a fetcher callback.
  */
 function feeds_fetcher_callback($importer, $feed_nid = 0) {
-  if ($importer instanceof FeedsImporter) {
+  if ($importer instanceof Importer) {
     try {
       return $importer->fetcher->request($feed_nid);
     }

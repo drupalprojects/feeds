@@ -418,7 +418,7 @@ class FeedsSource extends FeedsConfigurable {
    */
   public function save() {
     // Alert implementers of FeedsSourceInterface to the fact that we're saving.
-    foreach ($this->importer->plugin_types as $type) {
+    foreach ($this->importer->getPluginTypes() as $type) {
       $this->importer->$type->sourceSave($this);
     }
     $config = $this->getConfig();
@@ -472,7 +472,7 @@ class FeedsSource extends FeedsConfigurable {
   public function delete() {
     // Alert implementers of FeedsSourceInterface to the fact that we're
     // deleting.
-    foreach ($this->importer->plugin_types as $type) {
+    foreach ($this->importer->getPluginTypes() as $type) {
       $this->importer->$type->sourceDelete($this);
     }
     db_delete('feeds_source')
@@ -544,7 +544,7 @@ class FeedsSource extends FeedsConfigurable {
   public function configDefaults() {
     // Collect information from plugins.
     $defaults = array();
-    foreach ($this->importer->plugin_types as $type) {
+    foreach ($this->importer->getPluginTypes() as $type) {
       if ($this->importer->$type->hasSourceConfig()) {
         $defaults[get_class($this->importer->$type)] = $this->importer->$type->sourceDefaults();
       }
@@ -558,7 +558,7 @@ class FeedsSource extends FeedsConfigurable {
   public function configForm(&$form_state) {
     // Collect information from plugins.
     $form = array();
-    foreach ($this->importer->plugin_types as $type) {
+    foreach ($this->importer->getPluginTypes() as $type) {
       if ($this->importer->$type->hasSourceConfig()) {
         $class = get_class($this->importer->$type);
         $config = isset($this->config[$class]) ? $this->config[$class] : array();
@@ -573,7 +573,7 @@ class FeedsSource extends FeedsConfigurable {
    * Override parent::configFormValidate().
    */
   public function configFormValidate(&$values) {
-    foreach ($this->importer->plugin_types as $type) {
+    foreach ($this->importer->getPluginTypes() as $type) {
       $class = get_class($this->importer->$type);
       if (isset($values[$class]) && $this->importer->$type->hasSourceConfig()) {
         $this->importer->$type->sourceFormValidate($values[$class]);

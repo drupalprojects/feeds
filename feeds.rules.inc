@@ -38,7 +38,7 @@ function feeds_rules_event_info() {
     $label = isset($entity_info[$entity_type]['label']) ? $entity_info[$entity_type]['label'] : $entity_type;
 
     $info['feeds_import_'. $importer->id] = array(
-      'label' => t('Before saving an item imported via @name.', array('@name' => $importer->config['name'])),
+      'label' => t('Before saving an item imported via @name.', array('@name' => $importer->name)),
       'group' => t('Feeds'),
       'variables' => array(
         $entity_type => array(

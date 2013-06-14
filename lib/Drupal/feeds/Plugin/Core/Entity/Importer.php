@@ -2,55 +2,93 @@
 
 /**
  * @file
- * FeedsImporter class and related.
+ * Contains \Drupal\feeds\Plugin\Core\Entity\FeedType.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Plugin\Core\Entity;
 
-use Drupal\feeds\Plugin\FeedsConfigurable;
+use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Annotation\EntityType;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
- * A FeedsImporter object describes how an external source should be fetched,
- * parsed and processed. Feeds can manage an arbitrary amount of importers.
+ * Defines the feeds importer entity.
  *
- * A FeedsImporter holds a pointer to a FeedsFetcher, a FeedsParser and a
- * FeedsProcessor plugin. It further contains the configuration for itself and
- * each of the three plugins.
- *
- * Its most important responsibilities are configuration management, interfacing
- * with the job scheduler and expiring of all items produced by this
- * importer.
- *
- * When a FeedsImporter is instantiated, it loads its configuration. Then it
- * instantiates one fetcher, one parser and one processor plugin depending on
- * the configuration information. After instantiating them, it sets them to
- * the configuration information it holds for them.
+ * @EntityType(
+ *   id = "feeds_importer",
+ *   label = @Translation("Feed importer"),
+ *   module = "feeds",
+ *   controllers = {
+ *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController",
+ *     "access" = "Drupal\feeds\ImporterAccessController",
+ *     "list" = "Drupal\Core\Config\Entity\ConfigEntityListController",
+ *     "form" = {
+ *       "default" = "Drupal\feeds\ImporterFormController"
+ *     }
+ *   },
+ *   config_prefix = "feeds.importer",
+ *   entity_keys = {
+ *     "id" = "id",
+ *     "label" = "name",
+ *     "uuid" = "uuid"
+ *   }
+ * )
  */
-class FeedsImporter extends FeedsConfigurable {
+class Importer extends ConfigEntityBase implements ImporterInterface {
+
+  /**
+   * The importer ID.
+   *
+   * @var string
+   */
+  public $id;
+
+  /**
+   * Name of the importer.
+   *
+   * @var string
+   */
+  public $name;
+
+  /**
+   * Description of the importer.
+   *
+   * @var string
+   */
+  public $description;
+
+  /**
+   * The disabled status.
+   *
+   * @var bool
+   */
+  public $disabled = FALSE;
 
   // Every feed has a fetcher, a parser and a processor.
   // These variable names match the possible return values of
   // FeedsPlugin::typeOf().
-  protected $fetcher, $parser, $processor;
+  public $fetcher, $parser, $processor;
 
   // This array defines the variable names of the plugins above.
   protected $plugin_types = array('fetcher', 'parser', 'processor');
+  public $config = array();
 
   /**
    * Instantiate class variables, initialize and configure
    * plugins.
    */
-  protected function __construct($id) {
-    parent::__construct($id);
+  public function __construct(array $values, $entity_type) {
+    parent::__construct($values, $entity_type);
 
-    // Try to load information from database.
-    $this->load();
+    $this->config += $this->configDefaults();
 
     // Instantiate fetcher, parser and processor, set their configuration if
     // stored info is available.
     foreach ($this->plugin_types as $type) {
-      $plugin = feeds_plugin($this->config[$type]['plugin_key'], $this->id);
+      $plugin = feeds_plugin($this->config[$type]['plugin_key'], $this->id());
+      $plugin->importer = $this;
 
       if (isset($this->config[$type]['config'])) {
         $plugin->setConfig($this->config[$type]['config']);
@@ -79,41 +117,15 @@ class FeedsImporter extends FeedsConfigurable {
   }
 
   /**
-   * Save configuration.
-   */
-  public function save() {
-
-    $config = config('feeds.importer.' . $this->id);
-    $config->set('id', $this->id)
-      ->set('config', $this->getConfig())
-      ->save();
-  }
-
-  /**
-   * Load configuration and unpack.
-   */
-  public function load() {
-    if (config('feeds.importer.' . $this->id)->get('id')) {
-      $config = config('feeds.importer.' . $this->id)->get('config');
-      $this->disabled = isset($config['disabled']) ? $config['disabled'] : FALSE;
-      $this->config = $config;
-      return TRUE;
-    }
-    return FALSE;
-  }
-
-  /**
    * Deletes configuration.
    *
    * Removes configuration information from database, does not delete
    * configuration itself.
    */
   public function delete() {
-    db_delete('feeds_importer')
-      ->condition('id', $this->id)
-      ->execute();
+    parent::delete();
 
-    feeds_reschedule($this->id);
+    feeds_reschedule($this->id());
   }
 
   /**
@@ -127,44 +139,42 @@ class FeedsImporter extends FeedsConfigurable {
   public function setPlugin($plugin_key) {
     // $plugin_type can be either 'fetcher', 'parser' or 'processor'
     if ($plugin_type = FeedsPlugin::typeOf($plugin_key)) {
-      if ($plugin = feeds_plugin($plugin_key, $this->id)) {
+      if ($plugin = feeds_plugin($plugin_key, $this->id())) {
         // Unset existing plugin, switch to new plugin.
         unset($this->$plugin_type);
         $this->$plugin_type = $plugin;
         // Set configuration information, blow away any previous information on
         // this spot.
-        $this->config[$plugin_type] = array('plugin_key' => $plugin_key);
+        $this->config[$plugin_type] = array(
+          'plugin_key' => $plugin_key,
+          'config' => $plugin->getConfig(),
+        );
       }
     }
   }
 
   /**
-   * Copy a FeedsImporter configuration into this importer.
+   * Similar to setConfig but adds to existing configuration.
    *
-   * @param FeedsImporter $importer
-   *   The feeds importer object to copy from.
+   * @param $config
+   *   Array containing configuration information. Will be filtered by the keys
+   *   returned by configDefaults().
    */
-   public function copy(FeedsConfigurable $configurable) {
-     parent::copy($configurable);
-
-     if ($configurable instanceof FeedsImporter) {
-       // Instantiate new fetcher, parser and processor and initialize their
-       // configurations.
-       foreach ($this->plugin_types as $plugin_type) {
-         $this->setPlugin($configurable->config[$plugin_type]['plugin_key']);
-         $this->$plugin_type->setConfig($configurable->config[$plugin_type]['config']);
-       }
-     }
-   }
+  public function addConfig($config) {
+    $this->config = is_array($this->config) ? array_merge($this->config, $config) : $config;
+    $default_keys = $this->configDefaults();
+    $this->config = array_intersect_key($this->config, $default_keys);
+  }
 
   /**
    * Get configuration of this feed.
    */
   public function getConfig() {
-    foreach (array('fetcher', 'parser', 'processor') as $type) {
+    foreach ($this->plugin_types as $type) {
       $this->config[$type]['config'] = $this->$type->getConfig();
     }
-    return parent::getConfig();
+
+    return $this->config;
   }
 
   /**
@@ -172,16 +182,17 @@ class FeedsImporter extends FeedsConfigurable {
    */
   public function configDefaults() {
     return array(
-      'name' => '',
-      'description' => '',
       'fetcher' => array(
         'plugin_key' => 'http',
+        'config' => array(),
       ),
       'parser' => array(
         'plugin_key' => 'syndication',
+        'config' => array(),
       ),
       'processor' => array(
         'plugin_key' => 'node',
+        'config' => array(),
       ),
       'content_type' => '',
       'update' => 0,
@@ -202,14 +213,14 @@ class FeedsImporter extends FeedsConfigurable {
       '#type' => 'textfield',
       '#title' => t('Name'),
       '#description' => t('A human readable name of this importer.'),
-      '#default_value' => $config['name'],
+      '#default_value' => $this->name,
       '#required' => TRUE,
     );
     $form['description'] = array(
       '#type' => 'textfield',
       '#title' => t('Description'),
       '#description' => t('A description of this importer.'),
-      '#default_value' => $config['description'],
+      '#default_value' => $this->description,
     );
     $node_types = node_type_get_names();
     array_walk($node_types, 'check_plain');
@@ -253,13 +264,46 @@ class FeedsImporter extends FeedsConfigurable {
     return $form;
   }
 
+  public function configFormValidate(array &$values) {
+    foreach ($this->plugin_types as $type) {
+      if (isset($values[$type])) {
+        $this->$type->configFormValidate($values[$type]);
+      }
+    }
+  }
+
   /**
    * Reschedule if import period changes.
    */
   public function configFormSubmit(&$values) {
     if ($this->config['import_period'] != $values['import_period']) {
-      feeds_reschedule($this->id);
+      feeds_reschedule($this->id());
     }
-    parent::configFormSubmit($values);
+    $this->name = $values['name'];
+    $this->description = $values['description'];
+    $this->addConfig($values);
+
+    $this->save();
+    drupal_set_message(t('Your changes have been saved.'));
+  }
+
+  public function save() {
+    $plugins = array();
+
+    foreach ($this->plugin_types as $type) {
+      $this->config[$type]['config'] = $this->$type->getConfig();
+      $plugins[$type] = $this->$type;
+      unset($this->$type);
+    }
+
+    parent::save();
+
+    foreach ($plugins as $type => $plugin) {
+      $this->$type = $plugin;
+    }
+  }
+
+  public function getPluginTypes() {
+    return $this->plugin_types;
   }
 }
