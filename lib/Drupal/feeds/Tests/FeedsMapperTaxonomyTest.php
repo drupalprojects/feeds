@@ -186,7 +186,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       $tids[] = $term->id();
     }
 
-    FeedsPlugin::loadMappers();
+    feeds_load_mappers();
 
     $target = 'field_tags';
     $mapping = array(
@@ -234,7 +234,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       drupal_write_record('feeds_item', $record);
     }
 
-    FeedsPlugin::loadMappers();
+    feeds_load_mappers();
 
     $entity = entity_create('node', array('type' => 'article'))->getBCEntity();
 

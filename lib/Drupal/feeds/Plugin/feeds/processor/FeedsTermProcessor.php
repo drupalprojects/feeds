@@ -183,7 +183,7 @@ class FeedsTermProcessor extends FeedsProcessor {
 
     // Let implementers of hook_feeds_term_processor_targets() add their targets.
     try {
-      self::loadMappers();
+      feeds_load_mappers();
       $entity_type = $this->entityType();
       $bundle = $this->bundle();
       drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);

@@ -553,7 +553,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     If the mapping specifies a callback method, use the callback instead of
     setTargetElement().
     */
-    self::loadMappers();
+    feeds_load_mappers();
     foreach ($this->config['mappings'] as $mapping) {
       // Retrieve source element's value from parser.
       if (isset($sources[$this->id][$mapping['source']]) &&

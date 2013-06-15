@@ -215,7 +215,7 @@ class FeedsUserProcessor extends FeedsProcessor {
     }
 
     // Let other modules expose mapping targets.
-    self::loadMappers();
+    feeds_load_mappers();
     $entity_type = $this->entityType();
     $bundle = $this->bundle();
     drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
