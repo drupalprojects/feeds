@@ -68,7 +68,7 @@ abstract class FeedsFetcher extends FeedsPlugin {
    *   Path for this fetcher/source combination.
    */
   public function path($feed_nid = 0) {
-    $id = urlencode($this->id);
+    $id = urlencode($this->importer->id());
     if ($feed_nid && is_numeric($feed_nid)) {
       return "feeds/importer/$id/$feed_nid";
     }

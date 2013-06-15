@@ -228,7 +228,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
         // Allow modules to alter the entity before saving.
         module_invoke_all('feeds_presave', $source, $entity, $item, $entity_id);
         if (module_exists('rules')) {
-          rules_invoke_event('feeds_import_'. $source->importer()->id, $entity);
+          rules_invoke_event('feeds_import_'. $source->importer()->id(), $entity);
         }
 
         // Enable modules to skip saving at all.
@@ -337,7 +337,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       'feeds_item',
       'fi',
       "e.{$info['entity_keys']['id']} = fi.entity_id AND fi.entity_type = '{$this->entityType()}'");
-    $select->condition('fi.id', $this->id);
+    $select->condition('fi.id', $this->importer->id());
     $select->condition('fi.feed_nid', $source->feed_nid);
 
     // If there is no total, query it.
@@ -480,7 +480,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
         ':entity_type' => $this->entityType(),
     ));
-    $select->condition('fi.id', $this->id);
+    $select->condition('fi.id', $this->importer->id());
     $select->condition('fi.feed_nid', $source->feed_nid);
 
     return $select;
@@ -490,7 +490,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Counts the number of items imported by this processor.
    */
   public function itemCount(FeedsSource $source) {
-    return db_query("SELECT count(*) FROM {feeds_item} WHERE id = :id AND entity_type = :entity_type AND feed_nid = :feed_nid", array(':id' => $this->id, ':entity_type' => $this->entityType(), ':feed_nid' => $source->feed_nid))->fetchField();
+    return db_query("SELECT count(*) FROM {feeds_item} WHERE id = :id AND entity_type = :entity_type AND feed_nid = :feed_nid", array(':id' => $this->importer->id(), ':entity_type' => $this->entityType(), ':feed_nid' => $source->feed_nid))->fetchField();
   }
 
   /**
@@ -520,14 +520,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
     // Static cache $targets as getMappingTargets() may be an expensive method.
     static $sources;
-    if (!isset($sources[$this->id])) {
-      $sources[$this->id] = feeds_importer($this->id)->parser->getMappingSources();
+    if (!isset($sources[$this->importer->id()])) {
+      $sources[$this->importer->id()] = $this->importer->parser->getMappingSources();
     }
     static $targets;
-    if (!isset($targets[$this->id])) {
-      $targets[$this->id] = $this->getMappingTargets();
+    if (!isset($targets[$this->importer->id()])) {
+      $targets[$this->importer->id()] = $this->getMappingTargets();
     }
-    $parser = feeds_importer($this->id)->parser;
+    $parser = $this->importer->parser;
     if (empty($target_item)) {
       $target_item = array();
     }
@@ -536,8 +536,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
     foreach ($this->config['mappings'] as $mapping) {
-      if (isset($targets[$this->id][$mapping['target']]['real_target'])) {
-        unset($target_item->{$targets[$this->id][$mapping['target']]['real_target']});
+      if (isset($targets[$this->importer->id()][$mapping['target']]['real_target'])) {
+        unset($target_item->{$targets[$this->importer->id()][$mapping['target']]['real_target']});
       }
       elseif (isset($target_item->{$mapping['target']})) {
         unset($target_item->{$mapping['target']});
@@ -556,11 +556,11 @@ abstract class FeedsProcessor extends FeedsPlugin {
     feeds_load_mappers();
     foreach ($this->config['mappings'] as $mapping) {
       // Retrieve source element's value from parser.
-      if (isset($sources[$this->id][$mapping['source']]) &&
-          is_array($sources[$this->id][$mapping['source']]) &&
-          isset($sources[$this->id][$mapping['source']]['callback']) &&
-          function_exists($sources[$this->id][$mapping['source']]['callback'])) {
-        $callback = $sources[$this->id][$mapping['source']]['callback'];
+      if (isset($sources[$this->importer->id()][$mapping['source']]) &&
+          is_array($sources[$this->importer->id()][$mapping['source']]) &&
+          isset($sources[$this->importer->id()][$mapping['source']]['callback']) &&
+          function_exists($sources[$this->importer->id()][$mapping['source']]['callback'])) {
+        $callback = $sources[$this->importer->id()][$mapping['source']]['callback'];
         $value = $callback($source, $result, $mapping['source']);
       }
       else {
@@ -568,11 +568,11 @@ abstract class FeedsProcessor extends FeedsPlugin {
       }
 
       // Map the source element's value to the target.
-      if (isset($targets[$this->id][$mapping['target']]) &&
-          is_array($targets[$this->id][$mapping['target']]) &&
-          isset($targets[$this->id][$mapping['target']]['callback']) &&
-          function_exists($targets[$this->id][$mapping['target']]['callback'])) {
-        $callback = $targets[$this->id][$mapping['target']]['callback'];
+      if (isset($targets[$this->importer->id()][$mapping['target']]) &&
+          is_array($targets[$this->importer->id()][$mapping['target']]) &&
+          isset($targets[$this->importer->id()][$mapping['target']]['callback']) &&
+          function_exists($targets[$this->importer->id()][$mapping['target']]['callback'])) {
+        $callback = $targets[$this->importer->id()][$mapping['target']]['callback'];
         $callback($source, $target_item, $mapping['target'], $value, $mapping);
       }
       else {
@@ -691,7 +691,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if (!$this->bundle()) {
       $info = $this->entityInfo();
       $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : t('bundle');
-      $url = url('admin/structure/feeds/' . $this->id . '/settings/processor');
+      $url = url('admin/structure/feeds/' . $this->importer->id() . '/settings/processor');
       drupal_set_message(t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
     }
 
@@ -744,7 +744,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       ->fields('feeds_item', array('entity_id'))
       ->condition('feed_nid', $source->feed_nid)
       ->condition('entity_type', $this->entityType())
-      ->condition('id', $source->id);
+      ->condition('id', $source->importer->id());
 
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
@@ -778,7 +778,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   elements from the source item mapped to these targets.
    */
   protected function uniqueTargets(FeedsSource $source, FeedsParserResult $result) {
-    $parser = feeds_importer($this->id)->parser;
+    $parser = $this->importer->parser;
     $targets = array();
     foreach ($this->config['mappings'] as $mapping) {
       if (!empty($mapping['unique'])) {
@@ -805,7 +805,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $entity->feeds_item->is_new = TRUE;
     $entity->feeds_item->entity_id = 0;
     $entity->feeds_item->entity_type = $this->entityType();
-    $entity->feeds_item->id = $this->id;
+    $entity->feeds_item->id = $this->importer->id();
     $entity->feeds_item->feed_nid = $feed_nid;
     $entity->feeds_item->imported = REQUEST_TIME;
     $entity->feeds_item->hash = $hash;

@@ -232,7 +232,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
    */
   public function configFormSubmit(&$values) {
     if ($this->config['expire'] != $values['expire']) {
-      feeds_reschedule($this->id);
+      feeds_reschedule($this->importer->id());
     }
     parent::configFormSubmit($values);
   }
@@ -342,7 +342,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
     // If the target content type is a Feed node, expose its source field.
     if ($id = feeds_get_importer_id($this->bundle())) {
-      $name = feeds_importer($id)->name;
+      $name = feeds_importer($id)->label();
       $targets['feeds_source'] = array(
         'name' => t('Feed source'),
         'description' => t('The content type created by this processor is a Feed Node, it represents a source itself. Depending on the fetcher selected on the importer "@importer", this field is expected to be for example a URL or a path to a file.', array('@importer' => $name)),

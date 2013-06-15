@@ -67,9 +67,9 @@ abstract class FeedsParser extends FeedsPlugin {
   public function getMappingSources() {
     feeds_load_mappers();
     $sources = array();
-    $content_type = feeds_importer($this->id)->config['content_type'];
+    $content_type = $this->importer->config['content_type'];
     drupal_alter('feeds_parser_sources', $sources, $content_type);
-    if (!feeds_importer($this->id)->config['content_type']) {
+    if (!$this->importer->config['content_type']) {
       return $sources;
     }
     $sources['parent:uid'] = array(

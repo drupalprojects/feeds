@@ -136,7 +136,7 @@ class FeedsCSVParser extends FeedsParser {
     $form = array();
     $form['#weight'] = -10;
 
-    $mappings = feeds_importer($this->id)->processor->config['mappings'];
+    $mappings = $this->importer->processor->config['mappings'];
     $sources = $uniques = array();
     foreach ($mappings as $mapping) {
       $sources[] = check_plain($mapping['source']);
@@ -148,7 +148,7 @@ class FeedsCSVParser extends FeedsParser {
     $output = t('Import !csv_files with one or more of these columns: !columns.', array('!csv_files' => l(t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '!columns' => implode(', ', $sources)));
     $items = array();
     $items[] = format_plural(count($uniques), t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
-    $items[] = l(t('Download a template'), 'import/' . $this->id . '/template');
+    $items[] = l(t('Download a template'), 'import/' . $this->importer->id() . '/template');
     $form['help'] = array(
       '#prefix' => '<div class="help">',
       '#suffix' => '</div>',
@@ -222,7 +222,7 @@ class FeedsCSVParser extends FeedsParser {
   }
 
   public function getTemplate() {
-    $mappings = feeds_importer($this->id)->processor->config['mappings'];
+    $mappings = $this->importer->processor->config['mappings'];
     $sources = $uniques = array();
     foreach ($mappings as $mapping) {
       if (!empty($mapping['unique'])) {
@@ -241,7 +241,7 @@ class FeedsCSVParser extends FeedsParser {
       $columns[] = $col;
     }
     drupal_add_http_header('Cache-Control', 'max-age=60, must-revalidate');
-    drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $this->id . '_template.csv"');
+    drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $this->importer->id() . '_template.csv"');
     drupal_add_http_header('Content-type', 'text/csv; charset=utf-8');
     print implode($sep, $columns);
     return;

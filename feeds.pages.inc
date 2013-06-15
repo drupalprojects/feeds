@@ -18,12 +18,12 @@ function feeds_page() {
       if ($importer->disabled) {
         continue;
       }
-      if (!(user_access('import ' . $importer->id . ' feeds') || user_access('administer feeds'))) {
+      if (!(user_access('import ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
         continue;
       }
       if (empty($importer->config['content_type'])) {
-        $link = 'import/' . $importer->id;
-        $title = $importer->name;
+        $link = 'import/' . $importer->id();
+        $title = $importer->label();
       }
       elseif (node_access('create', $importer->config['content_type'])) {
         $link = 'node/add/' . str_replace('_', '-', $importer->config['content_type']);
@@ -160,7 +160,7 @@ function feeds_import_tab_form_submit($form, &$form_state) {
 function feeds_delete_tab_form($form, &$form_state, $importer_id, $node = NULL) {
   if (empty($node)) {
     $source = feeds_source($importer_id);
-    $form['#redirect'] = 'import/' . $source->id;
+    $form['#redirect'] = 'import/' . $source->importer->id();
   }
   else {
     $importer_id = feeds_get_importer_id($node->type);
@@ -168,7 +168,7 @@ function feeds_delete_tab_form($form, &$form_state, $importer_id, $node = NULL) 
     $form['#redirect'] = 'node/' . $source->feed_nid;
   }
   // Form cannot pass on source object.
-  $form['#importer_id'] = $source->id;
+  $form['#importer_id'] = $source->importer->id();
   $form['#feed_nid'] = $source->feed_nid;
   $form['source_status'] = array(
     '#type' => 'fieldset',
@@ -204,7 +204,7 @@ function feeds_delete_tab_form_submit($form, &$form_state) {
 function feeds_unlock_tab_form($form, &$form_state, $importer_id, $node = NULL) {
   if (empty($node)) {
     $source = feeds_source($importer_id);
-    $form['#redirect'] = 'import/' . $source->id;
+    $form['#redirect'] = 'import/' . $source->importer->id();
   }
   else {
     $importer_id = feeds_get_importer_id($node->type);
@@ -212,7 +212,7 @@ function feeds_unlock_tab_form($form, &$form_state, $importer_id, $node = NULL) 
     $form['#redirect'] = 'node/' . $source->feed_nid;
   }
   // Form cannot pass on source object.
-  $form['#importer_id'] = $source->id;
+  $form['#importer_id'] = $source->importer->id();
   $form['#feed_nid'] = $source->feed_nid;
   $form['source_status'] = array(
     '#type' => 'fieldset',

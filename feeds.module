@@ -57,8 +57,8 @@ function feeds_cron() {
     else {
       $sources = db_query("SELECT feed_nid, id FROM {feeds_source} WHERE id IN (:ids)", array(':ids' => $importers));
     }
-    foreach ($sources as $source) {
-      feeds_source($source->id, $source->feed_nid)->schedule();
+    foreach ($sources as $source_row) {
+      feeds_source($source_row->id, $source_row->feed_nid)->schedule();
     }
     feeds_reschedule(FALSE);
   }
@@ -252,14 +252,14 @@ function feeds_permission() {
     ),
   );
   foreach (feeds_importer_load_all() as $importer) {
-    $perms["import $importer->id feeds"] = array(
-      'title' => t('Import @name feeds', array('@name' => $importer->name)),
+    $perms["import {$importer->id()} feeds"] = array(
+      'title' => t('Import @name feeds', array('@name' => $importer->label())),
     );
-    $perms["clear $importer->id feeds"] = array(
-      'title' => t('Delete items from @name feeds', array('@name' => $importer->name)),
+    $perms["clear {$importer->id()} feeds"] = array(
+      'title' => t('Delete items from @name feeds', array('@name' => $importer->label())),
     );
-    $perms["unlock $importer->id feeds"] = array(
-      'title' => t('Unlock imports from @name feeds', array('@name' => $importer->name)),
+    $perms["unlock {$importer->id()} feeds"] = array(
+      'title' => t('Unlock imports from @name feeds', array('@name' => $importer->label())),
       'description' => t('If a feed importation breaks for some reason, users with this permission can unlock them.')
     );
   }
@@ -275,15 +275,13 @@ function feeds_forms() {
   $forms = array();
   $forms['Drupal\feeds\Plugin\Core\Entity\Importer_feeds_form']['callback'] = 'feeds_form';
 
-  $definitions = array();
-  $definitions['fetcher'] = \Drupal::service('plugin.manager.feeds.fetcher')->getDefinitions();
-  $definitions['parser'] = \Drupal::service('plugin.manager.feeds.parser')->getDefinitions();
-  $definitions['processor'] = \Drupal::service('plugin.manager.feeds.processor')->getDefinitions();
-  foreach ($definitions as $type => $plugins) {
-    foreach ($plugins as $plugin) {
-      $forms[$plugin['class'] . '_feeds_form']['callback'] = 'feeds_form';
+  foreach (array('fetcher', 'parser', 'processor') as $type) {
+    $definitions = \Drupal::service('plugin.manager.feeds.' . $type)->getDefinitions();
+    foreach ($definitions as $definition) {
+      $forms[$definition['class'] . '_feeds_form']['callback'] = 'feeds_form';
     }
   }
+
   return $forms;
 }
 
@@ -387,8 +385,7 @@ function feeds_importer_load($id) {
  * Title callback.
  */
 function feeds_importer_title($id) {
-  $importer = feeds_importer($id);
-  return $importer->name;
+  return feeds_importer($id)->label();
 }
 
 /**
@@ -725,7 +722,7 @@ function feeds_get_importer_id($content_type) {
 function _feeds_importer_digest() {
   $importers = array();
   foreach (feeds_importer_load_all() as $importer) {
-    $importers[$importer->id] = isset($importer->config['content_type']) ? $importer->config['content_type'] : '';
+    $importers[$importer->id()] = isset($importer->config['content_type']) ? $importer->config['content_type'] : '';
   }
   return $importers;
 }
@@ -1224,22 +1221,6 @@ function feeds_form_submit($form, &$form_state) {
  */
 function _feeds_form_helper($form, &$form_state, $action) {
   $method = $form['#feeds_form_method'] . $action;
-  $class = get_class($form['#configurable']);
-  $id = $form['#configurable']->id;
-
-  // Re-initialize the configurable object. Using feeds_importer() will ensure
-  // that we're using the same instance. We can't reuse the previous form
-  // instance because feeds_importer() is used to save. This will re-initialize
-  // all of the plugins anyway, causing some tricky saving issues in certain
-  // cases.
-  // See http://drupal.org/node/1672880.
-  if ($class == 'Drupal\feeds\Plugin\Core\Entity\Importer') {
-    $form['#configurable'] = feeds_importer($id);
-  }
-  else {
-    $importer = feeds_importer($id);
-    $form['#configurable'] = $importer->{$form['#configurable']->pluginType()};
-  }
   if (method_exists($form['#configurable'], $method)) {
     $form['#configurable']->$method($form_state['values']);
   }

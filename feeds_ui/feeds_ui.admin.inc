@@ -62,7 +62,7 @@ function feeds_ui_overview_form($form, &$form_status) {
   );
   foreach (feeds_importer_load_all(TRUE) as $importer) {
     $importer_form = array();
-    $importer_form['name']['#markup'] = check_plain($importer->name);
+    $importer_form['name']['#markup'] = check_plain($importer->label());
     $importer_form['description']['#markup'] = check_plain($importer->description);
 
     $content_types = node_type_get_names();
@@ -83,21 +83,21 @@ function feeds_ui_overview_form($form, &$form_status) {
     $delete = t('Delete');
     $importer_form['operations'] = array(
       '#markup' =>
-        l($edit, 'admin/structure/feeds/' . $importer->id) . ' | ' .
-        l(t('Clone'), 'admin/structure/feeds/' . $importer->id . '/clone') .
-        (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/' . $importer->id . '/delete')),
+        l($edit, 'admin/structure/feeds/' . $importer->id()) . ' | ' .
+        l(t('Clone'), 'admin/structure/feeds/' . $importer->id() . '/clone') .
+        (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/' . $importer->id() . '/delete')),
     );
 
-    $importer_form[$importer->id] = array(
+    $importer_form[$importer->id()] = array(
       '#type' => 'checkbox',
       '#default_value' => !$importer->disabled,
     );
 
     if ($importer->disabled) {
-      $form['disabled'][$importer->id] = $importer_form;
+      $form['disabled'][$importer->id()] = $importer_form;
     }
     else {
-      $form['enabled'][$importer->id] = $importer_form;
+      $form['enabled'][$importer->id()] = $importer_form;
     }
   }
   $form['submit'] = array(
@@ -114,7 +114,7 @@ function feeds_ui_overview_form_submit($form, &$form_state) {
 
   $disabled = array();
   foreach (feeds_importer_load_all(TRUE) as $importer) {
-    $disabled[$importer->id] = !$form_state['values'][$importer->id];
+    $disabled[$importer->id()] = !$form_state['values'][$importer->id()];
   }
   variable_set('default_feeds_importer', $disabled);
   feeds_cache_clear();
@@ -205,7 +205,7 @@ function feeds_ui_create_form_submit($form, &$form_state) {
   else {
     drupal_set_message(t('A clone of the @name configuration has been created.', array('@name' => $form['#from_importer']->config['name'])));
   }
-  $form_state['redirect'] = 'admin/structure/feeds/' . $importer->id;
+  $form_state['redirect'] = 'admin/structure/feeds/' . $importer->id();
   feeds_cache_clear();
 }
 
@@ -213,8 +213,8 @@ function feeds_ui_create_form_submit($form, &$form_state) {
  * Delete configuration form.
  */
 function feeds_ui_delete_form($form, &$form_state, $importer) {
-  $form['#importer'] = $importer->id;
-  $title = t('Would you really like to delete the importer @importer?', array('@importer' => $importer->name));
+  $form['#importer'] = $importer->id();
+  $title = t('Would you really like to delete the importer @importer?', array('@importer' => $importer->label()));
   $button_label = t('Delete');
   return confirm_form(
     $form,
@@ -244,7 +244,7 @@ function feeds_ui_delete_form_submit($form, &$form_state) {
 function feeds_ui_edit_page($importer, $active = 'help', $plugin_type = '') {
 
   // Base path for changing the active container.
-  $path = 'admin/structure/feeds/' . $importer->id;
+  $path = 'admin/structure/feeds/' . $importer->id();
 
   $active_container = array(
     'class' => array('active-container'),
@@ -386,7 +386,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_type = '') {
 function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
   $definitions = \Drupal::service('plugin.manager.feeds.' . $type)->getDefinitions();
 
-  $form['#importer'] = $importer->id;
+  $form['#importer'] = $importer->id();
   $form['#plugin_type'] = $type;
 
   $importer_key = $importer->config[$type]['plugin_key'];
@@ -454,7 +454,7 @@ function theme_feeds_ui_plugin_form($variables) {
  *   FeedsProcessor, a flag can tell whether mapping is supported or not.
  */
 function feeds_ui_mapping_form($form, &$form_state, $importer) {
-  $form['#importer'] = $importer->id;
+  $form['#importer'] = $importer->id();
   $form['#mappings'] = $mappings = $importer->processor->getMappings();
   $form['help']['#markup'] = feeds_ui_mapping_help();
   $form['#prefix'] = '<div id="feeds-ui-mapping-form-wrapper">';

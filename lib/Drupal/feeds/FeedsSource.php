@@ -62,8 +62,6 @@ class FeedsSource {
   // Timestamp when this source was imported the last time.
   public $imported;
 
-  public $id;
-
   public $config = array();
 
   /**
@@ -83,7 +81,6 @@ class FeedsSource {
    * Constructor.
    */
   protected function __construct($importer_id, $feed_nid) {
-    $this->id = $importer_id;
     $this->feed_nid = $feed_nid;
     $this->importer = feeds_importer($importer_id);
     $this->load();
@@ -177,7 +174,7 @@ class FeedsSource {
     }
     $period = $this->progressImporting() === FEEDS_BATCH_COMPLETE ? $period : 0;
     $job = array(
-      'type' => $this->id,
+      'type' => $this->importer->id(),
       'id' => $this->feed_nid,
       // Schedule as soon as possible if a batch is active.
       'period' => $period,
@@ -199,7 +196,7 @@ class FeedsSource {
     $period = $this->progressExpiring() === FEEDS_BATCH_COMPLETE ? 3600 : 0;
 
     $job = array(
-      'type' => $this->id,
+      'type' => $this->importer->id(),
       'id' => $this->feed_nid,
       'period' => $period,
       'periodic' => TRUE,
@@ -217,7 +214,7 @@ class FeedsSource {
    */
   public function scheduleClear() {
     $job = array(
-      'type' => $this->id,
+      'type' => $this->importer->id(),
       'id' => $this->feed_nid,
       'period' => 0,
       'periodic' => TRUE,
@@ -433,7 +430,7 @@ class FeedsSource {
       $source = $config[get_class($this->importer->fetcher)]['source'];
     }
     $object = array(
-      'id' => $this->id,
+      'id' => $this->importer->id(),
       'feed_nid' => $this->feed_nid,
       'imported' => $this->imported,
       'config' => $config,
@@ -441,7 +438,7 @@ class FeedsSource {
       'state' => isset($this->state) ? $this->state : FALSE,
       'fetcher_result' => isset($this->fetcher_result) ? $this->fetcher_result : FALSE,
     );
-    if (db_query_range("SELECT 1 FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", 0, 1, array(':id' => $this->id, ':nid' => $this->feed_nid))->fetchField()) {
+    if (db_query_range("SELECT 1 FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", 0, 1, array(':id' => $this->importer->id(), ':nid' => $this->feed_nid))->fetchField()) {
       drupal_write_record('feeds_source', $object, array('id', 'feed_nid'));
     }
     else {
@@ -453,7 +450,7 @@ class FeedsSource {
    * Load configuration and unpack.
    */
   public function load() {
-    if ($record = db_query("SELECT imported, config, state, fetcher_result FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", array(':id' => $this->id, ':nid' => $this->feed_nid))->fetchObject()) {
+    if ($record = db_query("SELECT imported, config, state, fetcher_result FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", array(':id' => $this->importer->id(), ':nid' => $this->feed_nid))->fetchObject()) {
       $this->imported = $record->imported;
       $this->config = unserialize($record->config);
 
@@ -484,12 +481,12 @@ class FeedsSource {
       $this->importer->$type->sourceDelete($this);
     }
     db_delete('feeds_source')
-      ->condition('id', $this->id)
+      ->condition('id', $this->importer->id())
       ->condition('feed_nid', $this->feed_nid)
       ->execute();
     // Remove from schedule.
     $job = array(
-      'type' => $this->id,
+      'type' => $this->importer->id(),
       'id' => $this->feed_nid,
     );
     JobScheduler::get('feeds_source_import')->remove($job);
@@ -584,7 +581,7 @@ class FeedsSource {
    * Writes to feeds log.
    */
   public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
-    feeds_log($this->id, $this->feed_nid, $type, $message, $variables, $severity);
+    feeds_log($this->importer->id(), $this->feed_nid, $type, $message, $variables, $severity);
   }
 
   /**
@@ -608,7 +605,7 @@ class FeedsSource {
   protected function startBackgroundJob($method) {
     if (FEEDS_BATCH_COMPLETE != $this->$method()) {
       $job = array(
-        'type' => $this->id,
+        'type' => $this->importer->id(),
         'id' => $this->feed_nid,
         'period' => 0,
         'periodic' => FALSE,
@@ -633,7 +630,7 @@ class FeedsSource {
     $batch = array(
       'title' => $title,
       'operations' => array(
-        array('feeds_batch', array($method, $this->id, $this->feed_nid)),
+        array('feeds_batch', array($method, $this->importer->id(), $this->feed_nid)),
       ),
     );
     batch_set($batch);
@@ -646,8 +643,8 @@ class FeedsSource {
    *   If a lock for the requested job could not be acquired.
    */
   protected function acquireLock() {
-    if (!lock()->acquire("feeds_source_{$this->id}_{$this->feed_nid}", 60.0)) {
-      throw new FeedsLockException(t('Cannot acquire lock for source @id / @feed_nid.', array('@id' => $this->id, '@feed_nid' => $this->feed_nid)));
+    if (!lock()->acquire("feeds_source_{$this->importer->id()}_{$this->feed_nid}", 60.0)) {
+      throw new FeedsLockException(t('Cannot acquire lock for source @id / @feed_nid.', array('@id' => $this->importer->id(), '@feed_nid' => $this->feed_nid)));
     }
   }
 
@@ -655,7 +652,7 @@ class FeedsSource {
    * Releases a lock for this source.
    */
   protected function releaseLock() {
-    lock()->release("feeds_source_{$this->id}_{$this->feed_nid}");
+    lock()->release("feeds_source_{$this->importer->id()}_{$this->feed_nid}");
   }
 
   /**

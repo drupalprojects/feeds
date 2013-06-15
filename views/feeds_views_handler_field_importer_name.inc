@@ -42,12 +42,12 @@ class feeds_views_handler_field_importer_name extends views_handler_field {
     try {
       $importer = feeds_importer($values->{$this->field_alias})->existing();
       if ($this->options['link'] == 1) {
-        return l($importer->name, 'admin/structure/feeds/' . $importer->id);
+        return l($importer->label(), 'admin/structure/feeds/' . $importer->id());
       }
       elseif ($this->options['link'] == 2 && empty($importer->config['content_type'])) {
-        return l($importer->name, 'import/' . $importer->id);
+        return l($importer->label(), 'import/' . $importer->id());
       }
-      return check_plain($importer->name);
+      return check_plain($importer->label());
     }
     catch (Exception $e) {
       return t('Missing importer');
