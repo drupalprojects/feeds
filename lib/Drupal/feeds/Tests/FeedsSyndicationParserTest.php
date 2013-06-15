@@ -35,7 +35,7 @@ class FeedsSyndicationParserTest extends FeedsWebTestBase {
 
     // foreach (array('syndication', 'FeedsSimplePieParser') as $parser) {
     foreach (array('syndication') as $parser) {
-      $this->setPlugin('syndication', $parser);
+      $this->setPlugin('syndication', 'parser', $parser);
       foreach ($this->feedUrls() as $url => $assertions) {
         $this->createFeedNode('syndication', $url);
         $this->assertText('Created ' . $assertions['item_count'] . ' nodes');

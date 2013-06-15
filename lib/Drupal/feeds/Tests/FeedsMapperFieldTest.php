@@ -48,9 +48,9 @@ class FeedsMapperFieldTest extends FeedsMapperTestBase {
     // Create and configure importer.
     $this->createImporterConfiguration('Content CSV', 'csv');
     $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
-    $this->setPlugin('csv', 'file');
-    $this->setPlugin('csv', 'csv');
-    $this->setSettings('csv', 'node', array('bundle' => $typename));
+    $this->setPlugin('csv', 'fetcher', 'file');
+    $this->setPlugin('csv', 'parser', 'csv');
+    $this->setSettings('csv', 'processor', array('bundle' => $typename));
     $this->addMappings('csv', array(
       0 => array(
         'source' => 'title',

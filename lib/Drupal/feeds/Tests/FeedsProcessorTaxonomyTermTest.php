@@ -29,9 +29,9 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('Term import', 'term_import');
 
     // Set and configure plugins and mappings.
-    $this->setPlugin('term_import', 'file');
-    $this->setPlugin('term_import', 'csv');
-    $this->setPlugin('term_import', 'taxonomy_term');
+    $this->setPlugin('term_import', 'fetcher', 'file');
+    $this->setPlugin('term_import', 'parser', 'csv');
+    $this->setPlugin('term_import', 'processor', 'taxonomy_term');
 
     // Create vocabulary.
     entity_create('taxonomy_vocabulary', array(
@@ -39,7 +39,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
       'vid' => 'addams',
     ))->save();
 
-    $this->setSettings('term_import', 'taxonomy_term', array('bundle' => 'addams'));
+    $this->setSettings('term_import', 'processor', array('bundle' => 'addams'));
 
     // Use standalone form.
     $this->setSettings('term_import', NULL, array('content_type' => ''));
@@ -72,7 +72,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     $this->assertText('There are no new terms.');
 
     // Force update.
-    $this->setSettings('term_import', 'taxonomy_term', array(
+    $this->setSettings('term_import', 'processor', array(
       'skip_hash_check' => TRUE,
       'update_existing' => 2,
     ));

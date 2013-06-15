@@ -27,8 +27,8 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
     $this->setSettings('node', NULL, array('content_type' => ''));
-    $this->setPlugin('node', 'file');
-    $this->setPlugin('node', 'csv');
+    $this->setPlugin('node', 'fetcher', 'file');
+    $this->setPlugin('node', 'parser', 'csv');
 
     $this->addMappings('node', array(
       0 => array(
@@ -38,7 +38,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     ));
     // Straight up upload is covered in other tests, focus on direct mode
     // and file batching here.
-    $this->setSettings('node', 'file', array(
+    $this->setSettings('node', 'fetcher', array(
       'direct' => TRUE,
       'directory' => 'public://feeds',
     ));
@@ -78,8 +78,8 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
     $this->setSettings('node', NULL, array('content_type' => ''));
-    $this->setPlugin('node', 'file');
-    $this->setPlugin('node', 'csv');
+    $this->setPlugin('node', 'fetcher', 'file');
+    $this->setPlugin('node', 'parser', 'csv');
     $this->addMappings('node', array(
       0 => array(
         'source' => 'title',
@@ -88,7 +88,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     ));
     // Straight up upload is covered in other tests, focus on direct mode
     // and file batching here.
-    $this->setSettings('node', 'file', array(
+    $this->setSettings('node', 'fetcher', array(
       'direct' => TRUE,
       'directory' => 'private://feeds',
     ));

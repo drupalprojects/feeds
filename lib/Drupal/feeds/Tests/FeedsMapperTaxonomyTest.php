@@ -124,7 +124,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       'Drupal planet',
     );
 
-    $this->setSettings('syndication', 'node', array(
+    $this->setSettings('syndication', 'processor', array(
       'skip_hash_check' => TRUE,
       'update_existing' => 2,
     ));

@@ -70,7 +70,7 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
 
     // Create importer configuration.
     $this->createImporterConfiguration();
-    $this->setSettings('syndication', 'node', array('bundle' => $typename));
+    $this->setSettings('syndication', 'processor', array('bundle' => $typename));
     $this->addMappings('syndication', array(
       0 => array(
         'source' => 'title',

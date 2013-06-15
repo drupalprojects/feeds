@@ -24,7 +24,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
    */
   public function test() {
     $this->createImporterConfiguration('Sitemap', 'sitemap');
-    $this->setPlugin('sitemap', 'sitemap');
+    $this->setPlugin('sitemap', 'parser', 'sitemap');
 
     $this->addMappings('sitemap', array(
       0 => array(

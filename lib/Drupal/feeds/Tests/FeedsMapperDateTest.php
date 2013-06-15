@@ -77,8 +77,8 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
       'content_type' => '',
       'import_period' => FEEDS_SCHEDULE_NEVER,
     ));
-    $this->setPlugin('daterss', 'file');
-    $this->setSettings('daterss', 'node', array(
+    $this->setPlugin('daterss', 'fetcher', 'file');
+    $this->setSettings('daterss', 'processor', array(
       'bundle' => $typename,
     ));
     $this->addMappings('daterss', array(
@@ -96,7 +96,7 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
       ),
     ));
 
-    $this->setSettings('daterss', 'file', array('allowed_extensions' => 'rss2'));
+    $this->setSettings('daterss', 'fetcher', array('allowed_extensions' => 'rss2'));
 
     // Import CSV file.
     $this->importFile('daterss', $this->absolutePath() . '/tests/feeds/googlenewstz.rss2');

@@ -153,7 +153,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $min_last = db_query("SELECT MIN(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_source_import' AND period = 0")->fetchField();
     $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_source_expire'")->fetchField());
     $this->drupalLogin($this->admin_user);
-    $this->setSettings('syndication', 'node', array('expire' => 86400));
+    $this->setSettings('syndication', 'processor', array('expire' => 86400));
     $this->drupalLogout();
     sleep(1);
     $this->cronRun();
@@ -206,8 +206,8 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
     $this->setSettings('node', '', array('content_type' => ''));
-    $this->setPlugin('node', 'file');
-    $this->setPlugin('node', 'csv');
+    $this->setPlugin('node', 'fetcher', 'file');
+    $this->setPlugin('node', 'parser', 'csv');
     $this->addMappings('node', array(
       0 => array(
         'source' => 'title',

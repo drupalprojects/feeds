@@ -189,7 +189,7 @@ class FeedsWebTestBase extends WebTestBase {
     // Per default attach to page content type.
     $this->setSettings($id, NULL, array('content_type' => 'page'));
     // Per default attached to article content type.
-    $this->setSettings($id, 'node', array('bundle' => 'article'));
+    $this->setSettings($id, 'processor', array('bundle' => 'article'));
   }
 
   /**
@@ -201,17 +201,15 @@ class FeedsWebTestBase extends WebTestBase {
    *   The key string of the plugin to choose (one of the keys defined in
    *   feeds_feeds_plugins()).
    */
-  public function setPlugin($id, $plugin_key) {
-    if ($type = FeedsPlugin::typeOf($plugin_key)) {
-      $edit = array(
-        'plugin_key' => $plugin_key,
-      );
-      $this->drupalPost("admin/structure/feeds/$id/$type", $edit, 'Save');
+  public function setPlugin($id, $type, $plugin_key) {
+    $edit = array(
+      'plugin_key' => $plugin_key,
+    );
+    $this->drupalPost("admin/structure/feeds/$id/$type", $edit, 'Save');
 
-      // Assert actual configuration.
-      $config = config('feeds.importer.' . $id)->get('config');
-      $this->assertEqual($config[$type]['plugin_key'], $plugin_key, 'Verified correct ' . $type . ' (' . $plugin_key . ').');
-    }
+    // Assert actual configuration.
+    $config = config('feeds.importer.' . $id)->get('config');
+    $this->assertEqual($config[$type]['plugin_key'], $plugin_key, 'Verified correct ' . $type . ' (' . $plugin_key . ').');
   }
 
   /**
@@ -224,8 +222,8 @@ class FeedsWebTestBase extends WebTestBase {
    * @param $settings
    *   The settings to set.
    */
-  public function setSettings($id, $plugin, $settings) {
-    $this->drupalPost('admin/structure/feeds/' . $id . '/settings/' . $plugin, $settings, 'Save');
+  public function setSettings($id, $plugin_type, $settings) {
+    $this->drupalPost('admin/structure/feeds/' . $id . '/settings/' . $plugin_type, $settings, 'Save');
     $this->assertText('Your changes have been saved.');
   }
 

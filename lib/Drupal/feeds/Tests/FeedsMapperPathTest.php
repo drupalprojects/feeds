@@ -40,8 +40,8 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 
     // Create importer configuration.
     $this->createImporterConfiguration($this->randomName(), 'path_test');
-    $this->setPlugin('path_test', 'file');
-    $this->setPlugin('path_test', 'csv');
+    $this->setPlugin('path_test', 'fetcher', 'file');
+    $this->setPlugin('path_test', 'parser', 'csv');
     $this->addMappings('path_test', array(
       0 => array(
         'source' => 'Title',
@@ -59,7 +59,7 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
     ));
 
     // Turn on update existing.
-    $this->setSettings('path_test', 'node', array('update_existing' => 2));
+    $this->setSettings('path_test', 'processor', array('update_existing' => 2));
 
     // Import RSS file.
     $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
@@ -95,9 +95,9 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 
   //   // Create importer configuration.
   //   $this->createImporterConfiguration($this->randomName(), 'path_test');
-  //   $this->setPlugin('path_test', 'file');
-  //   $this->setPlugin('path_test', 'csv');
-  //   $this->setPlugin('path_test', 'taxonomy_term');
+  //   $this->setPlugin('path_test', 'fetcher', 'file');
+  //   $this->setPlugin('path_test', 'parser', 'csv');
+  //   $this->setPlugin('path_test', 'processor', 'taxonomy_term');
 
   //   // Create vocabulary.
   //   $edit = array(
@@ -106,7 +106,7 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
   //   );
   //   $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
 
-  //   $this->setSettings('path_test', 'taxonomy_term', array('bundle' => 'addams', 'update_existing' => 2));
+  //   $this->setSettings('path_test', 'processor', array('bundle' => 'addams', 'update_existing' => 2));
 
   //   // Add mappings.
   //   $this->addMappings('path_test', array(
@@ -187,8 +187,8 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 
 //     // Create importer configuration.
 //     $this->createImporterConfiguration($this->randomName(), 'path_test');
-//     $this->setPlugin('path_test', 'file');
-//     $this->setPlugin('path_test', 'csv');
+//     $this->setPlugin('path_test', 'fetcher', 'file');
+//     $this->setPlugin('path_test', 'parser', 'csv');
 //     $this->addMappings('path_test', array(
 //       0 => array(
 //         'source' => 'Title',
@@ -208,7 +208,7 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 //     ));
 
 //     // Turn on update existing.
-//     $this->setSettings('path_test', 'FeedsNodeProcessor', array('update_existing' => 2));
+//     $this->setSettings('path_test', 'processor', array('update_existing' => 2));
 
 //     // Import RSS file.
 //     $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');

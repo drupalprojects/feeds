@@ -27,9 +27,9 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('User import', 'user_import');
 
     // Set and configure plugins.
-    $this->setPlugin('user_import', 'file');
-    $this->setPlugin('user_import', 'csv');
-    $this->setPlugin('user_import', 'user');
+    $this->setPlugin('user_import', 'fetcher', 'file');
+    $this->setPlugin('user_import', 'parser', 'csv');
+    $this->setPlugin('user_import', 'processor', 'user');
 
     // Go to mapping page and create a couple of mappings.
     $mappings = array(
@@ -64,7 +64,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
       "roles[$manager_rid]" => TRUE,
       "roles[$admin_rid]" => FALSE,
     );
-    $this->setSettings('user_import', 'user', $edit);
+    $this->setSettings('user_import', 'processor', $edit);
 
     // Import CSV file.
     $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
@@ -106,7 +106,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
       ),
     );
     $this->removeMappings('user_import', $mappings);
-    $this->setSettings('user_import', 'user', array('update_existing' => 2));
+    $this->setSettings('user_import', 'processor', array('update_existing' => 2));
     $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
     // Assert result.
     $this->assertText('Updated 3 users');
