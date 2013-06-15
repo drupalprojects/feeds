@@ -44,17 +44,6 @@ abstract class FeedsPlugin extends PluginBase implements FeedsSourceInterface {
   }
 
   /**
-   * Override magic method __get(). Make sure that $this->config goes through
-   * getConfig().
-   */
-  public function __get($name) {
-    if ($name == 'config') {
-      return $this->getConfig();
-    }
-    return isset($this->$name) ? $this->$name : NULL;
-  }
-
-  /**
    * Returns the type of plugin.
    *
    * @return string
