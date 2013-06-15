@@ -691,8 +691,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if (!$this->bundle()) {
       $info = $this->entityInfo();
       $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : t('bundle');
-      $plugin_key = feeds_importer($this->id)->config['processor']['plugin_key'];
-      $url = url('admin/structure/feeds/' . $this->id . '/settings/' . $plugin_key);
+      $url = url('admin/structure/feeds/' . $this->id . '/settings/processor');
       drupal_set_message(t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
     }
 

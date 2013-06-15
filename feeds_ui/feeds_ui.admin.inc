@@ -6,7 +6,6 @@
  * administrative pages.
  */
 
-use Drupal\feeds\Plugin\FeedsConfigurable;
 use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
@@ -242,11 +241,8 @@ function feeds_ui_delete_form_submit($form, &$form_state) {
 /**
  * Edit feed configuration.
  */
-function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
+function feeds_ui_edit_page($importer, $active = 'help', $plugin_type = '') {
 
-  // Get plugins and configuration.
-  $plugins = FeedsPlugin::all();
-  $config = $importer->config;
   // Base path for changing the active container.
   $path = 'admin/structure/feeds/' . $importer->id;
 
@@ -269,19 +265,20 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       break;
 
     case 'settings':
-      if (empty($plugin_key)) {
+      if (!$plugin_type) {
         $active_container['title'] = t('Basic settings');
         $active_container['body'] = feeds_get_form($importer, 'configForm');
       }
-      elseif (in_array($plugin_key, array_keys($plugins))) {
-        $active_container['title'] = t('Settings for !plugin', array('!plugin' => $plugins[$plugin_key]['title']));
-        $plugin = $importer->{FeedsPlugin::typeOf($plugin_key)};
-        $active_container['body'] = feeds_get_form($plugin, 'configForm');
+      else {
+        $definition = $importer->$plugin_type->getPluginDefinition();
+        $active_container['title'] = t('Settings for !plugin', array('!plugin' => $definition['title']));
+        $active_container['body'] = feeds_get_form($importer->$plugin_type, 'configForm');
       }
       break;
 
     case 'mapping':
-      $active_container['title'] = t('Mapping for !processor', array('!processor' => $plugins[$config['processor']['plugin_key']]['title']));
+      $definition = $importer->processor->getPluginDefinition();
+      $active_container['title'] = t('Mapping for !processor', array('!processor' => $definition['title']));
       $active_container['body'] = drupal_get_form('feeds_ui_mapping_form', $importer);
       break;
   }
@@ -316,16 +313,16 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $config_info[] = $info;
 
   // Fetcher.
-  $fetcher = $plugins[$config['fetcher']['plugin_key']];
+  $fetcher_definition = $importer->fetcher->getPluginDefinition();
   $actions = array();
   if (feeds_get_form($importer->fetcher, 'configForm')) {
-    $actions = array(l(t('Settings'), $path . '/settings/' . $config['fetcher']['plugin_key']));
+    $actions = array(l(t('Settings'), $path . '/settings/fetcher'));
   }
   $info['title'] = t('Fetcher');
   $info['body'] = array(
     array(
-      'title' => $fetcher['title'],
-      'body' => $fetcher['description'],
+      'title' => $fetcher_definition['title'],
+      'body' => $fetcher_definition['description'],
       'actions' => $actions,
     ),
   );
@@ -333,16 +330,16 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $config_info[] = $info;
 
   // Parser.
-  $parser = $plugins[$config['parser']['plugin_key']];
+  $parser_definition = $importer->parser->getPluginDefinition();
   $actions = array();
   if (feeds_get_form($importer->parser, 'configForm')) {
-    $actions = array(l(t('Settings'), $path . '/settings/' . $config['parser']['plugin_key']));
+    $actions = array(l(t('Settings'), $path . '/settings/parser'));
   }
   $info['title'] = t('Parser');
   $info['body'] = array(
     array(
-      'title' => $parser['title'],
-      'body' => $parser['description'],
+      'title' => $parser_definition['title'],
+      'body' => $parser_definition['description'],
       'actions' => $actions,
     )
   );
@@ -350,17 +347,17 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
   $config_info[] = $info;
 
   // Processor.
-  $processor = $plugins[$config['processor']['plugin_key']];
   $actions = array();
+  $processor_definition = $importer->processor->getPluginDefinition();
   if (feeds_get_form($importer->processor, 'configForm')) {
-    $actions[] = l(t('Settings'), $path . '/settings/' . $config['processor']['plugin_key']);
+    $actions[] = l(t('Settings'), $path . '/settings/processor');
   }
   $actions[] = l(t('Mapping'), $path . '/mapping');
   $info['title'] = t('Processor');
   $info['body'] = array(
     array(
-      'title' => $processor['title'],
-      'body' => $processor['description'],
+      'title' => $processor_definition['title'],
+      'body' => $processor_definition['description'],
       'actions' => $actions,
     )
   );
@@ -387,14 +384,14 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
  *   A Form API form definition.
  */
 function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
-  $plugins = FeedsPlugin::byType($type);
+  $definitions = \Drupal::service('plugin.manager.feeds.' . $type)->getDefinitions();
 
   $form['#importer'] = $importer->id;
   $form['#plugin_type'] = $type;
 
   $importer_key = $importer->config[$type]['plugin_key'];
 
-  foreach ($plugins as $key => $plugin) {
+  foreach ($definitions as $key => $plugin) {
 
     $form['plugin_key'][$key] = array(
       '#type' => 'radio',
@@ -418,7 +415,7 @@ function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
 function feeds_ui_plugin_form_submit($form, &$form_state) {
   // Set the plugin and save feed.
   $importer = feeds_importer($form['#importer']);
-  $importer->setPlugin($form_state['values']['plugin_key']);
+  $importer->setPlugin($form['#plugin_type'], $form_state['values']['plugin_key']);
   $importer->save();
   drupal_set_message(t('Changed @type plugin.', array('@type' => $form['#plugin_type'])));
 }

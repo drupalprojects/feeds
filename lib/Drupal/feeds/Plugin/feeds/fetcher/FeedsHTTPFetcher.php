@@ -210,7 +210,10 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    */
   public function subscribe(FeedsSource $source) {
     $source_config = $source->getConfigFor($this);
-    $this->subscriber($source->feed_nid)->subscribe($source_config['source'], url($this->path($source->feed_nid), array('absolute' => TRUE)), valid_url($this->config['designated_hub']) ? $this->config['designated_hub'] : '');
+    $sub = $this->subscriber($source->feed_nid);
+    $url = valid_url($this->config['designated_hub']) ? $this->config['designated_hub'] : '';
+    $path = url($this->path($source->feed_nid), array('absolute' => TRUE));
+    $sub->subscribe($source_config['source'], $path, $url);
   }
 
   /**
@@ -236,4 +239,5 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   protected function subscriber($subscriber_id) {
     return PushSubscriber::instance($this->id, $subscriber_id, 'Drupal\feeds\PuSHSubscription', PuSHEnvironment::instance());
   }
+
 }

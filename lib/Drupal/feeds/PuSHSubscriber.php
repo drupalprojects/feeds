@@ -78,12 +78,12 @@ class PuSHSubscriber {
     $data = curl_exec($request);
     if (curl_getinfo($request, CURLINFO_HTTP_CODE) == 200) {
       try {
-        $xml = @ new SimpleXMLElement($data);
+        $xml = new \SimpleXMLElement($data);
         $xml->registerXPathNamespace('atom', 'http://www.w3.org/2005/Atom');
-        if (empty($hub) && $hub = @current($xml->xpath("//atom:link[attribute::rel='hub']"))) {
+        if (empty($hub) && $hub = current($xml->xpath("//atom:link[attribute::rel='hub']"))) {
           $hub = (string) $hub->attributes()->href;
         }
-        if ($self = @current($xml->xpath("//atom:link[attribute::rel='self']"))) {
+        if ($self = current($xml->xpath("//atom:link[attribute::rel='self']"))) {
           $self = (string) $self->attributes()->href;
         }
       }
@@ -312,81 +312,5 @@ class PuSHSubscriber {
   protected function log($msg, $level = 'status') {
     $this->env->log("{$this->domain}:{$this->subscriber_id}\t$msg", $level);
   }
-}
 
-/**
- * Implement to provide a storage backend for subscriptions.
- *
- * Variables passed in to the constructor must be accessible as public class
- * variables.
- */
-interface PuSHSubscriptionInterface {
-  /**
-   * @param $domain
-   *   A string that defines the domain in which the subscriber_id is unique.
-   * @param $subscriber_id
-   *   A unique numeric subscriber id.
-   * @param $hub
-   *   The URL of the hub endpoint.
-   * @param $topic
-   *   The topic to subscribe to.
-   * @param $secret
-   *   A secret key used for message authentication.
-   * @param $status
-   *   The status of the subscription.
-   *   'subscribe' - subscribing to a feed.
-   *   'unsubscribe' - unsubscribing from a feed.
-   *   'subscribed' - subscribed.
-   *   'unsubscribed' - unsubscribed.
-   *   'subscribe failed' - subscribe request failed.
-   *   'unsubscribe failed' - unsubscribe request failed.
-   * @param $post_fields
-   *   An array of the fields posted to the hub.
-   */
-  public function __construct($domain, $subscriber_id, $hub, $topic, $secret, $status = '', $post_fields = '');
-
-  /**
-   * Save a subscription.
-   */
-  public function save();
-
-  /**
-   * Load a subscription.
-   *
-   * @return
-   *   A PuSHSubscriptionInterface object if a subscription exist, NULL
-   *   otherwise.
-   */
-  public static function load($domain, $subscriber_id);
-
-  /**
-   * Delete a subscription.
-   */
-  public function delete();
-}
-
-/**
- * Implement to provide environmental functionality like user messages and
- * logging.
- */
-interface PuSHSubscriberEnvironmentInterface {
-  /**
-   * A message to be displayed to the user on the current page load.
-   *
-   * @param $msg
-   *   A string that is the message to be displayed.
-   * @param $level
-   *   A string that is either 'status', 'warning' or 'error'.
-   */
-  public function msg($msg, $level = 'status');
-
-  /**
-   * A log message to be logged to the database or the file system.
-   *
-   * @param $msg
-   *   A string that is the message to be displayed.
-   * @param $level
-   *   A string that is either 'status', 'warning' or 'error'.
-   */
-  public function log($msg, $level = 'status');
 }

@@ -2,17 +2,14 @@
 
 /**
  * @file
- * Definition of FeedsPlugin class.
+ * Contains Drupal\feeds\Plugin\FeedsPlugin.
  */
 
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedsSource;
 use Drupal\feeds\FeedsSourceInterface;
-
-/**
- * Base class for a fetcher, parser or processor result.
- */
+use Drupal\Component\Plugin\PluginBase;
 
 /**
  * Implement source interface for all plugins.
@@ -21,16 +18,40 @@ use Drupal\feeds\FeedsSourceInterface;
  * Doing this would break the model where source information is represented by
  * an object that is being passed into a Feed object and its plugins.
  */
-abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInterface {
+abstract class FeedsPlugin extends PluginBase implements FeedsSourceInterface {
+
+  // Holds the actual configuration information.
+  protected $config;
+  protected $importer;
 
   /**
-   * Constructor.
+   * Constructs a Drupal\Component\Plugin\PluginBase object.
    *
-   * Initialize class variables.
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param array $plugin_definition
+   *   The plugin implementation definition.
    */
-  public function __construct($id) {
-    parent::__construct($id);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->id = $configuration['importer']->id();
+    $this->importer = $configuration['importer'];
+    unset($configuration['importer']);
+    $this->setConfig($configuration);
     $this->source_config = $this->sourceDefaults();
+  }
+
+  /**
+   * Override magic method __get(). Make sure that $this->config goes through
+   * getConfig().
+   */
+  public function __get($name) {
+    if ($name == 'config') {
+      return $this->getConfig();
+    }
+    return isset($this->$name) ? $this->$name : NULL;
   }
 
   /**
@@ -117,130 +138,85 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   }
 
   /**
-   * Get all available plugins.
+   * Similar to setConfig but adds to existing configuration.
+   *
+   * @param $config
+   *   Array containing configuration information. Will be filtered by the keys
+   *   returned by configDefaults().
    */
-  public static function all() {
-    $fetchers = \Drupal::service('plugin.manager.feeds.fetcher')->getDefinitions();
-    $parsers = \Drupal::service('plugin.manager.feeds.parser')->getDefinitions();
-    $processors = \Drupal::service('plugin.manager.feeds.processor')->getDefinitions();
-    $result = array();
-
-    foreach ($fetchers as $key => $info) {
-      if (!empty($info['hidden'])) {
-        continue;
-      }
-      $result[$key] = $info;
-    }
-
-    foreach ($parsers as $key => $info) {
-      if (!empty($info['hidden'])) {
-        continue;
-      }
-      $result[$key] = $info;
-    }
-
-    foreach ($processors as $key => $info) {
-      if (!empty($info['hidden'])) {
-        continue;
-      }
-      $result[$key] = $info;
-    }
-
-    // Sort plugins by name and return.
-    // uasort($result, 'feeds_plugin_compare');
-    return $result;
+  public function addConfig($config) {
+    $this->config = array_merge($this->config, $config);
+    $default_keys = $this->configDefaults();
+    $this->config = array_intersect_key($this->config, $default_keys);
   }
 
   /**
-   * Determines whether given plugin is derived from given base plugin.
+   * Implements getConfig().
    *
-   * @param $plugin_key
-   *   String that identifies a Feeds plugin key.
-   * @param $parent_plugin
-   *   String that identifies a Feeds plugin key to be tested against.
+   * Return configuration array, ensure that all default values are present.
+   */
+  public function getConfig() {
+    return $this->config;
+  }
+
+  /**
+   * Set configuration.
+   *
+   * @param $config
+   *   Array containing configuration information. Config array will be filtered
+   *   by the keys returned by configDefaults() and populated with default
+   *   values that are not included in $config.
+   */
+  public function setConfig($config) {
+    $defaults = $this->configDefaults();
+    $this->config = array_intersect_key($config, $defaults) + $defaults;
+  }
+
+  /**
+   * Return default configuration.
+   *
+   * @todo rename to getConfigDefaults().
    *
    * @return
-   *   TRUE if $parent_plugin is directly *or indirectly* a parent of $plugin,
-   *   FALSE otherwise.
+   *   Array where keys are the variable names of the configuration elements and
+   *   values are their default values.
    */
-  public static function child($plugin_key, $parent_plugin) {
-    $all_info = self::all();
-    $info = $all_info[$plugin_key];
-
-    return TRUE;
+  public function configDefaults() {
+    return array();
   }
 
   /**
-   * Determines the type of a plugin.
-   *
-   * @todo PHP5.3: Implement self::type() and query with $plugin_key::type().
-   *
-   * @param $plugin_key
-   *   String that identifies a Feeds plugin key.
+   * Return configuration form for this object. The keys of the configuration
+   * form must match the keys of the array returned by configDefaults().
    *
    * @return
-   *   One of the following values:
-   *   'fetcher' if the plugin is a fetcher
-   *   'parser' if the plugin is a parser
-   *   'processor' if the plugin is a processor
-   *   FALSE otherwise.
+   *   FormAPI style form definition.
    */
-  public static function typeOf($plugin_key) {
-    $fetchers = \Drupal::service('plugin.manager.feeds.fetcher')->getDefinitions();
-
-    if (isset($fetchers[$plugin_key])) {
-      return 'fetcher';
-    }
-
-    $parsers = \Drupal::service('plugin.manager.feeds.parser')->getDefinitions();
-
-    if (isset($parsers[$plugin_key])) {
-      return 'parser';
-    }
-
-    $processors = \Drupal::service('plugin.manager.feeds.processor')->getDefinitions();
-
-    if (isset($processors[$plugin_key])) {
-      return 'processor';
-    }
-
-    return FALSE;
+  public function configForm(&$form_state) {
+    return array();
   }
 
   /**
-   * Gets all available plugins of a particular type.
+   * Validation handler for configForm().
    *
-   * @param $type
-   *   'fetcher', 'parser' or 'processor'
+   * Set errors with form_set_error().
+   *
+   * @param $values
+   *   An array that contains the values entered by the user through configForm.
    */
-  public static function byType($type) {
-    $plugins = self::all();
-
-    $result = array();
-    foreach ($plugins as $key => $info) {
-      if ($type == self::typeOf($key)) {
-        $result[$key] = $info;
-      }
-    }
-    return $result;
+  public function configFormValidate(&$values) {
   }
-}
 
-/**
- * Used when a plugin is missing.
- */
-// class FeedsMissingPlugin extends FeedsPlugin {
-//   public function pluginType() {
-//     return 'missing';
-//   }
-//   public function menuItem() {
-//     return array();
-//   }
-// }
+  /**
+   *  Submission handler for configForm().
+   *
+   *  @param $values
+   */
+  public function configFormSubmit(&$values) {
+    $this->addConfig($values);
+    $this->save();
+    drupal_set_message(t('Your changes have been saved.'));
+    feeds_cache_clear(FALSE);
+  }
 
-/**
- * Sort callback for FeedsPlugin::all().
- */
-function feeds_plugin_compare($a, $b) {
-  return strcasecmp($a['name'], $b['name']);
 }

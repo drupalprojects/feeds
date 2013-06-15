@@ -6,7 +6,6 @@
  */
 
 use Drupal\feeds\Plugin\FeedsPlugin;
-use Drupal\feeds\Plugin\FeedsConfigurable;
 use Drupal\feeds\FeedsSource;
 use Drupal\Core\Datetime\DrupalDateTime;
 
@@ -270,14 +269,20 @@ function feeds_permission() {
 /**
  * Implements hook_forms().
  *
- * Declare form callbacks for all known classes derived from FeedsConfigurable.
+ * Declare form callbacks for Importer and plugin classes.
  */
 function feeds_forms() {
   $forms = array();
   $forms['Drupal\feeds\Plugin\Core\Entity\Importer_feeds_form']['callback'] = 'feeds_form';
-  $plugins = FeedsPlugin::all();
-  foreach ($plugins as $plugin) {
-    $forms[$plugin['class'] . '_feeds_form']['callback'] = 'feeds_form';
+
+  $definitions = array();
+  $definitions['fetcher'] = \Drupal::service('plugin.manager.feeds.fetcher')->getDefinitions();
+  $definitions['parser'] = \Drupal::service('plugin.manager.feeds.parser')->getDefinitions();
+  $definitions['processor'] = \Drupal::service('plugin.manager.feeds.processor')->getDefinitions();
+  foreach ($definitions as $type => $plugins) {
+    foreach ($plugins as $plugin) {
+      $forms[$plugin['class'] . '_feeds_form']['callback'] = 'feeds_form';
+    }
   }
   return $forms;
 }
@@ -686,15 +691,7 @@ function feeds_field_extra_fields() {
  *   An array of all feed configurations available.
  */
 function feeds_importer_load_all($load_disabled = FALSE) {
-  $feeds = array();
-  foreach (config_get_storage_names_with_prefix('feeds.importer') as $file) {
-    $id = config($file)->get('id');
-    $config = config($file)->get('config');
-    if (!empty($id) && ($load_disabled || empty($config['disabled']))) {
-      $feeds[$id] = feeds_importer($id);
-    }
-  }
-  return $feeds;
+  return entity_load_multiple('feeds_importer');
 }
 
 /**
@@ -1076,33 +1073,6 @@ function feeds_get_subscription_jobs() {
 }
 
 /**
- * Implements hook_entity_property_info_alter().
- */
-function feeds_entity_property_info_alter(&$info) {
-  // Gather entities supported by Feeds processors.
-  $processors = FeedsPlugin::byType('processor');
-  $supported_entities = array();
-  foreach ($processors as $processor) {
-    $instance = new $processor['handler']['class']('create');
-    if (method_exists($instance, 'entityType')) {
-      $supported_entities[] = $instance->entityType();
-    }
-  }
-  // Feeds processors can fake the entity info. Only set the property for
-  // defined entities.
-  $supported_entities = array_intersect(array_keys($info), $supported_entities);
-
-  foreach ($supported_entities as $entity_type) {
-    $info[$entity_type]['properties']['feed_nid'] = array(
-      'label' => 'Feed NID',
-      'type' => 'integer',
-      'description' => t('Nid of the Feed Node that imported this entity.'),
-      'getter callback' => 'feeds_get_feed_nid_entity_callback',
-    );
-  }
-}
-
-/**
  * Gets the feed_nid for an entity for use in entity metadata.
  */
 function feeds_get_feed_nid_entity_callback($entity, array $options, $name, $entity_type) {
@@ -1190,11 +1160,10 @@ function feeds_to_unixtime($date, $default_value) {
 }
 
 /**
- * Config form wrapper. Use to render the configuration form of
- * a FeedsConfigurable object.
+ * Config form wrapper. Use to render the configuration form of a plugin.
  *
  * @param $configurable
- *   FeedsConfigurable object.
+ *   FeedsPlugin object.
  * @param $form_method
  *   The form method that should be rendered.
  *
@@ -1214,7 +1183,7 @@ function feeds_get_form($configurable, $form_method) {
  * @param
  *   FormAPI $form_state.
  * @param
- *   FeedsConfigurable object.
+ *   FeedsPlugin object.
  * @param
  *   The object to perform the save() operation on.
  * @param $form_method

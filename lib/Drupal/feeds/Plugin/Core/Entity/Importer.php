@@ -67,8 +67,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public $disabled = FALSE;
 
   // Every feed has a fetcher, a parser and a processor.
-  // These variable names match the possible return values of
-  // FeedsPlugin::typeOf().
   public $fetcher, $parser, $processor;
 
   // This array defines the variable names of the plugins above.
@@ -86,18 +84,18 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
     // Instantiate fetcher, parser and processor, set their configuration if
     // stored info is available.
-    $info = FeedsPlugin::all();
-    foreach ($this->plugin_types as $type) {
+
+    foreach ($this->getPluginTypes() as $type) {
       $plugin_key = $this->config[$type]['plugin_key'];
 
-      if (isset($info[$plugin_key])) {
-        $plugin = new $info[$plugin_key]['class']($this->id());
-      }
-      $plugin->importer = $this;
-
+      $config = array();
       if (isset($this->config[$type]['config'])) {
-        $plugin->setConfig($this->config[$type]['config']);
+        $config = $this->config[$type]['config'];
       }
+      $config['importer'] = $this;
+
+      $plugin = \Drupal::service('plugin.manager.feeds.' . $type)->createInstance($plugin_key, $config);
+
       $this->$type = $plugin;
     }
   }
@@ -136,29 +134,22 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * Set plugin.
    *
+   * @param string $plugin_type
+   *   The type of plugin. Either fetcher, parser, or processor.
    * @param $plugin_key
-   *   A fetcher, parser or processor plugin.
-   *
-   * @todo Error handling, handle setting to the same plugin.
+   *   A id key.
    */
-  public function setPlugin($plugin_key) {
-    // $plugin_type can be either 'fetcher', 'parser' or 'processor'
-    if ($plugin_type = FeedsPlugin::typeOf($plugin_key)) {
-
-      $info = FeedsPlugin::all();
-
-      if (isset($info[$plugin_key]) && $plugin = new $info[$plugin_key]['class']($this->id())) {
-        // Unset existing plugin, switch to new plugin.
-        unset($this->$plugin_type);
-        $this->$plugin_type = $plugin;
-        // Set configuration information, blow away any previous information on
-        // this spot.
-        $this->config[$plugin_type] = array(
-          'plugin_key' => $plugin_key,
-          'config' => $plugin->getConfig(),
-        );
-      }
-    }
+  public function setPlugin($plugin_type, $plugin_key) {
+    $plugin = \Drupal::service('plugin.manager.feeds.' . $plugin_type)->createInstance($plugin_key, array('importer' => $this));
+    // Unset existing plugin, switch to new plugin.
+    unset($this->$plugin_type);
+    $this->$plugin_type = $plugin;
+    // Set configuration information, blow away any previous information on
+    // this spot.
+    $this->config[$plugin_type] = array(
+      'plugin_key' => $plugin_key,
+      'config' => $plugin->getConfig(),
+    );
   }
 
   /**

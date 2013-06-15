@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds;
 
-use Drupal\feeds\Plugin\FeedsConfigurable;
 use Drupal\job_scheduler\JobScheduler;
 
 /**
@@ -43,15 +42,15 @@ define('FEEDS_PROCESS_EXPIRE', 'process_expire');
  * As with FeedsImporter, the idea with FeedsSource is that it can be used
  * without actually saving the object to the database.
  */
-class FeedsSource extends FeedsConfigurable {
+class FeedsSource {
 
   // Contains the node id of the feed this source info object is attached to.
   // Equals 0 if not attached to any node - i. e. if used on a
   // standalone import form within Feeds or by other API users.
-  protected $feed_nid;
+  public $feed_nid;
 
   // The FeedsImporter object that this source is expected to be used with.
-  protected $importer;
+  public $importer;
 
   // A FeedsSourceState object holding the current import/clearing state of this
   // source.
@@ -61,7 +60,11 @@ class FeedsSource extends FeedsConfigurable {
   protected $fetcher_result;
 
   // Timestamp when this source was imported the last time.
-  protected $imported;
+  public $imported;
+
+  public $id;
+
+  public $config = array();
 
   /**
    * Instantiate a unique object per class/id/feed_nid. Don't use
@@ -80,9 +83,9 @@ class FeedsSource extends FeedsConfigurable {
    * Constructor.
    */
   protected function __construct($importer_id, $feed_nid) {
+    $this->id = $importer_id;
     $this->feed_nid = $feed_nid;
     $this->importer = feeds_importer($importer_id);
-    parent::__construct($importer_id);
     $this->load();
   }
 
@@ -397,7 +400,7 @@ class FeedsSource extends FeedsConfigurable {
    *   The FeedsState object for the given stage.
    */
   public function state($stage) {
-    if (!is_array($this->state)) {
+    if (!isset($this->state) || !is_array($this->state)) {
       $this->state = array();
     }
     if (!isset($this->state[$stage])) {
@@ -453,6 +456,11 @@ class FeedsSource extends FeedsConfigurable {
     if ($record = db_query("SELECT imported, config, state, fetcher_result FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", array(':id' => $this->id, ':nid' => $this->feed_nid))->fetchObject()) {
       $this->imported = $record->imported;
       $this->config = unserialize($record->config);
+
+      if (!is_array($this->config)) {
+        $this->config = array();
+      }
+
       if (!empty($record->state)) {
         $this->state = unserialize($record->state);
       }
@@ -490,8 +498,6 @@ class FeedsSource extends FeedsConfigurable {
 
   /**
    * Only return source if configuration is persistent and valid.
-   *
-   * @see FeedsConfigurable::existing().
    */
   public function existing() {
     // If there is no feed nid given, there must be no content type specified.
@@ -500,13 +506,6 @@ class FeedsSource extends FeedsConfigurable {
     // Ensure that source is persistent (= defined in DB).
 
     return $this;
-
-    if ((empty($this->feed_nid) && empty($this->importer->config['content_type'])) ||
-        (!empty($this->feed_nid) && !empty($this->importer->config['content_type']))) {
-      $this->importer->existing();
-      return parent::existing();
-    }
-    throw new FeedsNotExistingException(t('Source configuration not valid.'));
   }
 
   /**
@@ -657,6 +656,41 @@ class FeedsSource extends FeedsConfigurable {
    */
   protected function releaseLock() {
     lock()->release("feeds_source_{$this->id}_{$this->feed_nid}");
+  }
+
+  /**
+   * Similar to setConfig but adds to existing configuration.
+   *
+   * @param $config
+   *   Array containing configuration information. Will be filtered by the keys
+   *   returned by configDefaults().
+   */
+  public function addConfig($config) {
+    $this->config = array_merge($this->config, $config);
+    $default_keys = $this->configDefaults();
+    $this->config = array_intersect_key($this->config, $default_keys);
+  }
+
+  /**
+   * Implements getConfig().
+   *
+   * Return configuration array, ensure that all default values are present.
+   */
+  public function getConfig() {
+    return $this->config;
+  }
+
+  /**
+   * Set configuration.
+   *
+   * @param $config
+   *   Array containing configuration information. Config array will be filtered
+   *   by the keys returned by configDefaults() and populated with default
+   *   values that are not included in $config.
+   */
+  public function setConfig($config) {
+    $defaults = $this->configDefaults();
+    $this->config = array_intersect_key($config, $defaults) + $defaults;
   }
 
 }

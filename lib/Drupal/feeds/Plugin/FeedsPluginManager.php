@@ -32,4 +32,5 @@ class FeedsPluginManager extends PluginManagerBase {
     $this->discovery = new CacheDecorator($this->discovery, "feeds_$type:" . language(Language::TYPE_INTERFACE)->langcode);
     $this->factory = new DefaultFactory($this->discovery);
   }
+
 }

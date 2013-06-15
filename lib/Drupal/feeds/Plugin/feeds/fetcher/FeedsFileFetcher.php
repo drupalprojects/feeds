@@ -129,8 +129,7 @@ class FeedsFileFetcher extends FeedsFetcher {
 
       if (!file_prepare_directory($feed_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
         if (user_access('administer feeds')) {
-          $plugin_key = feeds_importer($this->id)->config[$this->pluginType()]['plugin_key'];
-          $link = url('admin/structure/feeds/' . $this->id . '/settings/' . $plugin_key);
+          $link = url('admin/structure/feeds/' . $this->id . '/settings/' . $this->pluginType());
           form_set_error('feeds][FeedsFileFetcher][source', t('Upload failed. Please check the upload <a href="@link">settings.</a>', array('@link' => $link)));
         }
         else {
