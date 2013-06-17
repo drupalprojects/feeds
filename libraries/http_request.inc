@@ -105,134 +105,49 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     }
   }
 
-  $curl = http_request_use_curl();
+  // Support the 'feed' and 'webcal' schemes by converting them into 'http'.
+  $url = strtr($url, array('feed://' => 'http://', 'webcal://' => 'http://'));
+
+  $request = \Drupal::httpClient()->get($url);
 
   // Only download and parse data if really needs refresh.
   // Based on "Last-Modified" and "If-Modified-Since".
-  $headers = array();
   if ($cache = cache()->get('feeds_http_download_' . md5($url))) {
     $last_result = $cache->data;
     $last_headers = array_change_key_case($last_result->headers);
 
     if (!empty($last_headers['etag'])) {
-      if ($curl) {
-        $headers[] = 'If-None-Match: ' . $last_headers['etag'];
-      }
-      else {
-        $headers['If-None-Match'] = $last_headers['etag'];
-      }
+      $request->addHeader('If-None-Match', $last_headers['etag']);
+
     }
     if (!empty($last_headers['last-modified'])) {
-      if ($curl) {
-        $headers[] = 'If-Modified-Since: ' . $last_headers['last-modified'];
-      }
-      else {
-        $headers['If-Modified-Since'] = $last_headers['last-modified'];
-      }
+      $request->addHeader('If-Modified-Since', $last_headers['last-modified']);
     }
-    if (!empty($username) && !$curl) {
-      $headers['Authorization'] = 'Basic ' . base64_encode("$username:$password");
+    if (!empty($username)) {
+      $request->addHeader('Authorization', 'Basic ' . base64_encode("$username:$password"));
     }
   }
 
-  $test_info = &$GLOBALS['drupal_test_info'];
-  if (!empty($test_info['test_run_id'])) {
-    $headers[] = 'User-Agent: ' . drupal_generate_test_ua($test_info['test_run_id']);
+  $result = new \stdClass();
+
+  try {
+    $response = $request->send();
+    $result->data = $response->getBody(TRUE);
+    $result->headers = $response->getHeaders();
+    $result->code = $response->getStatusCode();
+
   }
-  else {
-    $headers[] = 'User-Agent: Drupal (+http://drupal.org/)';
+  catch (BadResponseException $e) {
+    $response = $e->getResponse();
+    watchdog('feeds', 'The feed %url seems to be broken due to "%error".', array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()), WATCHDOG_WARNING);
+    drupal_set_message(t('The feed %url seems to be broken because of error "%error".', array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase())));
+    return FALSE;
   }
-
-  // Support the 'feed' and 'webcal' schemes by converting them into 'http'.
-  $url = strtr($url, array('feed://' => 'http://', 'webcal://' => 'http://'));
-
-  if ($curl) {
-    $result = new \stdClass();
-    $result->headers = array();
-
-    // Parse the URL and make sure we can handle the schema.
-    // cURL can only support either http:// or https://.
-    // CURLOPT_PROTOCOLS is only supported with cURL 7.19.4
-    $uri = parse_url($url);
-    if (!isset($uri['scheme'])) {
-      $result->error = 'missing schema';
-      $result->code = -1002;
-    }
-    else {
-      switch ($uri['scheme']) {
-        case 'http':
-        case 'https':
-          // Valid scheme.
-          break;
-
-        default:
-          $result->error = 'invalid schema ' . $uri['scheme'];
-          $result->code = -1003;
-          break;
-      }
-    }
-
-    // If the scheme was valid, continue to request the feed using cURL.
-    if (empty($result->error)) {
-      $download = curl_init($url);
-      curl_setopt($download, CURLOPT_FOLLOWLOCATION, TRUE);
-      if (!empty($username)) {
-        curl_setopt($download, CURLOPT_USERPWD, "{$username}:{$password}");
-        curl_setopt($download, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-      }
-      curl_setopt($download, CURLOPT_HTTPHEADER, $headers);
-      curl_setopt($download, CURLOPT_HEADER, TRUE);
-      curl_setopt($download, CURLOPT_RETURNTRANSFER, TRUE);
-      curl_setopt($download, CURLOPT_ENCODING, '');
-      curl_setopt($download, CURLOPT_TIMEOUT, $request_timeout);
-      if ($accept_invalid_cert) {
-        curl_setopt($download, CURLOPT_SSL_VERIFYPEER, 0);
-      }
-      $header = '';
-      $data = curl_exec($download);
-      if (curl_error($download)) {
-        throw new HRCurlException(
-          t('cURL error (@code) @error for @url', array(
-            '@code' => curl_errno($download),
-            '@error' => curl_error($download),
-            '@url' => $url,
-          )), curl_errno($download)
-        );
-      }
-
-      $header_size = curl_getinfo($download, CURLINFO_HEADER_SIZE);
-      $header = substr($data, 0, $header_size - 1);
-      $result->data = substr($data, $header_size);
-      $headers = preg_split("/(\r\n){2}/", $header);
-      $header_lines = preg_split("/\r\n|\n|\r/", end($headers));
-      // Skip HTTP response status.
-      array_shift($header_lines);
-
-      while ($line = trim(array_shift($header_lines))) {
-        list($header, $value) = explode(':', $line, 2);
-        // Normalize the headers.
-        $header = strtolower($header);
-
-        if (isset($result->headers[$header]) && $header == 'set-cookie') {
-          // RFC 2109: the Set-Cookie response header comprises the token Set-
-          // Cookie:, followed by a comma-separated list of one or more cookies.
-          $result->headers[$header] .= ',' . trim($value);
-        }
-        else {
-          $result->headers[$header] = trim($value);
-        }
-      }
-      $result->code = curl_getinfo($download, CURLINFO_HTTP_CODE);
-
-      curl_close($download);
-    }
+  catch (RequestException $e) {
+    watchdog('feeds', 'The feed %url seems to be broken due to "%error".', array('%url' => $url, '%error' => $e->getMessage()), WATCHDOG_WARNING);
+    drupal_set_message(t('The feed %url seems to be broken because of error "%error".', array('%url' => $url, '%error' => $e->getMessage())));
+    return FALSE;
   }
-  else {
-    $result = drupal_http_request($url, array('headers' => $headers, 'timeout' => $request_timeout));
-    $result->headers = isset($result->headers) ? $result->headers : array();
-  }
-
-  $result->code = isset($result->code) ? $result->code : 200;
 
   // In case of 304 Not Modified try to return cached data.
   if ($result->code == 304) {
@@ -254,23 +169,6 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   $download_cache[$url] = $result;
 
   return $result;
-}
-
-/**
- * Decides if it's possible to use cURL or not.
- *
- * @return bool
- *   TRUE if cURL is available, FALSE otherwise.
- */
-function http_request_use_curl() {
-  // Allow site administrators to choose to not use cURL.
-  if (variable_get('feeds_never_use_curl', FALSE)) {
-    return FALSE;
-  }
-
-  // Check availability of cURL on the system.
-  $basedir = ini_get("open_basedir");
-  return function_exists('curl_init') && !ini_get('safe_mode') && empty($basedir);
 }
 
 /**
