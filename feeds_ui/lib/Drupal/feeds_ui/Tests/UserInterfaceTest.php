@@ -2,26 +2,28 @@
 
 /**
  * @file
- * Tests for Feeds Admin UI module.
+ * Contains Drupal\feeds_ui\Tests\UserInterfaceTest.
  */
 
+namespace Drupal\feeds_ui\Tests;
+
+use Drupal\feeds\Tests\FeedsWebTestBase;
+
 /**
- * Test basic Feeds UI functionality.
+ * Tests basic Feeds UI functionality.
  */
-class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
+class UserInterfaceTest extends FeedsWebTestBase {
+
   public static function getInfo() {
     return array(
-      'name' => 'Feeds UI user interface',
-      'description' => 'Tests Feeds Admin UI module\'s GUI.',
+      'name' => 'User interface',
+      'description' => "Tests Feeds Admin UI module's GUI.",
       'group' => 'Feeds',
     );
   }
 
   /**
-   * UI functionality tests on
-   * feeds_ui_overview(),
-   * feeds_ui_create_form(),
-   * Change plugins on feeds_ui_edit_page().
+   * UI functionality tests.
    */
   public function testEditFeedConfiguration() {
 
@@ -32,9 +34,9 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     $this->drupalGet('admin/structure/feeds/manage/test_feed');
     $this->assertText('Basic settings');
     $this->assertText('Fetcher');
-    $this->assertText('HTTP Fetcher');
+    $this->assertText('HTTP fetcher');
     $this->assertText('Parser');
-    $this->assertText('Common syndication parser');
+    $this->assertText('Syndication parser');
     $this->assertText('Processor');
     $this->assertText('Node processor');
     $this->assertText('Getting started');
@@ -43,8 +45,8 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     $this->assertRaw('admin/structure/feeds/manage/test_feed/fetcher');
     $this->assertRaw('admin/structure/feeds/manage/test_feed/parser');
     $this->assertRaw('admin/structure/feeds/manage/test_feed/processor');
-    $this->drupalGet('import');
-    $this->assertText('Basic page');
+    $this->drupalGet('feed/add');
+    $this->assertText('Test feed');
 
     // Select some other plugins.
     $this->drupalGet('admin/structure/feeds/manage/test_feed');
@@ -52,30 +54,30 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     $this->clickLink('Change', 0);
     $this->assertText('Select a fetcher');
     $edit = array(
-      'plugin_key' => 'FeedsFileFetcher',
+      'plugin_key' => 'file',
     );
     $this->drupalPost('admin/structure/feeds/manage/test_feed/fetcher', $edit, 'Save');
 
     $this->clickLink('Change', 1);
     $this->assertText('Select a parser');
     $edit = array(
-      'plugin_key' => 'FeedsCSVParser',
+      'plugin_key' => 'csv',
     );
     $this->drupalPost('admin/structure/feeds/manage/test_feed/parser', $edit, 'Save');
 
     $this->clickLink('Change', 2);
     $this->assertText('Select a processor');
     $edit = array(
-      'plugin_key' => 'FeedsUserProcessor',
+      'plugin_key' => 'user',
     );
     $this->drupalPost('admin/structure/feeds/manage/test_feed/processor', $edit, 'Save');
 
     // Assert changed configuration.
-    $this->assertPlugins('test_feed', 'FeedsFileFetcher', 'FeedsCSVParser', 'FeedsUserProcessor');
+    $this->assertPlugins('test_feed', 'file', 'csv', 'user');
 
     // Delete importer.
     $this->drupalPost('admin/structure/feeds/manage/test_feed/delete', array(), 'Delete');
-    $this->drupalGet('import');
+    $this->drupalGet('feed/add');
     $this->assertNoText('Test feed');
 
     // Create the same importer again.
@@ -84,7 +86,6 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     // Test basic settings settings.
     $edit = array(
       'name' => 'Syndication feed',
-      'content_type' => 'page',
       'import_period' => 3600,
     );
     $this->setSettings('test_feed', NULL, $edit);
@@ -92,10 +93,8 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     // Assert results of change.
     $this->assertText('Syndication feed');
     $this->assertText('Your changes have been saved.');
-    $this->assertText('Attached to: Basic page');
     $this->assertText('Periodic import: every 1 hour');
     $this->drupalGet('admin/structure/feeds');
-    $this->assertLink('Basic page');
 
     // Configure processor.
     $this->setSettings('test_feed', 'processor', array('bundle' => 'article'));
@@ -104,11 +103,12 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     // Create a feed node.
     $edit = array(
       'title' => 'Development Seed',
-      'feeds[FeedsHTTPFetcher][source]' => $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2',
-      );
-    $this->drupalPost('node/add/page', $edit, 'Save');
-    $this->assertText('Basic page Development Seed has been created.');
+      'fetcher[source]' => $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2',
+    );
+    $this->drupalPost('feed/add/test_feed', $edit, 'Save');
+    $this->assertText('Syndication feed Development Seed has been created.');
 
     // @todo Refreshing/deleting feed items. Needs to live in feeds.test
   }
+
 }
