@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Plugin\feeds\fetcher;
 
 use Drupal\feeds\FeedsFileFetcherResult;
-use Drupal\feeds\Plugin\FeedsFetcher;
+use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
@@ -26,10 +26,10 @@ use Exception;
  *   description = @Translation("Upload content from a local file.")
  * )
  */
-class FeedsFileFetcher extends FeedsFetcher {
+class FeedsFileFetcher extends FetcherBase {
 
   /**
-   * Implements FeedsFetcher::fetch().
+   * Implements FetcherBase::fetch().
    */
   public function fetch(Feed $feed) {
     $feed_config = $feed->getConfigFor($this);

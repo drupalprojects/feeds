@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains the FeedsFetcher and related classes.
+ * Contains Drupal\feeds\Plugin\FetcherBase.
  */
 
 namespace Drupal\feeds\Plugin;
@@ -12,10 +12,8 @@ use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Abstract class, defines shared functionality between fetchers.
- *
- * Implements FeedInfoInterface to expose source forms to Feeds.
  */
-abstract class FeedsFetcher extends FeedsPlugin {
+abstract class FetcherBase extends FeedsPlugin {
 
   /**
    * Implements FeedsPlugin::pluginType().
@@ -27,24 +25,24 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Fetch content from a source and return it.
    *
-   * Every class that extends FeedsFetcher must implement this method.
+   * Every class that extends FetcherBase must implement this method.
    *
-   * @param $source
+   * @param $feed
    *   Source value as entered by user through sourceForm().
    *
    * @return
    *   A FeedsFetcherResult object.
    */
-  public abstract function fetch(Feed $source);
+  public abstract function fetch(Feed $feed);
 
   /**
    * Clear all caches for results for given source.
    *
-   * @param Feed $source
+   * @param Feed $feed
    *   Source information for this expiry. Implementers can choose to only clear
    *   caches pertaining to this source.
    */
-  public function clear(Feed $source) {}
+  public function clear(Feed $feed) {}
 
   /**
    * Request handler invoked if callback URL is requested. Locked down by
@@ -62,7 +60,7 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Construct a path for a concrete fetcher/source combination. The result of
    * this method matches up with the general path definition in
-   * FeedsFetcher::menuItem(). For example usage look at FeedsHTTPFetcher.
+   * FetcherBase::menuItem(). For example usage look at FeedsHTTPFetcher.
    *
    * @return
    *   Path for this fetcher/source combination.
@@ -78,9 +76,9 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Menu item definition for fetchers of this class. Note how the path
    * component in the item definition matches the return value of
-   * FeedsFetcher::path();
+   * FetcherBase::path();
    *
-   * Requests to this menu item will be routed to FeedsFetcher::request().
+   * Requests to this menu item will be routed to FetcherBase::request().
    *
    * @return
    *   An array where the key is the Drupal menu item path and the value is
@@ -101,29 +99,29 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Subscribe to a source. Only implement if fetcher requires subscription.
    *
-   * @param Feed $source
+   * @param Feed $feed
    *   Source information for this subscription.
    */
-  public function subscribe(Feed $source) {}
+  public function subscribe(Feed $feed) {}
 
   /**
    * Unsubscribe from a source. Only implement if fetcher requires subscription.
    *
-   * @param Feed $source
+   * @param Feed $feed
    *   Source information for unsubscribing.
    */
-  public function unsubscribe(Feed $source) {}
+  public function unsubscribe(Feed $feed) {}
 
   /**
    * Override import period settings. This can be used to force a certain import
    * interval.
    *
-   * @param $source
+   * @param $feed
    *   A Feed object.
    *
    * @return
    *   A time span in seconds if periodic import should be overridden for given
-   *   $source, NULL otherwise.
+   *   $feed, NULL otherwise.
    */
-  public function importPeriod(Feed $source) {}
+  public function importPeriod(Feed $feed) {}
 }

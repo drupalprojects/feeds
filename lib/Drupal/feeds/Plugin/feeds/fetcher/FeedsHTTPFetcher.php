@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Plugin\feeds\fetcher;
 
-use Drupal\feeds\Plugin\FeedsFetcher;
+use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
@@ -27,10 +27,10 @@ use Drupal\feeds\FeedsHTTPFetcherResult;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class FeedsHTTPFetcher extends FeedsFetcher {
+class FeedsHTTPFetcher extends FetcherBase {
 
   /**
-   * Implements FeedsFetcher::fetch().
+   * Implements FetcherBase::fetch().
    */
   public function fetch(Feed $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -54,7 +54,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   }
 
   /**
-   * Implements FeedsFetcher::request().
+   * Implements FetcherBase::request().
    */
   public function request($fid = 0) {
     feeds_dbg($_GET);
@@ -195,7 +195,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   }
 
   /**
-   * Implement FeedsFetcher::subscribe() - subscribe to hub.
+   * Implement FetcherBase::subscribe() - subscribe to hub.
    */
   public function subscribe(Feed $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -206,7 +206,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   }
 
   /**
-   * Implement FeedsFetcher::unsubscribe() - unsubscribe from hub.
+   * Implement FetcherBase::unsubscribe() - unsubscribe from hub.
    */
   public function unsubscribe(Feed $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -214,7 +214,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   }
 
   /**
-   * Implement FeedsFetcher::importPeriod().
+   * Implement FetcherBase::importPeriod().
    */
   public function importPeriod(Feed $feed) {
     if ($this->subscriber($feed->id())->subscribed()) {
