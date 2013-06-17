@@ -41,6 +41,7 @@ define('FEEDS_PROCESS_EXPIRE', 'process_expire');
  *       "default" = "Drupal\feeds\FeedFormController",
  *       "edit" = "Drupal\feeds\FeedFormController"
  *     },
+ *     "list" = "Drupal\Core\Entity\EntityListController"
  *   },
  *   base_table = "feeds_feed",
  *   uri_callback = "feeds_feed_uri",
@@ -179,6 +180,13 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function id() {
     return $this->get('fid')->value;
+  }
+
+  /**
+   * Implements Drupal\Core\Entity\EntityInterface::id().
+   */
+  public function label($langcode = NULL) {
+    return $this->get('title')->value;
   }
 
   /**
@@ -373,7 +381,7 @@ class Feed extends EntityNG implements FeedInterface {
 
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
       $state = $this->state->value;
-      $this->imported = time();
+      $this->imported->value = time();
       $this->log('import', 'Imported in !s s', array('!s' => $this->imported->value - $state[FEEDS_START]), WATCHDOG_INFO);
       module_invoke_all('feeds_after_import', $this);
       unset($this->fetcher_result, $this->state);

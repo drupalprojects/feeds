@@ -317,6 +317,6 @@ function feeds_feed_delete_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = '<front>';
 }
 
-function feeds_feed_page_view() {
-  return t('asdfasdf');
+function feeds_feed_page_view($feed) {
+  return feeds_feed_status($feed);
 }

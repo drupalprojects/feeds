@@ -299,6 +299,12 @@ function feeds_forms() {
  */
 function feeds_menu() {
   $items = array();
+  $items['admin/content/feed'] = array(
+    'title' => 'Feeds',
+    'description' => 'Manage the feeds defined for your site.',
+    'route_name' => 'feeds_list',
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+  );
   $items['feed/add'] = array(
     'title' => 'Add feed',
     'page callback' => 'feeds_page',
@@ -315,15 +321,17 @@ function feeds_menu() {
     'file' => 'feeds.pages.inc',
   );
   $items['feed/%feeds_feed'] = array(
+    'title callback' => 'feeds_feed_title',
+    'title arguments' => array(1),
     'page callback' => 'feeds_feed_page_view',
     'page arguments' => array(1),
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('view', 1),
     'file' => 'feeds.pages.inc',
   );
   $items['feed/%feeds_feed/view'] = array(
     'title' => 'View',
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('view', 1),
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
@@ -331,7 +339,7 @@ function feeds_menu() {
     'title' => 'Edit',
     'page callback' => 'entity_get_form',
     'page arguments' => array(1),
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('edit', 1),
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -340,41 +348,41 @@ function feeds_menu() {
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('feeds_feed_delete_confirm', 1),
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('delete', 1),
-    'weight' => 10,
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_INLINE,
+    'type' => MENU_NORMAL_ITEM,
+    'context' => MENU_CONTEXT_PAGE,
     'file' => 'feeds.pages.inc',
   );
   $items['feed/%feeds_feed/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('feeds_import_tab_form', 1),
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('import', 1),
     'file' => 'feeds.pages.inc',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_ACTION,
     'weight' => 10,
   );
   $items['feed/%feeds_feed/delete-items'] = array(
     'title' => 'Delete items',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('feeds_delete_tab_form', 1),
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('clear', 1),
     'file' => 'feeds.pages.inc',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_ACTION,
     'weight' => 11,
   );
   $items['feed/%feeds_feed/unlock'] = array(
     'title' => 'Unlock',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('feeds_unlock_tab_form', 1),
-    'access callback' => 'feeds_access',
+    'access callback' => 'feeds_feed_access',
     'access arguments' => array('unlock', 1),
     'file' => 'feeds.pages.inc',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_ACTION,
+
     'weight' => 11,
   );
 
@@ -407,7 +415,14 @@ function feeds_importer_load($id) {
  * Title callback.
  */
 function feeds_importer_title($id) {
-  // return feeds_importer($id)->label();
+  return feeds_importer($id)->label();
+}
+
+/**
+ * Feed title callback.
+ */
+function feeds_feed_title($feed) {
+  return $feed->label();
 }
 
 /**
@@ -460,6 +475,36 @@ function feeds_access($action, $param) {
     if (user_access('administer feeds') || user_access("{$action} {$importer_id} feeds")) {
       return TRUE;
     }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Menu access callback.
+ *
+ * @param $action
+ *   The action to be performed. Possible values are:
+ *   - import
+ *   - clear
+ *   - unlock
+ * @param Drupal\feeds\Plugin\Core\Entity\Feed $feed
+ *   The feed.
+ */
+function feeds_feed_access($action, $feed) {
+  if (!in_array($action, array('view', 'edit','delete', 'import', 'clear', 'unlock'))) {
+    // If $action is not one of the supported actions, we return access denied.
+    return FALSE;
+  }
+
+  if ($action == 'unlock') {
+    if ($feed->progressImporting() == FEEDS_BATCH_COMPLETE && $feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
+      return FALSE;
+    }
+  }
+
+  if (user_access('administer feeds') || user_access("{$action} {$feed->getImporter()->id()} feeds")) {
+    return TRUE;
   }
 
   return FALSE;
@@ -1085,11 +1130,10 @@ function feeds_data_type_info() {
  * Implements hook_entity_bundle_info().
  */
 function feeds_entity_bundle_info() {
-  $importers = feeds_importer_load_all();
   $bundles = array();
-
-  foreach ($importers as $importer) {
-    $bundles['feeds_feed'][$importer->id()]['label'] = $importer->label();
+  foreach (config_get_storage_names_with_prefix('feeds.importer.') as $config_name) {
+    $config = config($config_name);
+    $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('name');
   }
   return $bundles;
 }

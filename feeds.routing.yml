@@ -1,0 +1,7 @@
+feeds_list:
+  pattern: '/admin/content/feed'
+  defaults:
+    _content: '\Drupal\Core\Entity\Controller\EntityListController::listing'
+    entity_type: 'feeds_feed'
+  requirements:
+    _permission: 'administer feeds'
