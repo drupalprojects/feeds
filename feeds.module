@@ -15,16 +15,10 @@ define('FEEDS_REQUEST_TIME', time());
 define('FEEDS_SCHEDULE_NEVER', -1);
 // Never expire feed items.
 define('FEEDS_EXPIRE_NEVER', -1);
-// An object that is not persistent. Compare EXPORT_IN_DATABASE, EXPORT_IN_CODE.
-define('FEEDS_EXPORT_NONE', 0x0);
+
 // Status of batched operations.
 define('FEEDS_BATCH_COMPLETE', 1.0);
 define('FEEDS_BATCH_ACTIVE', 0.0);
-
-/**
- * @defgroup hooks Hook and callback implementations
- * @{
- */
 
 /**
  * Implements hook_hook_info().
@@ -585,15 +579,6 @@ function feeds_entity_delete($entity) {
 }
 
 /**
- * @}
- */
-
-/**
- * @defgroup utility Utility functions
- * @{
- */
-
-/**
  * Loads all importers.
  *
  * @param $load_disabled
@@ -716,15 +701,6 @@ function feeds_item_info_save($entity, $entity_id) {
 }
 
 /**
- * @}
- */
-
-/**
- * @defgroup instantiators Instantiators
- * @{
- */
-
-/**
  * Gets an importer instance.
  *
  * @param $id
@@ -754,15 +730,6 @@ function feeds_importer($id) {
 function feeds_feed_load($fid) {
   return entity_load('feeds_feed', $fid);
 }
-
-/**
- * @}
- */
-
-/**
- * @defgroup include Funtions for loading libraries
- * @{
- */
 
 /**
  * Includes a library file.
@@ -868,10 +835,6 @@ function feeds_include_simplepie() {
   }
   return FALSE;
 }
-
-/**
- * @}
- */
 
 /**
  * Copy of valid_url() that supports the webcal scheme.

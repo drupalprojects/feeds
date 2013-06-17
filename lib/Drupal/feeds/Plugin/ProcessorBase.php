@@ -34,10 +34,6 @@ abstract class ProcessorBase extends FeedsPlugin {
   }
 
   /**
-   * @defgroup entity_api_wrapper Entity API wrapper.
-   */
-
-  /**
    * Entity type this processor operates on.
    */
   public abstract function entityType();
@@ -165,10 +161,6 @@ abstract class ProcessorBase extends FeedsPlugin {
   protected function entityInfo() {
     return entity_get_info($this->entityType());
   }
-
-  /**
-   * @}
-   */
 
   /**
    * Process the result of the parsing stage.
