@@ -40,77 +40,6 @@ function feeds_page() {
 }
 
 /**
- * Render a feeds import form on import/[config] pages.
- */
-function feeds_import_form($form, &$form_state, $importer) {
-
-  $feed = entity_create('feeds_feed', array(
-    'importer' => $importer->id(),
-  ));
-
-  $form = array();
-  $form['#importer_id'] = $importer->id();
-  // @todo Move this into fetcher?
-  $form['#attributes']['enctype'] = 'multipart/form-data';
-  $form['source_status'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Status'),
-    '#tree' => TRUE,
-    '#value' => feeds_feed_status($feed),
-  );
-
-  $feed_form = $feed->configForm($form_state);
-  if (!empty($feed_form)) {
-    $form['feeds'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Import'),
-      '#tree' => TRUE,
-    ) + $feed_form;
-  }
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Import'),
-  );
-  $progress = $feed->progressImporting();
-  if ($progress !== FEEDS_BATCH_COMPLETE) {
-    $form['submit']['#disabled'] = TRUE;
-    $form['submit']['#value'] =
-      t('Importing (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
-  }
-  return $form;
-}
-
-/**
- * Validation handler for node forms and feeds_import_form().
- */
-function feeds_import_form_validate($form, &$form_state) {
-  // @todo This may be a problem here, as we don't have a fid at this point.
-  feeds_feed_load($form['#importer_id'])->configFormValidate($form_state['values']['feeds']);
-}
-
-/**
- * Submit handler for feeds_import_form().
- */
-function feeds_import_form_submit($form, &$form_state) {
-  // Save source and import.
-  $feed = feeds_feed_load($form['#importer_id']);
-
-  if (!empty($form_state['values']['feeds']) && is_array($form_state['values']['feeds'])) {
-    $feed->addConfig($form_state['values']['feeds']);
-    $feed->save();
-  }
-
-  // Add to schedule.
-  $feed->schedule();
-
-  // Refresh feed if import on create is selected.
-  if ($feed->importer->config['import_on_create']) {
-    $feed->startImport();
-  }
-}
-
-/**
  * Render a feeds import form on node/id/import pages.
  */
 function feeds_import_tab_form($form, &$form_state, $feed) {
@@ -236,17 +165,6 @@ function feeds_fetcher_callback($importer, $fid = 0) {
     }
   }
   drupal_access_denied();
-}
-
-/**
- * Template generation
- */
-function feeds_importer_template($importer_id) {
-  $importer = feeds_importer($importer_id);
-  if ($importer->parser instanceof FeedsCSVParser) {
-    return $importer->parser->getTemplate();
-  }
-  return drupal_not_found();
 }
 
 /**
