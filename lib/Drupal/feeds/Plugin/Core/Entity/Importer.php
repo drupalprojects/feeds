@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\Core\Entity\FeedType.
+ * Contains \Drupal\feeds\Plugin\Core\Entity\Importer.
  */
 
 namespace Drupal\feeds\Plugin\Core\Entity;
@@ -193,7 +193,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
         'plugin_key' => 'node',
         'config' => array(),
       ),
-      'content_type' => '',
       'update' => 0,
       'import_period' => 1800, // Refresh every 30 minutes by default.
       'expire_period' => 3600, // Expire every hour by default, this is a hidden setting.
@@ -220,17 +219,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
       '#title' => t('Description'),
       '#description' => t('A description of this importer.'),
       '#default_value' => $this->description,
-    );
-    $node_types = node_type_get_names();
-    array_walk($node_types, 'check_plain');
-    $form['content_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Attach to content type'),
-      '#description' => t('If "Use standalone form" is selected a source is imported by using a form under !import_form.
-                           If a content type is selected a source is imported by creating a node of that content type.',
-                           array('!import_form' => l(url('import', array('absolute' => TRUE)), 'import', array('attributes' => array('target' => '_new'))))),
-      '#options' => array('' => t('Use standalone form')) + $node_types,
-      '#default_value' => $config['content_type'],
     );
     $cron_required =  ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
     $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');

@@ -192,6 +192,38 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
   }
 
   /**
+   * Reuses an existing field on an importer.
+   *
+   * @param string $importer
+   *   The importer id.
+   * @param string $field_name
+   *   The name of the field.
+   * @param string $field_type
+   *   The type of the field.
+   * @param string $field_widget
+   *   (optional) The field widget to use. If null, a default will be provided.
+   * @param array $instance settings
+   *   (optional) An array of field instance settings.
+   */
+  protected function reuseFeedField($importer, $field_name, $field_type, $field_widget = NULL, array $instance_settings = array()) {
+    if (!$field_widget) {
+      $field_widget = $this->selectFieldWidget($field_name, $field_type);
+    }
+    $this->assertTrue($field_widget !== NULL, "Field type $field_type supported");
+    $label = $field_name . '_' . $field_type . '_label';
+    $edit = array(
+      'fields[_add_existing_field][label]' => $label,
+      'fields[_add_existing_field][field_name]' => 'field_' . $field_name,
+      'fields[_add_existing_field][widget_type]' => $field_widget,
+    );
+    $this->drupalPost("admin/structure/feeds/manage/$importer/fields", $edit, 'Save');
+
+    // Field instance settings.
+    $this->drupalPost(NULL, $instance_settings, 'Save settings');
+    $this->assertText('Saved ' . $label . ' configuration.');
+  }
+
+  /**
    * Select the widget for the field. Default implementation provides widgets
    * for Date, Number, Text, Node reference, User reference, Email, Emfield,
    * Filefield, Image, and Link.

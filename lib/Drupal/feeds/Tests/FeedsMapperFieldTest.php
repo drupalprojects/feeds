@@ -47,7 +47,7 @@ class FeedsMapperFieldTest extends FeedsMapperTestBase {
 
     // Create and configure importer.
     $this->createImporterConfiguration('Content CSV', 'csv');
-    $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
+    $this->setSettings('csv', NULL, array('import_period' => FEEDS_SCHEDULE_NEVER));
     $this->setPlugin('csv', 'fetcher', 'file');
     $this->setPlugin('csv', 'parser', 'csv');
     $this->setSettings('csv', 'processor', array('bundle' => $typename));
@@ -83,7 +83,7 @@ class FeedsMapperFieldTest extends FeedsMapperTestBase {
     ));
 
     // Import CSV file.
-    $this->importFile('csv', $this->absolutePath() . '/tests/feeds/content.csv');
+    $fid = $this->importFile('csv', $this->absolutePath() . '/tests/feeds/content.csv');
     $this->assertText('Created 2 nodes');
 
     // Check the two imported files.
@@ -99,4 +99,5 @@ class FeedsMapperFieldTest extends FeedsMapperTestBase {
     $this->assertNodeFieldValue('gamma', '1.20');
     $this->assertNodeFieldValue('delta', '5.62951');
   }
+
 }

@@ -26,7 +26,6 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $this->setSettings('node', NULL, array('content_type' => ''));
     $this->setPlugin('node', 'fetcher', 'file');
     $this->setPlugin('node', 'parser', 'csv');
 
@@ -45,12 +44,10 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
 
     // Verify that invalid paths are not accepted.
     foreach (array('/tmp/') as $path) {
-      $edit = array(
-        'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsFileFetcher][source]' => $path,
-      );
-      $this->drupalPost('import/node', $edit, t('Import'));
+      $edit = array('title' => $this->randomString(), 'fetcher[source]' => $path);
+      $this->drupalPost('feed/add/node', $edit, 'Save');
       $this->assertText("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes:");
-      $count = db_query("SELECT COUNT(*) FROM {feeds_source} WHERE feed_nid = 0")->fetchField();
+      $count = db_query("SELECT COUNT(*) FROM {feeds_feed}")->fetchField();
       $this->assertEqual($count, 0);
     }
 
@@ -63,11 +60,10 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // too.
     variable_set('feeds_process_limit', 5);
 
-    $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsFileFetcher][source]' => $dir,
-    );
-    $this->drupalPost('import/node', $edit, t('Import'));
+    $this->importURL('node', $dir);
     $this->assertText('Created 18 nodes');
+    $count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
+    $this->assertEqual($count, 18, t("@count nodes in the database.", array('@count' => $count)));
   }
 
   /**
@@ -77,7 +73,6 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $this->setSettings('node', NULL, array('content_type' => ''));
     $this->setPlugin('node', 'fetcher', 'file');
     $this->setPlugin('node', 'parser', 'csv');
     $this->addMappings('node', array(
@@ -101,11 +96,10 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Ingest directory of files. Set limit to 5 to force processor to batch,
     // too.
     variable_set('feeds_process_limit', 5);
-    $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsFileFetcher][source]' => $dir,
-    );
-    $this->drupalPost('import/node', $edit, t('Import'));
+    $this->importURL('node', $dir);
     $this->assertText('Created 18 nodes');
+    $count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
+    $this->assertEqual($count, 18, t("@count nodes in the database.", array('@count' => $count)));
   }
 
 }

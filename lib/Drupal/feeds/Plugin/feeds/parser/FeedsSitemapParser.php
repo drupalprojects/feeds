@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\parser;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsParser;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
 use SimpleXMLElement;
@@ -28,7 +28,7 @@ class FeedsSitemapParser extends FeedsParser {
   /**
    * Implements FeedsParser::parse().
    */
-  public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
+  public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
     // Set time zone to GMT for parsing dates with strtotime().
     $tz = date_default_timezone_get();
     date_default_timezone_set('GMT');

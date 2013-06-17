@@ -40,7 +40,6 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     );
 
     $this->createField('article', 'tags', 'taxonomy_term_reference', 'options_select', $field_settings);
-    $this->reuseField('page', 'tags', 'taxonomy_term_reference');
 
     $edit = array(
       'fields[field_tags][type]' => 'taxonomy_term_reference_link',
@@ -73,6 +72,8 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
         'unique' => TRUE,
       ),
     ));
+
+    $this->reuseFeedField('syndication', 'tags', 'taxonomy_term_reference');
   }
 
   /**
@@ -94,18 +95,18 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     ));
 
     // Create feed node and add term term1.
-    $nid = $this->createFeedNode('syndication', NULL, 'Syndication');
+    $fid = $this->createFeed('syndication', NULL, 'Syndication');
 
-    $this->drupalPost('node/' . $nid . '/edit', array('field_tags[und][]' => 1), t('Save and keep published'));
+    $this->drupalPost("feed/$fid/edit", array('field_tags[und][]' => 1), t('Save'));
 
     // Import nodes.
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('Created 10 nodes.');
 
     $count = db_query("SELECT COUNT(*) FROM {taxonomy_index}")->fetchField();
 
-    // There should be one term for each node imported plus the term on the feed node.
-    $this->assertEqual(11, $count, t('Found @count tags for all feed nodes and feed items.', array('@count' => $count)));
+    // There should be one term for each node imported.
+    $this->assertEqual(10, $count, t('Found @count tags for all feed nodes and feed items.', array('@count' => $count)));
   }
 
   /**
@@ -136,14 +137,14 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       ),
     );
     $this->addMappings('syndication', $mappings);
-    $nid = $this->createFeedNode('syndication', NULL, 'Syndication');
+    $fid = $this->createFeed('syndication', NULL, 'Syndication');
     $this->assertText('Created 10 nodes.');
     // Check that terms we not auto-created.
-    $this->drupalGet('node/2');
+    $this->drupalGet('node/1');
     foreach ($terms as $term) {
       $this->assertNoTaxonomyTerm($term);
     }
-    $this->drupalGet('node/3');
+    $this->drupalGet('node/2');
     $this->assertNoTaxonomyTerm('Washington DC');
 
     // Change the mapping configuration.
@@ -151,21 +152,21 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     // Turn on autocreate.
     $mappings[5]['autocreate'] = TRUE;
     $this->addMappings('syndication', $mappings);
-    $this->drupalPost('node/' . $nid . '/import', array(), t('Import'));
+    $this->feedImportItems($fid);
     $this->assertText('Updated 10 nodes.');
 
-    $this->drupalGet('node/2');
+    $this->drupalGet('node/1');
     foreach ($terms as $term) {
       $this->assertTaxonomyTerm($term);
     }
-    $this->drupalGet('node/3');
+    $this->drupalGet('node/2');
     $this->assertTaxonomyTerm('Washington DC');
 
     $names = db_query('SELECT name FROM {taxonomy_term_data}')->fetchCol();
     $this->assertEqual(count($names), 31, 'Found correct number of terms in the database.');
 
     // Run import again. This verifys that the terms we found by name.
-    $this->drupalPost('node/' . $nid . '/import', array(), t('Import'));
+    $this->feedImportItems($fid);
     $this->assertText('Updated 10 nodes.');
     $names = db_query('SELECT name FROM {taxonomy_term_data}')->fetchCol();
     $this->assertEqual(count($names), 31, 'Found correct number of terms in the database.');
@@ -225,8 +226,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       $record = array(
         'entity_type' => 'taxonomy_term',
         'entity_id' => $tid,
-        'id' => 'does_not_exist',
-        'feed_nid' => 0,
+        'fid' => 1,
         'imported' => REQUEST_TIME,
         'url' => '',
         'guid' => $guid,

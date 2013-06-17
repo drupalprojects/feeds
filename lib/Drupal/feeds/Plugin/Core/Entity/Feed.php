@@ -2,12 +2,18 @@
 
 /**
  * @file
- * Definition of FeedsSourceInterface and FeedsSource class.
+ * Definition of FeedInterface and Feed class.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Plugin\Core\Entity;
 
 use Drupal\job_scheduler\JobScheduler;
+use Drupal\Core\Entity\EntityNG;
+use Drupal\Core\Entity\Annotation\EntityType;
+use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedsState;
+use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
  * Denote a import or clearing stage. Used for multi page processing.
@@ -20,77 +26,166 @@ define('FEEDS_PROCESS_CLEAR', 'process_clear');
 define('FEEDS_PROCESS_EXPIRE', 'process_expire');
 
 /**
- * This class encapsulates a source of a feed. It stores where the feed can be
- * found and how to import it.
+ * Defines the feed entity class.
  *
- * Information on how to import a feed is encapsulated in a FeedsImporter object
- * which is identified by the common id of the FeedsSource and the
- * FeedsImporter. More than one FeedsSource can use the same FeedsImporter
- * therefore a FeedsImporter never holds a pointer to a FeedsSource object, nor
- * does it hold any other information for a particular FeedsSource object.
- *
- * Classes extending FeedsPlugin can implement a sourceForm to expose
- * configuration for a FeedsSource object. This is for instance how FeedsFetcher
- * exposes a text field for a feed URL or how FeedsCSVParser exposes a select
- * field for choosing between colon or semicolon delimiters.
- *
- * It is important that a FeedsPlugin does not directly hold information about
- * a source but leave all storage up to FeedsSource. An instance of a
- * FeedsPlugin class only exists once per FeedsImporter configuration, while an
- * instance of a FeedsSource class exists once per feed_nid to be imported.
- *
- * As with FeedsImporter, the idea with FeedsSource is that it can be used
- * without actually saving the object to the database.
+ * @EntityType(
+ *   id = "feeds_feed",
+ *   label = @Translation("Feed"),
+ *   bundle_label = @Translation("Importer"),
+ *   module = "feeds",
+ *   controllers = {
+ *     "storage" = "Drupal\feeds\FeedStorageController",
+ *     "render" = "Drupal\feeds\FeedRenderController",
+ *     "access" = "Drupal\feeds\FeedAccessController",
+ *     "form" = {
+ *       "default" = "Drupal\feeds\FeedFormController",
+ *       "edit" = "Drupal\feeds\FeedFormController"
+ *     },
+ *   },
+ *   base_table = "feeds_feed",
+ *   uri_callback = "feeds_feed_uri",
+ *   fieldable = TRUE,
+ *   entity_keys = {
+ *     "id" = "fid",
+ *     "bundle" = "importer",
+ *     "label" = "name",
+ *     "uuid" = "uuid"
+ *   },
+ *   bundle_keys = {
+ *     "bundle" = "importer"
+ *   },
+ *   route_base_path = "admin/structure/feeds/manage/{bundle}",
+ *   permission_granularity = "bundle",
+ *   links = {
+ *     "canonical" = "/feed/{feeds_feed}",
+ *     "edit-form" = "/feed/{feeds_feed}/edit",
+ *   }
+ * )
  */
-class FeedsSource {
+class Feed extends EntityNG implements FeedInterface {
 
-  // Contains the node id of the feed this source info object is attached to.
-  // Equals 0 if not attached to any node - i. e. if used on a
-  // standalone import form within Feeds or by other API users.
-  public $feed_nid;
+  /**
+   * The feed ID.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $fid;
 
-  // The FeedsImporter object that this source is expected to be used with.
+  /**
+   * The node UUID.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $uuid;
+
+  /**
+   * The feed importer (bundle).
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
   public $importer;
-
-  // A FeedsSourceState object holding the current import/clearing state of this
-  // source.
-  protected $state;
-
-  // Fetcher result, used to cache fetcher result when batching.
-  protected $fetcher_result;
-
-  // Timestamp when this source was imported the last time.
-  public $imported;
 
   public $config = array();
 
   /**
-   * Instantiate a unique object per class/id/feed_nid. Don't use
-   * directly, use feeds_source() instead.
+   * The node title.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
    */
-  public static function instance($importer_id, $feed_nid) {
-    $class = variable_get('feeds_source_class', 'Drupal\feeds\FeedsSource');
-    static $instances = array();
-    if (!isset($instances[$class][$importer_id][$feed_nid])) {
-      $instances[$class][$importer_id][$feed_nid] = new $class($importer_id, $feed_nid);
-    }
-    return $instances[$class][$importer_id][$feed_nid];
+  public $title;
+
+  /**
+   * The feed source.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $source;
+
+  /**
+   * The node owner's user ID.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $uid;
+
+  /**
+   * The node published status indicator.
+   *
+   * Unpublished nodes are only visible to their authors and to administrators.
+   * The value is either NODE_PUBLISHED or NODE_NOT_PUBLISHED.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $status;
+
+  /**
+   * The node creation timestamp.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $created;
+
+  /**
+   * The node modification timestamp.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $changed;
+
+  /**
+   * The node modification timestamp.
+   *
+   * @var \Drupal\Core\Entity\Field\FieldInterface
+   */
+  public $imported;
+
+  // A FeedState object holding the current import/clearing state of this
+  // source.
+  public $state;
+
+  // Fetcher result, used to cache fetcher result when batching.
+  public $fetcher_result;
+
+  /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values, $entity_type, $bundle = FALSE) {
+    parent::__construct($values, $entity_type, $bundle);
   }
 
   /**
-   * Constructor.
+   * Overrides \Drupal\Core\Entity\EntityNG::init().
    */
-  protected function __construct($importer_id, $feed_nid) {
-    $this->feed_nid = $feed_nid;
-    $this->importer = feeds_importer($importer_id);
-    $this->load();
+  protected function init() {
+    parent::init();
+    // We unset all defined properties, so magic getters apply.
+    unset($this->fid);
+    unset($this->uuid);
+    unset($this->importer);
+    unset($this->title);
+    unset($this->source);
+    unset($this->uid);
+    unset($this->status);
+    unset($this->created);
+    unset($this->changed);
+    unset($this->imported);
+    unset($this->config);
+    unset($this->state);
+    unset($this->fetcher_result);
+  }
+
+  /**
+   * Implements Drupal\Core\Entity\EntityInterface::id().
+   */
+  public function id() {
+    return $this->get('fid')->value;
   }
 
   /**
    * Returns the FeedsImporter object that this source is expected to be used with.
    */
-  public function importer() {
-    return $this->importer;
+  public function getImporter() {
+    return entity_load('feeds_importer', (string) $this->bundle());
   }
 
   /**
@@ -103,8 +198,8 @@ class FeedsSource {
    *   Throws Exception if an error occurs when fetching or parsing.
    */
   public function preview() {
-    $result = $this->importer->fetcher->fetch($this);
-    $result = $this->importer->parser->parse($this, $result);
+    $result = $this->getImporter()->fetcher->fetch($this);
+    $result = $this->getImporter()->parser->parse($this, $result);
     module_invoke_all('feeds_after_parse', $this, $result);
     return $result;
   }
@@ -119,11 +214,11 @@ class FeedsSource {
    * @throws Exception
    *   If processing in background is enabled, the first batch chunk of the
    *   import will be executed on the current page request. This means that this
-   *   method may throw the same exceptions as FeedsSource::import().
+   *   method may throw the same exceptions as Feed::import().
    */
   public function startImport() {
     module_invoke_all('feeds_before_import', $this);
-    $config = $this->importer->getConfig();
+    $config = $this->getImporter()->getConfig();
     if ($config['process_in_background']) {
       $this->startBackgroundJob('import');
     }
@@ -142,10 +237,10 @@ class FeedsSource {
    * @throws Exception
    *   If processing in background is enabled, the first batch chunk of the
    *   clear task will be executed on the current page request. This means that
-   *   this method may throw the same exceptions as FeedsSource::clear().
+   *   this method may throw the same exceptions as Feed::clear().
    */
   public function startClear() {
-    $config = $this->importer->getConfig();
+    $config = $this->getImporter()->getConfig();
     if ($config['process_in_background']) {
       $this->startBackgroundJob('clear');
     }
@@ -167,24 +262,24 @@ class FeedsSource {
    */
   public function scheduleImport() {
     // Check whether any fetcher is overriding the import period.
-    $period = $this->importer->config['import_period'];
-    $fetcher_period = $this->importer->fetcher->importPeriod($this);
+    $period = $this->getImporter()->config['import_period'];
+    $fetcher_period = $this->getImporter()->fetcher->importPeriod($this);
     if (is_numeric($fetcher_period)) {
       $period = $fetcher_period;
     }
     $period = $this->progressImporting() === FEEDS_BATCH_COMPLETE ? $period : 0;
     $job = array(
-      'type' => $this->importer->id(),
-      'id' => $this->feed_nid,
+      'type' => $this->getImporter()->id(),
+      'id' => $this->id(),
       // Schedule as soon as possible if a batch is active.
       'period' => $period,
       'periodic' => TRUE,
     );
     if ($period == FEEDS_SCHEDULE_NEVER) {
-      JobScheduler::get('feeds_source_import')->remove($job);
+      JobScheduler::get('feeds_feed_import')->remove($job);
     }
     else {
-      JobScheduler::get('feeds_source_import')->set($job);
+      JobScheduler::get('feeds_feed_import')->set($job);
     }
   }
 
@@ -196,16 +291,16 @@ class FeedsSource {
     $period = $this->progressExpiring() === FEEDS_BATCH_COMPLETE ? 3600 : 0;
 
     $job = array(
-      'type' => $this->importer->id(),
-      'id' => $this->feed_nid,
+      'type' => $this->getImporter()->id(),
+      'id' => $this->id(),
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($this->importer->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
-      JobScheduler::get('feeds_source_expire')->remove($job);
+    if ($this->getImporter()->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
+      JobScheduler::get('feeds_feed_expire')->remove($job);
     }
     else {
-      JobScheduler::get('feeds_source_expire')->set($job);
+      JobScheduler::get('feeds_feed_expire')->set($job);
     }
   }
 
@@ -214,18 +309,18 @@ class FeedsSource {
    */
   public function scheduleClear() {
     $job = array(
-      'type' => $this->importer->id(),
-      'id' => $this->feed_nid,
+      'type' => $this->getImporter()->id(),
+      'id' => $this->id(),
       'period' => 0,
       'periodic' => TRUE,
     );
     // Remove job if batch is complete.
     if ($this->progressClearing() === FEEDS_BATCH_COMPLETE) {
-      JobScheduler::get('feeds_source_clear')->remove($job);
+      JobScheduler::get('feeds_feed_clear')->remove($job);
     }
     // Schedule as soon as possible if batch is not complete.
     else {
-      JobScheduler::get('feeds_source_clear')->set($job);
+      JobScheduler::get('feeds_feed_clear')->set($job);
     }
   }
 
@@ -233,7 +328,7 @@ class FeedsSource {
    * Import a source: execute fetching, parsing and processing stage.
    *
    * This method only executes the current batch chunk, then returns. If you are
-   * looking to import an entire source, use FeedsSource::startImport() instead.
+   * looking to import an entire source, use Feed::startImport() instead.
    *
    * @return
    *   FEEDS_BATCH_COMPLETE if the import process finished. A decimal between
@@ -245,24 +340,28 @@ class FeedsSource {
   public function import() {
     $this->acquireLock();
     try {
+      $state = $this->state->value;
       // If fetcher result is empty, we are starting a new import, log.
-      if (empty($this->fetcher_result)) {
-        $this->state[FEEDS_START] = time();
+      if (empty($this->fetcher_result->value)) {
+        $state[FEEDS_START] = time();
+        $this->state = $state;
       }
 
       // Fetch.
-      if (empty($this->fetcher_result) || FEEDS_BATCH_COMPLETE == $this->progressParsing()) {
-        $this->fetcher_result = $this->importer->fetcher->fetch($this);
+      if (empty($this->fetcher_result->value) || FEEDS_BATCH_COMPLETE == $this->progressParsing()) {
+        $this->fetcher_result = $this->getImporter()->fetcher->fetch($this);
         // Clean the parser's state, we are parsing an entirely new file.
-        unset($this->state[FEEDS_PARSE]);
+        $state = $this->state->value;
+        unset($state[FEEDS_PARSE]);
+        $this->state = $state;
       }
 
       // Parse.
-      $parser_result = $this->importer->parser->parse($this, $this->fetcher_result);
+      $parser_result = $this->getImporter()->parser->parse($this, $this->fetcher_result->value);
       module_invoke_all('feeds_after_parse', $this, $parser_result);
 
-      // Process.
-      $this->importer->processor->process($this, $parser_result);
+      // // Process.
+      $this->getImporter()->processor->process($this, $parser_result);
     }
     catch (Exception $e) {
       // Do nothing.
@@ -273,11 +372,13 @@ class FeedsSource {
     $result = $this->progressImporting();
 
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
+      $state = $this->state->value;
       $this->imported = time();
-      $this->log('import', 'Imported in !s s', array('!s' => $this->imported - $this->state[FEEDS_START]), WATCHDOG_INFO);
+      $this->log('import', 'Imported in !s s', array('!s' => $this->imported->value - $state[FEEDS_START]), WATCHDOG_INFO);
       module_invoke_all('feeds_after_import', $this);
       unset($this->fetcher_result, $this->state);
     }
+
     $this->save();
     if (isset($e)) {
       throw $e;
@@ -289,7 +390,7 @@ class FeedsSource {
    * Remove all items from a feed.
    *
    * This method only executes the current batch chunk, then returns. If you are
-   * looking to delete all items of a source, use FeedsSource::startClear()
+   * looking to delete all items of a source, use Feed::startClear()
    * instead.
    *
    * @return
@@ -302,9 +403,9 @@ class FeedsSource {
   public function clear() {
     $this->acquireLock();
     try {
-      $this->importer->fetcher->clear($this);
-      $this->importer->parser->clear($this);
-      $this->importer->processor->clear($this);
+      $this->getImporter()->fetcher->clear($this);
+      $this->getImporter()->parser->clear($this);
+      $this->getImporter()->processor->clear($this);
     }
     catch (Exception $e) {
       // Do nothing.
@@ -313,14 +414,18 @@ class FeedsSource {
 
     // Clean up.
     $result = $this->progressClearing();
+
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
       module_invoke_all('feeds_after_clear', $this);
       unset($this->state);
     }
+
     $this->save();
+
     if (isset($e)) {
       throw $e;
     }
+
     return $result;
   }
 
@@ -330,7 +435,7 @@ class FeedsSource {
   public function expire() {
     $this->acquireLock();
     try {
-      $result = $this->importer->processor->expire($this);
+      $result = $this->getImporter()->processor->expire($this);
     }
     catch (Exception $e) {
       // Will throw after the lock is released.
@@ -397,100 +502,19 @@ class FeedsSource {
    *   The FeedsState object for the given stage.
    */
   public function state($stage) {
-    if (!isset($this->state) || !is_array($this->state)) {
-      $this->state = array();
+    $state = $this->state->value;
+    if (!isset($state[$stage])) {
+      $state[$stage] = new FeedsState();
     }
-    if (!isset($this->state[$stage])) {
-      $this->state[$stage] = new FeedsState();
-    }
-    return $this->state[$stage];
+    $this->state = $state;
+    return $state[$stage];
   }
 
   /**
    * Count items imported by this source.
    */
   public function itemCount() {
-    return $this->importer->processor->itemCount($this);
-  }
-
-  /**
-   * Save configuration.
-   */
-  public function save() {
-    // Alert implementers of FeedsSourceInterface to the fact that we're saving.
-    foreach ($this->importer->getPluginTypes() as $type) {
-      $this->importer->$type->sourceSave($this);
-    }
-    $config = $this->getConfig();
-
-    // Store the source property of the fetcher in a separate column so that we
-    // can do fast lookups on it.
-    $source = '';
-    if (isset($config[get_class($this->importer->fetcher)]['source'])) {
-      $source = $config[get_class($this->importer->fetcher)]['source'];
-    }
-    $object = array(
-      'id' => $this->importer->id(),
-      'feed_nid' => $this->feed_nid,
-      'imported' => $this->imported,
-      'config' => $config,
-      'source' => $source,
-      'state' => isset($this->state) ? $this->state : FALSE,
-      'fetcher_result' => isset($this->fetcher_result) ? $this->fetcher_result : FALSE,
-    );
-    if (db_query_range("SELECT 1 FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", 0, 1, array(':id' => $this->importer->id(), ':nid' => $this->feed_nid))->fetchField()) {
-      drupal_write_record('feeds_source', $object, array('id', 'feed_nid'));
-    }
-    else {
-      drupal_write_record('feeds_source', $object);
-    }
-  }
-
-  /**
-   * Load configuration and unpack.
-   */
-  public function load() {
-    if ($record = db_query("SELECT imported, config, state, fetcher_result FROM {feeds_source} WHERE id = :id AND feed_nid = :nid", array(':id' => $this->importer->id(), ':nid' => $this->feed_nid))->fetchObject()) {
-      $this->imported = $record->imported;
-      $this->config = unserialize($record->config);
-
-      if (!is_array($this->config)) {
-        $this->config = array();
-      }
-
-      if (!empty($record->state)) {
-        $this->state = unserialize($record->state);
-      }
-      if (!is_array($this->state)) {
-        $this->state = array();
-      }
-      if (!empty($record->fetcher_result)) {
-        $this->fetcher_result = unserialize($record->fetcher_result);
-      }
-    }
-  }
-
-  /**
-   * Delete configuration. Removes configuration information
-   * from database, does not delete configuration itself.
-   */
-  public function delete() {
-    // Alert implementers of FeedsSourceInterface to the fact that we're
-    // deleting.
-    foreach ($this->importer->getPluginTypes() as $type) {
-      $this->importer->$type->sourceDelete($this);
-    }
-    db_delete('feeds_source')
-      ->condition('id', $this->importer->id())
-      ->condition('feed_nid', $this->feed_nid)
-      ->execute();
-    // Remove from schedule.
-    $job = array(
-      'type' => $this->importer->id(),
-      'id' => $this->feed_nid,
-    );
-    JobScheduler::get('feeds_source_import')->remove($job);
-    JobScheduler::get('feeds_source_expire')->remove($job);
+    return $this->getImporter()->processor->itemCount($this);
   }
 
   /**
@@ -508,30 +532,32 @@ class FeedsSource {
   /**
    * Returns the configuration for a specific client class.
    *
-   * @param FeedsSourceInterface $client
-   *   An object that is an implementer of FeedsSourceInterface.
+   * @param FeedInterface $client
+   *   An object that is an implementer of FeedInterface.
    *
    * @return
    *   An array stored for $client.
    */
-  public function getConfigFor(FeedsSourceInterface $client) {
-    $class = get_class($client);
-    return isset($this->config[$class]) ? $this->config[$class] : $client->sourceDefaults();
+  public function getConfigFor(FeedsPlugin $client) {
+    $id = $client->getPluginID();
+    return isset($this->config->value[$id]) ? $this->config->value[$id] : $client->sourceDefaults();
   }
 
   /**
    * Sets the configuration for a specific client class.
    *
-   * @param FeedsSourceInterface $client
-   *   An object that is an implementer of FeedsSourceInterface.
+   * @param FeedInterface $client
+   *   An object that is an implementer of FeedInterface.
    * @param $config
    *   The configuration for $client.
    *
    * @return
    *   An array stored for $client.
    */
-  public function setConfigFor(FeedsSourceInterface $client, $config) {
-    $this->config[get_class($client)] = $config;
+  public function setConfigFor(FeedsPlugin $client, $config) {
+    $this_config = $this->config->value;
+    $this_config[$client->getPluginID()] = $config;
+    $this->config = $this_config;
   }
 
   /**
@@ -540,48 +566,18 @@ class FeedsSource {
   public function configDefaults() {
     // Collect information from plugins.
     $defaults = array();
-    foreach ($this->importer->getPluginTypes() as $type) {
-      if ($this->importer->$type->hasSourceConfig()) {
-        $defaults[get_class($this->importer->$type)] = $this->importer->$type->sourceDefaults();
-      }
+    foreach ($this->getImporter()->getPluginTypes() as $type) {
+      $plugin = $this->getImporter()->$type;
+      $defaults[$plugin->getPluginID()] = $plugin->sourceDefaults();
     }
     return $defaults;
-  }
-
-  /**
-   * Override parent::configForm().
-   */
-  public function configForm(&$form_state) {
-    // Collect information from plugins.
-    $form = array();
-    foreach ($this->importer->getPluginTypes() as $type) {
-      if ($this->importer->$type->hasSourceConfig()) {
-        $class = get_class($this->importer->$type);
-        $config = isset($this->config[$class]) ? $this->config[$class] : array();
-        $form[$class] = $this->importer->$type->sourceForm($config);
-        $form[$class]['#tree'] = TRUE;
-      }
-    }
-    return $form;
-  }
-
-  /**
-   * Override parent::configFormValidate().
-   */
-  public function configFormValidate(&$values) {
-    foreach ($this->importer->getPluginTypes() as $type) {
-      $class = get_class($this->importer->$type);
-      if (isset($values[$class]) && $this->importer->$type->hasSourceConfig()) {
-        $this->importer->$type->sourceFormValidate($values[$class]);
-      }
-    }
   }
 
   /**
    * Writes to feeds log.
    */
   public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
-    feeds_log($this->importer->id(), $this->feed_nid, $type, $message, $variables, $severity);
+    feeds_log($this, $type, $message, $variables, $severity);
   }
 
   /**
@@ -594,8 +590,8 @@ class FeedsSource {
    * submits a source for import or clearing, we will leave her without any
    * visual indicators of an ongoing job.
    *
-   * @see FeedsSource::startImport().
-   * @see FeedsSource::startClear().
+   * @see Feed::startImport().
+   * @see Feed::startClear().
    *
    * @param $method
    *   Method to execute on importer; one of 'import' or 'clear'.
@@ -605,20 +601,20 @@ class FeedsSource {
   protected function startBackgroundJob($method) {
     if (FEEDS_BATCH_COMPLETE != $this->$method()) {
       $job = array(
-        'type' => $this->importer->id(),
-        'id' => $this->feed_nid,
+        'type' => $this->getImporter()->id(),
+        'id' => $this->id(),
         'period' => 0,
         'periodic' => FALSE,
       );
-      JobScheduler::get("feeds_source_{$method}")->set($job);
+      JobScheduler::get("feeds_feed_{$method}")->set($job);
     }
   }
 
   /**
    * Batch API helper. Starts a Batch API job.
    *
-   * @see FeedsSource::startImport().
-   * @see FeedsSource::startClear().
+   * @see Feed::startImport()
+   * @see Feed::startClear()
    * @see feeds_batch()
    *
    * @param $title
@@ -630,7 +626,7 @@ class FeedsSource {
     $batch = array(
       'title' => $title,
       'operations' => array(
-        array('feeds_batch', array($method, $this->importer->id(), $this->feed_nid)),
+        array('feeds_batch', array($method, $this->id())),
       ),
     );
     batch_set($batch);
@@ -643,8 +639,8 @@ class FeedsSource {
    *   If a lock for the requested job could not be acquired.
    */
   protected function acquireLock() {
-    if (!lock()->acquire("feeds_source_{$this->importer->id()}_{$this->feed_nid}", 60.0)) {
-      throw new FeedsLockException(t('Cannot acquire lock for source @id / @feed_nid.', array('@id' => $this->importer->id(), '@feed_nid' => $this->feed_nid)));
+    if (!lock()->acquire("feeds_feed_{$this->id()}", 60.0)) {
+      throw new FeedsLockException(t('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
     }
   }
 
@@ -652,7 +648,7 @@ class FeedsSource {
    * Releases a lock for this source.
    */
   protected function releaseLock() {
-    lock()->release("feeds_source_{$this->importer->id()}_{$this->feed_nid}");
+    lock()->release("feeds_feed_{$this->id()}");
   }
 
   /**
@@ -663,9 +659,9 @@ class FeedsSource {
    *   returned by configDefaults().
    */
   public function addConfig($config) {
-    $this->config = array_merge($this->config, $config);
+    $this->config = array_merge($this->config->value, $config);
     $default_keys = $this->configDefaults();
-    $this->config = array_intersect_key($this->config, $default_keys);
+    $this->config = array_intersect_key($this->config->value, $default_keys);
   }
 
   /**
@@ -674,7 +670,7 @@ class FeedsSource {
    * Return configuration array, ensure that all default values are present.
    */
   public function getConfig() {
-    return $this->config;
+    return $this->config->value;
   }
 
   /**
@@ -688,6 +684,10 @@ class FeedsSource {
   public function setConfig($config) {
     $defaults = $this->configDefaults();
     $this->config = array_intersect_key($config, $defaults) + $defaults;
+  }
+
+  public function getUser() {
+    return user_load($this->get('uid')->value);
   }
 
 }

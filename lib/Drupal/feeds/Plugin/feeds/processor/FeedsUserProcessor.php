@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\processor;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsProcessor;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsValidationException;
 
@@ -45,7 +45,7 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Creates a new user account in memory and returns it.
    */
-  protected function newEntity(FeedsSource $source) {
+  protected function newEntity(Feed $feed) {
     return entity_create('user', array(
       'uid' => 0,
       'roles' => array_filter(array_values($this->config['roles'])),
@@ -56,8 +56,8 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Loads an existing user.
    */
-  protected function entityLoad(FeedsSource $source, $uid) {
-    $user = parent::entityLoad($source, $uid)->getBCEntity();
+  protected function entityLoad(Feed $feed, $uid) {
+    $user = parent::entityLoad($feed, $uid)->getBCEntity();
 
     // Copy the password so that we can compare it again at save.
     $user->feeds_original_pass = $user->pass;
@@ -97,13 +97,6 @@ class FeedsUserProcessor extends FeedsProcessor {
         drupal_write_record('authmap', $authmap);
       }
     }
-  }
-
-  /**
-   * Delete multiple user accounts.
-   */
-  protected function entityDeleteMultiple($uids) {
-    entity_delete_multiple($this->entityType(), $uids);
   }
 
   /**
@@ -157,7 +150,7 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Override setTargetElement to operate on a target item that is a node.
    */
-  public function setTargetElement(FeedsSource $source, $target_user, $target_element, $value) {
+  public function setTargetElement(Feed $feed, $target_user, $target_element, $value) {
     switch ($target_element) {
       case 'created':
         $target_user->created = feeds_to_unixtime($value, REQUEST_TIME);
@@ -168,7 +161,7 @@ class FeedsUserProcessor extends FeedsProcessor {
         break;
 
       default:
-        parent::setTargetElement($source, $target_user, $target_element, $value);
+        parent::setTargetElement($feed, $target_user, $target_element, $value);
         break;
     }
   }
@@ -226,14 +219,14 @@ class FeedsUserProcessor extends FeedsProcessor {
   /**
    * Get id of an existing feed item term if available.
    */
-  protected function existingEntityId(FeedsSource $source, FeedsParserResult $result) {
-    if ($uid = parent::existingEntityId($source, $result)) {
+  protected function existingEntityId(Feed $feed, FeedsParserResult $result) {
+    if ($uid = parent::existingEntityId($feed, $result)) {
       return $uid;
     }
 
     // Iterate through all unique targets and try to find a user for the
     // target's value.
-    foreach ($this->uniqueTargets($source, $result) as $target => $value) {
+    foreach ($this->uniqueTargets($feed, $result) as $target => $value) {
       switch ($target) {
         case 'name':
           $uid = db_query("SELECT uid FROM {users} WHERE name = :name", array(':name' => $value))->fetchField();

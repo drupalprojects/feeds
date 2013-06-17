@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsProcessor;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
 
@@ -47,9 +47,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
   /**
    * Creates a new node in memory and returns it.
    */
-  protected function newEntity(FeedsSource $source) {
+  protected function newEntity(Feed $feed) {
     $defaults = variable_get('node_options_' . $this->bundle(), array('status', 'promote'));
-
     return entity_create('node', array(
       'type' => $this->bundle(),
       'changed' => REQUEST_TIME,
@@ -70,8 +69,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
    *
    * @todo Reevaluate the use of node_object_prepare().
    */
-  protected function entityLoad(FeedsSource $source, $nid) {
-    $node = parent::entityLoad($source, $nid)->getBCEntity();
+  protected function entityLoad(Feed $feed, $nid) {
+    $node = parent::entityLoad($feed, $nid)->getBCEntity();
 
     if ($this->config['update_existing'] != FEEDS_UPDATE_EXISTING) {
       $node->uid = $this->config['author'];
@@ -150,17 +149,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
   }
 
   /**
-   * Delete a series of nodes.
-   */
-  protected function entityDeleteMultiple($nids) {
-    entity_delete_multiple($this->entityType(), $nids);
-  }
-
-  /**
    * Overrides parent::expiryQuery().
    */
-  protected function expiryQuery(FeedsSource $source, $time) {
-    $select = parent::expiryQuery($source, $time);
+  protected function expiryQuery(Feed $feed, $time) {
+    $select = parent::expiryQuery($feed, $time);
     $data_table = $select->join('node_field_data', 'nfd', 'e.nid = nfd.nid');
     $select->condition('nfd.created', REQUEST_TIME - $time, '<');
     return $select;
@@ -240,22 +232,13 @@ class FeedsNodeProcessor extends FeedsProcessor {
   /**
    * Override setTargetElement to operate on a target item that is a node.
    */
-  public function setTargetElement(FeedsSource $source, $target_node, $target_element, $value) {
+  public function setTargetElement(Feed $feed, $target_node, $target_element, $value) {
     switch ($target_element) {
       case 'created':
         $target_node->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
 
       case 'feeds_source':
-        // Get the class of the feed node importer's fetcher and set the source
-        // property. See feeds_node_update() how $node->feeds gets stored.
-        if ($id = feeds_get_importer_id($this->bundle())) {
-          $class = get_class(feeds_importer($id)->fetcher);
-          $target_node->feeds[$class]['source'] = $value;
-          // This effectively suppresses 'import on submission' feature.
-          // See feeds_node_insert().
-          $target_node->feeds['suppress_import'] = TRUE;
-        }
         break;
 
       case 'user_name':
@@ -271,7 +254,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
         break;
 
       default:
-        parent::setTargetElement($source, $target_node, $target_element, $value);
+        parent::setTargetElement($feed, $target_node, $target_element, $value);
         break;
     }
   }
@@ -340,16 +323,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
       );
     }
 
-    // If the target content type is a Feed node, expose its source field.
-    if ($id = feeds_get_importer_id($this->bundle())) {
-      $name = feeds_importer($id)->label();
-      $targets['feeds_source'] = array(
-        'name' => t('Feed source'),
-        'description' => t('The content type created by this processor is a Feed Node, it represents a source itself. Depending on the fetcher selected on the importer "@importer", this field is expected to be for example a URL or a path to a file.', array('@importer' => $name)),
-        'optional_unique' => TRUE,
-      );
-    }
-
     // Let other modules expose mapping targets.
     feeds_load_mappers();
     $entity_type = $this->entityType();
@@ -362,14 +335,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
   /**
    * Get nid of an existing feed item node if available.
    */
-  protected function existingEntityId(FeedsSource $source, FeedsParserResult $result) {
-    if ($nid = parent::existingEntityId($source, $result)) {
+  protected function existingEntityId(Feed $feed, FeedsParserResult $result) {
+    if ($nid = parent::existingEntityId($feed, $result)) {
       return $nid;
     }
 
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
-    foreach ($this->uniqueTargets($source, $result) as $target => $value) {
+    foreach ($this->uniqueTargets($feed, $result) as $target => $value) {
       switch ($target) {
         case 'nid':
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
@@ -377,12 +350,6 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
         case 'title':
           $nid = db_query("SELECT nid FROM {node_field_data} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->bundle()))->fetchField();
-          break;
-
-        case 'feeds_source':
-          if ($id = feeds_get_importer_id($this->bundle())) {
-            $nid = db_query("SELECT fs.feed_nid FROM {node} n JOIN {feeds_source} fs ON n.nid = fs.feed_nid WHERE fs.id = :id AND fs.source = :source", array(':id' => $id, ':source' => $value))->fetchField();
-          }
           break;
       }
       if ($nid) {

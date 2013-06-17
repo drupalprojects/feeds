@@ -59,7 +59,7 @@ class FeedsMapperConfigTest extends FeedsMapperTestBase {
     $this->drupalPost(NULL, array(), t('Save'));
 
     // Reload.
-    $this->drupalGet('admin/structure/feeds/syndication/mapping');
+    $this->drupalGet('admin/structure/feeds/manage/syndication/mapping');
 
     // See if our settings were saved.
     $this->assertText('Checkbox active.');
@@ -92,7 +92,7 @@ class FeedsMapperConfigTest extends FeedsMapperTestBase {
     $this->assertText('A text field field is required.');
     $this->drupalPost(NULL, array(), t('Save'));
     // Reload.
-    $this->drupalGet('admin/structure/feeds/syndication/mapping');
+    $this->drupalGet('admin/structure/feeds/manage/syndication/mapping');
     // Value has not changed.
     $this->assertText('Textfield value: Some text');
 
@@ -115,7 +115,7 @@ class FeedsMapperConfigTest extends FeedsMapperTestBase {
     // Click Save.
     $this->drupalPost(NULL, array(), t('Save'));
     // Reload.
-    $this->drupalGet('admin/structure/feeds/syndication/mapping');
+    $this->drupalGet('admin/structure/feeds/manage/syndication/mapping');
     $this->assertText('Checkbox active.');
     $this->assertText('Checkbox inactive.');
     $this->assertText('Second mapping text');

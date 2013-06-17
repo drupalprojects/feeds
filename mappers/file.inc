@@ -51,7 +51,7 @@ function file_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  * user has decided to map to and $value contains the value of the feed item
  * element the user has picked as a source.
  */
-function file_feeds_set_target($source, $entity, $target, $value) {
+function file_feeds_set_target($feed, $entity, $target, $value) {
   if (empty($value)) {
     return;
   }
@@ -83,8 +83,8 @@ function file_feeds_set_target($source, $entity, $target, $value) {
 
     static $destination;
     if (!$destination) {
-      $entity_type = $source->importer->processor->entityType();
-      $bundle = $source->importer->processor->bundle();
+      $entity_type = $feed->getImporter()->processor->entityType();
+      $bundle = $feed->getImporter()->processor->bundle();
 
       $instance_info = field_info_instance($entity_type, $field_name, $bundle);
 
@@ -102,7 +102,7 @@ function file_feeds_set_target($source, $entity, $target, $value) {
   $field = isset($entity->$field_name) ? $entity->$field_name : array(Language::LANGCODE_NOT_SPECIFIED => array());
   $delta = 0;
   foreach ($value as $v) {
-    if ($info['cardinality'] == $delta) {
+    if ($delta >= $info['cardinality'] && $info['cardinality'] > -1) {
       break;
     }
 
@@ -119,7 +119,9 @@ function file_feeds_set_target($source, $entity, $target, $value) {
       case 'uri':
         try {
           $file = $v->getFile($destination);
-          $field[Language::LANGCODE_NOT_SPECIFIED][$delta] += (array) $file;
+          $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['entity'] = $file;
+          $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['fid'] = $file->id();
+          // $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['description'] = $file->description->value;
           // @todo: Figure out how to properly populate this field.
           $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['display'] = 1;
         }

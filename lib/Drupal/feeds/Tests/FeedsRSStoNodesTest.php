@@ -67,7 +67,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
    * Test node creation, refreshing/deleting feeds and feed items.
    */
   public function test() {
-    $nid = $this->createFeedNode();
+    $fid = $this->createFeed();
 
     // Assert 10 items aggregated after creation of the node.
     $this->assertText('Created 10 nodes');
@@ -75,9 +75,9 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->assertEqual("Created by FeedsNodeProcessor", db_query("SELECT nr.log FROM {node} n JOIN {node_field_revision} nr ON n.vid = nr.vid WHERE n.nid = :nid", array(':nid' => $article_nid))->fetchField());
 
     // Navigate to feed node, there should be Feeds tabs visible.
-    $this->drupalGet("node/$nid");
-    $this->assertRaw("node/$nid/import");
-    $this->assertRaw("node/$nid/delete-items");
+    $this->drupalGet("feed/$fid");
+    $this->assertRaw("feed/$fid/import");
+    $this->assertRaw("feed/$fid/delete-items");
 
     // Assert accuracy of aggregated information.
     $this->drupalGet('node');
@@ -95,7 +95,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // $this->assertEqual($format, filter_fallback_format(), 'Using default Input format.');
 
     // Import again.
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('There are no new nodes');
 
     // Assert DB status, there still shouldn't be more than 10 items.
@@ -110,22 +110,22 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
       'node_options[status]' => FALSE,
     );
     $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
-    $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedDeleteItems($fid);
+    $this->feedImportItems($fid);
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 0")->fetchField();
     $this->assertEqual($count, 10, 'No items are published.');
     $edit = array(
       'node_options[status]' => TRUE,
     );
     $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
-    $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
+    $this->feedDeleteItems($fid);
 
     // Enable replace existing and import updated feed file.
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->setSettings('syndication', 'processor', array('update_existing' => 1));
     $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed_changes.rss2';
-    $this->editFeedNode($nid, $feed_url);
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->editFeed($fid, $feed_url);
+    $this->feedImportItems($fid);
     $this->assertText('Updated 2 nodes');
 
     // Assert accuracy of aggregated content (check 2 updates, one original).
@@ -135,24 +135,27 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->assertText('Scaling the Open Atrium UI');
 
     // Import again.
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('There are no new nodes');
     $this->assertFeedItemCount(10);
 
     // Now delete all items.
-    $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
+    $this->feedDeleteItems($fid);
     $this->assertText('Deleted 10 nodes');
     $this->assertFeedItemCount(0);
 
     // Change author and turn off authorization.
     $this->auth_user = $this->drupalCreateUser(array('access content'));
-    $this->setSettings('syndication', 'processor', array('author' => $this->auth_user->name, 'authorize' => FALSE));
+    $this->setSettings('syndication', 'processor', array(
+      'author' => $this->auth_user->name,
+      'authorize' => FALSE,
+    ));
 
     // Change input format.
     $this->setSettings('syndication', 'processor', array('input_format' => 'plain_text'));
 
     // Import again.
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('Created 10 nodes');
 
     // Assert author.
@@ -181,14 +184,14 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
       ->condition('entity_id', $nids, 'IN')
       ->execute();
 
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
 
     $this->drupalGet('node');
     $this->assertNoPattern('/<span>' . check_plain($this->auth_user->name) . '<\/span>/');
     $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node_field_data} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
     $this->assertEqual($count, 0, t('@count items in database.', array('@count' => $count)));
 
-    // Map feed node's author to feed item author, update - feed node's items
+    // Map feed's author to feed item author, update - feed node's items
     // should now be assigned to feed node author.
     $this->addMappings('syndication', array(
       5 => array(
@@ -196,20 +199,20 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
         'target' => 'uid',
       ),
     ));
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->drupalGet('node');
     $this->assertNoPattern('/<span>' . check_plain($this->auth_user->name) . '<\/span>/');
-    $uid = db_query("SELECT uid FROM {node_field_data} WHERE nid = :nid", array(':nid' => $nid))->fetchField();
+    $uid = db_query("SELECT uid FROM {feeds_feed} WHERE fid = :fid", array(':fid' => $fid))->fetchField();
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} WHERE uid = :uid", array(':uid' => $uid))->fetchField();
-    $this->assertEqual($count, 11, 'All feed item nodes are assigned to feed node author.');
+    $this->assertEqual($count, 10, t('@count feed item nodes are assigned to feed node author.', array('@count' => $count)));
 
     // Login with new user with only access content permissions.
     $this->drupalLogin($this->auth_user);
 
     // Navigate to feed node, there should be no Feeds tabs visible.
-    $this->drupalGet("node/$nid");
-    $this->assertNoRaw("node/$nid/import");
-    $this->assertNoRaw("node/$nid/delete-items");
+    $this->drupalGet("feed/$fid");
+    $this->assertNoRaw("feed/$fid/import");
+    $this->assertNoRaw("feed/$fid/delete-items");
 
     // Now create a second feed configuration that is not attached to a content
     // type and run tests on importing/purging.
@@ -217,14 +220,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Login with sufficient permissions.
     $this->drupalLogin($this->admin_user);
     // Remove all items again so that next test can check for them.
-    $this->drupalPost("node/$nid/delete-items", array(), 'Delete');
+    $this->feedDeleteItems($fid);
 
     // Create an importer, not attached to content type.
     $this->createImporterConfiguration('Syndication standalone', 'syndication_standalone');
-    $edit = array(
-      'content_type' => '',
-    );
-    $this->drupalPost('admin/structure/feeds/syndication_standalone/settings', $edit, 'Save');
     $this->addMappings('syndication_standalone', array(
       0 => array(
         'source' => 'title',
@@ -252,7 +251,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     ));
 
     // Import, assert 10 items aggregated after creation of the node.
-    $this->importURL('syndication_standalone');
+    $fid = $this->importURL('syndication_standalone');
     $this->assertText('Created 10 nodes');
 
     // Assert accuracy of aggregated information.
@@ -261,14 +260,14 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->assertFeedItemCount(10);
 
     // Import again.
-    $this->drupalPost('import/syndication_standalone', array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('There are no new nodes');
     $this->assertFeedItemCount(10);
 
     // Enable replace existing and import updated feed file.
     $this->setSettings('syndication_standalone', 'processor', array('update_existing' => 1));
     $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed_changes.rss2';
-    $this->importURL('syndication_standalone', $feed_url);
+    $this->importURL('syndication_standalone', $feed_url, $fid);
     $this->assertText('Updated 2 nodes');
 
     // Assert accuracy of aggregated information (check 2 updates, one orig).
@@ -278,17 +277,17 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->assertText('Scaling the Open Atrium UI');
 
     // Import again.
-    $this->drupalPost('import/syndication_standalone', array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('There are no new nodes');
     $this->assertFeedItemCount(10);
 
     // Now delete all items.
-    $this->drupalPost('import/syndication_standalone/delete-items', array(), 'Delete');
+    $this->feedDeleteItems($fid);
     $this->assertText('Deleted 10 nodes');
     $this->assertFeedItemCount(0);
 
     // Import again, we should find new content.
-    $this->drupalPost('import/syndication_standalone', array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('Created 10 nodes');
     $this->assertFeedItemCount(10);
 
@@ -296,7 +295,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->drupalLogin($this->auth_user);
 
     // Navigate to feed import form, access should be denied.
-    $this->drupalGet('import/syndication_standalone');
+    $this->drupalGet("feed/$fid/import");
     $this->assertResponse(403);
 
     // Use File Fetcher.
@@ -307,9 +306,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
     // Create a feed node.
     $edit = array(
-      'files[feeds]' => $this->absolutePath() . '/tests/feeds/drupalplanet.rss2',
+      'files[fetcher]' => $this->absolutePath() . '/tests/feeds/drupalplanet.rss2',
     );
-    $this->drupalPost('import/syndication_standalone', $edit, 'Import');
+    $this->drupalPost("feed/$fid/edit", $edit, 'Save');
+    $this->feedImportItems($fid);
     $this->assertText('Created 25 nodes');
   }
 
@@ -362,14 +362,16 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
    */
   function testFeedURLValidation() {
     $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => 'invalid://url',
+      'fetcher[source]' => 'invalid://url',
     );
-    $this->drupalPost('node/add/page', $edit, 'Save and publish');
+    $this->drupalPost('feed/add/syndication', $edit, 'Save');
     $this->assertText('The URL invalid://url is invalid.');
   }
 
   /**
    * Test using non-normal URLs like feed:// and webcal://.
+   *
+   * @todo Fix auto title.
    */
   function testOddFeedSchemes() {
     $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2';
@@ -379,28 +381,14 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     foreach ($schemes as $scheme) {
       $feed_url = strtr($url, array('http://' => $scheme . '://', 'https://' => $scheme . '://'));
 
-      $edit['feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]'] = $feed_url;
-      $this->drupalPost('node/add/page', $edit, 'Save and publish');
-      $this->assertText('Basic page Development Seed - Technological Solutions for Progressive Organizations has been created.');
+      $edit['fetcher[source]'] = $feed_url;
+      $edit['title'] = 'Development Seed - Technological Solutions for Progressive Organizations has been created.';
+      $this->drupalPost('feed/add/syndication', $edit, 'Save');
+      $this->assertText('Syndication Development Seed - Technological Solutions for Progressive Organizations has been created.');
       $this->assertText('Created 10 nodes.');
       $this->assertFeedItemCount($item_count + 10);
       $item_count += 10;
     }
-  }
-
-  /**
-   * Test that feed elements and links are not found on non-feed nodes.
-   */
-  function testNonFeedNodeUI() {
-    // There should not be feed links on an article node.
-    $non_feed_node = $this->drupalCreateNode(array('type' => 'article'));
-    $this->drupalGet('node/' . $non_feed_node->nid);
-    $this->assertNoLinkByHref('node/' . $non_feed_node->nid . '/import');
-    $this->assertNoLink('Delete items');
-
-    // Navigate to a non-feed node form, there should be no Feed field visible.
-    $this->drupalGet('node/add/article');
-    $this->assertNoFieldByName('feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]');
   }
 
   /**
@@ -420,23 +408,23 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
       ),
     ));
 
-    $nid = $this->createFeedNode();
+    $fid = $this->createFeed();
 
     $this->assertText('Failed importing 10 nodes.');
     $this->assertText('User ' . $account->name . ' is not authorized to create content type article.');
     $node_count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
 
-    // We should have 1 node, the feed node.
-    $this->assertEqual($node_count, 1, t('Correct number of nodes in the database.'));
+    // We should have 0 nodes.
+    $this->assertEqual($node_count, 0, t('@count of nodes in the database.', array('@count' => $node_count)));
 
     // Give the user super admin powers.
     user_delete($account->uid);
     $account = $this->drupalCreateUser(array('access content', 'bypass node access'), 'Development Seed');
 
-    $this->drupalPost("node/$nid/import", array(), 'Import');
+    $this->feedImportItems($fid);
     $this->assertText('Created 10 nodes.');
     $node_count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
-    $this->assertEqual($node_count, 11, t('Correct number of nodes in the database.'));
+    $this->assertEqual($node_count, 10, t('@count of nodes in the database.', array('@count' => $node_count)));
   }
 
   /**
@@ -444,13 +432,13 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
    */
   public function testExpiry() {
     // Create importer configuration.
-    $this->setSettings('syndication', NULL, array('content_type' => ''));
     $this->setSettings('syndication', 'processor', array(
       'expire' => 3600,
     ));
 
     // Create importer.
     $this->importURL('syndication');
+    $node_count = db_query('SELECT COUNT(*) FROM {feeds_item}')->fetchField();
 
     // Set date of a few nodes to current date so they don't expire.
     $edit = array(
@@ -469,7 +457,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
       ->fields(array(
         'next' => 0,
       ))
-      ->condition('name', 'feeds_source_expire')
+      ->condition('name', 'feeds_feed_expire')
       ->execute();
 
     // Run cron to execute scheduled jobs.
@@ -479,7 +467,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $row_count = db_query('SELECT COUNT(*) FROM {feeds_item}')->fetchField();
 
     // Check that number of feeds items is equal to the expected items.
-    $this->assertEqual($row_count, 2, 'Nodes expired.');
+    $this->assertEqual($row_count, 2, t('@count nodes expired.', array('@count' => $node_count - $row_count)));
   }
 
 }

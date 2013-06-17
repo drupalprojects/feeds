@@ -65,13 +65,13 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
         'target' => 'field_files:uri',
       ),
     ));
-    $nid = $this->createFeedNode('syndication', $this->getAbsoluteUrl('testing/feeds/flickr.xml'));
+    $fid = $this->createFeed('syndication', $this->getAbsoluteUrl('testing/feeds/flickr.xml'));
     $this->assertText('Created 5 nodes');
 
     $files = $this->listTestFiles();
     $entities = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
-      ->condition('id', 'syndication')
+      ->condition('fid', $fid)
       ->execute();
 
     foreach ($entities as $entity) {
@@ -95,7 +95,6 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     $this->createImporterConfiguration('Node import from CSV', 'node');
     $this->setPlugin('node', 'parser', 'csv');
     $this->setSettings('node', 'processor', array('bundle' => $typename));
-    $this->setSettings('node', NULL, array('content_type' => ''));
     $this->addMappings('node', array(
       0 => array(
         'source' => 'title',
@@ -108,17 +107,14 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     ));
 
     // Import.
-    $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $this->getAbsoluteUrl('testing/feeds/files.csv'),
-    );
-    $this->drupalPost('import/node', $edit, 'Import');
+    $fid = $this->importURL('node', $this->getAbsoluteUrl('testing/feeds/files.csv'));
     $this->assertText('Created 5 nodes');
 
     // Assert: files should be in resources/.
     $files = $this->listTestFiles();
     $entities = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
-      ->condition('id', 'node')
+      ->condition('fid', $fid)
       ->execute();
 
     foreach ($entities as $entity) {
@@ -128,24 +124,21 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     }
 
     // 3) Test mapping of local resources, this time leave files in place.
-    $this->drupalPost('import/node/delete-items', array(), 'Delete');
+    $this->feedDeleteItems($fid);
     // Setting the fields file directory to images will make copying files
     // obsolete.
     $edit = array(
       'instance[settings][file_directory]' => 'images',
     );
     $this->drupalPost("admin/structure/types/manage/$typename/fields/node.$typename.field_files", $edit, t('Save settings'));
-    $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $this->getAbsoluteUrl('testing/feeds/files.csv'),
-    );
-    $this->drupalPost('import/node', $edit, 'Import');
+    $this->importURL('node', $this->getAbsoluteUrl('testing/feeds/files.csv'), $fid);
     $this->assertText('Created 5 nodes');
 
     // Assert: files should be in images/ now.
     $files = $this->listTestFiles();
     $entities = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
-      ->condition('id', 'node')
+      ->condition('fid', $fid)
       ->execute();
 
     foreach ($entities as $entity) {
@@ -156,7 +149,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     }
 
     // Deleting all imported items will delete the files from the images/ dir.
-    $this->drupalPost('import/node/delete-items', array(), 'Delete');
+    $this->feedDeleteItems($fid);
 
     // @todo Figure out why these files are not being removed.
     // $this->cronRun();
@@ -184,7 +177,6 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     $this->createImporterConfiguration('Node import from CSV', 'image_test');
     $this->setPlugin('image_test', 'parser', 'csv');
     $this->setSettings('image_test', 'processor', array('bundle' => $typename));
-    $this->setSettings('image_test', NULL, array('content_type' => ''));
     $this->addMappings('image_test', array(
       0 => array(
         'source' => 'title',
@@ -205,17 +197,14 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     ));
 
     // Import.
-    $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => url('testing/feeds/files-remote.csv', array('absolute' => TRUE)),
-    );
-    $this->drupalPost('import/image_test', $edit, 'Import');
+    $fid = $this->importURL('image_test', $this->getAbsoluteUrl('testing/feeds/files-remote.csv'));
     $this->assertText('Created 5 nodes');
 
     // Assert files exist.
     $files = $this->listTestFiles();
     $entities = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
-      ->condition('id', 'image_test')
+      ->condition('fid', $fid)
       ->execute();
 
     foreach ($entities as $i => $entity) {

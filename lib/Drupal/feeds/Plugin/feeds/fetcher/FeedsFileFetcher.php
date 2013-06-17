@@ -11,7 +11,7 @@ use Drupal\feeds\FeedsFileFetcherResult;
 use Drupal\feeds\Plugin\FeedsFetcher;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Exception;
 
 
@@ -31,19 +31,19 @@ class FeedsFileFetcher extends FeedsFetcher {
   /**
    * Implements FeedsFetcher::fetch().
    */
-  public function fetch(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
+  public function fetch(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
 
     // Just return a file fetcher result if this is a file.
-    if (is_file($source_config['source'])) {
-      return new FeedsFileFetcherResult($source_config['source']);
+    if (is_file($feed_config['source'])) {
+      return new FeedsFileFetcherResult($feed_config['source']);
     }
 
     // Batch if this is a directory.
-    $state = $source->state(FEEDS_FETCH);
+    $state = $feed->state(FEEDS_FETCH);
     $files = array();
     if (!isset($state->files)) {
-      $state->files = $this->listFiles($source_config['source']);
+      $state->files = $this->listFiles($feed_config['source']);
       $state->total = count($state->files);
     }
     if (count($state->files)) {
@@ -52,7 +52,7 @@ class FeedsFileFetcher extends FeedsFetcher {
       return new FeedsFileFetcherResult($file);
     }
 
-    throw new Exception(t('Resource is not a file or it is an empty directory: %source', array('%source' => $source_config['source'])));
+    throw new Exception(t('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
   }
 
   /**
@@ -81,23 +81,23 @@ class FeedsFileFetcher extends FeedsFetcher {
   /**
    * Source form.
    */
-  public function sourceForm($source_config) {
+  public function sourceForm($feed_config) {
     $form = array();
     $form['fid'] = array(
       '#type' => 'value',
-      '#value' => empty($source_config['fid']) ? 0 : $source_config['fid'],
+      '#value' => empty($feed_config['fid']) ? 0 : $feed_config['fid'],
     );
     if (empty($this->config['direct'])) {
       $form['source'] = array(
         '#type' => 'value',
-        '#value' => empty($source_config['source']) ? '' : $source_config['source'],
+        '#value' => empty($feed_config['source']) ? '' : $feed_config['source'],
       );
       $form['upload'] = array(
         '#type' => 'file',
         '#title' => empty($this->config['direct']) ? t('File') : NULL,
-        '#description' => empty($source_config['source']) ? t('Select a file from your local system.') : t('Select a different file from your local system.'),
+        '#description' => empty($feed_config['source']) ? t('Select a file from your local system.') : t('Select a different file from your local system.'),
         '#theme' => 'feeds_upload',
-        '#file_info' => empty($source_config['fid']) ? NULL : file_load($source_config['fid']),
+        '#file_info' => empty($feed_config['fid']) ? NULL : file_load($feed_config['fid']),
         '#size' => 10,
       );
     }
@@ -106,7 +106,7 @@ class FeedsFileFetcher extends FeedsFetcher {
         '#type' => 'textfield',
         '#title' => t('File'),
         '#description' => t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->config['allowed_schemes']))),
-        '#default_value' => empty($source_config['source']) ? '' : $source_config['source'],
+        '#default_value' => empty($feed_config['source']) ? '' : $feed_config['source'],
       );
     }
     return $form;
@@ -129,7 +129,7 @@ class FeedsFileFetcher extends FeedsFetcher {
 
       if (!file_prepare_directory($feed_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
         if (user_access('administer feeds')) {
-          $link = url('admin/structure/feeds/' . $this->id . '/settings/' . $this->pluginType());
+          $link = url('admin/structure/feeds/manage/' . $this->id . '/settings/' . $this->pluginType());
           form_set_error('feeds][FeedsFileFetcher][source', t('Upload failed. Please check the upload <a href="@link">settings.</a>', array('@link' => $link)));
         }
         else {
@@ -138,12 +138,12 @@ class FeedsFileFetcher extends FeedsFetcher {
         watchdog('feeds', 'The upload directory %directory required by a feed could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', array('%directory' => $feed_dir));
       }
       // Validate and save uploaded file.
-      elseif ($file = file_save_upload('feeds', $validators, $feed_dir, 0)) {
-        $values['source'] = $file->uri;
+      elseif ($file = file_save_upload('fetcher', $validators, $feed_dir, 0)) {
+        $values['source'] = $file->getFileUri();
         $values['file'] = $file;
       }
       elseif (empty($values['source'])) {
-        form_set_error('feeds][FeedsFileFetcher][source', t('Please upload a file.'));
+        form_set_error('files][fetcher', t('Please upload a file.'));
       }
       else {
         // File present from previous upload. Nothing to validate.
@@ -165,32 +165,32 @@ class FeedsFileFetcher extends FeedsFetcher {
   /**
    * Overrides parent::sourceSave().
    */
-  public function sourceSave(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
+  public function sourceSave(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
 
     // If a new file is present, delete the old one and replace it with the new
     // one.
-    if (isset($source_config['file'])) {
-      $file = $source_config['file'];
-      if (isset($source_config['fid'])) {
-        $this->deleteFile($source_config['fid'], $source->feed_nid);
+    if (isset($feed_config['file'])) {
+      $file = $feed_config['file'];
+      if (isset($feed_config['fid'])) {
+        $this->deleteFile($feed_config['fid'], $feed->id());
       }
-      $file->status = FILE_STATUS_PERMANENT;
-      file_usage()->add($file, 'feeds', get_class($this), $source->feed_nid);
+      $file->setPermanent();
+      file_usage()->add($file, 'feeds', $this->getPluginID(), $feed->id());
 
-      $source_config['fid'] = $file->fid;
-      unset($source_config['file']);
-      $source->setConfigFor($this, $source_config);
+      $feed_config['fid'] = $file->id();
+      unset($feed_config['file']);
+      $feed->setConfigFor($this, $feed_config);
     }
   }
 
   /**
    * Overrides parent::sourceDelete().
    */
-  public function sourceDelete(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
-    if (isset($source_config['fid'])) {
-      $this->deleteFile($source_config['fid'], $source->feed_nid);
+  public function sourceDelete(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    if (isset($feed_config['fid'])) {
+      $this->deleteFile($feed_config['fid'], $feed->id());
     }
   }
 
@@ -295,7 +295,7 @@ class FeedsFileFetcher extends FeedsFetcher {
    *
    * @param int $fid
    *   The file id.
-   * @param int $feed_nid
+   * @param int $fid
    *   The feed node's id, or 0 if a standalone feed.
    *
    * @return bool|array
@@ -304,9 +304,9 @@ class FeedsFileFetcher extends FeedsFetcher {
    *
    * @see file_delete()
    */
-  protected function deleteFile($fid, $feed_nid) {
+  protected function deleteFile($fid, $feed_id) {
     if ($file = file_load($fid)) {
-      file_usage()->delete($file, 'feeds', get_class($this), $feed_nid);
+      file_usage()->delete($file, 'feeds', $this->getPluginID(), $feed_id);
     }
     return FALSE;
   }

@@ -54,15 +54,15 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
 
 
     $path = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/';
-    $nid = $this->createFeedNode('sitemap', $path . 'sitemap-example.xml', 'Testing Sitemap Parser');
+    $fid = $this->createFeed('sitemap', $path . 'sitemap-example.xml', 'Testing Sitemap Parser');
     $this->assertText('Created 5 nodes');
 
     // Assert DB status.
     $count = db_query("SELECT COUNT(*) FROM {feeds_item} WHERE entity_type = 'node'")->fetchField();
-    $this->assertEqual($count, 5, 'Accurate number of items in database.');
+    $this->assertEqual($count, 5, t('@count items in database.', array('@count' => $count)));
 
     // Check items against known content of feed.
-    $items = db_query("SELECT * FROM {feeds_item} WHERE entity_type = 'node' AND feed_nid = :nid ORDER BY entity_id", array(':nid' => $nid));
+    $items = db_query("SELECT * FROM {feeds_item} WHERE entity_type = 'node' AND fid = :fid ORDER BY entity_id", array(':fid' => $fid));
 
     // Check first item.
     date_default_timezone_set('GMT');
@@ -119,4 +119,5 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     $item = $items->fetchObject();
     $this->assertFalse($item, 'Correct number of feed items recorded.');
   }
+
 }

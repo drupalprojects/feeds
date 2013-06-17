@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\parser;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsParser;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\ParserCSVIterator;
@@ -30,18 +30,18 @@ class FeedsCSVParser extends FeedsParser {
   /**
    * Implements FeedsParser::parse().
    */
-  public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
-    $source_config = $source->getConfigFor($this);
-    $state = $source->state(FEEDS_PARSE);
+  public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
+    $feed_config = $feed->getConfigFor($this);
+    $state = $feed->state(FEEDS_PARSE);
 
     // Load and configure parser.
     feeds_include_library('ParserCSV.inc', 'ParserCSV');
     $parser = new ParserCSV();
-    $delimiter = $source_config['delimiter'] == 'TAB' ? "\t" : $source_config['delimiter'];
+    $delimiter = $feed_config['delimiter'] == 'TAB' ? "\t" : $feed_config['delimiter'];
     $parser->setDelimiter($delimiter);
 
     $iterator = new ParserCSVIterator($fetcher_result->getFilePath());
-    if (empty($source_config['no_headers'])) {
+    if (empty($feed_config['no_headers'])) {
       // Get first line and use it for column names, convert them to lower case.
       $header = $this->parseHeader($parser, $iterator);
       if (!$header) {
@@ -52,7 +52,7 @@ class FeedsCSVParser extends FeedsParser {
 
     // Determine section to parse, parse.
     $start = $state->pointer ? $state->pointer : $parser->lastLinePos();
-    $limit = $source->importer->getLimit();
+    $limit = $this->importer->getLimit();
     $rows = $this->parseItems($parser, $iterator, $start, $limit);
 
     // Report progress.
@@ -62,7 +62,7 @@ class FeedsCSVParser extends FeedsParser {
     $state->progress($state->total, $progress);
 
     // Create a result object and return it.
-    return new FeedsParserResult($rows, $source->feed_nid);
+    return new FeedsParserResult($rows, $feed->id());
   }
 
   /**
@@ -113,8 +113,8 @@ class FeedsCSVParser extends FeedsParser {
   /**
    * Override parent::getSourceElement() to use only lower keys.
    */
-  public function getSourceElement(FeedsSource $source, FeedsParserResult $result, $element_key) {
-    return parent::getSourceElement($source, $result, drupal_strtolower($element_key));
+  public function getSourceElement(Feed $feed, FeedsParserResult $result, $element_key) {
+    return parent::getSourceElement($feed, $result, drupal_strtolower($element_key));
   }
 
   /**
@@ -132,20 +132,20 @@ class FeedsCSVParser extends FeedsParser {
    *
    * Show mapping configuration as a guidance for import form users.
    */
-  public function sourceForm($source_config) {
+  public function sourceForm($feed_config) {
     $form = array();
     $form['#weight'] = -10;
 
     $mappings = $this->importer->processor->config['mappings'];
-    $sources = $uniques = array();
+    $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
-      $sources[] = check_plain($mapping['source']);
+      $feeds[] = check_plain($mapping['source']);
       if (!empty($mapping['unique'])) {
         $uniques[] = check_plain($mapping['source']);
       }
     }
 
-    $output = t('Import !csv_files with one or more of these columns: !columns.', array('!csv_files' => l(t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '!columns' => implode(', ', $sources)));
+    $output = t('Import !csv_files with one or more of these columns: !columns.', array('!csv_files' => l(t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '!columns' => implode(', ', $feeds)));
     $items = array();
     $items[] = format_plural(count($uniques), t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
     $items[] = l(t('Download a template'), 'import/' . $this->importer->id() . '/template');
@@ -173,13 +173,13 @@ class FeedsCSVParser extends FeedsParser {
         '|' => '|',
         '+' => '+',
       ),
-      '#default_value' => isset($source_config['delimiter']) ? $source_config['delimiter'] : ',',
+      '#default_value' => isset($feed_config['delimiter']) ? $feed_config['delimiter'] : ',',
     );
     $form['no_headers'] = array(
       '#type' => 'checkbox',
       '#title' => t('No Headers'),
       '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
-      '#default_value' => isset($source_config['no_headers']) ? $source_config['no_headers'] : 0,
+      '#default_value' => isset($feed_config['no_headers']) ? $feed_config['no_headers'] : 0,
     );
     return $form;
   }
@@ -223,18 +223,18 @@ class FeedsCSVParser extends FeedsParser {
 
   public function getTemplate() {
     $mappings = $this->importer->processor->config['mappings'];
-    $sources = $uniques = array();
+    $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
       if (!empty($mapping['unique'])) {
         $uniques[] = check_plain($mapping['source']);
       }
       else {
-        $sources[] = check_plain($mapping['source']);
+        $feeds[] = check_plain($mapping['source']);
       }
     }
     $sep = ',';
     $columns = array();
-    foreach (array_merge($uniques, $sources) as $col) {
+    foreach (array_merge($uniques, $feeds) as $col) {
       if (strpos($col, $sep) !== FALSE) {
         $col = '"' . str_replace('"', '""', $col) . '"';
       }

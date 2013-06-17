@@ -21,17 +21,8 @@ function feeds_page() {
       if (!(user_access('import ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
         continue;
       }
-      if (empty($importer->config['content_type'])) {
-        $link = 'import/' . $importer->id();
-        $title = $importer->label();
-      }
-      elseif (node_access('create', $importer->config['content_type'])) {
-        $link = 'node/add/' . str_replace('_', '-', $importer->config['content_type']);
-        $title = node_type_get_label($importer->config['content_type']);
-      }
-      else {
-        continue;
-      }
+      $link = 'feed/add/' . $importer->id();
+      $title = $importer->label();
       $rows[] = array(
         l($title, $link),
         check_plain($importer->description),
@@ -51,34 +42,37 @@ function feeds_page() {
 /**
  * Render a feeds import form on import/[config] pages.
  */
-function feeds_import_form($form, &$form_state, $importer_id) {
-  $source = feeds_source($importer_id, empty($form['nid']['#value']) ? 0 : $form['nid']['#value']);
+function feeds_import_form($form, &$form_state, $importer) {
+
+  $feed = entity_create('feeds_feed', array(
+    'importer' => $importer->id(),
+  ));
 
   $form = array();
-  $form['#importer_id'] = $importer_id;
+  $form['#importer_id'] = $importer->id();
   // @todo Move this into fetcher?
   $form['#attributes']['enctype'] = 'multipart/form-data';
   $form['source_status'] = array(
     '#type' => 'fieldset',
     '#title' => t('Status'),
     '#tree' => TRUE,
-    '#value' => feeds_source_status($source),
+    '#value' => feeds_feed_status($feed),
   );
 
-  $source_form = $source->configForm($form_state);
-  if (!empty($source_form)) {
+  $feed_form = $feed->configForm($form_state);
+  if (!empty($feed_form)) {
     $form['feeds'] = array(
       '#type' => 'fieldset',
       '#title' => t('Import'),
       '#tree' => TRUE,
-    ) + $source_form;
+    ) + $feed_form;
   }
 
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import'),
   );
-  $progress = $source->progressImporting();
+  $progress = $feed->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['submit']['#disabled'] = TRUE;
     $form['submit']['#value'] =
@@ -91,8 +85,8 @@ function feeds_import_form($form, &$form_state, $importer_id) {
  * Validation handler for node forms and feeds_import_form().
  */
 function feeds_import_form_validate($form, &$form_state) {
-  // @todo This may be a problem here, as we don't have a feed_nid at this point.
-  feeds_source($form['#importer_id'])->configFormValidate($form_state['values']['feeds']);
+  // @todo This may be a problem here, as we don't have a fid at this point.
+  feeds_feed_load($form['#importer_id'])->configFormValidate($form_state['values']['feeds']);
 }
 
 /**
@@ -100,41 +94,36 @@ function feeds_import_form_validate($form, &$form_state) {
  */
 function feeds_import_form_submit($form, &$form_state) {
   // Save source and import.
-  $source = feeds_source($form['#importer_id']);
+  $feed = feeds_feed_load($form['#importer_id']);
 
   if (!empty($form_state['values']['feeds']) && is_array($form_state['values']['feeds'])) {
-    $source->addConfig($form_state['values']['feeds']);
-    $source->save();
+    $feed->addConfig($form_state['values']['feeds']);
+    $feed->save();
   }
 
   // Add to schedule.
-  $source->schedule();
+  $feed->schedule();
 
   // Refresh feed if import on create is selected.
-  if ($source->importer->config['import_on_create']) {
-    $source->startImport();
+  if ($feed->importer->config['import_on_create']) {
+    $feed->startImport();
   }
 }
 
 /**
  * Render a feeds import form on node/id/import pages.
  */
-function feeds_import_tab_form($form, &$form_state, $node) {
-  $importer_id = feeds_get_importer_id($node->type);
-  $source = feeds_source($importer_id, $node->nid);
-
-  $form = array();
-  $form['#feed_nid'] = $node->nid;
-  $form['#importer_id'] = $importer_id;
-  $form['#redirect'] = 'node/' . $node->nid;
+function feeds_import_tab_form($form, &$form_state, $feed) {
+  $form_state['feed'] = $feed;
+  $form['#redirect'] = 'feed/' . $feed->id();
   $form['source_status'] = array(
     '#type' => 'fieldset',
     '#title' => t('Status'),
     '#tree' => TRUE,
-    '#value' => feeds_source_status($source),
+    '#value' => feeds_feed_status($feed),
   );
-  $form = confirm_form($form, t('Import all content from source?'), 'node/' . $node->nid, '', t('Import'), t('Cancel'), 'confirm feeds update');
-  $progress = $source->progressImporting();
+  $form = confirm_form($form, t('Import all content from source?'), 'feed/' . $feed->id(), '', t('Import'), t('Cancel'), 'confirm feeds update');
+  $progress = $feed->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
     $form['actions']['submit']['#value'] =
@@ -148,7 +137,7 @@ function feeds_import_tab_form($form, &$form_state, $node) {
  */
 function feeds_import_tab_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
-  feeds_source($form['#importer_id'], $form['#feed_nid'])->startImport();
+  $form_state['feed']->startImport();
 }
 
 /**
@@ -157,27 +146,18 @@ function feeds_import_tab_form_submit($form, &$form_state) {
  * Used on both node pages and configuration pages.
  * Therefore $node may be missing.
  */
-function feeds_delete_tab_form($form, &$form_state, $importer_id, $node = NULL) {
-  if (empty($node)) {
-    $source = feeds_source($importer_id);
-    $form['#redirect'] = 'import/' . $source->importer->id();
-  }
-  else {
-    $importer_id = feeds_get_importer_id($node->type);
-    $source = feeds_source($importer_id, $node->nid);
-    $form['#redirect'] = 'node/' . $source->feed_nid;
-  }
+function feeds_delete_tab_form($form, &$form_state, $feed) {
+  $form['#redirect'] = 'feed/' . $feed->id();
   // Form cannot pass on source object.
-  $form['#importer_id'] = $source->importer->id();
-  $form['#feed_nid'] = $source->feed_nid;
+  $form_state['feed'] = $feed;
   $form['source_status'] = array(
     '#type' => 'fieldset',
     '#title' => t('Status'),
     '#tree' => TRUE,
-    '#value' => feeds_source_status($source),
+    '#value' => feeds_feed_status($feed),
   );
   $form = confirm_form($form, t('Delete all items from source?'), $form['#redirect'], '', t('Delete'), t('Cancel'), 'confirm feeds update');
-  $progress = $source->progressClearing();
+  $progress = $feed->progressClearing();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
     $form['actions']['submit']['#value'] =
@@ -191,8 +171,7 @@ function feeds_delete_tab_form($form, &$form_state, $importer_id, $node = NULL) 
  */
 function feeds_delete_tab_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
-  $feed_nid = empty($form['#feed_nid']) ? 0 : $form['#feed_nid'];
-  feeds_source($form['#importer_id'], $feed_nid)->startClear();
+  $form_state['feed']->startClear();
 }
 
 /**
@@ -201,27 +180,18 @@ function feeds_delete_tab_form_submit($form, &$form_state) {
  * Used on both node pages and configuration pages.
  * Therefore $node may be missing.
  */
-function feeds_unlock_tab_form($form, &$form_state, $importer_id, $node = NULL) {
-  if (empty($node)) {
-    $source = feeds_source($importer_id);
-    $form['#redirect'] = 'import/' . $source->importer->id();
-  }
-  else {
-    $importer_id = feeds_get_importer_id($node->type);
-    $source = feeds_source($importer_id, $node->nid);
-    $form['#redirect'] = 'node/' . $source->feed_nid;
-  }
+function feeds_unlock_tab_form($form, &$form_state, $feed) {
+  $form['#redirect'] = 'feed/' . $feed->id();
+  $form_state['feed'] = $feed;
   // Form cannot pass on source object.
-  $form['#importer_id'] = $source->importer->id();
-  $form['#feed_nid'] = $source->feed_nid;
   $form['source_status'] = array(
     '#type' => 'fieldset',
     '#title' => t('Status'),
     '#tree' => TRUE,
-    '#value' => feeds_source_status($source),
+    '#value' => feeds_feed_status($feed),
   );
   $form = confirm_form($form, t('Unlock this importer?'), $form['#redirect'], '', t('Delete'), t('Cancel'), 'confirm feeds update');
-  if ($source->progressImporting() == FEEDS_BATCH_COMPLETE && $source->progressClearing() == FEEDS_BATCH_COMPLETE) {
+  if ($feed->progressImporting() == FEEDS_BATCH_COMPLETE && $feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
     $form['source_locked'] = array(
       '#type' => 'markup',
       '#title' => t('Not Locked'),
@@ -243,13 +213,12 @@ function feeds_unlock_tab_form($form, &$form_state, $importer_id, $node = NULL) 
 function feeds_unlock_tab_form_submit($form, &$form_state) {
   drupal_set_message(t('Import Unlocked'));
   $form_state['redirect'] = $form['#redirect'];
-  $feed_nid = empty($form['#feed_nid']) ? 0 : $form['#feed_nid'];
+  $fid = empty($form['#fid']) ? 0 : $form['#fid'];
   $importer_id = $form['#importer_id'];
 
   //Is there a more API-friendly way to set the state?
-  db_update('feeds_source')
-    ->condition('id', $importer_id)
-    ->condition('feed_nid', $feed_nid)
+  db_update('feeds_feed')
+    ->condition('fid', $fid)
     ->fields(array('state' => FALSE))
     ->execute();
 }
@@ -257,10 +226,10 @@ function feeds_unlock_tab_form_submit($form, &$form_state) {
 /**
  * Handle a fetcher callback.
  */
-function feeds_fetcher_callback($importer, $feed_nid = 0) {
+function feeds_fetcher_callback($importer, $fid = 0) {
   if ($importer instanceof Importer) {
     try {
-      return $importer->fetcher->request($feed_nid);
+      return $importer->fetcher->request($fid);
     }
     catch (Exception $e) {
       // Do nothing.
@@ -283,27 +252,27 @@ function feeds_importer_template($importer_id) {
 /**
  * Renders a status display for a source.
  */
-function feeds_source_status($source) {
-  $progress_importing = $source->progressImporting();
+function feeds_feed_status($feed) {
+  $progress_importing = $feed->progressImporting();
   $v = array();
   if ($progress_importing != FEEDS_BATCH_COMPLETE) {
     $v['progress_importing'] = $progress_importing;
   }
-  $progress_clearing = $source->progressClearing();
+  $progress_clearing = $feed->progressClearing();
   if ($progress_clearing != FEEDS_BATCH_COMPLETE) {
     $v['progress_clearing'] = $progress_clearing;
   }
-  $v['imported'] = $source->imported;
-  $v['count'] = $source->itemCount();
+  $v['imported'] = $feed->imported->value;
+  $v['count'] = $feed->itemCount();
   if (!empty($v)) {
-    return theme('feeds_source_status', $v);
+    return theme('feeds_feed_status', $v);
   }
 }
 
 /**
  * Themes a status display for a source.
  */
-function theme_feeds_source_status($v) {
+function theme_feeds_feed_status($v) {
   $output = '<div class="info-box feeds-source-status">';
   $items = array();
   if ($v['progress_importing']) {
@@ -340,21 +309,21 @@ function theme_feeds_upload($variables) {
   $description = '';
   if (!empty($element['#file_info'])) {
     $file = $element['#file_info'];
-    $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
+    $wrapper = file_stream_wrapper_get_instance_by_uri($file->getFileUri());
     $description .= '<div class="file-info">';
     $description .= '<div class="file-name">';
     if ($wrapper) {
-      $description .= l($file->filename, $wrapper->getExternalUrl());
+      $description .= l($file->getFilename(), $wrapper->getExternalUrl());
     }
     else {
-      $description .= t('URI scheme %scheme not available.', array('%scheme' =>  file_uri_scheme($uri)));
+      $description .= t('URI scheme %scheme not available.', array('%scheme' =>  file_uri_scheme($file->getFileUri())));
     }
     $description .= '</div>';
     $description .= '<div class="file-size">';
-    $description .= format_size($file->filesize);
+    $description .= format_size($file->getSize());
     $description .= '</div>';
     $description .= '<div class="file-mime">';
-    $description .= check_plain($file->filemime);
+    $description .= check_plain($file->getMimeType());
     $description .= '</div>';
     $description .= '</div>';
   }
@@ -366,4 +335,70 @@ function theme_feeds_upload($variables) {
   // For some reason not unsetting #title leads to printing the title twice.
   unset($element['#title']);
   return theme('form_element', $element);
+}
+
+/**
+ * Page callback: Provides the feed submission form.
+ *
+ * @param Importer $importer
+ *   The feeds_importer entity.
+ *
+ * @return array
+ *   A feed submission form.
+ *
+ * @see feeds_menu()
+ */
+function feeds_feed_add_page($importer) {
+  drupal_set_title(t('Create @name', array('@name' => $importer->label())), PASS_THROUGH);
+
+  $feed = entity_create('feeds_feed', array(
+    'uid' => $GLOBALS['user']->uid,
+    'importer' => $importer->id(),
+    'status' => 1,
+    'create' => REQUEST_TIME,
+  ));
+
+  return entity_get_form($feed);
+}
+
+/**
+ * Page callback: Form constructor for feed deletion confirmation form.
+ *
+ * @param FeedInterface $feed
+ *   A feed object.
+ *
+ * @return array
+ *   A form array.
+ *
+ * @see feeds_feed_delete_confirm_submit()
+ * @see feed_menu()
+ */
+function feeds_feed_delete_confirm($form, &$form_state, $feed) {
+  // Always provide entity id in the same form key as in the entity edit form.
+  $form_state['feed'] = $feed;
+  return confirm_form($form,
+    t('Are you sure you want to delete %title?', array('%title' => $feed->label())),
+    'feed/' . $feed->id(),
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+/**
+ * Form submission handler for feeds_feed_delete_confirm().
+ */
+function feeds_feed_delete_confirm_submit($form, &$form_state) {
+  if ($form_state['values']['confirm']) {
+    $feed = $form_state['feed'];
+    $feed->delete();
+    watchdog('content', '@type: deleted %title.', array('@type' => $feed->type, '%title' => $feed->label()));
+    drupal_set_message(t('@type %title has been deleted.', array('@type' => $feed->getImporter()->label(), '%title' => $feed->label())));
+  }
+
+  $form_state['redirect'] = '<front>';
+}
+
+function feeds_feed_page_view() {
+  return t('asdfasdf');
 }

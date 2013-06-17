@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedsResult;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
 
@@ -29,21 +29,21 @@ abstract class FeedsParser extends FeedsPlugin {
    *
    * Extending classes must implement this method.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   Source information.
    * @param $fetcher_result
    *   FeedsFetcherResult returned by fetcher.
    */
-  public abstract function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result);
+  public abstract function parse(Feed $source, FeedsFetcherResult $fetcher_result);
 
   /**
    * Clear all caches for results for given source.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   Source information for this expiry. Implementers can choose to only clear
    *   caches pertaining to this source.
    */
-  public function clear(FeedsSource $source) {}
+  public function clear(Feed $source) {}
 
   /**
    * Declare the possible mapping sources that this parser produces.
@@ -67,18 +67,15 @@ abstract class FeedsParser extends FeedsPlugin {
   public function getMappingSources() {
     feeds_load_mappers();
     $sources = array();
-    $content_type = $this->importer->config['content_type'];
-    drupal_alter('feeds_parser_sources', $sources, $content_type);
-    if (!$this->importer->config['content_type']) {
-      return $sources;
-    }
+    $importer_id = $this->importer->id();
+    drupal_alter('feeds_parser_sources', $sources, $importer_id);
     $sources['parent:uid'] = array(
-      'name' => t('Feed node: User ID'),
-      'description' => t('The feed node author uid.'),
+      'name' => t('Feed: User ID'),
+      'description' => t('The feed author uid.'),
     );
-    $sources['parent:nid'] = array(
-      'name' => t('Feed node: Node ID'),
-      'description' => t('The feed node nid.'),
+    $sources['parent:fid'] = array(
+      'name' => t('Feed: ID'),
+      'description' => t('The feed fid.'),
     );
     return $sources;
   }
@@ -104,20 +101,18 @@ abstract class FeedsParser extends FeedsPlugin {
    * @see FeedsProcessor::map()
    * @see FeedsCSVParser::getSourceElement()
    */
-  public function getSourceElement(FeedsSource $source, FeedsParserResult $result, $element_key) {
+  public function getSourceElement(Feed $feed, FeedsParserResult $result, $element_key) {
 
     switch ($element_key) {
-
       case 'parent:uid':
-        if ($source->feed_nid && $node = node_load($source->feed_nid)) {
-          return $node->uid;
-        }
-        break;
-      case 'parent:nid':
-        return $source->feed_nid;
+        return $feed->uid->value;
+
+      case 'parent:fid':
+        return $feed->id();
     }
 
     $item = $result->currentItem();
     return isset($item[$element_key]) ? $item[$element_key] : '';
   }
+
 }

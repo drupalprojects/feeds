@@ -40,9 +40,6 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     ))->save();
 
     $this->setSettings('term_import', 'processor', array('bundle' => 'addams'));
-
-    // Use standalone form.
-    $this->setSettings('term_import', NULL, array('content_type' => ''));
   }
 
   /**
@@ -59,7 +56,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     ));
 
     // Import and assert.
-    $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $fid = $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv');
     $this->assertText('Created 5 terms');
     $this->drupalGet('admin/structure/taxonomy/manage/addams');
     $this->assertText('Morticia');
@@ -68,7 +65,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     $this->assertText('Pugsley');
 
     // Import again.
-    $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv', $fid);
     $this->assertText('There are no new terms.');
 
     // Force update.
@@ -76,7 +73,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
       'skip_hash_check' => TRUE,
       'update_existing' => 2,
     ));
-    $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->importFile('term_import', $this->absolutePath() . '/tests/feeds/users.csv', $fid);
     $this->assertText('Updated 5 terms.');
 
     // Add a term manually, delete all terms, this term should still stand.
@@ -84,7 +81,8 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
       'name' => 'Cousin Itt',
       'vid' => 'addams',
     ))->save();
-    $this->drupalPost('import/term_import/delete-items', array(), t('Delete'));
+
+    $this->feedDeleteItems($fid);
     $this->drupalGet('admin/structure/taxonomy/manage/addams');
     $this->assertText('Cousin Itt');
     $this->assertNoText('Morticia');
@@ -92,4 +90,5 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     $this->assertNoText('Gomez');
     $this->assertNoText('Pugsley');
   }
+
 }

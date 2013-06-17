@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ImporterAccessController.
+ * Contains \Drupal\feeds\FeedAccessController.
  */
 
 namespace Drupal\feeds;
@@ -12,11 +12,11 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines an access controller for the feeds_importer entity.
+ * Defines an access controller for the feeds_feed entity.
  *
- * @see \Drupal\feeds\Plugin\Core\Entity\Importer
+ * @see \Drupal\feeds\Plugin\Core\Entity\Feed
  */
-class ImporterAccessController extends EntityAccessController {
+class FeedAccessController extends EntityAccessController {
 
   /**
    * {@inheritdoc}

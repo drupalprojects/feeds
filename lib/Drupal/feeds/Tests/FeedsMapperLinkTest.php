@@ -37,8 +37,6 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
    * Basic test loading a single entry CSV file.
    */
   public function test() {
-    // $static_title = $this->randomName();
-
     // Create content type.
     $typename = $this->createContentType(array(), array(
       'alpha' => array(
@@ -59,13 +57,6 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
           'instance[settings][title]' => 1,
         ),
       ),
-      // 'omega' => array(
-      // 'type' => 'link',
-      //   'instance_settings' => array(
-      //     'instance[settings][title]' => ,
-      //     'instance[settings][title_value]' => $static_title,
-      //   ),
-      // ),
     ));
 
     // Create importer configuration.
@@ -104,37 +95,28 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
         'source' => 'title',
         'target' => 'field_gamma:title',
       ),
-      // 8 => array(
-      //   'source' => 'url',
-      //   'target' => 'field_omega:url',
-      // ),
     ));
 
     // Import RSS file.
-    $nid = $this->createFeedNode();
+    $fid = $this->createFeed();
     // Assert 10 items aggregated after creation of the node.
     $this->assertText('Created 10 nodes');
 
     // Edit the imported node.
-    $this->drupalGet('node/2/edit');
+    $this->drupalGet('node/1/edit');
 
     $url = 'http://developmentseed.org/blog/2009/oct/06/open-atrium-translation-workflow-two-way-updating';
     $title = 'Open Atrium Translation Workflow: Two Way Translation Updates';
-    $this->assertNodeFieldValue('alpha', array('url' => $url, 'static' => $title));
+    $this->assertNodeFieldValue('alpha', array('url' => $url, 'title' => $title));
     $this->assertNodeFieldValue('beta', array('url' => $url));
-    $this->assertNodeFieldValue('gamma', array('url' => $url, 'static' => $title));
-    // $this->assertNodeFieldValue('omega', array('url' => $url, 'static' => $static_title));
-
-    // Test the static title.
-    // $this->drupalGet('node/2');
-    // $this->assertText($static_title, 'Static title link found.');
+    $this->assertNodeFieldValue('gamma', array('url' => $url, 'title' => $title));
   }
 
   /**
    * Override parent::getFormFieldsNames().
    */
   protected function getFormFieldsNames($field_name, $index) {
-    if (in_array($field_name, array('alpha', 'beta', 'gamma', 'omega'))) {
+    if (in_array($field_name, array('alpha', 'beta', 'gamma'))) {
       $fields = array("field_{$field_name}[und][{$index}][url]");
       if (in_array($field_name, array('alpha', 'gamma'))) {
         $fields[] = "field_{$field_name}[und][{$index}][title]";
@@ -164,4 +146,5 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
       return parent::getFormFieldsValues($field_name, $index);
     }
   }
+
 }

@@ -8,12 +8,12 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedsResult;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Abstract class, defines shared functionality between fetchers.
  *
- * Implements FeedsSourceInfoInterface to expose source forms to Feeds.
+ * Implements FeedInfoInterface to expose source forms to Feeds.
  */
 abstract class FeedsFetcher extends FeedsPlugin {
 
@@ -35,16 +35,16 @@ abstract class FeedsFetcher extends FeedsPlugin {
    * @return
    *   A FeedsFetcherResult object.
    */
-  public abstract function fetch(FeedsSource $source);
+  public abstract function fetch(Feed $source);
 
   /**
    * Clear all caches for results for given source.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   Source information for this expiry. Implementers can choose to only clear
    *   caches pertaining to this source.
    */
-  public function clear(FeedsSource $source) {}
+  public function clear(Feed $source) {}
 
   /**
    * Request handler invoked if callback URL is requested. Locked down by
@@ -55,7 +55,7 @@ abstract class FeedsFetcher extends FeedsPlugin {
    * @return
    *   A string to be returned to the client.
    */
-  public function request($feed_nid = 0) {
+  public function request($fid = 0) {
     drupal_access_denied();
   }
 
@@ -67,10 +67,10 @@ abstract class FeedsFetcher extends FeedsPlugin {
    * @return
    *   Path for this fetcher/source combination.
    */
-  public function path($feed_nid = 0) {
+  public function path($fid = 0) {
     $id = urlencode($this->importer->id());
-    if ($feed_nid && is_numeric($feed_nid)) {
-      return "feeds/importer/$id/$feed_nid";
+    if ($fid && is_numeric($fid)) {
+      return "feeds/importer/$id/$fid";
     }
     return "feeds/importer/$id";
   }
@@ -101,29 +101,29 @@ abstract class FeedsFetcher extends FeedsPlugin {
   /**
    * Subscribe to a source. Only implement if fetcher requires subscription.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   Source information for this subscription.
    */
-  public function subscribe(FeedsSource $source) {}
+  public function subscribe(Feed $source) {}
 
   /**
    * Unsubscribe from a source. Only implement if fetcher requires subscription.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   Source information for unsubscribing.
    */
-  public function unsubscribe(FeedsSource $source) {}
+  public function unsubscribe(Feed $source) {}
 
   /**
    * Override import period settings. This can be used to force a certain import
    * interval.
    *
    * @param $source
-   *   A FeedsSource object.
+   *   A Feed object.
    *
    * @return
    *   A time span in seconds if periodic import should be overridden for given
    *   $source, NULL otherwise.
    */
-  public function importPeriod(FeedsSource $source) {}
+  public function importPeriod(Feed $source) {}
 }

@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\fetcher;
 use Drupal\feeds\Plugin\FeedsFetcher;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\PuSHSubscriber;
 use Drupal\feeds\PuSHEnvironment;
 use Drupal\feeds\FeedsHTTPFetcherResult;
@@ -32,12 +32,12 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   /**
    * Implements FeedsFetcher::fetch().
    */
-  public function fetch(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
-    if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($source->feed_nid)->receive())) {
+  public function fetch(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
       return new FeedsFetcherResult($raw);
     }
-    $fetcher_result = new FeedsHTTPFetcherResult($source_config['source']);
+    $fetcher_result = new FeedsHTTPFetcherResult($feed_config['source']);
     // When request_timeout is empty, the global value is used.
     $fetcher_result->setTimeout($this->config['request_timeout']);
     return $fetcher_result;
@@ -46,9 +46,9 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   /**
    * Clear caches.
    */
-  public function clear(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
-    $url = $source_config['source'];
+  public function clear(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    $url = $feed_config['source'];
     feeds_include_library('http_request.inc', 'http_request');
     http_request_clear_cache($url);
   }
@@ -56,17 +56,17 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   /**
    * Implements FeedsFetcher::request().
    */
-  public function request($feed_nid = 0) {
+  public function request($fid = 0) {
     feeds_dbg($_GET);
     @feeds_dbg(file_get_contents('php://input'));
     // A subscription verification has been sent, verify.
     if (isset($_GET['hub_challenge'])) {
-      $this->subscriber($feed_nid)->verifyRequest();
+      $this->subscriber($fid)->verifyRequest();
     }
     // No subscription notification has ben sent, we are being notified.
     else {
       try {
-        feeds_source($this->id, $feed_nid)->existing()->import();
+        feeds_feed_load($fid)->existing()->import();
       }
       catch (Exception $e) {
         // In case of an error, respond with a 503 Service (temporary) unavailable.
@@ -135,13 +135,13 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   /**
    * Expose source form.
    */
-  public function sourceForm($source_config) {
+  public function sourceForm($feed_config) {
     $form = array();
     $form['source'] = array(
       '#type' => 'textfield',
       '#title' => t('URL'),
       '#description' => t('Enter a feed URL.'),
-      '#default_value' => isset($source_config['source']) ? $source_config['source'] : '',
+      '#default_value' => isset($feed_config['source']) ? $feed_config['source'] : '',
       '#maxlength' => NULL,
       '#required' => TRUE,
     );
@@ -169,66 +169,55 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   /**
    * Override sourceSave() - subscribe to hub.
    */
-  public function sourceSave(FeedsSource $source) {
+  public function sourceSave(Feed $feed) {
     if ($this->config['use_pubsubhubbub']) {
-      // If this is a feeds node we want to delay the subscription to
-      // feeds_exit() to avoid transaction race conditions.
-      if ($source->feed_nid) {
-        $job = array('fetcher' => $this, 'source' => $source);
-        feeds_set_subscription_job($job);
-      }
-      else {
-        $this->subscribe($source);
-      }
+      $job = array(
+        'fetcher' => $this,
+        'source' => $feed,
+      );
+      feeds_set_subscription_job($job);
     }
   }
 
   /**
    * Override sourceDelete() - unsubscribe from hub.
    */
-  public function sourceDelete(FeedsSource $source) {
+  public function sourceDelete(Feed $feed) {
     if ($this->config['use_pubsubhubbub']) {
-      // If we're in a feed node, queue the unsubscribe,
-      // else process immediately.
-      if ($source->feed_nid) {
-        $job = array(
-          'type' => $source->id,
-          'id' => $source->feed_nid,
-          'period' => 0,
-          'periodic' => FALSE,
-        );
-        JobScheduler::get('feeds_push_unsubscribe')->set($job);
-      }
-      else {
-        $this->unsubscribe($source);
-      }
+      $job = array(
+        'type' => $feed->getImporter()->id(),
+        'id' => $feed->id(),
+        'period' => 0,
+        'periodic' => FALSE,
+      );
+      JobScheduler::get('feeds_push_unsubscribe')->set($job);
     }
   }
 
   /**
    * Implement FeedsFetcher::subscribe() - subscribe to hub.
    */
-  public function subscribe(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
-    $sub = $this->subscriber($source->feed_nid);
+  public function subscribe(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    $sub = $this->subscriber($feed->id());
     $url = valid_url($this->config['designated_hub']) ? $this->config['designated_hub'] : '';
-    $path = url($this->path($source->feed_nid), array('absolute' => TRUE));
-    $sub->subscribe($source_config['source'], $path, $url);
+    $path = url($this->path($feed->id()), array('absolute' => TRUE));
+    $sub->subscribe($feed_config['source'], $path, $url);
   }
 
   /**
    * Implement FeedsFetcher::unsubscribe() - unsubscribe from hub.
    */
-  public function unsubscribe(FeedsSource $source) {
-    $source_config = $source->getConfigFor($this);
-    $this->subscriber($source->feed_nid)->unsubscribe($source_config['source'], url($this->path($source->feed_nid), array('absolute' => TRUE)));
+  public function unsubscribe(Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    $this->subscriber($feed->id())->unsubscribe($feed_config['source'], url($this->path($feed->id()), array('absolute' => TRUE)));
   }
 
   /**
    * Implement FeedsFetcher::importPeriod().
    */
-  public function importPeriod(FeedsSource $source) {
-    if ($this->subscriber($source->feed_nid)->subscribed()) {
+  public function importPeriod(Feed $feed) {
+    if ($this->subscriber($feed->id())->subscribed()) {
       return 259200; // Delay for three days if there is a successful subscription.
     }
   }

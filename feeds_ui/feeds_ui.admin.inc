@@ -9,7 +9,7 @@
 use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
- * Introductory help for admin/structure/feeds/%feeds_importer page
+ * Introductory help for admin/structure/feeds/manage/%feeds_importer page
  */
 function feeds_ui_edit_help() {
   return t('
@@ -83,9 +83,9 @@ function feeds_ui_overview_form($form, &$form_status) {
     $delete = t('Delete');
     $importer_form['operations'] = array(
       '#markup' =>
-        l($edit, 'admin/structure/feeds/' . $importer->id()) . ' | ' .
-        l(t('Clone'), 'admin/structure/feeds/' . $importer->id() . '/clone') .
-        (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/' . $importer->id() . '/delete')),
+        l($edit, 'admin/structure/feeds/manage/' . $importer->id()) . ' | ' .
+        l(t('Clone'), 'admin/structure/feeds/manage/' . $importer->id() . '/clone') .
+        (empty($delete) ? '' :  ' | ' . l($delete, 'admin/structure/feeds/manage/' . $importer->id() . '/delete')),
     );
 
     $importer_form[$importer->id()] = array(
@@ -205,7 +205,7 @@ function feeds_ui_create_form_submit($form, &$form_state) {
   else {
     drupal_set_message(t('A clone of the @name configuration has been created.', array('@name' => $form['#from_importer']->config['name'])));
   }
-  $form_state['redirect'] = 'admin/structure/feeds/' . $importer->id();
+  $form_state['redirect'] = 'admin/structure/feeds/manage/' . $importer->id();
   feeds_cache_clear();
 }
 
@@ -242,9 +242,8 @@ function feeds_ui_delete_form_submit($form, &$form_state) {
  * Edit feed configuration.
  */
 function feeds_ui_edit_page($importer, $active = 'help', $plugin_type = '') {
-
   // Base path for changing the active container.
-  $path = 'admin/structure/feeds/' . $importer->id();
+  $path = 'admin/structure/feeds/manage/' . $importer->id();
 
   $active_container = array(
     'class' => array('active-container'),
@@ -289,8 +288,6 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_type = '') {
 
   // Basic information.
   $items = array();
-  $content_types = node_type_get_names();
-  $items[] = t('Attached to: @type', array('@type' => $importer->config['content_type'] ? $content_types[$importer->config['content_type']] : t('[none]')));
   if ($importer->config['import_period'] == FEEDS_SCHEDULE_NEVER) {
     $import_period = t('off');
   }

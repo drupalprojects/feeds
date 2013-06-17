@@ -35,36 +35,36 @@ function feeds_ui_menu() {
     'file' => 'feeds_ui.admin.inc',
     'type' => MENU_LOCAL_ACTION,
   );
-  $items['admin/structure/feeds/%feeds_importer'] = array(
+  $items['admin/structure/feeds/manage/%feeds_importer'] = array(
     'title callback' => 'feeds_ui_importer_title',
-    'title arguments' => array(3),
+    'title arguments' => array(4),
     'page callback' => 'feeds_ui_edit_page',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'access arguments' => array('administer feeds'),
     'file' => 'feeds_ui.admin.inc',
   );
-  $items['admin/structure/feeds/%feeds_importer/edit'] = array(
+  $items['admin/structure/feeds/manage/%feeds_importer/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'feeds_ui_edit_page',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'access arguments' => array('administer feeds'),
     'file' => 'feeds_ui.admin.inc',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['admin/structure/feeds/%feeds_importer/clone'] = array(
+  $items['admin/structure/feeds/manage/%feeds_importer/clone'] = array(
     'title' => 'Clone',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_ui_create_form', 3),
+    'page arguments' => array('feeds_ui_create_form', 4),
     'access arguments' => array('administer feeds'),
     'file' => 'feeds_ui.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
   );
-  $items['admin/structure/feeds/%feeds_importer/delete'] = array(
+  $items['admin/structure/feeds/manage/%feeds_importer/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_ui_delete_form', 3),
+    'page arguments' => array('feeds_ui_delete_form', 4),
     'access arguments' => array('administer feeds'),
     'file' => 'feeds_ui.admin.inc',
     'type' => MENU_LOCAL_TASK,
@@ -110,7 +110,7 @@ function feeds_ui_admin_menu_map() {
   if (!user_access('administer feeds')) {
     return;
   }
-  $map['admin/structure/feeds/%feeds_importer'] = array(
+  $map['admin/structure/feeds/manage/%feeds_importer'] = array(
     'parent' => 'admin/structure/feeds',
     'arguments' => array(
       array('%feeds_importer' => feeds_enabled_importers()),

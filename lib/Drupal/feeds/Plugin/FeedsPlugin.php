@@ -7,8 +7,7 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal\feeds\FeedsSource;
-use Drupal\feeds\FeedsSourceInterface;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Component\Plugin\PluginBase;
 
 /**
@@ -18,7 +17,7 @@ use Drupal\Component\Plugin\PluginBase;
  * Doing this would break the model where source information is represented by
  * an object that is being passed into a Feed object and its plugins.
  */
-abstract class FeedsPlugin extends PluginBase implements FeedsSourceInterface {
+abstract class FeedsPlugin extends PluginBase {
 
   // Holds the actual configuration information.
   protected $config;
@@ -60,7 +59,7 @@ abstract class FeedsPlugin extends PluginBase implements FeedsSourceInterface {
   }
 
   /**
-   * Implements FeedsSourceInterface::sourceDefaults().
+   * Implements FeedInterface::sourceDefaults().
    */
   public function sourceDefaults() {
     $values = array_flip(array_keys($this->sourceForm(array())));
@@ -83,14 +82,19 @@ abstract class FeedsPlugin extends PluginBase implements FeedsSourceInterface {
   public function sourceFormValidate(&$source_config) {}
 
   /**
+   * Validation handler for sourceForm.
+   */
+  public function sourceFormSubmit(&$source_config) {}
+
+  /**
    * A source is being saved.
    */
-  public function sourceSave(FeedsSource $source) {}
+  public function sourceSave(Feed $source) {}
 
   /**
    * A source is being deleted.
    */
-  public function sourceDelete(FeedsSource $source) {}
+  public function sourceDelete(Feed $source) {}
 
   /**
    * Similar to setConfig but adds to existing configuration.

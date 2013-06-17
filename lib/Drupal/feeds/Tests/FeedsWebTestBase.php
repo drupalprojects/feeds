@@ -70,6 +70,7 @@ class FeedsWebTestBase extends WebTestBase {
         ),
       ),
     ));
+
     $filtered_html_format->save();
 
     $permissions = array();
@@ -83,6 +84,8 @@ class FeedsWebTestBase extends WebTestBase {
     $permissions[] = 'administer feeds';
     $permissions[] = 'administer node fields';
     $permissions[] = 'administer node display';
+    $permissions[] = 'administer feeds_feed fields';
+    $permissions[] = 'administer feeds_feed display';
 
     // Create an admin user and log in.
     $this->admin_user = $this->drupalCreateUser($permissions);
@@ -186,8 +189,6 @@ class FeedsWebTestBase extends WebTestBase {
     // Assert message and presence of default plugins.
     $this->assertText('Your configuration has been created with default settings.');
     $this->assertPlugins($id, 'http', 'syndication', 'node');
-    // Per default attach to page content type.
-    $this->setSettings($id, NULL, array('content_type' => 'page'));
     // Per default attached to article content type.
     $this->setSettings($id, 'processor', array('bundle' => 'article'));
   }
@@ -205,7 +206,7 @@ class FeedsWebTestBase extends WebTestBase {
     $edit = array(
       'plugin_key' => $plugin_key,
     );
-    $this->drupalPost("admin/structure/feeds/$id/$type", $edit, 'Save');
+    $this->drupalPost("admin/structure/feeds/manage/$id/$type", $edit, 'Save');
 
     // Assert actual configuration.
     $config = config('feeds.importer.' . $id)->get('config');
@@ -223,7 +224,7 @@ class FeedsWebTestBase extends WebTestBase {
    *   The settings to set.
    */
   public function setSettings($id, $plugin_type, $settings) {
-    $this->drupalPost('admin/structure/feeds/' . $id . '/settings/' . $plugin_type, $settings, 'Save');
+    $this->drupalPost('admin/structure/feeds/manage/' . $id . '/settings/' . $plugin_type, $settings, 'Save');
     $this->assertText('Your changes have been saved.');
   }
 
@@ -239,70 +240,80 @@ class FeedsWebTestBase extends WebTestBase {
    * @return
    *   The node id of the node created.
    */
-  public function createFeedNode($id = 'syndication', $feed_url = NULL, $title = '', $content_type = NULL) {
+  public function createFeed($id = 'syndication', $feed_url = NULL, $title = '') {
     if (empty($feed_url)) {
       $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2';
     }
 
-    // If content type not given, retrieve it.
-    if (!$content_type) {
-      $config = config('feeds.importer.' . $id)->get('config');
-      $content_type = $config['content_type'];
-      $this->assertFalse(empty($content_type), 'Valid content type found: ' . $content_type);
+    if (!$title) {
+      $title = $this->randomString();
     }
 
     // Create a feed node.
     $edit = array(
       'title' => $title,
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $feed_url,
+      'fetcher[source]' => $feed_url,
     );
-    $this->drupalPost('node/add/' . str_replace('_', '-', $content_type), $edit, 'Save and publish');
+    $this->drupalPost('feed/add/' . $id, $edit, 'Save');
     $this->assertText('has been created.');
 
     // Get the node id from URL.
-    $nid = $this->getNid($this->getUrl());
+    $fid = $this->getFid($this->getUrl());
 
-    // Check whether feed got recorded in feeds_source table.
-    $query = db_select('feeds_source', 's')
-      ->condition('s.id', $id, '=')
-      ->condition('s.feed_nid', $nid, '=');
+    // Check whether feed got recorded in feeds_feed table.
+    $query = db_select('feeds_feed', 'f')
+      ->condition('f.importer', $id, '=')
+      ->condition('f.fid', $fid, '=');
+
     $query->addExpression("COUNT(*)");
     $result = $query->execute()->fetchField();
     $this->assertEqual(1, $result);
 
-    $source = db_select('feeds_source', 's')
-      ->condition('s.id', $id, '=')
-      ->condition('s.feed_nid', $nid, '=')
-      ->fields('s', array('config'))
-      ->execute()->fetchObject();
+    $source = db_select('feeds_feed', 'f')
+      ->condition('f.importer', $id, '=')
+      ->condition('f.fid', $fid, '=')
+      ->fields('f', array('config'))
+      ->execute()
+      ->fetchObject();
+
     $config = unserialize($source->config);
-    $this->assertEqual($config['Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
-    return $nid;
+
+    $plugin_type = isset($config['http']) ? 'http' : 'file';
+
+    $this->assertEqual($config[$plugin_type]['source'], $feed_url, t('URL in DB correct.'));
+
+    return $fid;
   }
 
   /**
    * Edit the configuration of a feed node to test update behavior.
    *
-   * @param $nid
-   *   The nid to edit.
+   * @param $fid
+   *   The fid to edit.
    * @param $feed_url
    *   The new (absolute) feed URL to use.
    * @param $title
    *   Optional parameter to change title of feed node.
    */
-  public function editFeedNode($nid, $feed_url, $title = '') {
+  public function editFeed($fid, $feed_url, $title = '') {
+    if (!$title) {
+      $title = $this->randomString();
+    }
     $edit = array(
       'title' => $title,
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $feed_url,
+      'fetcher[source]' => $feed_url,
     );
     // Check that the update was saved.
-    $this->drupalPost('node/' . $nid . '/edit', $edit, 'Save and keep published');
+    $this->drupalPost("feed/$fid/edit", $edit, 'Save');
     $this->assertText('has been updated.');
 
-    // Check that the URL was updated in the feeds_source table.
-    $source = db_query("SELECT * FROM {feeds_source} WHERE feed_nid = :nid", array(':nid' => $nid))->fetchObject();
-    $config = unserialize($source->config);
-    $this->assertEqual($config['Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
+    // Check that the URL was updated in the feeds_feed table.
+    $feed = db_query("SELECT * FROM {feeds_feed} WHERE fid = :fid", array(':fid' => $fid))->fetchObject();
+    $config = unserialize($feed->config);
+
+    $plugin_type = isset($config['http']) ? 'http' : 'file';
+
+    $this->assertEqual($config[$plugin_type]['source'], $feed_url, t('URL in DB correct.'));
   }
 
   /**
@@ -312,55 +323,103 @@ class FeedsWebTestBase extends WebTestBase {
    * @return
    *   An array of node ids of the nodes created.
    */
-  public function createFeedNodes($id = 'syndication', $num = 20, $content_type = NULL) {
-    $nids = array();
+  public function createFeeds($id = 'syndication', $num = 20) {
+    $fids = array();
     for ($i = 0; $i < $num; $i++) {
-      $nids[] = $this->createFeedNode($id, NULL, $this->randomName(), $content_type);
+      $fids[] = $this->createFeed($id, NULL, $this->randomName());
     }
-    return $nids;
+
+    return $fids;
   }
 
   /**
-   * Import a URL through the import form. Assumes http in place.
+   * Import a URL through the import form. Assumes http, or file in place.
    */
-  public function importURL($id, $feed_url = NULL) {
-    if (empty($feed_url)) {
+  public function importURL($id, $feed_url = NULL, $fid = NULL) {
+    if (!$feed_url) {
       $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2';
     }
     $edit = array(
-      'feeds[Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher][source]' => $feed_url,
+      'fetcher[source]' => $feed_url,
     );
-    $nid = $this->drupalPost('import/' . $id, $edit, 'Import');
+    if (!$fid) {
+      $edit['title'] = $this->randomString();
+      $this->drupalPost('feed/add/' . $id, $edit, 'Save');
+      $fid = $this->getFid($this->getUrl());
+    }
+    else {
+      $this->drupalPost("feed/$fid/edit", $edit, 'Save');
+      $this->feedImportItems($fid);
+    }
 
-    // Check whether feed got recorded in feeds_source table.
-    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {feeds_source} WHERE id = :id AND feed_nid = 0", array(':id' => $id))->fetchField());
-    $source = db_query("SELECT * FROM {feeds_source} WHERE id = :id AND feed_nid = 0",  array(':id' => $id))->fetchObject();
-    $config = unserialize($source->config);
-    $this->assertEqual($config['Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher']['source'], $feed_url, t('URL in DB correct.'));
+    // Check whether feed got recorded in feeds_feed table.
+    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {feeds_feed} WHERE importer = :id AND fid = :fid", array(':id' => $id, ':fid' => $fid))->fetchField());
+    $feed = db_query("SELECT * FROM {feeds_feed} WHERE importer = :id AND fid = :fid",  array(':id' => $id, ':fid' => $fid))->fetchObject();
+    $config = unserialize($feed->config);
+
+    $plugin_id = isset($config['http']) ? 'http' : 'file';
+
+    $this->assertEqual($config[$plugin_id]['source'], $feed_url, t('URL in DB correct.'));
 
     // Check whether feed got properly added to scheduler.
-    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_import' AND last <> 0 AND scheduled = 0", array(':id' => $id))->fetchField());
+    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_import' AND last <> 0 AND scheduled = 0", array(':id' => $id, ':fid' => $fid))->fetchField());
 
     // Check expire scheduler.
-    $jobs = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = 0 AND name = 'feeds_source_expire'", array(':id' => $id))->fetchField();
+    $jobs = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_expire'", array(':id' => $id, ':fid' => $fid))->fetchField();
     if (feeds_importer($id)->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
       $this->assertEqual(0, $jobs);
     }
     else {
       $this->assertEqual(1, $jobs);
     }
+
+    return $fid;
   }
 
   /**
    * Import a file through the import form. Assumes FeedsFileFetcher in place.
    */
-  public function importFile($id, $file) {
+  public function importFile($id, $file, $fid = NULL, $title = NULL) {
+
+    if (!$title) {
+      $title = $this->randomString();
+    }
 
     $this->assertTrue(file_exists($file), 'Source file exists');
     $edit = array(
-      'files[feeds]' => $file,
+      'files[fetcher]' => $file,
     );
-    $this->drupalPost('import/' . $id, $edit, 'Import');
+
+    if (!$fid) {
+      $edit['title'] = $title;
+      $this->drupalPost('feed/add/' . $id, $edit, 'Save');
+    }
+    else {
+      $this->drupalPost("feed/$fid/edit", $edit, 'Save');
+      $this->feedImportItems($fid);
+    }
+
+    return $this->getFid($this->getUrl());
+  }
+
+  /**
+   * Delete the items belonging to a feed.
+   *
+   * @param $fid
+   *   The fid to delete items for.
+   */
+  public function feedDeleteItems($fid) {
+    $this->drupalPost("feed/$fid/delete-items", array(), 'Delete');
+  }
+
+  /**
+   * Delete the items belonging to a feed.
+   *
+   * @param $fid
+   *   The fid to delete items for.
+   */
+  public function feedImportItems($fid) {
+    $this->drupalPost("feed/$fid/import", array(), 'Import');
   }
 
   /**
@@ -393,7 +452,7 @@ class FeedsWebTestBase extends WebTestBase {
     */
   public function addMappings($id, $mappings, $test_mappings = TRUE) {
 
-    $path = "admin/structure/feeds/$id/mapping";
+    $path = "admin/structure/feeds/manage/$id/mapping";
 
     // Iterate through all mappings and add the mapping via the form.
     foreach ($mappings as $i => $mapping) {
@@ -442,7 +501,7 @@ class FeedsWebTestBase extends WebTestBase {
    *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
    */
   public function removeMappings($id, $mappings, $test_mappings = TRUE) {
-    $path = "admin/structure/feeds/$id/mapping";
+    $path = "admin/structure/feeds/manage/$id/mapping";
 
     $current_mappings = $this->getCurrentMappings($id);
 
@@ -523,15 +582,15 @@ class FeedsWebTestBase extends WebTestBase {
   /**
    * Helper function, retrieves node id from a URL.
    */
-  public function getNid($url) {
+  public function getFid($url) {
     $matches = array();
-    preg_match('/node\/(\d+?)$/', $url, $matches);
-    $nid = $matches[1];
+    preg_match('/feed\/(\d+?)$/', $url, $matches);
+    $fid = $matches[1];
 
     // Test for actual integerness.
-    $this->assertTrue($nid === (string) (int) $nid, 'Node id is an integer.');
+    $this->assertTrue($fid === (string) (int) $fid, 'Feed id is an integer.');
 
-    return $nid;
+    return $fid;
   }
 
   /**
@@ -593,4 +652,5 @@ class FeedsWebTestBase extends WebTestBase {
     // Set the simpletest library directory.
     variable_set('feeds_library_dir', $library_dir);
   }
+
 }

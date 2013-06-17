@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
 use Exception;
@@ -82,12 +82,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @return
    *   A new entity object.
    */
-  protected abstract function newEntity(FeedsSource $source);
+  protected abstract function newEntity(Feed $source);
 
   /**
    * Load an existing entity.
    *
-   * @param $source
+   * @param $feed
    *   The feeds source that spawns this entity.
    * @param $entity_id
    *   The unique id of the entity that should be loaded.
@@ -98,7 +98,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @todo We should be able to batch load these, if we found all of the
    *   existing ids first.
    */
-  protected function entityLoad(FeedsSource $source, $entity_id) {
+  protected function entityLoad(Feed $feed, $entity_id) {
     if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
       return entity_load($this->entityType(), $entity_id);
     }
@@ -111,7 +111,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $key = db_escape_field($info['entity_keys']['id']);
     $values = db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
 
-    $entity = $this->newEntity($source);
+    $entity = $this->newEntity($feed);
     foreach ($values as $key => $value) {
       $entity->$key = $value;
     }
@@ -152,7 +152,9 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @param $entity_ids
    *   Array of unique identity ids to be deleted.
    */
-  protected abstract function entityDeleteMultiple($entity_ids);
+  protected function entityDeleteMultiple($entity_ids) {
+    entity_delete_multiple($this->entityType(), $entity_ids);
+  }
 
   /**
    * Wrap entity_get_info() into a method so that extending classes can override
@@ -171,21 +173,21 @@ abstract class FeedsProcessor extends FeedsPlugin {
   /**
    * Process the result of the parsing stage.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   Source information about this import.
    * @param FeedsParserResult $parser_result
    *   The result of the parsing stage.
    */
-  public function process(FeedsSource $source, FeedsParserResult $parser_result) {
-    $state = $source->state(FEEDS_PROCESS);
+  public function process(Feed $feed, FeedsParserResult $parser_result) {
+    $state = $feed->state(FEEDS_PROCESS);
 
     while ($item = $parser_result->shiftItem()) {
 
       // Check if this item already exists.
-      $entity_id = $this->existingEntityId($source, $parser_result);
+      $entity_id = $this->existingEntityId($feed, $parser_result);
       $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
 
-      module_invoke_all('feeds_before_update', $source, $item, $entity_id);
+      module_invoke_all('feeds_before_update', $feed, $item, $entity_id);
 
       // If it exists, and we are not updating, pass onto the next item.
       if ($entity_id && $skip_existing) {
@@ -206,29 +208,29 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
         // Load an existing entity.
         if ($entity_id) {
-          $entity = $this->entityLoad($source, $entity_id);
+          $entity = $this->entityLoad($feed, $entity_id);
 
           // The feeds_item table is always updated with the info for the most
           // recently processed entity. The only carryover is the entity_id.
-          $this->newItemInfo($entity, $source->feed_nid, $hash);
+          $this->newItemInfo($entity, $feed->id(), $hash);
           $entity->feeds_item->entity_id = $entity_id;
           $entity->feeds_item->is_new = FALSE;
         }
 
         // Build a new entity.
         else {
-          $entity = $this->newEntity($source);
-          $this->newItemInfo($entity, $source->feed_nid, $hash);
+          $entity = $this->newEntity($feed);
+          $this->newItemInfo($entity, $feed->id(), $hash);
         }
 
         // Set property and field values.
-        $this->map($source, $parser_result, $entity);
+        $this->map($feed, $parser_result, $entity);
         $this->entityValidate($entity);
 
         // Allow modules to alter the entity before saving.
-        module_invoke_all('feeds_presave', $source, $entity, $item, $entity_id);
+        module_invoke_all('feeds_presave', $feed, $entity, $item, $entity_id);
         if (module_exists('rules')) {
-          rules_invoke_event('feeds_import_'. $source->importer()->id(), $entity);
+          rules_invoke_event('feeds_import_'. $feed->importer()->id(), $entity);
         }
 
         // Enable modules to skip saving at all.
@@ -242,7 +244,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
         // Allow modules to perform operations using the saved entity data.
         // $entity contains the updated entity after saving.
-        module_invoke_all('feeds_after_save', $source, $entity, $item, $entity_id);
+        module_invoke_all('feeds_after_save', $feed, $entity, $item, $entity_id);
 
         // Track progress.
         if (empty($entity_id)) {
@@ -258,12 +260,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
         $state->failed++;
         drupal_set_message($e->getMessage(), 'warning');
         $message = $this->createLogMessage($e, $entity, $item);
-        $source->log('import', $message, array(), WATCHDOG_ERROR);
+        $feed->log('import', $message, array(), WATCHDOG_ERROR);
       }
     }
 
     // Set messages if we're done.
-    if ($source->progressImporting() != FEEDS_BATCH_COMPLETE) {
+    if ($feed->progressImporting() != FEEDS_BATCH_COMPLETE) {
       return;
     }
 
@@ -311,7 +313,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     }
     foreach ($messages as $message) {
       drupal_set_message($message['message']);
-      $source->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
+      $feed->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
     }
   }
 
@@ -319,15 +321,15 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Remove all stored results or stored results up to a certain time for a
    * source.
    *
-   * @param FeedsSource $source
+   * @param Feed $feed
    *   Source information for this expiry. Implementers should only delete items
    *   pertaining to this source. The preferred way of determining whether an
-   *   item pertains to a certain souce is by using $source->feed_nid. It is the
-   *   processor's responsibility to store the feed_nid of an imported item in
+   *   item pertains to a certain souce is by using $source->fid. It is the
+   *   processor's responsibility to store the fid of an imported item in
    *   the processing stage.
    */
-  public function clear(FeedsSource $source) {
-    $state = $source->state(FEEDS_PROCESS_CLEAR);
+  public function clear(Feed $feed) {
+    $state = $feed->state(FEEDS_PROCESS_CLEAR);
 
     // Build base select statement.
     $info = $this->entityInfo();
@@ -337,8 +339,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       'feeds_item',
       'fi',
       "e.{$info['entity_keys']['id']} = fi.entity_id AND fi.entity_type = '{$this->entityType()}'");
-    $select->condition('fi.id', $this->importer->id());
-    $select->condition('fi.feed_nid', $source->feed_nid);
+    $select->condition('fi.fid', $feed->id());
 
     // If there is no total, query it.
     if (!$state->total) {
@@ -366,7 +367,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     }
 
     // Report results when done.
-    if ($source->progressClearing() == FEEDS_BATCH_COMPLETE) {
+    if ($feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
       if ($state->deleted) {
         $message = format_plural(
           $state->deleted,
@@ -378,7 +379,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
             '@entities' => strtolower($info['label plural']),
           )
         );
-        $source->log('clear', $message, array(), WATCHDOG_INFO);
+        $feed->log('clear', $message, array(), WATCHDOG_INFO);
         drupal_set_message($message);
       }
       else {
@@ -395,7 +396,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * If a number other than 0 is given, Feeds parsers that support batching
    * will only deliver this limit to the processor.
    *
-   * @see FeedsSource::getLimit()
+   * @see Feed::getLimit()
    * @see FeedsCSVParser::parse()
    */
   public function getLimit() {
@@ -406,9 +407,9 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Deletes feed items older than REQUEST_TIME - $time.
    *
    * Do not invoke expire on a processor directly, but use
-   * FeedsSource::expire() instead.
+   * Feed::expire() instead.
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   The source to expire entities for.
    *
    * @param $time
@@ -420,10 +421,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   FEEDS_BATCH_COMPLETE if all items have been processed, a float between 0
    *   and 0.99* indicating progress otherwise.
    *
-   * @see FeedsSource::expire()
+   * @see Feed::expire()
    */
-  public function expire(FeedsSource $source, $time = NULL) {
-    $state = $source->state(FEEDS_PROCESS_EXPIRE);
+  public function expire(Feed $feed, $time = NULL) {
+    $state = $feed->state(FEEDS_PROCESS_EXPIRE);
 
     if ($time === NULL) {
       $time = $this->expiryTime();
@@ -432,7 +433,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       return;
     }
 
-    $select = $this->expiryQuery($source, $time);
+    $select = $this->expiryQuery($feed, $time);
 
     // If there is no total, query it.
     if (!$state->total) {
@@ -457,7 +458,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Processor classes should override this method to set the age portion of the
    * query.
    *
-   * @param FeedsSource $source
+   * @param Feed $feed
    *   The feed source.
    * @param int $time
    *   Delete entities older than this.
@@ -467,7 +468,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @see FeedsNodeProcessor::expiryQuery()
    */
-  protected function expiryQuery(FeedsSource $source, $time) {
+  protected function expiryQuery(Feed $feed, $time) {
     // Build base select statement.
     $info = $this->entityInfo();
     $id_key = db_escape_field($info['entity_keys']['id']);
@@ -480,8 +481,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
         ':entity_type' => $this->entityType(),
     ));
-    $select->condition('fi.id', $this->importer->id());
-    $select->condition('fi.feed_nid', $source->feed_nid);
+    $select->condition('fi.fid', $feed->id());
 
     return $select;
   }
@@ -489,8 +489,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
   /**
    * Counts the number of items imported by this processor.
    */
-  public function itemCount(FeedsSource $source) {
-    return db_query("SELECT count(*) FROM {feeds_item} WHERE id = :id AND entity_type = :entity_type AND feed_nid = :feed_nid", array(':id' => $this->importer->id(), ':entity_type' => $this->entityType(), ':feed_nid' => $source->feed_nid))->fetchField();
+  public function itemCount(Feed $feed) {
+    return db_query("SELECT count(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $feed->id()))->fetchField();
   }
 
   /**
@@ -516,7 +516,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @see hook_feeds_term_processor_targets_alter()
    * @see hook_feeds_user_processor_targets_alter()
    */
-  protected function map(FeedsSource $source, FeedsParserResult $result, $target_item = NULL) {
+  protected function map(Feed $source, FeedsParserResult $result, $target_item = NULL) {
 
     // Static cache $targets as getMappingTargets() may be an expensive method.
     static $sources;
@@ -691,7 +691,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if (!$this->bundle()) {
       $info = $this->entityInfo();
       $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : t('bundle');
-      $url = url('admin/structure/feeds/' . $this->importer->id() . '/settings/processor');
+      $url = url('admin/structure/feeds/manage/' . $this->importer->id() . '/settings/processor');
       drupal_set_message(t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
     }
 
@@ -714,7 +714,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @ingroup mappingapi
    */
-  public function setTargetElement(FeedsSource $source, $target_item, $target_element, $value) {
+  public function setTargetElement(Feed $source, $target_item, $target_element, $value) {
     switch ($target_element) {
       case 'url':
       case 'guid':
@@ -731,7 +731,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @ingroup mappingapi
    *
-   * @param FeedsSource $source
+   * @param Feed $source
    *   The source information about this import.
    * @param $result
    *   A FeedsParserResult object.
@@ -739,20 +739,20 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @return
    *   The serial id of an entity if found, 0 otherwise.
    */
-  protected function existingEntityId(FeedsSource $source, FeedsParserResult $result) {
+  protected function existingEntityId(Feed $feed, FeedsParserResult $result) {
     $query = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
-      ->condition('feed_nid', $source->feed_nid)
-      ->condition('entity_type', $this->entityType())
-      ->condition('id', $source->importer->id());
+      ->condition('fid', $feed->id())
+      ->condition('entity_type', $this->entityType());
 
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
-    foreach ($this->uniqueTargets($source, $result) as $target => $value) {
+    foreach ($this->uniqueTargets($feed, $result) as $target => $value) {
       switch ($target) {
         case 'url':
           $entity_id = $query->condition('url', $value)->execute()->fetchField();
           break;
+
         case 'guid':
           $entity_id = $query->condition('guid', $value)->execute()->fetchField();
           break;
@@ -777,14 +777,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   An array where the keys are target field names and the values are the
    *   elements from the source item mapped to these targets.
    */
-  protected function uniqueTargets(FeedsSource $source, FeedsParserResult $result) {
+  protected function uniqueTargets(Feed $feed, FeedsParserResult $result) {
     $parser = $this->importer->parser;
     $targets = array();
     foreach ($this->config['mappings'] as $mapping) {
       if (!empty($mapping['unique'])) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
-        $targets[$mapping['target']] = $parser->getSourceElement($source, $result, $mapping['source']);
+        $targets[$mapping['target']] = $parser->getSourceElement($feed, $result, $mapping['source']);
       }
     }
     return $targets;
@@ -795,18 +795,18 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @param $entity
    *   The entity object to be populated with new item info.
-   * @param $feed_nid
+   * @param $fid
    *   The feed nid of the source that produces this entity.
    * @param $hash
    *   The fingerprint of the source item.
    */
-  protected function newItemInfo($entity, $feed_nid, $hash = '') {
+  protected function newItemInfo($entity, $fid, $hash = '') {
     $entity->feeds_item = new \stdClass();
     $entity->feeds_item->is_new = TRUE;
     $entity->feeds_item->entity_id = 0;
     $entity->feeds_item->entity_type = $this->entityType();
     $entity->feeds_item->id = $this->importer->id();
-    $entity->feeds_item->feed_nid = $feed_nid;
+    $entity->feeds_item->fid = $fid;
     $entity->feeds_item->imported = REQUEST_TIME;
     $entity->feeds_item->hash = $hash;
     $entity->feeds_item->url = '';

@@ -54,27 +54,9 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
       'datetime' => 'datetime',
     ));
 
-    // Hack to get date fields to not round to every 15 minutes.
-    // foreach (array('date', 'datestamp') as $field) {
-    //   $field = 'field_' . $field;
-    //   $edit = array(
-    //     'widget_type' => 'date_select',
-    //   );
-    //   $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
-    //   $edit = array(
-    //     'instance[widget][settings][increment]' => 1,
-    //   );
-    //   $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field, $edit, 'Save settings');
-    //   $edit = array(
-    //     'widget_type' => 'date_text',
-    //   );
-    //   $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
-    // }
-
     // Create and configure importer.
     $this->createImporterConfiguration('Date RSS', 'daterss');
     $this->setSettings('daterss', NULL, array(
-      'content_type' => '',
       'import_period' => FEEDS_SCHEDULE_NEVER,
     ));
     $this->setPlugin('daterss', 'fetcher', 'file');
@@ -99,7 +81,7 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
     $this->setSettings('daterss', 'fetcher', array('allowed_extensions' => 'rss2'));
 
     // Import CSV file.
-    $this->importFile('daterss', $this->absolutePath() . '/tests/feeds/googlenewstz.rss2');
+    $fid = $this->importFile('daterss', $this->absolutePath() . '/tests/feeds/googlenewstz.rss2');
     $this->assertText('Created 6 nodes');
 
     // Check the imported nodes.
@@ -129,11 +111,12 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
   }
 
   protected function getFormFieldsNames($field_name, $index) {
-    if (in_array($field_name, array('date', 'datetime', 'datestamp'))) {
+    if (in_array($field_name, array('datetime'))) {
       return array("field_{$field_name}[und][{$index}][value][date]");
     }
     else {
       return parent::getFormFieldsNames($field_name, $index);
     }
   }
+
 }

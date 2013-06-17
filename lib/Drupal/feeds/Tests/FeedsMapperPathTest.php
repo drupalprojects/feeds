@@ -61,8 +61,8 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
     // Turn on update existing.
     $this->setSettings('path_test', 'processor', array('update_existing' => 2));
 
-    // Import RSS file.
-    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
+    // Import CSV file.
+    $fid = $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
     $this->assertText('Created 9 nodes');
 
     $aliases = array();
@@ -80,8 +80,8 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
         'target' => 'body',
       ),
     ));
-    // Import RSS file.
-    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv');
+    // Import CSV file.
+    $this->importFile('path_test', $this->absolutePath() . '/tests/feeds/path_alias.csv', $fid);
     $this->assertText('Updated 9 nodes');
 
     // Check that duplicate aliases are not created.

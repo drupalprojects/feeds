@@ -5,7 +5,7 @@
  * On behalf implementation of Feeds mapping API for taxonomy.module.
  */
 
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsTermElement;
 use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
@@ -28,19 +28,17 @@ define('FEEDS_TAXONOMY_SEARCH_TERM_GUID', 2);
 /**
  * Implements hook_feeds_parser_sources_alter().
  */
-function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
-  if (!empty($content_type)) {
+function taxonomy_feeds_parser_sources_alter(&$sources, $importer) {
 
-    foreach (field_info_instances('node', $content_type) as $name => $instance) {
-    $info = field_info_field($name);
+  foreach (field_info_instances('feeds_feed', $importer) as $name => $instance) {
+  $info = field_info_field($name);
 
-      if ($info['type'] == 'taxonomy_term_reference') {
-        $sources['parent:taxonomy:' . $info->label()] = array(
-          'name' => t('Feed node: Taxonomy: @vocabulary', array('@vocabulary' => $instance->label())),
-          'description' => t('Taxonomy terms from feed node.'),
-          'callback' => 'taxonomy_feeds_get_source',
-        );
-      }
+    if ($info['type'] == 'taxonomy_term_reference') {
+      $sources['parent:taxonomy:' . $info->label()] = array(
+        'name' => t('Feed node: Taxonomy: @vocabulary', array('@vocabulary' => $instance->label())),
+        'description' => t('Taxonomy terms from feed node.'),
+        'callback' => 'taxonomy_feeds_get_source',
+      );
     }
   }
 }
@@ -48,18 +46,15 @@ function taxonomy_feeds_parser_sources_alter(&$sources, $content_type) {
 /**
  * Callback, returns taxonomy from feed node.
  */
-function taxonomy_feeds_get_source(FeedsSource $source, FeedsParserResult $result, $key) {
-  if ($node = node_load($source->feed_nid)->getNGEntity()) {
+function taxonomy_feeds_get_source(Feed $feed, FeedsParserResult $result, $key) {
+  list(, , $field) = explode(':', $key, 3);
 
-    list(, , $field) = explode(':', $key, 3);
-
-    $result = array();
-    foreach ($node->$field as $term) {
-      $result[] = $term;
-    }
-
-    return $result;
+  $result = array();
+  foreach ($feed->$field as $term) {
+    $result[] = $term;
   }
+
+  return $result;
 }
 
 /**
@@ -85,7 +80,7 @@ function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle
  *
  * @todo Do not create new terms for non-autotag fields.
  */
-function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping = array()) {
+function taxonomy_feeds_set_target($feed, $entity, $target, $terms, $mapping = array()) {
 
   // Allow mapping the string '0' to a term name.
   if (empty($terms) && $terms != 0) {

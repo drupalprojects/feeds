@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\processor;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FeedsProcessor;
-use Drupal\feeds\FeedsSource;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
 use Drupal\feeds\FeedsValidationException;
@@ -50,7 +50,7 @@ class FeedsTermProcessor extends FeedsProcessor {
    *
    * @todo Use entityNG.
    */
-  protected function newEntity(FeedsSource $source) {
+  protected function newEntity(Feed $feed) {
     return entity_create('taxonomy_term', array(
       'vid' => $this->bundle(),
       'format' => isset($this->config['input_format']) ? $this->config['input_format'] : filter_fallback_format(),
@@ -85,13 +85,6 @@ class FeedsTermProcessor extends FeedsProcessor {
   }
 
   /**
-   * Deletes a series of terms.
-   */
-  protected function entityDeleteMultiple($tids) {
-    entity_delete_multiple($this->entityType(), $tids);
-  }
-
-  /**
    * Override parent::configDefaults().
    */
   public function configDefaults() {
@@ -103,7 +96,7 @@ class FeedsTermProcessor extends FeedsProcessor {
   /**
    * Override setTargetElement to operate on a target item that is a taxonomy term.
    */
-  public function setTargetElement(FeedsSource $source, $target_term, $target_element, $value) {
+  public function setTargetElement(Feed $feed, $target_term, $target_element, $value) {
     switch ($target_element) {
       case 'parent':
         if (!empty($value)) {
@@ -144,7 +137,7 @@ class FeedsTermProcessor extends FeedsProcessor {
         $target_term->weight = $weight;
         break;
       default:
-        parent::setTargetElement($source, $target_term, $target_element, $value);
+        parent::setTargetElement($feed, $target_term, $target_element, $value);
         break;
     }
   }
@@ -197,13 +190,13 @@ class FeedsTermProcessor extends FeedsProcessor {
   /**
    * Get id of an existing feed item term if available.
    */
-  protected function existingEntityId(FeedsSource $source, FeedsParserResult $result) {
-    if ($tid = parent::existingEntityId($source, $result)) {
+  protected function existingEntityId(Feed $feed, FeedsParserResult $result) {
+    if ($tid = parent::existingEntityId($feed, $result)) {
       return $tid;
     }
 
     // The only possible unique target is name.
-    foreach ($this->uniqueTargets($source, $result) as $target => $value) {
+    foreach ($this->uniqueTargets($feed, $result) as $target => $value) {
       if ($target == 'name') {
         if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $this->bundle()))->fetchField()) {
           return $tid;
