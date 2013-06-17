@@ -92,7 +92,7 @@ abstract class ParserBase extends FeedsPlugin {
    * The element key corresponds to the values in the array returned by
    * ParserBase::getMappingSources().
    *
-   * This method is invoked from FeedsProcessor::map() when a concrete item is
+   * This method is invoked from ProcessorBase::map() when a concrete item is
    * processed.
    *
    * @ingroup mappingapi
@@ -105,7 +105,7 @@ abstract class ParserBase extends FeedsPlugin {
    * @return
    *   The source element from $item identified by $element_key.
    *
-   * @see FeedsProcessor::map()
+   * @see ProcessorBase::map()
    * @see FeedsCSVParser::getSourceElement()
    */
   public function getSourceElement(Feed $feed, FeedsParserResult $result, $element_key) {

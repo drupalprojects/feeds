@@ -8,7 +8,7 @@
 /**
  * Implements hook_feeds_processor_targets_alter().
  *
- * @see FeedsProcessor::getMappingTargets()
+ * @see ProcessorBase::getMappingTargets()
  */
 function number_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
   $numeric_types = array(

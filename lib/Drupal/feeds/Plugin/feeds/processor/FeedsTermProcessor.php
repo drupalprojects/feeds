@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\FeedsProcessor;
+use Drupal\feeds\Plugin\ProcessorBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
@@ -27,7 +27,7 @@ use Exception;
  *   description = @Translation("Creates taxonomy terms from feed items.")
  * )
  */
-class FeedsTermProcessor extends FeedsProcessor {
+class FeedsTermProcessor extends ProcessorBase {
   /**
    * Define entity type.
    */

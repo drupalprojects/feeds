@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\processor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\FeedsProcessor;
+use Drupal\feeds\Plugin\ProcessorBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
@@ -26,7 +26,7 @@ use Drupal\feeds\FeedsAccessException;
  *   description = @Translation("Creates nodes from feed items.")
  * )
  */
-class FeedsNodeProcessor extends FeedsProcessor {
+class FeedsNodeProcessor extends ProcessorBase {
 
   /**
    * Define entity type.

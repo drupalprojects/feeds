@@ -448,7 +448,7 @@ function theme_feeds_ui_plugin_form($variables) {
  *
  * @todo Completely merge this into config form handling. This is just a
  *   shared form of configuration, most of the common functionality can live in
- *   FeedsProcessor, a flag can tell whether mapping is supported or not.
+ *   ProcessorBase, a flag can tell whether mapping is supported or not.
  */
 function feeds_ui_mapping_form($form, &$form_state, $importer) {
   $form['#importer'] = $importer->id();
@@ -776,8 +776,8 @@ function feeds_ui_mapping_form_submit($form, &$form_state) {
 }
 
 /**
- * Walk the result of FeedsParser::getMappingSources() or
- * FeedsProcessor::getMappingTargets() and format them into
+ * Walk the result of ParserBase::getMappingSources() or
+ * ProcessorBase::getMappingTargets() and format them into
  * a Form API options array.
  */
 function _feeds_ui_format_options($options) {

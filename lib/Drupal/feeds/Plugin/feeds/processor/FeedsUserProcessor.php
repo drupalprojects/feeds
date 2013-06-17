@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\FeedsProcessor;
+use Drupal\feeds\Plugin\ProcessorBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsValidationException;
@@ -25,7 +25,7 @@ use Drupal\feeds\FeedsValidationException;
  *   description = @Translation("Creates users from feed items.")
  * )
  */
-class FeedsUserProcessor extends FeedsProcessor {
+class FeedsUserProcessor extends ProcessorBase {
   /**
    * Define entity type.
    */

@@ -1,16 +1,16 @@
 <?php
 
+/**
+ * @file
+ * Contains Drupal\feeds\Plugin\ProcessorBase.
+ */
+
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
 use Exception;
-
-/**
- * @file
- * Contains FeedsProcessor and related classes.
- */
 
 // Update mode for existing items.
 define('FEEDS_SKIP_EXISTING', 0);
@@ -24,7 +24,7 @@ define('FEEDS_PROCESS_LIMIT', 50);
 /**
  * Abstract class, defines interface for processors.
  */
-abstract class FeedsProcessor extends FeedsPlugin {
+abstract class ProcessorBase extends FeedsPlugin {
 
   /**
    * Implements FeedsPlugin::pluginType().
@@ -501,12 +501,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * are mapped onto $target_item following the processor's mapping
    * configuration.
    *
-   * For each mapping FeedsParser::getSourceElement() is executed to retrieve
-   * the source element, then FeedsProcessor::setTargetElement() is invoked
+   * For each mapping ParserBase::getSourceElement() is executed to retrieve
+   * the source element, then ProcessorBase::setTargetElement() is invoked
    * to populate the target item properly. Alternatively a
    * hook_x_targets_alter() may have specified a callback for a mapping target
    * in which case the callback is asked to populate the target item instead of
-   * FeedsProcessor::setTargetElement().
+   * ProcessorBase::setTargetElement().
    *
    * @ingroup mappingapi
    *
@@ -710,7 +710,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
   }
 
   /**
-   * Set a concrete target element. Invoked from FeedsProcessor::map().
+   * Set a concrete target element. Invoked from ProcessorBase::map().
    *
    * @ingroup mappingapi
    */
