@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\Plugin\ParserBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
@@ -25,10 +25,10 @@ use Drupal\feeds\ParserCSV;
  *   description = @Translation("Parse CSV files.")
  * )
  */
-class FeedsCSVParser extends FeedsParser {
+class FeedsCSVParser extends ParserBase {
 
   /**
-   * Implements FeedsParser::parse().
+   * Implements ParserBase::parse().
    */
   public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
     $feed_config = $feed->getConfigFor($this);
@@ -246,4 +246,5 @@ class FeedsCSVParser extends FeedsParser {
     print implode($sep, $columns);
     return;
   }
+
 }

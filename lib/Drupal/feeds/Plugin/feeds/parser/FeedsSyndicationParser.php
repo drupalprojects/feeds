@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\Plugin\ParserBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
@@ -23,10 +23,17 @@ use Drupal\feeds\FeedsParserResult;
  *   description = @Translation("Default parser for RSS, Atom and RDF feeds.")
  * )
  */
-class FeedsSyndicationParser extends FeedsParser {
+class FeedsSyndicationParser extends ParserBase {
 
   /**
-   * Implements FeedsParser::parse().
+   * Determines if this parser returns a feed title.
+   */
+  public function hasTitle() {
+    return TRUE;
+  }
+
+  /**
+   * Implements ParserBase::parse().
    */
   public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
     feeds_include_library('common_syndication_parser.inc', 'common_syndication_parser');

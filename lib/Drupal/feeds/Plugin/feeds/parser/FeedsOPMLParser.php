@@ -8,10 +8,10 @@
 /**
  * Feeds parser plugin that parses OPML feeds.
  */
-class FeedsOPMLParser extends FeedsParser {
+class FeedsOPMLParser extends ParserBase {
 
   /**
-   * Implements FeedsParser::parse().
+   * Implements ParserBase::parse().
    */
   public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
     feeds_include_library('opml_parser.inc', 'opml_parser');

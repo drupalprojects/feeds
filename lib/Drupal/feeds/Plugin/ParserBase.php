@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains FeedsParser and related classes.
+ * Contains Drupal\feeds\Plugin\ParserBase.
  */
 
 namespace Drupal\feeds\Plugin;
@@ -15,13 +15,20 @@ use Drupal\feeds\FeedsParserResult;
 /**
  * Abstract class, defines interface for parsers.
  */
-abstract class FeedsParser extends FeedsPlugin {
+abstract class ParserBase extends FeedsPlugin {
 
   /**
    * Implements FeedsPlugin::pluginType().
    */
   public function pluginType() {
     return 'parser';
+  }
+
+  /**
+   * Determines if this parser returns a feed title.
+   */
+  public function hasTitle() {
+    return FALSE;
   }
 
   /**
@@ -83,7 +90,7 @@ abstract class FeedsParser extends FeedsPlugin {
   /**
    * Get an element identified by $element_key of the given item.
    * The element key corresponds to the values in the array returned by
-   * FeedsParser::getMappingSources().
+   * ParserBase::getMappingSources().
    *
    * This method is invoked from FeedsProcessor::map() when a concrete item is
    * processed.

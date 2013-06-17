@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\FeedsParser;
+use Drupal\feeds\Plugin\ParserBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
@@ -26,10 +26,10 @@ use Drupal\feeds\FeedsSimplePieEnclosure;
  *   description = @Translation("Parse RSS and Atom feeds.")
  * )
  */
-class FeedsSimplePieParser extends FeedsParser {
+class FeedsSimplePieParser extends ParserBase {
 
   /**
-   * Implements FeedsParser::parse().
+   * Implements ParserBase::parse().
    */
   public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
     feeds_include_simplepie();
