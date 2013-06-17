@@ -414,8 +414,8 @@ function feeds_importer_load($id) {
 /**
  * Title callback.
  */
-function feeds_importer_title($id) {
-  return feeds_importer($id)->label();
+function feeds_importer_title($importer) {
+  return $importer->label();
 }
 
 /**
@@ -1093,7 +1093,7 @@ function feeds_format_expire($timestamp) {
   /**
    * Loads on-behalf implementations from mappers/ directory.
    *
-   * FeedsProcessor::map() does not load from mappers/ as only node and user
+   * ProcessorBase::map() does not load from mappers/ as only node and user
    * processor ship with on-behalf implementations.
    *
    * @see FeedsNodeProcessor::map()
