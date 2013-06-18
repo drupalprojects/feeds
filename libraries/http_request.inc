@@ -133,9 +133,8 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   try {
     $response = $request->send();
     $result->data = $response->getBody(TRUE);
-    $result->headers = $response->getHeaders();
+    $result->headers = $response->getHeaders()->toArray();
     $result->code = $response->getStatusCode();
-
   }
   catch (BadResponseException $e) {
     $response = $e->getResponse();
