@@ -20,17 +20,6 @@ use Drupal\job_scheduler\JobScheduler;
 class FeedStorageController extends DatabaseStorageControllerNG {
 
   /**
-   * Overrides Drupal\Core\Entity\DatabaseStorageController::preSave().
-   */
-  protected function preSave(EntityInterface $feed) {
-
-    // $feed->state = isset($feed->state) ? $feed->state : FALSE;
-    // $feed->fetcher_result = isset($feed->fetcher_result) ? $feed->fetcher_result : FALSE;
-    // Before saving the feeds, set changed and revision times.
-    $feed->changed->value = REQUEST_TIME;
-  }
-
-  /**
    * Call FeedsPlugin::sourceSave() on plugins.
    *
    * This is called after save() so that plugins have access to the feed id.
@@ -63,33 +52,6 @@ class FeedStorageController extends DatabaseStorageControllerNG {
         'config' => $config,
       ))
       ->execute();
-  }
-
-  /**
-   * Overrides Drupal\Core\Entity\DatabaseStorageController::postDelete().
-   */
-  protected function postDelete($feeds) {
-    // Delete values from other tables also referencing these feeds.
-    $ids = array_keys($feeds);
-
-    db_delete('feeds_log')
-      ->condition('fid', $ids, 'IN')
-      ->execute();
-
-    // Alert plugins that we are deleting.
-    foreach ($feeds as $feed) {
-      foreach ($feed->getImporter()->getPluginTypes() as $type) {
-        $feed->getImporter()->$type->sourceDelete($feed);
-      }
-
-      // Remove from schedule.
-      $job = array(
-        'type' => $feed->bundle(),
-        'id' => $feed->id(),
-      );
-      JobScheduler::get('feeds_feed_import')->remove($job);
-      JobScheduler::get('feeds_feed_expire')->remove($job);
-    }
   }
 
   /**
