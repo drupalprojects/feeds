@@ -423,6 +423,16 @@ class FeedsWebTestBase extends WebTestBase {
   }
 
   /**
+   * Deletes a feed.
+   *
+   * @param $fid
+   *   The fid to delete.
+   */
+  public function feedDelete($fid) {
+    $this->drupalPost("feed/$fid/delete", array(), 'Delete');
+  }
+
+  /**
    * Assert a feeds configuration's plugins.
    *
    * @deprecated:

@@ -179,7 +179,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     // Delete source, delete importer, check schedule.
     $this->drupalLogin($this->admin_user);
     $fid = array_shift($fids);
-    $this->drupalPost("feed/$fid/delete", array(), t('Delete'));
+    $this->feedDelete($fid);
     $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND id = :fid", array(':fid' => $fid))->fetchField());
     $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_expire' AND id = :fid", array(':fid' => $fid))->fetchField());
     $this->assertEqual(count($fids), db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import'")->fetchField());
