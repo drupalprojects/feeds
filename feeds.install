@@ -9,19 +9,17 @@
  * Implements hook_requirements().
  */
 function feeds_requirements($phase) {
-  $t = get_t();
-
   $requirements = array(
     'simplexml' => array(
-      'title' => $t('SimpleXML'),
-      'value' => extension_loaded('SimpleXML') ? $t('Enabled') : $t('Disabled'),
-      'description' => $t('SimpleXML PHP module is required for Feeds Syndication Parser.'),
+      'title' => t('SimpleXML'),
+      'value' => extension_loaded('SimpleXML') ? t('Enabled') : t('Disabled'),
+      'description' => t('SimpleXML PHP module is required for Feeds Syndication Parser.'),
       'severity' => REQUIREMENT_INFO,
     ),
     'simplepie' => array(
-      'title' => $t('SimplePie'),
-      'value' => $t('Unknown at install time.'),
-      'description' => $t('SimplePie library is required for Feeds SimplePie Parser.'),
+      'title' => t('SimplePie'),
+      'value' => t('Unknown at install time.'),
+      'description' => t('SimplePie library is required for Feeds SimplePie Parser.'),
       'severity' => REQUIREMENT_INFO,
     )
   );
