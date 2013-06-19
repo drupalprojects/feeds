@@ -94,7 +94,7 @@ function file_feeds_set_target($feed, $entity, $target, $value) {
       if (!empty($entity->uid)) {
         $data[$entity_type] = $entity;
       }
-      $destination = file_field_widget_uri($info, $instance_info, $data);
+      $destination = file_field_widget_uri($instance_info->getFieldSettings(), $data);
     }
   }
 
