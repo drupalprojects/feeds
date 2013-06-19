@@ -65,17 +65,17 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
 
     // Check whether feed got properly added to scheduler.
     foreach ($fids as $fid) {
-      $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND id = :fid AND name = 'feeds_feed_import' AND last <> 0 AND scheduled = 0 AND period = 1800 AND periodic = 1", array(':fid' => $fid))->fetchField());
+      $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND id = :fid AND name = 'feeds_feed_import' AND scheduled = 0 AND period = 1800 AND periodic = 1", array(':fid' => $fid))->fetchField());
     }
 
     // Take time for comparisons.
-    $time = time();
+    $time = time() + 1800;
     sleep(1);
 
     // Log out and run cron, no changes.
     $this->drupalLogout();
     $this->cronRun();
-    $count = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE last > :time", array(':time' => $time))->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE next > :time", array(':time' => $time))->fetchField();
     $this->assertEqual($count, 0, '0 feeds refreshed on cron.');
 
     // Set next time to 0 to simulate updates.
@@ -86,7 +86,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
 
     // There should be feeds_schedule_num X 2 (= 20) feeds updated now.
     $schedule = array();
-    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE last > :time", array(':time' => $time));
+    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE next > :time", array(':time' => $time));
     foreach ($rows as $row) {
       $schedule[$row->id] = $row;
     }
@@ -108,7 +108,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     // The import_period setting of the feed configuration is 1800, there
     // shouldn't be any change to the database now.
     $equal = TRUE;
-    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE last > :time", array(':time' => $time));
+    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE next > :time", array(':time' => $time));
     foreach ($rows as $row) {
       $equal = $equal && ($row->last == $schedule[$row->id]->last);
     }
@@ -123,7 +123,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     // Hit cron once, this should cause Feeds to reschedule all entries.
     $this->cronRun();
     $equal = FALSE;
-    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE last > :time", array(':time' => $time));
+    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE next > :time", array(':time' => $time));
     foreach ($rows as $row) {
       $equal = $equal && ($row->last == $schedule[$row->id]->last);
       $schedule[$row->id] = $row;
@@ -135,7 +135,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
       $this->cronRun();
     }
     $equal = FALSE;
-    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE last > :time", array(':time' => $time));
+    $rows = db_query("SELECT id, last, scheduled FROM {job_schedule} WHERE next > :time", array(':time' => $time));
     foreach ($rows as $row) {
       $equal = $equal && ($row->last == $schedule[$row->id]->last);
     }
@@ -146,23 +146,23 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $this->assertEqual($count, 200, 'The total of 200 article nodes has not changed.');
 
     // Set expire settings, check rescheduling.
-    $max_last = db_query("SELECT MAX(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
-    $min_last = db_query("SELECT MIN(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
+    $max_next = db_query("SELECT MAX(next) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
+    $min_next = db_query("SELECT MIN(next) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
     $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_expire'")->fetchField());
     $this->drupalLogin($this->admin_user);
     $this->setSettings('syndication', 'processor', array('expire' => 86400));
     $this->drupalLogout();
     sleep(1);
     $this->cronRun();
-    // There should be 20 feeds_feed_expire jobs now, and all last fields should be reset.
-    $this->assertEqual(count($fids), db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_expire' AND last <> 0 AND scheduled = 0 AND period = 3600")->fetchField());
-    $new_max_last = db_query("SELECT MAX(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
-    $new_min_last = db_query("SELECT MIN(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
-    $this->assertNotEqual($new_max_last, $max_last);
-    $this->assertNotEqual($new_min_last, $min_last);
-    $this->assertEqual($new_max_last, $new_min_last);
-    $max_last = $new_max_last;
-    $min_last = $new_min_last;
+    // There should be 20 feeds_feed_expire jobs now.
+    $this->assertEqual(count($fids), db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_expire' AND scheduled = 0 AND period = 3600")->fetchField());
+    $new_max_next = db_query("SELECT MAX(next) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
+    $new_min_next = db_query("SELECT MIN(next) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 0")->fetchField();
+    $this->assertNotEqual($new_max_next, $max_next);
+    $this->assertNotEqual($new_min_next, $min_next);
+    $this->assertEqual($new_max_next, $new_min_next);
+    $max_next = $new_max_next;
+    $min_next = $new_min_next;
 
     // Set import settings, check rescheduling.
     $this->drupalLogin($this->admin_user);
@@ -170,13 +170,13 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $this->drupalLogout();
     sleep(1);
     $this->cronRun();
-    $new_max_last = db_query("SELECT MAX(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 3600")->fetchField();
-    $new_min_last = db_query("SELECT MIN(last) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 3600")->fetchField();
-    $this->assertNotEqual($new_max_last, $max_last);
-    $this->assertNotEqual($new_min_last, $min_last);
-    $this->assertEqual($new_max_last, $new_min_last);
+    $new_max_next = db_query("SELECT MAX(next) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 3600")->fetchField();
+    $new_min_next = db_query("SELECT MIN(next) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period = 3600")->fetchField();
+    $this->assertNotEqual($new_max_next, $max_next);
+    $this->assertNotEqual($new_min_next, $min_next);
+    $this->assertEqual($new_max_next, $new_min_next);
     $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_import' AND period <> 3600")->fetchField());
-    $this->assertEqual(count($fids), db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_expire' AND period = 3600 AND last = :last", array(':last' => $new_min_last))->fetchField());
+    $this->assertEqual(count($fids), db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'syndication' AND name = 'feeds_feed_expire' AND period = 3600 AND next = :last", array(':last' => $new_min_next))->fetchField());
 
     // Delete source, delete importer, check schedule.
     $this->drupalLogin($this->admin_user);

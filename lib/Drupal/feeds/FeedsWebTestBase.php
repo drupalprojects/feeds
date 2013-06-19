@@ -363,7 +363,7 @@ class FeedsWebTestBase extends WebTestBase {
     $this->assertEqual($config[$plugin_id]['source'], $feed_url, t('URL in DB correct.'));
 
     // Check whether feed got properly added to scheduler.
-    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_import' AND last <> 0 AND scheduled = 0", array(':id' => $id, ':fid' => $fid))->fetchField());
+    $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_import' AND scheduled = 0", array(':id' => $id, ':fid' => $fid))->fetchField());
 
     // Check expire scheduler.
     $jobs = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_expire'", array(':id' => $id, ':fid' => $fid))->fetchField();
