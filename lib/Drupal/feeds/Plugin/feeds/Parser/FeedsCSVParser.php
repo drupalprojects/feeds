@@ -5,7 +5,7 @@
  * Contains the FeedsCSVParser class.
  */
 
-namespace Drupal\feeds\Plugin\feeds\parser;
+namespace Drupal\feeds\Plugin\feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;

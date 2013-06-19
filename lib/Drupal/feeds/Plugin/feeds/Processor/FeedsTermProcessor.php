@@ -5,7 +5,7 @@
  * FeedsTermProcessor class.
  */
 
-namespace Drupal\feeds\Plugin\feeds\processor;
+namespace Drupal\feeds\Plugin\feeds\Processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;

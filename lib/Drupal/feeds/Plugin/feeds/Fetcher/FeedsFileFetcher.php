@@ -5,15 +5,13 @@
  * Home of the FeedsFileFetcher and related classes.
  */
 
-namespace Drupal\feeds\Plugin\feeds\fetcher;
+namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\feeds\FeedsFileFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
-use Exception;
-
 
 /**
  * Defines a file fetcher.
@@ -52,7 +50,7 @@ class FeedsFileFetcher extends FetcherBase {
       return new FeedsFileFetcherResult($file);
     }
 
-    throw new Exception(t('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
+    throw new \Exception(t('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
   }
 
   /**

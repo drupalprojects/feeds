@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\fetcher\FeedsHTTPFetcher.
+ * Contains \Drupal\feeds\Plugin\feeds\Fetcher\FeedsHTTPFetcher.
  */
 
-namespace Drupal\feeds\Plugin\feeds\fetcher;
+namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;

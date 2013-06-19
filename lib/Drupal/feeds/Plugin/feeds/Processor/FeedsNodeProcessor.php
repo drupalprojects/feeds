@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\fetcher\FeedsNodeProcessor.
+ * Contains \Drupal\feeds\Plugin\feeds\Fetcher\FeedsNodeProcessor.
  */
 
-namespace Drupal\feeds\Plugin\feeds\processor;
+namespace Drupal\feeds\Plugin\feeds\Processor;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Annotation\Plugin;
