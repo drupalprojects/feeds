@@ -28,14 +28,15 @@ class FeedsWebTestBase extends WebTestBase {
    * @var array
    */
   public static $modules = array(
-    'taxonomy',
-    'image',
-    'file',
     'field',
     'field_ui',
-    // 'feeds_tests',
+    'taxonomy',
+    'file',
+    'image',
     'job_scheduler',
+    'feeds',
     'feeds_ui',
+    'feeds_tests',
     'views',
   );
 

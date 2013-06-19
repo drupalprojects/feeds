@@ -23,7 +23,7 @@ class CommonSyndicationParserTest extends FeedsWebTestBase {
   }
 
   public function setUp() {
-    parent::setUp(array('feeds', 'feeds_ui', 'job_scheduler'));
+    parent::setUp();
     feeds_include_library('common_syndication_parser.inc', 'common_syndication_parser');
   }
 
