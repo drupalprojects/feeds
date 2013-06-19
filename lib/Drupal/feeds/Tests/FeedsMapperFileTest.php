@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\FeedsEnclosure;
+use Drupal\feeds\FeedsMapperTestBase;
 
 /**
  * Class for testing Feeds file mapper.

@@ -5,7 +5,7 @@
  * Helper class with auxiliary functions for feeds mapper module tests.
  */
 
-namespace Drupal\feeds\Tests;
+namespace Drupal\feeds;
 
 /**
  * Base class for implementing Feeds Mapper test cases.

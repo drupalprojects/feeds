@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds_ui\Tests;
 
-use Drupal\feeds\Tests\FeedsWebTestBase;
+use Drupal\feeds\FeedsWebTestBase;
 
 /**
  * Tests basic Feeds UI functionality.

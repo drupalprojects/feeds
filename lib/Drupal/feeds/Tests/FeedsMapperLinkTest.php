@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\FeedsMapperTestBase;
+
 /**
  * Class for testing Feeds <em>link</em> mapper.
  */

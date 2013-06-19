@@ -1,11 +1,13 @@
 <?php
 
-namespace Drupal\feeds\Tests;
-
 /**
  * @file
  * Test case for date field mapper mappers/date.inc.
  */
+
+namespace Drupal\feeds\Tests;
+
+use Drupal\feeds\FeedsMapperTestBase;
 
 /**
  * Class for testing Feeds <em>content</em> mapper.

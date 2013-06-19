@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\FeedsWebTestBase;
+
 /**
  * Test aggregating a feed as node items.
  */

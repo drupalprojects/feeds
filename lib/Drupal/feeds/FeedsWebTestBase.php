@@ -5,7 +5,7 @@
  * Common functionality for all Feeds tests.
  */
 
-namespace Drupal\feeds\Tests;
+namespace Drupal\feeds;
 
 use Drupal\simpletest\WebTestBase;
 use Drupal\feeds\Plugin\FeedsPlugin;

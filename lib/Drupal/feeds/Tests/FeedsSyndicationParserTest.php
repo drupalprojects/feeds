@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\FeedsWebTestBase;
+
 /**
  * Test single feeds.
  */

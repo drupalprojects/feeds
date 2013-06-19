@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\FeedsMapperTestBase;
+
 /**
  * Class for testing basic Feeds ajax mapping configurtaion form behavior.
  */

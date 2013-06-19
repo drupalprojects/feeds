@@ -10,6 +10,7 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\simpletest\UnitTestBase;
+use Drupal\feeds\FeedsWebTestBase;
 
 class FeedsUnitTestBase extends FeedsWebTestBase {
   public static function getInfo() {
