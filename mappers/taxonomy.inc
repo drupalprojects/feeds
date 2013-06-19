@@ -103,7 +103,7 @@ function taxonomy_feeds_set_target($feed, $entity, $target, $terms, $mapping = a
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache['allowed_values'][$target])) {
     $instance = field_info_instance($entity->entityType(), $target, $entity->bundle());
-    $cache['allowed_values'][$target] = taxonomy_allowed_values($info, $instance, $entity);
+    $cache['allowed_values'][$target] = taxonomy_allowed_values($instance, $entity);
   }
 
   if (!isset($cache['allowed_vocabularies'][$target])) {

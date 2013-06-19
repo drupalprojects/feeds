@@ -177,6 +177,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
    * Tests mapping to taxonomy terms by tid.
    */
   public function testSearchByID() {
+    drupal_flush_all_caches();
     // Create 10 terms. The first one was created in setup.
     $tids = array(1);
     foreach (range(2, 10) as $i) {
@@ -208,6 +209,8 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
    * Tests mapping to a taxonomy term's guid.
    */
   public function testSearchByGUID() {
+    drupal_flush_all_caches();
+
     // Create 10 terms. The first one was created in setup.
     $tids = array(1);
     foreach (range(2, 10) as $i) {
