@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test cases for Feeds mapping configuration form.
+ * Contains \Drupal\feeds\Tests\FeedsMapperConfigTest.
  */
 
 namespace Drupal\feeds\Tests;
@@ -13,15 +13,6 @@ use Drupal\feeds\FeedsMapperTestBase;
  * Class for testing basic Feeds ajax mapping configurtaion form behavior.
  */
 class FeedsMapperConfigTest extends FeedsMapperTestBase {
-
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  public static $modules = array(
-    'feeds_tests',
-  );
 
   public static function getInfo() {
     return array(
@@ -122,4 +113,5 @@ class FeedsMapperConfigTest extends FeedsMapperTestBase {
     $this->assertText('Checkbox inactive.');
     $this->assertText('Second mapping text');
   }
+
 }

@@ -324,10 +324,11 @@ class FeedsNodeProcessor extends ProcessorBase {
     }
 
     // Let other modules expose mapping targets.
-    feeds_load_mappers();
-    $entity_type = $this->entityType();
-    $bundle = $this->bundle();
-    drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
+    $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
+    foreach ($definitions as $definition) {
+      $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
+      $mapper->targets($targets, $this->entityType(), $this->bundle());
+    }
 
     return $targets;
   }

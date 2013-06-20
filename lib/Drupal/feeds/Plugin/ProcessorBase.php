@@ -545,13 +545,12 @@ abstract class ProcessorBase extends FeedsPlugin {
     If the mapping specifies a callback method, use the callback instead of
     setTargetElement().
     */
-    feeds_load_mappers();
     foreach ($this->config['mappings'] as $mapping) {
       // Retrieve source element's value from parser.
       if (isset($sources[$this->importer->id()][$mapping['source']]) &&
           is_array($sources[$this->importer->id()][$mapping['source']]) &&
           isset($sources[$this->importer->id()][$mapping['source']]['callback']) &&
-          function_exists($sources[$this->importer->id()][$mapping['source']]['callback'])) {
+          is_callable($sources[$this->importer->id()][$mapping['source']]['callback'])) {
         $callback = $sources[$this->importer->id()][$mapping['source']]['callback'];
         $value = $callback($source, $result, $mapping['source']);
       }
@@ -563,7 +562,7 @@ abstract class ProcessorBase extends FeedsPlugin {
       if (isset($targets[$this->importer->id()][$mapping['target']]) &&
           is_array($targets[$this->importer->id()][$mapping['target']]) &&
           isset($targets[$this->importer->id()][$mapping['target']]['callback']) &&
-          function_exists($targets[$this->importer->id()][$mapping['target']]['callback'])) {
+          is_callable($targets[$this->importer->id()][$mapping['target']]['callback'])) {
         $callback = $targets[$this->importer->id()][$mapping['target']]['callback'];
         $callback($source, $target_item, $mapping['target'], $value, $mapping);
       }

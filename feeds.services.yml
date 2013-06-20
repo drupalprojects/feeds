@@ -8,3 +8,6 @@ services:
   plugin.manager.feeds.processor:
     class: Drupal\feeds\Plugin\FeedsPluginManager
     arguments: [processor, '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+  plugin.manager.feeds.mapper:
+    class: Drupal\feeds\Plugin\FeedsMapperManager
+    arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']

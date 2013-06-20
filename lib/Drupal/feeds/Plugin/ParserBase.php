@@ -72,10 +72,14 @@ abstract class ParserBase extends FeedsPlugin {
    *   @endcode
    */
   public function getMappingSources() {
-    feeds_load_mappers();
     $sources = array();
-    $importer_id = $this->importer->id();
-    drupal_alter('feeds_parser_sources', $sources, $importer_id);
+
+    $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
+    foreach ($definitions as $definition) {
+      $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
+      $mapper->sources($sources, $this->importer);
+    }
+
     $sources['parent:uid'] = array(
       'name' => t('Feed: User ID'),
       'description' => t('The feed author uid.'),

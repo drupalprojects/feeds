@@ -174,16 +174,13 @@ class FeedsTermProcessor extends ProcessorBase {
       ),
     );
 
-    // Let implementers of hook_feeds_term_processor_targets() add their targets.
-    try {
-      feeds_load_mappers();
-      $entity_type = $this->entityType();
-      $bundle = $this->bundle();
-      drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
+    // Let other modules expose mapping targets.
+    $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
+    foreach ($definitions as $definition) {
+      $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
+      $mapper->targets($targets, $this->entityType(), $this->bundle());
     }
-    catch (Exception $e) {
-      // Do nothing.
-    }
+
     return $targets;
   }
 

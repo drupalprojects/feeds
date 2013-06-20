@@ -9,6 +9,7 @@ namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\FeedsMapperTestBase;
+use Drupal\feeds\Plugin\feeds\Mapper\Taxonomy;
 
 /**
  * Class for testing Feeds <em>content</em> mapper.
@@ -163,14 +164,14 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $this->drupalGet('node/2');
     $this->assertTaxonomyTerm('Washington DC');
 
-    $names = db_query('SELECT name FROM {taxonomy_term_data}')->fetchCol();
-    $this->assertEqual(count($names), 31, 'Found @count of terms in the database.', array('@count' => count($names)));
+    $count = db_query('SELECT COUNT(name) FROM {taxonomy_term_data}')->fetchField();
+    $this->assertEqual($count, 31, t('Found @count of terms in the database.', array('@count' => $count)));
 
     // Run import again. This verifys that the terms we found by name.
     $this->feedImportItems($fid);
     $this->assertText('Updated 10 nodes.');
-    $names = db_query('SELECT name FROM {taxonomy_term_data}')->fetchCol();
-    $this->assertEqual(count($names), 31, 'Found @count of terms in the database.', array('@count' => count($names)));
+    $count = db_query('SELECT COUNT(name) FROM {taxonomy_term_data}')->fetchField();
+    $this->assertEqual($count, 31, t('Found @count of terms in the database.', array('@count' => $count)));
   }
 
   /**
@@ -189,19 +190,19 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       $tids[] = $term->id();
     }
 
-    feeds_load_mappers();
-
     $target = 'field_tags';
+    $entity = entity_create('node', array('type' => 'article'))->getBCEntity();
+    $mapper = new Taxonomy(array(), 'test', array());
     $mapping = array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_ID,
     );
-    $entity = entity_create('node', array('type' => 'article'))->getBCEntity();
 
-    taxonomy_feeds_set_target(NULL, $entity, $target, $tids, $mapping);
+    $feed = entity_create('feeds_feed', array('importer' => 'syndication'));
+    $mapper->setTarget($feed, $entity, $target, $tids, $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
 
     // Test a second mapping with a bogus term id.
-    taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
+    $mapper->setTarget($feed, $entity, $target, array(1234), $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
   }
 
@@ -238,23 +239,25 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       drupal_write_record('feeds_item', $record);
     }
 
-    feeds_load_mappers();
-
     $entity = entity_create('node', array('type' => 'article'))->getBCEntity();
 
     $target = 'field_tags';
+
+    $feed = entity_create('feeds_feed', array('importer' => 'syndication'));
+    $mapper = new Taxonomy(array(), 'test', array());
+
     $mapping = array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_GUID,
     );
 
-    taxonomy_feeds_set_target(NULL, $entity, $target, $guids, $mapping);
+    $mapper->setTarget($feed, $entity, $target, $guids, $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
     foreach ($entity->field_tags['und'] as $delta => $values) {
       $this->assertEqual($tids[$delta], $values['target_id'], 'Correct term id foud.');
     }
 
     // Test a second mapping with a bogus term id.
-    taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
+    $mapper->setTarget($feed, $entity, $target, array(1234), $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
     foreach ($entity->field_tags['und'] as $delta => $values) {
       $this->assertEqual($tids[$delta], $values['target_id'], 'Correct term id foud.');

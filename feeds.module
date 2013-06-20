@@ -1053,29 +1053,6 @@ function feeds_format_expire($timestamp) {
   return t('after !time', array('!time' => format_interval($timestamp)));
 }
 
-  /**
-   * Loads on-behalf implementations from mappers/ directory.
-   *
-   * ProcessorBase::map() does not load from mappers/ as only node and user
-   * processor ship with on-behalf implementations.
-   *
-   * @see FeedsNodeProcessor::map()
-   * @see FeedsUserProcessor::map()
-   */
-function feeds_load_mappers() {
-  static $loaded = FALSE;
-  if (!$loaded) {
-    $path = drupal_get_path('module', 'feeds') . '/mappers';
-    $files = drupal_system_listing('/.*\.inc$/', $path, 'name', 0);
-    foreach ($files as $file) {
-      if (strstr($file->uri, '/mappers/')) {
-        require_once DRUPAL_ROOT . '/' . $file->uri;
-      }
-    }
-  }
-  $loaded = TRUE;
-}
-
 /**
  * Implements hook_data_type_info().
  */

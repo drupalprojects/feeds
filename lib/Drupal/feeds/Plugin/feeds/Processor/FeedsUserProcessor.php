@@ -87,16 +87,6 @@ class FeedsUserProcessor extends ProcessorBase {
     }
 
     $account->save();
-    if ($account->uid && !empty($account->openid)) {
-      $authmap = array(
-        'uid' => $account->uid,
-        'module' => 'openid',
-        'authname' => $account->openid,
-      );
-      if (SAVED_UPDATED != drupal_write_record('authmap', $authmap, array('uid', 'module'))) {
-        drupal_write_record('authmap', $authmap);
-      }
-    }
   }
 
   /**
@@ -208,10 +198,11 @@ class FeedsUserProcessor extends ProcessorBase {
     }
 
     // Let other modules expose mapping targets.
-    feeds_load_mappers();
-    $entity_type = $this->entityType();
-    $bundle = $this->bundle();
-    drupal_alter('feeds_processor_targets', $targets, $entity_type, $bundle);
+    $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
+    foreach ($definitions as $definition) {
+      $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
+      $mapper->targets($targets, $this->entityType(), $this->bundle());
+    }
 
     return $targets;
   }
@@ -234,10 +225,6 @@ class FeedsUserProcessor extends ProcessorBase {
 
         case 'mail':
           $uid = db_query("SELECT uid FROM {users} WHERE mail = :mail", array(':mail' => $value))->fetchField();
-          break;
-
-        case 'openid':
-          $uid = db_query("SELECT uid FROM {authmap} WHERE authname = :authname AND module = 'openid'", array(':authname' => $value))->fetchField();
           break;
       }
       if ($uid) {
