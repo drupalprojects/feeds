@@ -13,6 +13,8 @@ use Drupal\feeds\Plugin\ParserBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
+use Zend\Feed\Reader\Reader;
+use Zend\Feed\Reader\Exception\ExceptionInterface;
 
 /**
  * Defines an RSS and Atom feed parser.
@@ -36,22 +38,41 @@ class FeedsSyndicationParser extends ParserBase {
    * Implements ParserBase::parse().
    */
   public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
-    feeds_include_library('common_syndication_parser.inc', 'common_syndication_parser');
-    $feed = common_syndication_parser_parse($fetcher_result->getRaw());
     $result = new FeedsParserResult();
-    $result->title = $feed['title'];
-    $result->description = $feed['description'];
-    $result->link = $feed['link'];
-    if (is_array($feed['items'])) {
-      foreach ($feed['items'] as $item) {
-        if (isset($item['geolocations'])) {
-          foreach ($item['geolocations'] as $k => $v) {
-            $item['geolocations'][$k] = new FeedsGeoTermElement($v);
-          }
-        }
-        $result->items[] = $item;
-      }
+    try {
+      $channel = Reader::importString($fetcher_result->getRaw());
     }
+    catch (ExceptionInterface $e) {
+      watchdog_exception('feeds', $e);
+      drupal_set_message(t('The feed from %site seems to be broken because of error "%error".', array('%site' => $feed->label(), '%error' => $e->getMessage())), 'error');
+      return $result;
+    }
+
+    $result->title = $channel->getTitle();
+    $result->description = $channel->getDescription();
+    $result->link = $channel->getLink();
+
+    foreach ($channel as $item) {
+      // Reset the parsed item.
+      $parsed_item = array();
+      // Move the values to an array as expected by processors.
+      $parsed_item['title'] = $item->getTitle();
+      $parsed_item['guid'] = $item->getId();
+      $parsed_item['url'] = $item->getLink();
+      $parsed_item['description'] = $item->getDescription();
+      $parsed_item['author_name'] = '';
+      if ($author = $item->getAuthor()) {
+        $parsed_item['author_name'] = $author['name'];
+      }
+      $parsed_item['timestamp'] = '';
+      if ($date = $item->getDateModified()) {
+        $parsed_item['timestamp'] = $date->getTimestamp();
+      }
+      $parsed_item['tags'] = $item->getCategories()->getValues();
+
+      $result->items[] = $parsed_item;
+    }
+
     return $result;
   }
 
