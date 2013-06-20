@@ -135,8 +135,11 @@ function taxonomy_feeds_set_target($feed, $entity, $target, $terms, $mapping = a
     $tid = FALSE;
 
     // FeedsTermElement already is a term.
-    if ($term instanceof FeedsTermElement || $term instanceof TaxonomyTermReferenceItem) {
+    if ($term instanceof FeedsTermElement) {
       $tid = $term->tid;
+    }
+    elseif ($term instanceof TaxonomyTermReferenceItem) {
+      $tid = $term->value;
     }
     else {
       switch ($mapping['term_search']) {
@@ -174,7 +177,7 @@ function taxonomy_feeds_set_target($feed, $entity, $target, $terms, $mapping = a
     }
 
     if ($tid && isset($cache['allowed_values'][$target][$tid])) {
-      $field['und'][$delta]['tid'] = $tid;
+      $field['und'][$delta]['target_id'] = $tid;
       $delta++;
     }
   }

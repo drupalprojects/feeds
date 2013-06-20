@@ -164,13 +164,13 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $this->assertTaxonomyTerm('Washington DC');
 
     $names = db_query('SELECT name FROM {taxonomy_term_data}')->fetchCol();
-    $this->assertEqual(count($names), 31, 'Found correct number of terms in the database.');
+    $this->assertEqual(count($names), 31, 'Found @count of terms in the database.', array('@count' => count($names)));
 
     // Run import again. This verifys that the terms we found by name.
     $this->feedImportItems($fid);
     $this->assertText('Updated 10 nodes.');
     $names = db_query('SELECT name FROM {taxonomy_term_data}')->fetchCol();
-    $this->assertEqual(count($names), 31, 'Found correct number of terms in the database.');
+    $this->assertEqual(count($names), 31, 'Found @count of terms in the database.', array('@count' => count($names)));
   }
 
   /**
@@ -250,14 +250,14 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     taxonomy_feeds_set_target(NULL, $entity, $target, $guids, $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
     foreach ($entity->field_tags['und'] as $delta => $values) {
-      $this->assertEqual($tids[$delta], $values['tid'], 'Correct term id foud.');
+      $this->assertEqual($tids[$delta], $values['target_id'], 'Correct term id foud.');
     }
 
     // Test a second mapping with a bogus term id.
     taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
     foreach ($entity->field_tags['und'] as $delta => $values) {
-      $this->assertEqual($tids[$delta], $values['tid'], 'Correct term id foud.');
+      $this->assertEqual($tids[$delta], $values['target_id'], 'Correct term id foud.');
     }
   }
 
