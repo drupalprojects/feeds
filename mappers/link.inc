@@ -55,11 +55,11 @@ function link_feeds_set_target($source, $entity, $target, $value) {
   list($field_name, $column) = explode(':', $target);
   $info = field_info_field($field_name);
 
-  $field = isset($entity->$field_name) ? $entity->$field_name : array();
+  $field = isset($entity->$field_name) ? $entity->$field_name : array('und' => array());
   $delta = 0;
 
   foreach ($value as $v) {
-    if ($info['cardinality'] == $delta) {
+    if ($delta >= $info['cardinality'] && $info['cardinality'] > -1) {
       break;
     }
 
@@ -68,15 +68,14 @@ function link_feeds_set_target($source, $entity, $target, $value) {
     }
 
     if (is_scalar($v)) {
-      if (!isset($field['und'][$delta]['title'])) {
-        $field['und'][$delta]['title'] = '';
+      if (!isset($field['und'][$delta])) {
+        $field['und'][$delta] = array();
       }
-      if (!isset($field['und'][$delta]['url'])) {
-        $field['und'][$delta]['url'] = '';
-      }
+      $field['und'][$delta] += array('title' => '', 'url' => '');
       $field['und'][$delta][$column] = $v;
       $delta++;
     }
   }
+
   $entity->$field_name = $field;
 }

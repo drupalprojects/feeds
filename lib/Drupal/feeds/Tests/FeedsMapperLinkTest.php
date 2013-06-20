@@ -20,11 +20,7 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
    * @var array
    */
   public static $modules = array(
-    'field',
-    'field_ui',
     'link',
-    'job_scheduler',
-    'feeds_ui',
   );
 
   public static function getInfo() {
