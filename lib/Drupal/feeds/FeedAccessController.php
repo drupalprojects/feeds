@@ -21,8 +21,23 @@ class FeedAccessController extends EntityAccessController {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
-    return user_access('administer feeds', $account);
+  protected function checkAccess(EntityInterface $feed, $operation, $langcode, AccountInterface $account) {
+    if (!in_array($operation, array('view', 'add', 'edit','delete', 'import', 'clear', 'unlock'))) {
+      // If $operation is not one of the supported actions, we return access denied.
+      return FALSE;
+    }
+
+    if ($operation === 'unlock') {
+      if ($feed->progressImporting() == FEEDS_BATCH_COMPLETE && $feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
+        return FALSE;
+      }
+    }
+
+    if (user_access('administer feeds', $account) || user_access("{$operation} {$feed->bundle()} feeds", $account)) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 }

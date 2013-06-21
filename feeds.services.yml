@@ -11,3 +11,11 @@ services:
   plugin.manager.feeds.mapper:
     class: Drupal\feeds\Plugin\FeedsMapperManager
     arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+  access_check.feeds.feed_add_list:
+    class: Drupal\feeds\Access\FeedAddListAccessCheck
+    tags:
+      - { name: access_check }
+  access_check.feeds.feed_add:
+    class: Drupal\feeds\Access\FeedAddAccessCheck
+    tags:
+      - { name: access_check }

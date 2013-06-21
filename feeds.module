@@ -8,6 +8,7 @@
 use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Template\Attribute;
 
 // Common request time, use as point of reference and to avoid calls to time().
 define('FEEDS_REQUEST_TIME', time());
@@ -249,6 +250,9 @@ function feeds_permission() {
     $perms["view {$importer->id()} feeds"] = array(
       'title' => t('View @name feeds', array('@name' => $importer->label())),
     );
+    $perms["add {$importer->id()} feeds"] = array(
+      'title' => t('Add @name feeds', array('@name' => $importer->label())),
+    );
     $perms["edit {$importer->id()} feeds"] = array(
       'title' => t('Edit @name feeds', array('@name' => $importer->label())),
     );
@@ -263,7 +267,7 @@ function feeds_permission() {
     );
     $perms["unlock {$importer->id()} feeds"] = array(
       'title' => t('Unlock imports from @name feeds', array('@name' => $importer->label())),
-      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock them.')
+      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it .')
     );
   }
   return $perms;
@@ -296,87 +300,54 @@ function feeds_menu() {
   $items['admin/content/feed'] = array(
     'title' => 'Feeds',
     'description' => 'Manage the feeds defined for your site.',
-    'route_name' => 'feeds_list',
+    'route_name' => 'feeds_feed_list',
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
   );
   $items['feed/add'] = array(
     'title' => 'Add feed',
-    'page callback' => 'feeds_page',
-    'access callback' => 'feeds_page_access',
-    'file' => 'feeds.pages.inc',
+    'route_name' => 'feeds_feed_add_list',
   );
   $items['feed/add/%feeds_importer'] = array(
-    'title callback' => 'feeds_importer_title',
-    'title arguments' => array(2),
-    'page callback' => 'feeds_feed_add_page',
-    'page arguments' => array(2),
-    'access callback' => 'feeds_page_access',
-    'access arguments' => array(2),
-    'file' => 'feeds.pages.inc',
+    'title' => 'Add feed',
+    'route_name' => 'feeds_feed_add',
   );
   $items['feed/%feeds_feed'] = array(
-    'title callback' => 'feeds_feed_title',
-    'title arguments' => array(1),
-    'page callback' => 'feeds_feed_page_view',
-    'page arguments' => array(1),
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('view', 1),
-    'file' => 'feeds.pages.inc',
+    'title' => 'Feed',
+    'route_name' => 'feeds_feed',
   );
   $items['feed/%feeds_feed/view'] = array(
     'title' => 'View',
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('view', 1),
+    'route_name' => 'feeds_feed_view',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['feed/%feeds_feed/edit'] = array(
     'title' => 'Edit',
-    'page callback' => 'entity_get_form',
-    'page arguments' => array(1),
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('edit', 1),
+    'route_name' => 'feeds_feed_edit',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
   $items['feed/%feeds_feed/delete'] = array(
     'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_feed_delete_confirm', 1),
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('delete', 1),
+    'route_name' => 'feeds_feed_delete',
     'type' => MENU_NORMAL_ITEM,
     'context' => MENU_CONTEXT_PAGE,
-    'file' => 'feeds.pages.inc',
   );
   $items['feed/%feeds_feed/import'] = array(
     'title' => 'Import',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_import_tab_form', 1),
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('import', 1),
-    'file' => 'feeds.pages.inc',
+    'route_name' => 'feeds_feed_import',
     'type' => MENU_LOCAL_ACTION,
     'weight' => 10,
   );
   $items['feed/%feeds_feed/delete-items'] = array(
     'title' => 'Delete items',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_delete_tab_form', 1),
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('clear', 1),
-    'file' => 'feeds.pages.inc',
+    'route_name' => 'feeds_feed_delete_items',
     'type' => MENU_LOCAL_ACTION,
     'weight' => 11,
   );
   $items['feed/%feeds_feed/unlock'] = array(
     'title' => 'Unlock',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_unlock_tab_form', 1),
-    'access callback' => 'feeds_feed_access',
-    'access arguments' => array('unlock', 1),
-    'file' => 'feeds.pages.inc',
+    'route_name' => 'feeds_feed_unlock',
     'type' => MENU_LOCAL_ACTION,
-
     'weight' => 11,
   );
 
@@ -401,22 +372,42 @@ function feeds_admin_paths() {
 /**
  * Menu loader callback.
  */
-function feeds_importer_load($id) {
-  return feeds_importer($id);
+function feeds_importer_load($importer_id) {
+  return entity_load('feeds_importer', $importer_id);
 }
 
 /**
  * Title callback.
  */
-function feeds_importer_title($importer) {
-  return $importer->label();
+function feeds_importer_title($importer_id) {
+  if ($importer = entity_load('feeds_importer', $importer_id)) {
+    return $importer->label();
+  }
 }
 
 /**
  * Feed title callback.
  */
-function feeds_feed_title($feed) {
-  return $feed->label();
+function feeds_feed_title($feed_id) {
+  if ($feed = entity_load('feeds_feed', $feed_id)) {
+    return $feed->label();
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks().
+ */
+function feeds_menu_local_tasks(&$data, $router_item, $root_path) {
+  // Add action link to 'feeds/add' on 'admin/content/feed' page.
+  if ($root_path == 'admin/content/feed') {
+    $item = menu_get_item('feed/add');
+    if ($item['access']) {
+      $data['actions'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
 }
 
 /**
@@ -425,11 +416,9 @@ function feeds_feed_title($feed) {
 function feeds_theme() {
   return array(
     'feeds_upload' => array(
-      'file' => 'feeds.pages.inc',
       'render element' => 'element',
     ),
     'feeds_feed_status' => array(
-      'file' => 'feeds.pages.inc',
       'variables' => array(
         'progress_importing' => NULL,
         'progress_clearing' => NULL,
@@ -467,57 +456,6 @@ function feeds_access($action, $param) {
   // Check for permissions if feed id is present, otherwise return FALSE.
   if ($importer_id) {
     if (user_access('administer feeds') || user_access("{$action} {$importer_id} feeds")) {
-      return TRUE;
-    }
-  }
-
-  return FALSE;
-}
-
-/**
- * Menu access callback.
- *
- * @param $action
- *   The action to be performed. Possible values are:
- *   - import
- *   - clear
- *   - unlock
- * @param Drupal\feeds\Plugin\Core\Entity\Feed $feed
- *   The feed.
- */
-function feeds_feed_access($action, $feed) {
-  if (!in_array($action, array('view', 'edit','delete', 'import', 'clear', 'unlock'))) {
-    // If $action is not one of the supported actions, we return access denied.
-    return FALSE;
-  }
-
-  if ($action == 'unlock') {
-    if ($feed->progressImporting() == FEEDS_BATCH_COMPLETE && $feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
-      return FALSE;
-    }
-  }
-
-  if (user_access('administer feeds') || user_access("{$action} {$feed->getImporter()->id()} feeds")) {
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-/**
- * Menu access callback.
- */
-function feeds_page_access($importer_id = NULL) {
-  if (user_access('administer feeds')) {
-    return TRUE;
-  }
-
-  if ($importer_id) {
-    return user_access("import $importer_id feeds");
-  }
-
-  foreach (feeds_enabled_importers() as $id) {
-    if (user_access("import $id feeds")) {
       return TRUE;
     }
   }
@@ -1076,4 +1014,92 @@ function feeds_entity_bundle_info() {
     $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('name');
   }
   return $bundles;
+}
+
+/**
+ * Theme functions.
+ * @todo remove these.
+ */
+
+/**
+ * Themes a status display for a source.
+ */
+function theme_feeds_feed_status($v) {
+  $output = '<div class="info-box feeds-source-status">';
+  $items = array();
+  if ($v['progress_importing']) {
+    $progress = number_format(100.0 * $v['progress_importing'], 0);
+    $items[] = t('Importing - @progress % complete.', array('@progress' => $progress));
+  }
+  if ($v['progress_clearing']) {
+    $progress = number_format(100.0 * $v['progress_clearing'], 0);
+    $items[] = t('Deleting items - @progress % complete.', array('@progress' => $progress));
+  }
+  if (!count($items)) {
+    if ($v['count']) {
+      if ($v['imported']) {
+        $items[] = t('Last import: @ago ago.', array('@ago' => format_interval(REQUEST_TIME - $v['imported'], 1)));
+      }
+      $items[] = t('@count imported items total.', array('@count' => $v['count']));
+    }
+    else {
+      $items[] = t('No imported items.');
+    }
+  }
+  $output .= theme('item_list', array('items' => $items));
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ * Theme upload widget.
+ */
+function theme_feeds_upload($variables) {
+  $element = $variables['element'];
+  drupal_add_css(drupal_get_path('module', 'feeds') . '/feeds.css');
+  _form_set_attributes($element, array('form-file'));
+  $description = '';
+  if (!empty($element['#file_info'])) {
+    $file = $element['#file_info'];
+    $wrapper = file_stream_wrapper_get_instance_by_uri($file->getFileUri());
+    $description .= '<div class="file-info">';
+    $description .= '<div class="file-name">';
+    if ($wrapper) {
+      $description .= l($file->getFilename(), $wrapper->getExternalUrl());
+    }
+    else {
+      $description .= t('URI scheme %scheme not available.', array('%scheme' =>  file_uri_scheme($file->getFileUri())));
+    }
+    $description .= '</div>';
+    $description .= '<div class="file-size">';
+    $description .= format_size($file->getSize());
+    $description .= '</div>';
+    $description .= '<div class="file-mime">';
+    $description .= check_plain($file->getMimeType());
+    $description .= '</div>';
+    $description .= '</div>';
+  }
+  $description .= '<div class="file-upload">';
+  $description .= '<input type="file" name="' . $element['#name'] . '"' . ($element['#attributes'] ? ' ' . new Attribute($element['#attributes']) : '') . ' id="' . $element['#id'] . '" size="' . $element['#size'] . "\" />\n";
+  $description .= '</div>';
+  $element['#description'] = $description;
+
+  // For some reason not unsetting #title leads to printing the title twice.
+  unset($element['#title']);
+  return theme('form_element', $element);
+}
+
+/**
+ * Handle a fetcher callback.
+ */
+function feeds_fetcher_callback($importer, $fid = 0) {
+  if ($importer instanceof Importer) {
+    try {
+      return $importer->fetcher->request($fid);
+    }
+    catch (Exception $e) {
+      // Do nothing.
+    }
+  }
+  drupal_access_denied();
 }

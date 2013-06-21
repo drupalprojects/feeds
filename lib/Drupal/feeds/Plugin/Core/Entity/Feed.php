@@ -39,8 +39,13 @@ define('FEEDS_PROCESS_EXPIRE', 'process_expire');
  *     "render" = "Drupal\feeds\FeedRenderController",
  *     "access" = "Drupal\feeds\FeedAccessController",
  *     "form" = {
- *       "default" = "Drupal\feeds\FeedFormController",
- *       "edit" = "Drupal\feeds\FeedFormController"
+ *       "add" = "Drupal\feeds\FeedFormController",
+ *       "edit" = "Drupal\feeds\FeedFormController",
+ *       "delete" = "Drupal\feeds\Form\FeedDeleteForm",
+ *       "import" = "Drupal\feeds\Form\FeedImportForm",
+ *       "clear" = "Drupal\feeds\Form\FeedDeleteItemsForm",
+ *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
+ *       "default" = "Drupal\feeds\FeedFormController"
  *     },
  *     "list" = "Drupal\Core\Entity\EntityListController"
  *   },
@@ -734,6 +739,18 @@ class Feed extends EntityNG implements FeedInterface {
       JobScheduler::get('feeds_feed_import')->remove($job);
       JobScheduler::get('feeds_feed_expire')->remove($job);
     }
+  }
+
+  /**
+   * Unlocks a feed.
+   *
+   * @todo move this to the storage controller.
+   */
+  public function unlock() {
+    db_update('feeds_feed')
+      ->condition('fid', $this->id())
+      ->fields(array('state' => FALSE))
+      ->execute();
   }
 
 }

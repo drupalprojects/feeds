@@ -1,7 +1,77 @@
-feeds_list:
+feeds_feed_list:
   pattern: '/admin/content/feed'
   defaults:
-    _content: '\Drupal\Core\Entity\Controller\EntityListController::listing'
+    _content: 'Drupal\Core\Entity\Controller\EntityListController::listing'
     entity_type: 'feeds_feed'
   requirements:
     _permission: 'administer feeds'
+
+feeds_feed_add_list:
+  pattern: '/feed/add'
+  defaults:
+    _content: 'Drupal\feeds\Controller\FeedController::add'
+  requirements:
+    _access_feeds_feed_add_list: 'TRUE'
+
+feeds_feed_add:
+  pattern: '/feed/add/{feeds_importer}'
+  defaults:
+    _content: 'Drupal\feeds\Controller\FeedController::addForm'
+  requirements:
+    _access_feeds_feed_add: 'TRUE'
+
+feeds_feed:
+  pattern: '/feed/{feeds_feed}'
+  defaults:
+    _content: 'Drupal\feeds\Controller\FeedController::view'
+  requirements:
+    _entity_access: 'feeds_feed.view'
+    feeds_feed:  \d+
+
+feeds_feed_view:
+  pattern: '/feed/{feeds_feed}/view'
+  defaults:
+    _content: 'Drupal\feeds\Controller\FeedController::view'
+  requirements:
+    _entity_access: 'feeds_feed.view'
+    feeds_feed:  \d+
+
+feeds_feed_edit:
+  pattern: '/feed/{feeds_feed}/edit'
+  defaults:
+    _entity_form: 'feeds_feed.edit'
+  requirements:
+    _entity_access: 'feeds_feed.edit'
+    feeds_feed:  \d+
+
+feeds_feed_delete:
+  pattern: '/feed/{feeds_feed}/delete'
+  defaults:
+    _entity_form: 'feeds_feed.delete'
+  requirements:
+    _entity_access: 'feeds_feed.delete'
+    feeds_feed:  \d+
+
+feeds_feed_import:
+  pattern: '/feed/{feeds_feed}/import'
+  defaults:
+    _entity_form: 'feeds_feed.import'
+  requirements:
+    _entity_access: 'feeds_feed.import'
+    feeds_feed:  \d+
+
+feeds_feed_delete_items:
+  pattern: '/feed/{feeds_feed}/delete-items'
+  defaults:
+    _entity_form: 'feeds_feed.clear'
+  requirements:
+    _entity_access: 'feeds_feed.clear'
+    feeds_feed:  \d+
+
+feeds_feed_unlock:
+  pattern: '/feed/{feeds_feed}/unlock'
+  defaults:
+    _entity_form: 'feeds_feed.unlock'
+  requirements:
+    _entity_access: 'feeds_feed.unlock'
+    feeds_feed:  \d+

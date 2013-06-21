@@ -410,7 +410,7 @@ class FeedsWebTestBase extends WebTestBase {
    *   The fid to delete items for.
    */
   public function feedDeleteItems($fid) {
-    $this->drupalPost("feed/$fid/delete-items", array(), 'Delete');
+    $this->drupalPost("feed/$fid/delete-items", array(), 'Delete items');
   }
 
   /**

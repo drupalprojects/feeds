@@ -24,7 +24,10 @@ class FeedFormController extends EntityFormControllerNG {
     $importer = $feed->getImporter();
 
     if ($this->operation == 'edit') {
-      drupal_set_title(t('<em>Edit @importer</em> @title', array('@importer' => $importer->label(), '@title' => $feed->title->value), PASS_THROUGH));
+      drupal_set_title(t('<em>Edit @importer</em> @title', array('@importer' => $importer->label(), '@title' => $feed->label())), PASS_THROUGH);
+    }
+    elseif ($this->operation == 'add') {
+      drupal_set_title(t('<em>Add @importer</em>', array('@importer' => $importer->label())), PASS_THROUGH);
     }
 
     $user_config = config('user.settings');
@@ -32,7 +35,7 @@ class FeedFormController extends EntityFormControllerNG {
     $form['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Title'),
-      '#default_value' => $feed->title->value,
+      '#default_value' => $feed->label(),
       '#required' => TRUE,
     );
 
@@ -170,8 +173,8 @@ class FeedFormController extends EntityFormControllerNG {
     $feed->save();
 
     $feed_link = l(t('view'), 'feed/' . $feed->id());
-    $watchdog_args = array('@importer' => $feed->type, '%title' => $feed->title->value);
-    $t_args = array('@importer' => $importer->label(), '%title' => $feed->title->value);
+    $watchdog_args = array('@importer' => $feed->type, '%title' => $feed->label());
+    $t_args = array('@importer' => $importer->label(), '%title' => $feed->label());
 
     if ($insert) {
       watchdog('feeds', '@importer: added %title.', $watchdog_args, WATCHDOG_NOTICE, $feed_link);

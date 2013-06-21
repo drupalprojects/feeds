@@ -90,10 +90,9 @@ abstract class FetcherBase extends FeedsPlugin {
         'page callback' => 'feeds_fetcher_callback',
         'page arguments' => array(2, 3),
         'access callback' => TRUE,
-        'file' => 'feeds.pages.inc',
         'type' => MENU_CALLBACK,
-        ),
-      );
+      ),
+    );
   }
 
   /**
