@@ -9,6 +9,7 @@ namespace Drupal\feeds\Form;
 
 use Drupal\Core\Form\BaseFormIdInterface;
 use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Form\MappingSettingsForm;
 
 /**
  * Provides a form for mapping.
@@ -97,7 +98,8 @@ class MappingForm implements BaseFormIdInterface {
 
       foreach ($mappings as $i => $mapping) {
         if (isset($targets[$mapping['target']])) {
-          $form['config'][$i] = feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targets[$mapping['target']]);
+          $settings_form = new MappingSettingsForm($i, $mapping, $targets[$mapping['target']]);
+          $form['config'][$i] = $settings_form->buildForm($form, $form_state);
         }
 
         $form['remove_flags'][$i] = array(
