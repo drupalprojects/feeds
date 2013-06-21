@@ -82,7 +82,7 @@ class MappingSettingsForm implements BaseFormIdInterface {
       }
 
       // Merge in the optional unique form.
-      $settings_form += feeds_ui_mapping_settings_optional_unique_form($this->mapping, $this->target, $form, $form_state);
+      $settings_form += $this->optionalUniqueForm($this->mapping, $this->target, $form, $form_state);
 
       return array(
         '#type' => 'container',
@@ -135,6 +135,20 @@ class MappingSettingsForm implements BaseFormIdInterface {
     }
 
     return $form;
+  }
+
+  protected function optionalUniqueForm($mapping, $target, $form, $form_state) {
+    $settings_form = array();
+
+    if (!empty($target['optional_unique'])) {
+      $settings_form['unique'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Unique'),
+        '#default_value' => !empty($mapping['unique']),
+      );
+    }
+
+    return $settings_form;
   }
 
   public function ajaxCallback(array $form, array &$form_state) {
