@@ -1,0 +1,6 @@
+feeds_importer_list:
+  pattern: '/admin/structure/feeds'
+  defaults:
+    _entity_list: 'feeds_importer'
+  requirements:
+    _permission: 'administer feeds'

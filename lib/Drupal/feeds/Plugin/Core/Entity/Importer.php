@@ -23,7 +23,7 @@ use Drupal\feeds\Plugin\FeedsPlugin;
  *   controllers = {
  *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController",
  *     "access" = "Drupal\feeds\ImporterAccessController",
- *     "list" = "Drupal\Core\Config\Entity\ConfigEntityListController",
+ *     "list" = "Drupal\feeds\ImporterListController",
  *     "form" = {
  *       "default" = "Drupal\feeds\ImporterFormController"
  *     }
@@ -293,4 +293,18 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public function getPluginTypes() {
     return $this->plugin_types;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function uri() {
+    return array(
+      'path' => 'admin/structure/feeds/manage/' . $this->id(),
+      'options' => array(
+        'entity_type' => $this->entityType,
+        'entity' => $this,
+      ),
+    );
+  }
+
 }

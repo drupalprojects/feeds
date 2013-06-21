@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  */
@@ -22,10 +23,7 @@ function feeds_ui_menu() {
   $items['admin/structure/feeds'] = array(
     'title' => 'Feeds importers',
     'description' => 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_ui_overview_form'),
-    'access arguments' => array('administer feeds'),
-    'file' => 'feeds_ui.admin.inc',
+    'route_name' => 'feeds_importer_list',
   );
   $items['admin/structure/feeds/create'] = array(
     'title' => 'Add importer',
@@ -99,25 +97,6 @@ function feeds_ui_theme() {
       'file' => 'feeds_ui.admin.inc',
     ),
   );
-}
-
-/**
- * Implements hook_admin_menu_map().
- */
-function feeds_ui_admin_menu_map() {
-  // Add awareness to the administration menu of the various importers so they
-  // are included in the dropdown menu.
-  if (!user_access('administer feeds')) {
-    return;
-  }
-  $map['admin/structure/feeds/manage/%feeds_importer'] = array(
-    'parent' => 'admin/structure/feeds',
-    'arguments' => array(
-      array('%feeds_importer' => feeds_enabled_importers()),
-    ),
-  );
-
-  return $map;
 }
 
 /**
