@@ -323,7 +323,8 @@ function feeds_menu() {
     'route_name' => 'feeds_feed_add',
   );
   $items['feed/%feeds_feed'] = array(
-    'title' => 'Feed',
+    'title callback' => 'feeds_feed_title',
+    'title arguments' => array(1),
     'route_name' => 'feeds_feed',
   );
   $items['feed/%feeds_feed/view'] = array(
@@ -346,19 +347,19 @@ function feeds_menu() {
   $items['feed/%feeds_feed/import'] = array(
     'title' => 'Import',
     'route_name' => 'feeds_feed_import',
-    'type' => MENU_LOCAL_ACTION,
+    'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 10,
   );
   $items['feed/%feeds_feed/delete-items'] = array(
     'title' => 'Delete items',
     'route_name' => 'feeds_feed_delete_items',
-    'type' => MENU_LOCAL_ACTION,
+    'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 11,
   );
   $items['feed/%feeds_feed/unlock'] = array(
-    'title' => 'Unlock',
+    'title' => 'unlock',
     'route_name' => 'feeds_feed_unlock',
-    'type' => MENU_LOCAL_ACTION,
+    'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 11,
   );
 
@@ -413,6 +414,27 @@ function feeds_menu() {
  */
 function feeds_local_actions() {
   return array(
+    array(
+      'route_name' => 'feeds_feed_import',
+      'title' => t('Import'),
+      'appears_on' => array(
+        'feeds_feed_view',
+      ),
+    ),
+    array(
+      'route_name' => 'feeds_feed_delete_items',
+      'title' => t('Delete items'),
+      'appears_on' => array(
+        'feeds_feed_view',
+      ),
+    ),
+    array(
+      'route_name' => 'feeds_feed_unlock',
+      'title' => t('Unlock'),
+      'appears_on' => array(
+        'feeds_feed_view',
+      ),
+    ),
     array(
       'route_name' => 'feeds_importer_add',
       'title' => t('Add importer'),
