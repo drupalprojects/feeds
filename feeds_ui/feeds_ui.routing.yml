@@ -12,6 +12,43 @@ feeds_importer_add:
   requirements:
     _permission: 'administer feeds'
 
+feeds_importer:
+  pattern: '/admin/structure/feeds/manage/{feeds_importer}'
+  defaults:
+    _content: 'Drupal\feeds\Controller\ImporterController::edit'
+  requirements:
+    _permission: 'administer feeds'
+
+feeds_importer_active:
+  pattern: '/admin/structure/feeds/manage/{feeds_importer}/{active}'
+  defaults:
+    _content: 'Drupal\feeds\Controller\ImporterController::edit'
+  requirements:
+    _permission: 'administer feeds'
+    active: '^(help|fetcher|parser|processor|settings|mapping)$'
+
+feeds_importer_active_plugin:
+  pattern: '/admin/structure/feeds/manage/{feeds_importer}/{active}/{plugin_type}'
+  defaults:
+    _content: 'Drupal\feeds\Controller\ImporterController::edit'
+  requirements:
+    _permission: 'administer feeds'
+    active: '^(help|fetcher|parser|processor|settings|mapping)$'
+
+feeds_settings:
+  pattern: '/admin/structure/feeds/settings'
+  defaults:
+    _entity_form: 'feeds_importer.edit'
+  requirements:
+    _permission: 'administer feeds'
+
+feeds_importer_edit:
+  pattern: '/admin/structure/feeds/manage/{feeds_importer}/edit'
+  defaults:
+    _entity_form: 'feeds_importer.edit'
+  requirements:
+    _permission: 'administer feeds'
+
 feeds_importer_delete:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/delete'
   defaults:
