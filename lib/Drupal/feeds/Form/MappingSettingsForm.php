@@ -60,7 +60,7 @@ class MappingSettingsForm implements BaseFormIdInterface {
     $base_button = array(
       '#submit' => array('feeds_ui_mapping_form_multistep_submit'),
       '#ajax' => array(
-        'callback' => 'feeds_ui_mapping_settings_form_callback',
+        'callback' => array($this, 'ajaxCallback'),
         'wrapper' => 'feeds-ui-mapping-form-wrapper',
         'effect' => 'fade',
         'progress' => 'none',
@@ -134,6 +134,10 @@ class MappingSettingsForm implements BaseFormIdInterface {
       }
     }
 
+    return $form;
+  }
+
+  public function ajaxCallback(array $form, array &$form_state) {
     return $form;
   }
 

@@ -195,13 +195,6 @@ function feeds_ui_mapping_form_multistep_submit($form, &$form_state) {
 }
 
 /**
- * AJAX callback that returns the whole feeds_ui_mapping_form().
- */
-function feeds_ui_mapping_settings_form_callback($form, $form_state) {
-  return $form;
-}
-
-/**
  * Walk the result of ParserBase::getMappingSources() or
  * ProcessorBase::getMappingTargets() and format them into
  * a Form API options array.
