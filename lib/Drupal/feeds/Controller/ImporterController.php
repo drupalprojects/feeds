@@ -78,7 +78,7 @@ class ImporterController implements ControllerInterface {
     switch ($active) {
       case 'help':
         $active_container['title'] = t('Getting started');
-        $active_container['body'] = '<div class="help feeds-admin-ui">' . feeds_ui_edit_help() . '</div>';
+        $active_container['body'] = '<div class="help feeds-admin-ui">' . $this->help() . '</div>';
         unset($active_container['actions']);
         break;
 
@@ -191,6 +191,34 @@ class ImporterController implements ControllerInterface {
       'info' => $config_info,
       'active' => $active_container,
     ));
+  }
+
+  /**
+   * Introductory help for admin/structure/feeds/manage/%feeds_importer page
+   */
+  protected function help() {
+    return t('
+      <p>
+      You can create as many Feeds importer configurations as you would like to. Each can have a distinct purpose like letting your users aggregate RSS feeds or importing a CSV file for content migration. Here are a couple of things that are important to understand in order to get started with Feeds:
+      </p>
+      <ul>
+      <li>
+      Every importer configuration consists of basic settings, a fetcher, a parser and a processor and their settings.
+      </li>
+      <li>
+      The <strong>basic settings</strong> define the general behavior of the importer. <strong>Fetchers</strong> are responsible for loading data, <strong>parsers</strong> for organizing it and <strong>processors</strong> for "doing stuff" with it, usually storing it.
+      </li>
+      <li>
+      In Basic settings, you can <strong>attach an importer configuration to a content type</strong>. This is useful when many imports of a kind should be created, for example in an RSS aggregation scenario. If you don\'t attach a configuration to a content type, you can use it on the !import page.
+      </li>
+      <li>
+      Imports can be <strong>scheduled periodically</strong> - see the periodic import select box in the Basic settings.
+      </li>
+      <li>
+      Processors can have <strong>mappings</strong> in addition to settings. Mappings allow you to define what elements of a data feed should be mapped to what content fields on a granular level. For instance, you can specify that a feed item\'s author should be mapped to a node\'s body.
+      </li>
+      </ul>
+      ', array('!import' => l(t('Import'), 'import')));
   }
 
 }

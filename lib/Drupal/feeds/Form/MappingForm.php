@@ -53,7 +53,7 @@ class MappingForm implements BaseFormIdInterface {
     $importer = $this->importer;
     $form['#importer'] = $importer->id();
     $form['#mappings'] = $mappings = $importer->processor->getMappings();
-    $form['help']['#markup'] = feeds_ui_mapping_help();
+    $form['help']['#markup'] = $this->help();
     $form['#prefix'] = '<div id="feeds-ui-mapping-form-wrapper">';
     $form['#suffix'] = '</div>';
 
@@ -61,7 +61,7 @@ class MappingForm implements BaseFormIdInterface {
     // for output.
     // Some parsers do not define mapping sources but let them define on the fly.
     if ($sources = $importer->parser->getMappingSources()) {
-      $source_options = _feeds_ui_format_options($sources);
+      $source_options = $this->sortOptions($sources);
       foreach ($sources as $k => $source) {
         $legend['sources'][$k]['name']['#markup'] = empty($source['name']) ? $k : $source['name'];
         $legend['sources'][$k]['description']['#markup'] = empty($source['description']) ? '' : $source['description'];
@@ -71,7 +71,7 @@ class MappingForm implements BaseFormIdInterface {
       $legend['sources']['#markup'] = t('This parser supports free source definitions. Enter the name of the source field in lower case into the Source text field above.');
     }
     $targets = $importer->processor->getMappingTargets();
-    $target_options = _feeds_ui_format_options($targets);
+    $target_options = $this->sortOptions($targets);
     $legend['targets'] = array();
     foreach ($targets as $k => $target) {
       $legend['targets'][$k]['name']['#markup'] = empty($target['name']) ? $k : $target['name'];
@@ -254,6 +254,34 @@ class MappingForm implements BaseFormIdInterface {
 
     $importer->save();
     drupal_set_message(t('Your changes have been saved.'));
+  }
+
+  protected function sortOptions(array $options) {
+    $result = array();
+    foreach ($options as $k => $v) {
+      if (is_array($v) && !empty($v['name'])) {
+        $result[$k] = $v['name'];
+      }
+      elseif (is_array($v)) {
+        $result[$k] = $k;
+      }
+      else {
+        $result[$k] = $v;
+      }
+    }
+    asort($result);
+    return $result;
+  }
+
+  /**
+   * Help text for mapping.
+   */
+  protected function help() {
+    return t('
+    <p>
+    Define which elements of a single item of a feed (= <em>Sources</em>) map to which content pieces in Drupal (= <em>Targets</em>). Make sure that at least one definition has a <em>Unique target</em>. A unique target means that a value for a target can only occur once. E. g. only one item with the URL <em>http://example.com/content/1</em> can exist.
+    </p>
+    ');
   }
 
 }

@@ -58,7 +58,7 @@ class MappingSettingsForm implements BaseFormIdInterface {
     );
 
     $base_button = array(
-      '#submit' => array('feeds_ui_mapping_form_multistep_submit'),
+      '#submit' => array(array($this, 'submitForm')),
       '#ajax' => array(
         'callback' => array($this, 'ajaxCallback'),
         'wrapper' => 'feeds-ui-mapping-form-wrapper',
@@ -111,7 +111,7 @@ class MappingSettingsForm implements BaseFormIdInterface {
       }
 
       // Append the optional unique summary.
-      if ($optional_unique_summary = feeds_ui_mapping_settings_optional_unique_summary($this->mapping, $this->target, $form, $form_state)) {
+      if ($optional_unique_summary = $this->optionalUniqueSummary($this->mapping, $this->target, $form, $form_state)) {
         $summary .= ' ' . $optional_unique_summary;
       }
 
@@ -151,6 +151,21 @@ class MappingSettingsForm implements BaseFormIdInterface {
     return $settings_form;
   }
 
+  /**
+   * Per mapping settings summary callback. Shows whether a mapping is used as
+   * unique or not.
+   */
+  protected function optionalUniqueSummary($mapping, $target, $form, $form_state) {
+    if (!empty($target['optional_unique'])) {
+      if ($mapping['unique']) {
+        return t('Used as <strong>unique</strong>.');
+      }
+      else {
+        return t('Not used as unique.');
+      }
+    }
+  }
+
   public function ajaxCallback(array $form, array &$form_state) {
     return $form;
   }
@@ -163,6 +178,26 @@ class MappingSettingsForm implements BaseFormIdInterface {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {}
+  public function submitForm(array &$form, array &$form_state) {
+    $trigger = $form_state['triggering_element'];
+
+    switch ($trigger['#op']) {
+      case 'edit':
+        $form_state['mapping_settings_edit'] = $trigger['#i'];
+        break;
+
+      case 'update':
+        $values = $form_state['values']['config'][$trigger['#i']]['settings'];
+        $form_state['mapping_settings'][$trigger['#i']] = $values;
+        unset($form_state['mapping_settings_edit']);
+        break;
+
+      case 'cancel':
+        unset($form_state['mapping_settings_edit']);
+        break;
+    }
+
+    $form_state['rebuild'] = TRUE;
+  }
 
 }
