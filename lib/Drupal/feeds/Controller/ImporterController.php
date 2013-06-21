@@ -10,6 +10,7 @@ namespace Drupal\feeds\Controller;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Controller\ControllerInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\feeds\Form\MappingForm;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -102,7 +103,7 @@ class ImporterController implements ControllerInterface {
       case 'mapping':
         $definition = $feeds_importer->processor->getPluginDefinition();
         $active_container['title'] = t('Mapping for !processor', array('!processor' => $definition['title']));
-        $active_container['body'] = drupal_get_form('feeds_ui_mapping_form', $feeds_importer);
+        $active_container['body'] = drupal_get_form(new MappingForm($feeds_importer));
         break;
     }
 
