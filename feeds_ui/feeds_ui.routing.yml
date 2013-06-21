@@ -4,3 +4,10 @@ feeds_importer_list:
     _entity_list: 'feeds_importer'
   requirements:
     _permission: 'administer feeds'
+
+feeds_importer_add:
+  pattern: '/admin/structure/feeds/add'
+  defaults:
+    _form: 'Drupal\feeds\Form\ImporterAddForm'
+  requirements:
+    _permission: 'administer feeds'

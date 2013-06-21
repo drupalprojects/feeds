@@ -185,7 +185,7 @@ class FeedsWebTestBase extends WebTestBase {
       'name' => $name,
       'id' => $id,
     );
-    $this->drupalPost('admin/structure/feeds/create', $edit, 'Create');
+    $this->drupalPost('admin/structure/feeds/add', $edit, 'Create');
 
     // Assert message and presence of default plugins.
     $this->assertText('Your configuration has been created with default settings.');
