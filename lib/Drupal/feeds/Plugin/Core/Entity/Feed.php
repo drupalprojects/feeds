@@ -62,6 +62,7 @@ define('FEEDS_PROCESS_EXPIRE', 'process_expire');
  *     "bundle" = "importer"
  *   },
  *   route_base_path = "admin/structure/feeds/manage/{bundle}",
+ *   menu_base_path = "feed/%feed",
  *   permission_granularity = "bundle",
  *   links = {
  *     "canonical" = "/feed/{feeds_feed}",
