@@ -94,7 +94,7 @@ function feeds_ui_theme() {
     'feeds_ui_edit_page' => array(
       'variables' => array('info' => NULL, 'active' => NULL),
     ),
-    'feeds_ui_plugin_form' => array(
+    'feeds_plugin_form' => array(
       'render element' => 'form',
     ),
     'feeds_ui_container' => array(
@@ -143,59 +143,9 @@ function feeds_ui_mapping_help() {
 }
 
 /**
- * Build a form of plugins to pick from.
- *
- * @param $form_state
- *   Form API form state array.
- * @param $importer
- *   Drupal\feeds\Plugin\Core\Entity\Importer object.
- * @param $type
- *   Plugin type. One of 'fetcher', 'parser', 'processor'.
- *
- * @return
- *   A Form API form definition.
- */
-function feeds_ui_plugin_form($form, &$form_state, $importer, $type) {
-  $definitions = \Drupal::service('plugin.manager.feeds.' . $type)->getDefinitions();
-
-  $form['#importer'] = $importer->id();
-  $form['#plugin_type'] = $type;
-
-  $importer_key = $importer->config[$type]['plugin_key'];
-
-  foreach ($definitions as $key => $plugin) {
-
-    $form['plugin_key'][$key] = array(
-      '#type' => 'radio',
-      '#parents' => array('plugin_key'),
-      '#title' => check_plain($plugin['title']),
-      '#description' => filter_xss(isset($plugin['help']) ? $plugin['help'] : $plugin['description']),
-      '#return_value' => $key,
-      '#default_value' => ($key == $importer_key) ? $key : '',
-    );
-  }
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-  );
-  return $form;
-}
-
-/**
- * Submit handler for feeds_ui_plugin_form().
- */
-function feeds_ui_plugin_form_submit($form, &$form_state) {
-  // Set the plugin and save feed.
-  $importer = feeds_importer($form['#importer']);
-  $importer->setPlugin($form['#plugin_type'], $form_state['values']['plugin_key']);
-  $importer->save();
-  drupal_set_message(t('Changed @type plugin.', array('@type' => $form['#plugin_type'])));
-}
-
-/**
  * Theme feeds_ui_plugin_form().
  */
-function theme_feeds_ui_plugin_form($variables) {
+function theme_feeds_plugin_form($variables) {
   $form = $variables['form'];
   $output = '';
 

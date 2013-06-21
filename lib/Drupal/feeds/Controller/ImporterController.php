@@ -11,6 +11,7 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Controller\ControllerInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\Form\MappingForm;
+use Drupal\feeds\Form\PluginForm;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -85,7 +86,7 @@ class ImporterController implements ControllerInterface {
       case 'parser':
       case 'processor':
         $active_container['title'] = t('Select a !plugin_type', array('!plugin_type' => $active));
-        $active_container['body'] = drupal_get_form('feeds_ui_plugin_form', $feeds_importer, $active);
+        $active_container['body'] = drupal_get_form(new PluginForm($feeds_importer, $active));
         break;
 
       case 'settings':
