@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains Drupal\feeds_ui\Tests\UserInterfaceTest.
+ * Contains Drupal\feeds\Tests\UserInterfaceTest.
  */
 
-namespace Drupal\feeds_ui\Tests;
+namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\FeedsWebTestBase;
 
@@ -17,7 +17,7 @@ class UserInterfaceTest extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
       'name' => 'User interface',
-      'description' => "Tests Feeds Admin UI module's GUI.",
+      'description' => 'Tests Feeds Admin GUI.',
       'group' => 'Feeds',
     );
   }

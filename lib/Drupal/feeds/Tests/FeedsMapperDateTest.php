@@ -27,7 +27,6 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
     'field_ui',
     'datetime',
     'job_scheduler',
-    'feeds_ui',
   );
 
   public static function getInfo() {

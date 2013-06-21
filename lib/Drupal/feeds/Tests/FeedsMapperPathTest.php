@@ -24,7 +24,6 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
     'field_ui',
     'path',
     'job_scheduler',
-    'feeds_ui',
   );
 
   public static function getInfo() {

@@ -187,7 +187,7 @@ class ImporterController implements ControllerInterface {
     $info['actions'] = array(l(t('Change'), $path . '/processor'));
     $config_info[] = $info;
 
-    return theme('feeds_ui_edit_page', array(
+    return theme('feeds_edit_page', array(
       'info' => $config_info,
       'active' => $active_container,
     ));

@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Theme functions for feeds_ui.
+ * Theme functions for feeds.
  */
 
 /**
- * Theme feeds_ui_plugin_form().
+ * Theme feeds_plugin_form().
  */
 function theme_feeds_plugin_form($variables) {
   $form = $variables['form'];
@@ -20,11 +20,11 @@ function theme_feeds_plugin_form($variables) {
       'body' => isset($form['plugin_key'][$key]['#description']) ? $form['plugin_key'][$key]['#description'] : '',
     );
     $form['plugin_key'][$key]['#title'] = t('Select');
-    $form['plugin_key'][$key]['#attributes']['class'] = array('feeds-ui-radio-link');
+    $form['plugin_key'][$key]['#attributes']['class'] = array('feeds-radio-link');
     unset($form['plugin_key'][$key]['#description']);
     $container['actions'] = array(drupal_render($form['plugin_key'][$key]));
 
-    $output .= theme('feeds_ui_container', array('container' => $container));
+    $output .= theme('feeds_container', array('container' => $container));
   }
 
   $output .= drupal_render_children($form);
@@ -32,12 +32,12 @@ function theme_feeds_plugin_form($variables) {
 }
 
 /**
- * Theme feeds_ui_edit_page().
+ * Theme feeds_edit_page().
  */
-function theme_feeds_ui_edit_page($variables) {
+function theme_feeds_edit_page($variables) {
   $config_info = $variables['info'];
   $active_container = $variables['active'];
-  drupal_add_css(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.css');
+  drupal_add_css(drupal_get_path('module', 'feeds') . '/feeds.ui.css');
 
   // Outer wrapper.
   $output = '<div class="feeds-settings clear-block">';
@@ -45,14 +45,14 @@ function theme_feeds_ui_edit_page($variables) {
   // Build left bar.
   $output .= '<div class="left-bar">';
   foreach ($config_info as $info) {
-    $output .= theme('feeds_ui_container', array('container' => $info));
+    $output .= theme('feeds_container', array('container' => $info));
   }
   $output .= '</div>';
 
   // Build configuration space.
   $output .= '<div class="configuration">';
   $output .= '<div class="configuration-squeeze">';
-  $output .= theme('feeds_ui_container', array('container' => $active_container));
+  $output .= theme('feeds_container', array('container' => $active_container));
   $output .= '</div>';
   $output .= '</div>';
 
@@ -78,7 +78,7 @@ function theme_feeds_ui_edit_page($variables) {
  *     'id' => 'the id of the container',
  *   );
  */
-function theme_feeds_ui_container($variables) {
+function theme_feeds_container($variables) {
   $container = $variables['container'];
 
   $class = array_merge(array('feeds-container'), empty($container['class']) ? array('plain') : $container['class']);
@@ -107,7 +107,7 @@ function theme_feeds_ui_container($variables) {
       }
       else {
         foreach ($container['body'] as $c) {
-          $output .= theme('feeds_ui_container', array('container' => $c));
+          $output .= theme('feeds_container', array('container' => $c));
         }
       }
     }
@@ -122,7 +122,7 @@ function theme_feeds_ui_container($variables) {
 }
 
 /**
- * Theme function for feeds_ui_mapping_form().
+ * Theme function for feeds_mapping_form().
  */
 function theme_feeds_mapping_form($variables) {
   $form = $variables['form'];
@@ -169,7 +169,7 @@ function theme_feeds_mapping_form($variables) {
     '',
   );
   $output = '<div class="help feeds-admin-ui">' . drupal_render($form['help']) . '</div>';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'feeds-ui-mapping-overview')));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'feeds-mapping-overview')));
 
   // Build the help table that explains available sources.
   $legend = '';
@@ -204,6 +204,6 @@ function theme_feeds_mapping_form($variables) {
   $output .= drupal_render($form['legendset']);
   $output .= drupal_render_children($form);
 
-  drupal_add_tabledrag('feeds-ui-mapping-overview', 'order', 'sibling', 'feeds-ui-mapping-weight');
+  drupal_add_tabledrag('feeds-mapping-overview', 'order', 'sibling', 'feeds-mapping-weight');
   return $output;
 }

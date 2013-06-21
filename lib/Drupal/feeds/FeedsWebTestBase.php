@@ -35,7 +35,6 @@ class FeedsWebTestBase extends WebTestBase {
     'image',
     'job_scheduler',
     'feeds',
-    'feeds_ui',
     'feeds_tests',
     'views',
   );

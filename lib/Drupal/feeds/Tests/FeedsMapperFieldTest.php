@@ -24,7 +24,6 @@ class FeedsMapperFieldTest extends FeedsMapperTestBase {
     'field_ui',
     'number',
     'job_scheduler',
-    'feeds_ui',
   );
 
   public static function getInfo() {
