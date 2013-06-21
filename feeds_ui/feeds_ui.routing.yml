@@ -11,3 +11,10 @@ feeds_importer_add:
     _form: 'Drupal\feeds\Form\ImporterAddForm'
   requirements:
     _permission: 'administer feeds'
+
+feeds_importer_delete:
+  pattern: '/admin/structure/feeds/manage/{feeds_importer}/delete'
+  defaults:
+    _entity_form: 'feeds_importer.delete'
+  requirements:
+    _permission: 'administer feeds'

@@ -25,6 +25,7 @@ use Drupal\feeds\Plugin\FeedsPlugin;
  *     "access" = "Drupal\feeds\ImporterAccessController",
  *     "list" = "Drupal\feeds\ImporterListController",
  *     "form" = {
+ *       "delete" = "Drupal\feeds\Form\ImporterDeleteForm",
  *       "default" = "Drupal\feeds\ImporterFormController"
  *     }
  *   },

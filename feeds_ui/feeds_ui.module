@@ -58,10 +58,7 @@ function feeds_ui_menu() {
   );
   $items['admin/structure/feeds/manage/%feeds_importer/delete'] = array(
     'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('feeds_ui_delete_form', 4),
-    'access arguments' => array('administer feeds'),
-    'file' => 'feeds_ui.admin.inc',
+    'route_name' => 'feeds_importer_delete',
     'type' => MENU_LOCAL_TASK,
     'weight' => 4,
   );
