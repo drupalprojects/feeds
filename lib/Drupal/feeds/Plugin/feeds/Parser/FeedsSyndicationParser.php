@@ -60,11 +60,14 @@ class FeedsSyndicationParser extends ParserBase {
       $parsed_item['guid'] = $item->getId();
       $parsed_item['url'] = $item->getLink();
       $parsed_item['description'] = $item->getDescription();
-      $parsed_item['author_name'] = '';
+
+      if ($enclosure = $item->getEnclosure()) {
+        $parsed_item['enclosures'][] = urldecode($enclosure->url);
+      }
+
       if ($author = $item->getAuthor()) {
         $parsed_item['author_name'] = $author['name'];
       }
-      $parsed_item['timestamp'] = '';
       if ($date = $item->getDateModified()) {
         $parsed_item['timestamp'] = $date->getTimestamp();
       }
@@ -116,6 +119,10 @@ class FeedsSyndicationParser extends ParserBase {
       'geolocations' => array(
         'name' => t('Geo Locations'),
         'description' => t('An array of geographic locations with a name and a position.'),
+      ),
+      'enclosures' => array(
+        'name' => t('Enclosures'),
+        'description' => t('A list of enclosures attached to the feed item.'),
       ),
     ) + parent::getMappingSources();
   }

@@ -36,21 +36,12 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
    * Basic test loading a single entry CSV file.
    */
   public function test() {
-    // Only download simplepie if the plugin doesn't already exist somewhere.
-    // People running tests locally might have it.
-    if (!feeds_simplepie_exists()) {
-      $this->downloadExtractSimplePie('1.3');
-      $this->assertTrue(feeds_simplepie_exists());
-      // Reset all the caches!
-      $this->resetAll();
-    }
     $typename = $this->createContentType(array(), array('files' => 'file'));
 
     // 1) Test mapping remote resources to file field.
 
     // Create importer configuration.
     $this->createImporterConfiguration();
-    $this->setPlugin('syndication', 'parser', 'simplepie');
     $this->setSettings('syndication', 'processor', array('bundle' => $typename));
     $this->addMappings('syndication', array(
       0 => array(
@@ -65,6 +56,11 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
         'source' => 'enclosures',
         'target' => 'field_files:uri',
       ),
+      3 => array(
+        'source' => 'guid',
+        'target' => 'guid',
+        'unique' => TRUE,
+      ),
     ));
     $fid = $this->createFeed('syndication', $this->getAbsoluteUrl('testing/feeds/flickr.xml'));
     $this->assertText('Created 5 nodes');
@@ -73,10 +69,13 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     $entities = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
       ->condition('fid', $fid)
-      ->execute();
+      ->execute()
+      ->fetchCol();
 
-    foreach ($entities as $entity) {
-      $this->drupalGet('node/' . $entity->entity_id . '/edit');
+    $this->assertEqual(count($entities), 5, t('@count nodes in the database.', array('@count' => count($entities))));
+
+    foreach ($entities as $entity_id) {
+      $this->drupalGet('node/' . $entity_id . '/edit');
       $f = new FeedsEnclosure(array_shift($files), NULL);
       $this->assertText($f->getLocalValue());
     }
