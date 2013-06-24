@@ -7,6 +7,7 @@
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\Plugin\Core\Entity\Importer;
 use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
@@ -83,7 +84,7 @@ function feeds_hook_info() {
  * Implements hook_cron().
  */
 function feeds_cron() {
-  if ($importers = feeds_reschedule()) {
+  if ($importers = Importer::reschedule()) {
     if ($importers === TRUE) {
       $feeds = db_query("SELECT fid FROM {feeds_feed}");
     }
@@ -93,7 +94,7 @@ function feeds_cron() {
     foreach ($feeds as $feed) {
       entity_load('feeds_feed', $feed->fid)->schedule();
     }
-    feeds_reschedule(FALSE);
+    Importer::reschedule(FALSE);
   }
 
   // Expire old log entries.
@@ -242,35 +243,6 @@ function feeds_batch($method, $fid, array &$context) {
   catch (Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
   }
-}
-
-/**
- * Reschedule one or all importers.
- *
- * @param string $importer_id
- *   If true, all importers will be rescheduled, if FALSE, no importers will
- *   be rescheduled, if an importer id, only importer of that id will be
- *   rescheduled.
- *
- * @return bool|array
- *   Returns true if all importers need rescheduling, or false if no
- *   rescheduling is required. An array of importers that need rescheduling.
- */
-function feeds_reschedule($importer_id = NULL) {
-  $reschedule = Drupal::state()->get('feeds.reschedule') ? : FALSE;
-
-  if ($importer_id === TRUE || $importer_id === FALSE) {
-    $reschedule = $importer_id;
-  }
-  elseif (is_string($importer_id) && $reschedule !== TRUE) {
-    $reschedule = is_array($reschedule) ? $reschedule : array();
-    $reschedule[$importer_id] = $importer_id;
-  }
-  Drupal::state()->set('feeds.reschedule', $reschedule);
-  if ($reschedule === TRUE) {
-    return entity_load_multiple('feeds_importer');
-  }
-  return $reschedule;
 }
 
 /**

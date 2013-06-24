@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Core\Entity;
 
+use Drupal;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Annotation\Translation;
@@ -129,7 +130,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public function delete() {
     parent::delete();
 
-    feeds_reschedule($this->id());
+    $this->reschedule($this->id());
   }
 
   /**
@@ -265,7 +266,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public function configFormSubmit(&$values) {
     if ($this->config['import_period'] != $values['import_period']) {
-      feeds_reschedule($this->id());
+      $this->reschedule($this->id());
     }
     $this->name = $values['name'];
     $this->description = $values['description'];
@@ -306,6 +307,37 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
         'entity' => $this,
       ),
     );
+  }
+
+  /**
+   * Reschedules one or all importers.
+   *
+   * @param string $importer_id
+   *   If true, all importers will be rescheduled, if FALSE, no importers will
+   *   be rescheduled, if an importer id, only importer of that id will be
+   *   rescheduled.
+   *
+   * @return bool|array
+   *   Returns true if all importers need rescheduling, or false if no
+   *   rescheduling is required. An array of importers that need rescheduling.
+   */
+  public static function reschedule($importer_id = NULL) {
+    $reschedule = Drupal::state()->get('feeds.reschedule') ? : FALSE;
+
+    if ($importer_id === TRUE || $importer_id === FALSE) {
+      $reschedule = $importer_id;
+    }
+    elseif (is_string($importer_id) && $reschedule !== TRUE) {
+      $reschedule = is_array($reschedule) ? $reschedule : array();
+      $reschedule[$importer_id] = $importer_id;
+    }
+
+    Drupal::state()->set('feeds.reschedule', $reschedule);
+    if ($reschedule === TRUE) {
+      return entity_load_multiple('feeds_importer');
+    }
+
+    return $reschedule;
   }
 
 }

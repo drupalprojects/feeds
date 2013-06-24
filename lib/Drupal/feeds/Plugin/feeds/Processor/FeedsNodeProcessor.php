@@ -224,7 +224,7 @@ class FeedsNodeProcessor extends ProcessorBase {
    */
   public function configFormSubmit(&$values) {
     if ($this->config['expire'] != $values['expire']) {
-      feeds_reschedule($this->importer->id());
+      $this->importer->reschedule($this->importer->id());
     }
     parent::configFormSubmit($values);
   }
