@@ -57,8 +57,6 @@ class FeedsHTTPFetcher extends FetcherBase {
    * Implements FetcherBase::request().
    */
   public function request($fid = 0) {
-    feeds_dbg($_GET);
-    @feeds_dbg(file_get_contents('php://input'));
     // A subscription verification has been sent, verify.
     if (isset($_GET['hub_challenge'])) {
       $this->subscriber($fid)->verifyRequest();

@@ -39,7 +39,6 @@ class PuSHEnvironment implements PuSHSubscriberEnvironmentInterface {
         $severity = WATCHDOG_NOTICE;
         break;
     }
-    feeds_dbg($msg);
     watchdog('FeedsHTTPFetcher', $msg, array(), $severity);
   }
 }
