@@ -22,7 +22,7 @@ use Drupal\feeds\Plugin\FeedsPlugin;
  *   label = @Translation("Feed importer"),
  *   module = "feeds",
  *   controllers = {
- *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController",
+ *     "storage" = "Drupal\feeds\ImporterStorageController",
  *     "access" = "Drupal\feeds\ImporterAccessController",
  *     "list" = "Drupal\feeds\ImporterListController",
  *     "form" = {
@@ -274,22 +274,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
     $this->save();
     drupal_set_message(t('Your changes have been saved.'));
-  }
-
-  public function save() {
-    $plugins = array();
-
-    foreach ($this->plugin_types as $type) {
-      $this->config[$type]['config'] = $this->$type->getConfig();
-      $plugins[$type] = $this->$type;
-      unset($this->$type);
-    }
-
-    parent::save();
-
-    foreach ($plugins as $type => $plugin) {
-      $this->$type = $plugin;
-    }
   }
 
   public function getPluginTypes() {

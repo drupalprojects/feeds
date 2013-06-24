@@ -8,7 +8,6 @@
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
-use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
  * Do not schedule a feed for refresh.
@@ -747,7 +746,7 @@ function feeds_to_unixtime($date, $default_value) {
  * @return array|null
  *   Config form array if available otherwise null.
  */
-function feeds_get_form(FeedsPlugin $configurable, $form_method) {
+function feeds_get_form($configurable, $form_method) {
   if (method_exists($configurable, $form_method)) {
     return drupal_get_form(get_class($configurable) . '_feeds_form', $configurable, $form_method);
   }
@@ -767,7 +766,7 @@ function feeds_get_form(FeedsPlugin $configurable, $form_method) {
  * @param string $form_method
  *   The $form_method that should be rendered.
  */
-function feeds_form(array $form, array &$form_state, FeedsPlugin $configurable, $form_method) {
+function feeds_form(array $form, array &$form_state, $configurable, $form_method) {
   $form = $configurable->$form_method($form_state);
   $form['#configurable'] = $configurable;
   $form['#feeds_form_method'] = $form_method;
