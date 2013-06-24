@@ -17,16 +17,6 @@ use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 
 /**
- * Denote a import or clearing stage. Used for multi page processing.
- */
-const FEEDS_START = 'start_time';
-const FEEDS_FETCH = 'fetch';
-const FEEDS_PARSE = 'parse';
-const FEEDS_PROCESS = 'process';
-const FEEDS_PROCESS_CLEAR = 'process_clear';
-const FEEDS_PROCESS_EXPIRE = 'process_expire';
-
-/**
  * Defines the feed entity class.
  *
  * @EntityType(

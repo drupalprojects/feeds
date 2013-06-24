@@ -5,9 +5,9 @@
  * Feeds - basic API functions and hook implementations.
  */
 
-use Drupal\feeds\Plugin\FeedsPlugin;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
  * Do not schedule a feed for refresh.
@@ -28,6 +28,25 @@ const FEEDS_BATCH_COMPLETE = 1.0;
  * Batch operation active.
  */
 const FEEDS_BATCH_ACTIVE = 0.0;
+
+/**
+ * Denote a import or clearing stage. Used for multi page processing.
+ */
+const FEEDS_START = 'start_time';
+const FEEDS_FETCH = 'fetch';
+const FEEDS_PARSE = 'parse';
+const FEEDS_PROCESS = 'process';
+const FEEDS_PROCESS_CLEAR = 'process_clear';
+const FEEDS_PROCESS_EXPIRE = 'process_expire';
+
+// Update mode for existing items.
+const FEEDS_SKIP_EXISTING = 0;
+const FEEDS_REPLACE_EXISTING = 1;
+const FEEDS_UPDATE_EXISTING = 2;
+
+// Default limit for creating items on a page load, not respected by all
+// processors.
+const FEEDS_PROCESS_LIMIT = 50;
 
 /**
  * Implements hook_help().
@@ -144,7 +163,7 @@ function feeds_queue_info() {
 /**
  * Scheduler callback for importing from a source.
  */
-function feeds_feed_import($job) {
+function feeds_feed_import(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
   try {
     $feed->existing()->import();
@@ -161,7 +180,7 @@ function feeds_feed_import($job) {
 /**
  * Scheduler callback for deleting all items from a source.
  */
-function feeds_feed_clear($job) {
+function feeds_feed_clear(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
   try {
     $feed->existing()->clear();
@@ -178,7 +197,7 @@ function feeds_feed_clear($job) {
 /**
  * Scheduler callback for expiring content.
  */
-function feeds_feed_expire($job) {
+function feeds_feed_expire(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
   try {
     $feed->existing()->expire();
@@ -195,7 +214,7 @@ function feeds_feed_expire($job) {
 /**
  * Scheduler callback for unsubscribing from PuSH hubs.
  */
-function feeds_push_unsubscribe($job) {
+function feeds_push_unsubscribe(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
   $feed->getImporter()->fetcher->unsubscribe($feed);
 }
@@ -203,19 +222,19 @@ function feeds_push_unsubscribe($job) {
 /**
  * Batch API worker callback. Used by Feed::startBatchAPIJob().
  *
- * @see Feed::startBatchAPIJob().
- *
  * @todo Harmonize Job Scheduler API callbacks with Batch API callbacks?
  *
- * @param $method
+ * @param string $method
  *   Method to execute on importer; one of 'import' or 'clear'.
- * @param $fid
+ * @param int $fid
  *   If importer is attached to content type, feed node id identifying the
  *   source to be imported.
- * @param $context
+ * @param array $context
  *   Batch context.
+ *
+ * @see Feed::startBatchAPIJob()
  */
-function feeds_batch($method, $fid, &$context) {
+function feeds_batch($method, $fid, array &$context) {
   $context['finished'] = FEEDS_BATCH_COMPLETE;
   try {
     $context['finished'] = entity_load('feeds_feed', $fid)->$method();
@@ -228,17 +247,18 @@ function feeds_batch($method, $fid, &$context) {
 /**
  * Reschedule one or all importers.
  *
- * @param $importer_id
- *   If TRUE, all importers will be rescheduled, if FALSE, no importers will
+ * @param string $importer_id
+ *   If true, all importers will be rescheduled, if FALSE, no importers will
  *   be rescheduled, if an importer id, only importer of that id will be
  *   rescheduled.
  *
- * @return
- *   TRUE if all importers need rescheduling. FALSE if no rescheduling is
- *   required. An array of importers that need rescheduling.
+ * @return bool|array
+ *   Returns true if all importers need rescheduling, or false if no
+ *   rescheduling is required. An array of importers that need rescheduling.
  */
 function feeds_reschedule($importer_id = NULL) {
-  $reschedule = Drupal::state()->get('feeds.reschedule') ?: FALSE;
+  $reschedule = Drupal::state()->get('feeds.reschedule') ? : FALSE;
+
   if ($importer_id === TRUE || $importer_id === FALSE) {
     $reschedule = $importer_id;
   }
@@ -260,7 +280,7 @@ function feeds_permission() {
   $perms = array(
     'administer feeds' => array(
       'title' => t('Administer Feeds'),
-      'description' => t('Create, update, delete importers, execute import and delete tasks on any importer.')
+      'description' => t('Create, update, delete importers, execute import and delete tasks on any importer.'),
     ),
   );
   foreach (entity_load_multiple('feeds_importer') as $importer) {
@@ -284,9 +304,10 @@ function feeds_permission() {
     );
     $perms["unlock {$importer->id()} feeds"] = array(
       'title' => t('Unlock imports from @name feeds', array('@name' => $importer->label())),
-      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it .')
+      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it .'),
     );
   }
+
   return $perms;
 }
 
@@ -487,7 +508,7 @@ function feeds_feed_title($feed_id) {
 /**
  * Implements hook_menu_local_tasks().
  */
-function feeds_menu_local_tasks(&$data, $router_item, $root_path) {
+function feeds_menu_local_tasks(array &$data, $router_item, $root_path) {
   // Add action link to 'feeds/add' on 'admin/content/feed' page.
   if ($root_path == 'admin/content/feed') {
     $item = menu_get_item('feed/add');
@@ -576,7 +597,7 @@ function feeds_file_download($uri) {
     return;
   }
 
-   // Get the file record based on the URI. If not in the database just return.
+  // Get the file record based on the URI. If not in the database just return.
   $files = file_load_multiple(array(), array('uri' => $uri));
   foreach ($files as $item) {
     // Since some database servers sometimes use a case-insensitive comparison
@@ -616,7 +637,7 @@ function feeds_exit() {
   foreach ($jobs as $job) {
     if (!isset($job['fetcher']) || !isset($job['source'])) {
       continue;
-     }
+    }
     $job['fetcher']->subscribe($job['source']);
   }
 
@@ -628,28 +649,28 @@ function feeds_exit() {
 /**
  * Implements hook_entity_insert().
  */
-function feeds_entity_insert($entity) {
+function feeds_entity_insert(EntityInterface $entity) {
   \Drupal::service('feeds.item_info')->insert($entity);
 }
 
 /**
  * Implements hook_entity_update().
  */
-function feeds_entity_update($entity) {
+function feeds_entity_update(EntityInterface $entity) {
   \Drupal::service('feeds.item_info')->save($entity);
 }
 
 /**
  * Implements hook_entity_delete().
  */
-function feeds_entity_delete($entity) {
+function feeds_entity_delete(EntityInterface $entity) {
   \Drupal::service('feeds.item_info')->delete($entity);
 }
 
 /**
  * Copy of valid_url() that supports the webcal scheme.
  *
- * @see valid_url().
+ * @see valid_url()
  *
  * @todo Replace with valid_url() when http://drupal.org/node/295021 is fixed.
  */
@@ -684,7 +705,7 @@ function feeds_valid_url($url, $absolute = FALSE) {
  *   Information about a new job to queue; or if set to NULL (default), leaves
  *   the current queued jobs unchanged.
  *
- * @return
+ * @return array
  *   An array of subscribe jobs to process.
  *
  * @see feeds_exit()
@@ -701,7 +722,7 @@ function feeds_set_subscription_job(array $job = NULL) {
 /**
  * Returns the list of queued jobs to be run.
  *
- * @return
+ * @return array
  *   An array of subscribe jobs to process.
  *
  * @see feeds_set_subscription_job()
@@ -721,12 +742,12 @@ function feeds_api_version() {
 /**
  * Converts to UNIX time.
  *
- * @param $date
+ * @param string|int|DrupalDateTime $date
  *   A date that is either a string, a DrupalDateTime or a UNIX timestamp.
- * @param $default_value
+ * @param int $default_value
  *   A default UNIX timestamp to return if $date could not be parsed.
  *
- * @return
+ * @return int
  *   $date as UNIX time if conversion was successful, $dfeault_value otherwise.
  */
 function feeds_to_unixtime($date, $default_value) {
@@ -746,34 +767,35 @@ function feeds_to_unixtime($date, $default_value) {
 /**
  * Config form wrapper. Use to render the configuration form of a plugin.
  *
- * @param $configurable
+ * @param FeedsPlugin $configurable
  *   FeedsPlugin object.
- * @param $form_method
+ * @param string $form_method
  *   The form method that should be rendered.
  *
- * @return
- *   Config form array if available. NULL otherwise.
+ * @return array|null
+ *   Config form array if available otherwise null.
  */
-function feeds_get_form($configurable, $form_method) {
+function feeds_get_form(FeedsPlugin $configurable, $form_method) {
   if (method_exists($configurable, $form_method)) {
     return drupal_get_form(get_class($configurable) . '_feeds_form', $configurable, $form_method);
   }
 }
 
 /**
- * Config form callback. Don't call directly, but use
- * feeds_get_form($configurable, 'method') instead.
+ * Config form callback.
  *
- * @param
- *   FormAPI $form_state.
- * @param
- *   FeedsPlugin object.
- * @param
+ * Don't call directly, but use feeds_get_form($configurable, 'method') instead.
+ *
+ * @param array $form
+ *   The form array.
+ * @param array $form_state
+ *   The form state array.
+ * @param FeedsPlugin $configurable
  *   The object to perform the save() operation on.
- * @param $form_method
+ * @param string $form_method
  *   The $form_method that should be rendered.
  */
-function feeds_form($form, &$form_state, $configurable, $form_method) {
+function feeds_form(array $form, array &$form_state, FeedsPlugin $configurable, $form_method) {
   $form = $configurable->$form_method($form_state);
   $form['#configurable'] = $configurable;
   $form['#feeds_form_method'] = $form_method;
@@ -790,14 +812,14 @@ function feeds_form($form, &$form_state, $configurable, $form_method) {
 /**
  * Validation handler for feeds_form().
  */
-function feeds_form_validate($form, &$form_state) {
+function feeds_form_validate(array $form, array &$form_state) {
   _feeds_form_helper($form, $form_state, 'Validate');
 }
 
 /**
  * Submit handler for feeds_form().
  */
-function feeds_form_submit($form, &$form_state) {
+function feeds_form_submit(array $form, array &$form_state) {
   _feeds_form_helper($form, $form_state, 'Submit');
 }
 
@@ -806,7 +828,7 @@ function feeds_form_submit($form, &$form_state) {
  *
  * @todo This is all terrible. Remove.
  */
-function _feeds_form_helper($form, &$form_state, $action) {
+function _feeds_form_helper(array $form, array &$form_state, $action) {
   $method = $form['#feeds_form_method'] . $action;
   if (method_exists($form['#configurable'], $method)) {
     $form['#configurable']->$method($form_state['values']);

@@ -13,15 +13,6 @@ use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
 use Exception;
 
-// Update mode for existing items.
-const FEEDS_SKIP_EXISTING = 0;
-const FEEDS_REPLACE_EXISTING = 1;
-const FEEDS_UPDATE_EXISTING = 2;
-
-// Default limit for creating items on a page load, not respected by all
-// processors.
-const FEEDS_PROCESS_LIMIT = 50;
-
 /**
  * Abstract class, defines interface for processors.
  */
