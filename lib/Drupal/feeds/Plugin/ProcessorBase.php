@@ -7,19 +7,20 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
 use Exception;
 
 // Update mode for existing items.
-define('FEEDS_SKIP_EXISTING', 0);
-define('FEEDS_REPLACE_EXISTING', 1);
-define('FEEDS_UPDATE_EXISTING', 2);
+const FEEDS_SKIP_EXISTING = 0;
+const FEEDS_REPLACE_EXISTING = 1;
+const FEEDS_UPDATE_EXISTING = 2;
 
 // Default limit for creating items on a page load, not respected by all
 // processors.
-define('FEEDS_PROCESS_LIMIT', 50);
+const FEEDS_PROCESS_LIMIT = 50;
 
 /**
  * Abstract class, defines interface for processors.

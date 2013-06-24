@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal;
 use Drupal\feeds\FeedsWebTestBase;
 
 /**

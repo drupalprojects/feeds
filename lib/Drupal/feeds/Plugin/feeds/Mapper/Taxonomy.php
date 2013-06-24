@@ -21,17 +21,17 @@ use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
 /**
  * Search by term name.
  */
-define('FEEDS_TAXONOMY_SEARCH_TERM_NAME', 0);
+const FEEDS_TAXONOMY_SEARCH_TERM_NAME = 0;
 
 /**
  * Search by term id.
  */
-define('FEEDS_TAXONOMY_SEARCH_TERM_ID', 1);
+const FEEDS_TAXONOMY_SEARCH_TERM_ID = 1;
 
 /**
  * Search by GUID.
  */
-define('FEEDS_TAXONOMY_SEARCH_TERM_GUID', 2);
+const FEEDS_TAXONOMY_SEARCH_TERM_GUID = 2;
 
 /**
  * Defines a taxonomy field mapper.

@@ -9,14 +9,25 @@ use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Core\Datetime\DrupalDateTime;
 
-// Do not schedule a feed for refresh.
-define('FEEDS_SCHEDULE_NEVER', -1);
-// Never expire feed items.
-define('FEEDS_EXPIRE_NEVER', -1);
+/**
+ * Do not schedule a feed for refresh.
+ */
+const FEEDS_SCHEDULE_NEVER = -1;
 
-// Status of batched operations.
-define('FEEDS_BATCH_COMPLETE', 1.0);
-define('FEEDS_BATCH_ACTIVE', 0.0);
+/**
+ * Never expire feed items.
+ */
+const FEEDS_EXPIRE_NEVER = -1;
+
+/**
+ * Batch operation complete.
+ */
+const FEEDS_BATCH_COMPLETE = 1.0;
+
+/**
+ * Batch operation active.
+ */
+const FEEDS_BATCH_ACTIVE = 0.0;
 
 /**
  * Implements hook_help().
