@@ -7,6 +7,8 @@
  * @todo Remove this.
  */
 
+namespace Drupal\feeds;
+
 /**
  * PCRE for finding the link tags in html.
  */
