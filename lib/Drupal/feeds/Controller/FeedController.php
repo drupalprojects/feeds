@@ -87,23 +87,21 @@ class FeedController implements ControllerInterface {
     }
 
     $rows = array();
-    if ($importers = feeds_importer_load_all()) {
-      foreach ($importers as $importer) {
-        if ($importer->disabled) {
-          continue;
-        }
-        if (!(user_access('add ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
-          continue;
-        }
-        $link = 'feed/add/' . $importer->id();
-        $title = $importer->label();
-        $rows[] = array(
-          l($title, $link),
-          check_plain($importer->description),
-        );
+    foreach (entity_load_multiple('feeds_importer') as $importer) {
+      if ($importer->disabled) {
+        continue;
       }
+      if (!(user_access('add ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
+        continue;
+      }
+      $link = 'feed/add/' . $importer->id();
+      $title = $importer->label();
+      $rows[] = array(
+        l($title, $link),
+        check_plain($importer->description),
+      );
     }
-    if (empty($rows)) {
+    if (!$rows) {
       drupal_set_message(t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => url('admin/structure/feeds'))));
     }
     $header = array(

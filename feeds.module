@@ -257,7 +257,7 @@ function feeds_permission() {
       'description' => t('Create, update, delete importers, execute import and delete tasks on any importer.')
     ),
   );
-  foreach (feeds_importer_load_all() as $importer) {
+  foreach (entity_load_multiple('feeds_importer') as $importer) {
     $perms["view {$importer->id()} feeds"] = array(
       'title' => t('View @name feeds', array('@name' => $importer->label())),
     );
@@ -461,13 +461,6 @@ function feeds_admin_paths() {
 }
 
 /**
- * Menu loader callback.
- */
-function feeds_importer_load($importer_id) {
-  return entity_load('feeds_importer', $importer_id);
-}
-
-/**
  * Title callback.
  */
 function feeds_importer_title($importer_id) {
@@ -624,20 +617,6 @@ function feeds_entity_delete($entity) {
 }
 
 /**
- * Loads all importers.
- *
- * @param $load_disabled
- *   Pass TRUE to load all importers, enabled or disabled, pass FALSE to only
- *   retrieve enabled importers.
- *
- * @return
- *   An array of all feed configurations available.
- */
-function feeds_importer_load_all($load_disabled = FALSE) {
-  return entity_load_multiple('feeds_importer');
-}
-
-/**
  * Gets an array of enabled importer ids.
  *
  * @return
@@ -645,7 +624,7 @@ function feeds_importer_load_all($load_disabled = FALSE) {
  */
 function feeds_enabled_importers() {
   $importers = array();
-  foreach (feeds_importer_load_all() as $importer) {
+  foreach (entity_load_multiple('feeds_importer') as $importer) {
     $importers[$importer->id()] = $importer->id();
   }
 
