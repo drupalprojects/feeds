@@ -814,9 +814,7 @@ abstract class ProcessorBase extends FeedsPlugin {
    *   TRUE if item info could be loaded, false if not.
    */
   protected function loadItemInfo($entity) {
-    $entity_info = entity_get_info($this->entityType());
-    $key = $entity_info['entity_keys']['id'];
-    if ($item_info = feeds_item_info_load($this->entityType(), $entity->$key)) {
+    if ($item_info = Drupal::service('feeds.item_info')->load($entity)) {
       $entity->feeds_item = $item_info;
       return TRUE;
     }

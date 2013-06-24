@@ -19,3 +19,5 @@ services:
     class: Drupal\feeds\Access\FeedAddAccessCheck
     tags:
       - { name: access_check }
+  feeds.item_info:
+    class: Drupal\feeds\ItemInfoController

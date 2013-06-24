@@ -8,7 +8,6 @@
 use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Template\Attribute;
 
 // Common request time, use as point of reference and to avoid calls to time().
 define('FEEDS_REQUEST_TIME', time());
@@ -201,8 +200,6 @@ function feeds_push_unsubscribe($job) {
  *
  * @param $method
  *   Method to execute on importer; one of 'import' or 'clear'.
- * @param $importer_id
- *   Identifier of a Drupal\feeds\Plugin\Core\Entity\Importer object.
  * @param $fid
  *   If importer is attached to content type, feed node id identifying the
  *   source to be imported.
@@ -532,6 +529,76 @@ function feeds_theme() {
 }
 
 /**
+ * Implements hook_data_type_info().
+ */
+function feeds_data_type_info() {
+  $info['feeds_serialized_field'] = array(
+    'label' => t('Serialized field item'),
+    'description' => t('An entity field containing a serialized blob.'),
+    'class' => '\Drupal\feeds\Type\SerializedItem',
+    'list class' => '\Drupal\Core\Entity\Field\Type\Field',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_entity_bundle_info().
+ */
+function feeds_entity_bundle_info() {
+  $bundles = array();
+  foreach (config_get_storage_names_with_prefix('feeds.importer.') as $config_name) {
+    $config = config($config_name);
+    $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('name');
+  }
+  return $bundles;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function feeds_file_download($uri) {
+  $fids = \Drupal::entityQuery('feeds_feed')
+    ->condition('source', $uri)
+    ->range(0, 1)
+    ->execute();
+
+  if (!$fids) {
+    // File is not associated with a feed.
+    return;
+  }
+
+   // Get the file record based on the URI. If not in the database just return.
+  $files = file_load_multiple(array(), array('uri' => $uri));
+  foreach ($files as $item) {
+    // Since some database servers sometimes use a case-insensitive comparison
+    // by default, double check that the filename is an exact match.
+    if ($file->getFileUri() === $uri) {
+      $file = $item;
+      break;
+    }
+  }
+  if (!isset($file)) {
+    return;
+  }
+
+  // Check if this file belongs to Feeds.
+  $usage_list = file_usage()->listUsage($file);
+  if (!isset($usage_list['feeds'])) {
+    return;
+  }
+
+  $fid = reset($fids);
+
+  if (!entity_load('feeds_feed', $fid)->access('import')) {
+    // User does not have permission to import this feed.
+    return -1;
+  }
+
+  // Return file headers.
+  return file_get_content_headers($file);
+}
+
+/**
  * Implements hook_exit().
  */
 function feeds_exit() {
@@ -550,115 +617,24 @@ function feeds_exit() {
 }
 
 /**
- * Implements hook_views_api().
- */
-function feeds_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'feeds') . '/views',
-  );
-}
-
-/**
  * Implements hook_entity_insert().
  */
 function feeds_entity_insert($entity) {
-  feeds_item_info_insert($entity, $entity->id());
+  \Drupal::service('feeds.item_info')->insert($entity);
 }
 
 /**
  * Implements hook_entity_update().
  */
 function feeds_entity_update($entity) {
-  feeds_item_info_save($entity, $entity->id());
+  \Drupal::service('feeds.item_info')->save($entity);
 }
 
 /**
  * Implements hook_entity_delete().
  */
 function feeds_entity_delete($entity) {
-  // // Delete any imported items produced by the source.
-  db_delete('feeds_item')
-    ->condition('entity_type', $entity->entityType())
-    ->condition('entity_id', $entity->id())
-    ->execute();
-}
-
-/**
- * Logs to a file like /tmp/feeds_my_domain_org.log in temporary directory.
- */
-function feeds_dbg($msg) {
-  if (variable_get('feeds_debug', FALSE)) {
-    if (!is_string($msg)) {
-      $msg = var_export($msg, TRUE);
-    }
-    $filename = trim(str_replace('/', '_', $_SERVER['HTTP_HOST'] . base_path()), '_');
-    $handle = fopen("temporary://feeds_$filename.log", 'a');
-    fwrite($handle, gmdate('c') . "\t$msg\n");
-    fclose($handle);
-  }
-}
-
-/**
- * Writes to feeds log.
- */
-function feeds_log($feed, $type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
-  if ($severity < WATCHDOG_NOTICE) {
-    $error = &drupal_static('feeds_log_error', FALSE);
-    $error = TRUE;
-  }
-  db_insert('feeds_log')
-    ->fields(array(
-      'fid' => $feed->id(),
-      'log_time' => time(),
-      'request_time' => REQUEST_TIME,
-      'type' => $type,
-      'message' => $message,
-      'variables' => serialize($variables),
-      'severity' => $severity,
-    ))
-    ->execute();
-}
-
-/**
- * Loads an item info object.
- *
- * Example usage:
- *
- * $info = feeds_item_info_load('node', $node->nid);
- */
-function feeds_item_info_load($entity_type, $entity_id) {
-  return db_select('feeds_item')
-    ->fields('feeds_item')
-    ->condition('entity_type', $entity_type)
-    ->condition('entity_id', $entity_id)
-    ->execute()
-    ->fetchObject();
-}
-
-/**
- * Inserts an item info object into the feeds_item table.
- */
-function feeds_item_info_insert($entity, $entity_id) {
-  if (isset($entity->feeds_item)) {
-    $entity->feeds_item->entity_id = $entity_id;
-    drupal_write_record('feeds_item', $entity->feeds_item);
-  }
-}
-
-/**
- * Inserts or updates an item info object in the feeds_item table.
- */
-function feeds_item_info_save($entity, $entity_id) {
-  if (isset($entity->feeds_item)) {
-    $entity->feeds_item->entity_id = $entity_id;
-    if (feeds_item_info_load($entity->feeds_item->entity_type, $entity_id)) {
-      drupal_write_record('feeds_item', $entity->feeds_item, array('entity_type', 'entity_id'));
-    }
-    else {
-      feeds_item_info_insert($entity, $entity_id);
-    }
-  }
+  \Drupal::service('feeds.item_info')->delete($entity);
 }
 
 /**
@@ -723,51 +699,6 @@ function feeds_set_subscription_job(array $job = NULL) {
  */
 function feeds_get_subscription_jobs() {
   return feeds_set_subscription_job();
-}
-
-/**
- * Implements hook_file_download().
- */
-function feeds_file_download($uri) {
-  $fids = \Drupal::entityQuery('feeds_feed')
-    ->condition('source', $uri)
-    ->range(0, 1)
-    ->execute();
-
-  if (!$fids) {
-    // File is not associated with a feed.
-    return;
-  }
-
-   // Get the file record based on the URI. If not in the database just return.
-  $files = file_load_multiple(array(), array('uri' => $uri));
-  foreach ($files as $item) {
-    // Since some database servers sometimes use a case-insensitive comparison
-    // by default, double check that the filename is an exact match.
-    if ($file->getFileUri() === $uri) {
-      $file = $item;
-      break;
-    }
-  }
-  if (!isset($file)) {
-    return;
-  }
-
-  // Check if this file belongs to Feeds.
-  $usage_list = file_usage()->listUsage($file);
-  if (!isset($usage_list['feeds'])) {
-    return;
-  }
-
-  $fid = reset($fids);
-
-  if (!entity_load('feeds_feed', $fid)->access('import')) {
-    // User does not have permission to import this feed.
-    return -1;
-  }
-
-  // Return file headers.
-  return file_get_content_headers($file);
 }
 
 /**
@@ -881,31 +812,6 @@ function feeds_format_expire($timestamp) {
     return t('Never');
   }
   return t('after !time', array('!time' => format_interval($timestamp)));
-}
-
-/**
- * Implements hook_data_type_info().
- */
-function feeds_data_type_info() {
-  $info['feeds_serialized_field'] = array(
-    'label' => t('Serialized field item'),
-    'description' => t('An entity field containing a serialized blob.'),
-    'class' => '\Drupal\feeds\Type\SerializedItem',
-    'list class' => '\Drupal\Core\Entity\Field\Type\Field',
-  );
-  return $info;
-}
-
-/**
- * Implements hook_entity_bundle_info().
- */
-function feeds_entity_bundle_info() {
-  $bundles = array();
-  foreach (config_get_storage_names_with_prefix('feeds.importer.') as $config_name) {
-    $config = config($config_name);
-    $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('name');
-  }
-  return $bundles;
 }
 
 /**
