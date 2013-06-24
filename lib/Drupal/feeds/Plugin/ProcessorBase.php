@@ -11,7 +11,6 @@ use Drupal;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsAccessException;
-use Exception;
 
 /**
  * Abstract class, defines interface for processors.
@@ -240,7 +239,7 @@ abstract class ProcessorBase extends FeedsPlugin {
       }
 
       // Something bad happened, log it.
-      catch (Exception $e) {
+      catch (\Exception $e) {
         $state->failed++;
         drupal_set_message($e->getMessage(), 'warning');
         $message = $this->createLogMessage($e, $entity, $item);
@@ -855,7 +854,7 @@ abstract class ProcessorBase extends FeedsPlugin {
    * @return string
    *   The message to log.
    */
-  protected function createLogMessage(Exception $e, $entity, $item) {
+  protected function createLogMessage(\Exception $e, $entity, $item) {
     include_once DRUPAL_ROOT . '/core/includes/utility.inc';
     $message = $e->getMessage();
     $message .= '<h3>Original item</h3>';
@@ -863,6 +862,22 @@ abstract class ProcessorBase extends FeedsPlugin {
     $message .= '<h3>Entity</h3>';
     $message .= '<pre>' . drupal_var_export($entity->getValue()) . '</pre>';
     return $message;
+  }
+
+  /**
+   * Formats UNIX timestamps to readable strings.
+   *
+   * @param int $timestamp
+   *   A UNIX timestamp.
+   *
+   * @return string
+   *   A string in the format, "After (time)" or "Never."
+   */
+  protected function formatExpire($timestamp) {
+    if ($timestamp == FEEDS_EXPIRE_NEVER) {
+      return t('Never');
+    }
+    return t('after !time', array('!time' => format_interval($timestamp)));
   }
 
 }

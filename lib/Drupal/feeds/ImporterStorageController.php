@@ -29,7 +29,7 @@ class ImporterStorageController extends ConfigStorageController {
       unset($importer->$type);
     }
 
-    parent::save();
+    parent::save($importer);
 
     foreach ($plugins as $type => $plugin) {
       $importer->$type = $plugin;

@@ -807,16 +807,6 @@ function _feeds_form_helper(array $form, array &$form_state, $action) {
 }
 
 /**
- * Helper, see FeedsDataProcessor class.
- */
-function feeds_format_expire($timestamp) {
-  if ($timestamp == FEEDS_EXPIRE_NEVER) {
-    return t('Never');
-  }
-  return t('after !time', array('!time' => format_interval($timestamp)));
-}
-
-/**
  * Handle a fetcher callback.
  */
 function feeds_fetcher_callback($importer, $fid = 0) {
