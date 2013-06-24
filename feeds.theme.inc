@@ -5,6 +5,8 @@
  * Theme functions for feeds.
  */
 
+use Drupal\Core\Template\Attribute;
+
 /**
  * Theme feeds_plugin_form().
  */
