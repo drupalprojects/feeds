@@ -592,7 +592,21 @@ class Feed extends EntityNG implements FeedInterface {
    * Writes to feeds log.
    */
   public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
-    feeds_log($this, $type, $message, $variables, $severity);
+    if ($severity < WATCHDOG_NOTICE) {
+      $error = &drupal_static('feeds_log_error', FALSE);
+      $error = TRUE;
+    }
+    db_insert('feeds_log')
+      ->fields(array(
+        'fid' => $this->id(),
+        'log_time' => time(),
+        'request_time' => REQUEST_TIME,
+        'type' => $type,
+        'message' => $message,
+        'variables' => serialize($variables),
+        'severity' => $severity,
+      ))
+      ->execute();
   }
 
   /**
