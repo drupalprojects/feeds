@@ -61,7 +61,7 @@ class MappingSettingsForm implements BaseFormIdInterface {
       '#submit' => array(array($this, 'submitForm')),
       '#ajax' => array(
         'callback' => array($this, 'ajaxCallback'),
-        'wrapper' => 'feeds-ui-mapping-form-wrapper',
+        'wrapper' => 'feeds-mapping-form-wrapper',
         'effect' => 'fade',
         'progress' => 'none',
       ),
@@ -133,8 +133,6 @@ class MappingSettingsForm implements BaseFormIdInterface {
         );
       }
     }
-
-    return $form;
   }
 
   protected function optionalUniqueForm($mapping, $target, $form, $form_state) {

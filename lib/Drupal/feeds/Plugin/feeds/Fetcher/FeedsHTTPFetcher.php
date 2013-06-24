@@ -66,7 +66,7 @@ class FeedsHTTPFetcher extends FetcherBase {
     // No subscription notification has ben sent, we are being notified.
     else {
       try {
-        feeds_feed_load($fid)->existing()->import();
+        entity_load('feeds_feed', $fid)->existing()->import();
       }
       catch (Exception $e) {
         // In case of an error, respond with a 503 Service (temporary) unavailable.

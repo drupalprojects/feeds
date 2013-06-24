@@ -64,7 +64,7 @@ function feeds_cron() {
       $feeds = db_query("SELECT fid FROM {feeds_feed} WHERE importer IN (:ids)", array(':ids' => $importers));
     }
     foreach ($feeds as $feed) {
-      feeds_feed_load($feed->fid)->schedule();
+      entity_load('feeds_feed', $feed->fid)->schedule();
     }
     feeds_reschedule(FALSE);
   }
@@ -137,7 +137,7 @@ function feeds_queue_info() {
  * Scheduler callback for importing from a source.
  */
 function feeds_feed_import($job) {
-  $feed = feeds_feed_load($job['id']);
+  $feed = entity_load('feeds_feed', $job['id']);
   try {
     $feed->existing()->import();
   }
@@ -154,7 +154,7 @@ function feeds_feed_import($job) {
  * Scheduler callback for deleting all items from a source.
  */
 function feeds_feed_clear($job) {
-  $feed = feeds_feed_load($job['id']);
+  $feed = entity_load('feeds_feed', $job['id']);
   try {
     $feed->existing()->clear();
   }
@@ -171,7 +171,7 @@ function feeds_feed_clear($job) {
  * Scheduler callback for expiring content.
  */
 function feeds_feed_expire($job) {
-  $feed = feeds_feed_load($job['id']);
+  $feed = entity_load('feeds_feed', $job['id']);
   try {
     $feed->existing()->expire();
   }
@@ -188,7 +188,7 @@ function feeds_feed_expire($job) {
  * Scheduler callback for unsubscribing from PuSH hubs.
  */
 function feeds_push_unsubscribe($job) {
-  $feed = feeds_feed_load($job['id']);
+  $feed = entity_load('feeds_feed', $job['id']);
   $feed->getImporter()->fetcher->unsubscribe($feed);
 }
 
@@ -212,7 +212,7 @@ function feeds_push_unsubscribe($job) {
 function feeds_batch($method, $fid, &$context) {
   $context['finished'] = FEEDS_BATCH_COMPLETE;
   try {
-    $context['finished'] = feeds_feed_load($fid)->$method();
+    $context['finished'] = entity_load('feeds_feed', $fid)->$method();
   }
   catch (Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
@@ -743,22 +743,6 @@ function feeds_item_info_save($entity, $entity_id) {
       feeds_item_info_insert($entity, $entity_id);
     }
   }
-}
-
-/**
- * Gets an instance of a source object.
- *
- * @param $importer_id
- *   A Drupal\feeds\Plugin\Core\Entity\Importer id.
- * @param $fid
- *   The node id of a feed node if the source is attached to a feed node.
- *
- * @return
- *   A Feed object or an object of a class defiend by the Drupal
- *   variable 'source_class'.
- */
-function feeds_feed_load($fid) {
-  return entity_load('feeds_feed', $fid);
 }
 
 /**
