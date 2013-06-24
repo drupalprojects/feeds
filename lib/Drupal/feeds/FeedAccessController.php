@@ -33,7 +33,7 @@ class FeedAccessController extends EntityAccessController {
       }
     }
 
-    if (user_access('administer feeds', $account) || user_access("{$operation} {$feed->bundle()} feeds", $account)) {
+    if (user_access('administer feeds', $account) || user_access("$operation {$feed->bundle()} feeds", $account)) {
       return TRUE;
     }
 
