@@ -746,21 +746,6 @@ function feeds_item_info_save($entity, $entity_id) {
 }
 
 /**
- * Gets an importer instance.
- *
- * @param $id
- *   The unique id of the importer object.
- *
- * @return
- *   A Drupal\feeds\Plugin\Core\Entity\Importer object or an object of a class
- *   defined by the Drupal variable 'feeds_importer_class'. There is only one
- *   importer object per $id system-wide.
- */
-function feeds_importer($id) {
-  return entity_load('feeds_importer', $id);
-}
-
-/**
  * Gets an instance of a source object.
  *
  * @param $importer_id

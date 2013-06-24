@@ -366,7 +366,7 @@ class FeedsWebTestBase extends WebTestBase {
 
     // Check expire scheduler.
     $jobs = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_expire'", array(':id' => $id, ':fid' => $fid))->fetchField();
-    if (feeds_importer($id)->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
+    if (entity_load('feeds_importer', $id)->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
       $this->assertEqual(0, $jobs);
     }
     else {

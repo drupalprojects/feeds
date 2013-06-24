@@ -51,10 +51,9 @@ class MappingForm implements BaseFormIdInterface {
    */
   public function buildForm(array $form, array &$form_state) {
     $importer = $this->importer;
-    $form['#importer'] = $importer->id();
     $form['#mappings'] = $mappings = $importer->processor->getMappings();
     $form['help']['#markup'] = $this->help();
-    $form['#prefix'] = '<div id="feeds-ui-mapping-form-wrapper">';
+    $form['#prefix'] = '<div id="feeds-mapping-form-wrapper">';
     $form['#suffix'] = '</div>';
 
     // Get mapping sources from parsers and targets from processor, format them
@@ -105,7 +104,7 @@ class MappingForm implements BaseFormIdInterface {
         $form['remove_flags'][$i] = array(
           '#type' => 'checkbox',
           '#title' => t('Remove'),
-          '#prefix' => '<div class="feeds-ui-checkbox-link">',
+          '#prefix' => '<div class="feeds-checkbox-link">',
           '#suffix' => '</div>',
         );
 
@@ -116,7 +115,7 @@ class MappingForm implements BaseFormIdInterface {
           '#delta' => $delta,
           '#attributes' => array(
             'class' => array(
-              'feeds-ui-mapping-weight'
+              'feeds-mapping-weight'
             ),
           ),
         );
@@ -157,6 +156,7 @@ class MappingForm implements BaseFormIdInterface {
       '#type' => 'submit',
       '#value' => t('Save'),
     );
+
     return $form;
   }
 
@@ -193,8 +193,7 @@ class MappingForm implements BaseFormIdInterface {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $importer = feeds_importer($form['#importer']);
-    $processor = $importer->processor;
+    $processor = $this->importer->processor;
 
     $form_state += array(
       'mapping_settings' => array(),
@@ -252,7 +251,7 @@ class MappingForm implements BaseFormIdInterface {
       }
     }
 
-    $importer->save();
+    $this->importer->save();
     drupal_set_message(t('Your changes have been saved.'));
   }
 
