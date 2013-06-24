@@ -242,7 +242,7 @@ function feeds_reschedule($importer_id = NULL) {
   }
   Drupal::state()->set('feeds.reschedule', $reschedule);
   if ($reschedule === TRUE) {
-    return feeds_enabled_importers();
+    return entity_load_multiple('feeds_importer');
   }
   return $reschedule;
 }
@@ -614,37 +614,6 @@ function feeds_entity_delete($entity) {
     ->condition('entity_type', $entity->entityType())
     ->condition('entity_id', $entity->id())
     ->execute();
-}
-
-/**
- * Gets an array of enabled importer ids.
- *
- * @return
- *   An array where the values contain ids of enabled importers.
- */
-function feeds_enabled_importers() {
-  $importers = array();
-  foreach (entity_load_multiple('feeds_importer') as $importer) {
-    $importers[$importer->id()] = $importer->id();
-  }
-
-  return $importers;
-}
-
-/**
- * Resets importer caches. Call when enabling/disabling importers.
- *
- * @todo Re-evaluate this.
- */
-function feeds_cache_clear($rebuild_menu = TRUE) {
-  // cache_clear_all('_feeds_importer_digest', 'cache');
-  // drupal_static_reset('_feeds_importer_digest');
-  // ctools_include('export');
-  // ctools_export_load_object_reset('feeds_importer');
-  // drupal_static_reset('_node_types_build');
-  // if ($rebuild_menu) {
-//    menu_rebuild();
-  //}
 }
 
 /**

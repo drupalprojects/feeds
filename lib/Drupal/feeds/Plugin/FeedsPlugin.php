@@ -175,7 +175,6 @@ abstract class FeedsPlugin extends PluginBase {
     $this->addConfig($values);
     $this->importer->save();
     drupal_set_message(t('Your changes have been saved.'));
-    feeds_cache_clear(FALSE);
   }
 
 }
