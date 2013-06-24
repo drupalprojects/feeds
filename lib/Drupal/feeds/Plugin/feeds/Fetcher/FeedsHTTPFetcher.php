@@ -14,6 +14,7 @@ use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\PuSHSubscriber;
 use Drupal\feeds\PuSHEnvironment;
 use Drupal\feeds\FeedsHTTPFetcherResult;
+use Drupal\feeds\HTTPRequest;
 
 
 /**
@@ -49,8 +50,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   public function clear(Feed $feed) {
     $feed_config = $feed->getConfigFor($this);
     $url = $feed_config['source'];
-    feeds_include_library('http_request.inc', 'http_request');
-    http_request_clear_cache($url);
+    cache()->delete('feeds_http_download_' . md5($url));
   }
 
   /**
@@ -159,8 +159,7 @@ class FeedsHTTPFetcher extends FetcherBase {
       form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
     elseif ($this->config['auto_detect_feeds']) {
-      feeds_include_library('http_request.inc', 'http_request');
-      if ($url = http_request_get_common_syndication($values['source'])) {
+      if ($url = HTTPRequest::getCommonSyndication($values['source'])) {
         $values['source'] = $url;
       }
     }

@@ -2,8 +2,12 @@
 
 /**
  * @file
- * OPML Parser plugin.
+ * Contains \Drupal\feeds\Plugin\Parser\FeedsOPMLParser.
  */
+
+namespace Drupal\feeds\Plugin\Parser;
+
+use Drupal\feeds\ParserOPML;
 
 /**
  * Feeds parser plugin that parses OPML feeds.
@@ -14,8 +18,7 @@ class FeedsOPMLParser extends ParserBase {
    * Implements ParserBase::parse().
    */
   public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
-    feeds_include_library('opml_parser.inc', 'opml_parser');
-    $opml = opml_parser_parse($fetcher_result->getRaw());
+    $opml = ParserOPML::parse($fetcher_result->getRaw());
     $result = new FeedsParserResult($opml['items']);
     $result->title = $opml['title'];
     return $result;
@@ -36,4 +39,5 @@ class FeedsOPMLParser extends ParserBase {
       ),
     ) + parent::getMappingSources();
   }
+
 }

@@ -35,7 +35,6 @@ class FeedsCSVParser extends ParserBase {
     $state = $feed->state(FEEDS_PARSE);
 
     // Load and configure parser.
-    feeds_include_library('ParserCSV.inc', 'ParserCSV');
     $parser = new ParserCSV();
     $delimiter = $feed_config['delimiter'] == 'TAB' ? "\t" : $feed_config['delimiter'];
     $parser->setDelimiter($delimiter);
