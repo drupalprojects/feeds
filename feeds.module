@@ -9,8 +9,6 @@ use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Core\Datetime\DrupalDateTime;
 
-// Common request time, use as point of reference and to avoid calls to time().
-define('FEEDS_REQUEST_TIME', time());
 // Do not schedule a feed for refresh.
 define('FEEDS_SCHEDULE_NEVER', -1);
 // Never expire feed items.
