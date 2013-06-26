@@ -41,7 +41,7 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 
     // Create importer configuration.
     $this->createImporterConfiguration($this->randomName(), 'path_test');
-    $this->setPlugin('path_test', 'fetcher', 'file');
+    $this->setPlugin('path_test', 'fetcher', 'upload');
     $this->setPlugin('path_test', 'parser', 'csv');
     $this->addMappings('path_test', array(
       0 => array(
@@ -96,7 +96,7 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 
   //   // Create importer configuration.
   //   $this->createImporterConfiguration($this->randomName(), 'path_test');
-  //   $this->setPlugin('path_test', 'fetcher', 'file');
+  //   $this->setPlugin('path_test', 'fetcher', 'upload');
   //   $this->setPlugin('path_test', 'parser', 'csv');
   //   $this->setPlugin('path_test', 'processor', 'taxonomy_term');
 
@@ -188,7 +188,7 @@ class FeedsMapperPathTest extends FeedsMapperTestBase {
 
 //     // Create importer configuration.
 //     $this->createImporterConfiguration($this->randomName(), 'path_test');
-//     $this->setPlugin('path_test', 'fetcher', 'file');
+//     $this->setPlugin('path_test', 'fetcher', 'upload');
 //     $this->setPlugin('path_test', 'parser', 'csv');
 //     $this->addMappings('path_test', array(
 //       0 => array(

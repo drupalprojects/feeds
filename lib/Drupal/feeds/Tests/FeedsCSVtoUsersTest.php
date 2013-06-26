@@ -29,7 +29,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('User import', 'user_import');
 
     // Set and configure plugins.
-    $this->setPlugin('user_import', 'fetcher', 'file');
+    $this->setPlugin('user_import', 'fetcher', 'upload');
     $this->setPlugin('user_import', 'parser', 'csv');
     $this->setPlugin('user_import', 'processor', 'entity:user');
 

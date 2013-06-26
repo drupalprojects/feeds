@@ -202,7 +202,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $this->setPlugin('node', 'fetcher', 'file');
+    $this->setPlugin('node', 'fetcher', 'upload');
     $this->setPlugin('node', 'parser', 'csv');
     $this->addMappings('node', array(
       0 => array(

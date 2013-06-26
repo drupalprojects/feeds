@@ -2,7 +2,7 @@
 
 /**
  * @file
- * File fetcher tests.
+ * Contains \Drupal\feeds\Tests\DirectoryFetcherTest.
  */
 
 namespace Drupal\feeds\Tests;
@@ -10,25 +10,25 @@ namespace Drupal\feeds\Tests;
 use Drupal\feeds\FeedsWebTestBase;
 
 /**
- * File fetcher test class.
+ * Directory fetcher test class.
  */
-class FeedsFileFetcherTest extends FeedsWebTestBase {
+class DirectoryFetcherTest extends FeedsWebTestBase {
   public static function getInfo() {
     return array(
-      'name' => 'File fetcher',
-      'description' => 'Tests for file fetcher plugin.',
+      'name' => 'Directory fetcher',
+      'description' => 'Tests for directory fetcher plugin.',
       'group' => 'Feeds',
     );
   }
 
   /**
-   * Test scheduling on cron.
+   * Tests public file importing.
    */
   public function testPublicFiles() {
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $this->setPlugin('node', 'fetcher', 'file');
+    $this->setPlugin('node', 'fetcher', 'directory');
     $this->setPlugin('node', 'parser', 'csv');
 
     $this->addMappings('node', array(
@@ -37,18 +37,24 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
         'target' => 'title',
       ),
     ));
-    // Straight up upload is covered in other tests, focus on direct mode
-    // and file batching here.
     $this->setSettings('node', 'fetcher', array(
-      'direct' => TRUE,
-      'directory' => 'public://feeds',
+      'allowed_schemes[private]' => FALSE,
     ));
 
     // Verify that invalid paths are not accepted.
-    foreach (array('/tmp/') as $path) {
+    foreach (array('/tmp/', 'private://asdfasfd') as $path) {
       $edit = array('title' => $this->randomString(), 'fetcher[source]' => $path);
       $this->drupalPost('feed/add/node', $edit, 'Save');
       $this->assertText("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes:");
+      $count = db_query("SELECT COUNT(*) FROM {feeds_feed}")->fetchField();
+      $this->assertEqual($count, 0);
+    }
+
+    // Verify that invalid files are not accepted.
+    foreach (array('public://asdfasfd') as $path) {
+      $edit = array('title' => $this->randomString(), 'fetcher[source]' => $path);
+      $this->drupalPost('feed/add/node', $edit, 'Save');
+      $this->assertText('The specified file or directory does not exist.');
       $count = db_query("SELECT COUNT(*) FROM {feeds_feed}")->fetchField();
       $this->assertEqual($count, 0);
     }
@@ -62,20 +68,20 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // too.
     variable_set('feeds_process_limit', 5);
 
-    $this->importURL('node', $dir);
+    $this->importURL('node', $dir, NULL, 'directory');
     $this->assertText('Created 18 nodes');
     $count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
     $this->assertEqual($count, 18, t("@count nodes in the database.", array('@count' => $count)));
   }
 
   /**
-   * Test uploading private files.
+   * Tests uploading private files.
    */
   public function testPrivateFiles() {
     // Set up an importer.
     $this->createImporterConfiguration('Node import', 'node');
     // Set and configure plugins and mappings.
-    $this->setPlugin('node', 'fetcher', 'file');
+    $this->setPlugin('node', 'fetcher', 'directory');
     $this->setPlugin('node', 'parser', 'csv');
     $this->addMappings('node', array(
       0 => array(
@@ -83,12 +89,28 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
         'target' => 'title',
       ),
     ));
-    // Straight up upload is covered in other tests, focus on direct mode
-    // and file batching here.
+
     $this->setSettings('node', 'fetcher', array(
-      'direct' => TRUE,
-      'directory' => 'private://feeds',
+      'allowed_schemes[public]' => FALSE,
     ));
+
+    // Verify that invalid paths are not accepted.
+    foreach (array('/tmp/', 'public://asdfasfd') as $path) {
+      $edit = array('title' => $this->randomString(), 'fetcher[source]' => $path);
+      $this->drupalPost('feed/add/node', $edit, 'Save');
+      $this->assertText("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes:");
+      $count = db_query("SELECT COUNT(*) FROM {feeds_feed}")->fetchField();
+      $this->assertEqual($count, 0);
+    }
+
+    // Verify that invalid files are not accepted.
+    foreach (array('private://asdfasfd') as $path) {
+      $edit = array('title' => $this->randomString(), 'fetcher[source]' => $path);
+      $this->drupalPost('feed/add/node', $edit, 'Save');
+      $this->assertText('The specified file or directory does not exist.');
+      $count = db_query("SELECT COUNT(*) FROM {feeds_feed}")->fetchField();
+      $this->assertEqual($count, 0);
+    }
 
     // Verify batching through directories.
     // Copy directory of files.
@@ -98,7 +120,7 @@ class FeedsFileFetcherTest extends FeedsWebTestBase {
     // Ingest directory of files. Set limit to 5 to force processor to batch,
     // too.
     variable_set('feeds_process_limit', 5);
-    $this->importURL('node', $dir);
+    $this->importURL('node', $dir, NULL, 'directory');
     $this->assertText('Created 18 nodes');
     $count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
     $this->assertEqual($count, 18, t("@count nodes in the database.", array('@count' => $count)));

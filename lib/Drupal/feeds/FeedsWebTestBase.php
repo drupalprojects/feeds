@@ -335,7 +335,7 @@ class FeedsWebTestBase extends WebTestBase {
   /**
    * Import a URL through the import form. Assumes http, or file in place.
    */
-  public function importURL($id, $feed_url = NULL, $fid = NULL) {
+  public function importURL($id, $feed_url = NULL, $fid = NULL, $plugin_id = 'http') {
     if (!$feed_url) {
       $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2';
     }
@@ -356,8 +356,6 @@ class FeedsWebTestBase extends WebTestBase {
     $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {feeds_feed} WHERE importer = :id AND fid = :fid", array(':id' => $id, ':fid' => $fid))->fetchField());
     $feed = db_query("SELECT * FROM {feeds_feed} WHERE importer = :id AND fid = :fid",  array(':id' => $id, ':fid' => $fid))->fetchObject();
     $config = unserialize($feed->config);
-
-    $plugin_id = isset($config['http']) ? 'http' : 'file';
 
     $this->assertEqual($config[$plugin_id]['source'], $feed_url, t('URL in DB correct.'));
 

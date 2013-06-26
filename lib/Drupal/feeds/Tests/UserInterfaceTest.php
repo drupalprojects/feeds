@@ -54,7 +54,7 @@ class UserInterfaceTest extends FeedsWebTestBase {
     $this->clickLink('Change', 0);
     $this->assertText('Select a fetcher');
     $edit = array(
-      'plugin_key' => 'file',
+      'plugin_key' => 'upload',
     );
     $this->drupalPost('admin/structure/feeds/manage/test_feed/fetcher', $edit, 'Save');
 
@@ -73,7 +73,7 @@ class UserInterfaceTest extends FeedsWebTestBase {
     $this->drupalPost('admin/structure/feeds/manage/test_feed/processor', $edit, 'Save');
 
     // Assert changed configuration.
-    $this->assertPlugins('test_feed', 'file', 'csv', 'entity:user');
+    $this->assertPlugins('test_feed', 'upload', 'csv', 'entity:user');
 
     // Delete importer.
     $this->drupalPost('admin/structure/feeds/manage/test_feed/delete', array(), 'Delete');

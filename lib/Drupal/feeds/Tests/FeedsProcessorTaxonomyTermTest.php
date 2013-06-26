@@ -31,7 +31,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     $this->createImporterConfiguration('Term import', 'term_import');
 
     // Set and configure plugins and mappings.
-    $this->setPlugin('term_import', 'fetcher', 'file');
+    $this->setPlugin('term_import', 'fetcher', 'upload');
     $this->setPlugin('term_import', 'parser', 'csv');
     $this->setPlugin('term_import', 'processor', 'entity:taxonomy_term');
 

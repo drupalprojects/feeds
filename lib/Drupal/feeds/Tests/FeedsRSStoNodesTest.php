@@ -303,7 +303,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Use File Fetcher.
     $this->drupalLogin($this->admin_user);
 
-    $this->setPlugin('syndication_standalone', 'fetcher', 'file');
+    $this->setPlugin('syndication_standalone', 'fetcher', 'upload');
     $this->setSettings('syndication_standalone', 'fetcher', array('allowed_extensions' => 'rss2'));
 
     // Create a feed node.
