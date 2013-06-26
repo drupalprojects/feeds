@@ -39,16 +39,8 @@ class FeedFormController extends EntityFormControllerNG {
       '#required' => TRUE,
     );
 
-    $feed_config = $feed->getConfig();
-
-    foreach ($feed->getImporter()->getPluginTypes() as $type) {
-      $plugin = $feed->getImporter()->$type;
-      $plugin_id = $plugin->getPluginId();
-
-      $config = isset($feed_config[$plugin_id]) ? $feed_config[$plugin_id] : array();
-
-      $form[$type] = $plugin->sourceForm($config);
-      $form[$type]['#tree'] = TRUE;
+    foreach ($importer->getPluginTypes() as $type) {
+      $form = $importer->$type->sourceForm($form, $form_state, $feed);
     }
 
     $form['advanced'] = array(
@@ -120,7 +112,7 @@ class FeedFormController extends EntityFormControllerNG {
 
     $importer = $feed->getImporter();
     foreach ($importer->getPluginTypes() as $type) {
-      $importer->$type->sourceFormValidate($form_state['values'][$type]);
+      $importer->$type->sourceFormValidate($form, $form_state, $feed);
     }
 
     // Validate the "authored by" field.
@@ -154,10 +146,9 @@ class FeedFormController extends EntityFormControllerNG {
     // Build the feed object from the submitted values.
     $feed = parent::submit($form, $form_state);
 
-    foreach ($feed->getImporter()->getPluginTypes() as $type) {
-      $plugin = $feed->getImporter()->$type;
-      $plugin->sourceFormSubmit($form_state['values'][$type]);
-      $feed->setConfigFor($plugin, $form_state['values'][$type]);
+    $importer = $feed->getImporter();
+    foreach ($importer->getPluginTypes() as $type) {
+      $importer->$type->sourceFormSubmit($form, $form_state, $feed);
     }
 
     return $feed;

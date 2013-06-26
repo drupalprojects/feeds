@@ -131,9 +131,10 @@ class FeedsCSVParser extends ParserBase {
    *
    * Show mapping configuration as a guidance for import form users.
    */
-  public function sourceForm($feed_config) {
-    $form = array();
-    $form['#weight'] = -10;
+  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    $form['parser']['#tree'] = TRUE;
+    $form['parser']['#weight'] = -10;
 
     $mappings = $this->importer->processor->config['mappings'];
     $feeds = $uniques = array();
@@ -148,7 +149,7 @@ class FeedsCSVParser extends ParserBase {
     $items = array();
     $items[] = format_plural(count($uniques), t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
     $items[] = l(t('Download a template'), 'import/' . $this->importer->id() . '/template');
-    $form['help'] = array(
+    $form['parser']['help'] = array(
       '#prefix' => '<div class="help">',
       '#suffix' => '</div>',
       'description' => array(
@@ -161,7 +162,7 @@ class FeedsCSVParser extends ParserBase {
         '#items' => $items,
       ),
     );
-    $form['delimiter'] = array(
+    $form['parser']['delimiter'] = array(
       '#type' => 'select',
       '#title' => t('Delimiter'),
       '#description' => t('The character that delimits fields in the CSV file.'),
@@ -174,7 +175,7 @@ class FeedsCSVParser extends ParserBase {
       ),
       '#default_value' => isset($feed_config['delimiter']) ? $feed_config['delimiter'] : ',',
     );
-    $form['no_headers'] = array(
+    $form['parser']['no_headers'] = array(
       '#type' => 'checkbox',
       '#title' => t('No Headers'),
       '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),

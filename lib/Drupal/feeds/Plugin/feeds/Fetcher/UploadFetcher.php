@@ -41,17 +41,18 @@ class UploadFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceForm($feed_config) {
-    $form = array();
-    $form['fid'] = array(
+  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+    $form['fetcher']['#tree'] = TRUE;
+    $form['fetcher']['fid'] = array(
       '#type' => 'value',
       '#value' => empty($feed_config['fid']) ? 0 : $feed_config['fid'],
     );
-    $form['source'] = array(
+    $form['fetcher']['source'] = array(
       '#type' => 'value',
       '#value' => empty($feed_config['source']) ? '' : $feed_config['source'],
     );
-    $form['upload'] = array(
+    $form['fetcher']['upload'] = array(
       '#type' => 'file',
       '#title' => t('File'),
       '#description' => empty($feed_config['source']) ? t('Select a file from your local system.') : t('Select a different file from your local system.'),
@@ -65,7 +66,8 @@ class UploadFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceFormValidate(&$values) {
+  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {
+    $values =& $form_state['values']['fetcher'];
 
     $feed_dir = $this->config['directory'];
     $validators = array(

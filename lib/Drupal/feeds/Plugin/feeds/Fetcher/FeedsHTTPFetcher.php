@@ -132,9 +132,11 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Expose source form.
    */
-  public function sourceForm($feed_config) {
-    $form = array();
-    $form['source'] = array(
+  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+
+    $form['fetcher']['#tree'] = TRUE;
+    $form['fetcher']['source'] = array(
       '#type' => 'textfield',
       '#title' => t('URL'),
       '#description' => t('Enter a feed URL.'),
@@ -148,7 +150,8 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Override parent::sourceFormValidate().
    */
-  public function sourceFormValidate(&$values) {
+  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {
+    $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
 
     if (!feeds_valid_url($values['source'], TRUE)) {

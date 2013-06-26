@@ -53,40 +53,32 @@ abstract class FeedsPlugin extends PluginBase {
   abstract public function pluginType();
 
   /**
-   * Returns TRUE if $this->sourceForm() returns a form.
-   */
-  public function hasSourceConfig() {
-    $form = $this->sourceForm(array());
-    return !empty($form);
-  }
-
-  /**
    * Implements FeedInterface::sourceDefaults().
    */
   public function sourceDefaults() {
-    $values = array_flip(array_keys($this->sourceForm(array())));
-    foreach ($values as $k => $v) {
-      $values[$k] = '';
-    }
-    return $values;
+    return array();
   }
 
   /**
    * Callback methods, exposes source form.
    */
-  public function sourceForm($source_config) {
-    return array();
+  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+    return $form;
   }
 
   /**
    * Validation handler for sourceForm.
    */
-  public function sourceFormValidate(&$source_config) {}
+  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {}
 
   /**
    * Validation handler for sourceForm.
    */
-  public function sourceFormSubmit(&$source_config) {}
+  public function sourceFormSubmit(array $form, array &$form_state, Feed $feed) {
+    if (isset($form_state['values'][$this->pluginType()])) {
+      $feed->setConfigFor($this, $form_state['values'][$this->pluginType()]);
+    }
+  }
 
   /**
    * A source is being saved.

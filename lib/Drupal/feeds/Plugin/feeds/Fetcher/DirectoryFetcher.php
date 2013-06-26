@@ -77,9 +77,11 @@ class DirectoryFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceForm($feed_config) {
-    $form = array();
-    $form['source'] = array(
+  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+    $feed_config = $feed->getConfigFor($this);
+
+    $form['fetcher']['#tree'] = TRUE;
+    $form['fetcher']['source'] = array(
       '#type' => 'textfield',
       '#title' => t('File'),
       '#description' => t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->config['allowed_schemes']))),
@@ -91,7 +93,8 @@ class DirectoryFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceFormValidate(&$values) {
+  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {
+    $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
     // Check if chosen url scheme is allowed.
     $scheme = file_uri_scheme($values['source']);
