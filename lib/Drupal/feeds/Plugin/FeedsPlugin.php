@@ -35,8 +35,10 @@ abstract class FeedsPlugin extends PluginBase {
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
     $this->id = $configuration['importer']->id();
     $this->importer = $configuration['importer'];
+
     unset($configuration['importer']);
     $this->setConfig($configuration);
     $this->source_config = $this->sourceDefaults();
@@ -114,7 +116,15 @@ abstract class FeedsPlugin extends PluginBase {
    *
    * Return configuration array, ensure that all default values are present.
    */
-  public function getConfig() {
+  public function getConfig($key = NULL) {
+    if ($key) {
+      if (isset($this->config[$key])) {
+        return $this->config[$key];
+      }
+
+      return NULL;
+    }
+
     return $this->config;
   }
 
@@ -151,8 +161,8 @@ abstract class FeedsPlugin extends PluginBase {
    * @return
    *   FormAPI style form definition.
    */
-  public function configForm(&$form_state) {
-    return array();
+  public function configForm(array $form, array &$form_state) {
+    return $form;
   }
 
   /**
@@ -163,7 +173,7 @@ abstract class FeedsPlugin extends PluginBase {
    * @param $values
    *   An array that contains the values entered by the user through configForm.
    */
-  public function configFormValidate(&$values) {
+  public function configFormValidate(array $form, array &$form_state) {
   }
 
   /**
@@ -171,8 +181,8 @@ abstract class FeedsPlugin extends PluginBase {
    *
    *  @param $values
    */
-  public function configFormSubmit(&$values) {
-    $this->addConfig($values);
+  public function configFormSubmit(array $form, array &$form_state) {
+    $this->addConfig($form_state['values']);
     $this->importer->save();
     drupal_set_message(t('Your changes have been saved.'));
   }

@@ -38,7 +38,7 @@ class UserInterfaceTest extends FeedsWebTestBase {
     $this->assertText('Parser');
     $this->assertText('Syndication parser');
     $this->assertText('Processor');
-    $this->assertText('Node processor');
+    $this->assertText('Content');
     $this->assertText('Getting started');
     $this->assertRaw('admin/structure/feeds/manage/test_feed/settings');
     $this->assertRaw('admin/structure/feeds/manage/test_feed/settings/processor');
@@ -68,12 +68,12 @@ class UserInterfaceTest extends FeedsWebTestBase {
     $this->clickLink('Change', 2);
     $this->assertText('Select a processor');
     $edit = array(
-      'plugin_key' => 'user',
+      'plugin_key' => 'entity:user',
     );
     $this->drupalPost('admin/structure/feeds/manage/test_feed/processor', $edit, 'Save');
 
     // Assert changed configuration.
-    $this->assertPlugins('test_feed', 'file', 'csv', 'user');
+    $this->assertPlugins('test_feed', 'file', 'csv', 'entity:user');
 
     // Delete importer.
     $this->drupalPost('admin/structure/feeds/manage/test_feed/delete', array(), 'Delete');
@@ -97,8 +97,8 @@ class UserInterfaceTest extends FeedsWebTestBase {
     $this->drupalGet('admin/structure/feeds');
 
     // Configure processor.
-    $this->setSettings('test_feed', 'processor', array('bundle' => 'article'));
-    $this->assertFieldByName('bundle', 'article');
+    $this->setSettings('test_feed', 'processor', array('values[type]' => 'article'));
+    $this->assertFieldByName('values[type]', 'article');
 
     // Create a feed node.
     $edit = array(

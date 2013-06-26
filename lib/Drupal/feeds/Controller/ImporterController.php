@@ -138,9 +138,7 @@ class ImporterController implements ControllerInterface {
     // Fetcher.
     $fetcher_definition = $feeds_importer->fetcher->getPluginDefinition();
     $actions = array();
-    if (feeds_get_form($feeds_importer->fetcher, 'configForm')) {
-      $actions = array(l(t('Settings'), $path . '/settings/fetcher'));
-    }
+    $actions = array(l(t('Settings'), $path . '/settings/fetcher'));
     $info['title'] = t('Fetcher');
     $info['body'] = array(
       array(
@@ -155,9 +153,7 @@ class ImporterController implements ControllerInterface {
     // Parser.
     $parser_definition = $feeds_importer->parser->getPluginDefinition();
     $actions = array();
-    if (feeds_get_form($feeds_importer->parser, 'configForm')) {
-      $actions = array(l(t('Settings'), $path . '/settings/parser'));
-    }
+    $actions = array(l(t('Settings'), $path . '/settings/parser'));
     $info['title'] = t('Parser');
     $info['body'] = array(
       array(
@@ -172,9 +168,7 @@ class ImporterController implements ControllerInterface {
     // Processor.
     $actions = array();
     $processor_definition = $feeds_importer->processor->getPluginDefinition();
-    if (feeds_get_form($feeds_importer->processor, 'configForm')) {
-      $actions[] = l(t('Settings'), $path . '/settings/processor');
-    }
+    $actions[] = l(t('Settings'), $path . '/settings/processor');
     $actions[] = l(t('Mapping'), $path . '/mapping');
     $info['title'] = t('Processor');
     $info['body'] = array(

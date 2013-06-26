@@ -461,19 +461,15 @@ function feeds_admin_paths() {
 /**
  * Title callback.
  */
-function feeds_importer_title($importer_id) {
-  if ($importer = entity_load('feeds_importer', $importer_id)) {
-    return $importer->label();
-  }
+function feeds_importer_title($importer) {
+  return $importer->label();
 }
 
 /**
  * Feed title callback.
  */
-function feeds_feed_title($feed_id) {
-  if ($feed = entity_load('feeds_feed', $feed_id)) {
-    return $feed->label();
-  }
+function feeds_feed_title($feed) {
+  return $feed->label();
 }
 
 /**
@@ -767,7 +763,7 @@ function feeds_get_form($configurable, $form_method) {
  *   The $form_method that should be rendered.
  */
 function feeds_form(array $form, array &$form_state, $configurable, $form_method) {
-  $form = $configurable->$form_method($form_state);
+  $form = $configurable->$form_method($form, $form_state);
   $form['#configurable'] = $configurable;
   $form['#feeds_form_method'] = $form_method;
   $form['#validate'] = array('feeds_form_validate');
@@ -802,12 +798,14 @@ function feeds_form_submit(array $form, array &$form_state) {
 function _feeds_form_helper(array $form, array &$form_state, $action) {
   $method = $form['#feeds_form_method'] . $action;
   if (method_exists($form['#configurable'], $method)) {
-    $form['#configurable']->$method($form_state['values']);
+    $form['#configurable']->$method($form, $form_state);
   }
 }
 
 /**
  * Handle a fetcher callback.
+ *
+ * @todo Move this to a controller.
  */
 function feeds_fetcher_callback($importer, $fid = 0) {
   if ($importer instanceof Importer) {

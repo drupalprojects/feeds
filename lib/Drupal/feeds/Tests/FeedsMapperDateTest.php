@@ -61,9 +61,7 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
       'import_period' => FEEDS_SCHEDULE_NEVER,
     ));
     $this->setPlugin('daterss', 'fetcher', 'file');
-    $this->setSettings('daterss', 'processor', array(
-      'bundle' => $typename,
-    ));
+    $this->setSettings('daterss', 'processor', array('values[type]' => $typename));
     $this->addMappings('daterss', array(
       0 => array(
         'source' => 'title',

@@ -23,7 +23,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     );
   }
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Add Tags vocabulary.
@@ -81,7 +81,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
   /**
    * Tests inheriting taxonomy from the feed node.
    */
-  function testInheritTaxonomy() {
+  public function testInheritTaxonomy() {
 
     // Adjust importer settings
     $this->setSettings('syndication', NULL, array('import_period' => FEEDS_SCHEDULE_NEVER));
@@ -194,7 +194,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $entity = entity_create('node', array('type' => 'article'))->getBCEntity();
     $mapper = new Taxonomy(array(), 'test', array());
     $mapping = array(
-      'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_ID,
+      'term_search' => 1,
     );
 
     $feed = entity_create('feeds_feed', array('importer' => 'syndication'));
@@ -247,7 +247,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $mapper = new Taxonomy(array(), 'test', array());
 
     $mapping = array(
-      'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_GUID,
+      'term_search' => 2,
     );
 
     $mapper->setTarget($feed, $entity, $target, $guids, $mapping);

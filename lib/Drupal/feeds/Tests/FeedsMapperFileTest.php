@@ -42,7 +42,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
 
     // Create importer configuration.
     $this->createImporterConfiguration();
-    $this->setSettings('syndication', 'processor', array('bundle' => $typename));
+    $this->setSettings('syndication', 'processor', array('values[type]' => $typename));
     $this->addMappings('syndication', array(
       0 => array(
         'source' => 'title',
@@ -94,7 +94,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     // Create a CSV importer configuration.
     $this->createImporterConfiguration('Node import from CSV', 'node');
     $this->setPlugin('node', 'parser', 'csv');
-    $this->setSettings('node', 'processor', array('bundle' => $typename));
+    $this->setSettings('node', 'processor', array('values[type]' => $typename));
     $this->addMappings('node', array(
       0 => array(
         'source' => 'title',
@@ -176,7 +176,7 @@ class FeedsMapperFileTest extends FeedsMapperTestBase {
     // Create a CSV importer configuration.
     $this->createImporterConfiguration('Node import from CSV', 'image_test');
     $this->setPlugin('image_test', 'parser', 'csv');
-    $this->setSettings('image_test', 'processor', array('bundle' => $typename));
+    $this->setSettings('image_test', 'processor', array('values[type]' => $typename));
     $this->addMappings('image_test', array(
       0 => array(
         'source' => 'title',

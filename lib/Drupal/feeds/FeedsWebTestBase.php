@@ -188,9 +188,9 @@ class FeedsWebTestBase extends WebTestBase {
 
     // Assert message and presence of default plugins.
     $this->assertText('Your configuration has been created with default settings.');
-    $this->assertPlugins($id, 'http', 'syndication', 'node');
+    $this->assertPlugins($id, 'http', 'syndication', 'entity:node');
     // Per default attached to article content type.
-    $this->setSettings($id, 'processor', array('bundle' => 'article'));
+    // $this->setSettings($id, 'processor', array('values[type]'' => 'article'));
   }
 
   /**

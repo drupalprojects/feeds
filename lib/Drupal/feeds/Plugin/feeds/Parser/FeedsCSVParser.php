@@ -196,8 +196,7 @@ class FeedsCSVParser extends ParserBase {
   /**
    * Build configuration form.
    */
-  public function configForm(&$form_state) {
-    $form = array();
+  public function configForm(array $form, array &$form_state) {
     $form['delimiter'] = array(
       '#type' => 'select',
       '#title' => t('Default delimiter'),

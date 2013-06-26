@@ -171,7 +171,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * Get configuration of this feed.
    */
   public function getConfig() {
-    foreach ($this->plugin_types as $type) {
+    foreach ($this->getPluginTypes() as $type) {
       $this->config[$type]['config'] = $this->$type->getConfig();
     }
 
@@ -192,7 +192,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
         'config' => array(),
       ),
       'processor' => array(
-        'plugin_key' => 'node',
+        'plugin_key' => 'entity:node',
         'config' => array(),
       ),
       'update' => 0,
@@ -206,7 +206,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * Override parent::configForm().
    */
-  public function configForm(&$form_state) {
+  public function configForm(array $form, array &$form_state) {
     $config = $this->getConfig();
     $form = array();
     $form['name'] = array(
@@ -253,10 +253,10 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     return $form;
   }
 
-  public function configFormValidate(array &$values) {
+  public function configFormValidate(array $form, array &$form_state) {
     foreach ($this->plugin_types as $type) {
-      if (isset($values[$type])) {
-        $this->$type->configFormValidate($values[$type]);
+      if (isset($form_state['values'][$type])) {
+        $this->$type->configFormValidate($form, $form_state);
       }
     }
   }
@@ -264,13 +264,13 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * Reschedule if import period changes.
    */
-  public function configFormSubmit(&$values) {
-    if ($this->config['import_period'] != $values['import_period']) {
+  public function configFormSubmit(array $form, array &$form_state) {
+    if ($this->config['import_period'] != $form_state['values']['import_period']) {
       $this->reschedule($this->id());
     }
-    $this->name = $values['name'];
-    $this->description = $values['description'];
-    $this->addConfig($values);
+    $this->name = $form_state['values']['name'];
+    $this->description = $form_state['values']['description'];
+    $this->addConfig($form_state['values']);
 
     $this->save();
     drupal_set_message(t('Your changes have been saved.'));

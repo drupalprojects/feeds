@@ -210,8 +210,7 @@ class FeedsFileFetcher extends FetcherBase {
   /**
    * Overrides parent::configForm().
    */
-  public function configForm(&$form_state) {
-    $form = array();
+  public function configForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
@@ -257,22 +256,22 @@ class FeedsFileFetcher extends FetcherBase {
    *
    * Ensure that the chosen directory is accessible.
    */
-  public function configFormValidate(&$values) {
+  public function configFormValidate(array $form, array &$form_state) {
 
-    $values['directory'] = trim($values['directory']);
-    $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
+    $form_state['values']['directory'] = trim($form_state['values']['directory']);
+    $form_state['values']['allowed_schemes'] = array_filter($form_state['values']['allowed_schemes']);
 
-    if (!$values['direct']) {
+    if (!$form_state['values']['direct']) {
       // Ensure that the upload directory field is not empty when not in
       // direct-mode.
-      if (!$values['directory']) {
+      if (!$form_state['values']['directory']) {
         form_set_error('directory', t('Please specify an upload directory.'));
         // Do not continue validating the directory if none was specified.
         return;
       }
 
       // Validate the URI scheme of the upload directory.
-      $scheme = file_uri_scheme($values['directory']);
+      $scheme = file_uri_scheme($form_state['values']['directory']);
       if (!$scheme || !in_array($scheme, $this->getSchemes())) {
         form_set_error('directory', t('Please enter a valid scheme into the directory location.'));
 
@@ -282,7 +281,7 @@ class FeedsFileFetcher extends FetcherBase {
       }
 
       // Ensure that the upload directory exists.
-      if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      if (!file_prepare_directory($form_state['values']['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
         form_set_error('directory', t('The chosen directory does not exist and attempts to create it failed.'));
       }
     }

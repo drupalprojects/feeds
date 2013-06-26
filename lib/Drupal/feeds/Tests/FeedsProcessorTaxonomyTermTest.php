@@ -33,7 +33,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
     // Set and configure plugins and mappings.
     $this->setPlugin('term_import', 'fetcher', 'file');
     $this->setPlugin('term_import', 'parser', 'csv');
-    $this->setPlugin('term_import', 'processor', 'taxonomy_term');
+    $this->setPlugin('term_import', 'processor', 'entity:taxonomy_term');
 
     // Create vocabulary.
     entity_create('taxonomy_vocabulary', array(
@@ -41,7 +41,7 @@ class FeedsProcessorTaxonomyTermTest extends FeedsWebTestBase {
       'vid' => 'addams',
     ))->save();
 
-    $this->setSettings('term_import', 'processor', array('bundle' => 'addams'));
+    $this->setSettings('term_import', 'processor', array('values[vid]' => 'addams'));
   }
 
   /**

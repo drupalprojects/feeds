@@ -92,8 +92,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Override parent::configForm().
    */
-  public function configForm(&$form_state) {
-    $form = array();
+  public function configForm(array $form, array &$form_state) {
     $form['auto_detect_feeds'] = array(
       '#type' => 'checkbox',
       '#title' => t('Auto detect feeds'),

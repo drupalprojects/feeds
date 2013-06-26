@@ -51,7 +51,7 @@ class FeedsMapperFieldTest extends FeedsMapperTestBase {
     $this->setSettings('csv', NULL, array('import_period' => FEEDS_SCHEDULE_NEVER));
     $this->setPlugin('csv', 'fetcher', 'file');
     $this->setPlugin('csv', 'parser', 'csv');
-    $this->setSettings('csv', 'processor', array('bundle' => $typename));
+    $this->setSettings('csv', 'processor', array('values[type]' => $typename));
     $this->addMappings('csv', array(
       0 => array(
         'source' => 'title',

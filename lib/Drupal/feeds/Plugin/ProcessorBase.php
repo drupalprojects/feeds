@@ -15,142 +15,13 @@ use Drupal\feeds\FeedsAccessException;
 /**
  * Abstract class, defines interface for processors.
  */
-abstract class ProcessorBase extends FeedsPlugin {
+class ProcessorBase extends FeedsPlugin {
 
   /**
    * Implements FeedsPlugin::pluginType().
    */
   public function pluginType() {
     return 'processor';
-  }
-
-  /**
-   * Entity type this processor operates on.
-   */
-  public abstract function entityType();
-
-  /**
-   * Bundle type this processor operates on.
-   *
-   * Defaults to the entity type for entities that do not define bundles.
-   *
-   * @return string|NULL
-   *   The bundle type this processor operates on, or NULL if it is undefined.
-   */
-  public function bundle() {
-    return $this->config['bundle'];
-  }
-
-  /**
-   * Provides a list of bundle options for use in select lists.
-   *
-   * @return array
-   *   A keyed array of bundle => label.
-   */
-  public function bundleOptions() {
-    $options = array();
-    foreach (entity_get_bundles($this->entityType()) as $bundle => $info) {
-      if (!empty($info['label'])) {
-        $options[$bundle] = $info['label'];
-      }
-      else {
-        $options[$bundle] = $bundle;
-      }
-    }
-    return $options;
-  }
-
-  /**
-   * Create a new entity.
-   *
-   * @param $source
-   *   The feeds source that spawns this entity.
-   *
-   * @return
-   *   A new entity object.
-   */
-  protected abstract function newEntity(Feed $source);
-
-  /**
-   * Load an existing entity.
-   *
-   * @param $feed
-   *   The feeds source that spawns this entity.
-   * @param $entity_id
-   *   The unique id of the entity that should be loaded.
-   *
-   * @return
-   *   A new entity object.
-   *
-   * @todo We should be able to batch load these, if we found all of the
-   *   existing ids first.
-   */
-  protected function entityLoad(Feed $feed, $entity_id) {
-    if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
-      return entity_load($this->entityType(), $entity_id);
-    }
-
-    $info = $this->entityInfo();
-
-    $args = array(':entity_id' => $entity_id);
-
-    $table = db_escape_table($info['base_table']);
-    $key = db_escape_field($info['entity_keys']['id']);
-    $values = db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
-
-    $entity = $this->newEntity($feed);
-    foreach ($values as $key => $value) {
-      $entity->$key = $value;
-    }
-
-    return $entity;
-  }
-
-  /**
-   * Validate an entity.
-   *
-   * @throws FeedsValidationException $e
-   *   If validation fails.
-   */
-  protected function entityValidate($entity) {}
-
-  /**
-   * Access check for saving an enity.
-   *
-   * @param $entity
-   *   Entity to be saved.
-   *
-   * @throws FeedsAccessException $e
-   *   If the access check fails.
-   */
-  protected function entitySaveAccess($entity) {}
-
-  /**
-   * Save an entity.
-   *
-   * @param $entity
-   *   Entity to be saved.
-   */
-  protected abstract function entitySave($entity);
-
-  /**
-   * Delete a series of entities.
-   *
-   * @param $entity_ids
-   *   Array of unique identity ids to be deleted.
-   */
-  protected function entityDeleteMultiple($entity_ids) {
-    entity_delete_multiple($this->entityType(), $entity_ids);
-  }
-
-  /**
-   * Wrap entity_get_info() into a method so that extending classes can override
-   * it and more entity information. Allowed additional keys:
-   *
-   * 'label plural' ... the plural label of an entity type.
-   */
-  protected function entityInfo() {
-    return entity_get_info($this->entityType());
   }
 
   /**
@@ -255,7 +126,7 @@ abstract class ProcessorBase extends FeedsPlugin {
     $info = $this->entityInfo();
     $tokens = array(
       '@entity' => strtolower($info['label']),
-      '@entities' => strtolower($info['label plural']),
+      '@entities' => strtolower($info['label_plural']),
     );
     $messages = array();
     if ($state->created) {
@@ -291,7 +162,7 @@ abstract class ProcessorBase extends FeedsPlugin {
     }
     if (empty($messages)) {
       $messages[] = array(
-        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label plural']))),
+        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label_plural']))),
       );
     }
     foreach ($messages as $message) {
@@ -359,14 +230,14 @@ abstract class ProcessorBase extends FeedsPlugin {
           array(
             '@number' => $state->deleted,
             '@entity' => strtolower($info['label']),
-            '@entities' => strtolower($info['label plural']),
+            '@entities' => strtolower($info['label_plural']),
           )
         );
         $feed->log('clear', $message, array(), WATCHDOG_INFO);
         drupal_set_message($message);
       }
       else {
-        drupal_set_message(t('There are no @entities to be deleted.', array('@entities' => $info['label plural'])));
+        drupal_set_message(t('There are no @entities to be deleted.', array('@entities' => $info['label_plural'])));
       }
     }
   }
@@ -408,7 +279,6 @@ abstract class ProcessorBase extends FeedsPlugin {
    */
   public function expire(Feed $feed, $time = NULL) {
     $state = $feed->state(FEEDS_PROCESS_EXPIRE);
-
     if ($time === NULL) {
       $time = $this->expiryTime();
     }
@@ -417,7 +287,6 @@ abstract class ProcessorBase extends FeedsPlugin {
     }
 
     $select = $this->expiryQuery($feed, $time);
-
     // If there is no total, query it.
     if (!$state->total) {
       $state->total = $select->countQuery()->execute()->fetchField();
@@ -576,74 +445,39 @@ abstract class ProcessorBase extends FeedsPlugin {
    * Declare default configuration.
    */
   public function configDefaults() {
-    $info = $this->entityInfo();
-    $bundle = NULL;
-    if (empty($info['entity_keys']['bundle'])) {
-      $bundle = $this->entityType();
-    }
-    return array(
+    $defaults = array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
-      'input_format' => NULL,
+      'input_format' => 'plain_text',
       'skip_hash_check' => FALSE,
-      'bundle' => $bundle,
     );
+
+    return $defaults;
   }
 
   /**
    * Overrides parent::configForm().
    */
-  public function configForm(&$form_state) {
-    $info = $this->entityInfo();
-    $form = array();
+  public function configForm(array $form, array &$form_state) {
 
-    if (!empty($info['entity_keys']['bundle'])) {
-      $form['bundle'] = array(
-        '#type' => 'select',
-        '#options' => $this->bundleOptions(),
-        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : t('Bundle'),
-        '#required' => TRUE,
-        '#default_value' => $this->bundle(),
-      );
-    }
-    else {
-      $form['bundle'] = array(
-        '#type' => 'value',
-        '#value' => $this->entityType(),
-      );
-    }
-
-    $tokens = array('@entities' => strtolower($info['label plural']));
-
-    $form['update_existing'] = array(
-      '#type' => 'radios',
-      '#title' => t('Update existing @entities', $tokens),
-      '#description' =>
-        t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
-      '#options' => array(
-        FEEDS_SKIP_EXISTING => t('Do not update existing @entities', $tokens),
-        FEEDS_REPLACE_EXISTING => t('Replace existing @entities', $tokens),
-        FEEDS_UPDATE_EXISTING => t('Update existing @entities', $tokens),
-      ),
-      '#default_value' => $this->config['update_existing'],
-    );
-    global $user;
-    $formats = filter_formats($user);
-    foreach ($formats as $format) {
-      $format_options[$format->format] = $format->name;
-    }
     $form['skip_hash_check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Skip hash check'),
       '#description' => t('Force update of items even if item source data did not change.'),
       '#default_value' => $this->config['skip_hash_check'],
     );
+
+    global $user;
+    $formats = filter_formats($user);
+    foreach ($formats as $format) {
+      $format_options[$format->format] = $format->name;
+    }
     $form['input_format'] = array(
       '#type' => 'select',
       '#title' => t('Text format'),
       '#description' => t('Select the input format for the body field of the nodes to be created.'),
       '#options' => $format_options,
-      '#default_value' => isset($this->config['input_format']) ? $this->config['input_format'] : 'plain_text',
+      '#default_value' => $this->config['input_format'],
       '#required' => TRUE,
     );
 
@@ -654,7 +488,7 @@ abstract class ProcessorBase extends FeedsPlugin {
    * Get mappings.
    */
   public function getMappings() {
-    return isset($this->config['mappings']) ? $this->config['mappings'] : array();
+    return $this->config['mappings'];
   }
 
   /**
@@ -668,14 +502,6 @@ abstract class ProcessorBase extends FeedsPlugin {
    *   FALSE otherwise.
    */
   public function getMappingTargets() {
-
-    // The bundle has not been selected.
-    if (!$this->bundle()) {
-      $info = $this->entityInfo();
-      $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : t('bundle');
-      $url = url('admin/structure/feeds/manage/' . $this->importer->id() . '/settings/processor');
-      drupal_set_message(t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
-    }
 
     return array(
       'url' => array(
@@ -696,12 +522,13 @@ abstract class ProcessorBase extends FeedsPlugin {
    *
    * @ingroup mappingapi
    */
-  public function setTargetElement(Feed $source, $target_item, $target_element, $value) {
+  public function setTargetElement(Feed $feed, $target_item, $target_element, $value) {
     switch ($target_element) {
       case 'url':
       case 'guid':
         $target_item->feeds_item->$target_element = $value;
         break;
+
       default:
         $target_item->$target_element = $value;
         break;
@@ -744,6 +571,7 @@ abstract class ProcessorBase extends FeedsPlugin {
         return $entity_id;
       }
     }
+
     return 0;
   }
 
@@ -759,7 +587,7 @@ abstract class ProcessorBase extends FeedsPlugin {
    *   An array where the keys are target field names and the values are the
    *   elements from the source item mapped to these targets.
    */
-  protected function uniqueTargets(Feed $feed, FeedsParserResult $result) {
+  public function uniqueTargets(Feed $feed, FeedsParserResult $result) {
     $parser = $this->importer->parser;
     $targets = array();
     foreach ($this->config['mappings'] as $mapping) {
