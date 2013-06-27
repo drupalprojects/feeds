@@ -10,15 +10,16 @@ class ParserOPML {
   /**
    * Parse OPML file.
    *
-   * @param $raw
+   * @param string $raw
    *   File contents.
-   * @return
+   *
+   * @return array
    *   An array of the parsed OPML file.
    */
-  public function function parse($raw) {
+  public function parse($raw) {
     $feeds = $items = array();
     $xml = @ new SimpleXMLElement($raw);
-    $feeds['title'] = (string)current($xml->xpath('//head/title'));
+    $feeds['title'] = (string) current($xml->xpath('//head/title'));
 
     // @todo Make xpath case insensitive.
     $outlines = $xml->xpath('//outline[@xmlUrl]');
@@ -44,6 +45,7 @@ class ParserOPML {
       }
     }
     $feeds['items'] = $items;
+
     return $feeds;
   }
 
