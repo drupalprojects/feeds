@@ -9,8 +9,8 @@ namespace Drupal\feeds\Plugin\feeds\Processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\Plugin\ProcessorBase;
 
 /**
@@ -178,7 +178,7 @@ class EntityProcessor extends ProcessorBase {
   /**
    * {@inheritdoc}
    */
-  protected function newEntity(Feed $feed) {
+  protected function newEntity(FeedInterface $feed) {
     $values = $this->config['values'];
     $this->apply('newEntityValues', $feed, $values);
     return entity_create($this->entityType(), $values)->getBCEntity();
@@ -187,7 +187,7 @@ class EntityProcessor extends ProcessorBase {
   /**
    * {@inheritdoc}
    */
-  protected function entityLoad(Feed $feed, $entity_id) {
+  protected function entityLoad(FeedInterface $feed, $entity_id) {
     $entity = entity_load($this->entityType(), $entity_id)->getBCEntity();
     $this->apply('entityPrepare', $feed, $entity);
 
@@ -358,7 +358,7 @@ class EntityProcessor extends ProcessorBase {
    *
    * @ingroup mappingapi
    */
-  public function setTargetElement(Feed $feed, $entity, $target_element, $value) {
+  public function setTargetElement(FeedInterface $feed, $entity, $target_element, $value) {
     $properties = $this->getProperties();
     if (isset($properties[$target_element])) {
       $entity->set($target_element, $value);
@@ -376,13 +376,13 @@ class EntityProcessor extends ProcessorBase {
     return $this->config['expire'];
   }
 
-  protected function expiryQuery(Feed $feed, $time) {
+  protected function expiryQuery(FeedInterface $feed, $time) {
     $select = parent::expiryQuery($feed, $time);
     $this->apply('expiryQuery', $feed, $select, $time);
     return $select;
   }
 
-  protected function existingEntityId(Feed $feed, FeedsParserResult $result) {
+  protected function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
     if ($id = parent::existingEntityId($feed, $result)) {
       return $id;
     }

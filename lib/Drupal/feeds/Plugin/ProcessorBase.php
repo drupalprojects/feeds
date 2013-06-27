@@ -7,10 +7,9 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsAccessException;
+use Drupal\feeds\FeedsParserResult;
 
 /**
  * Abstract class, defines interface for processors.
@@ -27,12 +26,12 @@ class ProcessorBase extends FeedsPlugin {
   /**
    * Process the result of the parsing stage.
    *
-   * @param Feed $source
+   * @param FeedInterface $source
    *   Source information about this import.
    * @param FeedsParserResult $parser_result
    *   The result of the parsing stage.
    */
-  public function process(Feed $feed, FeedsParserResult $parser_result) {
+  public function process(FeedInterface $feed, FeedsParserResult $parser_result) {
     $state = $feed->state(FEEDS_PROCESS);
 
     while ($item = $parser_result->shiftItem()) {
@@ -175,14 +174,14 @@ class ProcessorBase extends FeedsPlugin {
    * Remove all stored results or stored results up to a certain time for a
    * source.
    *
-   * @param Feed $feed
+   * @param FeedInterface $feed
    *   Source information for this expiry. Implementers should only delete items
    *   pertaining to this source. The preferred way of determining whether an
    *   item pertains to a certain souce is by using $source->fid. It is the
    *   processor's responsibility to store the fid of an imported item in
    *   the processing stage.
    */
-  public function clear(Feed $feed) {
+  public function clear(FeedInterface $feed) {
     $state = $feed->state(FEEDS_PROCESS_CLEAR);
 
     // Build base select statement.
@@ -263,7 +262,7 @@ class ProcessorBase extends FeedsPlugin {
    * Do not invoke expire on a processor directly, but use
    * Feed::expire() instead.
    *
-   * @param Feed $source
+   * @param FeedInterface $source
    *   The source to expire entities for.
    *
    * @param $time
@@ -277,7 +276,7 @@ class ProcessorBase extends FeedsPlugin {
    *
    * @see Feed::expire()
    */
-  public function expire(Feed $feed, $time = NULL) {
+  public function expire(FeedInterface $feed, $time = NULL) {
     $state = $feed->state(FEEDS_PROCESS_EXPIRE);
     if ($time === NULL) {
       $time = $this->expiryTime();
@@ -310,7 +309,7 @@ class ProcessorBase extends FeedsPlugin {
    * Processor classes should override this method to set the age portion of the
    * query.
    *
-   * @param Feed $feed
+   * @param FeedInterface $feed
    *   The feed source.
    * @param int $time
    *   Delete entities older than this.
@@ -320,7 +319,7 @@ class ProcessorBase extends FeedsPlugin {
    *
    * @see FeedsNodeProcessor::expiryQuery()
    */
-  protected function expiryQuery(Feed $feed, $time) {
+  protected function expiryQuery(FeedInterface $feed, $time) {
     // Build base select statement.
     $info = $this->entityInfo();
     $id_key = db_escape_field($info['entity_keys']['id']);
@@ -341,7 +340,7 @@ class ProcessorBase extends FeedsPlugin {
   /**
    * Counts the number of items imported by this processor.
    */
-  public function itemCount(Feed $feed) {
+  public function itemCount(FeedInterface $feed) {
     return db_query("SELECT count(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $feed->id()))->fetchField();
   }
 
@@ -368,7 +367,7 @@ class ProcessorBase extends FeedsPlugin {
    * @see hook_feeds_term_processor_targets_alter()
    * @see hook_feeds_user_processor_targets_alter()
    */
-  protected function map(Feed $source, FeedsParserResult $result, $target_item = NULL) {
+  protected function map(FeedInterface $source, FeedsParserResult $result, $target_item = NULL) {
 
     // Static cache $targets as getMappingTargets() may be an expensive method.
     static $sources;
@@ -522,7 +521,7 @@ class ProcessorBase extends FeedsPlugin {
    *
    * @ingroup mappingapi
    */
-  public function setTargetElement(Feed $feed, $target_item, $target_element, $value) {
+  public function setTargetElement(FeedInterface $feed, $target_item, $target_element, $value) {
     switch ($target_element) {
       case 'url':
       case 'guid':
@@ -540,7 +539,7 @@ class ProcessorBase extends FeedsPlugin {
    *
    * @ingroup mappingapi
    *
-   * @param Feed $source
+   * @param FeedInterface $source
    *   The source information about this import.
    * @param $result
    *   A FeedsParserResult object.
@@ -548,7 +547,7 @@ class ProcessorBase extends FeedsPlugin {
    * @return
    *   The serial id of an entity if found, 0 otherwise.
    */
-  protected function existingEntityId(Feed $feed, FeedsParserResult $result) {
+  protected function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
     $query = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
       ->condition('fid', $feed->id())
@@ -587,7 +586,7 @@ class ProcessorBase extends FeedsPlugin {
    *   An array where the keys are target field names and the values are the
    *   elements from the source item mapped to these targets.
    */
-  public function uniqueTargets(Feed $feed, FeedsParserResult $result) {
+  public function uniqueTargets(FeedInterface $feed, FeedsParserResult $result) {
     $parser = $this->importer->parser;
     $targets = array();
     foreach ($this->config['mappings'] as $mapping) {
@@ -633,7 +632,7 @@ class ProcessorBase extends FeedsPlugin {
    *   TRUE if item info could be loaded, false if not.
    */
   protected function loadItemInfo($entity) {
-    if ($item_info = Drupal::service('feeds.item_info')->load($entity)) {
+    if ($item_info = \Drupal::service('feeds.item_info')->load($entity)) {
       $entity->feeds_item = $item_info;
       return TRUE;
     }

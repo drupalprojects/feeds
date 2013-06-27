@@ -9,6 +9,7 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFormControllerNG;
+use Drupal\feeds\FeedPluginFormInterface;
 
 /**
  * Form controller for the feed edit forms.
@@ -40,7 +41,9 @@ class FeedFormController extends EntityFormControllerNG {
     );
 
     foreach ($importer->getPluginTypes() as $type) {
-      $form = $importer->$type->sourceForm($form, $form_state, $feed);
+      if ($importer->$type instanceof FeedPluginFormInterface) {
+        $form = $importer->$type->feedForm($form, $form_state, $feed);
+      }
     }
 
     $form['advanced'] = array(
@@ -112,7 +115,9 @@ class FeedFormController extends EntityFormControllerNG {
 
     $importer = $feed->getImporter();
     foreach ($importer->getPluginTypes() as $type) {
-      $importer->$type->sourceFormValidate($form, $form_state, $feed);
+      if ($importer->$type instanceof FeedPluginFormInterface) {
+        $importer->$type->feedFormValidate($form, $form_state, $feed);
+      }
     }
 
     // Validate the "authored by" field.
@@ -148,7 +153,9 @@ class FeedFormController extends EntityFormControllerNG {
 
     $importer = $feed->getImporter();
     foreach ($importer->getPluginTypes() as $type) {
-      $importer->$type->sourceFormSubmit($form, $form_state, $feed);
+      if ($importer->$type instanceof FeedPluginFormInterface) {
+        $importer->$type->feedFormSubmit($form, $form_state, $feed);
+      }
     }
 
     return $feed;

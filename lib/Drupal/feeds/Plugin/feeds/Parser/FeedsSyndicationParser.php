@@ -9,8 +9,8 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\ParserBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
 use Zend\Feed\Reader\Reader;
@@ -37,7 +37,7 @@ class FeedsSyndicationParser extends ParserBase {
   /**
    * Implements ParserBase::parse().
    */
-  public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
+  public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
     $result = new FeedsParserResult();
     try {
       $channel = Reader::importString($fetcher_result->getRaw());
@@ -126,4 +126,5 @@ class FeedsSyndicationParser extends ParserBase {
       ),
     ) + parent::getMappingSources();
   }
+
 }

@@ -9,9 +9,9 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsValidationException;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Handles special user entity operations.
@@ -36,7 +36,7 @@ class TaxonomyTermHandler extends PluginBase {
   /**
    * Creates a new user account in memory and returns it.
    */
-  public function newEntityValues(Feed $feed, &$values) {
+  public function newEntityValues(FeedInterface $feed, &$values) {
     $values['input_format'] = $this->importer->processor->getConfig('input_format');
   }
 
@@ -87,7 +87,7 @@ class TaxonomyTermHandler extends PluginBase {
   /**
    * Get id of an existing feed item term if available.
    */
-  public function existingEntityId(Feed $feed, FeedsParserResult $result) {
+  public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
     // The only possible unique target is name.
     foreach ($this->importer->processor->uniqueTargets($feed, $result) as $target => $value) {
       if ($target == 'name') {

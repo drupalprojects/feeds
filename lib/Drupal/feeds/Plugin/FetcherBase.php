@@ -7,8 +7,8 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsResult;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Abstract class, defines shared functionality between fetchers.
@@ -28,21 +28,21 @@ abstract class FetcherBase extends FeedsPlugin {
    * Every class that extends FetcherBase must implement this method.
    *
    * @param $feed
-   *   Source value as entered by user through sourceForm().
+   *   Source value as entered by user through feedForm().
    *
    * @return
    *   A FeedsFetcherResult object.
    */
-  public abstract function fetch(Feed $feed);
+  public abstract function fetch(FeedInterface $feed);
 
   /**
    * Clear all caches for results for given source.
    *
-   * @param Feed $feed
+   * @param FeedInterface $feed
    *   Source information for this expiry. Implementers can choose to only clear
    *   caches pertaining to this source.
    */
-  public function clear(Feed $feed) {}
+  public function clear(FeedInterface $feed) {}
 
   /**
    * Request handler invoked if callback URL is requested. Locked down by
@@ -98,29 +98,30 @@ abstract class FetcherBase extends FeedsPlugin {
   /**
    * Subscribe to a source. Only implement if fetcher requires subscription.
    *
-   * @param Feed $feed
+   * @param FeedInterface $feed
    *   Source information for this subscription.
    */
-  public function subscribe(Feed $feed) {}
+  public function subscribe(FeedInterface $feed) {}
 
   /**
    * Unsubscribe from a source. Only implement if fetcher requires subscription.
    *
-   * @param Feed $feed
+   * @param FeedInterface $feed
    *   Source information for unsubscribing.
    */
-  public function unsubscribe(Feed $feed) {}
+  public function unsubscribe(FeedInterface $feed) {}
 
   /**
    * Override import period settings. This can be used to force a certain import
    * interval.
    *
    * @param $feed
-   *   A Feed object.
+   *   A FeedInterface object.
    *
    * @return
    *   A time span in seconds if periodic import should be overridden for given
    *   $feed, NULL otherwise.
    */
-  public function importPeriod(Feed $feed) {}
+  public function importPeriod(FeedInterface $feed) {}
+
 }

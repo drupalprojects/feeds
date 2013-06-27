@@ -7,11 +7,12 @@
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FeedsFileFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Defines a file upload fetcher.
@@ -22,12 +23,12 @@ use Drupal\feeds\Plugin\Core\Entity\Feed;
  *   description = @Translation("Upload content from a local file.")
  * )
  */
-class UploadFetcher extends FetcherBase {
+class UploadFetcher extends FetcherBase implements FeedPluginFormInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function fetch(Feed $feed) {
+  public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
 
     if (is_file($feed_config['source'])) {
@@ -41,7 +42,7 @@ class UploadFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['fid'] = array(
@@ -66,7 +67,7 @@ class UploadFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {
+  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
 
     $feed_dir = $this->config['directory'];
@@ -102,7 +103,7 @@ class UploadFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceSave(Feed $feed) {
+  public function sourceSave(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
 
     // If a new file is present, delete the old one and replace it with the new
@@ -125,7 +126,7 @@ class UploadFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceDelete(Feed $feed) {
+  public function sourceDelete(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     if (isset($feed_config['fid'])) {
       $this->deleteFile($feed_config['fid'], $feed->id());

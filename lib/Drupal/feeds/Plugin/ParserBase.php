@@ -7,8 +7,8 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsResult;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
 
@@ -36,21 +36,21 @@ abstract class ParserBase extends FeedsPlugin {
    *
    * Extending classes must implement this method.
    *
-   * @param Feed $source
+   * @param FeedInterface $feed
    *   Source information.
    * @param $fetcher_result
    *   FeedsFetcherResult returned by fetcher.
    */
-  public abstract function parse(Feed $source, FeedsFetcherResult $fetcher_result);
+  public abstract function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result);
 
   /**
    * Clear all caches for results for given source.
    *
-   * @param Feed $source
+   * @param FeedInterface $feed
    *   Source information for this expiry. Implementers can choose to only clear
    *   caches pertaining to this source.
    */
-  public function clear(Feed $source) {}
+  public function clear(FeedInterface $feed) {}
 
   /**
    * Declare the possible mapping sources that this parser produces.
@@ -66,8 +66,8 @@ abstract class ParserBase extends FeedsPlugin {
    *   array(
    *     'title' => t('Title'),
    *     'created' => t('Published date'),
-   *     'url' => t('Feed item URL'),
-   *     'guid' => t('Feed item GUID'),
+   *     'url' => t('FeedInterface item URL'),
+   *     'guid' => t('FeedInterface item GUID'),
    *   )
    *   @endcode
    */
@@ -112,7 +112,7 @@ abstract class ParserBase extends FeedsPlugin {
    * @see ProcessorBase::map()
    * @see FeedsCSVParser::getSourceElement()
    */
-  public function getSourceElement(Feed $feed, FeedsParserResult $result, $element_key) {
+  public function getSourceElement(FeedInterface $feed, FeedsParserResult $result, $element_key) {
 
     switch ($element_key) {
       case 'parent:uid':

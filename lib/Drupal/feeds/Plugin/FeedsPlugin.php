@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\feeds\FeedInterface;
 use Drupal\Component\Plugin\PluginBase;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\Component\Plugin\PluginBase;
  *
  * Note how this class does not attempt to store source information locally.
  * Doing this would break the model where source information is represented by
- * an object that is being passed into a Feed object and its plugins.
+ * an object that is being passed into a FeedInterface object and its plugins.
  */
 abstract class FeedsPlugin extends PluginBase {
 
@@ -60,35 +60,32 @@ abstract class FeedsPlugin extends PluginBase {
   }
 
   /**
-   * Callback methods, exposes source form.
+   * Stub for plugins implementing FeedPluginFormInterface.
+   *
+   * @see \Drupal\feeds\FeedPluginFormInterface
    */
-  public function sourceForm(array $form, array &$form_state, Feed $feed) {
-    return $form;
-  }
+  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {}
 
   /**
-   * Validation handler for sourceForm.
+   * Stub for plugins implementing FeedPluginFormInterface.
+   *
+   * @see \Drupal\feeds\FeedPluginFormInterface
    */
-  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {}
-
-  /**
-   * Validation handler for sourceForm.
-   */
-  public function sourceFormSubmit(array $form, array &$form_state, Feed $feed) {
+  public function feedFormSubmit(array $form, array &$form_state, FeedInterface $feed) {
     if (isset($form_state['values'][$this->pluginType()])) {
       $feed->setConfigFor($this, $form_state['values'][$this->pluginType()]);
     }
   }
 
   /**
-   * A source is being saved.
+   * A feed is being saved.
    */
-  public function sourceSave(Feed $source) {}
+  public function sourceSave(FeedInterface $feed) {}
 
   /**
-   * A source is being deleted.
+   * A feed is being deleted.
    */
-  public function sourceDelete(Feed $source) {}
+  public function sourceDelete(FeedInterface $feed) {}
 
   /**
    * Similar to setConfig but adds to existing configuration.
@@ -128,7 +125,7 @@ abstract class FeedsPlugin extends PluginBase {
    *   by the keys returned by configDefaults() and populated with default
    *   values that are not included in $config.
    */
-  public function setConfig($config) {
+  public function setConfig(array $config) {
     $defaults = $this->configDefaults();
     $this->config = array_intersect_key($config, $defaults) + $defaults;
   }

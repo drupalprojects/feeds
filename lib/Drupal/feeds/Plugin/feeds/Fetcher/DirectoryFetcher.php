@@ -7,11 +7,12 @@
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FeedsFileFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Defines a directory fetcher.
@@ -22,12 +23,12 @@ use Drupal\feeds\Plugin\Core\Entity\Feed;
  *   description = @Translation("Uses a directory, or file, on the server.")
  * )
  */
-class DirectoryFetcher extends FetcherBase {
+class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function fetch(Feed $feed) {
+  public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
 
     // Just return a file fetcher result if this is a file.
@@ -77,7 +78,7 @@ class DirectoryFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -93,7 +94,7 @@ class DirectoryFetcher extends FetcherBase {
   /**
    * {@inheritdoc}
    */
-  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {
+  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
     // Check if chosen url scheme is allowed.

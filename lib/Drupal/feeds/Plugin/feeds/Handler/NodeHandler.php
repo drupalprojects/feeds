@@ -9,9 +9,9 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsAccessException;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Handles special node entity operations.
@@ -42,7 +42,7 @@ class NodeHandler extends PluginBase {
   /**
    * Creates a new user account in memory and returns it.
    */
-  public function newEntityValues(Feed $feed, &$values) {
+  public function newEntityValues(FeedInterface $feed, &$values) {
     $defaults = variable_get('node_options_' . $this->importer->processor->bundle(), array('status', 'promote'));
 
     $values['uid'] = $this->config['author'];
@@ -118,7 +118,7 @@ class NodeHandler extends PluginBase {
   /**
    * Loads an existing user.
    */
-  public function entityPrepare(Feed $feed, $node) {
+  public function entityPrepare(FeedInterface $feed, $node) {
     $update_existing = $this->importer->processor->getConfig('update_existing');
 
     if ($update_existing != FEEDS_UPDATE_EXISTING) {
@@ -193,7 +193,7 @@ class NodeHandler extends PluginBase {
   /**
    * Override setTargetElement to operate on a target item that is a node.
    */
-  public function setTargetElement(Feed $feed, $node, $target_element, $value) {
+  public function setTargetElement(FeedInterface $feed, $node, $target_element, $value) {
     switch ($target_element) {
       case 'user_name':
         if ($user = user_load_by_name($value)) {
@@ -227,7 +227,7 @@ class NodeHandler extends PluginBase {
   /**
    * Overrides parent::expiryQuery().
    */
-  public function expiryQuery(Feed $feed, $select, $time) {
+  public function expiryQuery(FeedInterface $feed, $select, $time) {
     $data_table = $select->join('node_field_data', 'nfd', 'e.nid = nfd.nid');
     $select->condition('nfd.created', REQUEST_TIME - $time, '<');
     return $select;
@@ -236,7 +236,7 @@ class NodeHandler extends PluginBase {
   /**
    * Get nid of an existing feed item node if available.
    */
-  public function existingEntityId(Feed $feed, FeedsParserResult $result) {
+  public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
     $nid = FALSE;
     // Iterate through all unique targets and test whether they do already
     // exist in the database.

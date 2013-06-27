@@ -9,9 +9,9 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FeedsValidationException;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 
 /**
  * Handles special user entity operations.
@@ -42,7 +42,7 @@ class UserHandler extends PluginBase {
   /**
    * Creates a new user account in memory and returns it.
    */
-  public function newEntityValues(Feed $feed, &$values) {
+  public function newEntityValues(FeedInterface $feed, &$values) {
     $values['uid'] = 0;
     $values['roles'] = array_filter(array_values($this->config['roles']));
     $values['status'] = $this->config['status'];
@@ -102,7 +102,7 @@ class UserHandler extends PluginBase {
   /**
    * Loads an existing user.
    */
-  public function entityPrepare(Feed $feed, $user) {
+  public function entityPrepare(FeedInterface $feed, $user) {
     // Copy the password so that we can compare it again at save.
     $user->feeds_original_pass = $user->pass;
   }
@@ -139,7 +139,7 @@ class UserHandler extends PluginBase {
   /**
    * Get id of an existing feed item term if available.
    */
-  public function existingEntityId(Feed $feed, FeedsParserResult $result) {
+  public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
     $uid = FALSE;
     // Iterate through all unique targets and try to find a user for the
     // target's value.

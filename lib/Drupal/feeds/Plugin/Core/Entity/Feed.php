@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of FeedInterface and Feed class.
+ * Contains \Drupal\feeds\Plugin\Core\Entity\Feed.
  */
 
 namespace Drupal\feeds\Plugin\Core\Entity;

@@ -9,13 +9,13 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\ParserBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\ParserCSVIterator;
 use Drupal\feeds\ParserCSV;
-
+use Drupal\feeds\ParserCSVIterator;
+use Drupal\feeds\Plugin\ParserBase;
 /**
  * Defines a CSV feed parser.
  *
@@ -25,12 +25,12 @@ use Drupal\feeds\ParserCSV;
  *   description = @Translation("Parse CSV files.")
  * )
  */
-class FeedsCSVParser extends ParserBase {
+class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
 
   /**
    * Implements ParserBase::parse().
    */
-  public function parse(Feed $feed, FeedsFetcherResult $fetcher_result) {
+  public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
     $feed_config = $feed->getConfigFor($this);
     $state = $feed->state(FEEDS_PARSE);
 
@@ -112,7 +112,7 @@ class FeedsCSVParser extends ParserBase {
   /**
    * Override parent::getSourceElement() to use only lower keys.
    */
-  public function getSourceElement(Feed $feed, FeedsParserResult $result, $element_key) {
+  public function getSourceElement(FeedInterface $feed, FeedsParserResult $result, $element_key) {
     return parent::getSourceElement($feed, $result, drupal_strtolower($element_key));
   }
 
@@ -131,7 +131,7 @@ class FeedsCSVParser extends ParserBase {
    *
    * Show mapping configuration as a guidance for import form users.
    */
-  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     $form['parser']['#tree'] = TRUE;
     $form['parser']['#weight'] = -10;

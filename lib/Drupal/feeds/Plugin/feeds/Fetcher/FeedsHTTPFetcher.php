@@ -7,10 +7,11 @@
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\PuSHSubscriber;
 use Drupal\feeds\PuSHEnvironment;
 use Drupal\feeds\FeedsHTTPFetcherResult;
@@ -28,12 +29,12 @@ use Drupal\feeds\HTTPRequest;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class FeedsHTTPFetcher extends FetcherBase {
+class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
 
   /**
    * Implements FetcherBase::fetch().
    */
-  public function fetch(Feed $feed) {
+  public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
       return new FeedsFetcherResult($raw);
@@ -47,7 +48,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Clear caches.
    */
-  public function clear(Feed $feed) {
+  public function clear(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     $url = $feed_config['source'];
     cache()->delete('feeds_http_download_' . md5($url));
@@ -130,9 +131,9 @@ class FeedsHTTPFetcher extends FetcherBase {
   }
 
   /**
-   * Expose source form.
+   * {@inheritdoc}
    */
-  public function sourceForm(array $form, array &$form_state, Feed $feed) {
+  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -148,9 +149,9 @@ class FeedsHTTPFetcher extends FetcherBase {
   }
 
   /**
-   * Override parent::sourceFormValidate().
+   * {@inheritdoc}
    */
-  public function sourceFormValidate(array $form, array &$form_state, Feed $feed) {
+  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
 
@@ -168,7 +169,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Override sourceSave() - subscribe to hub.
    */
-  public function sourceSave(Feed $feed) {
+  public function sourceSave(FeedInterface $feed) {
     if ($this->config['use_pubsubhubbub']) {
       $job = array(
         'fetcher' => $this,
@@ -181,7 +182,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Override sourceDelete() - unsubscribe from hub.
    */
-  public function sourceDelete(Feed $feed) {
+  public function sourceDelete(FeedInterface $feed) {
     if ($this->config['use_pubsubhubbub']) {
       $job = array(
         'type' => $feed->getImporter()->id(),
@@ -196,7 +197,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Implement FetcherBase::subscribe() - subscribe to hub.
    */
-  public function subscribe(Feed $feed) {
+  public function subscribe(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     $sub = $this->subscriber($feed->id());
     $url = valid_url($this->config['designated_hub']) ? $this->config['designated_hub'] : '';
@@ -207,7 +208,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Implement FetcherBase::unsubscribe() - unsubscribe from hub.
    */
-  public function unsubscribe(Feed $feed) {
+  public function unsubscribe(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     $this->subscriber($feed->id())->unsubscribe($feed_config['source'], url($this->path($feed->id()), array('absolute' => TRUE)));
   }
@@ -215,7 +216,7 @@ class FeedsHTTPFetcher extends FetcherBase {
   /**
    * Implement FetcherBase::importPeriod().
    */
-  public function importPeriod(Feed $feed) {
+  public function importPeriod(FeedInterface $feed) {
     if ($this->subscriber($feed->id())->subscribed()) {
       return 259200; // Delay for three days if there is a successful subscription.
     }
