@@ -12,7 +12,6 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\ImporterInterface;
-use Drupal\feeds\Plugin\FeedsPlugin;
 
 /**
  * Defines the feeds importer entity.

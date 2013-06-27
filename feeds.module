@@ -734,8 +734,8 @@ function feeds_to_unixtime($date, $default_value) {
 /**
  * Config form wrapper. Use to render the configuration form of a plugin.
  *
- * @param FeedsPlugin $configurable
- *   FeedsPlugin object.
+ * @param PluginBase $configurable
+ *   PluginBase object.
  * @param string $form_method
  *   The form method that should be rendered.
  *

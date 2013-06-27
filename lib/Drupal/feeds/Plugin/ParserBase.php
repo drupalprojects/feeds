@@ -15,10 +15,10 @@ use Drupal\feeds\FeedsParserResult;
 /**
  * Abstract class, defines interface for parsers.
  */
-abstract class ParserBase extends FeedsPlugin {
+abstract class ParserBase extends PluginBase {
 
   /**
-   * Implements FeedsPlugin::pluginType().
+   * Implements PluginBase::pluginType().
    */
   public function pluginType() {
     return 'parser';

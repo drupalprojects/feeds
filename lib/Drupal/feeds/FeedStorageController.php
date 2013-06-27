@@ -20,12 +20,12 @@ use Drupal\job_scheduler\JobScheduler;
 class FeedStorageController extends DatabaseStorageControllerNG {
 
   /**
-   * Call FeedsPlugin::sourceSave() on plugins.
+   * Call PluginBase::sourceSave() on plugins.
    *
    * This is called after save() so that plugins have access to the feed id.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object.
+   * @param \Drupal\Core\Entity\EntityInterface $feed
+   *   The feed object.
    *
    * @todo Figure out a better way to do this.
    */
@@ -55,7 +55,7 @@ class FeedStorageController extends DatabaseStorageControllerNG {
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\DataBaseStorageControllerNG::basePropertyDefinitions().
+   * {@inheritdoc}
    */
   public function baseFieldDefinitions() {
     $properties['fid'] = array(

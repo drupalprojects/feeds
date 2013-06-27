@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\feeds\Plugin\FeedsPlugin;
 use Drupal\feeds\FeedsMapperTestBase;
 use Drupal\feeds\Plugin\feeds\Mapper\Taxonomy;
 

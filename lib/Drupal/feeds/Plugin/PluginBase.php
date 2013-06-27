@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\FeedsPlugin.
+ * Contains Drupal\feeds\Plugin\PluginBase.
  */
 
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;
 
 /**
  * Implement source interface for all plugins.
@@ -17,7 +17,7 @@ use Drupal\Component\Plugin\PluginBase;
  * Doing this would break the model where source information is represented by
  * an object that is being passed into a FeedInterface object and its plugins.
  */
-abstract class FeedsPlugin extends PluginBase {
+abstract class PluginBase extends DrupalPluginBase {
 
   // Holds the actual configuration information.
   protected $config;

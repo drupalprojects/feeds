@@ -11,7 +11,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\feeds\Plugin\FeedsPlugin;
+use Drupal\feeds\Plugin\PluginBase;
 
 /**
  * Manages feeds plugins.
@@ -140,7 +140,7 @@ class FeedsPluginManager extends DefaultPluginManager {
  * @return
  *   A $form_state array already filled the plugin form controller.
  */
-protected function formStateDefaults(FeedsPlugin $plugin, $operation = 'default') {
+protected function formStateDefaults(PluginBase $plugin, $operation = 'default') {
   $form_state = array();
   $controller = $this->getFormController($plugin->getPluginID(), $operation);
   $controller->setPlugin($plugin);
@@ -171,7 +171,7 @@ protected function formStateDefaults(FeedsPlugin $plugin, $operation = 'default'
    * @return array
    *   The processed form for the given plugin and operation.
    */
-  public function getForm(FeedsPlugin $plugin, $operation = 'default', array $form_state = array()) {
+  public function getForm(PluginBase $plugin, $operation = 'default', array $form_state = array()) {
     $form_state += $this->formStateDefaults($plugin, $operation);
     $form_id = $form_state['build_info']['callback_object']->getFormID();
     return drupal_build_form($form_id, $form_state);

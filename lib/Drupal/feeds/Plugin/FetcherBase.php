@@ -13,10 +13,10 @@ use Drupal\feeds\FeedsResult;
 /**
  * Abstract class, defines shared functionality between fetchers.
  */
-abstract class FetcherBase extends FeedsPlugin {
+abstract class FetcherBase extends PluginBase {
 
   /**
-   * Implements FeedsPlugin::pluginType().
+   * Implements PluginBase::pluginType().
    */
   public function pluginType() {
     return 'fetcher';

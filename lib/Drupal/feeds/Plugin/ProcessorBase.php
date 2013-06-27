@@ -14,10 +14,10 @@ use Drupal\feeds\FeedsParserResult;
 /**
  * Abstract class, defines interface for processors.
  */
-class ProcessorBase extends FeedsPlugin {
+class ProcessorBase extends PluginBase {
 
   /**
-   * Implements FeedsPlugin::pluginType().
+   * Implements PluginBase::pluginType().
    */
   public function pluginType() {
     return 'processor';

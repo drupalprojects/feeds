@@ -7,14 +7,14 @@
 
 namespace Drupal\feeds\Plugin\Core\Entity;
 
-use Drupal\job_scheduler\JobScheduler;
-use Drupal\Core\Entity\EntityNG;
-use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Entity\Annotation\EntityType;
+use Drupal\Core\Entity\EntityNG;
+use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsState;
-use Drupal\feeds\Plugin\FeedsPlugin;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\feeds\Plugin\PluginBase;
+use Drupal\job_scheduler\JobScheduler;
 
 /**
  * Defines the feed entity class.
@@ -543,7 +543,7 @@ class Feed extends EntityNG implements FeedInterface {
    * @return
    *   An array stored for $client.
    */
-  public function getConfigFor(FeedsPlugin $client) {
+  public function getConfigFor(PluginBase $client) {
     $id = $client->getPluginID();
     return isset($this->config->value[$id]) ? $this->config->value[$id] : $client->sourceDefaults();
   }
@@ -559,7 +559,7 @@ class Feed extends EntityNG implements FeedInterface {
    * @return
    *   An array stored for $client.
    */
-  public function setConfigFor(FeedsPlugin $client, $config) {
+  public function setConfigFor(PluginBase $client, $config) {
     $this_config = $this->config->value;
     $this_config[$client->getPluginID()] = $config;
     $this->config = $this_config;
