@@ -2,13 +2,14 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\feeds\Processor\EntityProcessor.
+ * Contains \Drupal\feeds\Plugin\feeds\Processor\EntityProcessor.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\Plugin\ProcessorBase;
@@ -25,7 +26,7 @@ use Drupal\feeds\Plugin\ProcessorBase;
  *   derivative = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
  * )
  */
-class EntityProcessor extends ProcessorBase {
+class EntityProcessor extends ProcessorBase implements FormInterface {
 
   /**
    * The plugin definition.
@@ -240,7 +241,7 @@ class EntityProcessor extends ProcessorBase {
   }
 
   /**
-   * Declare default configuration.
+   * {@inheritdoc}
    */
   public function configDefaults() {
     $bundle = key(entity_get_bundles($this->entityType()));
@@ -259,9 +260,9 @@ class EntityProcessor extends ProcessorBase {
   }
 
   /**
-   * Overrides parent::configForm().
+   * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function buildForm(array $form, array &$form_state) {
     $info = $this->entityInfo();
 
     $form['values']['#tree'] = TRUE;
@@ -290,9 +291,9 @@ class EntityProcessor extends ProcessorBase {
       '#default_value' => $this->config['update_existing'],
     );
 
-    $form = parent::configForm($form, $form_state);
+    $form = parent::buildForm($form, $form_state);
 
-    $this->apply('configFormAlter', $form, $form_state);
+    $this->apply('formAlter', $form, $form_state);
 
     return $form;
   }
@@ -300,27 +301,20 @@ class EntityProcessor extends ProcessorBase {
   /**
    * {@inheritdoc}
    */
-  public function configFormValidate(array $form, array &$form_state) {
-    $this->apply('configFormValidate', $form, $form_state);
+  public function validateForm(array &$form, array &$form_state) {
+    $this->apply('validateForm', $form, $form_state);
   }
 
   /**
-   * Reschedule if expiry time changes.
+   * {@inheritdoc}
    */
-  public function configFormSubmit(array $form, array &$form_state) {
-    $this->apply('configFormSubmit', $form, $form_state);
-    parent::configFormSubmit($form, $form_state);
+  public function submitForm(array &$form, array &$form_state) {
+    $this->apply('submitForm', $form, $form_state);
+    parent::submitForm($form, $form_state);
   }
 
   /**
-   * Declare possible mapping targets that this processor exposes.
-   *
-   * @ingroup mappingapi
-   *
-   * @return
-   *   An array of mapping targets. Keys are paths to targets
-   *   separated by ->, values are TRUE if target can be unique,
-   *   FALSE otherwise.
+   * {@inheritdoc}
    */
   public function getMappingTargets() {
 
@@ -354,9 +348,7 @@ class EntityProcessor extends ProcessorBase {
   }
 
   /**
-   * Set a concrete target element. Invoked from ProcessorBase::map().
-   *
-   * @ingroup mappingapi
+   * {@inheritdoc}
    */
   public function setTargetElement(FeedInterface $feed, $entity, $target_element, $value) {
     $properties = $this->getProperties();

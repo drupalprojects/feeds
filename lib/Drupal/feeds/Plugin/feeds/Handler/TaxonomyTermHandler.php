@@ -83,7 +83,6 @@ class TaxonomyTermHandler extends PluginBase {
     );
   }
 
-
   /**
    * Get id of an existing feed item term if available.
    */

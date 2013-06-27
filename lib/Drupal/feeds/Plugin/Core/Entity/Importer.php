@@ -7,10 +7,10 @@
 
 namespace Drupal\feeds\Plugin\Core\Entity;
 
-use Drupal;
+use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
@@ -37,7 +37,7 @@ use Drupal\feeds\ImporterInterface;
  *   }
  * )
  */
-class Importer extends ConfigEntityBase implements ImporterInterface {
+class Importer extends ConfigEntityBase implements ImporterInterface, FormInterface {
 
   /**
    * The importer ID.
@@ -71,7 +71,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public $fetcher, $parser, $processor;
 
   // This array defines the variable names of the plugins above.
-  protected $plugin_types = array('fetcher', 'parser', 'processor');
+  protected $pluginTypes = array('fetcher', 'parser', 'processor');
   public $config = array();
 
   /**
@@ -203,11 +203,19 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   }
 
   /**
-   * Override parent::configForm().
+   * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function getFormID() {
+    return 'feeds_importer_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Move this to ImporterFormController.
+   */
+  public function buildForm(array $form, array &$form_state) {
     $config = $this->getConfig();
-    $form = array();
     $form['name'] = array(
       '#type' => 'textfield',
       '#title' => t('Name'),
@@ -249,21 +257,23 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
       '#description' => t('For very large imports. If checked, import and delete tasks started from the web UI will be handled by a cron task in the background rather than by the browser. This does not affect periodic imports, they are handled by a cron task in any case.') . $cron_required,
       '#default_value' => $config['process_in_background'],
     );
+
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+      '#weight' => 100,
+    );
+
     return $form;
   }
 
-  public function configFormValidate(array $form, array &$form_state) {
-    foreach ($this->plugin_types as $type) {
-      if (isset($form_state['values'][$type])) {
-        $this->$type->configFormValidate($form, $form_state);
-      }
-    }
-  }
+  public function validateForm(array &$form, array &$form_state) {}
 
   /**
    * Reschedule if import period changes.
    */
-  public function configFormSubmit(array $form, array &$form_state) {
+  public function submitForm(array &$form, array &$form_state) {
     if ($this->config['import_period'] != $form_state['values']['import_period']) {
       $this->reschedule($this->id());
     }
@@ -276,7 +286,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   }
 
   public function getPluginTypes() {
-    return $this->plugin_types;
+    return $this->pluginTypes;
   }
 
   /**
@@ -305,7 +315,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *   rescheduling is required. An array of importers that need rescheduling.
    */
   public static function reschedule($importer_id = NULL) {
-    $reschedule = Drupal::state()->get('feeds.reschedule') ? : FALSE;
+    $reschedule = \Drupal::state()->get('feeds.reschedule') ? : FALSE;
 
     if ($importer_id === TRUE || $importer_id === FALSE) {
       $reschedule = $importer_id;
@@ -315,7 +325,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
       $reschedule[$importer_id] = $importer_id;
     }
 
-    Drupal::state()->set('feeds.reschedule', $reschedule);
+    \Drupal::state()->set('feeds.reschedule', $reschedule);
     if ($reschedule === TRUE) {
       return entity_load_multiple('feeds_importer');
     }

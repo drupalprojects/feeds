@@ -35,7 +35,7 @@ class FeedsSyndicationParser extends ParserBase {
   }
 
   /**
-   * Implements ParserBase::parse().
+   * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
     $result = new FeedsParserResult();
@@ -80,11 +80,7 @@ class FeedsSyndicationParser extends ParserBase {
   }
 
   /**
-   * Return mapping sources.
-   *
-   * At a future point, we could expose data type information here,
-   * storage systems like Data module could use this information to store
-   * parsed data automatically in fields with a correct field type.
+   * {@inheritdoc}
    */
   public function getMappingSources() {
     return array(

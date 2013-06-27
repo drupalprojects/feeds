@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FeedsFetcherResult;
@@ -16,6 +17,7 @@ use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\ParserCSV;
 use Drupal\feeds\ParserCSVIterator;
 use Drupal\feeds\Plugin\ParserBase;
+
 /**
  * Defines a CSV feed parser.
  *
@@ -25,10 +27,10 @@ use Drupal\feeds\Plugin\ParserBase;
  *   description = @Translation("Parse CSV files.")
  * )
  */
-class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
+class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, FormInterface {
 
   /**
-   * Implements ParserBase::parse().
+   * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
     $feed_config = $feed->getConfigFor($this);
@@ -103,21 +105,21 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Override parent::getMappingSources().
+   * {@inheritdoc}
    */
   public function getMappingSources() {
     return FALSE;
   }
 
   /**
-   * Override parent::getSourceElement() to use only lower keys.
+   * {@inheritdoc}
    */
   public function getSourceElement(FeedInterface $feed, FeedsParserResult $result, $element_key) {
     return parent::getSourceElement($feed, $result, drupal_strtolower($element_key));
   }
 
   /**
-   * Define defaults.
+   * {@inheritdoc}
    */
   public function sourceDefaults() {
     return array(
@@ -127,9 +129,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Source form.
-   *
-   * Show mapping configuration as a guidance for import form users.
+   * {@inheritdoc}
    */
   public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -185,7 +185,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Define default configuration.
+   * {@inheritdoc}
    */
   public function configDefaults() {
     return array(
@@ -195,9 +195,9 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Build configuration form.
+   * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function buildForm(array $form, array &$form_state) {
     $form['delimiter'] = array(
       '#type' => 'select',
       '#title' => t('Default delimiter'),
@@ -217,7 +217,8 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface {
       '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
       '#default_value' => $this->config['no_headers'],
     );
-    return $form;
+
+    return parent::buildForm($form, $form_state);
   }
 
   public function getTemplate() {

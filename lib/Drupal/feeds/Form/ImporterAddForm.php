@@ -63,7 +63,7 @@ class ImporterAddForm implements FormInterface {
   public function validateForm(array &$form, array &$form_state) {
     if (!empty($form_state['values']['id'])) {
       $importer = entity_create('feeds_importer', array('id' => $form_state['values']['id']));
-      $importer->configFormValidate($form, $form_state);
+      $importer->validateForm($form, $form_state);
     }
   }
 

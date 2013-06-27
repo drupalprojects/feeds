@@ -455,9 +455,9 @@ class ProcessorBase extends PluginBase {
   }
 
   /**
-   * Overrides parent::configForm().
+   * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function buildForm(array $form, array &$form_state) {
 
     $form['skip_hash_check'] = array(
       '#type' => 'checkbox',
@@ -480,7 +480,7 @@ class ProcessorBase extends PluginBase {
       '#required' => TRUE,
     );
 
-    return $form;
+    return parent::buildForm($form, $form_state);
   }
 
   /**

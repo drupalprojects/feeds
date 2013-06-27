@@ -67,7 +67,7 @@ class UserHandler extends PluginBase {
     return $defaults;
   }
 
-  public function configFormAlter(array &$form, array &$form_state) {
+  public function formAlter(array &$form, array &$form_state) {
     $form['status'] = array(
       '#type' => 'radios',
       '#title' => t('Status'),

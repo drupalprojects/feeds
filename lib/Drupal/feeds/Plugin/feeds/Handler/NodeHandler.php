@@ -72,7 +72,7 @@ class NodeHandler extends PluginBase {
     return $defaults;
   }
 
-  public function configFormAlter(array &$form, array &$form_state) {
+  public function formAlter(array &$form, array &$form_state) {
     $author = user_load($this->config['author']);
     $form['author'] = array(
       '#type' => 'textfield',
@@ -97,10 +97,7 @@ class NodeHandler extends PluginBase {
     );
   }
 
-  /**
-   * Override parent::configFormValidate().
-   */
-  public function configFormValidate(array $form, array &$form_state) {
+  public function validateForm(array &$form, array &$form_state) {
     if ($author = user_load_by_name($form_state['values']['author'])) {
       $form_state['values']['author'] = $author->uid;
     }
@@ -109,7 +106,7 @@ class NodeHandler extends PluginBase {
     }
   }
 
-  public function configFormSubmit(array $form, array &$form_state) {
+  public function submitForm(array &$form, array &$form_state) {
     if ($this->config['expire'] != $form_state['values']['expire']) {
       $this->importer->reschedule($this->importer->id());
     }

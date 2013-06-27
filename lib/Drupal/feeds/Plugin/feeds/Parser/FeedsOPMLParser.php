@@ -16,7 +16,7 @@ use Drupal\feeds\ParserOPML;
 class FeedsOPMLParser extends ParserBase {
 
   /**
-   * Implements ParserBase::parse().
+   * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
     $opml = ParserOPML::parse($fetcher_result->getRaw());
@@ -26,7 +26,7 @@ class FeedsOPMLParser extends ParserBase {
   }
 
   /**
-   * Return mapping sources.
+   * {@inheritdoc}
    */
   public function getMappingSources() {
     return array(

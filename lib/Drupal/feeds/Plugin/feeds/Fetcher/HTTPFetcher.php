@@ -7,15 +7,16 @@
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\PuSHSubscriber;
-use Drupal\feeds\PuSHEnvironment;
+use Drupal\Core\Form\FormInterface;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\HTTPFetcherResult;
 use Drupal\feeds\HTTPRequest;
+use Drupal\feeds\Plugin\FetcherBase;
+use Drupal\feeds\PuSHEnvironment;
+use Drupal\feeds\PuSHSubscriber;
 
 /**
  * Defines an HTTP fetcher.
@@ -28,7 +29,7 @@ use Drupal\feeds\HTTPRequest;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
+class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormInterface {
 
   /**
    * {@inheritdoc}
@@ -93,7 +94,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function buildForm(array $form, array &$form_state) {
     $form['auto_detect_feeds'] = array(
       '#type' => 'checkbox',
       '#title' => t('Auto detect feeds'),
@@ -128,7 +129,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
       '#size' => 30,
     );
 
-    return $form;
+    return parent::buildForm($form, $form_state);
   }
 
   /**

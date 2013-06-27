@@ -7,12 +7,13 @@
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FeedsFileFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Defines a file upload fetcher.
@@ -23,7 +24,7 @@ use Drupal\Core\Annotation\Translation;
  *   description = @Translation("Upload content from a local file.")
  * )
  */
-class UploadFetcher extends FetcherBase implements FeedPluginFormInterface {
+class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, FormInterface {
 
   /**
    * {@inheritdoc}
@@ -149,7 +150,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function buildForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
@@ -164,13 +165,13 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface {
       '#required' => TRUE,
     );
 
-    return $form;
+    return parent::buildForm($form, $form_state);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function configFormValidate(array $form, array &$form_state) {
+  public function validateForm(array &$form, array &$form_state) {
 
     $form_state['values']['directory'] = trim($form_state['values']['directory']);
 

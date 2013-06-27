@@ -10,6 +10,7 @@ namespace Drupal\feeds\Controller;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Controller\ControllerInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\Form\MappingForm;
 use Drupal\feeds\Form\PluginForm;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
@@ -92,12 +93,12 @@ class ImporterController implements ControllerInterface {
       case 'settings':
         if (!$plugin_type) {
           $active_container['title'] = t('Basic settings');
-          $active_container['body'] = feeds_get_form($feeds_importer, 'configForm');
+          $active_container['body'] = drupal_get_form($feeds_importer);
         }
-        else {
+        elseif ($feeds_importer->$plugin_type instanceof FormInterface) {
           $definition = $feeds_importer->$plugin_type->getPluginDefinition();
           $active_container['title'] = t('Settings for !plugin', array('!plugin' => $definition['title']));
-          $active_container['body'] = feeds_get_form($feeds_importer->$plugin_type, 'configForm');
+          $active_container['body'] = drupal_get_form($feeds_importer->$plugin_type);
         }
         break;
 
@@ -138,7 +139,9 @@ class ImporterController implements ControllerInterface {
     // Fetcher.
     $fetcher_definition = $feeds_importer->fetcher->getPluginDefinition();
     $actions = array();
-    $actions = array(l(t('Settings'), $path . '/settings/fetcher'));
+    if ($feeds_importer->fetcher instanceof FormInterface) {
+      $actions = array(l(t('Settings'), $path . '/settings/fetcher'));
+    }
     $info['title'] = t('Fetcher');
     $info['body'] = array(
       array(
@@ -153,7 +156,9 @@ class ImporterController implements ControllerInterface {
     // Parser.
     $parser_definition = $feeds_importer->parser->getPluginDefinition();
     $actions = array();
-    $actions = array(l(t('Settings'), $path . '/settings/parser'));
+    if ($feeds_importer->parser instanceof FormInterface) {
+      $actions = array(l(t('Settings'), $path . '/settings/parser'));
+    }
     $info['title'] = t('Parser');
     $info['body'] = array(
       array(
@@ -168,7 +173,9 @@ class ImporterController implements ControllerInterface {
     // Processor.
     $actions = array();
     $processor_definition = $feeds_importer->processor->getPluginDefinition();
-    $actions[] = l(t('Settings'), $path . '/settings/processor');
+    if ($feeds_importer->processor instanceof FormInterface) {
+      $actions[] = l(t('Settings'), $path . '/settings/processor');
+    }
     $actions[] = l(t('Mapping'), $path . '/mapping');
     $info['title'] = t('Processor');
     $info['body'] = array(

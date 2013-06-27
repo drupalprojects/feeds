@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\PluginBase.
+ * Contains \Drupal\feeds\Plugin\PluginBase.
  */
 
 namespace Drupal\feeds\Plugin;
@@ -24,7 +24,7 @@ abstract class PluginBase extends DrupalPluginBase {
   protected $importer;
 
   /**
-   * Constructs a Drupal\Component\Plugin\PluginBase object.
+   * Constructs a PluginBase object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -144,33 +144,47 @@ abstract class PluginBase extends DrupalPluginBase {
   }
 
   /**
-   * Return configuration form for this object. The keys of the configuration
-   * form must match the keys of the array returned by configDefaults().
+   * Returns a unique string identifying the form.
    *
-   * @return
-   *   FormAPI style form definition.
+   * Plugins that want to provide configuration forms should impement
+   * FormInterface themselves.
+   *
+   * @return string
+   *   The unique string identifying the form.
    */
-  public function configForm(array $form, array &$form_state) {
+  public function getFormID() {
+    return 'feeds_plugin_' . $this->getPluginID() . '_form';
+  }
+
+  /**
+   * Stub for plugins implementing FormInterface.
+   *
+   * @see \Drupal\Core\Form\FormInterface
+   */
+  public function buildForm(array $form, array &$form_state) {
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+      '#weight' => 100,
+    );
+
     return $form;
   }
 
   /**
-   * Validation handler for configForm().
+   * Stub for plugins implementing FormInterface.
    *
-   * Set errors with form_set_error().
-   *
-   * @param $values
-   *   An array that contains the values entered by the user through configForm.
+   * @see \Drupal\Core\Form\FormInterface
    */
-  public function configFormValidate(array $form, array &$form_state) {
-  }
+  public function validateForm(array &$form, array &$form_state) {}
 
   /**
-   *  Submission handler for configForm().
+   * Stub for plugins implementing FormInterface.
    *
-   *  @param $values
+   * @see \Drupal\Core\Form\FormInterface
    */
-  public function configFormSubmit(array $form, array &$form_state) {
+  public function submitForm(array &$form, array &$form_state) {
     $this->addConfig($form_state['values']);
     $this->importer->save();
     drupal_set_message(t('Your changes have been saved.'));

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains FeedsSitemapParser and related classes.
+ * Contains \Drupal\feeds\Plugin\feeds\Parser\FeedsSitemapParser.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Parser;
@@ -13,7 +13,6 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\ParserBase;
 use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
-use SimpleXMLElement;
 
 /**
  * Defines a SitemapXML feed parser.
@@ -27,14 +26,14 @@ use SimpleXMLElement;
 class FeedsSitemapParser extends ParserBase {
 
   /**
-   * Implements ParserBase::parse().
+   * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
     // Set time zone to GMT for parsing dates with strtotime().
     $tz = date_default_timezone_get();
     date_default_timezone_set('GMT');
-    // Yes, using a DOM parser is a bit inefficient, but will do for now
-    $xml = new SimpleXMLElement($fetcher_result->getRaw());
+    // Yes, using a DOM parser is a bit inefficient, but will do for now.
+    $xml = new \SimpleXMLElement($fetcher_result->getRaw());
     $result = new FeedsParserResult();
     foreach ($xml->url as $url) {
       $item = array('url' => (string) $url->loc);
@@ -54,7 +53,7 @@ class FeedsSitemapParser extends ParserBase {
   }
 
   /**
-   * Implements ParserBase::getMappingSources().
+   * {@inheritdoc}
    */
   public function getMappingSources() {
     return array(
@@ -76,4 +75,5 @@ class FeedsSitemapParser extends ParserBase {
       ),
     ) + parent::getMappingSources();
   }
+
 }

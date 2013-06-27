@@ -7,12 +7,13 @@
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
+use Drupal\Component\Annotation\Plugin;
+use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FeedsFileFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Defines a directory fetcher.
@@ -23,7 +24,7 @@ use Drupal\Core\Annotation\Translation;
  *   description = @Translation("Uses a directory, or file, on the server.")
  * )
  */
-class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface {
+class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, FormInterface {
 
   /**
    * {@inheritdoc}
@@ -121,7 +122,7 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function configForm(array $form, array &$form_state) {
+  public function buildForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
@@ -136,13 +137,13 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface {
       '#description' => t('Select the schemes you want to allow for direct upload.'),
     );
 
-    return $form;
+    return parent::buildForm($form, $form_state);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function configFormValidate(array $form, array &$form_state) {
+  public function validateForm(array &$form, array &$form_state) {
     $form_state['values']['allowed_schemes'] = array_filter($form_state['values']['allowed_schemes']);
   }
 
