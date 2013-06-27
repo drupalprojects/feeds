@@ -1,17 +1,21 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\HTTPFetcherResult.
+ */
+
 namespace Drupal\feeds;
 
 /**
- * Result of FeedsHTTPFetcher::fetch().
+ * Result of HTTPFetcher::fetch().
  */
-class FeedsHTTPFetcherResult extends FeedsFetcherResult {
+class HTTPFetcherResult extends FeedsFetcherResult {
   protected $url;
-  protected $file_path;
   protected $timeout;
 
   /**
-   * Constructor.
+   * Constructs an HTTPFetcherResult object.
    */
   public function __construct($url = NULL) {
     $this->url = $url;
@@ -19,7 +23,7 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
   }
 
   /**
-   * Overrides FeedsFetcherResult::getRaw();
+   * {@inheritdoc}
    */
   public function getRaw() {
     $result = HTTPRequest::Get($this->url, NULL, NULL, NULL, $this->timeout);
@@ -36,4 +40,5 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
   public function setTimeout($timeout) {
     $this->timeout = $timeout;
   }
+
 }

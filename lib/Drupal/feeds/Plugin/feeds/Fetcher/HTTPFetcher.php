@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Fetcher\FeedsHTTPFetcher.
+ * Contains \Drupal\feeds\Plugin\feeds\Fetcher\HTTPFetcher.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
@@ -14,9 +14,8 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\PuSHSubscriber;
 use Drupal\feeds\PuSHEnvironment;
-use Drupal\feeds\FeedsHTTPFetcherResult;
+use Drupal\feeds\HTTPFetcherResult;
 use Drupal\feeds\HTTPRequest;
-
 
 /**
  * Defines an HTTP fetcher.
@@ -29,24 +28,24 @@ use Drupal\feeds\HTTPRequest;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
+class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
 
   /**
-   * Implements FetcherBase::fetch().
+   * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
     if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
       return new FeedsFetcherResult($raw);
     }
-    $fetcher_result = new FeedsHTTPFetcherResult($feed_config['source']);
+    $fetcher_result = new HTTPFetcherResult($feed_config['source']);
     // When request_timeout is empty, the global value is used.
     $fetcher_result->setTimeout($this->config['request_timeout']);
     return $fetcher_result;
   }
 
   /**
-   * Clear caches.
+   * {@inheritdoc}
    */
   public function clear(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -55,7 +54,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Implements FetcherBase::request().
+   * {@inheritdoc}
    */
   public function request($fid = 0) {
     // A subscription verification has been sent, verify.
@@ -68,7 +67,8 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
         entity_load('feeds_feed', $fid)->existing()->import();
       }
       catch (Exception $e) {
-        // In case of an error, respond with a 503 Service (temporary) unavailable.
+        // In case of an error, respond with a 503 Service (temporary)
+        // unavailable.
         header('HTTP/1.1 503 "Not Found"', NULL, 503);
         drupal_exit();
       }
@@ -79,7 +79,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Override parent::configDefaults().
+   * {@inheritdoc}
    */
   public function configDefaults() {
     return array(
@@ -91,7 +91,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Override parent::configForm().
+   * {@inheritdoc}
    */
   public function configForm(array $form, array &$form_state) {
     $form['auto_detect_feeds'] = array(
@@ -115,18 +115,19 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
         'edit-use-pubsubhubbub' => array(1),
       ),
     );
-   // Per importer override of global http request timeout setting.
-   $form['request_timeout'] = array(
-     '#type' => 'number',
-     '#title' => t('Request timeout'),
-     '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>' .
+    // Per importer override of global http request timeout setting.
+    $form['request_timeout'] = array(
+      '#type' => 'number',
+      '#title' => t('Request timeout'),
+      '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>' .
                          '<b>Note:</b> this setting will override the global setting.</br>' .
                          'When left empty, the global value is used.'),
-     '#default_value' => $this->config['request_timeout'],
-     '#min' => 0,
-     '#maxlength' => 3,
-     '#size'=> 30,
-   );
+      '#default_value' => $this->config['request_timeout'],
+      '#min' => 0,
+      '#maxlength' => 3,
+      '#size' => 30,
+    );
+
     return $form;
   }
 
@@ -167,7 +168,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Override sourceSave() - subscribe to hub.
+   * {@inheritdoc}
    */
   public function sourceSave(FeedInterface $feed) {
     if ($this->config['use_pubsubhubbub']) {
@@ -180,7 +181,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Override sourceDelete() - unsubscribe from hub.
+   * {@inheritdoc}
    */
   public function sourceDelete(FeedInterface $feed) {
     if ($this->config['use_pubsubhubbub']) {
@@ -195,7 +196,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Implement FetcherBase::subscribe() - subscribe to hub.
+   * {@inheritdoc}
    */
   public function subscribe(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -206,7 +207,7 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Implement FetcherBase::unsubscribe() - unsubscribe from hub.
+   * {@inheritdoc}
    */
   public function unsubscribe(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
@@ -214,11 +215,12 @@ class FeedsHTTPFetcher extends FetcherBase implements FeedPluginFormInterface {
   }
 
   /**
-   * Implement FetcherBase::importPeriod().
+   * {@inheritdoc}
    */
   public function importPeriod(FeedInterface $feed) {
     if ($this->subscriber($feed->id())->subscribed()) {
-      return 259200; // Delay for three days if there is a successful subscription.
+      // Delay for three days if there is a successful subscription.
+      return 259200;
     }
   }
 

@@ -8,7 +8,7 @@
 namespace Drupal\feeds;
 
 use Drupal\simpletest\WebTestBase;
-use Drupal\feeds\Plugin\FeedsPlugin;
+use Drupal\feeds\Plugin\PluginBase;
 
 /**
  * Test basic Data API functionality.
