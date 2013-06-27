@@ -136,57 +136,26 @@ class ImporterController implements ControllerInterface {
     );
     $config_info[] = $info;
 
-    // Fetcher.
-    $fetcher_definition = $feeds_importer->fetcher->getPluginDefinition();
-    $actions = array();
-    if ($feeds_importer->fetcher instanceof FormInterface) {
-      $actions = array(l(t('Settings'), $path . '/settings/fetcher'));
+    foreach ($feeds_importer->getPluginTypes() as $type) {
+      $plugin_definition = $feeds_importer->$type->getPluginDefinition();
+      $actions = array();
+      if ($feeds_importer->$type instanceof FormInterface) {
+        $actions = array(l(t('Settings'), "$path/settings/$type"));
+      }
+      if ($type == 'processor') {
+        $actions[] = l(t('Mapping'), "$path/mapping");
+      }
+      $info['title'] = t('Fetcher');
+      $info['body'] = array(
+        array(
+          'title' => $plugin_definition['title'],
+          'body' => $plugin_definition['description'],
+          'actions' => $actions,
+        ),
+      );
+      $info['actions'] = array(l(t('Change'), "$path/$type"));
+      $config_info[] = $info;
     }
-    $info['title'] = t('Fetcher');
-    $info['body'] = array(
-      array(
-        'title' => $fetcher_definition['title'],
-        'body' => $fetcher_definition['description'],
-        'actions' => $actions,
-      ),
-    );
-    $info['actions'] = array(l(t('Change'), $path . '/fetcher'));
-    $config_info[] = $info;
-
-    // Parser.
-    $parser_definition = $feeds_importer->parser->getPluginDefinition();
-    $actions = array();
-    if ($feeds_importer->parser instanceof FormInterface) {
-      $actions = array(l(t('Settings'), $path . '/settings/parser'));
-    }
-    $info['title'] = t('Parser');
-    $info['body'] = array(
-      array(
-        'title' => $parser_definition['title'],
-        'body' => $parser_definition['description'],
-        'actions' => $actions,
-      )
-    );
-    $info['actions'] = array(l(t('Change'), $path . '/parser'));
-    $config_info[] = $info;
-
-    // Processor.
-    $actions = array();
-    $processor_definition = $feeds_importer->processor->getPluginDefinition();
-    if ($feeds_importer->processor instanceof FormInterface) {
-      $actions[] = l(t('Settings'), $path . '/settings/processor');
-    }
-    $actions[] = l(t('Mapping'), $path . '/mapping');
-    $info['title'] = t('Processor');
-    $info['body'] = array(
-      array(
-        'title' => $processor_definition['title'],
-        'body' => $processor_definition['description'],
-        'actions' => $actions,
-      )
-    );
-    $info['actions'] = array(l(t('Change'), $path . '/processor'));
-    $config_info[] = $info;
 
     return theme('feeds_edit_page', array(
       'info' => $config_info,
