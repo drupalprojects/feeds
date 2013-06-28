@@ -104,8 +104,8 @@ class FeedsWebTestBase extends WebTestBase {
     foreach ($types as $type) {
       $this->drupalCreateContentType($type);
       $edit = array(
-        'node_options[status]' => 1,
-        'node_options[promote]' => 1,
+        'settings[node][options][status]' => 1,
+        'settings[node][options][promote]' => 1,
       );
       $this->drupalPost('admin/structure/types/manage/' . $type['type'], $edit, 'Save content type');
     }
@@ -408,6 +408,8 @@ class FeedsWebTestBase extends WebTestBase {
    */
   public function feedDeleteItems($fid) {
     $this->drupalPost("feed/$fid/delete-items", array(), 'Delete items');
+    $count = db_query("SELECT COUNT(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $fid))->fetchField();
+    $this->assertEqual($count, 0, format_string('@count items after running delete items.', array('@count' => $count)));
   }
 
   /**

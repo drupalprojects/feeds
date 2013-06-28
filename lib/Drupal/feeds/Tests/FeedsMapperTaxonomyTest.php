@@ -40,7 +40,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
       'field[settings][allowed_values][0][vocabulary]' => 'tags',
     );
 
-    $this->createField('article', 'tags', 'taxonomy_term_reference', 'options_select', $field_settings);
+    $this->createField('article', 'tags', 'taxonomy_term_reference', $field_settings);
 
     $edit = array(
       'fields[field_tags][type]' => 'taxonomy_term_reference_link',

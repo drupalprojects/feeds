@@ -109,15 +109,15 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 1")->fetchField();
     $this->assertEqual($count, 10, 'All items are published.');
     $edit = array(
-      'node_options[status]' => FALSE,
+      'settings[node][options][status]' => FALSE,
     );
     $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
     $this->feedDeleteItems($fid);
     $this->feedImportItems($fid);
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 0")->fetchField();
-    $this->assertEqual($count, 10, 'No items are published.');
+    $this->assertEqual($count, 10, format_string('@count items are unpublished.', array('@count' => $count)));
     $edit = array(
-      'node_options[status]' => TRUE,
+      'settings[node][options][status]' => TRUE,
     );
     $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
     $this->feedDeleteItems($fid);

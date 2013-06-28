@@ -43,12 +43,19 @@ class NodeHandler extends PluginBase {
    * Creates a new user account in memory and returns it.
    */
   public function newEntityValues(FeedInterface $feed, &$values) {
-    $defaults = variable_get('node_options_' . $this->importer->processor->bundle(), array('status', 'promote'));
+    $node_settings = entity_load('node_type', $this->importer->processor->bundle())->getModuleSettings('node');
+
+    // Ensure default settings.
+    $node_settings += array(
+      'options' => array('status', 'promote'),
+      'preview' => DRUPAL_OPTIONAL,
+      'submitted' => TRUE,
+    );
 
     $values['uid'] = $this->config['author'];
-    $values['status'] = (int) in_array('status', $defaults);
+    $values['status'] = (int) in_array('status', $node_settings['options']);
     $values['log'] = 'Created by FeedsNodeProcessor';
-    $values['promote'] = (int) in_array('promote', $defaults);
+    $values['promote'] = (int) in_array('promote', $node_settings['options']);
   }
 
   /**
