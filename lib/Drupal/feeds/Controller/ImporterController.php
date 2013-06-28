@@ -93,7 +93,7 @@ class ImporterController implements ControllerInterface {
       case 'settings':
         if (!$plugin_type) {
           $active_container['title'] = t('Basic settings');
-          $active_container['body'] = drupal_get_form($feeds_importer);
+          $active_container['body'] = $this->entityManager->getForm($feeds_importer);
         }
         elseif ($feeds_importer->$plugin_type instanceof FormInterface) {
           $definition = $feeds_importer->$plugin_type->getPluginDefinition();
@@ -145,7 +145,7 @@ class ImporterController implements ControllerInterface {
       if ($type == 'processor') {
         $actions[] = l(t('Mapping'), "$path/mapping");
       }
-      $info['title'] = t('Fetcher');
+      $info['title'] = t(ucfirst($type));
       $info['body'] = array(
         array(
           'title' => $plugin_definition['title'],

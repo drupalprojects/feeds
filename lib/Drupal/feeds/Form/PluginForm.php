@@ -75,9 +75,12 @@ class PluginForm implements BaseFormIdInterface {
         '#default_value' => ($key == $importer_key) ? $key : '',
       );
     }
-    $form['submit'] = array(
+
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
+      '#button_type' => 'primary',
     );
 
     return $form;

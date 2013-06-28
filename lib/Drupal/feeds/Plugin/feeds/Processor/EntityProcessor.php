@@ -276,7 +276,8 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
       );
     }
 
-    $tokens = array('@entities' => drupal_strtolower($info['label_plural']));
+    $label_plural = isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
+    $tokens = array('@entities' => drupal_strtolower($label_plural));
 
     $form['update_existing'] = array(
       '#type' => 'radios',

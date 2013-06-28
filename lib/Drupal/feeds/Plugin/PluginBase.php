@@ -167,6 +167,7 @@ abstract class PluginBase extends DrupalPluginBase {
       '#type' => 'submit',
       '#value' => t('Save'),
       '#weight' => 100,
+      '#button_type' => 'primary',
     );
 
     return $form;
