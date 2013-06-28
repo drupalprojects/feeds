@@ -56,7 +56,7 @@ class HTTPRequest {
     // @see http_request_get.
     $downloaded_string = $download->data;
     // If this happens to be a feed then just return the url.
-    if (static::isFeed($download->headers['content-type'], $downloaded_string)) {
+    if (static::isFeed($download->headers['content-type'][0], $downloaded_string)) {
       return $url;
     }
 
@@ -135,7 +135,7 @@ class HTTPRequest {
     try {
       $response = $request->send();
       $result->data = $response->getBody(TRUE);
-      $result->headers = $response->getHeaders()->toArray();
+      $result->headers = array_change_key_case($response->getHeaders()->toArray());
       $result->code = $response->getStatusCode();
     }
     catch (BadResponseException $e) {
