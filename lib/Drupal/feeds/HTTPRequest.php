@@ -9,6 +9,8 @@
 
 namespace Drupal\feeds;
 
+use Guzzle\Http\Url;
+
 /**
  * PCRE for finding the link tags in html.
  */
@@ -253,64 +255,11 @@ class HTTPRequest {
    *   An absolute url
    */
   public static function createAbsoluteURL($url, $base_url) {
-    $url = trim($url);
-    if (valid_url($url, TRUE)) {
-      // Valid absolute url already.
-      return $url;
-    }
+    $url = Url::factory($url);
 
-    // Turn relative url into absolute.
-    if (valid_url($url, FALSE)) {
-      // Produces variables $scheme, $host, $user, $pass, $path, $query and
-      // $fragment.
-      $parsed_url = parse_url($base_url);
+    $url->combine($base_url);
 
-      $path = dirname($parsed_url['path']);
-
-      // Adding to the existing path.
-      if ($url{0} == '/') {
-        $cparts = array_filter(explode("/", $url));
-      }
-      else {
-        // Backtracking from the existing path.
-        $cparts = array_merge(array_filter(explode("/", $path)), array_filter(explode("/", $url)));
-        foreach ($cparts as $i => $part) {
-          if ($part == '.') {
-            $cparts[$i] = NULL;
-          }
-          if ($part == '..') {
-            $cparts[$i - 1] = NULL;
-            $cparts[$i] = NULL;
-          }
-        }
-        $cparts = array_filter($cparts);
-      }
-      $path = implode("/", $cparts);
-
-      // Build the prefix to the path.
-      $absolute_url = '';
-      if (isset($parsed_url['scheme'])) {
-        $absolute_url = $parsed_url['scheme'] . '://';
-      }
-
-      if (isset($parsed_url['user'])) {
-        $absolute_url .= $parsed_url['user'];
-        if (isset($pass)) {
-          $absolute_url .= ':' . $parsed_url['pass'];
-        }
-        $absolute_url .= '@';
-      }
-      if (isset($parsed_url['host'])) {
-        $absolute_url .= $parsed_url['host'] . '/';
-      }
-
-      $absolute_url .= $path;
-
-      if (valid_url($absolute_url, TRUE)) {
-        return $absolute_url;
-      }
-    }
-    return FALSE;
+    return (string) $url;
   }
 
 }
