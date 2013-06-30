@@ -9,17 +9,7 @@
 
 namespace Drupal\feeds;
 
-use Guzzle\Http\Url;
-
-/**
- * PCRE for finding the link tags in html.
- */
-const HTTP_REQUEST_PCRE_LINK_TAG = '/<link((?:[\x09\x0A\x0B\x0C\x0D\x20]+[^\x09\x0A\x0B\x0C\x0D\x20\x2F\x3E][^\x09\x0A\x0B\x0C\x0D\x20\x2F\x3D\x3E]*(?:[\x09\x0A\x0B\x0C\x0D\x20]*=[\x09\x0A\x0B\x0C\x0D\x20]*(?:"(?:[^"]*)"|\'(?:[^\']*)\'|(?:[^\x09\x0A\x0B\x0C\x0D\x20\x22\x27\x3E][^\x09\x0A\x0B\x0C\x0D\x20\x3E]*)?))?)*)[\x09\x0A\x0B\x0C\x0D\x20]*(>(.*)<\/link>|(\/)?>)/si';
-
-/**
- * PCRE for matching all the attributes in a tag.
- */
-const HTTP_REQUEST_PCRE_TAG_ATTRIBUTES = '/[\x09\x0A\x0B\x0C\x0D\x20]+([^\x09\x0A\x0B\x0C\x0D\x20\x2F\x3E][^\x09\x0A\x0B\x0C\x0D\x20\x2F\x3D\x3E]*)(?:[\x09\x0A\x0B\x0C\x0D\x20]*=[\x09\x0A\x0B\x0C\x0D\x20]*(?:"([^"]*)"|\'([^\']*)\'|([^\x09\x0A\x0B\x0C\x0D\x20\x22\x27\x3E][^\x09\x0A\x0B\x0C\x0D\x20\x3E]*)?))?/';
+use Zend\Feed\Reader\FeedSet;
 
 /**
  * Support caching, HTTP Basic Authentication, detection of RSS/Atom feeds,
@@ -58,18 +48,11 @@ class HTTPRequest {
     // @see http_request_get.
     $downloaded_string = $download->data;
     // If this happens to be a feed then just return the url.
-    if (static::isFeed($download->headers['content-type'][0], $downloaded_string)) {
+    if (static::isFeed($downloaded_string)) {
       return $url;
     }
 
-    $discovered_feeds = static::findFeeds($downloaded_string);
-    foreach ($discovered_feeds as $feed_url) {
-      $absolute = static::createAbsoluteURL($feed_url, $url);
-      if (!empty($absolute)) {
-        // @TODO: something more intelligent?
-        return $absolute;
-      }
-    }
+    return static::findFeed($downloaded_string, $url);
   }
 
   /**
@@ -177,28 +160,21 @@ class HTTPRequest {
   /**
    * Returns if the provided $content_type is a feed.
    *
-   * @param string $content_type
-   *   The Content-Type header.
-   *
    * @param string $data
    *   The actual data from the http request.
    *
    * @return bool
-   *   Returns TRUE if this is a parsable feed.
+   *   Returns true if this is a parsable feed, false otherwise.
    */
-  public static function isFeed($content_type, $data) {
-    $pos = strpos($content_type, ';');
-    if ($pos !== FALSE) {
-      $content_type = substr($content_type, 0, $pos);
+  public static function isFeed($data) {
+    try {
+      $feed_type = Reader::detectType($data);
     }
-    $content_type = strtolower($content_type);
-    if (strpos($content_type, 'xml') !== FALSE) {
-      return TRUE;
+    catch (Exception $e) {
+      return FALSE;
     }
 
-    // @TODO: Sometimes the content-type can be text/html but still be a valid
-    // feed.
-    return FALSE;
+    return $feed_type != Reader::TYPE_ANY;
   }
 
   /**
@@ -206,60 +182,35 @@ class HTTPRequest {
    *
    * @param string $html
    *   The html string to search.
+   * @param string $url
+   *   The url to use as a base url.
    *
-   * @return array
-   *   An array of href to feeds.
+   * @return string|bool
+   *   The url of the first feed link found, or false if unable to find a link.
    */
-  public static function findFeeds($html) {
-    $matches = array();
-    preg_match_all(HTTP_REQUEST_PCRE_LINK_TAG, $html, $matches);
-    $links = $matches[1];
-    $valid_links = array();
+  public static function findFeed($html, $url) {
+    $use_error = libxml_use_internal_errors(true);
+    $entity_loader = libxml_disable_entity_loader(true);
+    $dom = new DOMDocument();
+    $status = $dom->loadHTML(trim($html));
+    libxml_disable_entity_loader($entity_loader);
+    libxml_use_internal_errors($use_error);
 
-    // Build up all the links information.
-    foreach ($links as $link_tag) {
-      $attributes = array();
-      $candidate = array();
+    if (!$status) {
+      return FALSE;
+    }
 
-      preg_match_all(HTTP_REQUEST_PCRE_TAG_ATTRIBUTES, $link_tag, $attributes, PREG_SET_ORDER);
-      foreach ($attributes as $attribute) {
-        // Find the key value pairs, attribute[1] is key and attribute[2] is the
-        // value.
-        if (!empty($attribute[1]) && !empty($attribute[2])) {
-          $candidate[drupal_strtolower($attribute[1])] = drupal_strtolower(decode_entities($attribute[2]));
-        }
-      }
+    $feed_set = new FeedSet();
+    $feed_set->addLinks($dom->getElementsByTagName('link'), $url);
 
-      // Examine candidate to see if it s a feed.
-      // @TODO: could/should use http_request_is_feed ??
-      if (isset($candidate['rel']) && $candidate['rel'] == 'alternate') {
-        if (isset($candidate['href']) && isset($candidate['type']) && strpos($candidate['type'], 'xml') !== FALSE) {
-          // All tests pass, its a valid candidate.
-          $valid_links[] = $candidate['href'];
-        }
+    // Load the first feed type found.
+    foreach (array('atom', 'rss', 'rdf') as $feed_type) {
+      if (isset($feed_set->$feed_type)) {
+        return $feed_set->$feed_type;
       }
     }
 
-    return $valid_links;
-  }
-
-  /**
-   * Create an absolute url.
-   *
-   * @param string $url
-   *   The href to transform.
-   * @param string $base_url
-   *   The url to be used as the base for a relative $url.
-   *
-   * @return string
-   *   An absolute url
-   */
-  public static function createAbsoluteURL($url, $base_url) {
-    $url = Url::factory($url);
-
-    $url->combine($base_url);
-
-    return (string) $url;
+    return FALSE;
   }
 
 }
