@@ -45,9 +45,9 @@ class FeedUnlockForm extends EntityNGConfirmFormBase {
    * {@inheritdoc}
    */
   public function submit(array $form, array &$form_state) {
-    $this->entity->startImport();
-    watchdog('feeds', '@importer: imported %title.', array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label()));
-    drupal_set_message(t('@importer %title has been importd.', array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label())));
+    $this->entity->unlock();
+    watchdog('feeds', '@importer: unlocked %title.', array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label()));
+    drupal_set_message(t('@importer %title has been unlocked.', array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label())));
     $form_state['redirect'] = 'feed/' . $this->entity->id();
   }
 

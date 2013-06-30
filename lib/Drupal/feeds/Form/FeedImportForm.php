@@ -37,7 +37,7 @@ class FeedImportForm extends EntityNGConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function save(array $form, array &$form_state) {
     $this->entity->startImport();
     $form_state['redirect'] = 'feed/' . $this->entity->id();
   }
