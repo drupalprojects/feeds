@@ -116,16 +116,19 @@ class FeedStorageController extends DatabaseStorageControllerNG {
       'label' => t('Config'),
       'description' => t('The config of the feed.'),
       'type' => 'feeds_serialized_field',
+      'settings' => array('default_value' => array()),
     );
     $properties['fetcher_result'] = array(
       'label' => t('Fetcher result'),
       'description' => t('The source of the feed.'),
       'type' => 'feeds_serialized_field',
+      'settings' => array('default_value' => array()),
     );
     $properties['state'] = array(
       'label' => t('State'),
       'description' => t('The source of the feed.'),
       'type' => 'feeds_serialized_field',
+      'settings' => array('default_value' => array()),
     );
 
     return $properties;
