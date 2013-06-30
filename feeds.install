@@ -18,37 +18,6 @@ function feeds_uninstall() {
 function feeds_schema() {
   $schema = array();
 
-  $schema['feeds_importer'] = array(
-    'description' => 'Configuration of feeds objects.',
-    'export' => array(
-      'key' => 'id',
-      'identifier' => 'feeds_importer',
-      'default hook' => 'feeds_importer_default',  // Function hook name.
-      'api' => array(
-        'owner' => 'feeds',
-        'api' => 'feeds_importer_default',  // Base name for api include files.
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-    'fields' => array(
-      'id' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Id of the fields object.',
-      ),
-      'config' => array(
-        'type' => 'blob',
-        'size' => 'big',
-        'not null' => FALSE,
-        'description' => 'Configuration of the feeds object.',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('id'),
-  );
   $schema['feeds_feed'] = array(
     'description' => 'Source definitions for feeds.',
     'fields' => array(
