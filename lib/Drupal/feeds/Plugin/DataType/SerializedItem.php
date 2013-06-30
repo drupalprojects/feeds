@@ -2,15 +2,24 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Type\SerializedItem.
+ * Contains \Drupal\feeds\Plugin\DataType\SerializedItem.
  */
 
-namespace Drupal\feeds\Type;
+namespace Drupal\feeds\Plugin\DataType;
 
+use Drupal\Core\TypedData\Annotation\DataType;
+use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\Field\FieldItemBase;
 
 /**
- * Defines the 'feeds_serialized_field' entity field item.
+ * Defines the 'feeds_field' entity field item.
+ *
+ * @DataType(
+ *   id = "feeds_serialized_field",
+ *   label = @Translation("Feeds serialized field"),
+ *   description = @Translation("An entity field containing a feeds related data."),
+ *   list_class = "\Drupal\Core\Entity\Field\Field"
+ * )
  */
 class SerializedItem extends FieldItemBase {
 
