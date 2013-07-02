@@ -12,7 +12,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FetcherResultInterface;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\ParserCSV;
 use Drupal\feeds\ParserCSVIterator;
@@ -32,7 +32,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $feed_config = $feed->getConfigFor($this);
     $state = $feed->state(FEEDS_PARSE);
 

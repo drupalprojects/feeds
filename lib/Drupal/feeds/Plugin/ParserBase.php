@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsResult;
-use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FetcherResultInterface;
 use Drupal\feeds\FeedsParserResult;
 
 /**
@@ -18,17 +18,10 @@ use Drupal\feeds\FeedsParserResult;
 abstract class ParserBase extends PluginBase {
 
   /**
-   * Implements PluginBase::pluginType().
+   * {@inheritdoc}
    */
   public function pluginType() {
     return 'parser';
-  }
-
-  /**
-   * Determines if this parser returns a feed title.
-   */
-  public function hasTitle() {
-    return FALSE;
   }
 
   /**
@@ -36,12 +29,12 @@ abstract class ParserBase extends PluginBase {
    *
    * Extending classes must implement this method.
    *
-   * @param FeedInterface $feed
+   * @param \Drupal\feeds\FeedInterface $feed
    *   Source information.
-   * @param $fetcher_result
-   *   FeedsFetcherResult returned by fetcher.
+   * @param \Drupal\feeds\FetcherResultInterface $fetcher_result
+   *   Result returned by fetcher.
    */
-  public abstract function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result);
+  public abstract function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result);
 
   /**
    * Clear all caches for results for given source.
@@ -54,8 +47,6 @@ abstract class ParserBase extends PluginBase {
 
   /**
    * Declare the possible mapping sources that this parser produces.
-   *
-   * @ingroup mappingapi
    *
    * @return
    *   An array of mapping sources, or FALSE if the sources can be defined by
@@ -98,8 +89,6 @@ abstract class ParserBase extends PluginBase {
    *
    * This method is invoked from ProcessorBase::map() when a concrete item is
    * processed.
-   *
-   * @ingroup mappingapi
    *
    * @param $batch
    *   FeedsImportBatch object containing the sources to be mapped from.

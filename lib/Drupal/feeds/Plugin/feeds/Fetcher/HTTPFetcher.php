@@ -13,11 +13,12 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedNotModifiedException;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FeedsFetcherResult;
+use Drupal\feeds\FetcherResult;
 use Drupal\feeds\HTTPRequest;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\feeds\PuSHEnvironment;
 use Drupal\feeds\PuSHSubscriber;
+use Drupal\feeds\RawFetcherResult;
 
 /**
  * Defines an HTTP fetcher.
@@ -36,12 +37,14 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed) {
+
+    // Handle pubsubhubbub.
+    if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
+      return new RawFetcherResult($raw);
+    }
+
     $feed_config = $feed->getConfigFor($this);
-    // if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
-    //   $fp = fopen('php://temp', 'w');
-    //   fputs($fp, $raw);
-    //   return new FeedsFetcherResult($raw);
-    // }
+
     $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->config['request_timeout']));
     $result = $http->get();
     if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
@@ -55,7 +58,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
     if ($result->code == 304) {
       throw new FeedNotModifiedException();
     }
-    return new FeedsFetcherResult($result->file);
+    return new FetcherResult($result->file);
   }
 
   /**

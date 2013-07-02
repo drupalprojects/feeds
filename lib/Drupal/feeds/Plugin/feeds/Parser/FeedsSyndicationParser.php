@@ -10,9 +10,9 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\ParserBase;
-use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FetcherResultInterface;
+use Drupal\feeds\Plugin\ParserBase;
 use Zend\Feed\Reader\Reader;
 use Zend\Feed\Reader\Exception\ExceptionInterface;
 
@@ -28,16 +28,9 @@ use Zend\Feed\Reader\Exception\ExceptionInterface;
 class FeedsSyndicationParser extends ParserBase {
 
   /**
-   * Determines if this parser returns a feed title.
-   */
-  public function hasTitle() {
-    return TRUE;
-  }
-
-  /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $result = new FeedsParserResult();
     try {
       $channel = Reader::importString($fetcher_result->getRaw());

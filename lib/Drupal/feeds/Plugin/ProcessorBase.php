@@ -359,8 +359,6 @@ class ProcessorBase extends PluginBase {
    * in which case the callback is asked to populate the target item instead of
    * ProcessorBase::setTargetElement().
    *
-   * @ingroup mappingapi
-   *
    * @see hook_feeds_parser_sources_alter()
    * @see hook_feeds_data_processor_targets_alter()
    * @see hook_feeds_node_processor_targets_alter()
@@ -493,9 +491,7 @@ class ProcessorBase extends PluginBase {
   /**
    * Declare possible mapping targets that this processor exposes.
    *
-   * @ingroup mappingapi
-   *
-   * @return
+   * @return array
    *   An array of mapping targets. Keys are paths to targets
    *   separated by ->, values are TRUE if target can be unique,
    *   FALSE otherwise.
@@ -518,8 +514,6 @@ class ProcessorBase extends PluginBase {
 
   /**
    * Set a concrete target element. Invoked from ProcessorBase::map().
-   *
-   * @ingroup mappingapi
    */
   public function setTargetElement(FeedInterface $feed, $target_item, $target_element, $value) {
     switch ($target_element) {
@@ -536,8 +530,6 @@ class ProcessorBase extends PluginBase {
 
   /**
    * Retrieve the target entity's existing id if available. Otherwise return 0.
-   *
-   * @ingroup mappingapi
    *
    * @param FeedInterface $source
    *   The source information about this import.

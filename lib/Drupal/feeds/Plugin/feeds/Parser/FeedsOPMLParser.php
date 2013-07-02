@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\Parser;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FetcherResultInterface;
 use Drupal\feeds\ParserOPML;
 
 /**
@@ -18,7 +19,7 @@ class FeedsOPMLParser extends ParserBase {
   /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FeedsFetcherResult $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $opml = ParserOPML::parse($fetcher_result->getRaw());
     $result = new FeedsParserResult($opml['items']);
     $result->title = $opml['title'];

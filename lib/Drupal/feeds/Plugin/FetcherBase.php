@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsResult;
+use Drupal\feeds\FetcherResultInterface;
 
 /**
  * Abstract class, defines shared functionality between fetchers.
@@ -31,7 +31,7 @@ abstract class FetcherBase extends PluginBase {
    *   Source value as entered by user through feedForm().
    *
    * @return
-   *   A FeedsFetcherResult object.
+   *   A \Drupal\feeds\FetcherResultInterface object.
    */
   public abstract function fetch(FeedInterface $feed);
 
