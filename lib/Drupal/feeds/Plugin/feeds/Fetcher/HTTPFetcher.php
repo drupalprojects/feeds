@@ -11,8 +11,9 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedNotModifiedException;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\HTTPFetcherResult;
+use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\HTTPRequest;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\feeds\PuSHEnvironment;
@@ -36,13 +37,25 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    */
   public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigFor($this);
-    if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
-      return new FeedsFetcherResult($raw);
+    // if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
+    //   $fp = fopen('php://temp', 'w');
+    //   fputs($fp, $raw);
+    //   return new FeedsFetcherResult($raw);
+    // }
+    $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->config['request_timeout']));
+    $result = $http->get();
+    if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
+      throw new \Exception(t('Download of @url failed with code !code.', array('@url' => $feed_config['source'], '!code' => $result->code)));
     }
-    $fetcher_result = new HTTPFetcherResult($feed_config['source']);
-    // When request_timeout is empty, the global value is used.
-    $fetcher_result->setTimeout($this->config['request_timeout']);
-    return $fetcher_result;
+    // Update source if there was a permanent redirect.
+    if ($result->redirect) {
+      $feed_config['source'] = $result->redirect;
+      $feed->setConfigFor($this, $feed_config);
+    }
+    if ($result->code == 304) {
+      throw new FeedNotModifiedException();
+    }
+    return new FeedsFetcherResult($result->file);
   }
 
   /**
@@ -162,7 +175,8 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
     elseif ($this->config['auto_detect_feeds']) {
-      if ($url = HTTPRequest::getCommonSyndication($values['source'])) {
+      $http = new HTTPRequest($values['source']);
+      if ($url = $http->getCommonSyndication()) {
         $values['source'] = $url;
       }
     }

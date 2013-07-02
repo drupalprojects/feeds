@@ -12,7 +12,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FeedsFileFetcherResult;
+use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
 
 /**
@@ -33,7 +33,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
     $feed_config = $feed->getConfigFor($this);
 
     if (is_file($feed_config['source'])) {
-      return new FeedsFileFetcherResult($feed_config['source']);
+      return new FeedsFetcherResult($feed_config['source']);
     }
 
     // File does not exist.

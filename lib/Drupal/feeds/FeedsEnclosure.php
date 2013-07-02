@@ -60,11 +60,12 @@ class FeedsEnclosure extends FeedsElement {
    *   The content of the referenced resource.
    */
   public function getContent() {
-    $result = HTTPRequest::get($this->getUrlEncodedValue());
+    $http = new HTTPRequest($this->getUrlEncodedValue());
+    $result = $http->get();
     if ($result->code != 200) {
       throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->getUrlEncodedValue(), '!code' => $result->code)));
     }
-    return $result->data;
+    return file_get_contents($result->file);
   }
 
   /**

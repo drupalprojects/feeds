@@ -1,30 +1,40 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\FeedsFetcherResult.
+ */
+
 namespace Drupal\feeds;
 
 /**
  * Base class for all fetcher results.
  */
-class FeedsFetcherResult extends FeedsResult {
-  protected $raw;
-  protected $file_path;
+class FeedsFetcherResult {
 
   /**
-   * Constructor.
+   * The filepath of the fetched item.
+   *
+   * @var string
    */
-  public function __construct($raw) {
-    $this->raw = $raw;
+  protected $filePath;
+
+  /**
+   * Constructs a new FeedsFetcherResult object.
+   */
+  public function __construct($file_path) {
+    $this->filePath = $file_path;
   }
 
   /**
-   * @return
+   * @return string
    *   The raw content from the source as a string.
    *
    * @throws Exception
    *   Extending classes MAY throw an exception if a problem occurred.
    */
   public function getRaw() {
-    return $this->sanitizeRaw($this->raw);
+    return $this->sanitizeRaw(file_get_contents($this->filePath));
   }
 
   /**
@@ -40,22 +50,10 @@ class FeedsFetcherResult extends FeedsResult {
    *   If an unexpected problem occurred.
    */
   public function getFilePath() {
-    if (!isset($this->file_path)) {
-      $destination = 'public://feeds';
-      if (!file_prepare_directory($destination, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-        throw new Exception(t('Feeds directory either cannot be created or is not writable.'));
-      }
-      $this->file_path = FALSE;
-      if ($file = file_save_data($this->getRaw(), $destination . '/' . get_class($this) . REQUEST_TIME)) {
-        $file->setTemporary();
-        $file->save();
-        $this->file_path = $file->getFileUri();
-      }
-      else {
-        throw new Exception(t('Cannot write content to %dest', array('%dest' => $destination)));
-      }
+    if (!file_exists($this->filePath)) {
+      throw new Exception(t('File @filepath is not accessible.', array('@filepath' => $this->file_path)));
     }
-    return $this->sanitizeFile($this->file_path);
+    return $this->sanitizeFile($this->filePath);
   }
 
   /**
@@ -101,4 +99,5 @@ class FeedsFetcherResult extends FeedsResult {
     }
     return $filepath;
   }
+
 }

@@ -12,7 +12,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FeedsFileFetcherResult;
+use Drupal\feeds\FeedsFetcherResult;
 use Drupal\feeds\Plugin\FetcherBase;
 
 /**
@@ -34,7 +34,7 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
 
     // Just return a file fetcher result if this is a file.
     if (is_file($feed_config['source'])) {
-      return new FeedsFileFetcherResult($feed_config['source']);
+      return new FeedsFetcherResult($feed_config['source']);
     }
 
     // Batch if this is a directory.
@@ -47,7 +47,7 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
     if ($state->files) {
       $file = array_shift($state->files);
       $state->progress($state->total, $state->total - count($state->files));
-      return new FeedsFileFetcherResult($file);
+      return new FeedsFetcherResult($file);
     }
 
     throw new \Exception(t('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
