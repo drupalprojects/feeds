@@ -15,7 +15,6 @@ use Drupal\feeds\Plugin\MapperBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\FeedsTermElement;
 use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
 
 /**
@@ -150,11 +149,7 @@ class Taxonomy extends MapperBase {
 
       $tid = FALSE;
 
-      // FeedsTermElement already is a term.
-      if ($term instanceof FeedsTermElement) {
-        $tid = $term->tid;
-      }
-      elseif ($term instanceof TaxonomyTermReferenceItem) {
+      if ($term instanceof TaxonomyTermReferenceItem) {
         $tid = $term->value;
       }
       else {
