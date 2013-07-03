@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Returns responses for feeds module routes.
+ * Returns responses for feed routes.
  */
 class FeedController implements ControllerInterface {
 
@@ -80,14 +80,14 @@ class FeedController implements ControllerInterface {
    */
   public function add(Request $request) {
     // Show add form if there is only one importer.
-    $importers = $this->importerStorage->load();
+    $importers = $this->importerStorage->loadMultiple();
     if ($importers && count($importers) == 1) {
       $importer = reset($importers);
       return $this->addForm($importer, $request);
     }
 
     $rows = array();
-    foreach (entity_load_multiple('feeds_importer') as $importer) {
+    foreach ($importers as $importer) {
       if ($importer->disabled) {
         continue;
       }
@@ -136,8 +136,8 @@ class FeedController implements ControllerInterface {
    */
   public function view(Feed $feeds_feed, Request $request) {
     return $this->entityManager
-    ->getRenderController('feeds_feed')
-    ->view($feeds_feed);
+      ->getRenderController('feeds_feed')
+      ->view($feeds_feed);
   }
 
 }
