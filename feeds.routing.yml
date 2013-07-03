@@ -1,4 +1,4 @@
-feeds_feed_list:
+feeds_feed.list:
   pattern: '/admin/content/feed'
   defaults:
     _content: 'Drupal\Core\Entity\Controller\EntityListController::listing'
@@ -6,14 +6,14 @@ feeds_feed_list:
   requirements:
     _permission: 'administer feeds'
 
-feeds_feed_create_list:
+feeds_feed.create_list:
   pattern: '/feed/add'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::add'
   requirements:
     _access_feeds_feed_create_list: 'TRUE'
 
-feeds_feed_create:
+feeds_feed.create:
   pattern: '/feed/add/{feeds_importer}'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::addForm'
@@ -28,7 +28,7 @@ feeds_feed:
     _entity_access: 'feeds_feed.view'
     feeds_feed:  \d+
 
-feeds_feed_view:
+feeds_feed.view:
   pattern: '/feed/{feeds_feed}/view'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::view'
@@ -36,7 +36,7 @@ feeds_feed_view:
     _entity_access: 'feeds_feed.view'
     feeds_feed:  \d+
 
-feeds_feed_edit:
+feeds_feed.edit:
   pattern: '/feed/{feeds_feed}/edit'
   defaults:
     _entity_form: 'feeds_feed.edit'
@@ -44,7 +44,7 @@ feeds_feed_edit:
     _entity_access: 'feeds_feed.edit'
     feeds_feed:  \d+
 
-feeds_feed_delete:
+feeds_feed.delete:
   pattern: '/feed/{feeds_feed}/delete'
   defaults:
     _entity_form: 'feeds_feed.delete'
@@ -52,7 +52,7 @@ feeds_feed_delete:
     _entity_access: 'feeds_feed.delete'
     feeds_feed:  \d+
 
-feeds_feed_import:
+feeds_feed.import:
   pattern: '/feed/{feeds_feed}/import'
   defaults:
     _entity_form: 'feeds_feed.import'
@@ -60,7 +60,7 @@ feeds_feed_import:
     _entity_access: 'feeds_feed.import'
     feeds_feed:  \d+
 
-feeds_feed_clear:
+feeds_feed.clear:
   pattern: '/feed/{feeds_feed}/delete-items'
   defaults:
     _entity_form: 'feeds_feed.clear'
@@ -68,7 +68,7 @@ feeds_feed_clear:
     _entity_access: 'feeds_feed.clear'
     feeds_feed:  \d+
 
-feeds_feed_unlock:
+feeds_feed.unlock:
   pattern: '/feed/{feeds_feed}/unlock'
   defaults:
     _entity_form: 'feeds_feed.unlock'
@@ -96,14 +96,14 @@ feeds_feed.subscribe:
 
 # Admin UI routes.
 
-feeds_importer_list:
+feeds_importer.list:
   pattern: '/admin/structure/feeds'
   defaults:
     _entity_list: 'feeds_importer'
   requirements:
     _permission: 'administer feeds'
 
-feeds_importer_create:
+feeds_importer.create:
   pattern: '/admin/structure/feeds/add'
   defaults:
     _form: 'Drupal\feeds\Form\ImporterAddForm'
@@ -117,7 +117,7 @@ feeds_importer:
   requirements:
     _permission: 'administer feeds'
 
-feeds_importer_active:
+feeds_importer.active:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/{active}'
   defaults:
     _content: 'Drupal\feeds\Controller\ImporterController::edit'
@@ -125,7 +125,7 @@ feeds_importer_active:
     _permission: 'administer feeds'
     active: '^(help|fetcher|parser|processor|settings|mapping)$'
 
-feeds_importer_active_plugin:
+feeds_importer.active_plugin:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/{active}/{plugin_type}'
   defaults:
     _content: 'Drupal\feeds\Controller\ImporterController::edit'
@@ -140,14 +140,14 @@ feeds_settings:
   requirements:
     _permission: 'administer feeds'
 
-feeds_importer_edit:
+feeds_importer.edit:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/edit'
   defaults:
     _entity_form: 'feeds_importer.edit'
   requirements:
     _permission: 'administer feeds'
 
-feeds_importer_delete:
+feeds_importer.delete:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/delete'
   defaults:
     _entity_form: 'feeds_importer.delete'

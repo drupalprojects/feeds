@@ -365,16 +365,16 @@ function feeds_menu() {
   $items['admin/content/feed'] = array(
     'title' => 'Feeds',
     'description' => 'Manage the feeds defined for your site.',
-    'route_name' => 'feeds_feed_list',
+    'route_name' => 'feeds_feed.list',
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
   );
   $items['feed/add'] = array(
     'title' => 'Add feed',
-    'route_name' => 'feeds_feed_create_list',
+    'route_name' => 'feeds_feed.create_list',
   );
   $items['feed/add/%feeds_importer'] = array(
     'title' => 'Add feed',
-    'route_name' => 'feeds_feed_create',
+    'route_name' => 'feeds_feed.create',
   );
   $items['feed/%feeds_feed'] = array(
     'title callback' => 'entity_page_label',
@@ -383,36 +383,36 @@ function feeds_menu() {
   );
   $items['feed/%feeds_feed/view'] = array(
     'title' => 'View',
-    'route_name' => 'feeds_feed_view',
+    'route_name' => 'feeds_feed.view',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['feed/%feeds_feed/edit'] = array(
     'title' => 'Edit',
-    'route_name' => 'feeds_feed_edit',
+    'route_name' => 'feeds_feed.edit',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
   $items['feed/%feeds_feed/delete'] = array(
     'title' => 'Delete',
-    'route_name' => 'feeds_feed_delete',
+    'route_name' => 'feeds_feed.delete',
     'type' => MENU_NORMAL_ITEM,
     'context' => MENU_CONTEXT_PAGE,
   );
   $items['feed/%feeds_feed/import'] = array(
     'title' => 'Import',
-    'route_name' => 'feeds_feed_import',
+    'route_name' => 'feeds_feed.import',
     'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 10,
   );
   $items['feed/%feeds_feed/delete-items'] = array(
     'title' => 'Delete items',
-    'route_name' => 'feeds_feed_clear',
+    'route_name' => 'feeds_feed.clear',
     'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 11,
   );
   $items['feed/%feeds_feed/unlock'] = array(
     'title' => 'unlock',
-    'route_name' => 'feeds_feed_unlock',
+    'route_name' => 'feeds_feed.unlock',
     'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 11,
   );
@@ -421,14 +421,14 @@ function feeds_menu() {
   $items['admin/structure/feeds'] = array(
     'title' => 'Feeds importers',
     'description' => 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.',
-    'route_name' => 'feeds_importer_list',
+    'route_name' => 'feeds_importer.list',
   );
   $items['admin/structure/feeds/list'] = array(
     'title' => 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/feeds/add'] = array(
-    'route_name' => 'feeds_importer_create',
+    'route_name' => 'feeds_importer.create',
     'type' => MENU_SIBLING_LOCAL_TASK,
   );
   $items['admin/structure/feeds/manage/%feeds_importer'] = array(
@@ -439,12 +439,12 @@ function feeds_menu() {
   $items['admin/structure/feeds/manage/%feeds_importer/%'] = array(
     'title callback' => 'entity_page_label',
     'title arguments' => array(4),
-    'route_name' => 'feeds_importer_active',
+    'route_name' => 'feeds_importer.active',
   );
   $items['admin/structure/feeds/manage/%feeds_importer/%/%'] = array(
     'title callback' => 'entity_page_label',
     'title arguments' => array(4),
-    'route_name' => 'feeds_importer_active_plugin',
+    'route_name' => 'feeds_importer.active_plugin',
   );
   $items['admin/structure/feeds/manage/%feeds_importer/edit'] = array(
     'title' => 'Edit',
@@ -454,7 +454,7 @@ function feeds_menu() {
   );
   $items['admin/structure/feeds/manage/%feeds_importer/delete'] = array(
     'title' => 'Delete',
-    'route_name' => 'feeds_importer_delete',
+    'route_name' => 'feeds_importer.delete',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_NONE,
     'weight' => 4,
@@ -469,31 +469,31 @@ function feeds_menu() {
 function feeds_local_actions() {
   return array(
     array(
-      'route_name' => 'feeds_feed_import',
+      'route_name' => 'feeds_feed.import',
       'title' => t('Import'),
       'appears_on' => array(
-        'feeds_feed_view',
+        'feeds_feed.view',
       ),
     ),
     array(
-      'route_name' => 'feeds_feed_delete_items',
+      'route_name' => 'feeds_feed.clear',
       'title' => t('Delete items'),
       'appears_on' => array(
-        'feeds_feed_view',
+        'feeds_feed.view',
       ),
     ),
     array(
-      'route_name' => 'feeds_feed_unlock',
+      'route_name' => 'feeds_feed.unlock',
       'title' => t('Unlock'),
       'appears_on' => array(
-        'feeds_feed_view',
+        'feeds_feed.view',
       ),
     ),
     array(
-      'route_name' => 'feeds_importer_add',
+      'route_name' => 'feeds_importer.create',
       'title' => t('Add importer'),
       'appears_on' => array(
-        'feeds_importer_list',
+        'feeds_importer.list',
       ),
     ),
   );
