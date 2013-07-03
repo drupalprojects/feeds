@@ -370,11 +370,11 @@ function feeds_menu() {
   );
   $items['feed/add'] = array(
     'title' => 'Add feed',
-    'route_name' => 'feeds_feed_add_list',
+    'route_name' => 'feeds_feed_create_list',
   );
   $items['feed/add/%feeds_importer'] = array(
     'title' => 'Add feed',
-    'route_name' => 'feeds_feed_add',
+    'route_name' => 'feeds_feed_create',
   );
   $items['feed/%feeds_feed'] = array(
     'title callback' => 'entity_page_label',
@@ -406,7 +406,7 @@ function feeds_menu() {
   );
   $items['feed/%feeds_feed/delete-items'] = array(
     'title' => 'Delete items',
-    'route_name' => 'feeds_feed_delete_items',
+    'route_name' => 'feeds_feed_clear',
     'type' => MENU_SIBLING_LOCAL_TASK,
     'weight' => 11,
   );
@@ -428,7 +428,7 @@ function feeds_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/feeds/add'] = array(
-    'route_name' => 'feeds_importer_add',
+    'route_name' => 'feeds_importer_create',
     'type' => MENU_SIBLING_LOCAL_TASK,
   );
   $items['admin/structure/feeds/manage/%feeds_importer'] = array(

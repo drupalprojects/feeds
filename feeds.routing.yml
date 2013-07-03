@@ -6,14 +6,14 @@ feeds_feed_list:
   requirements:
     _permission: 'administer feeds'
 
-feeds_feed_add_list:
+feeds_feed_create_list:
   pattern: '/feed/add'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::add'
   requirements:
-    _access_feeds_feed_add_list: 'TRUE'
+    _access_feeds_feed_create_list: 'TRUE'
 
-feeds_feed_add:
+feeds_feed_create:
   pattern: '/feed/add/{feeds_importer}'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::addForm'
@@ -60,7 +60,7 @@ feeds_feed_import:
     _entity_access: 'feeds_feed.import'
     feeds_feed:  \d+
 
-feeds_feed_delete_items:
+feeds_feed_clear:
   pattern: '/feed/{feeds_feed}/delete-items'
   defaults:
     _entity_form: 'feeds_feed.clear'
@@ -103,7 +103,7 @@ feeds_importer_list:
   requirements:
     _permission: 'administer feeds'
 
-feeds_importer_add:
+feeds_importer_create:
   pattern: '/admin/structure/feeds/add'
   defaults:
     _form: 'Drupal\feeds\Form\ImporterAddForm'

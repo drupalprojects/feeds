@@ -15,7 +15,8 @@ services:
     class: Drupal\feeds\Plugin\FeedsHandlerManager
     arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   access_check.feeds.feed_add_list:
-    class: Drupal\feeds\Access\FeedAddListAccessCheck
+    class: Drupal\feeds\Access\FeedCreateListAccessCheck
+    arguments: ['@plugin.manager.entity']
     tags:
       - { name: access_check }
   access_check.feeds.feed_create:
