@@ -170,7 +170,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
 
     $feed_config = $feed->getConfigFor($this);
 
-    $job = array(
+    $item = array(
       'type' => $this->getPluginId(),
       'id' => $feed->id(),
     );
@@ -187,17 +187,17 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       \Drupal::service('feeds.subscription.crud')->setSubscription($sub);
 
       // Subscribe to new topic.
-      \Drupal::queue('feeds_push_subscribe')->createItem($job);
+      \Drupal::queue('feeds_push_subscribe')->createItem($item);
     }
 
     // Source has changed.
     elseif ($subscription['topic'] !== $feed_config['source']) {
       // Subscribe to new topic.
-      \Drupal::queue('feeds_push_subscribe')->createItem($job);
+      \Drupal::queue('feeds_push_subscribe')->createItem($item);
 
       // Unsubscribe from old topic.
-      $job['data'] = $subscription['topic'];
-      \Drupal::queue('feeds_push_unsubscribe')->createItem($job);
+      $item['data'] = $subscription['topic'];
+      \Drupal::queue('feeds_push_unsubscribe')->createItem($item);
 
       // Save new topic to subscription.
       $subscription['topic'] = $feed_config['source'];
@@ -215,7 +215,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
           break;
 
         default:
-          \Drupal::queue('feeds_push_subscribe')->createItem($job);
+          \Drupal::queue('feeds_push_subscribe')->createItem($item);
           break;
       }
     }
@@ -229,16 +229,13 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    */
   public function sourceDelete(FeedInterface $feed) {
     if ($this->config['use_pubsubhubbub']) {
-      $job = array(
+      $item = array(
         'type' => $this->getPluginId(),
         'id' => $feed->id(),
-        'period' => 0,
-        'periodic' => FALSE,
       );
 
-      // Remove any existing subscribe jobs.
-      JobScheduler::get('feeds_push_subscribe')->remove($job);
-      JobScheduler::get('feeds_push_unsubscribe')->set($job);
+      // Unsubscribe from feed.
+      \Drupal::queue('feeds_push_unsubscribe')->createItem($item);
     }
   }
 
