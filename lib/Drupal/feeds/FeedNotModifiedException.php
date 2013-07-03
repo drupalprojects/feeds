@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\FeedNotModifiedException.
  */
 
-namepsace Drupal\feeds;
+namespace Drupal\feeds;
 
 use RuntimeException;
 
