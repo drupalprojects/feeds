@@ -21,10 +21,12 @@ services:
       - { name: access_check }
   access_check.feeds_feed.create:
     class: Drupal\feeds\Access\FeedCreateAccessCheck
+    arguments: ['@plugin.manager.entity']
     tags:
       - { name: access_check }
   feeds.item_info:
     class: Drupal\feeds\ItemInfoController
+    arguments: ['@database', 'feeds_item']
   feeds.subscription.crud:
     class: Drupal\feeds\PuSH\Subscription
     arguments: ['@database', 'feeds_subscription']

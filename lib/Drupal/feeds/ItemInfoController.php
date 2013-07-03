@@ -7,57 +7,85 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Database\Connection;
 
+/**
+ * Tracks metadata for feed items.
+ */
 class ItemInfoController implements ItemInfoControllerInterface {
 
   /**
-   * {@inheritdoc}
+   * The database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
    */
-  public function load(EntityInterface $entity) {
-    return db_select('feeds_item')
-      ->fields('feeds_item')
-      ->condition('entity_type', $entity->entityType())
-      ->condition('entity_id', $entity->id())
-      ->range(0, 1)
-      ->execute()
-      ->fetchObject();
+  protected $connection;
+
+  /**
+   * The database table.
+   *
+   * @var string
+   */
+  protected $table;
+
+  /**
+   * The escaped database table.
+   *
+   * @var string
+   */
+  protected $escapedTable;
+
+  /**
+   * Constructs an ItemInfoController object.
+   *
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The database connection object.
+   * @param string $table
+   *   The database table to perform queries on.
+   */
+  public function __construct(Connection $connection, $table) {
+    $this->connection = $connection;
+    $this->table = $table;
+    $this->escapedTable = $connection->escapeTable($table);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function insert(EntityInterface $entity) {
-    if (isset($entity->feeds_item)) {
-      $entity->feeds_item->entity_id = $entity->id();
-      drupal_write_record('feeds_item', $entity->feeds_item);
-    }
+  public function load($entity_type, $entity_id) {
+    return $this->connection->query(
+      'SELECT * FROM {' . $this->escapedTable . '}
+      WHERE entity_type = :entity_type AND entity_id = :entity_id',
+      array(':entity_type' => $entity_type, ':entity_id' => $entity_id)
+    )->fetchObject();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function save(EntityInterface $entity) {
-    if (isset($entity->feeds_item)) {
-      $entity->feeds_item->entity_id = $entity->id();
-
-      if ($this->load($entity)) {
-        drupal_write_record('feeds_item', $entity->feeds_item, array('entity_type', 'entity_id'));
-      }
-      else {
-        $this->insert($entity);
-      }
-    }
+  public function save(\stdClass $item_info) {
+    $this->connection->merge($this->table)
+      ->key(array(
+        'entity_type' => $item_info->entityType,
+        'entity_id' => $item_info->entityId,
+      ))
+      ->fields(array(
+        'fid' => $item_info->fid,
+        'imported' => $item_info->imported,
+        'url' => $item_info->url,
+        'guid' => $item_info->guid,
+        'hash' => $item_info->hash,
+      ))
+      ->execute();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function delete(EntityInterface $entity) {
-    // // Delete any imported items produced by the source.
-    db_delete('feeds_item')
-      ->condition('entity_type', $entity->entityType())
-      ->condition('entity_id', $entity->id())
+  public function delete($entity_type, $entity_id) {
+    return (bool) $this->connection->delete($this->table)
+      ->condition('entity_type', $entity_type)
+      ->condition('entity_id', $entity_id)
       ->execute();
   }
 

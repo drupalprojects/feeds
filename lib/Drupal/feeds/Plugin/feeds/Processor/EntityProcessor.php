@@ -49,6 +49,11 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
    */
   protected $properties;
 
+  /**
+   * The extenders that apply to this entity type.
+   *
+   * @var array
+   */
   protected $handlers = array();
 
   /**
@@ -60,6 +65,148 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function process(FeedInterface $feed, FeedsParserResult $parser_result) {
+    $state = $feed->state(FEEDS_PROCESS);
+
+    while ($item = $parser_result->shiftItem()) {
+
+      // Check if this item already exists.
+      $entity_id = $this->existingEntityId($feed, $parser_result);
+      $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
+
+      module_invoke_all('feeds_before_update', $feed, $item, $entity_id);
+
+      // If it exists, and we are not updating, pass onto the next item.
+      if ($entity_id && $skip_existing) {
+        continue;
+      }
+
+      $hash = $this->hash($item);
+      $changed = ($hash !== $this->getHash($entity_id));
+      $force_update = $this->config['skip_hash_check'];
+
+      // Do not proceed if the item exists, has not changed, and we're not
+      // forcing the update.
+      if ($entity_id && !$changed && !$force_update) {
+        continue;
+      }
+
+      try {
+
+        // Load an existing entity.
+        if ($entity_id) {
+          $entity = $this->entityLoad($feed, $entity_id);
+
+          // The feeds_item table is always updated with the info for the most
+          // recently processed entity. The only carryover is the entity_id.
+          $item_info = $this->newItemInfo($entity, $feed, $hash);
+          $item_info->entityId = $entity_id;
+          $item_info->isNew = FALSE;
+        }
+
+        // Build a new entity.
+        else {
+          $entity = $this->newEntity($feed);
+          $item_info = $this->newItemInfo($entity, $feed, $hash);
+        }
+
+        // Set property and field values.
+        $this->map($feed, $parser_result, $entity, $item_info);
+        $this->entityValidate($entity);
+
+        // Allow modules to alter the entity before saving.
+        module_invoke_all('feeds_presave', $feed, $entity, $item, $item_info);
+
+        // Enable modules to skip saving at all.
+        if (!empty($item_info->skip)) {
+          continue;
+        }
+
+        // This will throw an exception on failure.
+        $this->entitySaveAccess($entity);
+        $this->entitySave($entity);
+
+        $item_info->entityId = $entity->id();
+        \Drupal::service('feeds.item_info')->save($item_info);
+
+        // Allow modules to perform operations using the saved entity data.
+        // $entity contains the updated entity after saving.
+        module_invoke_all('feeds_after_save', $feed, $entity, $item, $entity_id);
+
+        // Track progress.
+        if (empty($entity_id)) {
+          $state->created++;
+        }
+        else {
+          $state->updated++;
+        }
+      }
+
+      // Something bad happened, log it.
+      catch (\Exception $e) {
+        $state->failed++;
+        drupal_set_message($e->getMessage(), 'warning');
+        $message = $this->createLogMessage($e, $entity, $item);
+        $feed->log('import', $message, array(), WATCHDOG_ERROR);
+      }
+    }
+
+    // Set messages if we're done.
+    if ($feed->progressImporting() != FEEDS_BATCH_COMPLETE) {
+      return;
+    }
+
+    $info = $this->entityInfo();
+    $tokens = array(
+      '@entity' => strtolower($info['label']),
+      '@entities' => strtolower($info['label_plural']),
+    );
+    $messages = array();
+    if ($state->created) {
+      $messages[] = array(
+       'message' => format_plural(
+          $state->created,
+          'Created @number @entity.',
+          'Created @number @entities.',
+          array('@number' => $state->created) + $tokens
+        ),
+      );
+    }
+    if ($state->updated) {
+      $messages[] = array(
+       'message' => format_plural(
+          $state->updated,
+          'Updated @number @entity.',
+          'Updated @number @entities.',
+          array('@number' => $state->updated) + $tokens
+        ),
+      );
+    }
+    if ($state->failed) {
+      $messages[] = array(
+       'message' => format_plural(
+          $state->failed,
+          'Failed importing @number @entity.',
+          'Failed importing @number @entities.',
+          array('@number' => $state->failed) + $tokens
+        ),
+        'level' => WATCHDOG_ERROR,
+      );
+    }
+    if (empty($messages)) {
+      $messages[] = array(
+        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label_plural']))),
+      );
+    }
+    foreach ($messages as $message) {
+      drupal_set_message($message['message']);
+      $feed->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
+    }
+  }
+
   protected function loadHandlers(array $configuration) {
     $definitions = \Drupal::service('plugin.manager.feeds.handler')->getDefinitions();
 
@@ -69,6 +216,31 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
         $this->handlers[] = \Drupal::service('plugin.manager.feeds.handler')->createInstance($definition['id'], $configuration);
       }
     }
+  }
+
+  /**
+   * Returns a new item info object.
+   *
+   * This is used to track entities created by Feeds.
+   *
+   * @param $entity
+   *   The entity object to be populated with new item info.
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed that produces this entity.
+   * @param $hash
+   *   The fingerprint of the feed item.
+   */
+  protected function newItemInfo($entity, FeedInterface $feed, $hash = '') {
+    $item_info = new \stdClass();
+    $item_info->isNew = TRUE;
+    $item_info->entityType = $entity->entityType();
+    $item_info->fid = $feed->id();
+    $item_info->imported = REQUEST_TIME;
+    $item_info->hash = $hash;
+    $item_info->url = '';
+    $item_info->guid = '';
+
+    return $item_info;
   }
 
   public function apply($action, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, &$arg4 = NULL) {
@@ -351,14 +523,14 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
   /**
    * {@inheritdoc}
    */
-  public function setTargetElement(FeedInterface $feed, $entity, $target_element, $value) {
+  public function setTargetElement(FeedInterface $feed, $entity, $target_element, $value, $mapping, \stdClass $item_info) {
     $properties = $this->getProperties();
     if (isset($properties[$target_element])) {
       $entity->set($target_element, $value);
     }
     else {
-      $this->apply('setTargetElement', $feed, $entity, $target_element, $value);
-      parent::setTargetElement($feed, $entity, $target_element, $value);
+      $this->apply('setTargetElement', $feed, $entity, $target_element, $value, $mapping, $item_info);
+      parent::setTargetElement($feed, $entity, $target_element, $value, $mapping, $item_info);
     }
   }
 

@@ -619,24 +619,10 @@ function feeds_file_download($uri) {
 }
 
 /**
- * Implements hook_entity_insert().
- */
-function feeds_entity_insert(EntityInterface $entity) {
-  \Drupal::service('feeds.item_info')->insert($entity);
-}
-
-/**
- * Implements hook_entity_update().
- */
-function feeds_entity_update(EntityInterface $entity) {
-  \Drupal::service('feeds.item_info')->save($entity);
-}
-
-/**
  * Implements hook_entity_delete().
  */
 function feeds_entity_delete(EntityInterface $entity) {
-  \Drupal::service('feeds.item_info')->delete($entity);
+  \Drupal::service('feeds.item_info')->delete($entity->entityType(), $entity->id());
 }
 
 /**

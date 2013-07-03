@@ -24,153 +24,6 @@ class ProcessorBase extends PluginBase {
   }
 
   /**
-   * Process the result of the parsing stage.
-   *
-   * @param FeedInterface $source
-   *   Source information about this import.
-   * @param FeedsParserResult $parser_result
-   *   The result of the parsing stage.
-   */
-  public function process(FeedInterface $feed, FeedsParserResult $parser_result) {
-    $state = $feed->state(FEEDS_PROCESS);
-
-    while ($item = $parser_result->shiftItem()) {
-
-      // Check if this item already exists.
-      $entity_id = $this->existingEntityId($feed, $parser_result);
-      $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
-
-      module_invoke_all('feeds_before_update', $feed, $item, $entity_id);
-
-      // If it exists, and we are not updating, pass onto the next item.
-      if ($entity_id && $skip_existing) {
-        continue;
-      }
-
-      $hash = $this->hash($item);
-      $changed = ($hash !== $this->getHash($entity_id));
-      $force_update = $this->config['skip_hash_check'];
-
-      // Do not proceed if the item exists, has not changed, and we're not
-      // forcing the update.
-      if ($entity_id && !$changed && !$force_update) {
-        continue;
-      }
-
-      try {
-
-        // Load an existing entity.
-        if ($entity_id) {
-          $entity = $this->entityLoad($feed, $entity_id);
-
-          // The feeds_item table is always updated with the info for the most
-          // recently processed entity. The only carryover is the entity_id.
-          $this->newItemInfo($entity, $feed->id(), $hash);
-          $entity->feeds_item->entity_id = $entity_id;
-          $entity->feeds_item->is_new = FALSE;
-        }
-
-        // Build a new entity.
-        else {
-          $entity = $this->newEntity($feed);
-          $this->newItemInfo($entity, $feed->id(), $hash);
-        }
-
-        // Set property and field values.
-        $this->map($feed, $parser_result, $entity);
-        $this->entityValidate($entity);
-
-        // Allow modules to alter the entity before saving.
-        module_invoke_all('feeds_presave', $feed, $entity, $item, $entity_id);
-        if (module_exists('rules')) {
-          rules_invoke_event('feeds_import_'. $feed->importer()->id(), $entity);
-        }
-
-        // Enable modules to skip saving at all.
-        if (!empty($entity->feeds_item->skip)) {
-          continue;
-        }
-
-        // This will throw an exception on failure.
-        $this->entitySaveAccess($entity);
-        $this->entitySave($entity);
-
-        // Allow modules to perform operations using the saved entity data.
-        // $entity contains the updated entity after saving.
-        module_invoke_all('feeds_after_save', $feed, $entity, $item, $entity_id);
-
-        // Track progress.
-        if (empty($entity_id)) {
-          $state->created++;
-        }
-        else {
-          $state->updated++;
-        }
-      }
-
-      // Something bad happened, log it.
-      catch (\Exception $e) {
-        $state->failed++;
-        drupal_set_message($e->getMessage(), 'warning');
-        $message = $this->createLogMessage($e, $entity, $item);
-        $feed->log('import', $message, array(), WATCHDOG_ERROR);
-      }
-    }
-
-    // Set messages if we're done.
-    if ($feed->progressImporting() != FEEDS_BATCH_COMPLETE) {
-      return;
-    }
-
-    $info = $this->entityInfo();
-    $tokens = array(
-      '@entity' => strtolower($info['label']),
-      '@entities' => strtolower($info['label_plural']),
-    );
-    $messages = array();
-    if ($state->created) {
-      $messages[] = array(
-       'message' => format_plural(
-          $state->created,
-          'Created @number @entity.',
-          'Created @number @entities.',
-          array('@number' => $state->created) + $tokens
-        ),
-      );
-    }
-    if ($state->updated) {
-      $messages[] = array(
-       'message' => format_plural(
-          $state->updated,
-          'Updated @number @entity.',
-          'Updated @number @entities.',
-          array('@number' => $state->updated) + $tokens
-        ),
-      );
-    }
-    if ($state->failed) {
-      $messages[] = array(
-       'message' => format_plural(
-          $state->failed,
-          'Failed importing @number @entity.',
-          'Failed importing @number @entities.',
-          array('@number' => $state->failed) + $tokens
-        ),
-        'level' => WATCHDOG_ERROR,
-      );
-    }
-    if (empty($messages)) {
-      $messages[] = array(
-        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label_plural']))),
-      );
-    }
-    foreach ($messages as $message) {
-      drupal_set_message($message['message']);
-      $feed->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
-    }
-  }
-
-  /**
    * Remove all stored results or stored results up to a certain time for a
    * source.
    *
@@ -365,7 +218,7 @@ class ProcessorBase extends PluginBase {
    * @see hook_feeds_term_processor_targets_alter()
    * @see hook_feeds_user_processor_targets_alter()
    */
-  protected function map(FeedInterface $source, FeedsParserResult $result, $target_item = NULL) {
+  protected function map(FeedInterface $feed, FeedsParserResult $result, $target_item, $item_info) {
 
     // Static cache $targets as getMappingTargets() may be an expensive method.
     static $sources;
@@ -409,10 +262,10 @@ class ProcessorBase extends PluginBase {
           isset($sources[$this->importer->id()][$mapping['source']]['callback']) &&
           is_callable($sources[$this->importer->id()][$mapping['source']]['callback'])) {
         $callback = $sources[$this->importer->id()][$mapping['source']]['callback'];
-        $value = $callback($source, $result, $mapping['source']);
+        $value = $callback($feed, $result, $mapping['source']);
       }
       else {
-        $value = $parser->getSourceElement($source, $result, $mapping['source']);
+        $value = $parser->getSourceElement($feed, $result, $mapping['source']);
       }
 
       // Map the source element's value to the target.
@@ -421,10 +274,10 @@ class ProcessorBase extends PluginBase {
           isset($targets[$this->importer->id()][$mapping['target']]['callback']) &&
           is_callable($targets[$this->importer->id()][$mapping['target']]['callback'])) {
         $callback = $targets[$this->importer->id()][$mapping['target']]['callback'];
-        $callback($source, $target_item, $mapping['target'], $value, $mapping);
+        $callback($feed, $target_item, $mapping['target'], $value, $mapping, $item_info);
       }
       else {
-        $this->setTargetElement($source, $target_item, $mapping['target'], $value, $mapping);
+        $this->setTargetElement($feed, $target_item, $mapping['target'], $value, $mapping, $item_info);
       }
     }
     return $target_item;
@@ -515,11 +368,11 @@ class ProcessorBase extends PluginBase {
   /**
    * Set a concrete target element. Invoked from ProcessorBase::map().
    */
-  public function setTargetElement(FeedInterface $feed, $target_item, $target_element, $value) {
+  public function setTargetElement(FeedInterface $feed, $target_item, $target_element, $value, $mapping, \stdClass $item_info) {
     switch ($target_element) {
       case 'url':
       case 'guid':
-        $target_item->feeds_item->$target_element = $value;
+        $item_info->$target_element = $value;
         break;
 
       default:
@@ -589,46 +442,6 @@ class ProcessorBase extends PluginBase {
       }
     }
     return $targets;
-  }
-
-  /**
-   * Adds Feeds specific information on $entity->feeds_item.
-   *
-   * @param $entity
-   *   The entity object to be populated with new item info.
-   * @param $fid
-   *   The feed nid of the source that produces this entity.
-   * @param $hash
-   *   The fingerprint of the source item.
-   */
-  protected function newItemInfo($entity, $fid, $hash = '') {
-    $entity->feeds_item = new \stdClass();
-    $entity->feeds_item->is_new = TRUE;
-    $entity->feeds_item->entity_id = 0;
-    $entity->feeds_item->entity_type = $this->entityType();
-    $entity->feeds_item->id = $this->importer->id();
-    $entity->feeds_item->fid = $fid;
-    $entity->feeds_item->imported = REQUEST_TIME;
-    $entity->feeds_item->hash = $hash;
-    $entity->feeds_item->url = '';
-    $entity->feeds_item->guid = '';
-  }
-
-  /**
-   * Loads existing entity information and places it on $entity->feeds_item.
-   *
-   * @param $entity
-   *   The entity object to load item info for. Id key must be present.
-   *
-   * @return
-   *   TRUE if item info could be loaded, false if not.
-   */
-  protected function loadItemInfo($entity) {
-    if ($item_info = \Drupal::service('feeds.item_info')->load($entity)) {
-      $entity->feeds_item = $item_info;
-      return TRUE;
-    }
-    return FALSE;
   }
 
   /**

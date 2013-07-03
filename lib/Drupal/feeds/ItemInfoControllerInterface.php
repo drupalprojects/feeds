@@ -7,43 +7,40 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Entity\EntityInterface;
-
 interface ItemInfoControllerInterface {
 
   /**
    * Loads an item info object.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to load item info for.
+   * @param string $entity_type
+   *   The entity type.
+   * @param int $entity_id
+   *   The entity id.
    *
    * @return stdClass|false
    *   The item info object or false if one does not exist.
    */
-  public function load(EntityInterface $entity);
-
-  /**
-   * Inserts an item info object into the feeds_item table.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to load item info for.
-   */
-  public function insert(EntityInterface $entity);
+  public function load($entity_type, $entity_id);
 
   /**
    * Inserts or updates an item info object in the feeds_item table.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to load item info for.
+   * @param stdClass $item_info
+   *   The item info object to save.
    */
-  public function save(EntityInterface $entity);
+  public function save(\stdClass $item_info);
 
   /**
    * Deletes item info for a given entity.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to delete item info for.
+   * @param string $entity_type
+   *   The entity type.
+   * @param int $entity_id
+   *   The entity id.
+   *
+   * @return bool
+   *   True if the item was actually deleted. False if it did not exist.
    */
-  public function delete(EntityInterface $entity);
+  public function delete($entity_type, $entity_id);
 
 }

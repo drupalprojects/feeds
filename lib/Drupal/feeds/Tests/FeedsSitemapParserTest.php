@@ -74,7 +74,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     $this->assertEqual($node->label(), 'monthly', 'Feed item 1 changefreq is correct.');
     $this->assertEqual($node->body->value, '0.8', 'Feed item 1 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2005-01-01'), 'Feed item 1 lastmod is correct.');
-    $info = Drupal::service('feeds.item_info')->load($node);
+    $info = Drupal::service('feeds.item_info')->load('node', $node->id());
     $this->assertEqual($info->url, 'http://www.example.com/', 'Feed item 1 url is correct.');
     $this->assertEqual($info->url, $info->guid, 'Feed item 1 guid is correct.');
 
@@ -84,7 +84,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     $this->assertEqual($node->label(), 'weekly', 'Feed item 2 changefreq is correct.');
     $this->assertEqual($node->body->value, '', 'Feed item 2 priority is correct.');
     // $node->created->value is... recently
-    $info = Drupal::service('feeds.item_info')->load($node);
+    $info = Drupal::service('feeds.item_info')->load('node', $node->id());
     $this->assertEqual($info->url, 'http://www.example.com/catalog?item=12&desc=vacation_hawaii', 'Feed item 2 url is correct.');
     $this->assertEqual($info->url, $info->guid, 'Feed item 2 guid is correct.');
 
@@ -94,7 +94,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     $this->assertEqual($node->label(), 'weekly', 'Feed item 3 changefreq is correct.');
     $this->assertEqual($node->body->value, '', 'Feed item 3 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2004-12-23'), 'Feed item 3 lastmod is correct.');
-    $info = Drupal::service('feeds.item_info')->load($node);
+    $info = Drupal::service('feeds.item_info')->load('node', $node->id());
     $this->assertEqual($info->url, 'http://www.example.com/catalog?item=73&desc=vacation_new_zealand', 'Feed item 3 url is correct.');
     $this->assertEqual($info->url, $info->guid, 'Feed item 3 guid is correct.');
 
@@ -104,7 +104,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     $this->assertEqual($node->label(), '', 'Feed item 4 changefreq is correct.');
     $this->assertEqual($node->body->value, '0.3', 'Feed item 4 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2004-12-23T18:00:15+00:00'), 'Feed item 4 lastmod is correct.');
-    $info = Drupal::service('feeds.item_info')->load($node);
+    $info = Drupal::service('feeds.item_info')->load('node', $node->id());
     $this->assertEqual($info->url, 'http://www.example.com/catalog?item=74&desc=vacation_newfoundland', 'Feed item 4 url is correct.');
     $this->assertEqual($info->url, $info->guid, 'Feed item 1 guid is correct.');
 
@@ -114,7 +114,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     $this->assertEqual($node->label(), '', 'Feed item 5 changefreq is correct.');
     $this->assertEqual($node->body->value, '', 'Feed item 5 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2004-11-23'), 'Feed item 5 lastmod is correct.');
-    $info = Drupal::service('feeds.item_info')->load($node);
+    $info = Drupal::service('feeds.item_info')->load('node', $node->id());
     $this->assertEqual($info->url, 'http://www.example.com/catalog?item=83&desc=vacation_usa', 'Feed item 5 url is correct.');
     $this->assertEqual($info->url, $info->guid, 'Feed item 5 guid is correct.');
 
