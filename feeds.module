@@ -396,7 +396,7 @@ function feeds_menu() {
     'route_name' => 'feeds_feed_add',
   );
   $items['feed/%feeds_feed'] = array(
-    'title callback' => 'feeds_feed_title',
+    'title callback' => 'entity_page_label',
     'title arguments' => array(1),
     'route_name' => 'feeds_feed',
   );
@@ -451,17 +451,17 @@ function feeds_menu() {
     'type' => MENU_SIBLING_LOCAL_TASK,
   );
   $items['admin/structure/feeds/manage/%feeds_importer'] = array(
-    'title callback' => 'feeds_importer_title',
+    'title callback' => 'entity_page_label',
     'title arguments' => array(4),
     'route_name' => 'feeds_importer',
   );
   $items['admin/structure/feeds/manage/%feeds_importer/%'] = array(
-    'title callback' => 'feeds_importer_title',
+    'title callback' => 'entity_page_label',
     'title arguments' => array(4),
     'route_name' => 'feeds_importer_active',
   );
   $items['admin/structure/feeds/manage/%feeds_importer/%/%'] = array(
-    'title callback' => 'feeds_importer_title',
+    'title callback' => 'entity_page_label',
     'title arguments' => array(4),
     'route_name' => 'feeds_importer_active_plugin',
   );
@@ -531,20 +531,6 @@ function feeds_admin_paths() {
     'feed/add' => TRUE,
     'feed/add/*' => TRUE,
   );
-}
-
-/**
- * Title callback.
- */
-function feeds_importer_title($importer) {
-  return $importer->label();
-}
-
-/**
- * Feed title callback.
- */
-function feeds_feed_title($feed) {
-  return $feed->label();
 }
 
 /**
