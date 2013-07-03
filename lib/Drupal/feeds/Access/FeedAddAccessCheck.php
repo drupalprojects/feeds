@@ -36,7 +36,7 @@ class FeedAddAccessCheck implements AccessCheckInterface {
     if ($request->attributes->has('feeds_importer')) {
       $importer = $request->attributes->get('feeds_importer');
       if ($importer instanceof ImporterInterface) {
-        return user_access("add {$importer->id()} feeds");
+        return user_access("create {$importer->id()} feeds");
       }
     }
   }

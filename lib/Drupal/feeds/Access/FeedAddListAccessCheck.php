@@ -32,7 +32,7 @@ class FeedAddListAccessCheck implements AccessCheckInterface {
     }
 
     foreach (entity_load_multiple('feeds_importer') as $importer) {
-      if (user_access("add {$importer->id()} feeds")) {
+      if (user_access("create {$importer->id()} feeds")) {
         return TRUE;
       }
     }

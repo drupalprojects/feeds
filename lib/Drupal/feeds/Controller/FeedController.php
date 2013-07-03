@@ -91,7 +91,7 @@ class FeedController implements ControllerInterface {
       if ($importer->disabled) {
         continue;
       }
-      if (!(user_access('add ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
+      if (!(user_access('create ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
         continue;
       }
       $link = 'feed/add/' . $importer->id();

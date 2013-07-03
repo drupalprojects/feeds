@@ -333,7 +333,7 @@ function feeds_permission() {
     $perms["view {$importer->id()} feeds"] = array(
       'title' => t('View @name feeds', array('@name' => $importer->label())),
     );
-    $perms["add {$importer->id()} feeds"] = array(
+    $perms["create {$importer->id()} feeds"] = array(
       'title' => t('Add @name feeds', array('@name' => $importer->label())),
     );
     $perms["edit {$importer->id()} feeds"] = array(
