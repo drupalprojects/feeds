@@ -18,7 +18,7 @@ feeds_feed_add:
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::addForm'
   requirements:
-    _access_feeds_feed_add: 'TRUE'
+    _access_feeds_feed_create: 'feeds_feed'
 
 feeds_feed:
   pattern: '/feed/{feeds_feed}'
