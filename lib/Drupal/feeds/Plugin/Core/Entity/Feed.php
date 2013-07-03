@@ -29,8 +29,8 @@ use Drupal\job_scheduler\JobScheduler;
  *     "render" = "Drupal\feeds\FeedRenderController",
  *     "access" = "Drupal\feeds\FeedAccessController",
  *     "form" = {
- *       "add" = "Drupal\feeds\FeedFormController",
- *       "edit" = "Drupal\feeds\FeedFormController",
+ *       "create" = "Drupal\feeds\FeedFormController",
+ *       "update" = "Drupal\feeds\FeedFormController",
  *       "delete" = "Drupal\feeds\Form\FeedDeleteForm",
  *       "import" = "Drupal\feeds\Form\FeedImportForm",
  *       "clear" = "Drupal\feeds\Form\FeedDeleteItemsForm",

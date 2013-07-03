@@ -36,12 +36,12 @@ feeds_feed.view:
     _entity_access: 'feeds_feed.view'
     feeds_feed:  \d+
 
-feeds_feed.edit:
+feeds_feed.update:
   pattern: '/feed/{feeds_feed}/edit'
   defaults:
-    _entity_form: 'feeds_feed.edit'
+    _entity_form: 'feeds_feed.update'
   requirements:
-    _entity_access: 'feeds_feed.edit'
+    _entity_access: 'feeds_feed.update'
     feeds_feed:  \d+
 
 feeds_feed.delete:
@@ -132,20 +132,6 @@ feeds_importer.active_plugin:
   requirements:
     _permission: 'administer feeds'
     active: '^(help|fetcher|parser|processor|settings|mapping)$'
-
-feeds_settings:
-  pattern: '/admin/structure/feeds/settings'
-  defaults:
-    _entity_form: 'feeds_importer.edit'
-  requirements:
-    _permission: 'administer feeds'
-
-feeds_importer.edit:
-  pattern: '/admin/structure/feeds/manage/{feeds_importer}/edit'
-  defaults:
-    _entity_form: 'feeds_importer.edit'
-  requirements:
-    _permission: 'administer feeds'
 
 feeds_importer.delete:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/delete'

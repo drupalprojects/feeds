@@ -22,7 +22,7 @@ class FeedAccessController extends EntityAccessController {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $feed, $operation, $langcode, AccountInterface $account) {
-    if (!in_array($operation, array('view', 'create', 'edit','delete', 'import', 'clear', 'unlock'))) {
+    if (!in_array($operation, array('view', 'create', 'update','delete', 'import', 'clear', 'unlock'))) {
       // If $operation is not one of the supported actions, we return access denied.
       return FALSE;
     }
