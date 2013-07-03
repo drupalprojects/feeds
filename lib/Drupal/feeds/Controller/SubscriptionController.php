@@ -116,7 +116,7 @@ class SubscriptionController {
 
     watchdog('feeds', $raw);
 
-    $feed->importRaw($raw);
+    $feeds_feed->importRaw($raw);
 
     return new Response('', 200);
   }

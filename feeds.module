@@ -123,12 +123,6 @@ function feeds_cron_job_scheduler_info() {
   $info['feeds_feed_expire'] = array(
     'queue name' => 'feeds_feed_expire',
   );
-  $info['feeds_push_unsubscribe'] = array(
-    'queue name' => 'feeds_push_unsubscribe',
-  );
-  $info['feeds_push_subscribe'] = array(
-    'queue name' => 'feeds_push_subscribe',
-  );
   return $info;
 }
 

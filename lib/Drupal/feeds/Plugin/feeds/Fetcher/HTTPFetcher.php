@@ -173,8 +173,6 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
     $job = array(
       'type' => $this->getPluginId(),
       'id' => $feed->id(),
-      'period' => 0,
-      'periodic' => FALSE,
     );
 
     // Subscription does not exist yet.
@@ -189,20 +187,17 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       \Drupal::service('feeds.subscription.crud')->setSubscription($sub);
 
       // Subscribe to new topic.
-      JobScheduler::get('feeds_push_subscribe')->set($job);
-
-      // Remove any unsubscribe jobs.
-      JobScheduler::get('feeds_push_unsubscribe')->remove($job);
+      \Drupal::queue('feeds_push_subscribe')->createItem($job);
     }
 
     // Source has changed.
     elseif ($subscription['topic'] !== $feed_config['source']) {
       // Subscribe to new topic.
-      JobScheduler::get('feeds_push_subscribe')->set($job);
+      \Drupal::queue('feeds_push_subscribe')->createItem($job);
 
       // Unsubscribe from old topic.
       $job['data'] = $subscription['topic'];
-      JobScheduler::get('feeds_push_unsubscribe')->set($job);
+      \Drupal::queue('feeds_push_unsubscribe')->createItem($job);
 
       // Save new topic to subscription.
       $subscription['topic'] = $feed_config['source'];
@@ -212,7 +207,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
     // Hub exists, but we aren't subscribed.
     // @todo Is this the best way to handle this?
     // @todo Periodically check for new hubs... Always check for new hubs...
-    // This is hard.
+    // Maintain a retry count so that we don't keep trying indefinitely.
     elseif ($subscription['hub']) {
       switch ($subscription['state']) {
         case 'subscribe':
@@ -220,8 +215,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
           break;
 
         default:
-          JobScheduler::get('feeds_push_unsubscribe')->remove($job);
-          JobScheduler::get('feeds_push_subscribe')->set($job);
+          \Drupal::queue('feeds_push_subscribe')->createItem($job);
           break;
       }
     }
