@@ -76,6 +76,24 @@ feeds_feed_unlock:
     _entity_access: 'feeds_feed.unlock'
     feeds_feed:  \d+
 
+feeds_feed.receive:
+  pattern: '/feed/{feeds_feed}/push_callback'
+  defaults:
+    _controller: 'feeds.subscription.controller:receive'
+  requirements:
+    _access: 'TRUE'
+    feeds_feed:  \d+
+    _method: 'POST'
+
+feeds_feed.subscribe:
+  pattern: '/feed/{feeds_feed}/push_callback'
+  defaults:
+    _controller: 'feeds.subscription.controller:subscribe'
+  requirements:
+    _access: 'TRUE'
+    feeds_feed:  \d+
+    _method: 'GET'
+
 # Admin UI routes.
 
 feeds_importer_list:

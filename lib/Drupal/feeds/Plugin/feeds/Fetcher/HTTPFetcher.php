@@ -16,14 +16,13 @@ use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FetcherResult;
 use Drupal\feeds\HTTPRequest;
 use Drupal\feeds\Plugin\FetcherBase;
-use Drupal\feeds\PuSHEnvironment;
-use Drupal\feeds\PuSHSubscriber;
 use Drupal\feeds\RawFetcherResult;
+use Drupal\job_scheduler\JobScheduler;
 
 /**
  * Defines an HTTP fetcher.
  *
- * Uses http_request_get() to download a feed.
+ * @todo Make a new subscriber interface.
  *
  * @Plugin(
  *   id = "http",
@@ -36,10 +35,10 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
   /**
    * {@inheritdoc}
    */
-  public function fetch(FeedInterface $feed) {
+  public function fetch(FeedInterface $feed, $raw = NULL) {
 
     // Handle pubsubhubbub.
-    if ($this->config['use_pubsubhubbub'] && ($raw = $this->subscriber($feed->id())->receive())) {
+    if ($this->config['use_pubsubhubbub'] && $raw !== NULL) {
       return new RawFetcherResult($raw);
     }
 
@@ -68,31 +67,6 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
     $feed_config = $feed->getConfigFor($this);
     $url = $feed_config['source'];
     cache()->delete('feeds_http_download_' . md5($url));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function request($fid = 0) {
-    // A subscription verification has been sent, verify.
-    if (isset($_GET['hub_challenge'])) {
-      $this->subscriber($fid)->verifyRequest();
-    }
-    // No subscription notification has ben sent, we are being notified.
-    else {
-      try {
-        entity_load('feeds_feed', $fid)->existing()->import();
-      }
-      catch (Exception $e) {
-        // In case of an error, respond with a 503 Service (temporary)
-        // unavailable.
-        header('HTTP/1.1 503 "Not Found"', NULL, 503);
-        drupal_exit();
-      }
-    }
-    // Will generate the default 200 response.
-    header('HTTP/1.1 200 "OK"', NULL, 200);
-    drupal_exit();
   }
 
   /**
@@ -136,9 +110,9 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
     $form['request_timeout'] = array(
       '#type' => 'number',
       '#title' => t('Request timeout'),
-      '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>' .
-                         '<b>Note:</b> this setting will override the global setting.</br>' .
-                         'When left empty, the global value is used.'),
+      '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>
+                         <b>Note:</b> this setting will override the global setting.</br>
+                         When left empty, the global value is used.'),
       '#default_value' => $this->config['request_timeout'],
       '#min' => 0,
       '#maxlength' => 3,
@@ -163,6 +137,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       '#maxlength' => NULL,
       '#required' => TRUE,
     );
+
     return $form;
   }
 
@@ -189,26 +164,86 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    * {@inheritdoc}
    */
   public function sourceSave(FeedInterface $feed) {
-    if ($this->config['use_pubsubhubbub']) {
-      $job = array(
-        'fetcher' => $this,
-        'source' => $feed,
+    if (!$this->config['use_pubsubhubbub']) {
+      return;
+    }
+
+    $feed_config = $feed->getConfigFor($this);
+
+    $job = array(
+      'type' => $this->getPluginId(),
+      'id' => $feed->id(),
+      'period' => 0,
+      'periodic' => FALSE,
+    );
+
+    // Subscription does not exist yet.
+    if (!$subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
+      $sub = array(
+        'id' => $feed->id(),
+        'state' => 'unsubscribed',
+        'hub' => '',
+        'topic' => $feed_config['source'],
       );
-      feeds_set_subscription_job($job);
+
+      \Drupal::service('feeds.subscription.crud')->setSubscription($sub);
+
+      // Subscribe to new topic.
+      JobScheduler::get('feeds_push_subscribe')->set($job);
+
+      // Remove any unsubscribe jobs.
+      JobScheduler::get('feeds_push_unsubscribe')->remove($job);
+    }
+
+    // Source has changed.
+    elseif ($subscription['topic'] !== $feed_config['source']) {
+      // Subscribe to new topic.
+      JobScheduler::get('feeds_push_subscribe')->set($job);
+
+      // Unsubscribe from old topic.
+      $job['data'] = $subscription['topic'];
+      JobScheduler::get('feeds_push_unsubscribe')->set($job);
+
+      // Save new topic to subscription.
+      $subscription['topic'] = $feed_config['source'];
+      \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
+    }
+
+    // Hub exists, but we aren't subscribed.
+    // @todo Is this the best way to handle this?
+    // @todo Periodically check for new hubs... Always check for new hubs...
+    // This is hard.
+    elseif ($subscription['hub']) {
+      switch ($subscription['state']) {
+        case 'subscribe':
+        case 'subscribed':
+          break;
+
+        default:
+          JobScheduler::get('feeds_push_unsubscribe')->remove($job);
+          JobScheduler::get('feeds_push_subscribe')->set($job);
+          break;
+      }
     }
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Call sourceDelete() when changing plugins.
+   * @todo Clear cache when deleting.
    */
   public function sourceDelete(FeedInterface $feed) {
     if ($this->config['use_pubsubhubbub']) {
       $job = array(
-        'type' => $feed->getImporter()->id(),
+        'type' => $this->getPluginId(),
         'id' => $feed->id(),
         'period' => 0,
         'periodic' => FALSE,
       );
+
+      // Remove any existing subscribe jobs.
+      JobScheduler::get('feeds_push_subscribe')->remove($job);
       JobScheduler::get('feeds_push_unsubscribe')->set($job);
     }
   }
@@ -216,37 +251,12 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
   /**
    * {@inheritdoc}
    */
-  public function subscribe(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
-    $sub = $this->subscriber($feed->id());
-    $url = valid_url($this->config['designated_hub']) ? $this->config['designated_hub'] : '';
-    $path = url($this->path($feed->id()), array('absolute' => TRUE));
-    $sub->subscribe($feed_config['source'], $path, $url);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function unsubscribe(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
-    $this->subscriber($feed->id())->unsubscribe($feed_config['source'], url($this->path($feed->id()), array('absolute' => TRUE)));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function importPeriod(FeedInterface $feed) {
-    if ($this->subscriber($feed->id())->subscribed()) {
+    $sub = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id());
+    if ($sub && $sub['state'] == 'subscribed') {
       // Delay for three days if there is a successful subscription.
       return 259200;
     }
-  }
-
-  /**
-   * Convenience method for instantiating a subscriber object.
-   */
-  protected function subscriber($subscriber_id) {
-    return PushSubscriber::instance($this->id, $subscriber_id, 'Drupal\feeds\PuSHSubscription', PuSHEnvironment::instance());
   }
 
 }

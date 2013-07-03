@@ -392,6 +392,32 @@ class Feed extends EntityNG implements FeedInterface {
   }
 
   /**
+   * Import a raw string.
+   *
+   * This does not batch. It assumes that the input is small enough to not need
+   * it.
+   *
+   * @param string $raw
+   *   (optional) A raw string to import. Defaults to null.
+   *
+   * @throws
+   *   Throws Exception if an error occurs when importing.
+   *
+   * @todo Figure out batching.
+   */
+  public function importRaw($raw) {
+    // Fetch.
+    $fetcher_result = $this->getImporter()->fetcher->fetch($this, $raw);
+
+    // Parse.
+    $parser_result = $this->getImporter()->parser->parse($this, $fetcher_result);
+    module_invoke_all('feeds_after_parse', $this, $parser_result);
+
+    // // Process.
+    $this->getImporter()->processor->process($this, $parser_result);
+  }
+
+  /**
    * Remove all items from a feed.
    *
    * This method only executes the current batch chunk, then returns. If you are
@@ -717,6 +743,33 @@ class Feed extends EntityNG implements FeedInterface {
     // $feed->fetcher_result = isset($feed->fetcher_result) ? $feed->fetcher_result : FALSE;
     // Before saving the feeds, set changed and revision times.
     $this->changed->value = REQUEST_TIME;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
+    // Alert implementers of FeedInterface to the fact that we're saving.
+    foreach ($this->getImporter()->getPluginTypes() as $type) {
+      $this->getImporter()->$type->sourceSave($this);
+    }
+    $config = $this->getConfig();
+
+    // Store the source property of the fetcher in a separate column so that we
+    // can do fast lookups on it.
+    $this->source->value = '';
+    if (isset($config[$this->getImporter()->fetcher->getPluginID()]['source'])) {
+      $this->source = $config[$this->getImporter()->fetcher->getPluginID()]['source'];
+    }
+
+    // @todo move this to the storage controller.
+    db_update('feeds_feed')
+      ->condition('fid', $this->id())
+      ->fields(array(
+        'source' => $this->source->value,
+        'config' => serialize($config),
+      ))
+      ->execute();
   }
 
   /**

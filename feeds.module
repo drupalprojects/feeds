@@ -7,7 +7,12 @@
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\HTTPRequest;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
+use Guzzle\Http\Exception\RequestException;
+use Guzzle\Http\Exception\BadResponseException;
+use Zend\Feed\Reader\Reader;
 
 /**
  * Do not schedule a feed for refresh.
@@ -121,6 +126,9 @@ function feeds_cron_job_scheduler_info() {
   $info['feeds_push_unsubscribe'] = array(
     'queue name' => 'feeds_push_unsubscribe',
   );
+  $info['feeds_push_subscribe'] = array(
+    'queue name' => 'feeds_push_subscribe',
+  );
   return $info;
 }
 
@@ -157,6 +165,13 @@ function feeds_queue_info() {
         'time' => 60,
       ),
     ),
+    'feeds_push_subscribe' => array(
+      'title' => t('Feeds push subscribe'),
+      'worker callback' => 'feeds_push_subscribe',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
   );
 }
 
@@ -164,17 +179,18 @@ function feeds_queue_info() {
  * Scheduler callback for importing from a source.
  */
 function feeds_feed_import(array $job) {
-  $feed = entity_load('feeds_feed', $job['id']);
-  try {
-    $feed->existing()->import();
+  if ($feed = entity_load('feeds_feed', $job['id'])) {
+    try {
+      $feed->existing()->import();
+    }
+    catch (FeedsNotExistingException $e) {
+      // Do nothing.
+    }
+    catch (Exception $e) {
+      $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
+    }
+    $feed->scheduleImport();
   }
-  catch (FeedsNotExistingException $e) {
-    // Do nothing.
-  }
-  catch (Exception $e) {
-    $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-  $feed->scheduleImport();
 }
 
 /**
@@ -213,10 +229,69 @@ function feeds_feed_expire(array $job) {
 
 /**
  * Scheduler callback for unsubscribing from PuSH hubs.
+ *
+ * @todo This isn't working yet.
  */
 function feeds_push_unsubscribe(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
   $feed->getImporter()->fetcher->unsubscribe($feed);
+}
+
+/**
+ * Scheduler callback for subscribing from PuSH hubs.
+ */
+function feeds_push_subscribe(array $job) {
+  if ($feed = entity_load('feeds_feed', $job['id'])) {
+    $feed_config = $feed->getConfig();
+
+    if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
+
+      if (isset($feed_config[$job['type']])) {
+        $http = new HTTPRequest($feed_config[$job['type']]['source']);
+
+        $response = $http->get();
+        $channel = Reader::importFile($response->file);
+
+        if ($hubs = $channel->getHubs()) {
+          $subscription['hub'] = reset($hubs);
+          $subscription['state'] = 'subscribe';
+          \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
+
+          $client = \Drupal::httpClient();
+
+          $request = $client
+            ->post($subscription['hub'])
+            ->addPostFields(array(
+              'hub.callback' => 'http://98.248.39.71:8080/feed/' . $feed->id() . '/push_callback',
+              'hub.mode' => $subscription['state'],
+              'hub.topic' => $subscription['topic'],
+              'hub.verify_token' => $subscription['token'],
+              'hub.verify' => 'sync',
+              'hub.lease_seconds' => '',
+              'hub.secret' => $subscription['secret'],
+            )
+          );
+
+          try {
+            $response = $request->send();
+          }
+          catch (BadResponseException $e) {
+            $response = $e->getResponse();
+            watchdog('feeds', '%error', array('%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()), WATCHDOG_WARNING);
+            drupal_set_message(t('%error', array('%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase())));
+          }
+          catch (RequestException $e) {
+            watchdog('feeds', '%error', array('%error' => $e->getMessage()), WATCHDOG_WARNING);
+            drupal_set_message(t('%error', array('%error' => $e->getMessage())));
+          }
+
+          if ($response->getStatusCode() != 204 || $response->getStatusCode() != 202) {
+            // There was an error, handle it.
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -526,19 +601,6 @@ function feeds_theme() {
 }
 
 /**
- * Implements hook_data_type_info().
- */
-function feeds_data_type_info() {
-  $info['feeds_serialized_field'] = array(
-    'label' => t('Serialized field item'),
-    'description' => t('An entity field containing a serialized blob.'),
-    'class' => '\Drupal\feeds\Type\SerializedItem',
-    'list class' => '\Drupal\Core\Entity\Field\Type\Field',
-  );
-  return $info;
-}
-
-/**
  * Implements hook_entity_bundle_info().
  */
 function feeds_entity_bundle_info() {
@@ -596,24 +658,6 @@ function feeds_file_download($uri) {
 }
 
 /**
- * Implements hook_exit().
- */
-function feeds_exit() {
-  // Process any pending PuSH subscriptions.
-  $jobs = feeds_get_subscription_jobs();
-  foreach ($jobs as $job) {
-    if (!isset($job['fetcher']) || !isset($job['source'])) {
-      continue;
-    }
-    $job['fetcher']->subscribe($job['source']);
-  }
-
-  if (drupal_static('feeds_log_error', FALSE)) {
-    watchdog('feeds', 'Feeds reported errors, visit the Feeds log for details.', array(), WATCHDOG_ERROR, 'admin/reports/dblog/feeds');
-  }
-}
-
-/**
  * Implements hook_entity_insert().
  */
 function feeds_entity_insert(EntityInterface $entity) {
@@ -666,59 +710,9 @@ function feeds_valid_url($url, $absolute = FALSE) {
 }
 
 /**
- * Registers a feed subscription job for execution on feeds_exit().
- *
- * @param array $job
- *   Information about a new job to queue; or if set to NULL (default), leaves
- *   the current queued jobs unchanged.
- *
- * @return array
- *   An array of subscribe jobs to process.
- *
- * @see feeds_exit()
- * @see feeds_get_subscription_jobs()
- */
-function feeds_set_subscription_job(array $job = NULL) {
-  $jobs = &drupal_static(__FUNCTION__, array());
-  if (isset($job)) {
-    $jobs[] = $job;
-  }
-  return $jobs;
-}
-
-/**
- * Returns the list of queued jobs to be run.
- *
- * @return array
- *   An array of subscribe jobs to process.
- *
- * @see feeds_set_subscription_job()
- */
-function feeds_get_subscription_jobs() {
-  return feeds_set_subscription_job();
-}
-
-/**
  * Feeds API version.
  */
 function feeds_api_version() {
   $version = feeds_ctools_plugin_api('feeds', 'plugins');
   return $version['version'];
-}
-
-/**
- * Handle a fetcher callback.
- *
- * @todo Move this to a controller.
- */
-function feeds_fetcher_callback($importer, $fid = 0) {
-  if ($importer instanceof Importer) {
-    try {
-      return $importer->fetcher->request($fid);
-    }
-    catch (Exception $e) {
-      // Do nothing.
-    }
-  }
-  drupal_access_denied();
 }

@@ -20,41 +20,6 @@ use Drupal\job_scheduler\JobScheduler;
 class FeedStorageController extends DatabaseStorageControllerNG {
 
   /**
-   * Call PluginBase::sourceSave() on plugins.
-   *
-   * This is called after save() so that plugins have access to the feed id.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $feed
-   *   The feed object.
-   *
-   * @todo Figure out a better way to do this.
-   */
-  protected function savePropertyData(EntityInterface $feed) {
-    parent::savePropertyData($feed);
-
-    // Alert implementers of FeedInterface to the fact that we're saving.
-    foreach ($feed->getImporter()->getPluginTypes() as $type) {
-      $feed->getImporter()->$type->sourceSave($feed);
-    }
-    $config = $feed->config->value;
-
-    // Store the source property of the fetcher in a separate column so that we
-    // can do fast lookups on it.
-    $feed->source->value = '';
-    if (isset($config[$feed->getImporter()->fetcher->getPluginID()]['source'])) {
-      $feed->source->value = $config[$feed->getImporter()->fetcher->getPluginID()]['source'];
-    }
-
-    db_update('feed_feed')
-      ->condition('fid', $feed->id())
-      ->fields(array(
-        'source' => $feed->source->value,
-        'config' => $config,
-      ))
-      ->execute();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function baseFieldDefinitions() {

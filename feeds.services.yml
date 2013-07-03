@@ -24,3 +24,9 @@ services:
       - { name: access_check }
   feeds.item_info:
     class: Drupal\feeds\ItemInfoController
+  feeds.subscription.crud:
+    class: Drupal\feeds\PuSH\Subscription
+    arguments: ['@database', 'feeds_subscription']
+  feeds.subscription.controller:
+    class: Drupal\feeds\Controller\SubscriptionController
+    arguments: ['@feeds.subscription.crud']
