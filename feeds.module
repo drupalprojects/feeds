@@ -694,11 +694,3 @@ function feeds_valid_url($url, $absolute = FALSE) {
     return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
   }
 }
-
-/**
- * Feeds API version.
- */
-function feeds_api_version() {
-  $version = feeds_ctools_plugin_api('feeds', 'plugins');
-  return $version['version'];
-}
