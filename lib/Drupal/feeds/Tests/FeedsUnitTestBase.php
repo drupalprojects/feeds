@@ -2,17 +2,18 @@
 
 /**
  * @file
- * Common functionality for all Feeds tests.
- *
- * @todo Convert to PHPUnit.
+ * Contains \Drupal\feeds\Tests\FeedsUnitTestBase.
  */
 
 namespace Drupal\feeds\Tests;
 
 use Drupal\simpletest\UnitTestBase;
-use Drupal\feeds\FeedsWebTestBase;
 
-class FeedsUnitTestBase extends FeedsWebTestBase {
+/**
+ * Base unit test class for Feeds.
+ */
+class FeedsUnitTestBase extends UnitTestBase {
+
   public static function getInfo() {
     return array(
       'name' => 'Unit tests',
@@ -21,16 +22,8 @@ class FeedsUnitTestBase extends FeedsWebTestBase {
     );
   }
 
-  public function setUp() {
-    parent::setUp();
-
-    // Manually include the feeds module.
-    // @todo Allow an array of modules from the child class.
-    drupal_load('module', 'feeds');
-  }
-
   /**
-   * Test valid absolute urls.
+   * Tests valid absolute urls.
    *
    * @see ValidUrlTestCase
    *
