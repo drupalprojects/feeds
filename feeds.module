@@ -358,25 +358,6 @@ function feeds_permission() {
 }
 
 /**
- * Implements hook_forms().
- *
- * Declare form callbacks for Importer and plugin classes.
- */
-function feeds_forms() {
-  $forms = array();
-  $forms['Drupal\feeds\Plugin\Core\Entity\Importer_feeds_form']['callback'] = 'feeds_form';
-
-  foreach (array('fetcher', 'parser', 'processor') as $type) {
-    $definitions = \Drupal::service('plugin.manager.feeds.' . $type)->getDefinitions();
-    foreach ($definitions as $definition) {
-      $forms[$definition['class'] . '_feeds_form']['callback'] = 'feeds_form';
-    }
-  }
-
-  return $forms;
-}
-
-/**
  * Implements hook_menu().
  */
 function feeds_menu() {
