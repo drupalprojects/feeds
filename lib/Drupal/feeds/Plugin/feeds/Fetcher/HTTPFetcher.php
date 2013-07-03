@@ -10,8 +10,8 @@ namespace Drupal\feeds\Plugin\feeds\Fetcher;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
+use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedNotModifiedException;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FetcherResult;
 use Drupal\feeds\HTTPRequest;
@@ -55,7 +55,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       $feed->setConfigFor($this, $feed_config);
     }
     if ($result->code == 304) {
-      throw new FeedNotModifiedException();
+      throw new NotModifiedException();
     }
     return new FetcherResult($result->file);
   }

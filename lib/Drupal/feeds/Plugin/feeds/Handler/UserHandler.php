@@ -9,9 +9,9 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\FeedsValidationException;
 
 /**
  * Handles special user entity operations.
@@ -112,7 +112,7 @@ class UserHandler extends PluginBase {
    */
   public function entityValidate($account) {
     if (empty($account->name) || empty($account->mail) || !valid_email_address($account->mail)) {
-      throw new FeedsValidationException(t('User name missing or email not valid.'));
+      throw new ValidationException(t('User name missing or email not valid.'));
     }
   }
 

@@ -11,6 +11,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityNG;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsState;
 use Drupal\feeds\Plugin\PluginBase;
@@ -680,12 +681,12 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * Acquires a lock for this source.
    *
-   * @throws FeedsLockException
+   * @throws \Drupal\feeds\Exception\LockException
    *   If a lock for the requested job could not be acquired.
    */
   protected function acquireLock() {
     if (!lock()->acquire("feeds_feed_{$this->id()}", 60.0)) {
-      throw new FeedsLockException(t('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
+      throw new LockException(t('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
     }
   }
 

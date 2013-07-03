@@ -9,8 +9,8 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsAccessException;
 use Drupal\feeds\FeedsParserResult;
 
 /**
@@ -166,7 +166,7 @@ class NodeHandler extends PluginBase {
       // could be invalid.
       if (!$author) {
         $message = 'User %uid is not a valid user.';
-        throw new FeedsAccessException(t($message, array('%uid' => $entity->uid)));
+        throw new AccessException(t($message, array('%uid' => $entity->uid)));
       }
 
       if ($entity->isNew()) {
@@ -180,7 +180,7 @@ class NodeHandler extends PluginBase {
 
       if (!$access) {
         $message = 'User %name is not authorized to %op content type %content_type.';
-        throw new FeedsAccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->bundle())));
+        throw new AccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->bundle())));
       }
     }
   }

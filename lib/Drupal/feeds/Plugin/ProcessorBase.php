@@ -7,8 +7,8 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsAccessException;
 use Drupal\feeds\FeedsParserResult;
 
 /**
