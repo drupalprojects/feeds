@@ -1,21 +1,30 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\FeedsParserResult.
+ */
+
 namespace Drupal\feeds;
 
 /**
- * A result of a parsing stage.
+ * The result of a parsing stage.
  */
-class FeedsParserResult extends FeedsResult {
+class FeedsParserResult {
+
   public $title;
   public $description;
   public $link;
   public $items;
-  public $current_item;
+  public $currentItem;
 
   /**
-   * Constructor.
+   * Constructs a FeedsParserResult object.
+   *
+   * @param array $items
+   *   (optional) The feed items to process. Defaults to an empty array.
    */
-  public function __construct($items = array()) {
+  public function __construct(array $items = array()) {
     $this->title = '';
     $this->description = '';
     $this->link = '';
@@ -23,24 +32,29 @@ class FeedsParserResult extends FeedsResult {
   }
 
   /**
+   * Returns the next item to process.
+   *
+   * @return array
+   *   Next available item or NULL if there is none. Every returned item is
+   *   removed from the internal array.
+   *
    * @todo Move to a nextItem() based approach, not consuming the item array.
    *   Can only be done once we don't cache the entire batch object between page
    *   loads for batching anymore.
-   *
-   * @return
-   *   Next available item or NULL if there is none. Every returned item is
-   *   removed from the internal array.
    */
   public function shiftItem() {
-    $this->current_item = array_shift($this->items);
-    return $this->current_item;
+    $this->currentItem = array_shift($this->items);
+    return $this->currentItem;
   }
 
   /**
-   * @return
+   * Returns the current item being processed.
+   *
+   * @return array
    *   Current result item.
    */
   public function currentItem() {
-    return empty($this->current_item) ? NULL : $this->current_item;
+    return empty($this->currentItem) ? NULL : $this->currentItem;
   }
+
 }

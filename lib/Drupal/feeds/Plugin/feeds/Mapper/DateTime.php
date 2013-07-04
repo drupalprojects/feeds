@@ -42,23 +42,15 @@ class DateTime extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  protected function buildField(array $field, $column, array $values, array $mapping) {
-    $delta = count($field['und']);
+  protected function validate($value) {
 
-    foreach ($values as $value) {
-      if ($delta >= $this->cardinality) {
-        break;
-      }
+    $value = new DrupalDateTime($value);
 
-      $value = new DrupalDateTime($value);
-
-      if (!$value->hasErrors()) {
-        $field['und'][$delta]['value'] = $value->format(DATETIME_DATETIME_STORAGE_FORMAT);
-        $delta++;
-      }
+    if (!$value->hasErrors()) {
+      return $value->format(DATETIME_DATETIME_STORAGE_FORMAT);
     }
 
-    return $field;
+    return FALSE;
   }
 
 }

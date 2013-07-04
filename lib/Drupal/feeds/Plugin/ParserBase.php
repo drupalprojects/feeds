@@ -8,9 +8,8 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsResult;
-use Drupal\feeds\FetcherResultInterface;
 use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\FetcherResultInterface;
 
 /**
  * Abstract class, defines interface for parsers.

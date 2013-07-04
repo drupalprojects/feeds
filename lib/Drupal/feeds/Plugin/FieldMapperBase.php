@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedsElement;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
 /**
@@ -112,6 +113,38 @@ abstract class FieldMapperBase extends MapperBase {
    * @return array
    *   The newly constructed field.
    */
-  abstract protected function buildField(array $field, $column, array $values, array $mapping);
+  protected function buildField(array $field, $column, array $values, array $mapping) {
+    $delta = count($field['und']);
+
+    foreach ($values as $value) {
+      if ($delta >= $this->cardinality) {
+        break;
+      }
+
+      if (is_object($value) && ($value instanceof FeedsElement)) {
+        $value = $value->getValue();
+      }
+
+      if (($value = $this->validate($value)) !== FALSE) {
+        $field['und'][$delta]['value'] = $value;
+        $delta++;
+      }
+    }
+
+    return $field;
+  }
+
+  /**
+   * Validates a field value.
+   *
+   * @param mixed $value
+   *   The field value.
+   *
+   * @return mixed|false
+   *   The value, or false if validation failed.
+   */
+  protected function validate($value) {
+    return $value;
+  }
 
 }

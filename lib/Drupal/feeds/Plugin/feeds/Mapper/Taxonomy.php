@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsElement;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\Plugin\FieldMapperBase;

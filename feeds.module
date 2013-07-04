@@ -188,7 +188,7 @@ function feeds_feed_import(array $job) {
 }
 
 /**
- * Scheduler callback for deleting all items from a source.
+ * Scheduler callback for deleting all items from a feed.
  */
 function feeds_feed_clear(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
@@ -324,27 +324,29 @@ function feeds_permission() {
     ),
   );
   foreach (entity_load_multiple('feeds_importer') as $importer) {
+    $args = array('@name' => $importer->label());
+
     $perms["view {$importer->id()} feeds"] = array(
-      'title' => t('View @name feeds', array('@name' => $importer->label())),
+      'title' => t('View @name feeds', $args),
     );
     $perms["create {$importer->id()} feeds"] = array(
-      'title' => t('Add @name feeds', array('@name' => $importer->label())),
+      'title' => t('Add @name feeds', $args),
     );
     $perms["update {$importer->id()} feeds"] = array(
-      'title' => t('Edit @name feeds', array('@name' => $importer->label())),
+      'title' => t('Edit @name feeds', $args),
     );
     $perms["delete {$importer->id()} feeds"] = array(
-      'title' => t('Delete @name feeds', array('@name' => $importer->label())),
+      'title' => t('Delete @name feeds', $args),
     );
     $perms["import {$importer->id()} feeds"] = array(
-      'title' => t('Import @name feeds', array('@name' => $importer->label())),
+      'title' => t('Import @name feeds', $args),
     );
     $perms["clear {$importer->id()} feeds"] = array(
-      'title' => t('Delete items from @name feeds', array('@name' => $importer->label())),
+      'title' => t('Delete items from @name feeds', $args),
     );
     $perms["unlock {$importer->id()} feeds"] = array(
-      'title' => t('Unlock imports from @name feeds', array('@name' => $importer->label())),
-      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it .'),
+      'title' => t('Unlock imports from @name feeds', $args),
+      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it.'),
     );
   }
 
@@ -459,30 +461,22 @@ function feeds_local_actions() {
     array(
       'route_name' => 'feeds_feed.import',
       'title' => t('Import'),
-      'appears_on' => array(
-        'feeds_feed.view',
-      ),
+      'appears_on' => array('feeds_feed.view'),
     ),
     array(
       'route_name' => 'feeds_feed.clear',
       'title' => t('Delete items'),
-      'appears_on' => array(
-        'feeds_feed.view',
-      ),
+      'appears_on' => array('feeds_feed.view'),
     ),
     array(
       'route_name' => 'feeds_feed.unlock',
       'title' => t('Unlock'),
-      'appears_on' => array(
-        'feeds_feed.view',
-      ),
+      'appears_on' => array('feeds_feed.view'),
     ),
     array(
       'route_name' => 'feeds_importer.create',
       'title' => t('Add importer'),
-      'appears_on' => array(
-        'feeds_importer.list',
-      ),
+      'appears_on' => array('feeds_importer.list'),
     ),
   );
 }

@@ -9,7 +9,6 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\FeedsElement;
 use Drupal\feeds\Plugin\FieldMapperBase;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
@@ -49,25 +48,12 @@ class Number extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  protected function buildField(array $field, $column, array $values, array $mapping) {
-    $delta = count($field['und']);
-
-    foreach ($values as $value) {
-      if ($delta >= $this->cardinality) {
-        break;
-      }
-
-      if (is_object($value) && ($value instanceof FeedsElement)) {
-        $value = $value->getValue();
-      }
-
-      if (is_numeric($value)) {
-        $field['und'][$delta]['value'] = $value;
-        $delta++;
-      }
+  protected function validate($value) {
+    if (is_numeric($value)) {
+      return $value;
     }
 
-    return $field;
+    return FALSE;
   }
 
 }
