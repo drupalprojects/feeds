@@ -10,12 +10,12 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
+use Drupal\feeds\Component\ParserCSV;
+use Drupal\feeds\Component\ParserCSVIterator;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FetcherResultInterface;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\ParserCSV;
-use Drupal\feeds\ParserCSVIterator;
+use Drupal\feeds\FetcherResultInterface;
 use Drupal\feeds\Plugin\ParserBase;
 
 /**

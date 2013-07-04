@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Tests for ParserCSV library.
+ * Contains \Drupal\feeds\Tests\ParserCSVTest.
  */
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\Component\ParserCSV;
+use Drupal\feeds\Component\ParserCSVIterator;
 use Drupal\simpletest\UnitTestBase;
-use Drupal\feeds\ParserCSV;
-use Drupal\feeds\ParserCSVIterator;
 
 /**
  * Test aggregating a feed as node items.
@@ -19,6 +19,7 @@ use Drupal\feeds\ParserCSVIterator;
  * Feeds at some time.
  */
 class ParserCSVTest extends UnitTestBase  {
+
   protected $profile = 'testing';
 
   public static function getInfo() {
@@ -104,4 +105,5 @@ class ParserCSVTest extends UnitTestBase  {
       'tab' => "\t",
     );
   }
+
 }

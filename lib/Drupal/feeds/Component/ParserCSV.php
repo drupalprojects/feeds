@@ -2,21 +2,20 @@
 
 /**
  * @file
- * Contains CSV Parser.
+ * Contains \Drupal\feeds\Component\ParserCSV.
  *
  * Functions in this file are independent of the Feeds specific implementation.
  * Thanks to jpetso http://drupal.org/user/56020 for most of the code in this
  * file.
  */
 
-namespace Drupal\feeds;
-
-use Iterator;
+namespace Drupal\feeds\Component;
 
 /**
  * Functionality to parse CSV files into a two dimensional array.
  */
 class ParserCSV {
+
   private $delimiter;
   private $skipFirstLine;
   private $columnNames;
@@ -128,7 +127,7 @@ class ParserCSV {
   /**
    * Parse CSV files into a two dimensional array.
    *
-   * @param Iterator $lineIterator
+   * @param \Iterator $lineIterator
    *   An Iterator object that yields line strings, e.g. ParserCSVIterator.
    * @param $start
    *   The byte number from where to start parsing the file.
@@ -137,7 +136,7 @@ class ParserCSV {
    * @return
    *   Two dimensional array that contains the data in the CSV file.
    */
-  public function parse(Iterator $lineIterator) {
+  public function parse(\Iterator $lineIterator) {
     $skipLine = $this->skipFirstLine;
     $rows = array();
 
@@ -277,4 +276,5 @@ class ParserCSV {
     }
     return $rows;
   }
+
 }

@@ -1,13 +1,15 @@
 <?php
 
-namespace Drupal\feeds;
+/**
+ * @file Contains \Drupal\feeds\Component\ParserCSVIterator.
+ */
 
-use Iterator;
+namespace Drupal\feeds\Component;
 
 /**
  * Text lines from file iterator.
  */
-class ParserCSVIterator implements Iterator {
+class ParserCSVIterator implements \Iterator {
   private $handle;
   private $currentLine;
   private $currentPos;
@@ -54,4 +56,5 @@ class ParserCSVIterator implements Iterator {
   public function key() {
     return 'line';
   }
+
 }
