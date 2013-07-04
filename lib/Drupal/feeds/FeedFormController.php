@@ -27,7 +27,7 @@ class FeedFormController extends EntityFormControllerNG {
     if ($this->operation == 'update') {
       drupal_set_title(t('<em>Edit @importer</em> @title', array('@importer' => $importer->label(), '@title' => $feed->label())), PASS_THROUGH);
     }
-    elseif ($this->operation == 'add') {
+    elseif ($this->operation == 'create') {
       drupal_set_title(t('<em>Add @importer</em>', array('@importer' => $importer->label())), PASS_THROUGH);
     }
 
