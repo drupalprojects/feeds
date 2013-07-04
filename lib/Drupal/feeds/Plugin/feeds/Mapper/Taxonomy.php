@@ -9,11 +9,9 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedsElement;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\Plugin\FieldMapperBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
 use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
@@ -54,7 +52,7 @@ class Taxonomy extends FieldMapperBase {
   public function sources(array &$sources, Importer $importer) {
 
     foreach (field_info_instances('feeds_feed', $importer->id()) as $name => $instance) {
-    $info = field_info_field($name);
+      $info = field_info_field($name);
 
       if ($info['type'] == 'taxonomy_term_reference') {
         $sources['parent:taxonomy:' . $info->label()] = array(
@@ -69,7 +67,7 @@ class Taxonomy extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  public function getSource(Feed $feed, FeedsParserResult $result, $key) {
+  public function getSource(FeedInterface $feed, FeedsParserResult $result, $key) {
     list(, , $field) = explode(':', $key, 3);
 
     $result = array();
@@ -96,55 +94,40 @@ class Taxonomy extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  function setTarget(Feed $feed, EntityInterface $entity, $target, $terms, array $mapping) {
-
-    // Allow mapping the string '0' to a term name.
-    if (empty($terms) && $terms != 0) {
-      return;
-    }
-
-    // Handle non-multiple values.
-    if (!is_array($terms)) {
-      $terms = array($terms);
-    }
-
+  protected function buildField(array $field, $column, array $values, array $mapping) {
     // Add in default values.
     $mapping += array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_NAME,
       'autocreate' => FALSE,
     );
 
-    $info = field_info_field($target);
+    $field_name = $this->instance->getFieldName();
 
     $cache = &drupal_static(__FUNCTION__);
-    if (!isset($cache['allowed_values'][$target])) {
-      $instance = field_info_instance($entity->entityType(), $target, $entity->bundle());
-      $cache['allowed_values'][$target] = taxonomy_allowed_values($instance, $entity);
+    if (!isset($cache['allowed_values'][$field_name])) {
+      $cache['allowed_values'][$field_name] = taxonomy_allowed_values($this->instance, $this->entity);
     }
 
-    if (!isset($cache['allowed_vocabularies'][$target])) {
-      foreach ($info['settings']['allowed_values'] as $tree) {
+    if (!isset($cache['allowed_vocabularies'][$field_name])) {
+      foreach ($this->instance->getFieldSetting('allowed_values') as $tree) {
         if ($vocabulary = entity_load('taxonomy_vocabulary', $tree['vocabulary'])) {
-          $cache['allowed_vocabularies'][$target][$vocabulary->id()] = $vocabulary->id();
+          $cache['allowed_vocabularies'][$field_name][$vocabulary->id()] = $vocabulary->id();
         }
       }
     }
 
     $query = \Drupal::entityQuery('taxonomy_term');
     $query
-      ->condition('vid', $cache['allowed_vocabularies'][$target])
+      ->condition('vid', $cache['allowed_vocabularies'][$field_name])
       ->range(0, 1);
-
-
-    $field = isset($entity->$target) ? $entity->$target : array('und' => array());
 
     // Allow for multiple mappings to the same target.
     $delta = count($field['und']);
 
     // Iterate over all values.
-    foreach ($terms as $term) {
+    foreach ($values as $term) {
 
-      if ($delta >= $info['cardinality'] && $info['cardinality'] > -1) {
+      if ($delta >= $this->cardinality) {
         break;
       }
 
@@ -165,12 +148,12 @@ class Taxonomy extends FieldMapperBase {
             elseif ($mapping['autocreate']) {
               $term = entity_create('taxonomy_term', array(
                 'name' => $term,
-                'vid' => key($cache['allowed_vocabularies'][$target]),
+                'vid' => key($cache['allowed_vocabularies'][$field_name]),
               ));
               $term->save();
               $tid = $term->id();
               // Add to the list of allowed values.
-              $cache['allowed_values'][$target][$tid] = $term->label();;
+              $cache['allowed_values'][$field_name][$tid] = $term->label();;
             }
             break;
 
@@ -188,13 +171,14 @@ class Taxonomy extends FieldMapperBase {
         }
       }
 
-      if ($tid && isset($cache['allowed_values'][$target][$tid])) {
+      if ($tid && isset($cache['allowed_values'][$field_name][$tid])) {
         $field['und'][$delta]['target_id'] = $tid;
         $delta++;
       }
     }
 
-    $entity->$target = $field;
+    return $field;
+
   }
 
   /**

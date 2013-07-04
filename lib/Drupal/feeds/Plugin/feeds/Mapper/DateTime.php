@@ -10,9 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Plugin\FieldMapperBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
 /**
@@ -44,32 +42,23 @@ class DateTime extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  public function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    $info = field_info_field($target);
-    $field = isset($entity->$target) ? $entity->$target : array('und' => array());
+  protected function buildField(array $field, $column, array $values, array $mapping) {
     $delta = count($field['und']);
 
-    foreach ($value as $v) {
-      if ($delta >= $info['cardinality'] && $info['cardinality'] > -1) {
+    foreach ($values as $value) {
+      if ($delta >= $this->cardinality) {
         break;
       }
 
-      $v = new DrupalDateTime($v);
+      $value = new DrupalDateTime($value);
 
-      if (!$v->hasErrors()) {
-        $field['und'][$delta]['value'] = $v->format(DATETIME_DATETIME_STORAGE_FORMAT);
+      if (!$value->hasErrors()) {
+        $field['und'][$delta]['value'] = $value->format(DATETIME_DATETIME_STORAGE_FORMAT);
         $delta++;
       }
     }
 
-    $entity->$target = $field;
+    return $field;
   }
 
 }
-
-
-

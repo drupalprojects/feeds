@@ -9,9 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedsElement;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 use Drupal\feeds\Plugin\FieldMapperBase;
 
@@ -49,39 +47,27 @@ class Text extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
-    if (empty($value)) {
-      return;
+  protected function buildField(array $field, $column, array $values, array $mapping) {
+
+    if (isset($this->importer->processor->config['input_format'])) {
+      $format = $this->importer->processor->config['input_format'];
     }
-
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    if (isset($feed->importer->processor->config['input_format'])) {
-      $format = $feed->importer->processor->config['input_format'];
-    }
-
-    $info = field_info_field($target);
-
-    // Iterate over all values.
-    $field = isset($entity->$target) ? $entity->$target : array('und' => array());
 
     // Allow for multiple mappings to the same target.
     $delta = count($field['und']);
 
-    foreach ($value as $v) {
+    foreach ($values as $value) {
 
-      if ($info['cardinality'] == $delta) {
+      if ($delta >= $this->cardinality) {
         break;
       }
 
-      if (is_object($v) && ($v instanceof FeedsElement)) {
-        $v = $v->getValue();
+      if (is_object($value) && ($value instanceof FeedsElement)) {
+        $value = $value->getValue();
       }
 
-      if (is_scalar($v)) {
-        $field['und'][$delta]['value'] = $v;
+      if (is_scalar($value)) {
+        $field['und'][$delta]['value'] = $value;
 
         if (isset($format)) {
           $field['und'][$delta]['format'] = $format;
@@ -89,9 +75,9 @@ class Text extends FieldMapperBase {
 
         $delta++;
       }
-    }
 
-    $entity->$target = $field;
+      return $field;
+    }
   }
 
 }

@@ -9,9 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedsElement;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\Plugin\FieldMapperBase;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
@@ -51,39 +49,25 @@ class Number extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
-    // Do not perform the regular empty() check here. 0 is a valid value. That's
-    // really just a performance thing anyway.
-
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    $info = field_info_field($target);
-
-    // Iterate over all values.
-    $field = isset($entity->$target) ? $entity->$target : array('und' => array());
-
-    // Allow for multiple mappings to the same target.
+  protected function buildField(array $field, $column, array $values, array $mapping) {
     $delta = count($field['und']);
 
-    foreach ($value as $v) {
-
-      if ($info['cardinality'] == $delta) {
+    foreach ($values as $value) {
+      if ($delta >= $this->cardinality) {
         break;
       }
 
-      if (is_object($v) && ($v instanceof FeedsElement)) {
-        $v = $v->getValue();
+      if (is_object($value) && ($value instanceof FeedsElement)) {
+        $value = $value->getValue();
       }
 
-      if (is_numeric($v)) {
-        $field['und'][$delta]['value'] = $v;
+      if (is_numeric($value)) {
+        $field['und'][$delta]['value'] = $value;
         $delta++;
       }
     }
 
-    $entity->$target = $field;
+    return $field;
   }
 
 }

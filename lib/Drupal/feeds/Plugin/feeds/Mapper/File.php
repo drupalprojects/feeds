@@ -9,10 +9,8 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\Plugin\FieldMapperBase;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
@@ -61,58 +59,38 @@ class File extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  public function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
-    if (empty($value)) {
-      return;
-    }
+  protected function buildField(array $field, $column, array $values, array $mapping) {
 
-    // Make sure $value is an array of objects of type FeedsEnclosure.
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    // Add default of uri for backwards compatibility.
-    list($field_name, $sub_field) = explode(':', $target . ':uri');
-    $info = field_info_field($field_name);
-
-    if ($sub_field == 'uri') {
-
-      foreach ($value as $k => $v) {
-        if (!($v instanceof FeedsEnclosure)) {
-          if (is_string($v)) {
-            $value[$k] = new FeedsEnclosure($v, file_get_mimetype($v));
+    if ($column == 'uri') {
+      foreach ($values as $k => $value) {
+        if (!($value instanceof FeedsEnclosure)) {
+          if (is_string($value)) {
+            $values[$k] = new FeedsEnclosure($value, file_get_mimetype($value));
           }
           else {
-            unset($value[$k]);
+            unset($values[$k]);
           }
         }
       }
-      if (empty($value)) {
+      if (!$values) {
         return;
       }
 
       static $destination;
       if (!$destination) {
-        $entity_type = $feed->getImporter()->processor->entityType();
-        $bundle = $feed->getImporter()->processor->bundle();
-
-        $instance_info = field_info_instance($entity_type, $field_name, $bundle);
-
         // Determine file destination.
         // @todo This needs review and debugging.
         $data = array();
-        if (!empty($entity->uid)) {
-          $data[$entity_type] = $entity;
+        if (!empty($this->entity->uid)) {
+          $data[$entity_type] = $this->entity;
         }
-        $destination = file_field_widget_uri($instance_info->getFieldSettings(), $data);
+        $destination = file_field_widget_uri($this->instance->getFieldSettings(), $data);
       }
     }
 
-    // Populate entity.
-    $field = isset($entity->$field_name) ? $entity->$field_name : array(Language::LANGCODE_NOT_SPECIFIED => array());
     $delta = 0;
-    foreach ($value as $v) {
-      if ($delta >= $info['cardinality'] && $info['cardinality'] > -1) {
+    foreach ($values as $value) {
+      if ($delta >= $this->cardinality) {
         break;
       }
 
@@ -120,15 +98,15 @@ class File extends FieldMapperBase {
         $field[Language::LANGCODE_NOT_SPECIFIED][$delta] = array();
       }
 
-      switch ($sub_field) {
+      switch ($column) {
         case 'alt':
         case 'title':
-          $field[Language::LANGCODE_NOT_SPECIFIED][$delta][$sub_field] = $v;
+          $field[Language::LANGCODE_NOT_SPECIFIED][$delta][$column] = $value;
           break;
 
         case 'uri':
           try {
-            $file = $v->getFile($destination);
+            $file = $value->getFile($destination);
             $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['entity'] = $file;
             $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['fid'] = $file->id();
             // $field[Language::LANGCODE_NOT_SPECIFIED][$delta]['description'] = $file->description->value;
@@ -144,7 +122,7 @@ class File extends FieldMapperBase {
       $delta++;
     }
 
-    $entity->$field_name = $field;
+    return $field;
   }
 
 }
