@@ -11,8 +11,9 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedsElement;
-use Drupal\feeds\Plugin\MapperBase;
 use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\field\Plugin\Core\Entity\FieldInstance;
+use Drupal\feeds\Plugin\FieldMapperBase;
 
 /**
  * Defines a text field mapper.
@@ -22,29 +23,27 @@ use Drupal\feeds\Plugin\Core\Entity\Feed;
  *   title = @Translation("Text")
  * )
  */
-class Text extends MapperBase {
+class Text extends FieldMapperBase {
 
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets, $entity_type, $bundle) {
-    $text_types = array(
-      'list_text',
-      'text',
-      'text_long',
-      'text_with_summary',
-    );
-    foreach (field_info_instances($entity_type, $bundle) as $name => $instance) {
-      $info = field_info_field($name);
+  protected $fieldTypes = array(
+    'list_text',
+    'text',
+    'text_long',
+    'text_with_summary',
+  );
 
-      if (in_array($info['type'], $text_types)) {
-        $targets[$name] = array(
-          'name' => check_plain($instance['label']),
-          'callback' => array($this, 'setTarget'),
-          'description' => t('The @label field of the entity.', array('@label' => $instance['label'])),
-        );
-      }
-    }
+  /**
+   * {@inheritdoc}
+   */
+  protected function applyTargets(array &$targets, FieldInstance $instance) {
+    $targets[$instance->getFieldName()] = array(
+      'name' => check_plain($instance->label()),
+      'callback' => array($this, 'setTarget'),
+      'description' => t('The @label field of the entity.', array('@label' => $instance->label())),
+    );
   }
 
   /**

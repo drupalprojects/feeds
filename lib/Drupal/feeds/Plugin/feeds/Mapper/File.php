@@ -11,9 +11,10 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\Language;
-use Drupal\feeds\Plugin\MapperBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\feeds\FeedsEnclosure;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\feeds\Plugin\FieldMapperBase;
+use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
 /**
  * Defines a file field mapper.
@@ -23,38 +24,37 @@ use Drupal\feeds\FeedsEnclosure;
  *   title = @Translation("File")
  * )
  */
-class File extends MapperBase {
+class File extends FieldMapperBase {
 
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets, $entity_type, $bundle_name) {
-    foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
-      $info = field_info_field($name);
+  protected $fieldTypes = array('file', 'image');
 
-      if (in_array($info['type'], array('file', 'image'))) {
-        $targets[$name . ':uri'] = array(
-          'name' => t('@label: URI', array('@label' => $instance['label'])),
-          'callback' => array($this, 'setTarget'),
-          'description' => t('The URI of the @label field.', array('@label' => $instance['label'])),
-          'real_target' => $name,
-        );
+  /**
+   * {@inheritdoc}
+   */
+  protected function applyTargets(array &$targets, FieldInstance $instance) {
+    $targets[$instance->getFieldName() . ':uri'] = array(
+      'name' => t('@label: URI', array('@label' => $instance->label())),
+      'callback' => array($this, 'setTarget'),
+      'description' => t('The URI of the @label field.', array('@label' => $instance->label())),
+      'real_target' => $instance->getFieldName(),
+    );
 
-        if ($info['type'] == 'image') {
-          $targets[$name . ':alt'] = array(
-            'name' => t('@label: Alt', array('@label' => $instance['label'])),
-            'callback' => array($this, 'setTarget'),
-            'description' => t('The alt tag of the @label field.', array('@label' => $instance['label'])),
-            'real_target' => $name,
-          );
-          $targets[$name . ':title'] = array(
-            'name' => t('@label: Title', array('@label' => $instance['label'])),
-            'callback' => array($this, 'setTarget'),
-            'description' => t('The title of the @label field.', array('@label' => $instance['label'])),
-            'real_target' => $name,
-          );
-        }
-      }
+    if ($instance->getFieldType() == 'image') {
+      $targets[$instance->getFieldName() . ':alt'] = array(
+        'name' => t('@label: Alt', array('@label' => $instance->label())),
+        'callback' => array($this, 'setTarget'),
+        'description' => t('The alt tag of the @label field.', array('@label' => $instance->label())),
+        'real_target' => $instance->getFieldName(),
+      );
+      $targets[$instance->getFieldName() . ':title'] = array(
+        'name' => t('@label: Title', array('@label' => $instance->label())),
+        'callback' => array($this, 'setTarget'),
+        'description' => t('The title of the @label field.', array('@label' => $instance->label())),
+        'real_target' => $instance->getFieldName(),
+      );
     }
   }
 

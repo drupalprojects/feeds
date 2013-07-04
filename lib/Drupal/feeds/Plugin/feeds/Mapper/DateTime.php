@@ -9,10 +9,11 @@ namespace Drupal\feeds\Plugin\feeds\Mapper;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\feeds\Plugin\MapperBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\Plugin\FieldMapperBase;
+use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\field\Plugin\Core\Entity\FieldInstance;
 
 /**
  * Defines a dateime field mapper.
@@ -22,29 +23,28 @@ use Drupal\Core\Datetime\DrupalDateTime;
  *   title = @Translation("DateTime")
  * )
  */
-class DateTime extends MapperBase {
+class DateTime extends FieldMapperBase {
 
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets, $entity_type, $bundle) {
-    foreach (field_info_instances($entity_type, $bundle) as $name => $instance) {
-      $info = field_info_field($name);
-      if ($info['type'] === 'datetime') {
-        $targets[$name] = array(
-          'name' => t('@name: Start', array('@name' => $instance['label'])),
-          'callback' => array($this, 'setTarget'),
-          'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $instance['label'])),
-          'real_target' => $name,
-        );
-      }
-    }
+  protected $fieldTypes = array('datetime');
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function applyTargets(array &$targets, FieldInstance $instance) {
+    $targets[$instance->getFieldName()] = array(
+      'name' => $instance->label(),
+      'callback' => array($this, 'setTarget'),
+      'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $instance->label())),
+    );
   }
 
   /**
    * {@inheritdoc}
    */
-  function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
+  public function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
     if (!is_array($value)) {
       $value = array($value);
     }
