@@ -125,7 +125,7 @@ class FeedController implements ControllerInterface {
       'created' => REQUEST_TIME,
     ));
 
-    return $this->entityManager->getForm($feed, 'add');
+    return $this->entityManager->getForm($feed, 'create');
   }
 
   /**
