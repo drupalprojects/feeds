@@ -20,6 +20,13 @@ class GenericOPMLParser extends XMLParserBase {
   protected $xpath;
 
   /**
+   * Whether to normalize the case of attributes.
+   *
+   * @var bool
+   */
+  protected $normalizeCase;
+
+  /**
    * Performs parsing of an OPML file.
    *
    * @param bool $normalize_case
@@ -27,6 +34,8 @@ class GenericOPMLParser extends XMLParserBase {
    *   them as is. Defaults to false.
    */
   protected function doParse($normalize_case = FALSE) {
+    $this->normalizeCase = $normalize_case;
+
     $this->xpath = new \DOMXPath($this->doc);
 
     $return = array();
@@ -34,7 +43,7 @@ class GenericOPMLParser extends XMLParserBase {
     $return['head'] = array('#title' => '');
 
     foreach ($this->xpath->query('/opml/head/*') as $element) {
-      if ($normalize_case) {
+      if ($this->normalizeCase) {
         $return['head']['#' . strtolower($element->nodeName)] = $element->nodeValue;
       }
       else {
@@ -67,7 +76,7 @@ class GenericOPMLParser extends XMLParserBase {
       $outline = array();
       if ($element->hasAttributes()) {
         foreach ($element->attributes as $attribute) {
-          if ($normalize_case) {
+          if ($this->normalizeCase) {
             $outline['#' . $attribute->nodeName] = $attribute->nodeValue;
           }
           else {
