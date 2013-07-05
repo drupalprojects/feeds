@@ -94,5 +94,10 @@ class FeedsMapperLocaleTestCase extends FeedsMapperTestCase {
     $this->drupalPost('node/'. $nid .'/import', array(), 'Import');
     $count = db_result(db_query("SELECT COUNT(*) FROM {node} WHERE language = 'zh-hans'"));
     $this->assertEqual(11, $count, 'Found correct number of nodes.');
+
+    // Weird simpletest bug language_list() is called on the testbot but locale
+    // is not installed. Don't care enough to try and fix it. Does not happen on
+    // Drupal >= 7.
+    variable_set('language_count', 1);
   }
 }
