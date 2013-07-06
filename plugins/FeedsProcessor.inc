@@ -129,7 +129,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
     self::loadMappers();
     foreach ($this->config['mappings'] as $mapping) {
       // Retrieve source element's value from parser.
-      if (is_array($sources[$this->id][$mapping['source']]) &&
+      if (isset($sources[$this->id][$mapping['source']]) &&
+          is_array($sources[$this->id][$mapping['source']]) &&
           isset($sources[$this->id][$mapping['source']]['callback']) &&
           function_exists($sources[$this->id][$mapping['source']]['callback'])) {
         $callback = $sources[$this->id][$mapping['source']]['callback'];
@@ -140,7 +141,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
       }
 
       // Map the source element's value to the target.
-      if (is_array($targets[$this->id][$mapping['target']]) &&
+      if (isset($targets[$this->id][$mapping['target']]) &&
+          is_array($targets[$this->id][$mapping['target']]) &&
           isset($targets[$this->id][$mapping['target']]['callback']) &&
           function_exists($targets[$this->id][$mapping['target']]['callback'])) {
         $callback = $targets[$this->id][$mapping['target']]['callback'];
