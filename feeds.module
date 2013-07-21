@@ -454,34 +454,6 @@ function feeds_menu() {
 }
 
 /**
- * Implements hook_local_actions().
- */
-function feeds_local_actions() {
-  return array(
-    array(
-      'route_name' => 'feeds_feed.import',
-      'title' => t('Import'),
-      'appears_on' => array('feeds_feed.view'),
-    ),
-    array(
-      'route_name' => 'feeds_feed.clear',
-      'title' => t('Delete items'),
-      'appears_on' => array('feeds_feed.view'),
-    ),
-    array(
-      'route_name' => 'feeds_feed.unlock',
-      'title' => t('Unlock'),
-      'appears_on' => array('feeds_feed.view'),
-    ),
-    array(
-      'route_name' => 'feeds_importer.create',
-      'title' => t('Add importer'),
-      'appears_on' => array('feeds_importer.list'),
-    ),
-  );
-}
-
-/**
  * Implements hook_admin_paths().
  */
 function feeds_admin_paths() {
