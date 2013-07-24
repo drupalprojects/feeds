@@ -40,4 +40,15 @@ class FeedAccessController extends EntityAccessController {
     return FALSE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
+    if (user_access('administer feeds', $account) || user_access("create $entity_bundle feeds", $account)) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
 }
