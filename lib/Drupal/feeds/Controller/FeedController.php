@@ -119,7 +119,7 @@ class FeedController implements ControllerInterface {
    */
   public function addForm(Importer $feeds_importer, Request $request) {
     $feed = $this->feedStorage->create(array(
-      'uid' => $GLOBALS['user']->uid,
+      'uid' => $GLOBALS['user']->id(),
       'importer' => $feeds_importer->id(),
       'status' => 1,
       'created' => REQUEST_TIME,
