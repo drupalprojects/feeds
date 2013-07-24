@@ -32,6 +32,8 @@ class FeedsSyndicationParser extends ParserBase {
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $result = new FeedsParserResult();
+    Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
+
     try {
       $channel = Reader::importString($fetcher_result->getRaw());
     }

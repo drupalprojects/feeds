@@ -244,6 +244,7 @@ function feeds_push_subscribe(array $job) {
         $http = new HTTPRequest($feed_config[$job['type']]['source']);
 
         $response = $http->get();
+        Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
         $channel = Reader::importFile($response->file);
 
         if ($hubs = $channel->getHubs()) {

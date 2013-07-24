@@ -211,6 +211,8 @@ class HTTPRequest {
    *   Returns true if this is a parsable feed, false otherwise.
    */
   public function isFeed($data) {
+    Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
+
     try {
       $feed_type = Reader::detectType($data);
     }
