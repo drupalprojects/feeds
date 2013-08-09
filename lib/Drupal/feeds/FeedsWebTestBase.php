@@ -390,10 +390,10 @@ class FeedsWebTestBase extends WebTestBase {
 
     if (!$fid) {
       $edit['title'] = $title;
-      $this->drupalPost('feed/add/' . $id, $edit, 'Save');
+      @$this->drupalPost('feed/add/' . $id, $edit, 'Save');
     }
     else {
-      $this->drupalPost("feed/$fid/edit", $edit, 'Save');
+      @$this->drupalPost("feed/$fid/edit", $edit, 'Save');
       $this->feedImportItems($fid);
     }
 
