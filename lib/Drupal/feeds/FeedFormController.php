@@ -66,7 +66,7 @@ class FeedFormController extends EntityFormControllerNG {
       '#title' => t('Authored by'),
       '#maxlength' => 60,
       '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => $feed->getUser()->name,
+      '#default_value' => $feed->getUser()->getUsername(),
       '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $user_config->get('anonymous'))),
     );
     $form['author']['date'] = array(
