@@ -81,12 +81,13 @@ class NodeHandler extends PluginBase {
 
   public function formAlter(array &$form, array &$form_state) {
     $author = user_load($this->config['author']);
+
     $form['author'] = array(
       '#type' => 'textfield',
       '#title' => t('Author'),
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => empty($author->getUserName()) ?  'anonymous' : check_plain($author->getUserName()),
+      '#default_value' => $author->getUserName() ? :  'anonymous',
     );
     $form['authorize'] = array(
       '#type' => 'checkbox',
