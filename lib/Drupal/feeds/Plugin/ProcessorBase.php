@@ -218,32 +218,20 @@ class ProcessorBase extends PluginBase {
    * @see hook_feeds_term_processor_targets_alter()
    * @see hook_feeds_user_processor_targets_alter()
    */
-  protected function map(FeedInterface $feed, FeedsParserResult $result, $target_item, $item_info) {
+  protected function map(FeedInterface $feed, array $item, $target_item, $item_info) {
 
-    // Static cache $targets as getMappingTargets() may be an expensive method.
-    static $sources;
-    if (!isset($sources[$this->importer->id()])) {
-      $sources[$this->importer->id()] = $this->importer->parser->getMappingSources();
-    }
-    static $targets;
-    if (!isset($targets[$this->importer->id()])) {
-      $targets[$this->importer->id()] = $this->getMappingTargets();
-    }
+    // @todo Revisit static cache.
+
+    $sources = $this->importer->parser->getMappingSources();
+    $targets = $this->getMappingTargets();
     $parser = $this->importer->parser;
-    if (empty($target_item)) {
-      $target_item = array();
-    }
 
     // Many mappers add to existing fields rather than replacing them. Hence we
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
     foreach ($this->config['mappings'] as $mapping) {
-      if (isset($targets[$this->importer->id()][$mapping['target']]['real_target'])) {
-        unset($target_item->{$targets[$this->importer->id()][$mapping['target']]['real_target']});
-      }
-      elseif (isset($target_item->{$mapping['target']})) {
-        unset($target_item->{$mapping['target']});
-      }
+      list($field) = explode(':', $mapping['target']);
+      unset($target_item->$field);
     }
 
     /*
@@ -255,31 +243,66 @@ class ProcessorBase extends PluginBase {
     If the mapping specifies a callback method, use the callback instead of
     setTargetElement().
     */
+
+    $value = array();
+
     foreach ($this->config['mappings'] as $mapping) {
-      // Retrieve source element's value from parser.
-      if (isset($sources[$this->importer->id()][$mapping['source']]) &&
-          is_array($sources[$this->importer->id()][$mapping['source']]) &&
-          isset($sources[$this->importer->id()][$mapping['source']]['callback']) &&
-          is_callable($sources[$this->importer->id()][$mapping['source']]['callback'])) {
-        $callback = $sources[$this->importer->id()][$mapping['source']]['callback'];
-        $value = $callback($feed, $result, $mapping['source']);
-      }
-      else {
-        $value = $parser->getSourceElement($feed, $result, $mapping['source']);
+
+      list($key, $subkey) = explode(':', $mapping['target'] . ':value');
+
+      if (!isset($value[$key][$subkey])) {
+        $value[$key][$subkey] = array();
       }
 
-      // Map the source element's value to the target.
-      if (isset($targets[$this->importer->id()][$mapping['target']]) &&
-          is_array($targets[$this->importer->id()][$mapping['target']]) &&
-          isset($targets[$this->importer->id()][$mapping['target']]['callback']) &&
-          is_callable($targets[$this->importer->id()][$mapping['target']]['callback'])) {
-        $callback = $targets[$this->importer->id()][$mapping['target']]['callback'];
-        $callback($feed, $target_item, $mapping['target'], $value, $mapping, $item_info);
+      // Retrieve source element's value from parser.
+      if (isset($sources[$mapping['source']]) &&
+          is_array($sources[$mapping['source']]) &&
+          isset($sources[$mapping['source']]['callback']) &&
+          is_callable($sources[$mapping['source']]['callback'])) {
+
+        $callback = $sources[$mapping['source']]['callback'];
+        $new_value = $callback($feed, $item, $mapping['source']);
       }
       else {
-        $this->setTargetElement($feed, $target_item, $mapping['target'], $value, $mapping, $item_info);
+        $new_value = $parser->getSourceElement($feed, $item, $mapping['source']);
+      }
+
+      if (!is_array($new_value)) {
+        $new_value = array($new_value);
+      }
+
+      $value[$key][$subkey] = array_merge($value[$key][$subkey], $new_value);
+    }
+
+    // Rearrange values into Drupal's field structure.
+    $new_value = array();
+    foreach ($value as $key => $vs) {
+      foreach ($vs as $subkey => $v) {
+        $delta = 0;
+        foreach ($v as $avalue) {
+          $new_value[$key][$delta][$subkey] = $avalue;
+          $delta++;
+        }
       }
     }
+
+    foreach ($this->config['mappings'] as $mapping) {
+
+      list($key, $subkey) = explode(':', $mapping['target'] . ':value');
+
+      // Map the source element's value to the target.
+      if (isset($targets[$mapping['target']]) &&
+          is_array($targets[$mapping['target']]) &&
+          isset($targets[$mapping['target']]['callback']) &&
+          is_callable($targets[$mapping['target']]['callback'])) {
+        $callback = $targets[$mapping['target']]['callback'];
+        $callback($feed, $target_item, $key, $new_value[$key], $mapping, $item_info);
+      }
+      else {
+        $this->setTargetElement($feed, $target_item, $key, $new_value[$key], $mapping, $item_info);
+      }
+    }
+
     return $target_item;
   }
 
@@ -368,15 +391,15 @@ class ProcessorBase extends PluginBase {
   /**
    * Set a concrete target element. Invoked from ProcessorBase::map().
    */
-  public function setTargetElement(FeedInterface $feed, $target_item, $target_element, $value, $mapping, \stdClass $item_info) {
-    switch ($target_element) {
+  public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping, \stdClass $item_info) {
+    switch ($key) {
       case 'url':
       case 'guid':
-        $item_info->$target_element = $value;
+        $item_info->$key = $value;
         break;
 
       default:
-        $target_item->$target_element = $value;
+        $target_item->$key = $value;
         break;
     }
   }
@@ -438,7 +461,7 @@ class ProcessorBase extends PluginBase {
       if (!empty($mapping['unique'])) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
-        $targets[$mapping['target']] = $parser->getSourceElement($feed, $result, $mapping['source']);
+        $targets[$mapping['target']] = $parser->getSourceElement($feed, $result->currentItem(), $mapping['source']);
       }
     }
     return $targets;

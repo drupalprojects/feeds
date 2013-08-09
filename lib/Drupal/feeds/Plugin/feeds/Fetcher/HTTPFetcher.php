@@ -17,7 +17,6 @@ use Drupal\feeds\FetcherResult;
 use Drupal\feeds\HTTPRequest;
 use Drupal\feeds\Plugin\FetcherBase;
 use Drupal\feeds\RawFetcherResult;
-use Drupal\job_scheduler\JobScheduler;
 
 /**
  * Defines an HTTP fetcher.

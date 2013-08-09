@@ -2,31 +2,33 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Mapper\TestMapper.
+ * Contains \Drupal\feeds\Plugin\feeds\Target\TestTarget.
  */
 
-namespace Drupal\feeds_tests\Plugin\feeds\Mapper;
+namespace Drupal\feeds_tests\Plugin\feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\feeds\Plugin\MapperBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\TargetBase;
 
 /**
  * Defines a test_mapper field mapper.
  *
  * @Plugin(
  *   id = "test_mapper",
- *   title = @Translation("TestMapper")
+ *   title = @Translation("TestTarget")
  * )
  */
-class TestMapper extends MapperBase {
+class TestTarget extends TargetBase {
 
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets, $entity_type, $bundle) {
+  public function targets() {
+    $targets = array();
+
     $targets['test_target'] = array(
       'name' => t('Test Target'),
       'description' => t('This is a test target.'),
@@ -34,12 +36,14 @@ class TestMapper extends MapperBase {
       'summary_callback' => array($this, 'summary'),
       'form_callback' => array($this, 'form'),
     );
+
+    return $targets;
   }
 
   /**
    * {@inheritdoc}
    */
-  function setTarget(Feed $feed, EntityInterface $entity, $target, $value, array $mapping) {
+  function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $value, array $mapping) {
     $entity->body['und'][0]['value'] = serialize($mapping);
   }
 

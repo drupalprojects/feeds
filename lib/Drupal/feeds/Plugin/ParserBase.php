@@ -64,11 +64,11 @@ abstract class ParserBase extends PluginBase {
   public function getMappingSources() {
     $sources = array();
 
-    $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
-    foreach ($definitions as $definition) {
-      $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
-      $mapper->sources($sources, $this->importer);
-    }
+    // $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
+    // foreach ($definitions as $definition) {
+    //   $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
+    //   $mapper->sources($sources, $this->importer);
+    // }
 
     $sources['parent:uid'] = array(
       'name' => t('Feed: User ID'),
@@ -100,7 +100,7 @@ abstract class ParserBase extends PluginBase {
    * @see ProcessorBase::map()
    * @see FeedsCSVParser::getSourceElement()
    */
-  public function getSourceElement(FeedInterface $feed, FeedsParserResult $result, $element_key) {
+  public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
 
     switch ($element_key) {
       case 'parent:uid':
@@ -110,7 +110,6 @@ abstract class ParserBase extends PluginBase {
         return $feed->id();
     }
 
-    $item = $result->currentItem();
     return isset($item[$element_key]) ? $item[$element_key] : '';
   }
 

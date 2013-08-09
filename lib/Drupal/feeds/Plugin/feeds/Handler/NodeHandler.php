@@ -86,7 +86,7 @@ class NodeHandler extends PluginBase {
       '#title' => t('Author'),
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => empty($author->name) ?  'anonymous' : check_plain($author->name),
+      '#default_value' => empty($author->getUserName()) ?  'anonymous' : check_plain($author->getUserName()),
     );
     $form['authorize'] = array(
       '#type' => 'checkbox',

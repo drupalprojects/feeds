@@ -1,16 +1,16 @@
 services:
   plugin.manager.feeds.fetcher:
     class: Drupal\feeds\Plugin\FeedsPluginManager
-    arguments: [fetcher, '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+    arguments: ['fetcher', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.parser:
     class: Drupal\feeds\Plugin\FeedsPluginManager
-    arguments: [parser, '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+    arguments: ['parser', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.processor:
     class: Drupal\feeds\Plugin\FeedsPluginManager
-    arguments: [processor, '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
-  plugin.manager.feeds.mapper:
-    class: Drupal\feeds\Plugin\FeedsMapperManager
-    arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+    arguments: ['processor', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+  plugin.manager.feeds.target:
+    class: Drupal\feeds\Plugin\FeedsPluginManager
+    arguments: ['target', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.handler:
     class: Drupal\feeds\Plugin\FeedsHandlerManager
     arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']

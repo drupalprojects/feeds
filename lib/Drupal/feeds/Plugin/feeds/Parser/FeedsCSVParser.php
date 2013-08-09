@@ -114,8 +114,8 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function getSourceElement(FeedInterface $feed, FeedsParserResult $result, $element_key) {
-    return parent::getSourceElement($feed, $result, drupal_strtolower($element_key));
+  public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
+    return parent::getSourceElement($feed, $item, drupal_strtolower($element_key));
   }
 
   /**

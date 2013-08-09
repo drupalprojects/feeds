@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Mapper\Taxonomy.
+ * Contains \Drupal\feeds\Plugin\feeds\Target\Taxonomy.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Mapper;
+namespace Drupal\feeds\Plugin\feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsElement;
 use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\Plugin\FieldMapperBase;
+use Drupal\feeds\Plugin\FieldTargetBase;
 use Drupal\field\Plugin\Core\Entity\FieldInstance;
 use Drupal\feeds\Plugin\Core\Entity\Importer;
 use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
@@ -40,12 +40,14 @@ const FEEDS_TAXONOMY_SEARCH_TERM_GUID = 2;
  *   title = @Translation("Taxonomy")
  * )
  */
-class Taxonomy extends FieldMapperBase {
+class Taxonomy extends FieldTargetBase {
 
   /**
    * {@inheritdoc}
    */
   protected $fieldTypes = array('taxonomy_term_reference');
+
+  protected $cache = array();
 
   /**
    * {@inheritdoc}
@@ -68,7 +70,7 @@ class Taxonomy extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  public function getSource(FeedInterface $feed, FeedsParserResult $result, $key) {
+  public function getSource(FeedInterface $feed, array $item, $key) {
     list(, , $field) = explode(':', $key, 3);
 
     $result = array();
@@ -82,20 +84,23 @@ class Taxonomy extends FieldMapperBase {
   /**
    * {@inheritdoc}
    */
-  protected function applyTargets(array &$targets, FieldInstance $instance) {
-    $targets[$instance->getFieldName()] = array(
-      'name' => check_plain($instance->label()),
-      'callback' => array($this, 'setTarget'),
-      'description' => t('The @label field of the entity.', array('@label' => $instance->label())),
-      'summary_callback' => array($this, 'summary'),
-      'form_callback' => array($this, 'form'),
+  protected function applyTargets(FieldInstance $instance) {
+    return array(
+      $instance->getFieldName() => array(
+        'name' => check_plain($instance->label()),
+        'callback' => array($this, 'setTarget'),
+        'description' => t('The @label field of the entity.', array('@label' => $instance->label())),
+        'summary_callback' => array($this, 'summary'),
+        'form_callback' => array($this, 'form'),
+        'columns' => array('target_id'),
+      ),
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function buildField(array $field, $column, array $values, array $mapping) {
+  protected function validate($key, $value, array $mapping) {
     // Add in default values.
     $mapping += array(
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_NAME,
@@ -104,82 +109,48 @@ class Taxonomy extends FieldMapperBase {
 
     $field_name = $this->instance->getFieldName();
 
-    $cache = &drupal_static(__FUNCTION__);
-    if (!isset($cache['allowed_values'][$field_name])) {
-      $cache['allowed_values'][$field_name] = taxonomy_allowed_values($this->instance, $this->entity);
+    if (!isset($this->cache['allowed_values'][$field_name])) {
+      $this->cache['allowed_values'][$field_name] = taxonomy_allowed_values($this->instance, $this->entity);
     }
 
-    if (!isset($cache['allowed_vocabularies'][$field_name])) {
+    if (!isset($this->cache['allowed_vocabularies'][$field_name])) {
       foreach ($this->instance->getFieldSetting('allowed_values') as $tree) {
-        if ($vocabulary = entity_load('taxonomy_vocabulary', $tree['vocabulary'])) {
-          $cache['allowed_vocabularies'][$field_name][$vocabulary->id()] = $vocabulary->id();
-        }
+        $this->cache['allowed_vocabularies'][$field_name][$tree['vocabulary']] = $tree['vocabulary'];
       }
     }
 
-    $query = \Drupal::entityQuery('taxonomy_term');
-    $query
-      ->condition('vid', $cache['allowed_vocabularies'][$field_name])
-      ->range(0, 1);
+    $tid = FALSE;
 
-    // Allow for multiple mappings to the same target.
-    $delta = count($field['und']);
+    if ($value instanceof TaxonomyTermReferenceItem) {
+      $tid = $value->value;
+    }
+    else {
+      switch ($mapping['term_search']) {
 
-    // Iterate over all values.
-    foreach ($values as $term) {
+        // Lookup by name.
+        case FEEDS_TAXONOMY_SEARCH_TERM_NAME:
+          $tid = $this->termSearchByName($value, $mapping['autocreate']);
+          break;
 
-      if ($delta >= $this->cardinality) {
-        break;
-      }
+        // Lookup by tid.
+        case FEEDS_TAXONOMY_SEARCH_TERM_ID:
+          if (is_numeric($value)) {
+            $tid = $value;
+          }
+          break;
 
-      $tid = FALSE;
-
-      if ($term instanceof TaxonomyTermReferenceItem) {
-        $tid = $term->value;
-      }
-      else {
-        switch ($mapping['term_search']) {
-
-          // Lookup by name.
-          case FEEDS_TAXONOMY_SEARCH_TERM_NAME:
-            $name_query = clone $query;
-            if ($tids = $name_query->condition('name', $term)->execute()) {
-              $tid = key($tids);
-            }
-            elseif ($mapping['autocreate']) {
-              $term = entity_create('taxonomy_term', array(
-                'name' => $term,
-                'vid' => key($cache['allowed_vocabularies'][$field_name]),
-              ));
-              $term->save();
-              $tid = $term->id();
-              // Add to the list of allowed values.
-              $cache['allowed_values'][$field_name][$tid] = $term->label();;
-            }
-            break;
-
-          // Lookup by tid.
-          case FEEDS_TAXONOMY_SEARCH_TERM_ID:
-            if (is_numeric($term)) {
-              $tid = $term;
-            }
-            break;
-
-          // Lookup by GUID.
-          case FEEDS_TAXONOMY_SEARCH_TERM_GUID:
-            $tid = $this->getTermByGUID($term);
-            break;
-        }
-      }
-
-      if ($tid && isset($cache['allowed_values'][$field_name][$tid])) {
-        $field['und'][$delta]['target_id'] = $tid;
-        $delta++;
+        // Lookup by GUID.
+        case FEEDS_TAXONOMY_SEARCH_TERM_GUID:
+          $tid = $this->getTermByGUID($value);
+          break;
       }
     }
 
-    return $field;
+    if ($tid && isset($this->cache['allowed_values'][$field_name][$tid])) {
+      return $tid;
+    }
 
+    return FALSE;
   }
 
   /**
@@ -198,6 +169,34 @@ class Taxonomy extends FieldMapperBase {
       ->condition('guid', $guid)
       ->execute()
       ->fetchField();
+  }
+
+  /**
+   *
+   */
+  protected function termSearchByName($value, $autocreate = FALSE) {
+
+    $query = \Drupal::entityQuery('taxonomy_term');
+    $tids = $query
+      ->condition('vid', $this->cache['allowed_vocabularies'][$this->instance->getFieldName()])
+      ->condition('name', $value)
+      ->range(0, 1)
+      ->execute();
+
+    if ($tids) {
+      return key($tids);
+    }
+    elseif ($autocreate) {
+      $term = entity_create('taxonomy_term', array(
+        'name' => $value,
+        'vid' => key($this->cache['allowed_vocabularies'][$this->instance->getFieldName()]),
+      ));
+      $term->save();
+      $tid = $term->id();
+      // Add to the list of allowed values.
+      $this->cache['allowed_values'][$this->instance->getFieldName()][$tid] = $term->label();
+      return $tid;
+    }
   }
 
   /**

@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\FeedsMapperTestBase;
-use Drupal\feeds\Plugin\feeds\Mapper\Taxonomy;
+use Drupal\feeds\Plugin\feeds\Target\Taxonomy;
 
 /**
  * Class for testing Feeds <em>content</em> mapper.
@@ -91,7 +91,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $this->addMappings('syndication', array(
       5 => array(
         'source' => 'parent:taxonomy:field_tags',
-        'target' => 'field_tags',
+        'target' => 'field_tags:target_id',
       ),
     ));
 
@@ -133,7 +133,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $mappings = array(
       5 => array(
         'source' => 'tags',
-        'target' => 'field_tags',
+        'target' => 'field_tags:target_id',
         'term_search' => 0,
       ),
     );
@@ -179,14 +179,14 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
   public function testSearchByID() {
     drupal_flush_all_caches();
     // Create 10 terms. The first one was created in setup.
-    $tids = array(1);
+    $tids = array(array('target_id' => 1));
     foreach (range(2, 10) as $i) {
       $term = entity_create('taxonomy_term', array(
         'name' => 'term' . $i,
         'vid' => 'tags',
       ));
       $term->save();
-      $tids[] = $term->id();
+      $tids[] = array('target_id' => $term->id());
     }
 
     $target = 'field_tags';
@@ -201,7 +201,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $this->assertEqual(count($entity->field_tags['und']), 10);
 
     // Test a second mapping with a bogus term id.
-    $mapper->setTarget($feed, $entity, $target, array(1234), $mapping);
+    $mapper->setTarget($feed, $entity, $target, array(array('target_id' => 1234)), $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
   }
 
@@ -226,7 +226,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     $guids = array();
     foreach ($tids as $tid) {
       $guid = 100 * $tid;
-      $guids[] = $guid;
+      $guids[] = array('target_id' => $guid);
       $record = array(
         'entity_type' => 'taxonomy_term',
         'entity_id' => $tid,
@@ -256,7 +256,7 @@ class FeedsMapperTaxonomyTest extends FeedsMapperTestBase {
     }
 
     // Test a second mapping with a bogus term id.
-    $mapper->setTarget($feed, $entity, $target, array(1234), $mapping);
+    $mapper->setTarget($feed, $entity, $target, array(array('value' => 1234)), $mapping);
     $this->assertEqual(count($entity->field_tags['und']), 10);
     foreach ($entity->field_tags['und'] as $delta => $values) {
       $this->assertEqual($tids[$delta], $values['target_id'], 'Correct term id foud.');

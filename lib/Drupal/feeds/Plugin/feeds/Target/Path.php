@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Mapper\Path.
+ * Contains \Drupal\feeds\Plugin\feeds\Target\Path.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Mapper;
+namespace Drupal\feeds\Plugin\feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsElement;
-use Drupal\feeds\Plugin\MapperBase;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\feeds\Plugin\TargetBase;
 
 /**
  * Defines a path field mapper.
@@ -22,13 +22,16 @@ use Drupal\feeds\Plugin\Core\Entity\Feed;
  *   title = @Translation("Path")
  * )
  */
-class Path extends MapperBase {
+class Path extends TargetBase {
 
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets, $entity_type, $bundle) {
-    switch ($entity_type) {
+  public function targets() {
+
+    $targets = array();
+
+    switch ($this->importer->processor->entityType()) {
       case 'node':
       case 'taxonomy_term':
       case 'user':
@@ -41,19 +44,20 @@ class Path extends MapperBase {
         );
         break;
     }
+
+    return $targets;
   }
 
   /**
    * {@inheritdoc}
    */
-  function setTarget(Feed $feed, EntityInterface $entity, $target, $value) {
-    if (empty($value)) {
-      $value = '';
-    }
-
-    // Path alias cannot be multi-valued, so use the first value.
-    if (is_array($value)) {
-      $value = $value[0];
+  function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $values, array $mapping) {
+    $value = '';
+    foreach ($values as $value) {
+      if (strlen(trim($value['value']))) {
+        $value = $value['value'];
+        break;
+      }
     }
 
     $entity->path = array();

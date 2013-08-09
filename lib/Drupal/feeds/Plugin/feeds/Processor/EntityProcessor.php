@@ -114,7 +114,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
         }
 
         // Set property and field values.
-        $this->map($feed, $parser_result, $entity, $item_info);
+        $this->map($feed, $item, $entity, $item_info);
         $this->entityValidate($entity);
 
         // Allow modules to alter the entity before saving.
@@ -511,27 +511,40 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
     $this->apply('getMappingTargets', $targets);
 
     // Let other modules expose mapping targets.
-    $definitions = \Drupal::service('plugin.manager.feeds.mapper')->getDefinitions();
+    $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
     foreach ($definitions as $definition) {
-      $mapper = \Drupal::service('plugin.manager.feeds.mapper')->createInstance($definition['id']);
-      $mapper->targets($targets, $this->entityType(), $this->bundle());
+      $mapper = \Drupal::service('plugin.manager.feeds.target')->createInstance($definition['id'], array('importer' => $this->importer));
+      $targets += $mapper->targets();
     }
 
-    return $targets;
+    $new_targets = array();
+
+    foreach ($targets as $key => $target) {
+      if (empty($target['columns'])) {
+        $new_targets[$key] = $target;
+      }
+      else {
+        foreach ($target['columns'] as $column) {
+          $new_targets[$key . ':' . $column] = $target;
+        }
+      }
+    }
+
+    return $new_targets;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setTargetElement(FeedInterface $feed, $entity, $target_element, $value, $mapping, \stdClass $item_info) {
-    $properties = $this->getProperties();
-    if (isset($properties[$target_element])) {
-      $entity->set($target_element, $value);
-    }
-    else {
-      $this->apply('setTargetElement', $feed, $entity, $target_element, $value, $mapping, $item_info);
-      parent::setTargetElement($feed, $entity, $target_element, $value, $mapping, $item_info);
-    }
+  public function setTargetElement(FeedInterface $feed, $entity, $target_element, $values, $mapping, \stdClass $item_info) {
+      $properties = $this->getProperties();
+      if (isset($properties[$target_element])) {
+        $entity->get($target_element)->setValue($values[0]['value']);
+      }
+      else {
+        $this->apply('setTargetElement', $feed, $entity, $target_element, $values[0]['value'], $mapping, $item_info);
+        parent::setTargetElement($feed, $entity, $target_element, $values[0]['value'], $mapping, $item_info);
+      }
   }
 
   /**
