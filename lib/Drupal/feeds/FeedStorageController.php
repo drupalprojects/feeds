@@ -9,7 +9,6 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Entity\DatabaseStorageControllerNG;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\job_scheduler\JobScheduler;
 
 /**
  * Controller class for feeds.
