@@ -14,7 +14,7 @@ use Drupal\Core\Session\AccountInterface;
 /**
  * Defines an access controller for the feeds_importer entity.
  *
- * @see \Drupal\feeds\Plugin\Core\Entity\Importer
+ * @see \Drupal\feeds\Entity\Importer
  */
 class ImporterAccessController extends EntityAccessController {
 

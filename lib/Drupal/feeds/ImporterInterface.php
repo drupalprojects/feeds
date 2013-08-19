@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\Core\Entity\ImporterInterface.
+ * Contains \Drupal\feeds\Entity\ImporterInterface.
  */
 
 namespace Drupal\feeds;

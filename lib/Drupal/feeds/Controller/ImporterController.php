@@ -13,7 +13,7 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\Form\MappingForm;
 use Drupal\feeds\Form\PluginForm;
-use Drupal\feeds\Plugin\Core\Entity\Importer;
+use Drupal\feeds\Entity\Importer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 

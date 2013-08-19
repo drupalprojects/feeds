@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedsElement;
 use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\field\Plugin\Core\Entity\FieldInstance;
+use Drupal\field\Entity\FieldInstance;
 
 /**
  * Defines a link field mapper.

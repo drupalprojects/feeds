@@ -13,8 +13,8 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsElement;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\field\Plugin\Core\Entity\FieldInstance;
-use Drupal\feeds\Plugin\Core\Entity\Importer;
+use Drupal\field\Entity\FieldInstance;
+use Drupal\feeds\Entity\Importer;
 use Drupal\taxonomy\Type\TaxonomyTermReferenceItem;
 
 /**

@@ -11,8 +11,8 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Controller\ControllerInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
-use Drupal\feeds\Plugin\Core\Entity\Importer;
+use Drupal\feeds\Entity\Feed;
+use Drupal\feeds\Entity\Importer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 

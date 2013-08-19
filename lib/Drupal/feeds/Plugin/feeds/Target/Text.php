@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\Target;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedsElement;
-use Drupal\field\Plugin\Core\Entity\FieldInstance;
+use Drupal\field\Entity\FieldInstance;
 use Drupal\feeds\Plugin\FieldTargetBase;
 
 /**

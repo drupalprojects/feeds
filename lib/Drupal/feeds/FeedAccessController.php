@@ -14,7 +14,7 @@ use Drupal\Core\Session\AccountInterface;
 /**
  * Defines an access controller for the feeds_feed entity.
  *
- * @see \Drupal\feeds\Plugin\Core\Entity\Feed
+ * @see \Drupal\feeds\Entity\Feed
  */
 class FeedAccessController extends EntityAccessController {
 

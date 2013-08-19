@@ -9,7 +9,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\HTTPRequest;
-use Drupal\feeds\Plugin\Core\Entity\Importer;
+use Drupal\feeds\Entity\Importer;
 use Guzzle\Http\Exception\RequestException;
 use Guzzle\Http\Exception\BadResponseException;
 use Zend\Feed\Reader\Reader;

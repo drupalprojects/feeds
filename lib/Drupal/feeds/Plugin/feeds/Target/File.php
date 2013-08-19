@@ -12,7 +12,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
 use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\field\Plugin\Core\Entity\FieldInstance;
+use Drupal\field\Entity\FieldInstance;
 
 /**
  * Defines a file field mapper.

@@ -10,7 +10,7 @@ namespace Drupal\feeds;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRenderController;
 use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
-use Drupal\feeds\Plugin\Core\Entity\Feed;
+use Drupal\feeds\Entity\Feed;
 
 /**
  * Render controller for feedss.

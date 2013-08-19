@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\field\Plugin\Core\Entity\FieldInstance;
+use Drupal\field\Entity\FieldInstance;
 
 /**
  * Helper class for field mappers.
@@ -52,7 +52,7 @@ abstract class FieldTargetBase extends MapperBase {
    *
    * @param array $targets
    *   The targets array.
-   * @param \Drupal\field\Plugin\Core\Entity\FieldInstance $instance
+   * @param \Drupal\field\Entity\FieldInstance $instance
    *   The field instance.
    */
   abstract protected function applyTargets(FieldInstance $instance);

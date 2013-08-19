@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\Core\Entity\Feed.
+ * Contains \Drupal\feeds\Entity\Feed.
  */
 
-namespace Drupal\feeds\Plugin\Core\Entity;
+namespace Drupal\feeds\Entity;
 
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\Annotation\EntityType;
