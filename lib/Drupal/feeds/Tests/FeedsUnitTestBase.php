@@ -7,12 +7,12 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\simpletest\UnitTestBase;
+use Drupal\simpletest\DrupalUnitTestBase;
 
 /**
  * Base unit test class for Feeds.
  */
-class FeedsUnitTestBase extends UnitTestBase {
+class FeedsUnitTestBase extends DrupalUnitTestBase {
 
   public static function getInfo() {
     return array(
@@ -30,6 +30,7 @@ class FeedsUnitTestBase extends UnitTestBase {
    * @todo Remove when http://drupal.org/node/1191252 is fixed.
    */
   function testFeedsValidURL() {
+    drupal_load('module', 'feeds');
     $url_schemes = array('http', 'https', 'ftp', 'feed', 'webcal');
     $valid_absolute_urls = array(
       'example.com',
