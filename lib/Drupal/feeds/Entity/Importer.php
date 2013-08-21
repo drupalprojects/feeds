@@ -263,6 +263,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface, FormInterf
       '#type' => 'submit',
       '#value' => t('Save'),
       '#weight' => 100,
+      '#button_type' => 'primary',
     );
 
     return $form;

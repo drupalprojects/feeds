@@ -203,8 +203,9 @@ function theme_feeds_mapping_form($variables) {
     '#markup' => '<div>' . $legend . '</div>',
   );
 
-  $output .= drupal_render($form['legendset']);
+  $legend = drupal_render($form['legendset']);
   $output .= drupal_render_children($form);
+  $output .= $legend;
 
   drupal_add_tabledrag('feeds-mapping-overview', 'order', 'sibling', 'feeds-mapping-weight');
   return $output;

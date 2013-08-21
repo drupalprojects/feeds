@@ -79,7 +79,7 @@ class MappingForm implements BaseFormIdInterface {
 
     // Legend explaining source and target elements.
     $form['legendset'] = array(
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => t('Legend'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
@@ -155,6 +155,7 @@ class MappingForm implements BaseFormIdInterface {
     $form['actions']['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
+      '#button_type' => 'primary',
     );
 
     return $form;
