@@ -31,7 +31,7 @@ class Path extends TargetBase {
 
     $targets = array();
 
-    switch ($this->importer->processor->entityType()) {
+    switch ($this->importer->getProcessor()->entityType()) {
       case 'node':
       case 'taxonomy_term':
       case 'user':

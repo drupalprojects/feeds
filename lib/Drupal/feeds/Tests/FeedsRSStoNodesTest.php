@@ -149,7 +149,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Change author and turn off authorization.
     $this->auth_user = $this->drupalCreateUser(array('access content'));
     $this->setSettings('syndication', 'processor', array(
-      'author' => $this->auth_user->name,
+      'author' => $this->auth_user->getUsername(),
       'authorize' => FALSE,
     ));
 
@@ -162,7 +162,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
     // Assert author.
     $this->drupalGet('node');
-    $this->assertPattern('/<span>' . check_plain($this->auth_user->name) . '<\/span>/');
+    $this->assertPattern('/<span>' . check_plain($this->auth_user->getUsername()) . '<\/span>/');
     $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node_field_data} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
     $this->assertEqual($count, 10, t('@count items in database.', array('@count' => $count)));
 
@@ -189,8 +189,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->feedImportItems($fid);
 
     $this->drupalGet('node');
-    $this->assertNoPattern('/<span>' . check_plain($this->auth_user->name) . '<\/span>/');
-    $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node_field_data} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid))->fetchField();
+    $this->assertNoPattern('/<span>' . check_plain($this->auth_user->getUsername()) . '<\/span>/');
+    $count = db_query("SELECT COUNT(*) FROM {feeds_item} fi JOIN {node_field_data} n ON fi.entity_type = 'node' AND fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->id()))->fetchField();
     $this->assertEqual($count, 0, t('@count items in database.', array('@count' => $count)));
 
     // Map feed's author to feed item author, update - feed node's items
@@ -203,7 +203,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     ));
     $this->feedImportItems($fid);
     $this->drupalGet('node');
-    $this->assertNoPattern('/<span>' . check_plain($this->auth_user->name) . '<\/span>/');
+    $this->assertNoPattern('/<span>' . check_plain($this->auth_user->getUsername()) . '<\/span>/');
     $uid = db_query("SELECT uid FROM {feeds_feed} WHERE fid = :fid", array(':fid' => $fid))->fetchField();
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} WHERE uid = :uid", array(':uid' => $uid))->fetchField();
     $this->assertEqual($count, 10, t('@count feed item nodes are assigned to feed node author.', array('@count' => $count)));

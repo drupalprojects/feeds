@@ -222,14 +222,14 @@ class ProcessorBase extends PluginBase {
 
     // @todo Revisit static cache.
 
-    $sources = $this->importer->parser->getMappingSources();
+    $sources = $this->importer->getParser()->getMappingSources();
     $targets = $this->getMappingTargets();
-    $parser = $this->importer->parser;
+    $parser = $this->importer->getParser();
 
     // Many mappers add to existing fields rather than replacing them. Hence we
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
-    foreach ($this->config['mappings'] as $mapping) {
+    foreach ($this->configuration['mappings'] as $mapping) {
       list($field) = explode(':', $mapping['target']);
       unset($target_item->$field);
     }
@@ -246,7 +246,7 @@ class ProcessorBase extends PluginBase {
 
     $value = array();
 
-    foreach ($this->config['mappings'] as $mapping) {
+    foreach ($this->configuration['mappings'] as $mapping) {
 
       list($key, $subkey) = explode(':', $mapping['target'] . ':value');
 
@@ -286,7 +286,7 @@ class ProcessorBase extends PluginBase {
       }
     }
 
-    foreach ($this->config['mappings'] as $mapping) {
+    foreach ($this->configuration['mappings'] as $mapping) {
 
       list($key, $subkey) = explode(':', $mapping['target'] . ':value');
 
@@ -317,7 +317,7 @@ class ProcessorBase extends PluginBase {
   /**
    * Declare default configuration.
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     $defaults = array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
@@ -337,7 +337,7 @@ class ProcessorBase extends PluginBase {
       '#type' => 'checkbox',
       '#title' => t('Skip hash check'),
       '#description' => t('Force update of items even if item source data did not change.'),
-      '#default_value' => $this->config['skip_hash_check'],
+      '#default_value' => $this->configuration['skip_hash_check'],
     );
 
     global $user;
@@ -350,18 +350,18 @@ class ProcessorBase extends PluginBase {
       '#title' => t('Text format'),
       '#description' => t('Select the input format for the body field of the nodes to be created.'),
       '#options' => $format_options,
-      '#default_value' => $this->config['input_format'],
+      '#default_value' => $this->configuration['input_format'],
       '#required' => TRUE,
     );
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
    * Get mappings.
    */
   public function getMappings() {
-    return $this->config['mappings'];
+    return $this->configuration['mappings'];
   }
 
   /**
@@ -455,9 +455,9 @@ class ProcessorBase extends PluginBase {
    *   elements from the source item mapped to these targets.
    */
   public function uniqueTargets(FeedInterface $feed, FeedsParserResult $result) {
-    $parser = $this->importer->parser;
+    $parser = $this->importer->getParser();
     $targets = array();
-    foreach ($this->config['mappings'] as $mapping) {
+    foreach ($this->configuration['mappings'] as $mapping) {
       if (!empty($mapping['unique'])) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
@@ -478,7 +478,7 @@ class ProcessorBase extends PluginBase {
    *  Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
    */
   protected function hash($item) {
-    return hash('md5', serialize($item) . serialize($this->config['mappings']));
+    return hash('md5', serialize($item) . serialize($this->configuration['mappings']));
   }
 
   /**

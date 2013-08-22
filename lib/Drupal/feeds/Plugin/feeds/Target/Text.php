@@ -48,8 +48,8 @@ class Text extends FieldTargetBase {
 
   protected function defaults() {
     $defaults = array();
-    if (isset($this->importer->processor->config['input_format'])) {
-      $defaults['format'] = $this->importer->processor->config['input_format'];
+    if (isset($this->importer->getProcessor()->config['input_format'])) {
+      $defaults['format'] = $this->importer->getProcessor()->config['input_format'];
     }
     return $defaults;
   }

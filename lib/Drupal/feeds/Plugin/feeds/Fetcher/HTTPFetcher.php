@@ -37,13 +37,13 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
   public function fetch(FeedInterface $feed, $raw = NULL) {
 
     // Handle pubsubhubbub.
-    if ($this->config['use_pubsubhubbub'] && $raw !== NULL) {
+    if ($this->configuration['use_pubsubhubbub'] && $raw !== NULL) {
       return new RawFetcherResult($raw);
     }
 
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
-    $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->config['request_timeout']));
+    $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->configuration['request_timeout']));
     $result = $http->get();
     if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
       throw new \Exception(t('Download of @url failed with code !code.', array('@url' => $feed_config['source'], '!code' => $result->code)));
@@ -63,7 +63,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    * {@inheritdoc}
    */
   public function clear(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
     $url = $feed_config['source'];
     cache()->delete('feeds_http_download_' . md5($url));
   }
@@ -71,7 +71,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
   /**
    * {@inheritdoc}
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     return array(
       'auto_detect_feeds' => FALSE,
       'use_pubsubhubbub' => FALSE,
@@ -88,19 +88,19 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       '#type' => 'checkbox',
       '#title' => t('Auto detect feeds'),
       '#description' => t('If the supplied URL does not point to a feed but an HTML document, attempt to extract a feed URL from the document.'),
-      '#default_value' => $this->config['auto_detect_feeds'],
+      '#default_value' => $this->configuration['auto_detect_feeds'],
     );
     $form['use_pubsubhubbub'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use PubSubHubbub'),
       '#description' => t('Attempt to use a <a href="http://en.wikipedia.org/wiki/PubSubHubbub">PubSubHubbub</a> subscription if available.'),
-      '#default_value' => $this->config['use_pubsubhubbub'],
+      '#default_value' => $this->configuration['use_pubsubhubbub'],
     );
     $form['designated_hub'] = array(
       '#type' => 'textfield',
       '#title' => t('Designated hub'),
       '#description' => t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
-      '#default_value' => $this->config['designated_hub'],
+      '#default_value' => $this->configuration['designated_hub'],
       '#dependency' => array(
         'edit-use-pubsubhubbub' => array(1),
       ),
@@ -112,20 +112,20 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>
                          <b>Note:</b> this setting will override the global setting.</br>
                          When left empty, the global value is used.'),
-      '#default_value' => $this->config['request_timeout'],
+      '#default_value' => $this->configuration['request_timeout'],
       '#min' => 0,
       '#maxlength' => 3,
       '#size' => 30,
     );
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
    * {@inheritdoc}
    */
   public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['source'] = array(
@@ -151,7 +151,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
       $form_key = 'feeds][' . get_class($this) . '][source';
       form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
-    elseif ($this->config['auto_detect_feeds']) {
+    elseif ($this->configuration['auto_detect_feeds']) {
       $http = new HTTPRequest($values['source']);
       if ($url = $http->getCommonSyndication()) {
         $values['source'] = $url;
@@ -163,11 +163,11 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    * {@inheritdoc}
    */
   public function sourceSave(FeedInterface $feed) {
-    if (!$this->config['use_pubsubhubbub']) {
+    if (!$this->configuration['use_pubsubhubbub']) {
       return;
     }
 
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
     $item = array(
       'type' => $this->getPluginId(),
@@ -227,7 +227,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
    * @todo Clear cache when deleting.
    */
   public function sourceDelete(FeedInterface $feed) {
-    if ($this->config['use_pubsubhubbub']) {
+    if ($this->configuration['use_pubsubhubbub']) {
       $item = array(
         'type' => $this->getPluginId(),
         'id' => $feed->id(),

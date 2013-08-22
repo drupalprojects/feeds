@@ -26,17 +26,18 @@ class UserHandler extends PluginBase {
 
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
     $this->importer = $configuration['importer'];
-    unset($configuration['importer']);
-    $this->config = $configuration + $this->configDefaults();
+    $this->configuration += $this->getConfigurationDefaults();
+    unset($this->configuration['importer']);
   }
 
-  public function getConfig() {
-    return $this->config + $this->configDefaults();
+  public function getConfiguration() {
+    return $this->configuration;
   }
 
   public static function applies($processor) {
-    return $processor->entityType() == 'user';
+    return $processor->entityType() === 'user';
   }
 
   /**
@@ -44,8 +45,8 @@ class UserHandler extends PluginBase {
    */
   public function newEntityValues(FeedInterface $feed, &$values) {
     $values['uid'] = 0;
-    $values['roles'] = array_filter(array_values($this->config['roles']));
-    $values['status'] = $this->config['status'];
+    $values['roles'] = array_filter(array_values($this->configuration['roles']));
+    $values['status'] = $this->configuration['status'];
   }
 
   /**
@@ -56,9 +57,9 @@ class UserHandler extends PluginBase {
   }
 
   /**
-   * Override parent::configDefaults().
+   * Override parent::getConfigurationDefaults().
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     $defaults = array();
     $defaults['roles'] = array();
     $defaults['status'] = 1;
@@ -73,7 +74,7 @@ class UserHandler extends PluginBase {
       '#title' => t('Status'),
       '#description' => t('Select whether users should be imported active or blocked.'),
       '#options' => array(0 => t('Blocked'), 1 => t('Active')),
-      '#default_value' => $this->config['status'],
+      '#default_value' => $this->configuration['status'],
     );
 
     $roles = user_roles(TRUE);
@@ -87,7 +88,7 @@ class UserHandler extends PluginBase {
         '#type' => 'checkboxes',
         '#title' => t('Additional roles'),
         '#description' => t('Every user is assigned the "authenticated user" role. Select additional roles here.'),
-        '#default_value' => $this->config['roles'],
+        '#default_value' => $this->configuration['roles'],
         '#options' => $options,
       );
     }
@@ -95,7 +96,7 @@ class UserHandler extends PluginBase {
       '#type' => 'checkbox',
       '#title' => t('Defuse e-mail addresses'),
       '#description' => t('This appends _test to all imported e-mail addresses to ensure they cannot be used as recipients.'),
-      '#default_value' => $this->config['defuse_mail'],
+      '#default_value' => $this->configuration['defuse_mail'],
     );
   }
 
@@ -117,7 +118,7 @@ class UserHandler extends PluginBase {
   }
 
   public function preSave($account) {
-    if ($this->config['defuse_mail']) {
+    if ($this->configuration['defuse_mail']) {
       $account->mail = $account->mail . '_test';
     }
 
@@ -143,7 +144,7 @@ class UserHandler extends PluginBase {
     $uid = FALSE;
     // Iterate through all unique targets and try to find a user for the
     // target's value.
-    foreach ($this->importer->processor->uniqueTargets($feed, $result) as $target => $value) {
+    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
 
       switch ($target) {
         case 'name':

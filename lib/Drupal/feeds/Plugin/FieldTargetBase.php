@@ -10,6 +10,7 @@ namespace Drupal\feeds\Plugin;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\field\Entity\FieldInstance;
+use Drupal\field\Field;
 
 /**
  * Helper class for field mappers.
@@ -38,10 +39,11 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
     $targets = array();
 
-    $entity_type = $this->importer->processor->entityType();
-    $bundle = $this->importer->processor->bundle();
+    $processor = $this->importer->getProcessor();
+    $entity_type = $processor->entityType();
+    $bundle = $processor->bundle();
 
-    foreach (field_info_instances($entity_type, $bundle) as $name => $instance) {
+    foreach (Field::fieldInfo()->getBundleInstances($entity_type, $bundle) as $name => $instance) {
       if (in_array($instance->getFieldType(), $this->fieldTypes)) {
         $targets += $this->applyTargets($instance);
       }

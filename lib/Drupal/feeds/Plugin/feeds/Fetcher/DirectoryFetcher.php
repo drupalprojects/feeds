@@ -30,7 +30,7 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
     // Just return a file fetcher result if this is a file.
     if (is_file($feed_config['source'])) {
@@ -80,13 +80,13 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
    * {@inheritdoc}
    */
   public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['source'] = array(
       '#type' => 'textfield',
       '#title' => t('File'),
-      '#description' => t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->config['allowed_schemes']))),
+      '#description' => t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))),
       '#default_value' => empty($feed_config['source']) ? '' : $feed_config['source'],
     );
     return $form;
@@ -100,8 +100,8 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
     $values['source'] = trim($values['source']);
     // Check if chosen url scheme is allowed.
     $scheme = file_uri_scheme($values['source']);
-    if (!$scheme || !in_array($scheme, $this->config['allowed_schemes'])) {
-      form_set_error('feeds][directory][source', t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->config['allowed_schemes']))));
+    if (!$scheme || !in_array($scheme, $this->configuration['allowed_schemes'])) {
+      form_set_error('feeds][directory][source', t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
     }
     // Check wether the given path exists.
     elseif (!file_exists($values['source'])) {
@@ -112,7 +112,7 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
   /**
    * {@inheritdoc}
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     return array(
       'allowed_extensions' => 'txt csv tsv xml opml',
       'allowed_schemes' => $this->getSchemes(),
@@ -127,24 +127,25 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
       '#description' => t('Allowed file extensions for upload.'),
-      '#default_value' => $this->config['allowed_extensions'],
+      '#default_value' => $this->configuration['allowed_extensions'],
     );
     $form['allowed_schemes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Allowed schemes'),
-      '#default_value' => $this->config['allowed_schemes'],
+      '#default_value' => $this->configuration['allowed_schemes'],
       '#options' => $this->getSchemeOptions(),
       '#description' => t('Select the schemes you want to allow for direct upload.'),
     );
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, array &$form_state) {
-    $form_state['values']['allowed_schemes'] = array_filter($form_state['values']['allowed_schemes']);
+    $values =& $form_state['values']['fetcher']['config'];
+    $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
   }
 
   /**

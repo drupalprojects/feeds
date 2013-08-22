@@ -228,7 +228,7 @@ function feeds_feed_expire(array $job) {
  */
 function feeds_push_unsubscribe(array $job) {
   $feed = entity_load('feeds_feed', $job['id']);
-  $feed->getImporter()->fetcher->unsubscribe($feed);
+  $feed->getImporter()->getFetcher()->unsubscribe($feed);
 }
 
 /**
@@ -236,7 +236,7 @@ function feeds_push_unsubscribe(array $job) {
  */
 function feeds_push_subscribe(array $job) {
   if ($feed = entity_load('feeds_feed', $job['id'])) {
-    $feed_config = $feed->getConfig();
+    $feed_config = $feed->getConfiguration();
 
     if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
 
@@ -433,22 +433,15 @@ function feeds_menu() {
     'title arguments' => array(4),
     'route_name' => 'feeds_importer',
   );
-  $items['admin/structure/feeds/manage/%feeds_importer/%'] = array(
-    'title callback' => 'entity_page_label',
-    'title arguments' => array(4),
-    'route_name' => 'feeds_importer.active',
+  $items['admin/structure/feeds/manage/%feeds_importer/edit'] = array(
+    'title' => 'Edit',
+    'route_name' => 'feeds_importer.edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/structure/feeds/manage/%feeds_importer/%/%'] = array(
-    'title callback' => 'entity_page_label',
-    'title arguments' => array(4),
-    'route_name' => 'feeds_importer.active_plugin',
-  );
-  $items['admin/structure/feeds/manage/%feeds_importer/delete'] = array(
-    'title' => 'Delete',
-    'route_name' => 'feeds_importer.delete',
+  $items['admin/structure/feeds/manage/%feeds_importer/mapping'] = array(
+    'title' => 'Mapping',
+    'route_name' => 'feeds_importer.mapping',
     'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_NONE,
-    'weight' => 4,
   );
 
   return $items;

@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;
 
 /**
@@ -17,10 +18,9 @@ use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;
  * Doing this would break the model where source information is represented by
  * an object that is being passed into a FeedInterface object and its plugins.
  */
-abstract class PluginBase extends DrupalPluginBase {
-
+abstract class PluginBase extends DrupalPluginBase implements ConfigurablePluginInterface {
+  protected $id;
   // Holds the actual configuration information.
-  protected $config;
   protected $importer;
 
   /**
@@ -34,14 +34,13 @@ abstract class PluginBase extends DrupalPluginBase {
    *   The plugin implementation definition.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    $this->importer = $configuration['importer'];
+    $this->id = $this->importer->id();
+    unset($configuration['importer']);
+
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    $this->id = $configuration['importer']->id();
-    $this->importer = $configuration['importer'];
-
-    unset($configuration['importer']);
-    $this->setConfig($configuration);
-    $this->source_config = $this->sourceDefaults();
+    $this->configuration += $this->getConfigurationDefaults();
   }
 
   /**
@@ -88,24 +87,9 @@ abstract class PluginBase extends DrupalPluginBase {
   public function sourceDelete(FeedInterface $feed) {}
 
   /**
-   * Similar to setConfig but adds to existing configuration.
-   *
-   * @param $config
-   *   Array containing configuration information. Will be filtered by the keys
-   *   returned by configDefaults().
+   * {@inheritdoc}
    */
-  public function addConfig($config) {
-    $this->config = array_merge($this->config, $config);
-    $default_keys = $this->configDefaults();
-    $this->config = array_intersect_key($this->config, $default_keys);
-  }
-
-  /**
-   * Implements getConfig().
-   *
-   * Return configuration array, ensure that all default values are present.
-   */
-  public function getConfig($key = NULL) {
+  public function getConfiguration($key = NULL) {
     if ($key) {
       if (isset($this->config[$key])) {
         return $this->config[$key];
@@ -114,32 +98,24 @@ abstract class PluginBase extends DrupalPluginBase {
       return NULL;
     }
 
-    return $this->config;
+    return $this->configuration;
   }
 
   /**
-   * Set configuration.
-   *
-   * @param $config
-   *   Array containing configuration information. Config array will be filtered
-   *   by the keys returned by configDefaults() and populated with default
-   *   values that are not included in $config.
+   * {@inheritdoc}
    */
-  public function setConfig(array $config) {
-    $defaults = $this->configDefaults();
-    $this->config = array_intersect_key($config, $defaults) + $defaults;
+  public function setConfiguration(array $configuration) {
+    $this->configuration = $configuration + $this->getConfigurationDefaults();
   }
 
   /**
-   * Return default configuration.
+   * Returns default configuration.
    *
-   * @todo rename to getConfigDefaults().
-   *
-   * @return
+   * @return array
    *   Array where keys are the variable names of the configuration elements and
    *   values are their default values.
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     return array();
   }
 
@@ -161,23 +137,6 @@ abstract class PluginBase extends DrupalPluginBase {
    *
    * @see \Drupal\Core\Form\FormInterface
    */
-  public function buildForm(array $form, array &$form_state) {
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-      '#weight' => 100,
-      '#button_type' => 'primary',
-    );
-
-    return $form;
-  }
-
-  /**
-   * Stub for plugins implementing FormInterface.
-   *
-   * @see \Drupal\Core\Form\FormInterface
-   */
   public function validateForm(array &$form, array &$form_state) {}
 
   /**
@@ -186,9 +145,7 @@ abstract class PluginBase extends DrupalPluginBase {
    * @see \Drupal\Core\Form\FormInterface
    */
   public function submitForm(array &$form, array &$form_state) {
-    $this->addConfig($form_state['values']);
-    $this->importer->save();
-    drupal_set_message(t('Your changes have been saved.'));
+    $this->setConfiguration($form_state['values'][$this->pluginType()]);
   }
 
 }

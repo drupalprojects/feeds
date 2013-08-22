@@ -30,7 +30,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
     if (is_file($feed_config['source'])) {
       return new FetcherResult($feed_config['source']);
@@ -44,7 +44,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['fid'] = array(
       '#type' => 'value',
@@ -71,10 +71,10 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
   public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
 
-    $feed_dir = $this->config['directory'];
+    $feed_dir = $this->configuration['directory'];
     $validators = array(
       'file_validate_extensions' => array(
-        $this->config['allowed_extensions'],
+        $this->configuration['allowed_extensions'],
       ),
     );
 
@@ -105,7 +105,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function sourceSave(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
 
     // If a new file is present, delete the old one and replace it with the new
     // one.
@@ -128,7 +128,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function sourceDelete(FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
     if (isset($feed_config['fid'])) {
       $this->deleteFile($feed_config['fid'], $feed->id());
     }
@@ -137,7 +137,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     $schemes = $this->getSchemes();
     $scheme = in_array('private', $schemes) ? 'private' : 'public';
 
@@ -155,17 +155,17 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
       '#description' => t('Allowed file extensions for upload.'),
-      '#default_value' => $this->config['allowed_extensions'],
+      '#default_value' => $this->configuration['allowed_extensions'],
     );
     $form['directory'] = array(
       '#type' => 'textfield',
       '#title' => t('Upload directory'),
       '#description' => t('Directory where uploaded files get stored. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->getSchemes()))),
-      '#default_value' => $this->config['directory'],
+      '#default_value' => $this->configuration['directory'],
       '#required' => TRUE,
     );
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
@@ -173,17 +173,19 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    */
   public function validateForm(array &$form, array &$form_state) {
 
-    $form_state['values']['directory'] = trim($form_state['values']['directory']);
+    $values =& $form_state['values']['fetcher']['config'];
+
+    $values['directory'] = trim($values['directory']);
 
     // Ensure that the upload directory field is not empty.
-    if (!$form_state['values']['directory']) {
+    if (!$values['directory']) {
       form_set_error('directory', t('Please specify an upload directory.'));
       // Do not continue validating the directory if none was specified.
       return;
     }
 
     // Validate the URI scheme of the upload directory.
-    $scheme = file_uri_scheme($form_state['values']['directory']);
+    $scheme = file_uri_scheme($values['directory']);
     if (!$scheme || !in_array($scheme, $this->getSchemes())) {
       form_set_error('directory', t('Please enter a valid scheme into the directory location.'));
 
@@ -193,7 +195,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
     }
 
     // Ensure that the upload directory exists.
-    if (!file_prepare_directory($form_state['values']['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+    if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       form_set_error('directory', t('The chosen directory does not exist and attempts to create it failed.'));
     }
   }

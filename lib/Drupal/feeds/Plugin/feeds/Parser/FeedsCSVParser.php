@@ -33,7 +33,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
     $state = $feed->state(FEEDS_PARSE);
 
     // Load and configure parser.
@@ -123,8 +123,8 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
    */
   public function sourceDefaults() {
     return array(
-      'delimiter' => $this->config['delimiter'],
-      'no_headers' => $this->config['no_headers'],
+      'delimiter' => $this->configuration['delimiter'],
+      'no_headers' => $this->configuration['no_headers'],
     );
   }
 
@@ -132,11 +132,11 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
     $form['parser']['#tree'] = TRUE;
     $form['parser']['#weight'] = -10;
 
-    $mappings = $this->importer->processor->config['mappings'];
+    $mappings = $this->importer->getProcessor()->config['mappings'];
     $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
       $feeds[] = check_plain($mapping['source']);
@@ -187,7 +187,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     return array(
       'delimiter' => ',',
       'no_headers' => 0,
@@ -209,20 +209,20 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
         '|' => '|',
         '+' => '+',
       ),
-      '#default_value' => $this->config['delimiter'],
+      '#default_value' => $this->configuration['delimiter'],
     );
     $form['no_headers'] = array(
       '#type' => 'checkbox',
       '#title' => t('No headers'),
       '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
-      '#default_value' => $this->config['no_headers'],
+      '#default_value' => $this->configuration['no_headers'],
     );
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   public function getTemplate() {
-    $mappings = $this->importer->processor->config['mappings'];
+    $mappings = $this->importer->getProcessor()->config['mappings'];
     $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
       if (!empty($mapping['unique'])) {

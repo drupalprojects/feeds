@@ -37,7 +37,7 @@ class TaxonomyTermHandler extends PluginBase {
    * Creates a new user account in memory and returns it.
    */
   public function newEntityValues(FeedInterface $feed, &$values) {
-    $values['input_format'] = $this->importer->processor->getConfig('input_format');
+    $values['input_format'] = $this->importer->getProcessor()->getConfig('input_format');
   }
 
   /**
@@ -88,9 +88,9 @@ class TaxonomyTermHandler extends PluginBase {
    */
   public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
     // The only possible unique target is name.
-    foreach ($this->importer->processor->uniqueTargets($feed, $result) as $target => $value) {
+    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
       if ($target == 'name') {
-        if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $this->importer->processor->bundle()))->fetchField()) {
+        if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $this->importer->getProcessor()->bundle()))->fetchField()) {
           return $tid;
         }
       }

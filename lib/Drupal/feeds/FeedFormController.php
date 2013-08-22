@@ -17,6 +17,13 @@ use Drupal\feeds\FeedPluginFormInterface;
 class FeedFormController extends EntityFormControllerNG {
 
   /**
+   * Plugins that have configuration forms.
+   *
+   * @var array
+   */
+  protected $configurablePlugins = array();
+
+  /**
    * Overrides Drupal\Core\Entity\EntityFormControllerNG::form().
    */
   public function form(array $form, array &$form_state) {
@@ -41,8 +48,11 @@ class FeedFormController extends EntityFormControllerNG {
     );
 
     foreach ($importer->getPluginTypes() as $type) {
-      if ($importer->$type instanceof FeedPluginFormInterface) {
-        $form = $importer->$type->feedForm($form, $form_state, $feed);
+      $plugin = $importer->getPlugin($type);
+      if ($plugin instanceof FeedPluginFormInterface) {
+        // Store the plugin for validate and submit.
+        $this->configurablePlugins[] = $plugin;
+        $form = $plugin->feedForm($form, $form_state, $feed);
       }
     }
 
@@ -109,15 +119,15 @@ class FeedFormController extends EntityFormControllerNG {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormControllerNG::validate().
+   *
+   * @todo Don't call buildEntity() here.
    */
   public function validate(array $form, array &$form_state) {
+
     $feed = $this->buildEntity($form, $form_state);
 
-    $importer = $feed->getImporter();
-    foreach ($importer->getPluginTypes() as $type) {
-      if ($importer->$type instanceof FeedPluginFormInterface) {
-        $importer->$type->feedFormValidate($form, $form_state, $feed);
-      }
+    foreach ($this->configurablePlugins as $plugin) {
+      $plugin->feedFormValidate($form, $form_state, $feed);
     }
 
     // Validate the "authored by" field.
@@ -151,14 +161,9 @@ class FeedFormController extends EntityFormControllerNG {
     // Build the feed object from the submitted values.
     $feed = parent::submit($form, $form_state);
 
-    $importer = $feed->getImporter();
-    foreach ($importer->getPluginTypes() as $type) {
-      if ($importer->$type instanceof FeedPluginFormInterface) {
-        $importer->$type->feedFormSubmit($form, $form_state, $feed);
-      }
+    foreach ($this->configurablePlugins as $plugin) {
+      $plugin->feedFormSubmit($form, $form_state, $feed);
     }
-
-    return $feed;
   }
 
   /**
@@ -184,25 +189,23 @@ class FeedFormController extends EntityFormControllerNG {
     }
 
     if ($feed->id()) {
-      $form_state['values']['fid'] = $feed->id();
-      $form_state['fid'] = $feed->id();
       $form_state['redirect'] = 'feed/' . $feed->id();
+
+      // Clear feed cache.
+      cache_invalidate_tags(array('feeds' => TRUE));
+
+      // Schedule jobs for this feed.
+      $feed->schedule();
+
+      if ($insert && $feed->getImporter()->import_on_create) {
+        $feed->startImport();
+      }
     }
     else {
       // In the unlikely case something went wrong on save, the feed will be
       // rebuilt and feed form redisplayed the same way as in preview.
       drupal_set_message(t('The feed could not be saved.'), 'error');
       $form_state['rebuild'] = TRUE;
-    }
-
-    // Clear the page and block caches.
-    cache_invalidate_tags(array('feeds' => TRUE));
-
-    // Schedule jobs for this feed.
-    $feed->schedule();
-
-    if ($insert && $feed->getImporter()->config['import_on_create']) {
-      $feed->startImport();
     }
   }
 

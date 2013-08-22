@@ -26,13 +26,14 @@ class NodeHandler extends PluginBase {
 
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
     $this->importer = $configuration['importer'];
-    unset($configuration['importer']);
-    $this->config = $configuration + $this->configDefaults();
+    $this->configuration += $this->getConfigurationDefaults();
+    unset($this->configuration['importer']);
   }
 
-  public function getConfig() {
-    return $this->config + $this->configDefaults();
+  public function getConfiguration() {
+    return $this->configuration;
   }
 
   public static function applies($processor) {
@@ -43,7 +44,7 @@ class NodeHandler extends PluginBase {
    * Creates a new user account in memory and returns it.
    */
   public function newEntityValues(FeedInterface $feed, &$values) {
-    $node_settings = entity_load('node_type', $this->importer->processor->bundle())->getModuleSettings('node');
+    $node_settings = entity_load('node_type', $this->importer->getProcessor()->bundle())->getModuleSettings('node');
 
     // Ensure default settings.
     $node_settings += array(
@@ -52,7 +53,7 @@ class NodeHandler extends PluginBase {
       'submitted' => TRUE,
     );
 
-    $values['uid'] = $this->config['author'];
+    $values['uid'] = $this->configuration['author'];
     $values['status'] = (int) in_array('status', $node_settings['options']);
     $values['log'] = 'Created by FeedsNodeProcessor';
     $values['promote'] = (int) in_array('promote', $node_settings['options']);
@@ -67,9 +68,9 @@ class NodeHandler extends PluginBase {
   }
 
   /**
-   * Override parent::configDefaults().
+   * Override parent::getConfigurationDefaults().
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     $defaults = array();
     $defaults['author'] = 0;
     $defaults['authorize'] = TRUE;
@@ -80,20 +81,20 @@ class NodeHandler extends PluginBase {
   }
 
   public function formAlter(array &$form, array &$form_state) {
-    $author = user_load($this->config['author']);
+    $author = user_load($this->configuration['author']);
 
     $form['author'] = array(
       '#type' => 'textfield',
       '#title' => t('Author'),
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => $author->getUserName() ? :  'anonymous',
+      '#default_value' => check_plain($author->getUsername()),
     );
     $form['authorize'] = array(
       '#type' => 'checkbox',
       '#title' => t('Authorize'),
       '#description' => t('Check that the author has permission to create the node.'),
-      '#default_value' => $this->config['authorize'],
+      '#default_value' => $this->configuration['authorize'],
     );
     $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this, 'formatExpire'));
     $form['expire'] = array(
@@ -101,21 +102,23 @@ class NodeHandler extends PluginBase {
       '#title' => t('Expire nodes'),
       '#options' => $period,
       '#description' => t('Select after how much time nodes should be deleted. The node\'s published date will be used for determining the node\'s age, see Mapping settings.'),
-      '#default_value' => $this->config['expire'],
+      '#default_value' => $this->configuration['expire'],
     );
   }
 
   public function validateForm(array &$form, array &$form_state) {
-    if ($author = user_load_by_name($form_state['values']['author'])) {
-      $form_state['values']['author'] = $author->uid;
+    $values =& $form_state['values']['processor']['config'];
+    if ($author = user_load_by_name($values['author'])) {
+      $values['author'] = $author->id();
     }
     else {
-      $form_state['values']['author'] = 0;
+      $values['author'] = 0;
     }
   }
 
   public function submitForm(array &$form, array &$form_state) {
-    if ($this->config['expire'] != $form_state['values']['expire']) {
+    $values =& $form_state['values']['processor']['config'];
+    if ($this->configuration['expire'] != $values['expire']) {
       $this->importer->reschedule($this->importer->id());
     }
   }
@@ -124,10 +127,10 @@ class NodeHandler extends PluginBase {
    * Loads an existing user.
    */
   public function entityPrepare(FeedInterface $feed, $node) {
-    $update_existing = $this->importer->processor->getConfig('update_existing');
+    $update_existing = $this->importer->getProcessor()->getConfig('update_existing');
 
     if ($update_existing != FEEDS_UPDATE_EXISTING) {
-      $node->uid = $this->config['author'];
+      $node->uid = $this->configuration['author'];
     }
 
     // node_object_prepare($node);
@@ -159,7 +162,7 @@ class NodeHandler extends PluginBase {
    */
   public function entitySaveAccess($entity) {
     // The check will be skipped for anonymous nodes.
-    if ($this->config['authorize'] && !empty($entity->uid)) {
+    if ($this->configuration['authorize'] && !empty($entity->uid)) {
 
       $author = user_load($entity->uid);
 
@@ -188,7 +191,7 @@ class NodeHandler extends PluginBase {
 
   public function preSave($entity) {
     if (!isset($entity->uid) || !is_numeric($entity->uid)) {
-       $entity->uid = $this->config['author'];
+       $entity->uid = $this->configuration['author'];
     }
     if (drupal_strlen($entity->title) > 255) {
       $entity->title = drupal_substr($entity->title, 0, 255);
@@ -245,7 +248,7 @@ class NodeHandler extends PluginBase {
     $nid = FALSE;
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
-    foreach ($this->importer->processor->uniqueTargets($feed, $result) as $target => $value) {
+    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
 
       switch ($target) {
         case 'nid':
@@ -253,7 +256,7 @@ class NodeHandler extends PluginBase {
           break;
 
         case 'title':
-          $nid = db_query("SELECT nid FROM {node_field_data} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->importer->processor->bundle()))->fetchField();
+          $nid = db_query("SELECT nid FROM {node_field_data} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->importer->getProcessor()->bundle()))->fetchField();
           break;
       }
       if ($nid) {

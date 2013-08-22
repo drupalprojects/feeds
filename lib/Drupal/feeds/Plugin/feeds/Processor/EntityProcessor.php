@@ -10,6 +10,7 @@ namespace Drupal\feeds\Plugin\feeds\Processor;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
+use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\Plugin\ProcessorBase;
@@ -26,7 +27,7 @@ use Drupal\feeds\Plugin\ProcessorBase;
  *   derivative = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
  * )
  */
-class EntityProcessor extends ProcessorBase implements FormInterface {
+class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFormPluginInterface {
 
   /**
    * The plugin definition.
@@ -75,7 +76,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
 
       // Check if this item already exists.
       $entity_id = $this->existingEntityId($feed, $parser_result);
-      $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
+      $skip_existing = $this->configuration['update_existing'] == FEEDS_SKIP_EXISTING;
 
       module_invoke_all('feeds_before_update', $feed, $item, $entity_id);
 
@@ -86,7 +87,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
 
       $hash = $this->hash($item);
       $changed = ($hash !== $this->getHash($entity_id));
-      $force_update = $this->config['skip_hash_check'];
+      $force_update = $this->configuration['skip_hash_check'];
 
       // Do not proceed if the item exists, has not changed, and we're not
       // forcing the update.
@@ -307,7 +308,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
    */
   public function bundle() {
     if ($bundle_key = $this->bundleKey()) {
-      return $this->config['values'][$bundle_key];
+      return $this->configuration['values'][$bundle_key];
     }
 
     return $this->entityType();
@@ -352,7 +353,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
    * {@inheritdoc}
    */
   protected function newEntity(FeedInterface $feed) {
-    $values = $this->config['values'];
+    $values = $this->configuration['values'];
     $this->apply('newEntityValues', $feed, $values);
     return entity_create($this->entityType(), $values)->getBCEntity();
   }
@@ -398,24 +399,18 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
     $this->apply('entityDeleteMultiple', $entity_ids);
   }
 
-  public function getConfig($key = NULL) {
-    $this->config + $this->apply('getConfig');
-
-    if ($key) {
-      if (isset($this->config[$key])) {
-        return $this->config[$key];
-      }
-
-      return NULL;
-    }
-
-    return $this->config;
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration($key = NULL) {
+    $this->configuration + $this->apply('getConfiguration');
+    return parent::getConfiguration($key);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     $bundle = key(entity_get_bundles($this->entityType()));
 
     $defaults = array(
@@ -424,9 +419,9 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
       ),
       'handlers' => array(),
       'expire' => FEEDS_EXPIRE_NEVER,
-    ) + parent::configDefaults();
+    ) + parent::getConfigurationDefaults();
 
-    $defaults += $this->apply('configDefaults');
+    $defaults += $this->apply('getConfigurationDefaults');
 
     return $defaults;
   }
@@ -436,17 +431,6 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
    */
   public function buildForm(array $form, array &$form_state) {
     $info = $this->entityInfo();
-
-    $form['values']['#tree'] = TRUE;
-    if ($bundle_key = $this->bundleKey()) {
-      $form['values'][$bundle_key] = array(
-        '#type' => 'select',
-        '#options' => $this->bundleOptions(),
-        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : t('Bundle'),
-        '#required' => TRUE,
-        '#default_value' => $this->bundle(),
-      );
-    }
 
     $label_plural = isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
     $tokens = array('@entities' => drupal_strtolower($label_plural));
@@ -461,7 +445,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
         FEEDS_REPLACE_EXISTING => t('Replace existing @entities', $tokens),
         FEEDS_UPDATE_EXISTING => t('Update existing @entities', $tokens),
       ),
-      '#default_value' => $this->config['update_existing'],
+      '#default_value' => $this->configuration['update_existing'],
     );
 
     $form = parent::buildForm($form, $form_state);
@@ -551,7 +535,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
    * Return expiry time.
    */
   public function expiryTime() {
-    return $this->config['expire'];
+    return $this->configuration['expire'];
   }
 
   protected function expiryQuery(FeedInterface $feed, $time) {
@@ -572,6 +556,23 @@ class EntityProcessor extends ProcessorBase implements FormInterface {
     }
 
     return 0;
+  }
+
+  public function buildAdvancedForm(array $form, array &$form_state) {
+    $info = $this->entityInfo();
+
+    $form['values']['#tree'] = TRUE;
+    if ($bundle_key = $this->bundleKey()) {
+      $form['values'][$bundle_key] = array(
+        '#type' => 'select',
+        '#options' => $this->bundleOptions(),
+        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : t('Bundle'),
+        '#required' => TRUE,
+        '#default_value' => $this->bundle(),
+      );
+    }
+
+    return $form;
   }
 
 }

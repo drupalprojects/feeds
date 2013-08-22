@@ -146,6 +146,11 @@ class Feed extends EntityNG implements FeedInterface {
   public $fetcher_result;
 
   /**
+   * The cached result from getImporter() since that gets called many times.
+   */
+  protected $_importer;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values, $entity_type, $bundle = FALSE) {
@@ -191,7 +196,17 @@ class Feed extends EntityNG implements FeedInterface {
    * Returns the FeedsImporter object that this source is expected to be used with.
    */
   public function getImporter() {
-    return entity_load('feeds_importer', (string) $this->bundle());
+
+    if (isset($this->_importer)) {
+      return $this->_importer;
+    }
+
+    if ($importer = entity_load('feeds_importer', (string) $this->bundle())) {
+      $this->_importer = $importer;
+      return $importer;
+    }
+
+    throw new \RuntimeException(format_string('The importer, @importer, for this feed does not exist.', array('@importer' => $this->bundle())));
   }
 
   /**
@@ -204,8 +219,8 @@ class Feed extends EntityNG implements FeedInterface {
    *   Throws Exception if an error occurs when fetching or parsing.
    */
   public function preview() {
-    $result = $this->getImporter()->fetcher->fetch($this);
-    $result = $this->getImporter()->parser->parse($this, $result);
+    $result = $this->getImporter()->getFetcher()->fetch($this);
+    $result = $this->getImporter()->getParser()->parse($this, $result);
     module_invoke_all('feeds_after_parse', $this, $result);
     return $result;
   }
@@ -224,8 +239,7 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function startImport() {
     module_invoke_all('feeds_before_import', $this);
-    $config = $this->getImporter()->getConfig();
-    if ($config['process_in_background']) {
+    if ($this->getImporter()->process_in_background) {
       $this->startBackgroundJob('import');
     }
     else {
@@ -246,8 +260,7 @@ class Feed extends EntityNG implements FeedInterface {
    *   this method may throw the same exceptions as Feed::clear().
    */
   public function startClear() {
-    $config = $this->getImporter()->getConfig();
-    if ($config['process_in_background']) {
+    if ($this->getImporter()->process_in_background) {
       $this->startBackgroundJob('clear');
     }
     else {
@@ -268,8 +281,8 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function scheduleImport() {
     // Check whether any fetcher is overriding the import period.
-    $period = $this->getImporter()->config['import_period'];
-    $fetcher_period = $this->getImporter()->fetcher->importPeriod($this);
+    $period = $this->getImporter()->import_period;
+    $fetcher_period = $this->getImporter()->getFetcher()->importPeriod($this);
     if (is_numeric($fetcher_period)) {
       $period = $fetcher_period;
     }
@@ -302,7 +315,7 @@ class Feed extends EntityNG implements FeedInterface {
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($this->getImporter()->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
+    if ($this->getImporter()->getProcessor()->expiryTime() == FEEDS_EXPIRE_NEVER) {
       JobScheduler::get('feeds_feed_expire')->remove($job);
     }
     else {
@@ -355,7 +368,7 @@ class Feed extends EntityNG implements FeedInterface {
 
       // Fetch.
       if (empty($this->fetcher_result->value) || FEEDS_BATCH_COMPLETE == $this->progressParsing()) {
-        $this->fetcher_result = $this->getImporter()->fetcher->fetch($this);
+        $this->fetcher_result = $this->getImporter()->getFetcher()->fetch($this);
         // Clean the parser's state, we are parsing an entirely new file.
         $state = $this->state->value;
         unset($state[FEEDS_PARSE]);
@@ -363,11 +376,11 @@ class Feed extends EntityNG implements FeedInterface {
       }
 
       // Parse.
-      $parser_result = $this->getImporter()->parser->parse($this, $this->fetcher_result->value);
+      $parser_result = $this->getImporter()->getParser()->parse($this, $this->fetcher_result->value);
       module_invoke_all('feeds_after_parse', $this, $parser_result);
 
       // // Process.
-      $this->getImporter()->processor->process($this, $parser_result);
+      $this->getImporter()->getProcessor()->process($this, $parser_result);
     }
     catch (Exception $e) {
       // Do nothing.
@@ -408,14 +421,15 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function importRaw($raw) {
     // Fetch.
-    $fetcher_result = $this->getImporter()->fetcher->fetch($this, $raw);
+    $importer = $this->getImporter();
+    $fetcher_result = $importer->getFetcher()->fetch($this, $raw);
 
     // Parse.
-    $parser_result = $this->getImporter()->parser->parse($this, $fetcher_result);
+    $parser_result = $importer->getParser()->parse($this, $fetcher_result);
     module_invoke_all('feeds_after_parse', $this, $parser_result);
 
     // // Process.
-    $this->getImporter()->processor->process($this, $parser_result);
+    $importer->getProcessor()->process($this, $parser_result);
   }
 
   /**
@@ -435,9 +449,10 @@ class Feed extends EntityNG implements FeedInterface {
   public function clear() {
     $this->acquireLock();
     try {
-      $this->getImporter()->fetcher->clear($this);
-      $this->getImporter()->parser->clear($this);
-      $this->getImporter()->processor->clear($this);
+      $importer = $this->getImporter();
+      $importer->getFetcher()->clear($this);
+      $importer->getParser()->clear($this);
+      $importer->getProcessor()->clear($this);
     }
     catch (Exception $e) {
       // Do nothing.
@@ -467,7 +482,7 @@ class Feed extends EntityNG implements FeedInterface {
   public function expire() {
     $this->acquireLock();
     try {
-      $result = $this->getImporter()->processor->expire($this);
+      $result = $this->getImporter()->getProcessor()->expire($this);
     }
     catch (Exception $e) {
       // Will throw after the lock is released.
@@ -525,7 +540,7 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * Return a state object for a given stage. Lazy instantiates new states.
    *
-   * @todo Rename getConfigFor() accordingly to config().
+   * @todo Rename getConfigurationFor() accordingly to config().
    *
    * @param $stage
    *   One of FEEDS_FETCH, FEEDS_PARSE, FEEDS_PROCESS or FEEDS_PROCESS_CLEAR.
@@ -546,7 +561,7 @@ class Feed extends EntityNG implements FeedInterface {
    * Count items imported by this source.
    */
   public function itemCount() {
-    return $this->getImporter()->processor->itemCount($this);
+    return $this->getImporter()->getProcessor()->itemCount($this);
   }
 
   /**
@@ -564,15 +579,20 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * Returns the configuration for a specific client class.
    *
-   * @param FeedInterface $client
-   *   An object that is an implementer of FeedInterface.
+   * @param PluginBase $client
+   *   An object that is an implementer of PluginBase.
    *
-   * @return
+   * @return array`
    *   An array stored for $client.
    */
-  public function getConfigFor(PluginBase $client) {
+  public function getConfigurationFor(PluginBase $client) {
     $id = $client->getPluginID();
-    return isset($this->config->value[$id]) ? $this->config->value[$id] : $client->sourceDefaults();
+
+    if (isset($this->config->value[$id])) {
+      return $this->config->value[$id];
+    }
+
+    return $client->sourceDefaults();
   }
 
   /**
@@ -586,7 +606,7 @@ class Feed extends EntityNG implements FeedInterface {
    * @return
    *   An array stored for $client.
    */
-  public function setConfigFor(PluginBase $client, $config) {
+  public function setConfigFor(PluginBase $client, array $config) {
     $this_config = $this->config->value;
     $this_config[$client->getPluginID()] = $config;
     $this->config = $this_config;
@@ -595,11 +615,12 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * Return defaults for feed configuration.
    */
-  public function configDefaults() {
+  public function getConfigurationDefaults() {
     // Collect information from plugins.
+    $importer = $this->getImporter();
     $defaults = array();
-    foreach ($this->getImporter()->getPluginTypes() as $type) {
-      $plugin = $this->getImporter()->$type;
+    foreach ($importer->getPluginTypes() as $type) {
+      $plugin = $importer->getPlugin($type);
       $defaults[$plugin->getPluginID()] = $plugin->sourceDefaults();
     }
     return $defaults;
@@ -698,38 +719,12 @@ class Feed extends EntityNG implements FeedInterface {
   }
 
   /**
-   * Similar to setConfig but adds to existing configuration.
-   *
-   * @param $config
-   *   Array containing configuration information. Will be filtered by the keys
-   *   returned by configDefaults().
-   */
-  public function addConfig($config) {
-    $this->config = array_merge($this->config->value, $config);
-    $default_keys = $this->configDefaults();
-    $this->config = array_intersect_key($this->config->value, $default_keys);
-  }
-
-  /**
-   * Implements getConfig().
+   * Implements getConfiguration().
    *
    * Return configuration array, ensure that all default values are present.
    */
-  public function getConfig() {
+  public function getConfiguration() {
     return $this->config->value;
-  }
-
-  /**
-   * Set configuration.
-   *
-   * @param $config
-   *   Array containing configuration information. Config array will be filtered
-   *   by the keys returned by configDefaults() and populated with default
-   *   values that are not included in $config.
-   */
-  public function setConfig($config) {
-    $defaults = $this->configDefaults();
-    $this->config = array_intersect_key($config, $defaults) + $defaults;
   }
 
   public function getUser() {
@@ -752,15 +747,15 @@ class Feed extends EntityNG implements FeedInterface {
   public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
     // Alert implementers of FeedInterface to the fact that we're saving.
     foreach ($this->getImporter()->getPluginTypes() as $type) {
-      $this->getImporter()->$type->sourceSave($this);
+      $this->getImporter()->getPlugin($type)->sourceSave($this);
     }
-    $config = $this->getConfig();
+    $config = $this->getConfiguration();
 
     // Store the source property of the fetcher in a separate column so that we
     // can do fast lookups on it.
     $this->source->value = '';
-    if (isset($config[$this->getImporter()->fetcher->getPluginID()]['source'])) {
-      $this->source = $config[$this->getImporter()->fetcher->getPluginID()]['source'];
+    if (isset($config[$this->getImporter()->getFetcher()->getPluginID()]['source'])) {
+      $this->source = $config[$this->getImporter()->getFetcher()->getPluginID()]['source'];
     }
 
     // @todo move this to the storage controller.
@@ -787,7 +782,7 @@ class Feed extends EntityNG implements FeedInterface {
     // Alert plugins that we are deleting.
     foreach ($feeds as $feed) {
       foreach ($feed->getImporter()->getPluginTypes() as $type) {
-        $feed->getImporter()->$type->sourceDelete($feed);
+        $feed->getImporter()->getPlugin($type)->sourceDelete($feed);
       }
 
       // Remove from schedule.

@@ -7,14 +7,13 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Core\Form\BaseFormIdInterface;
+use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\ImporterInterface;
-use Drupal\feeds\Form\MappingSettingsForm;
 
 /**
  * Provides a form for mapping.
  */
-class MappingForm implements BaseFormIdInterface {
+class MappingForm implements FormInterface {
 
   /**
    * The feeds importer.
@@ -24,34 +23,26 @@ class MappingForm implements BaseFormIdInterface {
   protected $importer;
 
   /**
-   * Constructs a new MappingForm object.
+   * The mappings for this importer.
    *
-   * @param \Drupal\feeds\ImporterInterface $importer
+   * @var array
    */
-  public function __construct(ImporterInterface $importer) {
-    $this->importer = $importer;
-  }
+  protected $mappings;
 
   /**
    * {@inheritdoc}
    */
-  public function getBaseFormID() {
+  public function getFormID() {
     return 'feeds_mapping_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormID() {
-    return 'feeds_' . $this->importer->id() . '_mapping_form';
-  }
+  public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
+    $importer = $this->importer = $feeds_importer;
+    $this->mappings = $form['#mappings'] = $importer->getProcessor()->getMappings();
 
-  /**
-   * {@inheritdoc}
-   */
-  public function buildForm(array $form, array &$form_state) {
-    $importer = $this->importer;
-    $form['#mappings'] = $mappings = $importer->processor->getMappings();
     $form['help']['#markup'] = $this->help();
     $form['#prefix'] = '<div id="feeds-mapping-form-wrapper">';
     $form['#suffix'] = '</div>';
@@ -59,7 +50,7 @@ class MappingForm implements BaseFormIdInterface {
     // Get mapping sources from parsers and targets from processor, format them
     // for output.
     // Some parsers do not define mapping sources but let them define on the fly.
-    if ($sources = $importer->parser->getMappingSources()) {
+    if ($sources = $importer->getParser()->getMappingSources()) {
       $source_options = $this->sortOptions($sources);
       foreach ($sources as $k => $source) {
         $legend['sources'][$k]['name']['#markup'] = empty($source['name']) ? $k : $source['name'];
@@ -69,7 +60,7 @@ class MappingForm implements BaseFormIdInterface {
     else {
       $legend['sources']['#markup'] = t('This parser supports free source definitions. Enter the name of the source field in lower case into the Source text field above.');
     }
-    $targets = $importer->processor->getMappingTargets();
+    $targets = $importer->getProcessor()->getMappingTargets();
     $target_options = $this->sortOptions($targets);
     $legend['targets'] = array();
     foreach ($targets as $k => $target) {
@@ -91,11 +82,11 @@ class MappingForm implements BaseFormIdInterface {
     $form['config'] = $form['remove_flags'] = $form['mapping_weight'] = array(
       '#tree' => TRUE,
     );
-    if (is_array($mappings)) {
+    if (is_array($this->mappings)) {
 
-      $delta = count($mappings) + 2;
+      $delta = count($this->mappings) + 2;
 
-      foreach ($mappings as $i => $mapping) {
+      foreach ($this->mappings as $i => $mapping) {
         if (isset($targets[$mapping['target']])) {
           $settings_form = new MappingSettingsForm($i, $mapping, $targets[$mapping['target']]);
           $form['config'][$i] = $settings_form->buildForm($form, $form_state);
@@ -154,9 +145,10 @@ class MappingForm implements BaseFormIdInterface {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['save'] = array(
       '#type' => 'submit',
-      '#value' => t('Save'),
-      '#button_type' => 'primary',
+      '#value' => t('Save mappings'),
     );
+
+    // $form['#theme'] = 'feeds_mapping_form';
 
     return $form;
   }
@@ -194,7 +186,7 @@ class MappingForm implements BaseFormIdInterface {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $processor = $this->importer->processor;
+    $processor = $this->importer->getProcessor();
 
     $form_state += array(
       'mapping_settings' => array(),
@@ -209,11 +201,10 @@ class MappingForm implements BaseFormIdInterface {
 
     // We may set some settings to mappings that we remove in the subsequent step,
     // that's fine.
-    $mappings = $form['#mappings'];
     foreach ($form_state['mapping_settings'] as $k => $v) {
-      $mappings[$k] = array(
-        'source' => $mappings[$k]['source'],
-        'target' => $mappings[$k]['target'],
+      $this->mappings[$k] = array(
+        'source' => $this->mappings[$k]['source'],
+        'target' => $this->mappings[$k]['target'],
       ) + $v;
     }
 
@@ -221,30 +212,36 @@ class MappingForm implements BaseFormIdInterface {
       $remove_flags = array_keys(array_filter($form_state['values']['remove_flags']));
 
       foreach ($remove_flags as $k) {
-        unset($mappings[$k]);
+        unset($this->mappings[$k]);
         unset($form_state['values']['mapping_weight'][$k]);
         drupal_set_message(t('Mapping has been removed.'), 'status', FALSE);
       }
     }
 
     // Keep our keys clean.
-    $mappings = array_values($mappings);
+    $this->mappings = array_values($this->mappings);
 
-    if (!empty($mappings)) {
-      array_multisort($form_state['values']['mapping_weight'], $mappings);
+    if ($this->mappings) {
+      array_multisort($form_state['values']['mapping_weight'], $this->mappings);
     }
 
-    $processor->addConfig(array('mappings' => $mappings));
+    $configuration = $processor->getConfiguration();
+    $configuration['mappings'] = $this->mappings;
+    $processor->setConfiguration($configuration);
 
     if (!empty($form_state['values']['source']) && !empty($form_state['values']['target'])) {
       try {
-        $mappings = $processor->getMappings();
-        $mappings[] = array(
+        $this->mappings = $processor->getMappings();
+        $this->mappings[] = array(
           'source' => $form_state['values']['source'],
           'target' => $form_state['values']['target'],
           'unique' => FALSE,
         );
-        $processor->addConfig(array('mappings' => $mappings));
+
+        $configuration = $processor->getConfiguration();
+        $configuration['mappings'] = $this->mappings;
+        $processor->setConfiguration($configuration);
+
         drupal_set_message(t('Mapping has been added.'));
       }
       catch (Exception $e) {
@@ -282,6 +279,10 @@ class MappingForm implements BaseFormIdInterface {
     Define which elements of a single item of a feed (= <em>Sources</em>) map to which content pieces in Drupal (= <em>Targets</em>). Make sure that at least one definition has a <em>Unique target</em>. A unique target means that a value for a target can only occur once. E. g. only one item with the URL <em>http://example.com/content/1</em> can exist.
     </p>
     ');
+  }
+
+  protected function buildSettingsForm($form, &$form_state) {
+
   }
 
 }

@@ -88,9 +88,6 @@ class FeedController implements ControllerInterface {
 
     $rows = array();
     foreach ($importers as $importer) {
-      if ($importer->disabled) {
-        continue;
-      }
       if (!(user_access('create ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
         continue;
       }

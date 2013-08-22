@@ -194,7 +194,7 @@ class FeedsWebTestBase extends WebTestBase {
   }
 
   /**
-   * Choose a plugin for a importer configuration and assert it.
+   * Choose a plugin for an importer configuration and assert it.
    *
    * @param $id
    *   The importer configuration's id.
@@ -204,9 +204,9 @@ class FeedsWebTestBase extends WebTestBase {
    */
   public function setPlugin($id, $type, $plugin_key) {
     $edit = array(
-      'plugin_key' => $plugin_key,
+      $type . '[plugin_key]' => $plugin_key,
     );
-    $this->drupalPost("admin/structure/feeds/manage/$id/$type", $edit, 'Save');
+    $this->drupalPost("admin/structure/feeds/manage/$id", $edit, 'Save');
 
     // Assert actual configuration.
     $config = config('feeds.importer.' . $id)->get('config');
@@ -216,15 +216,13 @@ class FeedsWebTestBase extends WebTestBase {
   /**
    * Set importer or plugin settings.
    *
-   * @param $id
+   * @param string $id
    *   The importer configuration's id.
-   * @param $plugin
-   *   The plugin (class) name, or NULL to set importer's settings
-   * @param $settings
+   * @param array $settings
    *   The settings to set.
    */
-  public function setSettings($id, $plugin_type, $settings) {
-    $this->drupalPost('admin/structure/feeds/manage/' . $id . '/settings/' . $plugin_type, $settings, 'Save');
+  public function setSettings($id, array $setting) {
+    $this->drupalPost("admin/structure/feeds/manage/$id", $settings, 'Save');
     $this->assertText('Your changes have been saved.');
   }
 
