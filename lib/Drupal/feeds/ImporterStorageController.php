@@ -21,7 +21,8 @@ class ImporterStorageController extends ConfigStorageController {
    *   The list of enabled importers, keyed by id.
    */
   public function loadEnabled() {
-    return $this->loadByProperties(array('status' => 1));
+    // This has to be a string for now.
+    return $this->loadByProperties(array('status' => '1'));
   }
 
 }
