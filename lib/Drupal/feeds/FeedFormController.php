@@ -17,38 +17,38 @@ use Drupal\feeds\FeedPluginFormInterface;
 class FeedFormController extends EntityFormControllerNG {
 
   /**
-   * Plugins that have configuration forms.
+   * Plugins that provide configuration forms.
    *
    * @var array
    */
   protected $configurablePlugins = array();
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormControllerNG::form().
+   * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
     $feed = $this->entity;
 
     $importer = $feed->getImporter();
 
+    $args = array('@importer' => $importer->label(), '@title' => $feed->label());
     if ($this->operation == 'update') {
-      drupal_set_title(t('<em>Edit @importer</em> @title', array('@importer' => $importer->label(), '@title' => $feed->label())), PASS_THROUGH);
+      drupal_set_title($this->t('<em>Edit @importer</em> @title', $args), PASS_THROUGH);
     }
     elseif ($this->operation == 'create') {
-      drupal_set_title(t('<em>Add @importer</em>', array('@importer' => $importer->label())), PASS_THROUGH);
+      drupal_set_title($this->t('<em>Add @importer</em>', $args), PASS_THROUGH);
     }
 
-    $user_config = config('user.settings');
+    $user_config = \Drupal::config('user.settings');
 
     $form['title'] = array(
       '#type' => 'textfield',
-      '#title' => t('Title'),
+      '#title' => $this->t('Title'),
       '#default_value' => $feed->label(),
       '#required' => TRUE,
     );
 
-    foreach ($importer->getPluginTypes() as $type) {
-      $plugin = $importer->getPlugin($type);
+    foreach ($importer->getPlugins() as $plugin) {
       if ($plugin instanceof FeedPluginFormInterface) {
         // Store the plugin for validate and submit.
         $this->configurablePlugins[] = $plugin;
@@ -65,7 +65,7 @@ class FeedFormController extends EntityFormControllerNG {
     $form['author'] = array(
       '#type' => 'details',
       '#access' => $this->getCurrentUser()->hasPermission('administer feeds'),
-      '#title' => t('Authoring information'),
+      '#title' => $this->t('Authoring information'),
       '#collapsed' => TRUE,
       '#group' => 'advanced',
       '#weight' => 90,
@@ -73,17 +73,17 @@ class FeedFormController extends EntityFormControllerNG {
 
     $form['author']['name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Authored by'),
+      '#title' => $this->t('Authored by'),
       '#maxlength' => 60,
       '#autocomplete_path' => 'user/autocomplete',
       '#default_value' => $feed->getUser()->getUsername(),
-      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $user_config->get('anonymous'))),
+      '#description' => $this->t('Leave blank for %anonymous.', array('%anonymous' => $user_config->get('anonymous'))),
     );
     $form['author']['date'] = array(
       '#type' => 'textfield',
-      '#title' => t('Authored on'),
+      '#title' => $this->t('Authored on'),
       '#maxlength' => 25,
-      '#description' => t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array(
+      '#description' => $this->t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array(
         '%time' => format_date($feed->created->value, 'custom', 'Y-m-d H:i:s O'),
         '%timezone' => format_date($feed->created->value, 'custom', 'O'),
       )),
@@ -93,14 +93,14 @@ class FeedFormController extends EntityFormControllerNG {
     $form['options'] = array(
       '#type' => 'details',
       '#access' => $this->getCurrentUser()->hasPermission('administer feeds'),
-      '#title' => t('Import options'),
+      '#title' => $this->t('Import options'),
       '#collapsed' => TRUE,
       '#group' => 'advanced',
     );
 
     $form['options']['status'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Active'),
+      '#title' => $this->t('Active'),
       '#default_value' => $feed->status->value,
     );
 
@@ -108,17 +108,7 @@ class FeedFormController extends EntityFormControllerNG {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormControllerNG::actions().
-   */
-  protected function actions(array $form, array &$form_state) {
-    $element = parent::actions($form, $form_state);
-    $feed = $this->entity;
-
-    return $element;
-  }
-
-  /**
-   * Overrides Drupal\Core\Entity\EntityFormControllerNG::validate().
+   * {@inheritdoc}
    *
    * @todo Don't call buildEntity() here.
    */
@@ -149,13 +139,7 @@ class FeedFormController extends EntityFormControllerNG {
   }
 
   /**
-   * Updates the feed object by processing the submitted values.
-   *
-   * This function can be called by a "Next" button of a wizard to update the
-   * form state's entity with the current step's values before proceeding to the
-   * next step.
-   *
-   * Overrides Drupal\Core\Entity\EntityFormControllerNG::submit().
+   * {@inheritdoc}
    */
   public function submit(array $form, array &$form_state) {
     // Build the feed object from the submitted values.
@@ -167,7 +151,7 @@ class FeedFormController extends EntityFormControllerNG {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormControllerNG::save().
+   * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
     $feed = $this->entity;
@@ -175,17 +159,16 @@ class FeedFormController extends EntityFormControllerNG {
     $importer = $feed->getImporter();
     $feed->save();
 
-    $feed_link = l(t('view'), 'feed/' . $feed->id());
-    $watchdog_args = array('@importer' => $feed->type, '%title' => $feed->label());
-    $t_args = array('@importer' => $importer->label(), '%title' => $feed->label());
+    $feed_link = l($this->t('View'), 'feed/' . $feed->id());
+    $args = array('@importer' => $importer->label(), '%title' => $feed->label());
 
     if ($insert) {
-      watchdog('feeds', '@importer: added %title.', $watchdog_args, WATCHDOG_NOTICE, $feed_link);
-      drupal_set_message(t('@importer %title has been created.', $t_args));
+      watchdog('feeds', '@importer: added %title.', $args, WATCHDOG_NOTICE, $feed_link);
+      drupal_set_message($this->t('%title has been created.', $args));
     }
     else {
-      watchdog('feeds', '@importer: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $feed_link);
-      drupal_set_message(t('@importer %title has been updated.', $t_args));
+      watchdog('feeds', '@importer: updated %title.', $args, WATCHDOG_NOTICE, $feed_link);
+      drupal_set_message($this->t('%title has been updated.', $args));
     }
 
     if ($feed->id()) {
@@ -197,28 +180,30 @@ class FeedFormController extends EntityFormControllerNG {
       // Schedule jobs for this feed.
       $feed->schedule();
 
-      if ($insert && $feed->getImporter()->import_on_create) {
+      if ($insert && $importer->import_on_create) {
         $feed->startImport();
       }
     }
     else {
       // In the unlikely case something went wrong on save, the feed will be
       // rebuilt and feed form redisplayed the same way as in preview.
-      drupal_set_message(t('The feed could not be saved.'), 'error');
+      drupal_set_message($this->t('The feed could not be saved.'), 'error');
       $form_state['rebuild'] = TRUE;
     }
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormControllerNG::delete().
+   * {@inheritdoc}
    */
   public function delete(array $form, array &$form_state) {
     $destination = array();
-    $query = \Drupal::request()->query;
+    $query = $this->getRequest()->query;
+
     if ($query->has('destination')) {
       $destination = drupal_get_destination();
       $query->remove('destination');
     }
+
     $feed = $this->entity;
     $form_state['redirect'] = array('feed/' . $feed->id() . '/delete', array('query' => $destination));
   }

@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Component\Utility\String;
 use Drupal\simpletest\WebTestBase;
 use Drupal\feeds\Plugin\PluginBase;
 
@@ -407,7 +408,7 @@ class FeedsWebTestBase extends WebTestBase {
   public function feedDeleteItems($fid) {
     $this->drupalPost("feed/$fid/delete-items", array(), 'Delete items');
     $count = db_query("SELECT COUNT(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $fid))->fetchField();
-    $this->assertEqual($count, 0, format_string('@count items after running delete items.', array('@count' => $count)));
+    $this->assertEqual($count, 0, String::format('@count items after running delete items.', array('@count' => $count)));
   }
 
   /**

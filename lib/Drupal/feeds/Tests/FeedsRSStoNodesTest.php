@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\Component\Utility\String;
 use Drupal\feeds\FeedsWebTestBase;
 
 /**
@@ -115,7 +116,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->feedDeleteItems($fid);
     $this->feedImportItems($fid);
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} n INNER JOIN {feeds_item} fi ON fi.entity_type = 'node' AND n.nid = fi.entity_id WHERE n.status = 0")->fetchField();
-    $this->assertEqual($count, 10, format_string('@count items are unpublished.', array('@count' => $count)));
+    $this->assertEqual($count, 10, String::format('@count items are unpublished.', array('@count' => $count)));
     $edit = array(
       'settings[node][options][status]' => TRUE,
     );

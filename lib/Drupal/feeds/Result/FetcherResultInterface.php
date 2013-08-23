@@ -13,24 +13,28 @@ namespace Drupal\feeds;
 interface FetcherResultInterface {
 
   /**
-   * Gets the resource provided by the fetcher as a string.
+   * Returns the file provided by the fetcher as a string.
    *
    * @return string
    *   The raw content from the source as a string.
    *
-   * @throws \Exception
-   *   Thrown if an unexpected problem occurred.
+   * @throws \RuntimeException
+   *   Thrown if an unexpected problem occurred usually regarding file handling.
    */
   public function getRaw();
 
   /**
-   * Gets the path to the file containing the resource provided by the fetcher.
+   * Returns the path to the file containing the file provided by the fetcher.
+   *
+   * When it comes to preference and effiency, this method should be used
+   * whenever possible by parsers so that they do not have to load the entire
+   * file into memory.
    *
    * @return string
-   *   A path to a file containing the raw content as a source.
+   *   A path to a file containing the raw content of a feed.
    *
-   * @throws \Exception
-   *   Thrown if an unexpected problem occurred.
+   * @throws \RuntimeException
+   *   Thrown if an unexpected problem occurred usually regarding file handling.
    */
   public function getFilePath();
 

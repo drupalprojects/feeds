@@ -9,15 +9,17 @@ namespace Drupal\feeds;
 
 /**
  * The result of a parsing stage.
+ *
+ * @todo Move the other items from ParserResult to methods on this interface so
+ *   that processors can depend on them.
  */
 interface ParserResultInterface {
 
   /**
    * Returns the next item to process.
    *
-   * @return array
-   *   Next available item or null if there is none. Every returned item is
-   *   removed from the internal array.
+   * @return array|null
+   *   The next available item or null if there isn't one.
    */
   public function shiftItem();
 

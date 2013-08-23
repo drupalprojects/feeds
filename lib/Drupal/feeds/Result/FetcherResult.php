@@ -35,7 +35,11 @@ class FetcherResult implements FetcherResultInterface {
    * {@inheritdoc}
    */
   public function getRaw() {
-    return $this->sanitizeRaw(file_get_contents($this->filePath));
+    $raw = file_get_contents($this->filePath);
+    if ($raw === FALSE) {
+      $this->error('The file %file is not readable.');
+    }
+    return $this->sanitizeRaw($raw);
   }
 
   /**
@@ -43,9 +47,9 @@ class FetcherResult implements FetcherResultInterface {
    */
   public function getFilePath() {
     if (!file_exists($this->filePath)) {
-      throw new \RuntimeException(String::format('File @filepath is not accessible.', array('@filepath' => $this->filePath)));
+      $this->error('File %filepath is not accessible.');
     }
-    return $this->sanitizeFile($this->filePath);
+    return $this->sanitizeFile();
   }
 
   /**
@@ -74,32 +78,48 @@ class FetcherResult implements FetcherResultInterface {
    * Currently supported sanitizations:
    * - Remove BOM header from UTF-8 files.
    *
-   * @param string $filepath
-   *   The file path of the file to be sanitized.
-   *
    * @return string
    *   The file path of the sanitized file.
    *
    * @throws \RuntimeException
    *   Thrown if the file is not writeable.
    */
-  protected function sanitizeFile($filepath) {
-    $handle = fopen($filepath, 'r');
+  protected function sanitizeFile() {
+    $handle = fopen($this->filePath, 'r');
+
+    // This should rarely happen since we already checked if the file exists.
+    if ($handle === FALSE) {
+      $this->error('File %filepath is not readable.');
+    }
     $line = fgets($handle);
     fclose($handle);
 
     // If BOM header is present, read entire contents of file and overwrite the
     // file with corrected contents.
     if (substr($line, 0, 3) == pack('CCC', 0xef, 0xbb, 0xbf)) {
-      $contents = file_get_contents($filepath);
+      $contents = file_get_contents($this->filePath);
       $contents = substr($contents, 3);
-      $status = file_put_contents($filepath, $contents);
+      $status = file_put_contents($this->filePath, $contents);
       if ($status === FALSE) {
-        throw new \RuntimeException(String::format('File @filepath is not writeable.', array('@filepath' => $filepath)));
+        $this->error('File %filepath is not writeable.');
       }
     }
 
-    return $filepath;
+    return $this->filePath;
+  }
+
+  /**
+   * Throws an exception on file error.
+   *
+   * @param string $message
+   *   The message to display. The filepath will be substituted in for
+   *   %filepath.
+   *
+   * @throws \RuntimeException
+   *   This always throws an exception, that's its job.
+   */
+  protected function error($message) {
+    throw new \RuntimeException(String::format($message, array('%filepath' => $this->filePath)));
   }
 
 }

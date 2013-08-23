@@ -46,7 +46,9 @@ class RawFetcherResult extends FetcherResult {
     // Write to a temporary file if the parser expects a file.
     if (!$this->filePath) {
       $this->filePath = drupal_tempnam('temporary://', 'feeds-raw');
-      file_put_contents($this->filePath, $this->getRaw());
+      if (file_put_contents($this->filePath, $this->getRaw()) === FALSE) {
+        $this->error('File %filepath is not writable.');
+      }
     }
 
     return $this->filePath;

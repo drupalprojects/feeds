@@ -11,9 +11,11 @@ use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Database\Connection;
 
 /**
- * @todo Document, interface.
+ * An SQL controller to manage PuSH subscriptions.
+ *
+ * @todo We need a cron job to re-lease expired leases.
  */
-class Subscription {
+class Subscription implements SubscriptionInterface {
 
   /**
    * The database connection.
@@ -30,6 +32,14 @@ class Subscription {
   protected $table;
 
   /**
+   * The escaped database table.
+   *
+   * @var string
+   */
+  protected $tableEscaped;
+
+
+  /**
    * Constructs a Subscription object.
    *
    * @param \Drupal\Core\Database\Connection $connection
@@ -40,12 +50,13 @@ class Subscription {
   public function __construct(Connection $connection, $table) {
     $this->connection = $connection;
     $this->table = $table;
+    $this->tableEscaped = $connection->escapeTable($this->table);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSubscription(array $data) {
+  public function setSubscription(array &$data) {
 
     if (isset($data['lease']) && is_numeric($data['lease'])) {
       $data['expires'] = (int) REQUEST_TIME + $data['lease'];
@@ -87,7 +98,7 @@ class Subscription {
    */
   public function getSubscription($key) {
     return $this->connection->query(
-      'SELECT * FROM {' . $this->connection->escapeTable($this->table) . '} WHERE id = :key',
+      'SELECT * FROM {' . $this->tableEscaped . '} WHERE id = :key',
       array(':key' => $key)
     )->fetchAssoc();
   }
@@ -97,7 +108,7 @@ class Subscription {
    */
   public function hasSubscription($key) {
     return (bool) $this->connection->query(
-      'SELECT 1 FROM {' . $this->connection->escapeTable($this->table) . '} WHERE id = :key',
+      'SELECT 1 FROM {' . $this->tableEscaped . '} WHERE id = :key',
       array(':key' => $key)
     )->fetchField();
   }

@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Entity;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityNG;
@@ -209,7 +210,7 @@ class Feed extends EntityNG implements FeedInterface {
       return $importer;
     }
 
-    throw new \RuntimeException(format_string('The importer, @importer, for this feed does not exist.', array('@importer' => $this->bundle())));
+    throw new \RuntimeException(String::format('The importer, @importer, for this feed does not exist.', array('@importer' => $this->bundle())));
   }
 
   /**
@@ -791,7 +792,7 @@ class Feed extends EntityNG implements FeedInterface {
    */
   protected function acquireLock() {
     if (!\Drupal::lock()->acquire("feeds_feed_{$this->id()}", 60.0)) {
-      throw new LockException(format_string('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
+      throw new LockException(String::format('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
     }
 
     return $this;

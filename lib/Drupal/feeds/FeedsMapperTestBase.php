@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Component\Utility\String;
+
 /**
  * Base class for implementing Feeds Mapper test cases.
  */
@@ -31,7 +33,7 @@ class FeedsMapperTestBase extends FeedsWebTestBase {
     $values = $this->getFormFieldsValues($field_name, $value);
     foreach ($names as $k => $name) {
       $value = $values[$k];
-      $this->assertFieldByName($name, $value, format_string('Found form field %name for %field_name with the expected value.', array('%name' => $name, '%field_name' => $field_name)));
+      $this->assertFieldByName($name, $value, String::format('Found form field %name for %field_name with the expected value.', array('%name' => $name, '%field_name' => $field_name)));
     }
   }
 
