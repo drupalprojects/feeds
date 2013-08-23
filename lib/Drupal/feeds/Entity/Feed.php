@@ -11,10 +11,13 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityNG;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsState;
 use Drupal\feeds\Plugin\PluginBase;
+use Drupal\feeds\Plugin\ClearableInterface;
+use Drupal\feeds\PuSH\PuSHFetcherInterface;
 use Drupal\job_scheduler\JobScheduler;
 
 /**
@@ -212,7 +215,7 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * Preview = fetch and parse a feed.
    *
-   * @return \Drupal\feeds\ParserResultInterface
+   * @return \Drupal\feeds\Result\ParserResultInterface
    *   The result of the parsing stage.
    *
    * @throws
@@ -418,19 +421,27 @@ class Feed extends EntityNG implements FeedInterface {
    * @throws
    *   Throws Exception if an error occurs when importing.
    *
-   * @todo Figure out batching.
+   * @todo We need to create a job for this that will run immediately so that
+   * services don't have to wait for us to process. Can we spawn a background
+   * process?
    */
   public function importRaw($raw) {
     // Fetch.
     $importer = $this->getImporter();
-    $fetcher_result = $importer->getFetcher()->fetch($this, $raw);
+    $fetcher = $importer->getFetcher();
+    if ($fetcher instanceof PuSHFetcherInterface) {
+      $fetcher_result = $importer->getFetcher()->push($this, $raw);
 
-    // Parse.
-    $parser_result = $importer->getParser()->parse($this, $fetcher_result);
-    module_invoke_all('feeds_after_parse', $this, $parser_result);
+      // Parse.
+      $parser_result = $importer->getParser()->parse($this, $fetcher_result);
+      module_invoke_all('feeds_after_parse', $this, $parser_result);
 
-    // // Process.
-    $importer->getProcessor()->process($this, $parser_result);
+      // // Process.
+      $importer->getProcessor()->process($this, $parser_result);
+    }
+    else {
+      throw new InterfaceNotImplementedException();
+    }
   }
 
   /**
@@ -450,13 +461,14 @@ class Feed extends EntityNG implements FeedInterface {
   public function clear() {
     $this->acquireLock();
     try {
-      $importer = $this->getImporter();
-      $importer->getFetcher()->clear($this);
-      $importer->getParser()->clear($this);
-      $importer->getProcessor()->clear($this);
+      foreach ($this->importer->getPlugins() as $plugin) {
+        if ($plugin instanceof ClearableInterface) {
+          $pligin->clear($this);
+        }
+      }
     }
     catch (Exception $e) {
-      // Do nothing.
+      // Do nothing yet.
     }
     $this->releaseLock();
 

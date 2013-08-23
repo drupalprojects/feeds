@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Controller;
 
+use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\PuSH\Subscription;
 use Symfony\Component\HttpFoundation\Request;
@@ -85,12 +86,16 @@ class SubscriptionController {
    * Receives a notification.
    *
    * @param \Drupal\feeds\FeedInterface $feeds_feed
-   *   The feed entity to perform the request on.
+   *   The feed to perform the request on.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
    * @return Symfony\Component\HttpFoundation\Response
    *   The response object.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   Thrown if the subscription was not found or the request parameters were
+   *   invalid.
    */
   public function receive(FeedInterface $feeds_feed, Request $request) {
     if (!$sig = $request->headers->get('X-Hub-Signature')) {
@@ -113,7 +118,13 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
-    $feeds_feed->importRaw($raw);
+    try {
+      $feeds_feed->importRaw($raw);
+    }
+    catch (InterfaceNotImplementedException $e) {
+      // The fetcher does not support PuSH updates.
+      throw new NotFoundHttpException();
+    }
 
     return new Response('', 200);
   }
