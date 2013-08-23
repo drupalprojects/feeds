@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains \Drupal\feeds\Form\FeedImportForm.
@@ -9,7 +10,7 @@ namespace Drupal\feeds\Form;
 use Drupal\Core\Entity\EntityNGConfirmFormBase;
 
 /**
- * Provides a form for deleting a feed.
+ * Provides a form for importing a feed.
  */
 class FeedImportForm extends EntityNGConfirmFormBase {
 
@@ -17,7 +18,7 @@ class FeedImportForm extends EntityNGConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return t('Are you sure you want to import the feed %feed?', array('%feed' => $this->entity->label()));
+    return $this->t('Are you sure you want to import the feed %feed?', array('%feed' => $this->entity->label()));
   }
 
   /**
@@ -31,15 +32,16 @@ class FeedImportForm extends EntityNGConfirmFormBase {
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return t('Import');
+    return $this->t('Import');
   }
 
   /**
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
+    // The import process will create its own messages.
     $this->entity->startImport();
-    $form_state['redirect'] = 'feed/' . $this->entity->id();
+    $form_state['redirect'] = $this->getCancelPath();
   }
 
 }

@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Contains \Drupal\feeds\Form\FeedDeleteItemsForm.
+ * Contains \Drupal\feeds\Form\FeedClearForm.
  */
 
 namespace Drupal\feeds\Form;
@@ -11,13 +12,13 @@ use Drupal\Core\Entity\EntityNGConfirmFormBase;
 /**
  * Provides a form for deleting the items from a feed.
  */
-class FeedDeleteItemsForm extends EntityNGConfirmFormBase {
+class FeedClearForm extends EntityNGConfirmFormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return t('Delete all items from feed %feed?', array('%feed' => $this->entity->label()));
+    return $this->t('Delete all items from feed %feed?', array('%feed' => $this->entity->label()));
   }
 
   /**
@@ -31,7 +32,7 @@ class FeedDeleteItemsForm extends EntityNGConfirmFormBase {
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return t('Delete items');
+    return $this->t('Delete items');
   }
 
   /**
@@ -39,7 +40,12 @@ class FeedDeleteItemsForm extends EntityNGConfirmFormBase {
    */
   public function save(array $form, array &$form_state) {
     $this->entity->startClear();
-    $form_state['redirect'] = 'feed/' . $this->entity->id();
+    $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
+
+    watchdog('feeds', '@importer: cleared %title.', $args);
+    drupal_set_message($this->t('The items from %title have been deleted.', $args));
+
+    $form_state['redirect'] = $this->getCancelPath();
   }
 
 }

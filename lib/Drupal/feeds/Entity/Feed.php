@@ -37,7 +37,7 @@ use Drupal\job_scheduler\JobScheduler;
  *       "update" = "Drupal\feeds\FeedFormController",
  *       "delete" = "Drupal\feeds\Form\FeedDeleteForm",
  *       "import" = "Drupal\feeds\Form\FeedImportForm",
- *       "clear" = "Drupal\feeds\Form\FeedDeleteItemsForm",
+ *       "clear" = "Drupal\feeds\Form\FeedClearForm",
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
  *       "default" = "Drupal\feeds\FeedFormController"
  *     },

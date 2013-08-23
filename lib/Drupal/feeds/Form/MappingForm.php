@@ -3,6 +3,8 @@
 /**
  * @file
  * Contains \Drupal\feeds\Form\MappingForm.
+ *
+ * @todo This needs some love.
  */
 
 namespace Drupal\feeds\Form;
@@ -11,7 +13,7 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
- * Provides a form for mapping.
+ * Provides a form for mapping configuration.
  */
 class MappingForm implements FormInterface {
 
@@ -48,8 +50,8 @@ class MappingForm implements FormInterface {
     $form['#suffix'] = '</div>';
 
     // Get mapping sources from parsers and targets from processor, format them
-    // for output.
-    // Some parsers do not define mapping sources but let them define on the fly.
+    // for output. Some parsers do not define mapping sources but let them
+    // define on the fly.
     if ($sources = $importer->getParser()->getMappingSources()) {
       $source_options = $this->sortOptions($sources);
       foreach ($sources as $k => $source) {
@@ -82,6 +84,7 @@ class MappingForm implements FormInterface {
     $form['config'] = $form['remove_flags'] = $form['mapping_weight'] = array(
       '#tree' => TRUE,
     );
+
     if (is_array($this->mappings)) {
 
       $delta = count($this->mappings) + 2;
@@ -106,7 +109,7 @@ class MappingForm implements FormInterface {
           '#delta' => $delta,
           '#attributes' => array(
             'class' => array(
-              'feeds-mapping-weight'
+              'feeds-mapping-weight',
             ),
           ),
         );
@@ -129,7 +132,6 @@ class MappingForm implements FormInterface {
         '#title' => t('Source'),
         '#title_display' => 'invisible',
         '#size' => 20,
-        '#default_value' => '',
         '#description' => t('The name of source field.'),
       );
     }
@@ -147,8 +149,6 @@ class MappingForm implements FormInterface {
       '#type' => 'submit',
       '#value' => t('Save mappings'),
     );
-
-    // $form['#theme'] = 'feeds_mapping_form';
 
     return $form;
   }
@@ -199,8 +199,8 @@ class MappingForm implements FormInterface {
       $form_state['mapping_settings'][$form_state['mapping_settings_edit']] = $values;
     }
 
-    // We may set some settings to mappings that we remove in the subsequent step,
-    // that's fine.
+    // We may set some settings to mappings that we remove in the subsequent
+    // step, that's fine.
     foreach ($form_state['mapping_settings'] as $k => $v) {
       $this->mappings[$k] = array(
         'source' => $this->mappings[$k]['source'],
@@ -225,10 +225,6 @@ class MappingForm implements FormInterface {
       array_multisort($form_state['values']['mapping_weight'], $this->mappings);
     }
 
-    $configuration = $processor->getConfiguration();
-    $configuration['mappings'] = $this->mappings;
-    $processor->setConfiguration($configuration);
-
     if (!empty($form_state['values']['source']) && !empty($form_state['values']['target'])) {
       try {
         $this->mappings = $processor->getMappings();
@@ -238,10 +234,6 @@ class MappingForm implements FormInterface {
           'unique' => FALSE,
         );
 
-        $configuration = $processor->getConfiguration();
-        $configuration['mappings'] = $this->mappings;
-        $processor->setConfiguration($configuration);
-
         drupal_set_message(t('Mapping has been added.'));
       }
       catch (Exception $e) {
@@ -249,10 +241,23 @@ class MappingForm implements FormInterface {
       }
     }
 
+    $configuration = $processor->getConfiguration();
+    $configuration['mappings'] = $this->mappings;
+    $processor->setConfiguration($configuration);
+
     $this->importer->save();
     drupal_set_message(t('Your changes have been saved.'));
   }
 
+  /**
+   * Builds an options list from mapping sources or targets.
+   *
+   * @param array $options
+   *   The options to sort.
+   *
+   * @return array
+   *   The sorted options.
+   */
   protected function sortOptions(array $options) {
     $result = array();
     foreach ($options as $k => $v) {
@@ -272,6 +277,9 @@ class MappingForm implements FormInterface {
 
   /**
    * Help text for mapping.
+   *
+   * @return string
+   *   The help text.
    */
   protected function help() {
     return t('
@@ -279,10 +287,6 @@ class MappingForm implements FormInterface {
     Define which elements of a single item of a feed (= <em>Sources</em>) map to which content pieces in Drupal (= <em>Targets</em>). Make sure that at least one definition has a <em>Unique target</em>. A unique target means that a value for a target can only occur once. E. g. only one item with the URL <em>http://example.com/content/1</em> can exist.
     </p>
     ');
-  }
-
-  protected function buildSettingsForm($form, &$form_state) {
-
   }
 
 }
