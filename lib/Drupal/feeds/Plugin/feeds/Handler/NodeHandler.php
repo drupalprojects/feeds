@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResultInterface;
 
 /**
  * Handles special node entity operations.
@@ -28,7 +28,7 @@ class NodeHandler extends PluginBase {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->importer = $configuration['importer'];
-    $this->configuration += $this->getConfigurationDefaults();
+    $this->configuration += $this->getDefaultConfiguration();
     unset($this->configuration['importer']);
   }
 
@@ -68,9 +68,9 @@ class NodeHandler extends PluginBase {
   }
 
   /**
-   * Override parent::getConfigurationDefaults().
+   * Override parent::getDefaultConfiguration().
    */
-  public function getConfigurationDefaults() {
+  public function getDefaultConfiguration() {
     $defaults = array();
     $defaults['author'] = 0;
     $defaults['authorize'] = TRUE;
@@ -80,7 +80,7 @@ class NodeHandler extends PluginBase {
     return $defaults;
   }
 
-  public function formAlter(array &$form, array &$form_state) {
+  public function buildConfigurationForm(array &$form, array &$form_state) {
     $author = user_load($this->configuration['author']);
 
     $form['author'] = array(
@@ -106,8 +106,8 @@ class NodeHandler extends PluginBase {
     );
   }
 
-  public function validateForm(array &$form, array &$form_state) {
-    $values =& $form_state['values']['processor']['config'];
+  public function validateConfigurationForm(array &$form, array &$form_state) {
+    $values =& $form_state['values']['processor']['configuration'];
     if ($author = user_load_by_name($values['author'])) {
       $values['author'] = $author->id();
     }
@@ -116,8 +116,8 @@ class NodeHandler extends PluginBase {
     }
   }
 
-  public function submitForm(array &$form, array &$form_state) {
-    $values =& $form_state['values']['processor']['config'];
+  public function submitConfigurationForm(array &$form, array &$form_state) {
+    $values =& $form_state['values']['processor']['configuration'];
     if ($this->configuration['expire'] != $values['expire']) {
       $this->importer->reschedule($this->importer->id());
     }
@@ -127,7 +127,7 @@ class NodeHandler extends PluginBase {
    * Loads an existing user.
    */
   public function entityPrepare(FeedInterface $feed, $node) {
-    $update_existing = $this->importer->getProcessor()->getConfig('update_existing');
+    $update_existing = $this->importer->getProcessor()->getConfiguration('update_existing');
 
     if ($update_existing != FEEDS_UPDATE_EXISTING) {
       $node->uid = $this->configuration['author'];
@@ -244,7 +244,7 @@ class NodeHandler extends PluginBase {
   /**
    * Get nid of an existing feed item node if available.
    */
-  public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
+  public function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
     $nid = FALSE;
     // Iterate through all unique targets and test whether they do already
     // exist in the database.

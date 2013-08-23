@@ -11,7 +11,6 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsElement;
-use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\Plugin\FieldTargetBase;
 use Drupal\field\Entity\FieldInstance;
 use Drupal\feeds\Entity\Importer;

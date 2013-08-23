@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Parser\FeedsSyndicationParser.
+ * Contains \Drupal\feeds\Plugin\feeds\Parser\SyndicationParser.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Parser;
@@ -10,9 +10,10 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResult;
 use Drupal\feeds\FetcherResultInterface;
-use Drupal\feeds\Plugin\ParserBase;
+use Drupal\feeds\Plugin\ParserInterface;
+use Drupal\feeds\Plugin\PluginBase;
 use Zend\Feed\Reader\Reader;
 use Zend\Feed\Reader\Exception\ExceptionInterface;
 
@@ -25,13 +26,13 @@ use Zend\Feed\Reader\Exception\ExceptionInterface;
  *   description = @Translation("Default parser for RSS, Atom and RDF feeds.")
  * )
  */
-class FeedsSyndicationParser extends ParserBase {
+class SyndicationParser extends PluginBase implements ParserInterface {
 
   /**
    * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
-    $result = new FeedsParserResult();
+    $result = new ParserResult();
     Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
 
     try {
@@ -115,7 +116,7 @@ class FeedsSyndicationParser extends ParserBase {
         'name' => t('Enclosures'),
         'description' => t('A list of enclosures attached to the feed item.'),
       ),
-    ) + parent::getMappingSources();
+    );
   }
 
 }

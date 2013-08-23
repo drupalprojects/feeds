@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\Parser\FeedsOPMLParser.
+ * Contains \Drupal\feeds\Plugin\Parser\OPMLParser.
  *
  * @todo TESTS!!!!!!!!!!!!!
  * @todo Batch correctly.
@@ -15,8 +15,9 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Component\GenericOPMLParser;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FetcherResultInterface;
-use Drupal\feeds\FeedsParserResult;
-use Drupal\feeds\Plugin\ParserBase;
+use Drupal\feeds\ParserResult;
+use Drupal\feeds\Plugin\ParserInterface;
+use Drupal\feeds\Plugin\PluginBase;
 
 /**
  * Defines an OPML feed parser.
@@ -27,7 +28,7 @@ use Drupal\feeds\Plugin\ParserBase;
  *   description = @Translation("Parse OPML files.")
  * )
  */
-class FeedsOPMLParser extends ParserBase {
+class OPMLParser extends PluginBase implements ParserInterface {
 
   /**
    * {@inheritdoc}
@@ -35,7 +36,7 @@ class FeedsOPMLParser extends ParserBase {
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $parser = new GenericOPMLParser($fetcher_result->getRaw());
     $opml = $parser->parse(TRUE);
-    $result = new FeedsParserResult();
+    $result = new ParserResult();
 
     $result->items = $this->getItems($opml['outlines'], array());
 
@@ -114,7 +115,7 @@ class FeedsOPMLParser extends ParserBase {
         'name' => t('Site URL'),
         'description' => t('The URL of the site that provides the feed.'),
       ),
-    ) + parent::getMappingSources();
+    );
   }
 
 }

@@ -8,27 +8,20 @@
 namespace Drupal\feeds;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Component\Utility\MapArray;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Entity\EntityControllerInterface;
 use Drupal\Core\Entity\EntityFormController;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\feeds\AdvancedFormPluginInterface;
+use Drupal\feeds\Ajax\SetHashCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the importer edit forms.
  */
-class ImporterFormController extends EntityFormController implements EntityControllerInterface  {
-
-  /**
-   * The entity manager.
-   *
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
-   */
-  protected $entityManager;
+class ImporterFormController extends EntityFormController {
 
   /**
    * The importer storage controller.
@@ -52,26 +45,23 @@ class ImporterFormController extends EntityFormController implements EntityContr
   protected $configurablePlugins = array();
 
   /**
-   * Constructs a new action form.
+   * Constructs an ImporterFormController object.
    *
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface
-   *   The module handler service.
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage_controller
-   *   The action storage controller.
-   *
-   * @todo
+   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $importer_storage
+   *   The importer storage controller.
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $fetcher_manager
+   *   The fetcher plugin manager.
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $parser_manager
+   *   The parser plugin manager.
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $processer_manager
+   *   The processor plugin manager.
    */
   public function __construct(
-    ModuleHandlerInterface $module_handler,
-    PluginManagerInterface $entity_manager,
     EntityStorageControllerInterface $importer_storage,
     PluginManagerInterface $fetcher_manager,
     PluginManagerInterface $parser_manager,
     PluginManagerInterface $processer_manager) {
 
-    parent::__construct($module_handler);
-
-    $this->entityManager = $entity_manager;
     $this->importerStorage = $importer_storage;
     $this->managers['fetcher'] = $fetcher_manager;
     $this->managers['parser'] = $parser_manager;
@@ -81,12 +71,9 @@ class ImporterFormController extends EntityFormController implements EntityContr
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
-    $entity_manager = $container->get('plugin.manager.entity');
+  public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('module_handler'),
-      $entity_manager,
-      $entity_manager->getStorageController('feeds_importer'),
+      $container->get('plugin.manager.entity')->getStorageController('feeds_importer'),
       $container->get('plugin.manager.feeds.fetcher'),
       $container->get('plugin.manager.feeds.parser'),
       $container->get('plugin.manager.feeds.processor')
@@ -123,6 +110,7 @@ class ImporterFormController extends EntityFormController implements EntityContr
       '#description' => t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
       '#machine_name' => array(
         'exists' => array($this, 'exists'),
+        'source' => array('basics', 'label'),
       ),
     );
     $form['basics']['description'] = array(
@@ -131,8 +119,10 @@ class ImporterFormController extends EntityFormController implements EntityContr
       '#description' => t('A description of this importer.'),
       '#default_value' => $this->entity->description,
     );
-    $cron_required =  ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-    $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
+
+    $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
+    $period = MapArray::copyValuesToKeys(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
+
     foreach ($period as &$p) {
       $p = t('Every !p', array('!p' => $p));
     }
@@ -169,9 +159,11 @@ class ImporterFormController extends EntityFormController implements EntityContr
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
+    // If this is an ajax requst, updating the plugins on the importer will give
+    // us the updated form.
     if (isset($form_state['values'])) {
       foreach ($this->entity->getPluginTypes() as $type) {
-        $this->entity->setPlugin($type, $form_state['values'][$type]['plugin_key']);
+        $this->entity->setPlugin($type, $form_state['values'][$type]['id']);
       }
     }
 
@@ -183,41 +175,45 @@ class ImporterFormController extends EntityFormController implements EntityContr
         $options[$key] = check_plain($definition['title']);
       }
 
-      $form[$type]['plugin_key'] = array(
+      $form[$type]['id'] = array(
         '#type' => 'select',
         '#title' => t('@type', array('@type' => ucfirst($type))),
         '#options' => $options,
-        '#default_value' => $plugin->getPluginID(),
+        '#default_value' => $plugin->getPluginId(),
         '#ajax' => array(
           'callback' => array($this, 'ajaxCallback'),
           'wrapper' => 'feeds-ajax-form-wrapper',
-          'effect' => 'fade',
+          'effect' => 'none',
           'progress' => 'none',
+        ),
+        '#attached' => array(
+          'library' => array(array('feeds', 'feeds')),
         ),
         '#plugin_type' => $type,
       );
 
+      // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
-
-        $this->configurablePlugins[$type] = $plugin;
         $form[$type]['advanced'] = $plugin->buildAdvancedForm(array(), $form_state);
+        $this->configurablePlugins[$type] = $plugin;
       }
 
       $form[$type]['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
       $form[$type]['advanced']['#suffix'] = '</div>';
 
-      if ($plugin instanceof FormInterface) {
-
+      if ($plugin instanceof PluginFormInterface) {
         $this->configurablePlugins[$type] = $plugin;
 
-        $form[$type . '_config'] = array(
+        $form[$type . '_configuration'] = array(
           '#type' => 'details',
           '#group' => 'plugin_settings',
           '#title' => t('@type settings', array('@type' => ucfirst($type))),
-          '#parents' => array($type, 'config'),
+          '#parents' => array($type, 'configuration'),
         );
+        // $form[$type . '_configuration']['#prefix'] = '<span id="feeds-' . $type . '-details">';
+        // $form[$type . '_configuration']['#suffix'] = '</span>';
 
-        $form[$type . '_config'] += $plugin->buildForm(array(), $form_state);
+        $form[$type . '_configuration'] += $plugin->buildConfigurationForm(array(), $form_state);
       }
     }
 
@@ -228,37 +224,30 @@ class ImporterFormController extends EntityFormController implements EntityContr
    * Determines if the importer already exists.
    *
    * @param string $id
-   *   The importer ID
+   *   The importer ID.
    *
    * @return bool
-   *   TRUE if the importer exists, FALSE otherwise.
+   *   True if the importer exists, false otherwise.
    */
   public function exists($id) {
-    $importer = $this->importerStorage->load($id);
-    return !empty($importer);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function actions(array $form, array &$form_state) {
-    $actions = parent::actions($form, $form_state);
-    return $actions;
+    return (bool) $this->importerStorage->load($id);
   }
 
   /**
    * {@inheritdoc}
    */
   public function validate(array $form, array &$form_state) {
+
+    // Moved advanced settings to regular settings.
     foreach ($this->entity->getPluginTypes() as $type) {
       if (isset($form_state['values'][$type]['advanced'])) {
-        $form_state['values'][$type]['config'] += $form_state['values'][$type]['advanced'];
+        $form_state['values'][$type]['configuration'] += $form_state['values'][$type]['advanced'];
         unset($form_state['values'][$type]['advanced']);
       }
     }
 
     foreach ($this->configurablePlugins as $plugin) {
-      $plugin->validateForm($form, $form_state);
+      $plugin->validateConfigurationForm($form, $form_state);
     }
 
     // Build the importer object from the submitted values.
@@ -271,7 +260,7 @@ class ImporterFormController extends EntityFormController implements EntityContr
   public function submit(array $form, array &$form_state) {
 
     foreach ($this->configurablePlugins as $plugin) {
-      $plugin->submitForm($form, $form_state);
+      $plugin->submitConfigurationForm($form, $form_state);
     }
 
     if ($this->entity->import_period != $form_state['values']['import_period']) {
@@ -293,12 +282,17 @@ class ImporterFormController extends EntityFormController implements EntityContr
     drupal_set_message(t('Your changes have been saved.'));
   }
 
+  /**
+   * Sends an ajax response.
+   */
   public function ajaxCallback(array $form, array &$form_state) {
     $type = $form_state['triggering_element']['#plugin_type'];
-
     $response = new AjaxResponse();
-    $status_messages = array('#theme' => 'status_messages');
-    // $response->addCommand(new ReplaceCommand(NULL, drupal_render($status_messages)));
+
+    if (isset($form[$type . '_configuration']['#id'])) {
+      $hash = ltrim($form[$type . '_configuration']['#id'], '#');
+      $response->addCommand(new SetHashCommand($hash));
+    }
     $response->addCommand(new ReplaceCommand('#feeds-ajax-form-wrapper', drupal_render($form['plugin_settings'])));
     $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', drupal_render($form[$type]['advanced'])));
 

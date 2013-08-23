@@ -62,20 +62,22 @@ class ItemInfoController implements ItemInfoControllerInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Grab the schema and do a diff.
    */
   public function save(\stdClass $item_info) {
+    // Doing this allows other modules to extend our schema without having to
+    // override this function, but it does mean that $item_info cannot have any
+    // extra fields.
+    $fields = (array) $item_info;
+    unset($fields['entity_type'], $fields['entity_id']);
+
     $this->connection->merge($this->table)
       ->key(array(
         'entity_type' => $item_info->entityType,
         'entity_id' => $item_info->entityId,
       ))
-      ->fields(array(
-        'fid' => $item_info->fid,
-        'imported' => $item_info->imported,
-        'url' => $item_info->url,
-        'guid' => $item_info->guid,
-        'hash' => $item_info->hash,
-      ))
+      ->fields($fields)
       ->execute();
   }
 

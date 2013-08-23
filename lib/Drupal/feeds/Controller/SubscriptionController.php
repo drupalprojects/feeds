@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Returns responses for feeds module routes.
+ * Returns responses for PuSH module routes.
  */
 class SubscriptionController {
 
@@ -89,9 +89,8 @@ class SubscriptionController {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
-   * @return
-   *   An XML string that is the payload of the notification if valid, FALSE
-   *   otherwise.
+   * @return Symfony\Component\HttpFoundation\Response
+   *   The response object.
    */
   public function receive(FeedInterface $feeds_feed, Request $request) {
     if (!$sig = $request->headers->get('X-Hub-Signature')) {
@@ -113,8 +112,6 @@ class SubscriptionController {
     if ($result['sha1'] !== hash_hmac('sha1', $raw, $sub['secret'])) {
       throw new NotFoundHttpException();
     }
-
-    watchdog('feeds', $raw);
 
     $feeds_feed->importRaw($raw);
 

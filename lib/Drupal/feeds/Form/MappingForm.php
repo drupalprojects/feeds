@@ -41,7 +41,7 @@ class MappingForm implements FormInterface {
    */
   public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
     $importer = $this->importer = $feeds_importer;
-    $this->mappings = $form['#mappings'] = $importer->getProcessor()->getMappings();
+    $this->mappings = $form['#mappings'] = $importer->getMappings();
 
     $form['help']['#markup'] = $this->help();
     $form['#prefix'] = '<div id="feeds-mapping-form-wrapper">';

@@ -8,20 +8,12 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
 use Drupal\feeds\FetcherResultInterface;
 
 /**
  * Abstract class, defines interface for parsers.
  */
-abstract class ParserBase extends PluginBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function pluginType() {
-    return 'parser';
-  }
+abstract class ParserBase extends ConfigurablePluginBase implements ParserInterface {
 
   /**
    * Parse content fetched by fetcher.

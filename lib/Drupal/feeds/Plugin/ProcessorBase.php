@@ -3,25 +3,20 @@
 /**
  * @file
  * Contains Drupal\feeds\Plugin\ProcessorBase.
+ *
+ * @todo This needs to be sorted with EntityProcessor.
  */
 
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResultInterface;
 
 /**
  * Abstract class, defines interface for processors.
  */
-class ProcessorBase extends PluginBase {
-
-  /**
-   * Implements PluginBase::pluginType().
-   */
-  public function pluginType() {
-    return 'processor';
-  }
+abstract class ProcessorBase extends ConfigurablePluginBase implements ClearableInterface {
 
   /**
    * Remove all stored results or stored results up to a certain time for a
@@ -317,7 +312,7 @@ class ProcessorBase extends PluginBase {
   /**
    * Declare default configuration.
    */
-  public function getConfigurationDefaults() {
+  protected function getDefaultConfiguration() {
     $defaults = array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
@@ -407,15 +402,15 @@ class ProcessorBase extends PluginBase {
   /**
    * Retrieve the target entity's existing id if available. Otherwise return 0.
    *
-   * @param FeedInterface $source
+   * @param \Drupal\feeds\FeedInterface $feed
    *   The source information about this import.
-   * @param $result
-   *   A FeedsParserResult object.
+   * @param \Drupal\feeds\ParserResultInterface $result
+   *   A parser result object.
    *
-   * @return
+   * @return int
    *   The serial id of an entity if found, 0 otherwise.
    */
-  protected function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
+  protected function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
     $query = db_select('feeds_item')
       ->fields('feeds_item', array('entity_id'))
       ->condition('fid', $feed->id())
@@ -447,14 +442,16 @@ class ProcessorBase extends PluginBase {
    * Utility function that iterates over a target array and retrieves all
    * sources that are unique.
    *
-   * @param $batch
-   *   A FeedsImportBatch.
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The source information about this import.
+   * @param \Drupal\feeds\ParserResultInterface $result
+   *   A parser result object.
    *
-   * @return
+   * @return array
    *   An array where the keys are target field names and the values are the
    *   elements from the source item mapped to these targets.
    */
-  public function uniqueTargets(FeedInterface $feed, FeedsParserResult $result) {
+  public function uniqueTargets(FeedInterface $feed, ParserResultInterface $result) {
     $parser = $this->importer->getParser();
     $targets = array();
     foreach ($this->configuration['mappings'] as $mapping) {
@@ -473,9 +470,13 @@ class ProcessorBase extends PluginBase {
    * Include mappings as a change in mappings may have an affect on the item
    * produced.
    *
-   * @return Always returns a hash, even with empty, NULL, FALSE:
-   *  Empty arrays return 40cd750bba9870f18aada2478b24840a
-   *  Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
+   * @param array $item
+   *   The item to hash.
+   *
+   * @return string
+   *   Always returns a hash, even with empty, NULL, FALSE:
+   *   Empty arrays return 40cd750bba9870f18aada2478b24840a
+   *   Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
    */
   protected function hash($item) {
     return hash('md5', serialize($item) . serialize($this->configuration['mappings']));
@@ -483,6 +484,9 @@ class ProcessorBase extends PluginBase {
 
   /**
    * Retrieves the MD5 hash of $entity_id from the database.
+   *
+   * @param int $entity_id
+   *   The entity id to get the hash for.
    *
    * @return string
    *   Empty string if no item is found, hash otherwise.
@@ -499,7 +503,7 @@ class ProcessorBase extends PluginBase {
   /**
    * Creates a log message for when an exception occured during import.
    *
-   * @param Exception $e
+   * @param \Exception $e
    *   The exception that was throwned during processing the item.
    * @param $entity
    *   The entity object.

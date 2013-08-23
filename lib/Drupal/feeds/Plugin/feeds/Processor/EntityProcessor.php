@@ -12,7 +12,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResultInterface;
 use Drupal\feeds\Plugin\ProcessorBase;
 
 /**
@@ -27,7 +27,7 @@ use Drupal\feeds\Plugin\ProcessorBase;
  *   derivative = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
  * )
  */
-class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFormPluginInterface {
+class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterface {
 
   /**
    * The plugin definition.
@@ -69,7 +69,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
   /**
    * {@inheritdoc}
    */
-  public function process(FeedInterface $feed, FeedsParserResult $parser_result) {
+  public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
     $state = $feed->state(FEEDS_PROCESS);
 
     while ($item = $parser_result->shiftItem()) {
@@ -288,8 +288,8 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
    *
    * Defaults to the entity type for entities that do not define bundles.
    *
-   * @return string|NULL
-   *   The bundle type this processor operates on, or NULL if it is undefined.
+   * @return string|null
+   *   The bundle type this processor operates on, or null if it is undefined.
    */
   public function bundleKey() {
     $info = $this->entityInfo();
@@ -303,12 +303,15 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
    *
    * Defaults to the entity type for entities that do not define bundles.
    *
-   * @return string|NULL
-   *   The bundle type this processor operates on, or NULL if it is undefined.
+   * @return string|null
+   *   The bundle type this processor operates on, or null if it is undefined.
    */
   public function bundle() {
     if ($bundle_key = $this->bundleKey()) {
-      return $this->configuration['values'][$bundle_key];
+      if (isset($this->configuration['values'][$bundle_key])) {
+        return $this->configuration['values'][$bundle_key];
+      }
+      return;
     }
 
     return $this->entityType();
@@ -410,18 +413,16 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
   /**
    * {@inheritdoc}
    */
-  public function getConfigurationDefaults() {
-    $bundle = key(entity_get_bundles($this->entityType()));
-
+  protected function getDefaultConfiguration() {
     $defaults = array(
       'values' => array(
-        $this->bundleKey() => $bundle,
+        $this->bundleKey() => NULL,
       ),
       'handlers' => array(),
       'expire' => FEEDS_EXPIRE_NEVER,
-    ) + parent::getConfigurationDefaults();
+    ) + parent::getDefaultConfiguration();
 
-    $defaults += $this->apply('getConfigurationDefaults');
+    $defaults += $this->apply(__FUNCTION__);
 
     return $defaults;
   }
@@ -429,7 +430,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, array &$form_state) {
     $info = $this->entityInfo();
 
     $label_plural = isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
@@ -450,7 +451,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
 
     $form = parent::buildForm($form, $form_state);
 
-    $this->apply('formAlter', $form, $form_state);
+    $this->apply(__FUNCTION__, $form, $form_state);
 
     return $form;
   }
@@ -458,16 +459,16 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
-    $this->apply('validateForm', $form, $form_state);
+  public function validateConfigurationForm(array &$form, array &$form_state) {
+    $this->apply(__FUNCTION__, $form, $form_state);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
-    $this->apply('submitForm', $form, $form_state);
-    parent::submitForm($form, $form_state);
+  public function submitConfigurationForm(array &$form, array &$form_state) {
+    $this->apply(__FUNCTION__, $form, $form_state);
+    parent::submitConfigurationForm($form, $form_state);
   }
 
   /**
@@ -544,7 +545,7 @@ class EntityProcessor extends ProcessorBase implements FormInterface, AdvancedFo
     return $select;
   }
 
-  protected function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
+  protected function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
     if ($id = parent::existingEntityId($feed, $result)) {
       return $id;
     }

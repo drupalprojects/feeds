@@ -9,11 +9,11 @@ namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FetcherResult;
-use Drupal\feeds\Plugin\FetcherBase;
+use Drupal\feeds\Plugin\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\FetcherInterface;
 
 /**
  * Defines a directory fetcher.
@@ -24,7 +24,7 @@ use Drupal\feeds\Plugin\FetcherBase;
  *   description = @Translation("Uses a directory, or file, on the server.")
  * )
  */
-class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, FormInterface {
+class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterface {
 
   /**
    * {@inheritdoc}
@@ -112,9 +112,9 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
   /**
    * {@inheritdoc}
    */
-  public function getConfigurationDefaults() {
+  protected function getDefaultConfiguration() {
     return array(
-      'allowed_extensions' => 'txt csv tsv xml opml',
+      'allowed_extensions' => array('txt', 'csv', 'tsv', 'xml', 'opml'),
       'allowed_schemes' => $this->getSchemes(),
     );
   }
@@ -122,12 +122,12 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
       '#description' => t('Allowed file extensions for upload.'),
-      '#default_value' => $this->configuration['allowed_extensions'],
+      '#default_value' => implode(' ', $this->configuration['allowed_extensions']),
     );
     $form['allowed_schemes'] = array(
       '#type' => 'checkboxes',
@@ -143,9 +143,12 @@ class DirectoryFetcher extends FetcherBase implements FeedPluginFormInterface, F
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
-    $values =& $form_state['values']['fetcher']['config'];
+  public function validateConfigurationForm(array &$form, array &$form_state) {
+    $values =& $form_state['values']['fetcher']['configuration'];
     $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
+    // Convert allowed_extensions to an array for storage.
+    $values['allowed_extensions'] = explode(' ', preg_replace('/\s+/', ' ', trim($values['allowed_extensions'])));
+    $values['allowed_extensions'] = array_unique($values['allowed_extensions']);
   }
 
   /**

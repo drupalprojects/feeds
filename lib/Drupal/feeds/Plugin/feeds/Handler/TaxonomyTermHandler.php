@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResultInterface;
 
 /**
  * Handles special user entity operations.
@@ -37,7 +37,7 @@ class TaxonomyTermHandler extends PluginBase {
    * Creates a new user account in memory and returns it.
    */
   public function newEntityValues(FeedInterface $feed, &$values) {
-    $values['input_format'] = $this->importer->getProcessor()->getConfig('input_format');
+    $values['input_format'] = $this->importer->getProcessor()->getConfiguration('input_format');
   }
 
   /**
@@ -86,7 +86,7 @@ class TaxonomyTermHandler extends PluginBase {
   /**
    * Get id of an existing feed item term if available.
    */
-  public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
+  public function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
     // The only possible unique target is name.
     foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
       if ($target == 'name') {

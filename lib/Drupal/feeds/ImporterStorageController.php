@@ -8,7 +8,6 @@
 namespace Drupal\feeds;
 
 use Drupal\Core\Config\Entity\ConfigStorageController;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Defines the storage controller class for Importer entities.
@@ -16,18 +15,11 @@ use Drupal\Core\Entity\EntityInterface;
 class ImporterStorageController extends ConfigStorageController {
 
   /**
-   * {@inheritdoc}
+   * Loads all enabled importers.
+   *
+   * @return \Drupal\feeds\ImporterInterface[]
+   *   The list of enabled importers, keyed by id.
    */
-  public function save(EntityInterface $importer) {
-
-    // This will grab configuration from plugins and handlers.
-    // foreach ($importer->getPluginTypes() as $type) {
-    //   $importer->{$type}['config'] = $importer->getPlugin($type)->getConfiguration();
-    // }
-
-    parent::save($importer);
-  }
-
   public function loadEnabled() {
     return $this->loadByProperties(array('status' => 1));
   }

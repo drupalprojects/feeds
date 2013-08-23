@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Parser\FeedsSitemapParser.
+ * Contains \Drupal\feeds\Plugin\feeds\Parser\SitemapParser.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Parser;
@@ -10,9 +10,10 @@ namespace Drupal\feeds\Plugin\feeds\Parser;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResult;
 use Drupal\feeds\FetcherResultInterface;
-use Drupal\feeds\Plugin\ParserBase;
+use Drupal\feeds\Plugin\ParserInterface;
+use Drupal\feeds\Plugin\PluginBase;
 
 /**
  * Defines a SitemapXML feed parser.
@@ -23,7 +24,7 @@ use Drupal\feeds\Plugin\ParserBase;
  *   description = @Translation("Parse Sitemap XML format feeds.")
  * )
  */
-class FeedsSitemapParser extends ParserBase {
+class SitemapParser extends PluginBase implements ParserInterface {
 
   /**
    * {@inheritdoc}
@@ -34,7 +35,7 @@ class FeedsSitemapParser extends ParserBase {
     date_default_timezone_set('GMT');
     // Yes, using a DOM parser is a bit inefficient, but will do for now.
     $xml = new \SimpleXMLElement($fetcher_result->getRaw());
-    $result = new FeedsParserResult();
+    $result = new ParserResult();
     foreach ($xml->url as $url) {
       $item = array('url' => (string) $url->loc);
       if ($url->lastmod) {
@@ -73,7 +74,7 @@ class FeedsSitemapParser extends ParserBase {
         'name' => t('Priority'),
         'description' => t('The priority of this URL relative to other URLs on the site.'),
       ),
-    ) + parent::getMappingSources();
+    );
   }
 
 }

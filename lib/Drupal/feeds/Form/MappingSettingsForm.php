@@ -7,13 +7,13 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Core\Form\BaseFormIdInterface;
+use Drupal\Core\Form\FormIdInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
  * Provides a form for mapping.
  */
-class MappingSettingsForm implements BaseFormIdInterface {
+class MappingSettingsForm implements FormIdInterface {
 
 
   protected $i;
@@ -23,12 +23,14 @@ class MappingSettingsForm implements BaseFormIdInterface {
   /**
    * Constructs a new MappingSettingsForm object.
    *
-   * @param \Drupal\feeds\ImporterInterface $importer
-   *   The feeds importer.
-   * @param string $plugin_type
-   *   The plugin type.
+   * @param int $i
+   *   The mapping index.
+   * @param array $mapping
+   *   The mapping array.
+   * @param string $target
+   *   The target.
    */
-  public function __construct($i, $mapping, $target) {
+  public function __construct($i, array $mapping, $target) {
     $this->i = $i;
     $this->mapping = $mapping;
     $this->target = $target;
@@ -37,15 +39,8 @@ class MappingSettingsForm implements BaseFormIdInterface {
   /**
    * {@inheritdoc}
    */
-  public function getBaseFormID() {
-    return 'feeds_mapping_settings_form';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getFormID() {
-    return 'feeds_' . $this->target . '_mapping_settings_form';
+    return 'feeds_mapping_settings_form';
   }
 
   /**
@@ -135,6 +130,11 @@ class MappingSettingsForm implements BaseFormIdInterface {
     }
   }
 
+  /**
+   * Provides an optional unique checkbox.
+   *
+   * @todo Make this a better API.
+   */
   protected function optionalUniqueForm($mapping, $target, $form, $form_state) {
     $settings_form = array();
 
@@ -150,8 +150,9 @@ class MappingSettingsForm implements BaseFormIdInterface {
   }
 
   /**
-   * Per mapping settings summary callback. Shows whether a mapping is used as
-   * unique or not.
+   * Shows whether a mapping is used as unique or not per mapping.
+   *
+   * @todo Make this a better API.
    */
   protected function optionalUniqueSummary($mapping, $target, $form, $form_state) {
     if (!empty($target['optional_unique'])) {
@@ -164,6 +165,9 @@ class MappingSettingsForm implements BaseFormIdInterface {
     }
   }
 
+  /**
+   * Ajax callback.
+   */
   public function ajaxCallback(array $form, array &$form_state) {
     return $form;
   }

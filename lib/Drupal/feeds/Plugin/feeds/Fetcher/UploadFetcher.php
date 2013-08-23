@@ -9,11 +9,14 @@ namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FetcherResult;
-use Drupal\feeds\Plugin\FetcherBase;
+use Drupal\feeds\Plugin\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\FetcherInterace;
 
 /**
  * Defines a file upload fetcher.
@@ -24,7 +27,57 @@ use Drupal\feeds\Plugin\FetcherBase;
  *   description = @Translation("Upload content from a local file.")
  * )
  */
-class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, FormInterface {
+class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, ContainerFactoryPluginInterface, FetcherInterace {
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $account;
+
+  /**
+   * The file usage backend.
+   *
+   * @var \Drupal\file\FileUsage\FileUsageInterface
+   */
+  protected $fileUsage;
+
+  /**
+   * The file storage backend.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
+   */
+  protected $fileStorage;
+
+  /**
+   * Constructs an UploadFetcher object.
+   *
+   * @param array $configuration
+   *   The plugin configuration.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param AccountInterface $account
+   *   The current user.
+   * @param FileUsageInterface $file_usage
+   *   The file usage backend.
+   * @param EntityStorageControllerInterface $file_storage
+   *   The file storage controller.
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, AccountInterface $account, FileUsageInterface $file_usage, EntityStorageControllerInterface $file_storage) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->account = $account;
+    $this->fileUsage = $file_usage;
+    $this->fileStorage = $file_storage;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+    $user = $container->get('request')->attributes->get('_account');
+    return new static($configuration, $plugin_id, $plugin_definition, $user, $container->get('file.usage'));
+  }
 
   /**
    * {@inheritdoc}
@@ -45,6 +98,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    */
   public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
+
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['fid'] = array(
       '#type' => 'value',
@@ -59,7 +113,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
       '#title' => t('File'),
       '#description' => empty($feed_config['source']) ? t('Select a file from your local system.') : t('Select a different file from your local system.'),
       '#theme' => 'feeds_upload',
-      '#file_info' => empty($feed_config['fid']) ? NULL : file_load($feed_config['fid']),
+      '#file_info' => empty($feed_config['fid']) ? NULL : $this->fileStorage->load($feed_config['fid']),
       '#size' => 10,
     );
     return $form;
@@ -69,6 +123,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    * {@inheritdoc}
    */
   public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
+    // @todo
     $values =& $form_state['values']['fetcher'];
 
     $feed_dir = $this->configuration['directory'];
@@ -79,8 +134,8 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
     );
 
     if (!file_prepare_directory($feed_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      if (user_access('administer feeds')) {
-        $link = url('admin/structure/feeds/manage/' . $this->getPluginID() . '/settings/fetcher');
+      if ($this->account->hasPermission('administer feeds')) {
+        $link = url('admin/structure/feeds/manage/' . $this->getPluginId() . '/settings/fetcher');
         form_set_error('feeds][upload][source', t('Upload failed. Please check the upload <a href="@link">settings.</a>', array('@link' => $link)));
       }
       else {
@@ -115,7 +170,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
         $this->deleteFile($feed_config['fid'], $feed->id());
       }
       $file->setPermanent();
-      file_usage()->add($file, 'feeds', $this->getPluginID(), $feed->id());
+      $this->fileUsage->add($file, 'feeds', $this->getPluginId(), $feed->id());
 
       $feed_config['fid'] = $file->id();
       unset($feed_config['file']);
@@ -137,7 +192,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function getConfigurationDefaults() {
+  protected function getDefaultConfiguration() {
     $schemes = $this->getSchemes();
     $scheme = in_array('private', $schemes) ? 'private' : 'public';
 
@@ -150,7 +205,7 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed file extensions'),
@@ -171,9 +226,9 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateConfigurationForm(array &$form, array &$form_state) {
 
-    $values =& $form_state['values']['fetcher']['config'];
+    $values =& $form_state['values']['fetcher']['configuration'];
 
     $values['directory'] = trim($values['directory']);
 
@@ -203,10 +258,10 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
   /**
    * Deletes a file.
    *
-   * @param int $fid
+   * @param int $file_id
    *   The file id.
-   * @param int $fid
-   *   The feed node's id, or 0 if a standalone feed.
+   * @param int $feed_id
+   *   The feed id.
    *
    * @return bool|array
    *   TRUE for success, FALSE in the event of an error, or an array if the file
@@ -214,9 +269,9 @@ class UploadFetcher extends FetcherBase implements FeedPluginFormInterface, Form
    *
    * @see file_delete()
    */
-  protected function deleteFile($fid, $feed_id) {
-    if ($file = file_load($fid)) {
-      file_usage()->delete($file, 'feeds', $this->getPluginID(), $feed_id);
+  protected function deleteFile($file_id, $feed_id) {
+    if ($file = $this->fileStorage->load($file_id)) {
+      $this->fileUsage->delete($file, 'feeds', $this->getPluginId(), $feed_id);
     }
     return FALSE;
   }

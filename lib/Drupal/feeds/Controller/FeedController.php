@@ -43,7 +43,7 @@ class FeedController implements ControllerInterface {
   protected $importerStorage;
 
   /**
-   * Constructs a \Drupal\feeds\Controller\FeedController object.
+   * Constructs a FeedController object.
    *
    * @param \Drupal\Component\Plugin\PluginManagerInterface $entity_manager
    *   The Entity manager.
@@ -79,8 +79,11 @@ class FeedController implements ControllerInterface {
    * @todo Return a render array/twig template?
    */
   public function add(Request $request) {
+
+    $account = $request->attributes->get('_account');
+
     // Show add form if there is only one importer.
-    $importers = $this->importerStorage->loadMultiple();
+    $importers = $this->importerStorage->loadEnabled();
     if ($importers && count($importers) == 1) {
       $importer = reset($importers);
       return $this->addForm($importer, $request);
@@ -88,15 +91,12 @@ class FeedController implements ControllerInterface {
 
     $rows = array();
     foreach ($importers as $importer) {
-      if (!(user_access('create ' . $importer->id() . ' feeds') || user_access('administer feeds'))) {
+      if (!($importer->access('create', $account))) {
         continue;
       }
       $link = 'feed/add/' . $importer->id();
       $title = $importer->label();
-      $rows[] = array(
-        l($title, $link),
-        check_plain($importer->description),
-      );
+      $rows[] = array(l($title, $link), check_plain($importer->description));
     }
     if (!$rows) {
       drupal_set_message(t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => url('admin/structure/feeds'))));
@@ -115,8 +115,10 @@ class FeedController implements ControllerInterface {
    *   A form array as expected by drupal_render().
    */
   public function addForm(Importer $feeds_importer, Request $request) {
+    $account = $request->attributes->get('_account');
+
     $feed = $this->feedStorage->create(array(
-      'uid' => $GLOBALS['user']->id(),
+      'uid' => $account->id(),
       'importer' => $feeds_importer->id(),
       'status' => 1,
       'created' => REQUEST_TIME,

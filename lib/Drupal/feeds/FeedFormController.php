@@ -64,7 +64,7 @@ class FeedFormController extends EntityFormControllerNG {
     // Feed author information for administrators.
     $form['author'] = array(
       '#type' => 'details',
-      '#access' => user_access('administer feeds'),
+      '#access' => $this->getCurrentUser()->hasPermission('administer feeds'),
       '#title' => t('Authoring information'),
       '#collapsed' => TRUE,
       '#group' => 'advanced',
@@ -92,7 +92,7 @@ class FeedFormController extends EntityFormControllerNG {
     // Feed options for administrators.
     $form['options'] = array(
       '#type' => 'details',
-      '#access' => user_access('administer feeds'),
+      '#access' => $this->getCurrentUser()->hasPermission('administer feeds'),
       '#title' => t('Import options'),
       '#collapsed' => TRUE,
       '#group' => 'advanced',

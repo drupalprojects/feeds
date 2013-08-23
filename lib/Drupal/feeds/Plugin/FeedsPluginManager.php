@@ -47,4 +47,12 @@ class FeedsPluginManager extends DefaultPluginManager {
     $this->setCacheBackend($cache_backend, $language_manager, "feeds_{$type}_plugins");
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function processDefinition(&$definition, $plugin_id) {
+    parent::processDefinition($definition, $plugin_id);
+    $definition['plugin_type'] = $this->pluginType;
+  }
+
 }

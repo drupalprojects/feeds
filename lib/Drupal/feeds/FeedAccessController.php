@@ -33,22 +33,14 @@ class FeedAccessController extends EntityAccessController {
       }
     }
 
-    if (user_access('administer feeds', $account) || user_access("$operation {$feed->bundle()} feeds", $account)) {
-      return TRUE;
-    }
-
-    return FALSE;
+    return $account->hasPermission('administer feeds') || $account->hasPermission("$operation {$feed->bundle()} feeds");
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    if (user_access('administer feeds', $account) || user_access("create $entity_bundle feeds", $account)) {
-      return TRUE;
-    }
-
-    return FALSE;
+    return $account->hasPermission('administer feeds') || $account->hasPermission("create $entity_bundle feeds");
   }
 
 }

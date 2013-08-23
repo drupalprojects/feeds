@@ -45,16 +45,17 @@ class FeedCreateListAccessCheck implements AccessCheckInterface {
    * {@inheritdoc}
    */
   public function access(Route $route, Request $request) {
-    if (user_access('administer feeds')) {
+    $account = $request->attributes->get('_account');
+
+    if ($account->hasPermission('administer feeds')) {
       return self::ALLOW;
     }
 
     // @todo Perhaps read config directly rather than load all importers.
-    foreach ($this->importerStorage->loadMultiple() as $importer) {
-      if (user_access("create {$importer->id()} feeds")) {
+    foreach ($this->importerStorage->loadEnabled() as $importer) {
+      if ($account->hasPermission("create {$importer->id()} feeds")) {
         return self::ALLOW;
       }
-
     }
 
     return self::DENY;

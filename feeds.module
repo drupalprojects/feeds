@@ -580,6 +580,24 @@ function feeds_entity_delete(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_library_info().
+ */
+function feeds_library_info() {
+  $libraries = array();
+  $libraries['feeds'] = array(
+    'title' => 'Feeds js.',
+    'version' => '1.0',
+    'js' => array(
+      drupal_get_path('module', 'feeds') . '/feeds.js' => array('group' => JS_LIBRARY, 'weight' => 2),
+    ),
+    'dependencies' => array(
+      array('system', 'drupal.ajax'),
+    ),
+  );
+  return $libraries;
+}
+
+/**
  * Copy of valid_url() that supports the webcal scheme.
  *
  * @see valid_url()

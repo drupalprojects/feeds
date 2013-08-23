@@ -7,9 +7,12 @@
 
 namespace Drupal\feeds\Entity;
 
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Component\Plugin\DefaultSinglePluginBag;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Annotation\EntityType;
+use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
@@ -61,84 +64,91 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public $description;
 
   /**
-   * The enabled status.
+   * The types of plugins we support.
    *
-   * @var bool
+   * @var array
+   *
+   * @todo Make this dynamic?
    */
-  public $status = TRUE;
-
-  // Every feed has a fetcher, a parser and a processor.
-  public $fetcher = array(
-    'plugin_key' => 'http',
-    'config' => array(),
-  );
-
-  public $parser = array(
-    'plugin_key' => 'syndication',
-    'config' => array(),
-  );
-
-  public $processor = array(
-    'plugin_key' => 'entity:node',
-    'config' => array(),
-  );
-
-  public $mappings = array();
-
-  // This array defines the variable names of the plugins above.
   protected $pluginTypes = array('fetcher', 'parser', 'processor');
+
+  /**
+   * Plugin ids and configuration.
+   *
+   * @todo Move this to sotrage controller.
+   */
+  protected $plugins = array(
+    'fetcher' => array(
+      'id' => 'http',
+      'configuration' => array(),
+    ),
+    'parser' => array(
+      'id' => 'syndication',
+      'configuration' => array(),
+    ),
+    'processor' => array(
+      'id' => 'entity:node',
+      'configuration' => array(),
+    ),
+  );
+
+  /**
+   * The plugin bags that store feeds plugins keyed by plugin type.
+   *
+   * @var \Drupal\Component\Plugin\DefaultSinglePluginBag[]
+   */
+  protected $pluginBags = array();
+
   public $import_period = 1800;
   public $expire_period = 3600;
   public $import_on_create = TRUE;
   public $process_in_background = FALSE;
 
-  protected $plugins = array();
-
   /**
    * Constructs a new Importer object.
    */
   public function __construct(array $values, $entity_type) {
+
+    // Move plugin configuration separately from values.
+    foreach ($this->getPluginTypes() as $type) {
+      if (isset($values[$type])) {
+        $this->plugins[$type] = $values[$type];
+        unset($values[$type]);
+      }
+    }
+
     parent::__construct($values, $entity_type);
 
-    // Instantiate fetcher, parser and processor, set their configuration if
-    // stored info is available.
-
+    // Setup plugins.
     foreach ($this->getPluginTypes() as $type) {
-      $plugin_key = $this->{$type}['plugin_key'];
+      $id = $this->plugins[$type]['id'];
 
-      $config = array();
-      if (isset($this->{$type}['config'])) {
-        $config = $this->{$type}['config'];
+      $configuration = array('importer' => $this);
+      if (isset($this->plugins[$type]['configuration'])) {
+        $configuration += $this->plugins[$type]['configuration'];
       }
+      $manager = \Drupal::service("plugin.manager.feeds.$type");
 
-      $this->setPlugin($type, $plugin_key, $config);
+      $this->pluginBags[$type] = new DefaultSinglePluginBag($manager, array($id), $configuration);
     }
   }
 
   /**
-   * Report how many items *should* be created on one page load by this
-   * importer.
-   *
-   * Note:
-   *
-   * It depends on whether parser implements batching if this limit is actually
-   * respected. Further, if no limit is reported it doesn't mean that the
-   * number of items that can be created on one page load is actually without
-   * limit.
-   *
-   * @return
-   *   A positive number defining the number of items that can be created on
-   *   one page load. 0 if this number is unlimited.
+   * {@inheritdoc}
    */
   public function getLimit() {
-    return $this->processor->getLimit();
+    return $this->getProcessor()->getLimit();
   }
 
   /**
-   * Deletes configuration.
-   *
-   * Removes configuration information from database, does not delete
-   * configuration itself.
+   * {@inheritdoc}
+   */
+  public function getMappings() {
+    return $this->getProcessor()->getMappings();
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function delete() {
     parent::delete();
@@ -146,57 +156,69 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     $this->reschedule($this->id());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getPluginTypes() {
     return $this->pluginTypes;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getPlugins() {
     $plugins = array();
-    foreach ($this->pluginTypes as $type) {
-      $plugins[$type] = $this->plugins[$type];
+    foreach ($this->getPluginTypes() as $type) {
+      $plugins[$type] = $this->getPlugin($type);
     }
 
     return $plugins;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getFetcher() {
-    return $this->plugins['fetcher'];
-  }
-
-  public function getParser() {
-    return $this->plugins['parser'];
-  }
-
-  public function getProcessor() {
-    return $this->plugins['processor'];
-  }
-
-  public function getPlugin($type) {
-    return $this->plugins[$type];
+    return $this->getPlugin('fetcher');
   }
 
   /**
-   * Set plugin.
-   *
-   * @param string $plugin_type
-   *   The type of plugin. Either fetcher, parser, or processor.
-   * @param $plugin_key
-   *   A id key.
+   * {@inheritdoc}
    */
-  public function setPlugin($plugin_type, $plugin_key, array $config = array()) {
-    $config['importer'] = $this;
-    $plugin = \Drupal::service('plugin.manager.feeds.' . $plugin_type)->createInstance($plugin_key, $config);
-    // Unset existing plugin, switch to new plugin.
-    unset($this->plugins[$plugin_type]);
-    $this->plugins[$plugin_type] = $plugin;
-    // Set configuration information, blow away any previous information on
-    // this spot.
-    $this->$plugin_type = array(
-      'plugin_key' => $plugin_key,
-      'config' => $plugin->getConfiguration(),
-    );
+  public function getParser() {
+    return $this->getPlugin('parser');
+  }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getProcessor() {
+    return $this->getPlugin('processor');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPlugin($plugin_type) {
+    return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setPlugin($plugin_type, $plugin_id) {
+    $this->plugins[$plugin_type]['id'] = $plugin_id;
+    $this->pluginBags[$plugin_type]->addInstanceID($plugin_id);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExportProperties() {
+    $properties = parent::getExportProperties();
+    $properties += $this->plugins;
+    return $properties;
   }
 
   /**
@@ -213,16 +235,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   }
 
   /**
-   * Reschedules one or all importers.
-   *
-   * @param string $importer_id
-   *   If true, all importers will be rescheduled, if FALSE, no importers will
-   *   be rescheduled, if an importer id, only importer of that id will be
-   *   rescheduled.
-   *
-   * @return bool|array
-   *   Returns true if all importers need rescheduling, or false if no
-   *   rescheduling is required. An array of importers that need rescheduling.
+   * {@inheritdoc}
    */
   public static function reschedule($importer_id = NULL) {
     $reschedule = \Drupal::state()->get('feeds.reschedule') ? : FALSE;
@@ -241,6 +254,23 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     }
 
     return $reschedule;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageControllerInterface $storage_controller) {
+    parent::preSave($storage_controller);
+
+    foreach ($this->getPlugins() as $type => $plugin) {
+      // If this plugin has any configuration, ensure that it is set.
+      if ($plugin instanceof ConfigurablePluginInterface) {
+        $this->plugins[$type]['configuration'] = $plugin->getConfiguration();
+      }
+      else {
+        unset($this->plugins[$type]['configuration']);
+      }
+    }
   }
 
 }

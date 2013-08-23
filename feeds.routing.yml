@@ -18,7 +18,7 @@ feeds_feed.create:
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::addForm'
   requirements:
-    _access_feeds_feed_create: 'feeds_feed'
+    _entity_create_access: 'feeds_feed'
 
 feeds_feed:
   pattern: '/feed/{feeds_feed}'
@@ -108,32 +108,32 @@ feeds_importer.create:
   defaults:
     _content: 'Drupal\feeds\Controller\ImporterController::createForm'
   requirements:
-    _permission: 'administer feeds'
+    _entity_create_access: 'feeds_importer'
 
 feeds_importer:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}'
   defaults:
     _entity_form: 'feeds_importer.edit'
   requirements:
-    _permission: 'administer feeds'
+    _entity_access: 'feeds_importer.edit'
 
 feeds_importer.edit:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/edit'
   defaults:
     _entity_form: 'feeds_importer.edit'
   requirements:
-    _permission: 'administer feeds'
+    _entity_access: 'feeds_importer.edit'
 
 feeds_importer.mapping:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/mapping'
   defaults:
     _form: '\Drupal\feeds\Form\MappingForm'
   requirements:
-    _permission: 'administer feeds'
+    _entity_access: 'feeds_importer.mapping'
 
 feeds_importer.delete:
   pattern: '/admin/structure/feeds/manage/{feeds_importer}/delete'
   defaults:
     _entity_form: 'feeds_importer.delete'
   requirements:
-    _permission: 'administer feeds'
+    _entity_access: 'feeds_importer.delete'

@@ -2,21 +2,21 @@
 
 /**
  * @file
- * Contains the FeedsCSVParser class.
+ * Contains \Drupal\feeds\Plugin\feeds\Parser\CSVParser.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\Component\ParserCSV;
 use Drupal\feeds\Component\ParserCSVIterator;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResult;
 use Drupal\feeds\FetcherResultInterface;
-use Drupal\feeds\Plugin\ParserBase;
+use Drupal\feeds\Plugin\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\ParserInterface;
 
 /**
  * Defines a CSV feed parser.
@@ -27,7 +27,7 @@ use Drupal\feeds\Plugin\ParserBase;
  *   description = @Translation("Parse CSV files.")
  * )
  */
-class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, FormInterface {
+class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterface, ParserInterface {
 
   /**
    * {@inheritdoc}
@@ -63,7 +63,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
     $state->progress($state->total, $progress);
 
     // Create a result object and return it.
-    return new FeedsParserResult($rows, $feed->id());
+    return new ParserResult($rows, $feed->id());
   }
 
   /**
@@ -136,7 +136,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
     $form['parser']['#tree'] = TRUE;
     $form['parser']['#weight'] = -10;
 
-    $mappings = $this->importer->getProcessor()->config['mappings'];
+    $mappings = $this->importer->getMappings();
     $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
       $feeds[] = check_plain($mapping['source']);
@@ -187,7 +187,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function getConfigurationDefaults() {
+  protected function getDefaultConfiguration() {
     return array(
       'delimiter' => ',',
       'no_headers' => 0,
@@ -197,7 +197,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, array &$form_state) {
     $form['delimiter'] = array(
       '#type' => 'select',
       '#title' => t('Default delimiter'),
@@ -222,7 +222,7 @@ class FeedsCSVParser extends ParserBase implements FeedPluginFormInterface, Form
   }
 
   public function getTemplate() {
-    $mappings = $this->importer->getProcessor()->config['mappings'];
+    $mappings = $this->importer->getMappings();
     $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
       if (!empty($mapping['unique'])) {

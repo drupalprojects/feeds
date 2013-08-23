@@ -9,13 +9,14 @@ namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\FetcherResult;
 use Drupal\feeds\HTTPRequest;
-use Drupal\feeds\Plugin\FetcherBase;
+use Drupal\feeds\Plugin\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\ClearableInterface;
+use Drupal\feeds\Plugin\FetcherInterface;
 use Drupal\feeds\RawFetcherResult;
 
 /**
@@ -29,7 +30,7 @@ use Drupal\feeds\RawFetcherResult;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormInterface {
+class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface {
 
   /**
    * {@inheritdoc}
@@ -71,7 +72,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
   /**
    * {@inheritdoc}
    */
-  public function getConfigurationDefaults() {
+  protected function getDefaultConfiguration() {
     return array(
       'auto_detect_feeds' => FALSE,
       'use_pubsubhubbub' => FALSE,
@@ -83,7 +84,7 @@ class HTTPFetcher extends FetcherBase implements FeedPluginFormInterface, FormIn
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, array &$form_state) {
     $form['auto_detect_feeds'] = array(
       '#type' => 'checkbox',
       '#title' => t('Auto detect feeds'),

@@ -7,6 +7,9 @@
 
 namespace Drupal\feeds;
 
+/**
+ * Interface for feed item info controllers.
+ */
 interface ItemInfoControllerInterface {
 
   /**
@@ -23,7 +26,7 @@ interface ItemInfoControllerInterface {
   public function load($entity_type, $entity_id);
 
   /**
-   * Inserts or updates an item info object in the feeds_item table.
+   * Inserts or updates an item info object in the {feeds_item} table.
    *
    * @param stdClass $item_info
    *   The item info object to save.

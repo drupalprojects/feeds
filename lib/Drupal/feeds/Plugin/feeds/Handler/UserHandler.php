@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedsParserResult;
+use Drupal\feeds\ParserResultInterface;
 
 /**
  * Handles special user entity operations.
@@ -28,7 +28,7 @@ class UserHandler extends PluginBase {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->importer = $configuration['importer'];
-    $this->configuration += $this->getConfigurationDefaults();
+    $this->configuration += $this->getDefaultConfiguration();
     unset($this->configuration['importer']);
   }
 
@@ -57,9 +57,9 @@ class UserHandler extends PluginBase {
   }
 
   /**
-   * Override parent::getConfigurationDefaults().
+   * Override parent::getDefaultConfiguration().
    */
-  public function getConfigurationDefaults() {
+  public function getDefaultConfiguration() {
     $defaults = array();
     $defaults['roles'] = array();
     $defaults['status'] = 1;
@@ -68,7 +68,7 @@ class UserHandler extends PluginBase {
     return $defaults;
   }
 
-  public function formAlter(array &$form, array &$form_state) {
+  public function buildConfigurationForm(array &$form, array &$form_state) {
     $form['status'] = array(
       '#type' => 'radios',
       '#title' => t('Status'),
@@ -140,7 +140,7 @@ class UserHandler extends PluginBase {
   /**
    * Get id of an existing feed item term if available.
    */
-  public function existingEntityId(FeedInterface $feed, FeedsParserResult $result) {
+  public function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
     $uid = FALSE;
     // Iterate through all unique targets and try to find a user for the
     // target's value.
