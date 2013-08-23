@@ -79,7 +79,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -95,7 +95,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
+  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
     // Check if chosen url scheme is allowed.

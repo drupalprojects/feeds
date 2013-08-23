@@ -96,7 +96,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -122,7 +122,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed) {
+  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
     // @todo
     $values =& $form_state['values']['fetcher'];
 

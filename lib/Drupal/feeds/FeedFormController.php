@@ -52,7 +52,7 @@ class FeedFormController extends EntityFormControllerNG {
       if ($plugin instanceof FeedPluginFormInterface) {
         // Store the plugin for validate and submit.
         $this->configurablePlugins[] = $plugin;
-        $form = $plugin->feedForm($form, $form_state, $feed);
+        $form = $plugin->buildFeedForm($form, $form_state, $feed);
       }
     }
 
@@ -117,7 +117,7 @@ class FeedFormController extends EntityFormControllerNG {
     $feed = $this->buildEntity($form, $form_state);
 
     foreach ($this->configurablePlugins as $plugin) {
-      $plugin->feedFormValidate($form, $form_state, $feed);
+      $plugin->validateFeedForm($form, $form_state, $feed);
     }
 
     // Validate the "authored by" field.
@@ -146,7 +146,7 @@ class FeedFormController extends EntityFormControllerNG {
     $feed = parent::submit($form, $form_state);
 
     foreach ($this->configurablePlugins as $plugin) {
-      $plugin->feedFormSubmit($form, $form_state, $feed);
+      $plugin->submitFeedForm($form, $form_state, $feed);
     }
   }
 

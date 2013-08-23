@@ -131,7 +131,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  public function feedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
     $form['parser']['#tree'] = TRUE;
     $form['parser']['#weight'] = -10;

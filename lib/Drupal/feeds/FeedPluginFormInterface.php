@@ -17,15 +17,15 @@ interface FeedPluginFormInterface {
    *
    * @param array $form
    *   An associative array containing the structure of the form.
-   * @param array $form_state
+   * @param array &$form_state
    *   An associative array containing the current state of the form.
-   * @param FeedInterface $feed
+   * @param \Drupal\feeds\FeedInterface $feed
    *   The feed currently being edited.
    *
    * @return array
    *   The form structure.
    */
-  public function feedForm(array $form, array &$form_state, FeedInterface $feed);
+  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed);
 
   /**
    * Form validation handler.
@@ -34,13 +34,13 @@ interface FeedPluginFormInterface {
    *   An associative array containing the structure of the form.
    * @param array $form_state
    *   An associative array containing the current state of the form.
-   * @param FeedInterface $feed
+   * @param \Drupal\feeds\FeedInterface $feed
    *   The feed currently being edited.
    *
    * @return array
    *   The form structure.
    */
-  public function feedFormValidate(array $form, array &$form_state, FeedInterface $feed);
+  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed);
 
   /**
    * Form submit handler.
@@ -49,12 +49,12 @@ interface FeedPluginFormInterface {
    *   An associative array containing the structure of the form.
    * @param array $form_state
    *   An associative array containing the current state of the form.
-   * @param FeedInterface $feed
+   * @param \Drupal\feeds\FeedInterface $feed
    *   The feed currently being edited.
    *
    * @return array
    *   The form structure.
    */
-  public function feedFormSubmit(array $form, array &$form_state, FeedInterface $feed);
+  public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed);
 
 }
