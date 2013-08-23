@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 
@@ -27,18 +26,6 @@ interface ProcessorInterface extends FeedsPluginInterface {
   public function process(FeedInterface $feed, ParserResultInterface $parser_result);
 
   /**
-   * Removes all stored results for a feed.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   Source information for this expiry. Implementers should only delete items
-   *   pertaining to this source. The preferred way of determining whether an
-   *   item pertains to a certain souce is by using $source->fid. It is the
-   *   processor's responsibility to store the fid of an imported item in
-   *   the processing stage.
-   */
-  public function clear(FeedInterface $feed);
-
-  /**
    * Reports the number of items that can be processed per call.
    *
    * 0 means 'unlimited'.
@@ -49,7 +36,8 @@ interface ProcessorInterface extends FeedsPluginInterface {
    * @return int
    *   The number of items to process in a single batch, or 0 for unlimited.
    *
-   * @todo This should be an importer level option.
+   * @todo This should be an importer level option, with the option for
+   *   processors to override.
    */
   public function getLimit();
 
@@ -61,7 +49,6 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to expire items for.
-   *
    * @param int $time
    *   (optional) All items produced by this configuration that are older than
    *   REQUEST_TIME - $time should be deleted. If null, the processor should use
@@ -84,10 +71,10 @@ interface ProcessorInterface extends FeedsPluginInterface {
    * @return int
    *   The number of items imported by this feed.
    */
-  public function itemCount(FeedInterface $feed);
+  public function getItemCount(FeedInterface $feed);
 
   /**
-   * Returns the age of items that should be removed,
+   * Returns the age of items that should be removed.
    *
    * @return int
    *   The unix timestamp of the age of items to be removed.
@@ -103,7 +90,7 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *   The mappings for this importer.
    *
    * @todo Processors shouldn't control mappings. They should be an importer
-   * level configuration.
+   *   level configuration.
    */
   public function getMappings();
 

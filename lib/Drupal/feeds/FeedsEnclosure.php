@@ -10,6 +10,7 @@
 namespace Drupal\feeds;
 
 use Drupal\Component\Utility\String;
+use Drupal\feeds\Utility\HTTPRequest;
 
 /**
  * Enclosure element, can be part of the result array.

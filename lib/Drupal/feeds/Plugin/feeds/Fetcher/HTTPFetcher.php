@@ -13,7 +13,7 @@ use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\Result\FetcherResult;
-use Drupal\feeds\HTTPRequest;
+use Drupal\feeds\Utility\HTTPRequest;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ClearableInterface;
 use Drupal\feeds\Plugin\FetcherInterface;

@@ -9,6 +9,8 @@ namespace Drupal\feeds\Component;
 
 /**
  * Parses a generic OPML string into an array.
+ *
+ * @todo Move this to Github.
  */
 class GenericOPMLParser extends XMLParserBase {
 
@@ -20,7 +22,7 @@ class GenericOPMLParser extends XMLParserBase {
   protected $xpath;
 
   /**
-   * Whether to normalize the case of attributes.
+   * Whether to normalize the case of elements and attributes.
    *
    * @var bool
    */
@@ -84,7 +86,7 @@ class GenericOPMLParser extends XMLParserBase {
           }
         }
       }
-
+      // Recurse.
       if ($sub_outlines = $this->getOutlines($element)) {
         $outline['outlines'] = $sub_outlines;
       }

@@ -14,12 +14,12 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\feeds\Plugin\PluginBase;
 
 /**
- * Manages feeds plugins.
+ * Manages Feeds plugins.
  */
 class FeedsPluginManager extends DefaultPluginManager {
 
   /**
-   * The plugin type this is managing.
+   * The plugin being managed.
    *
    * @var string
    */
@@ -29,7 +29,8 @@ class FeedsPluginManager extends DefaultPluginManager {
    * Constructs a new \Drupal\feeds\Plugin\FeedsPluginManager object.
    *
    * @param string $type
-   *   The plugin type. Either fetcher, parser, or processor.
+   *   The plugin type. Either fetcher, parser, or processor, handler, source,
+   *   target, or other.
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths
    *   keyed by the corresponding namespace to look for plugin implementations.
@@ -42,6 +43,8 @@ class FeedsPluginManager extends DefaultPluginManager {
    */
   public function __construct($type, \Traversable $namespaces, CacheBackendInterface $cache_backend, LanguageManager $language_manager, ModuleHandlerInterface $module_handler) {
     $this->pluginType = $type;
+
+    // Get us some proper namespaces.
     parent::__construct('Plugin/feeds/' . ucfirst($type), $namespaces);
     $this->alterInfo($module_handler, "feeds_{$type}_plugins");
     $this->setCacheBackend($cache_backend, $language_manager, "feeds_{$type}_plugins");
@@ -52,6 +55,8 @@ class FeedsPluginManager extends DefaultPluginManager {
    */
   public function processDefinition(&$definition, $plugin_id) {
     parent::processDefinition($definition, $plugin_id);
+
+    // Add plugin_type key so that we can determie the plugin type later.
     $definition['plugin_type'] = $this->pluginType;
   }
 

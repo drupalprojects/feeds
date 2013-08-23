@@ -9,7 +9,8 @@
 
 namespace Drupal\feeds\Plugin;
 
-use Drupal\feeds\Exception\AccessException;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 
@@ -19,15 +20,9 @@ use Drupal\feeds\Result\ParserResultInterface;
 abstract class ProcessorBase extends ConfigurablePluginBase implements ClearableInterface {
 
   /**
-   * Remove all stored results or stored results up to a certain time for a
-   * source.
+   * {@inheritdoc}
    *
-   * @param FeedInterface $feed
-   *   Source information for this expiry. Implementers should only delete items
-   *   pertaining to this source. The preferred way of determining whether an
-   *   item pertains to a certain souce is by using $source->fid. It is the
-   *   processor's responsibility to store the fid of an imported item in
-   *   the processing stage.
+   * @todo This should be moved to the EntityProcessor.
    */
   public function clear(FeedInterface $feed) {
     $state = $feed->state(FEEDS_CLEAR);
@@ -89,40 +84,17 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     }
   }
 
-  /*
-   * Report number of items that can be processed per call.
+  /**
+   * {@inheritdoc}
    *
-   * 0 means 'unlimited'.
-   *
-   * If a number other than 0 is given, Feeds parsers that support batching
-   * will only deliver this limit to the processor.
-   *
-   * @see Feed::getLimit()
-   * @see FeedsCSVParser::parse()
+   * @todo Get rid of the variable_get() here.
    */
   public function getLimit() {
     return variable_get('feeds_process_limit', FEEDS_PROCESS_LIMIT);
   }
 
   /**
-   * Deletes feed items older than REQUEST_TIME - $time.
-   *
-   * Do not invoke expire on a processor directly, but use
-   * Feed::expire() instead.
-   *
-   * @param FeedInterface $source
-   *   The source to expire entities for.
-   *
-   * @param $time
-   *   (optional) All items produced by this configuration that are older than
-   *   REQUEST_TIME - $time should be deleted. If NULL, processor should use
-   *   internal configuration. Defaults to NULL.
-   *
-   * @return float
-   *   FEEDS_BATCH_COMPLETE if all items have been processed, a float between 0
-   *   and 0.99* indicating progress otherwise.
-   *
-   * @see Feed::expire()
+   * {@inheritdoc}
    */
   public function expire(FeedInterface $feed, $time = NULL) {
     $state = $feed->state(FEEDS_PROCESS_EXPIRE);
@@ -165,7 +137,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * @return SelectQuery
    *   A select query to execute.
    *
-   * @see FeedsNodeProcessor::expiryQuery()
+   * @todo Move to EntityProcessor.
    */
   protected function expiryQuery(FeedInterface $feed, $time) {
     // Build base select statement.
@@ -186,9 +158,9 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   }
 
   /**
-   * Counts the number of items imported by this processor.
+   * {@inheritdoc}
    */
-  public function itemCount(FeedInterface $feed) {
+  public function getItemCount(FeedInterface $feed) {
     return db_query("SELECT count(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $feed->id()))->fetchField();
   }
 
@@ -206,12 +178,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * hook_x_targets_alter() may have specified a callback for a mapping target
    * in which case the callback is asked to populate the target item instead of
    * ProcessorBase::setTargetElement().
-   *
-   * @see hook_feeds_parser_sources_alter()
-   * @see hook_feeds_data_processor_targets_alter()
-   * @see hook_feeds_node_processor_targets_alter()
-   * @see hook_feeds_term_processor_targets_alter()
-   * @see hook_feeds_user_processor_targets_alter()
    */
   protected function map(FeedInterface $feed, array $item, $target_item, $item_info) {
 
@@ -302,15 +268,14 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   }
 
   /**
-   * Per default, don't support expiry. If processor supports expiry of imported
-   * items, return the time after which items should be removed.
+   * {@inheritdoc}
    */
   public function expiryTime() {
     return FEEDS_EXPIRE_NEVER;
   }
 
   /**
-   * Declare default configuration.
+   * {@inheritdoc}
    */
   protected function getDefaultConfiguration() {
     $defaults = array(
@@ -326,7 +291,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, array &$form_state) {
 
     $form['skip_hash_check'] = array(
       '#type' => 'checkbox',
@@ -353,19 +318,14 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   }
 
   /**
-   * Get mappings.
+   * {@inheritdoc}
    */
   public function getMappings() {
     return $this->configuration['mappings'];
   }
 
   /**
-   * Declare possible mapping targets that this processor exposes.
-   *
-   * @return array
-   *   An array of mapping targets. Keys are paths to targets
-   *   separated by ->, values are TRUE if target can be unique,
-   *   FALSE otherwise.
+   * {@inheritdoc}
    */
   public function getMappingTargets() {
 
@@ -384,7 +344,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   }
 
   /**
-   * Set a concrete target element. Invoked from ProcessorBase::map().
+   * {@inheritdoc}
    */
   public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping, \stdClass $item_info) {
     switch ($key) {
@@ -403,12 +363,14 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * Retrieve the target entity's existing id if available. Otherwise return 0.
    *
    * @param \Drupal\feeds\FeedInterface $feed
-   *   The source information about this import.
+   *   The Feed currently being imported.
    * @param \Drupal\feeds\Result\ParserResultInterface $result
    *   A parser result object.
    *
    * @return int
    *   The serial id of an entity if found, 0 otherwise.
+   *
+   * @todo Move to EntityProcessor.
    */
   protected function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
     $query = db_select('feeds_item')
@@ -439,13 +401,12 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
 
   /**
-   * Utility function that iterates over a target array and retrieves all
-   * sources that are unique.
+   * Iterates over a target array and retrieves all sources that are unique.
    *
    * @param \Drupal\feeds\FeedInterface $feed
-   *   The source information about this import.
+   *   The feed being imported.
    * @param \Drupal\feeds\Result\ParserResultInterface $result
-   *   A parser result object.
+   *   The parser result object.
    *
    * @return array
    *   An array where the keys are target field names and the values are the
@@ -461,24 +422,27 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
         $targets[$mapping['target']] = $parser->getSourceElement($feed, $result->currentItem(), $mapping['source']);
       }
     }
+
     return $targets;
   }
 
   /**
-   * Create MD5 hash of item and mappings array.
+   * Creates an MD5 hash of an item.
    *
-   * Include mappings as a change in mappings may have an affect on the item
-   * produced.
+   * Includes mappings so that items will be updated if the mapping
+   * configuration has changed.
    *
    * @param array $item
    *   The item to hash.
    *
    * @return string
-   *   Always returns a hash, even with empty, NULL, FALSE:
-   *   Empty arrays return 40cd750bba9870f18aada2478b24840a
-   *   Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
+   *   Always returns a hash, even with empty, null, or false:
+   *   - Empty arrays return 40cd750bba9870f18aada2478b24840a
+   *   - Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
+   *
+   * @todo I really doubt the above is still true. Plus, who cares.
    */
-  protected function hash($item) {
+  protected function hash(array $item) {
     return hash('md5', serialize($item) . serialize($this->configuration['mappings']));
   }
 
@@ -490,6 +454,8 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *
    * @return string
    *   Empty string if no item is found, hash otherwise.
+   *
+   * @todo Move to EntityProcessor.
    */
   protected function getHash($entity_id) {
 
@@ -501,19 +467,22 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   }
 
   /**
-   * Creates a log message for when an exception occured during import.
+   * Creates a log message when an exception occured during import.
    *
    * @param \Exception $e
-   *   The exception that was throwned during processing the item.
-   * @param $entity
-   *   The entity object.
-   * @param $item
+   *   The exception that was thrown during processing.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity object that was being processed.
+   * @param arary $item
    *   The parser result for this entity.
    *
    * @return string
    *   The message to log.
+   *
+   * @todo This no longer works due to circular references.
+   * @todo Move to EntityProcessor.
    */
-  protected function createLogMessage(\Exception $e, $entity, $item) {
+  protected function createLogMessage(\Exception $e, EntityInterface $entity, array $item) {
     include_once DRUPAL_ROOT . '/core/includes/utility.inc';
     $message = $e->getMessage();
     $message .= '<h3>Original item</h3>';
@@ -532,7 +501,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * @return string
    *   A string in the format, "After (time)" or "Never."
    */
-  protected function formatExpire($timestamp) {
+  public function formatExpire($timestamp) {
     if ($timestamp == FEEDS_EXPIRE_NEVER) {
       return t('Never');
     }

@@ -12,12 +12,12 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\Field\FieldItemBase;
 
 /**
- * Defines the 'feeds_field' entity field item.
+ * Defines the 'feeds_serialized_field' entity field item.
  *
  * @DataType(
  *   id = "feeds_serialized_field",
  *   label = @Translation("Feeds serialized field"),
- *   description = @Translation("An entity field containing a feeds related data."),
+ *   description = @Translation("An entity field containing a Feeds related data."),
  *   list_class = "\Drupal\Core\Entity\Field\Field"
  * )
  */
@@ -33,7 +33,7 @@ class SerializedItem extends FieldItemBase {
   static $propertyDefinitions;
 
   /**
-   * Implements \Drupal\Core\TypedData\ComplexDataInterface::getPropertyDefinitions().
+   * {@inheritdoc}
    */
   public function getPropertyDefinitions() {
 
@@ -49,10 +49,7 @@ class SerializedItem extends FieldItemBase {
 
 
   /**
-   * Overrides \Drupal\Core\TypedData\TypedData::setValue().
-   *
-   * @param array|null $values
-   *   An array of property values.
+   * {@inheritdoc}
    */
   public function setValue($values, $notify = TRUE) {
     // Treat the values as property value of the first property, if no array is
@@ -67,7 +64,7 @@ class SerializedItem extends FieldItemBase {
   }
 
   /**
-   * Implements \Drupal\Core\Entity\Field\FieldItemInterface::__get().
+   * {@inheritdoc}
    */
   public function __get($name) {
     // There is either a property object or a plain value - possibly for a
@@ -81,4 +78,3 @@ class SerializedItem extends FieldItemBase {
   }
 
 }
-

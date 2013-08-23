@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\feeds\Exception\AccessException;
+use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 
@@ -96,7 +96,9 @@ class NodeHandler extends PluginBase {
       '#description' => t('Check that the author has permission to create the node.'),
       '#default_value' => $this->configuration['authorize'],
     );
-    $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this, 'formatExpire'));
+
+    $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this->importer->getProcessor(), 'formatExpire'));
+
     $form['expire'] = array(
       '#type' => 'select',
       '#title' => t('Expire nodes'),
@@ -170,7 +172,7 @@ class NodeHandler extends PluginBase {
       // could be invalid.
       if (!$author) {
         $message = 'User %uid is not a valid user.';
-        throw new AccessException(t($message, array('%uid' => $entity->uid)));
+        throw new EntityAccessException(t($message, array('%uid' => $entity->uid)));
       }
 
       if ($entity->isNew()) {
@@ -184,7 +186,7 @@ class NodeHandler extends PluginBase {
 
       if (!$access) {
         $message = 'User %name is not authorized to %op content type %content_type.';
-        throw new AccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->bundle())));
+        throw new EntityAccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->bundle())));
       }
     }
   }

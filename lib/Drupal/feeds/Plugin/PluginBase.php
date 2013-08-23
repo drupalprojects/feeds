@@ -11,11 +11,11 @@ use Drupal\feeds\FeedInterface;
 use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;
 
 /**
- * Implement source interface for all plugins.
+ * The base class for the fetcher, parser, and processor plugins.
  *
- * Note how this class does not attempt to store source information locally.
- * Doing this would break the model where source information is represented by
- * an object that is being passed into a FeedInterface object and its plugins.
+ * @todo Move source* methods to another interface.
+ * @todo This class is currently a dumping ground for methods that should be
+ *   implemented by other interfaces. We're working on it.
  */
 abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterface {
 
@@ -59,7 +59,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   }
 
   /**
-   * Implements FeedInterface::sourceDefaults().
+   * {@inheritodc}
    */
   public function sourceDefaults() {
     return array();
@@ -74,6 +74,8 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
 
   /**
    * Stub for plugins implementing FeedPluginFormInterface.
+   *
+   * Most all plugins should get automatic submit handlers from this.
    *
    * @see \Drupal\feeds\FeedPluginFormInterface
    */
@@ -92,18 +94,5 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    * A feed is being deleted.
    */
   public function sourceDelete(FeedInterface $feed) {}
-
-  /**
-   * Returns a unique string identifying the form.
-   *
-   * Plugins that want to provide configuration forms should impement
-   * FormInterface themselves.
-   *
-   * @return string
-   *   The unique string identifying the form.
-   */
-  public function getFormID() {
-    return 'feeds_plugin_' . $this->getPluginId() . '_form';
-  }
 
 }

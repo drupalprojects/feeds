@@ -10,12 +10,12 @@ namespace Drupal\feeds\Plugin;
 use Drupal\feeds\FeedInterface;
 
 /**
- * Interface for feeds fetchers.
+ * Interface for Feeds fetchers.
  */
 interface FetcherInterface extends FeedsPluginInterface {
 
   /**
-   * Fetch content from a source and return it.
+   * Fetch content from a feed and return it.
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to fetch results for.

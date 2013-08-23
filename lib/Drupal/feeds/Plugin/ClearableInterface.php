@@ -21,8 +21,8 @@ interface ClearableInterface {
    * when a feed is being cleared (having its items deleted.) This is useful
    * if the plugin caches or stores information related to a feed.
    *
-   * This operation supports batching in the same way that fetch, parse and
-   * process operations do. You can get the state object from the feed.
+   * This operation supports batching in the same way that importing does. You
+   * can get the state object from the feed.
    * @code
    * $state = $feed->state(FEEDS_CLEAR);
    *

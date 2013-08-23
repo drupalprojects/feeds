@@ -596,8 +596,8 @@ class Feed extends EntityNG implements FeedInterface {
    * @return int
    *   The number of items imported by this Feed.
    */
-  public function itemCount() {
-    return $this->getImporter()->getProcessor()->itemCount($this);
+  public function getItemCount() {
+    return $this->getImporter()->getProcessor()->getItemCount($this);
   }
 
   /**

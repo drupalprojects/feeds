@@ -449,7 +449,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       '#default_value' => $this->configuration['update_existing'],
     );
 
-    $form = parent::buildForm($form, $form_state);
+    $form = parent::buildConfigurationForm($form, $form_state);
 
     $this->apply(__FUNCTION__, $form, $form_state);
 

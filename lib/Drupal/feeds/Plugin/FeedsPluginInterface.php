@@ -19,6 +19,8 @@ interface FeedsPluginInterface extends PluginInspectionInterface {
    *
    * @return string
    *   The type of plugin. Usually, one of 'fetcher', 'parser', or 'processor'.
+   *
+   * @see \Drupal\feeds\Plugin\FeedsPluginManager::processDefinition()
    */
   public function pluginType();
 

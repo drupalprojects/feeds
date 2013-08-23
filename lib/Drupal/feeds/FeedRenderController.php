@@ -49,7 +49,7 @@ class FeedRenderController extends EntityRenderController {
       $v['#progress_clearing'] = $progress_clearing;
     }
     $v['#imported'] = $feed->imported->value;
-    $v['#count'] = $feed->itemCount();
+    $v['#count'] = $feed->getItemCount();
     $v['#theme'] = 'feeds_feed_status';
     if (!empty($v)) {
       return $v;

@@ -85,7 +85,7 @@ interface ImporterInterface extends ConfigEntityInterface {
    * @param string $plugin_type
    *   The plugin type to return.
    *
-   * @return \Drupal\feeds\Plugin\PluginBase
+   * @return \Drupal\feeds\Plugin\PluginInterface
    *   The plugin specified.
    */
   public function getPlugin($plugin_type);

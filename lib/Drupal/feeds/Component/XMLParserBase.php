@@ -76,7 +76,7 @@ abstract class XMLParserBase {
   /**
    * Performs the actualy parsing.
    *
-   * @return mized
+   * @return mixed
    *   The result of parsing.
    */
   abstract protected function doParse();

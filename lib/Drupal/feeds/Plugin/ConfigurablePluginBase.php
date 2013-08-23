@@ -22,7 +22,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin id for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
    */
@@ -32,7 +32,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
     $this->pluginId = $plugin_id;
     $this->pluginDefinition = $plugin_definition;
 
-    // Calling setConfiguration() ensures the configuration id clean and
+    // Calling setConfiguration() ensures the configuration is clean and
     // defaults are set.
     $this->setConfiguration($configuration);
   }
@@ -46,7 +46,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
         return $this->configuration[$key];
       }
 
-      return NULL;
+      return;
     }
 
     return $this->configuration;
@@ -61,11 +61,14 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
   }
 
   /**
-   * Returns default configuration.
+   * Returns the default configuration for a plugin.
    *
    * @return array
    *   Array where keys are the variable names of the configuration elements and
-   *   values are their default values.
+   *   values are their default values. Any configuration that needs to be saved
+   *   must have its keys declared here.
+   *
+   * @see \Drupal\feeds\Plugin\ConfigurablePluginBase::setConfiguration()
    */
   abstract protected function getDefaultConfiguration();
 
@@ -79,7 +82,8 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, array &$form_state) {
-    $this->setConfiguration($form_state['values'][$this->pluginType()]['configuration']);
+    $configuration = $form_state['values'][$this->pluginType()]['configuration'];
+    $this->setConfiguration($configuration);
   }
 
 }

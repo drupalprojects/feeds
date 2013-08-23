@@ -11,10 +11,7 @@ use Drupal\Core\Entity\DatabaseStorageControllerNG;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Controller class for feeds.
- *
- * This extends the Drupal\Core\Entity\DatabaseStorageController class, adding
- * required special handling for feed entities.
+ * Controller class for Feed entities.
  */
 class FeedStorageController extends DatabaseStorageControllerNG {
 

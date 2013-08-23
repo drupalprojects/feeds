@@ -11,17 +11,22 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 
 /**
- * Abstract class, defines interface for parsers.
+ * The interface Feeds parser must implement.
  */
 interface ParserInterface extends FeedsPluginInterface {
 
   /**
-   * Parse content returned by fetcher.
+   * Parses content returned by fetcher.
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed we are parsing for.
    * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
-   *   Result returned by fetcher.
+   *   The result returned by the fetcher.
+   *
+   * @return \Drupal\feeds\Result\ParserResultInterface
+   *   The parser result object.
+   *
+   * @todo This needs more documentation.
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result);
 
@@ -29,18 +34,13 @@ interface ParserInterface extends FeedsPluginInterface {
    * Declare the possible mapping sources that this parser produces.
    *
    * @return array|false
-   *   An array of mapping sources, or FALSE if the sources can be defined by
+   *   An array of mapping sources, or false if the sources can be defined by
    *   typing a value in a text field.
    *
-   *   Example:
-   *   @code
-   *   array(
-   *     'title' => t('Title'),
-   *     'created' => t('Published date'),
-   *     'url' => t('FeedInterface item URL'),
-   *     'guid' => t('FeedInterface item GUID'),
-   *   )
-   *   @endcode
+   * @todo Get rid of the false return here and create a configurable source
+   *   solution for parsers.
+   * @todo Add type data here for automatic mappings.
+   * @todo Provide code example.
    */
   public function getMappingSources();
 
@@ -62,6 +62,8 @@ interface ParserInterface extends FeedsPluginInterface {
    *
    * @return mixed
    *   The source element from $item identified by $element_key.
+   *
+   * @todo $item should be generic, possible define an interface.
    */
   public function getSourceElement(FeedInterface $feed, array $item, $element_key);
 

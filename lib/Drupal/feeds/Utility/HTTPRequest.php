@@ -2,12 +2,12 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\HTTPRequest.
+ * Contains \Drupal\feeds\Utility\HTTPRequest.
  *
  * @todo Remove this.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Utility;
 
 use Zend\Feed\Reader\FeedSet;
 use Zend\Feed\Reader\Reader;
