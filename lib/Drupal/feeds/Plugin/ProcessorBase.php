@@ -200,9 +200,9 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * are mapped onto $target_item following the processor's mapping
    * configuration.
    *
-   * For each mapping ParserBase::getSourceElement() is executed to retrieve
-   * the source element, then ProcessorBase::setTargetElement() is invoked
-   * to populate the target item properly. Alternatively a
+   * For each mapping ParserInterface::getSourceElement() is executed to
+   * retrieve the source element, then ProcessorBase::setTargetElement() is
+   * invoked to populate the target item properly. Alternatively a
    * hook_x_targets_alter() may have specified a callback for a mapping target
    * in which case the callback is asked to populate the target item instead of
    * ProcessorBase::setTargetElement().

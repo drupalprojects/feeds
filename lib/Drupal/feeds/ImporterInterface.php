@@ -56,24 +56,24 @@ interface ImporterInterface extends ConfigEntityInterface {
   /**
    * Returns the configured fetcher for this importer.
    *
-   * @return \Drupal\feeds\Plugin\FetcherBase
-   *   The fetcher.
+   * @return \Drupal\feeds\Plugin\FetcherInterface
+   *   The fetcher associated with this Importer.
    */
   public function getFetcher();
 
   /**
    * Returns the configured parser for this importer.
    *
-   * @return \Drupal\feeds\Plugin\ParserBase
-   *   The parser.
+   * @return \Drupal\feeds\Plugin\ParserInterface
+   *   The parser associated with this Importer.
    */
   public function getParser();
 
   /**
    * Returns the configured processor for this importer.
    *
-   * @return \Drupal\feeds\Plugin\ProcessorBase
-   *   The processor.
+   * @return \Drupal\feeds\Plugin\ProcessorInterface
+   *   The processor associated with this Importer.
    */
   public function getProcessor();
 
