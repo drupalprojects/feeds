@@ -84,28 +84,34 @@ class FeedController implements ControllerInterface {
 
     // Show add form if there is only one importer.
     $importers = $this->importerStorage->loadEnabled();
+    // There is an access checker on this route that determines if the user can
+    // create at least one importer. If there is only one enabled importer, this
+    // must be it.
     if ($importers && count($importers) == 1) {
       $importer = reset($importers);
       return $this->addForm($importer, $request);
     }
 
-    $rows = array();
+    // @todo Don't show link for non-admins.
+    $empty = t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => url('admin/structure/feeds')));
+
+    $build = array(
+      '#theme' => 'table',
+      '#header' => array(t('Import'), t('Description')),
+      '#rows' => array(),
+      '#empty' => $empty,
+    );
+
     foreach ($importers as $importer) {
       if (!($importer->access('create', $account))) {
         continue;
       }
       $link = 'feed/add/' . $importer->id();
       $title = $importer->label();
-      $rows[] = array(l($title, $link), check_plain($importer->description));
+      $build['#rows'][] = array(l($title, $link), check_plain($importer->description));
     }
-    if (!$rows) {
-      drupal_set_message(t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => url('admin/structure/feeds'))));
-    }
-    $header = array(
-      t('Import'),
-      t('Description'),
-    );
-    return theme('table', array('header' => $header, 'rows' => $rows));
+
+    return $build;
   }
 
   /**
