@@ -12,8 +12,8 @@ services:
     class: Drupal\feeds\Plugin\FeedsPluginManager
     arguments: ['target', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.handler:
-    class: Drupal\feeds\Plugin\FeedsHandlerManager
-    arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+    class: Drupal\feeds\Plugin\FeedsPluginManager
+    arguments: ['handler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   access_check.feeds_feed.add_list:
     class: Drupal\feeds\Access\FeedCreateListAccessCheck
     arguments: ['@plugin.manager.entity']
