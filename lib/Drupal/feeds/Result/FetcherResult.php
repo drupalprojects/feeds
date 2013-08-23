@@ -2,10 +2,12 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\FetcherResult.
+ * Contains \Drupal\feeds\Result\FetcherResult.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Result;
+
+use Drupal\Component\Utility\String;
 
 /**
  * The default fetcher result object.
@@ -41,7 +43,7 @@ class FetcherResult implements FetcherResultInterface {
    */
   public function getFilePath() {
     if (!file_exists($this->filePath)) {
-      throw new \Exception(t('File @filepath is not accessible.', array('@filepath' => $this->filePath)));
+      throw new \RuntimeException(String::format('File @filepath is not accessible.', array('@filepath' => $this->filePath)));
     }
     return $this->sanitizeFile($this->filePath);
   }
@@ -78,7 +80,7 @@ class FetcherResult implements FetcherResultInterface {
    * @return string
    *   The file path of the sanitized file.
    *
-   * @throws \Exception
+   * @throws \RuntimeException
    *   Thrown if the file is not writeable.
    */
   protected function sanitizeFile($filepath) {
@@ -93,7 +95,7 @@ class FetcherResult implements FetcherResultInterface {
       $contents = substr($contents, 3);
       $status = file_put_contents($filepath, $contents);
       if ($status === FALSE) {
-        throw new \Exception(t('File @filepath is not writeable.', array('@filepath' => $filepath)));
+        throw new \RuntimeException(String::format('File @filepath is not writeable.', array('@filepath' => $filepath)));
       }
     }
 

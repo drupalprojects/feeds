@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ParserResultInterface.
+ * Contains \Drupal\feeds\Result\ParserResultInterface.
  */
 
 namespace Drupal\feeds;

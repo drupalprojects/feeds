@@ -8,7 +8,9 @@
 namespace Drupal\feeds;
 
 /**
- * The default fetcher result object.
+ * A fetcher result object that accepts a raw string.
+ *
+ * This will write the string to a file on-demand if the parser requests it.
  */
 class RawFetcherResult extends FetcherResult {
 
@@ -20,7 +22,7 @@ class RawFetcherResult extends FetcherResult {
   protected $raw;
 
   /**
-   * Constructs a new RawFetcherResult object.
+   * Constructs a RawFetcherResult object.
    *
    * @param string $raw
    *   The raw result string.

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\FetcherResultInterface.
+ * Contains \Drupal\feeds\Result\FetcherResultInterface.
  */
 
 namespace Drupal\feeds;
