@@ -13,8 +13,8 @@ use Drupal\feeds\Component\ParserCSV;
 use Drupal\feeds\Component\ParserCSVIterator;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\ParserResult;
-use Drupal\feeds\FetcherResultInterface;
+use Drupal\feeds\Result\ParserResult;
+use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ParserInterface;
 

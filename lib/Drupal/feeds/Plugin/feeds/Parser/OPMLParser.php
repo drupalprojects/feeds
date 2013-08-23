@@ -14,8 +14,8 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Component\GenericOPMLParser;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FetcherResultInterface;
-use Drupal\feeds\ParserResult;
+use Drupal\feeds\Result\FetcherResultInterface;
+use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Plugin\ParserInterface;
 use Drupal\feeds\Plugin\PluginBase;
 

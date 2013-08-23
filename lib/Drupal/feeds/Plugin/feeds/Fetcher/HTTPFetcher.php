@@ -12,11 +12,12 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FetcherResult;
+use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\HTTPRequest;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ClearableInterface;
 use Drupal\feeds\Plugin\FetcherInterface;
+use Drupal\feeds\PuSH\PuSHFetcherInterface;
 use Drupal\feeds\RawFetcherResult;
 
 /**
@@ -30,18 +31,12 @@ use Drupal\feeds\RawFetcherResult;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface {
+class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface, PuSHFetcherInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function fetch(FeedInterface $feed, $raw = NULL) {
-
-    // Handle pubsubhubbub.
-    if ($this->configuration['use_pubsubhubbub'] && $raw !== NULL) {
-      return new RawFetcherResult($raw);
-    }
-
+  public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
     $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->configuration['request_timeout']));
@@ -58,6 +53,16 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
       throw new NotModifiedException();
     }
     return new FetcherResult($result->file);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function push(FeedInterface $feed, $raw) {
+    // Handle pubsubhubbub.
+    if ($this->configuration['use_pubsubhubbub']) {
+      return new RawFetcherResult($raw);
+    }
   }
 
   /**

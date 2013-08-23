@@ -11,10 +11,10 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ParserResultInterface;
+use Drupal\feeds\Result\ParserResultInterface;
 
 /**
- * Abstract class, defines interface for processors.
+ * Abstract class, defines helpers for processors.
  */
 abstract class ProcessorBase extends ConfigurablePluginBase implements ClearableInterface {
 
@@ -404,7 +404,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The source information about this import.
-   * @param \Drupal\feeds\ParserResultInterface $result
+   * @param \Drupal\feeds\Result\ParserResultInterface $result
    *   A parser result object.
    *
    * @return int
@@ -444,7 +444,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The source information about this import.
-   * @param \Drupal\feeds\ParserResultInterface $result
+   * @param \Drupal\feeds\Result\ParserResultInterface $result
    *   A parser result object.
    *
    * @return array

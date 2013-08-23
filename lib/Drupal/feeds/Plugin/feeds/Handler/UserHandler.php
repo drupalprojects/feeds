@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ParserResultInterface;
+use Drupal\feeds\Result\ParserResultInterface;
 
 /**
  * Handles special user entity operations.

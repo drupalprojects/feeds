@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ParserResultInterface;
+use Drupal\feeds\Result\ParserResultInterface;
 
 /**
  * Interface for Feeds processor plugins.
@@ -21,7 +21,7 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being imported.
-   * @param Drupal\feeds\ParserResultInterface $parser_result
+   * @param Drupal\feeds\Result\ParserResultInterface $parser_result
    *   The result from the parser.
    */
   public function process(FeedInterface $feed, ParserResultInterface $parser_result);

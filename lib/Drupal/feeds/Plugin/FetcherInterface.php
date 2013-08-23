@@ -20,7 +20,7 @@ interface FetcherInterface extends FeedsPluginInterface {
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to fetch results for.
    *
-   * @return \Drupal\feeds\FetcherResultInterface
+   * @return \Drupal\feeds\Result\FetcherResultInterface
    *   A fetcher result object.
    */
   public function fetch(FeedInterface $feed);

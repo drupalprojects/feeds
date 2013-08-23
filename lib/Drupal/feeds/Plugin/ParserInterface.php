@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FetcherResultInterface;
+use Drupal\feeds\Result\FetcherResultInterface;
 
 /**
  * Abstract class, defines interface for parsers.
@@ -20,7 +20,7 @@ interface ParserInterface extends FeedsPluginInterface {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed we are parsing for.
-   * @param \Drupal\feeds\FetcherResultInterface $fetcher_result
+   * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
    *   Result returned by fetcher.
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result);

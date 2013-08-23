@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\AccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ParserResultInterface;
+use Drupal\feeds\Result\ParserResultInterface;
 
 /**
  * Handles special node entity operations.

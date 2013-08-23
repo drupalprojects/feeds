@@ -12,7 +12,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ParserResultInterface;
+use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Plugin\ProcessorBase;
 
 /**

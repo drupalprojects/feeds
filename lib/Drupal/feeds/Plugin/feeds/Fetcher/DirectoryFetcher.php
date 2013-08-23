@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
-use Drupal\feeds\FetcherResult;
+use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\FetcherInterface;
 
