@@ -41,7 +41,7 @@ const FEEDS_START = 'start_time';
 const FEEDS_FETCH = 'fetch';
 const FEEDS_PARSE = 'parse';
 const FEEDS_PROCESS = 'process';
-const FEEDS_PROCESS_CLEAR = 'process_clear';
+const FEEDS_CLEAR = 'process_clear';
 const FEEDS_PROCESS_EXPIRE = 'process_expire';
 
 // Update mode for existing items.

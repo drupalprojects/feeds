@@ -30,7 +30,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *   the processing stage.
    */
   public function clear(FeedInterface $feed) {
-    $state = $feed->state(FEEDS_PROCESS_CLEAR);
+    $state = $feed->state(FEEDS_CLEAR);
 
     // Build base select statement.
     $info = $this->entityInfo();

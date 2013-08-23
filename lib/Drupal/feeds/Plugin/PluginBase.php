@@ -79,7 +79,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    */
   public function feedFormSubmit(array $form, array &$form_state, FeedInterface $feed) {
     if (isset($form_state['values'][$this->pluginType()])) {
-      $feed->setConfigFor($this, $form_state['values'][$this->pluginType()]);
+      $feed->setConfigurationFor($this, $form_state['values'][$this->pluginType()]);
     }
   }
 

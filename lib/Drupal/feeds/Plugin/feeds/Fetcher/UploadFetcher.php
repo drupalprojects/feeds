@@ -174,7 +174,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
 
       $feed_config['fid'] = $file->id();
       unset($feed_config['file']);
-      $feed->setConfigFor($this, $feed_config);
+      $feed->setConfigurationFor($this, $feed_config);
       $file->save();
     }
   }

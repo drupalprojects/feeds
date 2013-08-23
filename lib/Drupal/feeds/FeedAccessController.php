@@ -23,11 +23,14 @@ class FeedAccessController extends EntityAccessController {
    */
   protected function checkAccess(EntityInterface $feed, $operation, $langcode, AccountInterface $account) {
     if (!in_array($operation, array('view', 'create', 'update','delete', 'import', 'clear', 'unlock'))) {
-      // If $operation is not one of the supported actions, we return access denied.
+      // If $operation is not one of the supported actions, we return access
+      // denied.
       return FALSE;
     }
 
     if ($operation === 'unlock') {
+      // If there is no need to unlock the feed, then the user does not have
+      // access.
       if ($feed->progressImporting() == FEEDS_BATCH_COMPLETE && $feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
         return FALSE;
       }

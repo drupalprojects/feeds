@@ -1,61 +1,90 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\FeedsState.
+ */
+
 namespace Drupal\feeds;
 
 /**
- * Status of an import or clearing operation on a source.
+ * Status of the import or clearing operation of a Feed.
  */
 class FeedsState {
+
   /**
-   * Floating point number denoting the progress made. 0.0 meaning no progress
-   * 1.0 = FEEDS_BATCH_COMPLETE meaning finished.
+   * Denotes the progress made.
+   *
+   * 0.0 meaning no progress. 1.0 = FEEDS_BATCH_COMPLETE meaning finished.
+   *
+   * @var float
    */
-  public $progress;
+  public $progress FEEDS_BATCH_COMPLETE;
 
   /**
    * Used as a pointer to store where left off. Must be serializable.
+   *
+   * @var scalar
    */
   public $pointer;
 
   /**
-   * Natural numbers denoting more details about the progress being made.
+   * The total number of items being processed.
+   *
+   * @var int
    */
-  public $total;
-  public $created;
-  public $updated;
-  public $deleted;
-  public $skipped;
-  public $failed;
+  public $total = 0;
 
   /**
-   * Constructor, initialize variables.
+   * The number of Feed items created.
+   *
+   * @var int
    */
-  public function __construct() {
-    $this->progress = FEEDS_BATCH_COMPLETE;
-    $this->total =
-    $this->created =
-    $this->updated =
-    $this->deleted =
-    $this->skipped =
-    $this->failed = 0;
-  }
+  public $created = 0;
 
   /**
-   * Safely report progress.
+   * The number of Feed items updated.
+   *
+   * @var int
+   */
+  public $updated = 0;
+
+  /**
+   * The number of Feed items deleted.
+   *
+   * @var int
+   */
+  public $deleted = 0;
+
+  /**
+   * The number of Feed items skipped.
+   *
+   * @var int
+   */
+  public $skipped = 0;
+
+  /**
+   * The number of failed Feed items.
+   *
+   * @var int
+   */
+  public $failed = 0;
+
+  /**
+   * Reports the progress of a batch.
    *
    * When $total == $progress, the state of the task tracked by this state is
    * regarded to be complete.
    *
    * Handles the following cases gracefully:
+   * - $total is 0.
+   * - $progress is larger than $total.
+   * - $progress approximates $total so that $finished rounds to 1.0.
    *
-   * - $total is 0
-   * - $progress is larger than $total
-   * - $progress approximates $total so that $finished rounds to 1.0
-   *
-   * @param $total
-   *   A natural number that is the total to be worked off.
-   * @param $progress
-   *   A natural number that is the progress made on $total.
+   * @param int $total
+   *   A number that is the total to be worked off.
+   * @param int $progress
+   *   A number that is the progress made on $total.
    */
   public function progress($total, $progress) {
     if ($progress > $total) {
@@ -71,4 +100,5 @@ class FeedsState {
       $this->progress = FEEDS_BATCH_COMPLETE;
     }
   }
+
 }

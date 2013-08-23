@@ -15,7 +15,7 @@ use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsState;
-use Drupal\feeds\Plugin\PluginBase;
+use Drupal\feeds\Plugin\FeedsPluginInterface;
 use Drupal\feeds\Plugin\ClearableInterface;
 use Drupal\feeds\PuSH\PuSHFetcherInterface;
 use Drupal\job_scheduler\JobScheduler;
@@ -74,7 +74,7 @@ class Feed extends EntityNG implements FeedInterface {
   public $fid;
 
   /**
-   * The node UUID.
+   * The feed UUID.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
@@ -90,7 +90,7 @@ class Feed extends EntityNG implements FeedInterface {
   public $config = array();
 
   /**
-   * The node title.
+   * The feed title.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
@@ -104,16 +104,16 @@ class Feed extends EntityNG implements FeedInterface {
   public $source;
 
   /**
-   * The node owner's user ID.
+   * The feed owner's user ID.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
   public $uid;
 
   /**
-   * The node published status indicator.
+   * The feed published status indicator.
    *
-   * Unpublished nodes are only visible to their authors and to administrators.
+   * Unpublished feeds are only visible to their authors and to administrators.
    * The value is either NODE_PUBLISHED or NODE_NOT_PUBLISHED.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
@@ -121,21 +121,21 @@ class Feed extends EntityNG implements FeedInterface {
   public $status;
 
   /**
-   * The node creation timestamp.
+   * The feed creation timestamp.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
   public $created;
 
   /**
-   * The node modification timestamp.
+   * The feed modification timestamp.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
   public $changed;
 
   /**
-   * The node modification timestamp.
+   * The feed modification timestamp.
    *
    * @var \Drupal\Core\Entity\Field\FieldInterface
    */
@@ -151,17 +151,17 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * The cached result from getImporter() since that gets called many times.
    */
-  protected $_importer;
+  protected $cachedImporter;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values, $entity_type, $bundle = FALSE) {
     parent::__construct($values, $entity_type, $bundle);
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\EntityNG::init().
+   * {@inheritdoc}
    */
   protected function init() {
     parent::init();
@@ -182,14 +182,14 @@ class Feed extends EntityNG implements FeedInterface {
   }
 
   /**
-   * Implements Drupal\Core\Entity\EntityInterface::id().
+   * {@inheritdoc}
    */
   public function id() {
     return $this->get('fid')->value;
   }
 
   /**
-   * Implements Drupal\Core\Entity\EntityInterface::id().
+   * {@inheritdoc}
    */
   public function label($langcode = NULL) {
     return $this->get('title')->value;
@@ -200,12 +200,12 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function getImporter() {
 
-    if ($this->_importer) {
-      return $this->_importer;
+    if ($this->cachedImporter) {
+      return $this->cachedImporter;
     }
 
     if ($importer = entity_load('feeds_importer', $this->bundle())) {
-      $this->_importer = $importer;
+      $this->cachedImporter = $importer;
       return $importer;
     }
 
@@ -353,11 +353,11 @@ class Feed extends EntityNG implements FeedInterface {
    * This method only executes the current batch chunk, then returns. If you are
    * looking to import an entire source, use Feed::startImport() instead.
    *
-   * @return
+   * @return float
    *   FEEDS_BATCH_COMPLETE if the import process finished. A decimal between
    *   0.0 and 0.9 periodic if import is still in progress.
    *
-   * @throws
+   * @throws \Exception
    *   Throws Exception if an error occurs when importing.
    */
   public function import() {
@@ -418,12 +418,18 @@ class Feed extends EntityNG implements FeedInterface {
    * @param string $raw
    *   (optional) A raw string to import. Defaults to null.
    *
-   * @throws
-   *   Throws Exception if an error occurs when importing.
+   * @throws \Drupal\feeds\Exception\InterfaceNotImplementedException
+   *   Thrown if the fetcher does not support real-time updates.
+   *
+   * @throws \Exception
+   *   Re-throws any exception that bubbles up.
+   *
+   * @todo We should document all possible exceptions, or at least the ones that
+   *   can bubble up.
    *
    * @todo We need to create a job for this that will run immediately so that
-   * services don't have to wait for us to process. Can we spawn a background
-   * process?
+   *   services don't have to wait for us to process. Can we spawn a background
+   *   process?
    */
   public function importRaw($raw) {
     // Fetch.
@@ -451,11 +457,11 @@ class Feed extends EntityNG implements FeedInterface {
    * looking to delete all items of a source, use Feed::startClear()
    * instead.
    *
-   * @return
+   * @return float
    *   FEEDS_BATCH_COMPLETE if the clearing process finished. A decimal between
    *   0.0 and 0.9 periodic if clearing is still in progress.
    *
-   * @throws
+   * @throws \Exception
    *   Throws Exception if an error occurs when clearing.
    */
   public function clear() {
@@ -491,6 +497,13 @@ class Feed extends EntityNG implements FeedInterface {
 
   /**
    * Removes all expired items from a feed.
+   *
+   * @return float
+   *   FEEDS_BATCH_COMPLETE if the expiring process finished. A decimal between
+   *   0.0 and 0.9 periodic if it is still in progress.
+   *
+   * @throws \Exception
+   *   Re-throws any exception that bubbles up.
    */
   public function expire() {
     $this->acquireLock();
@@ -510,14 +523,20 @@ class Feed extends EntityNG implements FeedInterface {
   }
 
   /**
-   * Report progress as float between 0 and 1. 1 = FEEDS_BATCH_COMPLETE.
+   * Reports the progress of the parsing stage.
+   *
+   * @return float
+   *   A float between 0 and 1. 1 = FEEDS_BATCH_COMPLETE.
    */
   public function progressParsing() {
     return $this->state(FEEDS_PARSE)->progress;
   }
 
   /**
-   * Report progress as float between 0 and 1. 1 = FEEDS_BATCH_COMPLETE.
+   * Reports the progress of the import process.
+   *
+   * @return float
+   *   A float between 0 and 1. 1 = FEEDS_BATCH_COMPLETE.
    */
   public function progressImporting() {
     $fetcher = $this->state(FEEDS_FETCH);
@@ -537,28 +556,28 @@ class Feed extends EntityNG implements FeedInterface {
   }
 
   /**
-   * Report progress on clearing.
+   * Reports progress on clearing.
    */
   public function progressClearing() {
-    return $this->state(FEEDS_PROCESS_CLEAR)->progress;
+    return $this->state(FEEDS_CLEAR)->progress;
   }
 
   /**
-   * Report progress on expiry.
+   * Reports progress on expiry.
    */
   public function progressExpiring() {
     return $this->state(FEEDS_PROCESS_EXPIRE)->progress;
   }
 
   /**
-   * Return a state object for a given stage. Lazy instantiates new states.
+   * Returns a state object for a given stage.
    *
-   * @todo Rename getConfigurationFor() accordingly to config().
+   * Lazily instantiates new states.
    *
-   * @param $stage
-   *   One of FEEDS_FETCH, FEEDS_PARSE, FEEDS_PROCESS or FEEDS_PROCESS_CLEAR.
+   * @param string $stage
+   *   One of FEEDS_FETCH, FEEDS_PARSE, FEEDS_PROCESS or FEEDS_CLEAR.
    *
-   * @return
+   * @return \Drupal\feeds\FeedsState
    *   The FeedsState object for the given stage.
    */
   public function state($stage) {
@@ -572,6 +591,9 @@ class Feed extends EntityNG implements FeedInterface {
 
   /**
    * Count items imported by this source.
+   *
+   * @return int
+   *   The number of items imported by this Feed.
    */
   public function itemCount() {
     return $this->getImporter()->getProcessor()->itemCount($this);
@@ -579,26 +601,26 @@ class Feed extends EntityNG implements FeedInterface {
 
   /**
    * Only return source if configuration is persistent and valid.
+   *
+   * @return \Drupal\feeds\Entity\Feed
+   *   The Feed object.
+   *
+   * @todo Figure out how to handle this.
    */
   public function existing() {
-    // If there is no feed nid given, there must be no content type specified.
-    // If there is a feed nid given, there must be a content type specified.
-    // Ensure that importer is persistent (= defined in code or DB).
-    // Ensure that source is persistent (= defined in DB).
-
     return $this;
   }
 
   /**
-   * Returns the configuration for a specific client class.
+   * Returns the configuration for a specific client plugin.
    *
-   * @param PluginBase $client
-   *   An object that is an implementer of PluginBase.
+   * @param \Drupal\feeds\Plugin\FeedsPluginInterface $client
+   *   A Feeds plugin.
    *
-   * @return array`
-   *   An array stored for $client.
+   * @return array
+   *   The plugin configuration being managed by this Feed.
    */
-  public function getConfigurationFor(PluginBase $client) {
+  public function getConfigurationFor(FeedsPluginInterface $client) {
     $id = $client->getPluginId();
 
     if (isset($this->config->value[$id])) {
@@ -609,38 +631,70 @@ class Feed extends EntityNG implements FeedInterface {
   }
 
   /**
-   * Sets the configuration for a specific client class.
+   * Sets the configuration for a specific client plugin.
    *
-   * @param FeedInterface $client
-   *   An object that is an implementer of FeedInterface.
-   * @param $config
-   *   The configuration for $client.
+   * @param \Drupal\feeds\Plugin\FeedsPluginInterface $client
+   *   A Feeds plugin.
+   * @param array $config
+   *   The configuration for the plugin.
    *
-   * @return
-   *   An array stored for $client.
+   * @return self
+   *   Returns the Feed for method chaining.
+   *
+   * @todo Refactor this. This can cause conflicts if different plugin types
+   *   use the same id.
    */
-  public function setConfigFor(PluginBase $client, array $config) {
+  public function setConfigurationFor(FeedsPluginInterface $client, array $config) {
     $this_config = $this->config->value;
     $this_config[$client->getPluginId()] = $config;
     $this->config = $this_config;
+
+    return $this;
   }
 
   /**
-   * Return defaults for feed configuration.
+   * Returns the default for a Feed.
+   *
+   * @return array
+   *   The default configuration.
    */
   protected function getDefaultConfiguration() {
     // Collect information from plugins.
-    $importer = $this->getImporter();
     $defaults = array();
-    foreach ($importer->getPluginTypes() as $type) {
-      $plugin = $importer->getPlugin($type);
+    foreach ($this->getImporter()->getPlugins() as $plugin) {
       $defaults[$plugin->getPluginId()] = $plugin->sourceDefaults();
     }
+
     return $defaults;
   }
 
   /**
-   * Writes to feeds log.
+   * Writes to {feeds_log}.
+   *
+   * @param string $type
+   *   The log type.
+   * @param string $message
+   *   The log message.
+   * @param array $variables
+   *   (optioanl) Variables used when translating the log message. Defaults to
+   *   an empty array.
+   * @param int $severity
+   *   (optional) The severity of the log message. One of:
+   *   - WATCHDOG_EMERGENCY
+   *   - WATCHDOG_ALERT
+   *   - WATCHDOG_CRITICAL
+   *   - WATCHDOG_ERROR
+   *   - WATCHDOG_WARNING
+   *   - WATCHDOG_NOTICE
+   *   - WATCHDOG_INFO
+   *   - WATCHDOG_DEBUG
+   *   Defaults to WATCHDOG_NOTICE.
+   *
+   * @return self
+   *   Returns the Feed for method chaining.
+   *
+   * @todo Redo the static thingy.
+   * @todo Figure out what Drupal 8 does with logging. Maybe we can use it.
    */
   public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
     if ($severity < WATCHDOG_NOTICE) {
@@ -658,25 +712,32 @@ class Feed extends EntityNG implements FeedInterface {
         'severity' => $severity,
       ))
       ->execute();
+
+      return $this;
   }
 
   /**
-   * Background job helper. Starts a background job using Job Scheduler.
+   * Starts a background job using Job Scheduler.
    *
-   * Execute the first batch chunk of a background job on the current page load,
-   * moves the rest of the job processing to a cron powered background job.
+   * Executes the first batch chunk of a background job on the current page
+   * load, moves the rest of the job processing to a cron powered background
+   * job.
    *
    * Executing the first batch chunk is important, otherwise, when a user
    * submits a source for import or clearing, we will leave her without any
    * visual indicators of an ongoing job.
    *
-   * @see Feed::startImport().
-   * @see Feed::startClear().
+   * @see Feed::startImport()
+   * @see Feed::startClear()
    *
-   * @param $method
+   * @param string $method
    *   Method to execute on importer; one of 'import' or 'clear'.
    *
-   * @throws Exception $e
+   * @return self
+   *   Returns the Feed for method chaining.
+   *
+   * @throws \Exception $e
+   *   Thrown when an error occured. Obviously.
    */
   protected function startBackgroundJob($method) {
     if (FEEDS_BATCH_COMPLETE != $this->$method()) {
@@ -688,19 +749,24 @@ class Feed extends EntityNG implements FeedInterface {
       );
       JobScheduler::get("feeds_feed_{$method}")->set($job);
     }
+
+    return $this;
   }
 
   /**
-   * Batch API helper. Starts a Batch API job.
+   * Starts a Batch API job.
    *
    * @see Feed::startImport()
    * @see Feed::startClear()
    * @see feeds_batch()
    *
-   * @param $title
-   *   Title to show to user when executing batch.
-   * @param $method
-   *   Method to execute on importer; one of 'import' or 'clear'.
+   * @param string $title
+   *   The title to show to user when executing batch.
+   * @param string $method
+   *   The method to execute on importer; one of 'import' or 'clear'.
+   *
+   * @return self
+   *   Returns the Feed for method chaining.
    */
   protected function startBatchAPIJob($title, $method) {
     $batch = array(
@@ -710,38 +776,59 @@ class Feed extends EntityNG implements FeedInterface {
       ),
     );
     batch_set($batch);
+
+    return $this;
   }
 
   /**
-   * Acquires a lock for this source.
+   * Acquires a lock for this feed.
    *
    * @throws \Drupal\feeds\Exception\LockException
    *   If a lock for the requested job could not be acquired.
+   *
+   * @return self
+   *   Returns the Feed for method chaining.
    */
   protected function acquireLock() {
-    if (!lock()->acquire("feeds_feed_{$this->id()}", 60.0)) {
-      throw new LockException(t('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
+    if (!\Drupal::lock()->acquire("feeds_feed_{$this->id()}", 60.0)) {
+      throw new LockException(format_string('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
     }
+
+    return $this;
   }
 
   /**
    * Releases a lock for this source.
+   *
+   * @return self
+   *   Returns the Feed for method chaining.
    */
   protected function releaseLock() {
-    lock()->release("feeds_feed_{$this->id()}");
+    \Drupal::lock()->release("feeds_feed_{$this->id()}");
+
+    return $this;
   }
 
   /**
-   * Implements getConfiguration().
+   * Returns the configuration for this Feed.
    *
-   * Return configuration array, ensure that all default values are present.
+   * @return array
+   *   The configuration array.
    */
   public function getConfiguration() {
     return $this->config->value;
   }
 
+  /**
+   * Returns the User who owns the Feed.
+   *
+   * @return Drupal\user\UserInterface
+   *   The user object.
+   */
   public function getUser() {
-    return user_load($this->get('uid')->value);
+    return \Drupal::entityManager()
+      ->getStorageController('user')
+      ->load($this->get('uid')->value);
   }
 
   /**
@@ -759,16 +846,17 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
     // Alert implementers of FeedInterface to the fact that we're saving.
-    foreach ($this->getImporter()->getPluginTypes() as $type) {
-      $this->getImporter()->getPlugin($type)->sourceSave($this);
+    foreach ($this->getImporter()->getPlugins() as $plugin) {
+      $plugin->sourceSave($this);
     }
     $config = $this->getConfiguration();
 
     // Store the source property of the fetcher in a separate column so that we
     // can do fast lookups on it.
     $this->source->value = '';
-    if (isset($config[$this->getImporter()->getFetcher()->getPluginId()]['source'])) {
-      $this->source = $config[$this->getImporter()->getFetcher()->getPluginId()]['source'];
+    $fetcher_id = $this->getImporter()->getFetcher()->getPluginId();
+    if (isset($config[$fetcher_id]['source'])) {
+      $this->source = $config[$fetcher_id]['source'];
     }
 
     // @todo move this to the storage controller.
@@ -788,14 +876,15 @@ class Feed extends EntityNG implements FeedInterface {
     // Delete values from other tables also referencing these feeds.
     $ids = array_keys($feeds);
 
+    // @todo Create a log controller or some sort of log handler that D8 uses.
     db_delete('feeds_log')
-      ->condition('fid', $ids, 'IN')
+      ->condition('fid', $ids)
       ->execute();
 
     // Alert plugins that we are deleting.
     foreach ($feeds as $feed) {
-      foreach ($feed->getImporter()->getPluginTypes() as $type) {
-        $feed->getImporter()->getPlugin($type)->sourceDelete($feed);
+      foreach ($feed->getImporter()->getPlugins() as $plugin) {
+        $plugin->sourceDelete($feed);
       }
 
       // Remove from schedule.

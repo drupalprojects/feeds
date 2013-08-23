@@ -34,9 +34,26 @@ class HTTPRequest {
    */
   protected $url;
 
+  /**
+   * The injected settings.
+   *
+   * @var array
+   */
   protected $settings;
 
-  public function __construct($url, $settings = array()) {
+  /**
+   * Constructs an HTTPRequst object.
+   *
+   * @param string $url
+   *   The URL the is being operated on.
+   * @param array $settings
+   *   (optional) Configuration settings. The accepted keys are:
+   *   - accept_invalid_cert: Used to ignore SSL verification failures.
+   *   - timeout: The timeout when making HTTP requests.
+   *   - username: The username for authentication.
+   *   - password: The password for authentication.
+   */
+  public function __construct($url, array $settings = array()) {
     $this->url = $url;
     $this->settings = $settings += array(
       'accept_invalid_cert' => FALSE,
@@ -49,11 +66,11 @@ class HTTPRequest {
   /**
    * Discovers RSS or atom feeds at the given URL.
    *
-   * If document in given URL is an HTML document, function attempts to discover
-   * RSS or Atom feeds.
+   * If the document at the given URL is an HTML document, this attempts to
+   * discover RSS or Atom feeds referenced from the page.
    *
-   * @return bool|string
-   *   The discovered feed, or FALSE if the URL is not reachable or there was an
+   * @return string|false
+   *   The discovered feed, or false if the URL is not reachable or there was an
    *   error.
    */
   public function getCommonSyndication() {
@@ -88,7 +105,7 @@ class HTTPRequest {
       'webcal://' => 'http://',
     ));
 
-    // Intra-pagedownload cache, avoid to download the same content twice within
+    // Intra-pagedownload cache, avoid downloading the same content twice within
     // one page download (it's possible, compatible and parse calls).
     if (isset(static::$downloadCache[$url])) {
       return static::$downloadCache[$url];
@@ -96,7 +113,8 @@ class HTTPRequest {
 
     $username = $this->settings['username'];
     $password = $this->settings['password'];
-    if (!$username && valid_url($url, TRUE)) {
+
+    if (!$username && feeds_valid_url($url, TRUE)) {
       // Handle password protected feeds.
       $url_parts = parse_url($url);
       if (!empty($url_parts['user']) && !empty($url_parts['pass'])) {
@@ -126,7 +144,7 @@ class HTTPRequest {
 
     // Only download and parse data if really needs refresh.
     // Based on "Last-Modified" and "If-Modified-Since".
-    if ($cache = cache()->get('feeds_http_download_' . md5($url))) {
+    if ($cache = \Drupal::cache()->get('feeds_http_download_' . md5($url))) {
       $last_result = $cache->data;
 
       if (!empty($last_result->headers['etag'])) {
@@ -155,14 +173,16 @@ class HTTPRequest {
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
-      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()), WATCHDOG_WARNING);
-      drupal_set_message(t('The feed %url seems to be broken because of error "%error".', array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase())));
+      $args = array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase());
+      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_WARNING);
+      drupal_set_message(t('The feed %url seems to be broken because of error "%error".', $args, 'warning'));
       fclose($handle);
       return FALSE;
     }
     catch (RequestException $e) {
-      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', array('%url' => $url, '%error' => $e->getMessage()), WATCHDOG_WARNING);
-      drupal_set_message(t('The feed %url seems to be broken because of error "%error".', array('%url' => $url, '%error' => $e->getMessage())));
+      $args = array('%url' => $url, '%error' => $e->getMessage());
+      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_WARNING);
+      drupal_set_message(t('The feed %url seems to be broken because of error "%error".', $args), 'warning');
       fclose($handle);
       return FALSE;
     }
@@ -177,15 +197,15 @@ class HTTPRequest {
         return $last_result;
       }
       else {
-        // It's a tragedy, this file must exist and contain good data.
-        // In this case, clear cache and repeat.
-        cache()->delete('feeds_http_download_' . md5($url));
+        // It's a tragedy, this file must exist and contain good data. In this
+        // case, clear cache and repeat.
+        \Drupal::cache()->delete('feeds_http_download_' . md5($url));
         return $this->get();
       }
     }
 
     $download_dir = 'public://feeds_download_cache';
-    if (config('system.file')->get('path.private')) {
+    if (\Drupal::config('system.file')->get('path.private')) {
       $download_dir = 'private://feeds_download_cache';
     }
 
@@ -195,7 +215,7 @@ class HTTPRequest {
     $result->file = $download_file;
 
     // Set caches.
-    cache()->set('feeds_http_download_' . md5($url), $result);
+    \Drupal::cache()->set('feeds_http_download_' . md5($url), $result);
     static::$downloadCache[$url] = $result;
 
     return $result;
@@ -229,8 +249,8 @@ class HTTPRequest {
    * @param string $html
    *   The html string to search.
    *
-   * @return string|bool
-   *   The url of the first feed link found, or false if unable to find a link.
+   * @return string|false
+   *   The URL of the first feed link found, or false if unable to find a link.
    */
   public function findFeed($html) {
     $use_error = libxml_use_internal_errors(TRUE);

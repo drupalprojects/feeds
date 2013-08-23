@@ -47,7 +47,7 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     // Update source if there was a permanent redirect.
     if ($result->redirect) {
       $feed_config['source'] = $result->redirect;
-      $feed->setConfigFor($this, $feed_config);
+      $feed->setConfigurationFor($this, $feed_config);
     }
     if ($result->code == 304) {
       throw new NotModifiedException();

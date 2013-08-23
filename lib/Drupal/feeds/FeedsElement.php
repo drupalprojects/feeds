@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\FeedsElement.
+ */
+
 namespace Drupal\feeds;
 
 /**
@@ -9,21 +14,30 @@ namespace Drupal\feeds;
  * @see FeedsEnclosure
  */
 class FeedsElement {
-  // The standard value of this element. This value can contain be a simple type,
-  // a FeedsElement or an array of either.
+  /**
+   * The standard value of this element.
+   *
+   * This value can contain be a simple type, a FeedsElement or an array of
+   * either.
+   *
+   * @var mixed
+   */
   protected $value;
 
   /**
-   * Constructor.
+   * Constructs a FeedsElement object.
+   *
+   * @param mixed $value
+   *   The value of this element.
    */
   public function __construct($value) {
     $this->value = $value;
   }
 
   /**
-   * @todo Make value public and deprecate use of getValue().
+   * Returns the value of this element.
    *
-   * @return
+   * @return scalar
    *   Value of this FeedsElement represented as a scalar.
    */
   public function getValue() {
@@ -31,10 +45,9 @@ class FeedsElement {
   }
 
   /**
-   * Magic method __toString() for printing and string conversion of this
-   * object.
+   * Converts this object to a string.
    *
-   * @return
+   * @return string
    *   A string representation of this element.
    */
   public function __toString() {
@@ -46,4 +59,5 @@ class FeedsElement {
     }
     return (string) $this->getValue();
   }
+
 }

@@ -12,6 +12,8 @@ use Drupal\Core\Config\Entity\ConfigEntityListController;
 
 /**
  * Provides a listing of Importers.
+ *
+ * @todo Would making this sortable help in specifying the importance of a feed?
  */
 class ImporterListController extends ConfigEntityListController {
 

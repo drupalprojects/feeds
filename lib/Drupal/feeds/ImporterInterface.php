@@ -11,13 +11,15 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
  * Provides an interface defining a feeds importer entity.
+ *
+ * An importer is a wrapper around a set of configured plugins that are used to
+ * perform an import. The importer manages the configuration on behalf of the
+ * plugins.
  */
 interface ImporterInterface extends ConfigEntityInterface {
 
   /**
    * Reports how many items should be created on one page load by this importer.
-   *
-   * Note:
    *
    * It depends on whether the parser implements batching if this limit is
    * actually respected. If no limit is reported it doesn't mean that the number
@@ -93,7 +95,7 @@ interface ImporterInterface extends ConfigEntityInterface {
    *
    * @param string $plugin_type
    *   The type of plugin being set.
-   * @param $plugin_id
+   * @param string $plugin_id
    *   A id of the plugin being set.
    *
    * @return self
@@ -110,11 +112,8 @@ interface ImporterInterface extends ConfigEntityInterface {
    *   rescheduled.
    *
    * @return bool|array
-   *   Returns true if all importers need rescheduling, false if no
-   *   rescheduling is required, or an array of importers that need
-   *   rescheduling.
-   *
-   * @todo Refactor this.
+   *   Returns true if all importers need rescheduling, false if no rescheduling
+   *   is required, or an array of importers that need rescheduling.
    */
   public static function reschedule($importer_id = NULL);
 

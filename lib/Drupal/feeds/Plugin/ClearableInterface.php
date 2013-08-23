@@ -24,7 +24,7 @@ interface ClearableInterface {
    * This operation supports batching in the same way that fetch, parse and
    * process operations do. You can get the state object from the feed.
    * @code
-   * $state = $feed->state(FEEDS_PROCESS_CLEAR);
+   * $state = $feed->state(FEEDS_CLEAR);
    *
    * $state->total = find_total($feed->id());
    *
