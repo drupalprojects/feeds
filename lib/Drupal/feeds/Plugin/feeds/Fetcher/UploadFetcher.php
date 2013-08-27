@@ -12,11 +12,13 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\FetcherInterace;
+use Drupal\feeds\Plugin\FetcherInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a file upload fetcher.
@@ -27,7 +29,7 @@ use Drupal\feeds\Plugin\FetcherInterace;
  *   description = @Translation("Upload content from a local file.")
  * )
  */
-class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, ContainerFactoryPluginInterface, FetcherInterace {
+class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, ContainerFactoryPluginInterface, FetcherInterface {
 
   /**
    * The current user.
@@ -75,8 +77,15 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
-    $user = $container->get('request')->attributes->get('_account');
-    return new static($configuration, $plugin_id, $plugin_definition, $user, $container->get('file.usage'));
+    $account = $container->get('request')->attributes->get('_account');
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $account,
+      $container->get('file.usage'),
+      $container->get('plugin.manager.entity')->getStorageController('file')
+    );
   }
 
   /**

@@ -17,6 +17,7 @@ use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ParserInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * Defines a CSV feed parser.
@@ -34,7 +35,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $feed_config = $feed->getConfigurationFor($this);
-    $state = $feed->state(FEEDS_PARSE);
+    $state = $feed->state(StateInterface::PARSE);
 
     // Load and configure parser.
     $parser = new ParserCSV();

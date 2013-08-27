@@ -81,40 +81,78 @@ class SyndicationParser extends PluginBase implements ParserInterface {
   public function getMappingSources() {
     return array(
       'title' => array(
-        'name' => t('Title'),
+        'label' => t('Title'),
         'description' => t('Title of the feed item.'),
+        'suggestions' => array(
+          'targets' => array('title'),
+          'types' => array(
+            'field_item:text' => array(),
+          )
+        ),
       ),
       'description' => array(
-        'name' => t('Description'),
+        'label' => t('Description'),
         'description' => t('Description of the feed item.'),
+        'suggested' => array('body'),
+        'suggestions' => array(
+          'targets' => array('body'),
+          'types' => array(
+            'field_item:text_with_summary' => array(),
+          ),
+        ),
       ),
       'author_name' => array(
-        'name' => t('Author name'),
+        'label' => t('Author name'),
         'description' => t('Name of the feed item\'s author.'),
+        'suggestions' => array(
+          'types' => array(
+            'entity_reference_field' => array('target_type' => 'user'),
+          ),
+        ),
       ),
       'timestamp' => array(
-        'name' => t('Published date'),
+        'label' => t('Published date'),
         'description' => t('Published date as UNIX time GMT of the feed item.'),
+        'suggestions' => array(
+          'targets' => array('created'),
+        ),
       ),
       'url' => array(
-        'name' => t('Item URL (link)'),
+        'label' => t('Item URL (link)'),
         'description' => t('URL of the feed item.'),
+        'suggestions' => array(
+          'targets' => array('url'),
+        ),
       ),
       'guid' => array(
-        'name' => t('Item GUID'),
+        'label' => t('Item GUID'),
         'description' => t('Global Unique Identifier of the feed item.'),
+        'suggestions' => array(
+          'targets' => array('guid'),
+        ),
       ),
       'tags' => array(
-        'name' => t('Categories'),
+        'label' => t('Categories'),
         'description' => t('An array of categories that have been assigned to the feed item.'),
+        'suggestions' => array(
+          'targets' => array('field_tags'),
+          'types' => array(
+            'field_item:taxonomy_term_reference' => array(),
+          ),
+        ),
       ),
       'geolocations' => array(
-        'name' => t('Geo Locations'),
+        'label' => t('Geo Locations'),
         'description' => t('An array of geographic locations with a name and a position.'),
       ),
       'enclosures' => array(
-        'name' => t('Enclosures'),
+        'label' => t('Enclosures'),
         'description' => t('A list of enclosures attached to the feed item.'),
+        'suggestions' => array(
+          'types' => array(
+            'field_item:file' => array(),
+          ),
+        ),
       ),
     );
   }

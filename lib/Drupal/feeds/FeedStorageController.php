@@ -9,11 +9,25 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Entity\DatabaseStorageControllerNG;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\FeedInterface;
 
 /**
  * Controller class for Feed entities.
  */
 class FeedStorageController extends DatabaseStorageControllerNG {
+
+  /**
+   * Unlocks a feed.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to unlock.
+   */
+  public function unlock(FeedInterface $feed) {
+    $this->database->update('feeds_feed')
+      ->condition('fid', $feed->id())
+      ->fields(array('state' => FALSE))
+      ->execute();
+  }
 
   /**
    * {@inheritdoc}
@@ -46,7 +60,10 @@ class FeedStorageController extends DatabaseStorageControllerNG {
       'label' => t('User ID'),
       'description' => t('The user ID of the feed author.'),
       'type' => 'entity_reference_field',
-      'settings' => array('target_type' => 'user'),
+      'settings' => array(
+        'target_type' => 'user',
+        'default_value' => 0,
+      ),
     );
     $properties['status'] = array(
       'label' => t('Import status'),

@@ -11,12 +11,12 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 
 /**
- * Interface targets must implement.
+ * Interface for Feed targets.s
  */
 interface TargetInterface {
 
   /**
-   * Returns the targets defined.
+   * Returns the targets defined by this plugin.
    *
    * @return array
    *   An array of targets.
@@ -24,10 +24,5 @@ interface TargetInterface {
    * @todo Finish documenting this.
    */
   public function targets();
-
-  /**
-   * Sets the value on an entity.
-   */
-  public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $value, array $mapping);
 
 }

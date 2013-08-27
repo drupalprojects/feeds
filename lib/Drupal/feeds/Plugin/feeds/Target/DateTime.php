@@ -18,15 +18,11 @@ use Drupal\field\Entity\FieldInstance;
  *
  * @Plugin(
  *   id = "datetime",
- *   title = @Translation("DateTime")
+ *   title = @Translation("DateTime"),
+ *   field_types = {"datetime"}
  * )
  */
 class DateTime extends FieldTargetBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $fieldTypes = array('datetime');
 
   /**
    * {@inheritdoc}
@@ -35,7 +31,6 @@ class DateTime extends FieldTargetBase {
     return array(
       $instance->getFieldName() => array(
         'name' => $instance->label(),
-        'callback' => array($this, 'setTarget'),
         'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $instance->label())),
       ),
     );

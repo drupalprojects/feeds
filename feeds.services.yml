@@ -28,3 +28,14 @@ services:
   feeds.subscription.controller:
     class: Drupal\feeds\Controller\SubscriptionController
     arguments: ['@feeds.subscription.crud']
+  feeds.batch_manager.batch:
+    class: Drupal\feeds\BatchManager
+    arguments: ['@string_translation']
+  feeds.batch_manager.background:
+    class: Drupal\feeds\BackgroundManager
+    arguments: ['@string_translation']
+  feeds.job.controller:
+    class: Drupal\feeds\Controller\JobController
+    arguments: ['@state', '@lock', '@service_container']
+  feeds.test:
+    class: Drupal\feeds\Controller\Test

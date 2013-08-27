@@ -36,15 +36,11 @@ const FEEDS_TAXONOMY_SEARCH_TERM_GUID = 2;
  *
  * @Plugin(
  *   id = "taxonomy",
- *   title = @Translation("Taxonomy")
+ *   title = @Translation("Taxonomy"),
+ *   field_types = {"taxonomy_term_reference"}
  * )
  */
 class Taxonomy extends FieldTargetBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $fieldTypes = array('taxonomy_term_reference');
 
   protected $cache = array();
 

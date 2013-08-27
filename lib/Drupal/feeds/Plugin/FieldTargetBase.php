@@ -19,13 +19,6 @@ use Drupal\field\Field;
  */
 abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
-  /**
-   * The supported field types.
-   *
-   * @var array
-   */
-  protected $fieldTypes = array();
-
   protected $cardinality = -1;
 
   protected $importer;
@@ -68,8 +61,6 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
    * {@inheritdoc}
    */
   public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $value, array $mapping) {
-    $value;
-
     $this->instance = field_info_instance($entity->entityType(), $field_name, $entity->bundle());
 
     $this->cardinality = $this->instance->getFieldCardinality();
@@ -80,8 +71,6 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
     if ($this->cardinality == -1) {
       $this->cardinality = 100000000;
     }
-
-    $this->importer = $feed->getImporter();
 
     $field = $entity->get($field_name);
 

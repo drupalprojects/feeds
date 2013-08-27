@@ -84,6 +84,11 @@ class ImporterFormController extends EntityFormController {
    * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
+
+    $feed = entity_load('feeds_feed', 1);
+
+    \Drupal\feeds\Utility\HTTPRequest::executeNonBlocking($feed, 'feeds.test');
+
     $form['#tree'] = TRUE;
 
     $form['basics'] = array(

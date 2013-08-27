@@ -94,6 +94,15 @@ feeds_feed.subscribe:
     feeds_feed:  \d+
     _method: 'GET'
 
+feeds_feed.execute:
+  pattern: '/feed/{feeds_feed}/execute'
+  defaults:
+    _controller: 'feeds.job.controller:execute'
+  requirements:
+    _access: 'TRUE'
+    feeds_feed:  \d+
+    _method: 'POST'
+
 # Admin UI routes.
 
 feeds_importer.list:
@@ -137,3 +146,4 @@ feeds_importer.delete:
     _entity_form: 'feeds_importer.delete'
   requirements:
     _entity_access: 'feeds_importer.delete'
+

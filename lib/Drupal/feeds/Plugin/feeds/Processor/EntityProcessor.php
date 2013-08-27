@@ -14,6 +14,7 @@ use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Plugin\ProcessorBase;
+use Drupal\feeds\StateInterface;
 
 /**
  * Defines an entity processor.
@@ -76,7 +77,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
 
       // Check if this item already exists.
       $entity_id = $this->existingEntityId($feed, $parser_result);
-      $skip_existing = $this->configuration['update_existing'] == FEEDS_SKIP_EXISTING;
+      $skip_existing = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
 
       module_invoke_all('feeds_before_update', $feed, $item, $entity_id);
 
@@ -105,7 +106,6 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
           // recently processed entity. The only carryover is the entity_id.
           $item_info = $this->newItemInfo($entity, $feed, $hash);
           $item_info->entityId = $entity_id;
-          $item_info->isNew = FALSE;
         }
 
         // Build a new entity.
@@ -156,7 +156,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     }
 
     // Set messages if we're done.
-    if ($feed->progressImporting() != FEEDS_BATCH_COMPLETE) {
+    if ($feed->progressImporting() != StateInterface::BATCH_COMPLETE) {
       return;
     }
 
@@ -233,9 +233,8 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    */
   protected function newItemInfo($entity, FeedInterface $feed, $hash = '') {
     $item_info = new \stdClass();
-    $item_info->isNew = TRUE;
-    $item_info->entityType = $entity->entityType();
     $item_info->fid = $feed->id();
+    $item_info->entityType = $entity->entityType();
     $item_info->imported = REQUEST_TIME;
     $item_info->hash = $hash;
     $item_info->url = '';
@@ -339,13 +338,26 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
 
   public function getProperties() {
     if (!isset($this->properties)) {
-      $fields = \Drupal::entityManager()->getFieldDefinitions($this->entityType(), $this->bundle());
+      $entity = entity_create($this->entityType(), $this->getConfiguration('values'))->getNGEntity();
 
-      $this->properties = array();
-      foreach ($fields as $id => $field) {
-        if (empty($field['configurable']) && empty($field['read-only'])) {
-          $this->properties[$id] = $field;
+      foreach ($entity as $id => $field) {
+
+        $definition = $field->getItemDefinition();
+
+        if (!empty($definition['read-only'])) {
+          continue;
         }
+
+        $this->properties[$id] = $definition;
+
+        // if (!empty($definition['configurable'])) {
+        //   foreach ($field->getPropertyDefinitions() as $key => $info) {
+        //     if (empty($info['computed'])) {
+        //       $info['label'] = $definition['label'] . ': ' . $info['label'];
+        //       $this->properties["$id:$key"] = $info;
+        //     }
+        //   }
+        // }
       }
     }
 
@@ -418,7 +430,6 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       'values' => array(
         $this->bundleKey() => NULL,
       ),
-      'handlers' => array(),
       'expire' => FEEDS_EXPIRE_NEVER,
     ) + parent::getDefaultConfiguration();
 
@@ -442,9 +453,9 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       '#description' =>
         t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
       '#options' => array(
-        FEEDS_SKIP_EXISTING => t('Do not update existing @entities', $tokens),
-        FEEDS_REPLACE_EXISTING => t('Replace existing @entities', $tokens),
-        FEEDS_UPDATE_EXISTING => t('Update existing @entities', $tokens),
+        ProcessorInterface::SKIP_EXISTING => t('Do not update existing @entities', $tokens),
+        ProcessorInterface::REPLACE_EXISTING => t('Replace existing @entities', $tokens),
+        ProcessorInterface::UPDATE_EXISTING => t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->configuration['update_existing'],
     );
@@ -487,49 +498,26 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     $targets = parent::getMappingTargets();
 
     foreach ($this->getProperties() as $id => $field) {
-      $targets[$id] = array(
-        'name' => $field['label'],
-        'description' => isset($field['description']) ? $field['description'] : '',
-      );
+      $targets[$id] = $field;
     }
 
-    $this->apply('getMappingTargets', $targets);
+    // $this->apply('getMappingTargets', $targets);
 
     // Let other modules expose mapping targets.
-    $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
-    foreach ($definitions as $definition) {
-      $mapper = \Drupal::service('plugin.manager.feeds.target')->createInstance($definition['id'], array('importer' => $this->importer));
-      $targets += $mapper->targets();
-    }
+    // $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
+    // foreach ($definitions as $definition) {
+    //   $mapper = \Drupal::service('plugin.manager.feeds.target')->createInstance($definition['id'], array('importer' => $this->importer));
+    //   $targets += $mapper->targets();
+    // }
 
-    $new_targets = array();
-
-    foreach ($targets as $key => $target) {
-      if (empty($target['columns'])) {
-        $new_targets[$key] = $target;
-      }
-      else {
-        foreach ($target['columns'] as $column) {
-          $new_targets[$key . ':' . $column] = $target;
-        }
-      }
-    }
-
-    return $new_targets;
+    return $targets;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setTargetElement(FeedInterface $feed, $entity, $target_element, $values, $mapping, \stdClass $item_info) {
-      $properties = $this->getProperties();
-      if (isset($properties[$target_element])) {
-        $entity->get($target_element)->setValue($values[0]['value']);
-      }
-      else {
-        $this->apply('setTargetElement', $feed, $entity, $target_element, $values[0]['value'], $mapping, $item_info);
-        parent::setTargetElement($feed, $entity, $target_element, $values[0]['value'], $mapping, $item_info);
-      }
+    $entity->get($target_element)->setValue($values);
   }
 
   /**

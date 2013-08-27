@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\Result\ParserResultInterface.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Result;
 
 /**
  * The result of a parsing stage.

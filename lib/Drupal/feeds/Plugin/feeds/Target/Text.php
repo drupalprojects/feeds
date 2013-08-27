@@ -18,20 +18,41 @@ use Drupal\feeds\Plugin\FieldTargetBase;
  *
  * @Plugin(
  *   id = "text",
- *   title = @Translation("Text")
+ *   title = @Translation("Text"),
+ *   field_types = {"list_text", "text", "text_long", "text_with_summary"}
  * )
  */
 class Text extends FieldTargetBase {
 
   /**
+   * The input format to use for text fields.
+   *
+   * @var string
+   */
+  protected $inputFormat;
+
+  /**
+   * The detault configuration to apply to an individual text field.
+   *
+   * @var array
+   */
+  protected $defaultFieldValues;
+
+  /**
    * {@inheritdoc}
    */
-  protected $fieldTypes = array(
-    'list_text',
-    'text',
-    'text_long',
-    'text_with_summary',
-  );
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->inputFormat = $this->importer->getProcessor()->getConfiguration('input_format');
+
+    // Fallback to a safe choice if something went haywire.
+    if (!$this->inputFormat) {
+      $this->inputFormat = 'plain_text';
+    }
+
+    $this->defaultFieldValues = array('format' => $this->inputFormat);
+
+  }
 
   /**
    * {@inheritdoc}
@@ -46,12 +67,8 @@ class Text extends FieldTargetBase {
     );
   }
 
-  protected function defaults() {
-    $defaults = array();
-    if (isset($this->importer->getProcessor()->config['input_format'])) {
-      $defaults['format'] = $this->importer->getProcessor()->config['input_format'];
-    }
-    return $defaults;
+  protected function defaultFieldValuess() {
+    return $this->defaultFieldValues;
   }
 
 }

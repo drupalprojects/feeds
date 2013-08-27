@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\RawFetcherResult.
+ * Contains \Drupal\feeds\Result\RawFetcherResult.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Result;
 
 /**
  * A fetcher result object that accepts a raw string.

@@ -10,6 +10,7 @@ namespace Drupal\feeds;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFormControllerNG;
 use Drupal\feeds\FeedPluginFormInterface;
+use Drupal\feeds\Feeds;
 
 /**
  * Form controller for the feed edit forms.
@@ -76,7 +77,7 @@ class FeedFormController extends EntityFormControllerNG {
       '#title' => $this->t('Authored by'),
       '#maxlength' => 60,
       '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => $feed->getUser()->getUsername(),
+      '#default_value' => $feed->getAuthor()->getUsername(),
       '#description' => $this->t('Leave blank for %anonymous.', array('%anonymous' => $user_config->get('anonymous'))),
     );
     $form['author']['date'] = array(
@@ -84,8 +85,8 @@ class FeedFormController extends EntityFormControllerNG {
       '#title' => $this->t('Authored on'),
       '#maxlength' => 25,
       '#description' => $this->t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array(
-        '%time' => format_date($feed->created->value, 'custom', 'Y-m-d H:i:s O'),
-        '%timezone' => format_date($feed->created->value, 'custom', 'O'),
+        '%time' => format_date($feed->getCreatedTime(), 'custom', 'Y-m-d H:i:s O'),
+        '%timezone' => format_date($feed->getCreatedTime(), 'custom', 'O'),
       )),
     );
 
@@ -101,7 +102,7 @@ class FeedFormController extends EntityFormControllerNG {
     $form['options']['status'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Active'),
-      '#default_value' => $feed->status->value,
+      '#default_value' => $feed->isActive(),
     );
 
     return parent::form($form, $form_state);
@@ -178,7 +179,7 @@ class FeedFormController extends EntityFormControllerNG {
       cache_invalidate_tags(array('feeds' => TRUE));
 
       // Schedule jobs for this feed.
-      $feed->schedule();
+      Feeds::scheduler()->schedule($feed);
 
       if ($insert && $importer->import_on_create) {
         $feed->startImport();

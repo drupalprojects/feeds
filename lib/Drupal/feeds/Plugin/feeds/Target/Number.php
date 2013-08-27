@@ -17,22 +17,18 @@ use Drupal\field\Entity\FieldInstance;
  *
  * @Plugin(
  *   id = "number",
- *   title = @Translation("Number")
+ *   title = @Translation("Number"),
+ *   field_types = {
+ *     "list_integer",
+ *     "list_float",
+ *     "list_boolean",
+ *     "number_integer",
+ *     "number_decimal",
+ *     "number_float"
+ *   }
  * )
  */
 class Number extends FieldTargetBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $fieldTypes = array(
-    'list_integer',
-    'list_float',
-    'list_boolean',
-    'number_integer',
-    'number_decimal',
-    'number_float',
-  );
 
   /**
    * {@inheritdoc}

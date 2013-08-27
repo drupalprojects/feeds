@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRenderController;
 use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
 use Drupal\feeds\Entity\Feed;
+use Drupal\feeds\StateInterface;
 
 /**
  * Render controller for feedss.
@@ -41,11 +42,11 @@ class FeedRenderController extends EntityRenderController {
   protected function getStatus(Feed $feed) {
     $progress_importing = $feed->progressImporting();
     $v = array();
-    if ($progress_importing != FEEDS_BATCH_COMPLETE) {
+    if ($progress_importing != StateInterface::BATCH_COMPLETE) {
       $v['#progress_importing'] = $progress_importing;
     }
     $progress_clearing = $feed->progressClearing();
-    if ($progress_clearing != FEEDS_BATCH_COMPLETE) {
+    if ($progress_clearing != StateInterface::BATCH_COMPLETE) {
       $v['#progress_clearing'] = $progress_clearing;
     }
     $v['#imported'] = $feed->imported->value;

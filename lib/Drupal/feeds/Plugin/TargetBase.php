@@ -40,9 +40,4 @@ abstract class TargetBase extends DrupalPluginBase implements TargetInterface {
    */
   abstract public function targets();
 
-  /**
-   * {@inheritdoc}
-   */
-  abstract public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $value, array $mapping);
-
 }

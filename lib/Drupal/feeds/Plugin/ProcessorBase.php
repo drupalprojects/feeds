@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * Abstract class, defines helpers for processors.
@@ -25,7 +26,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * @todo This should be moved to the EntityProcessor.
    */
   public function clear(FeedInterface $feed) {
-    $state = $feed->state(FEEDS_CLEAR);
+    $state = $feed->state(StateInterface::CLEAR);
 
     // Build base select statement.
     $info = $this->entityInfo();
@@ -63,7 +64,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     }
 
     // Report results when done.
-    if ($feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
+    if ($feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
       if ($state->deleted) {
         $message = format_plural(
           $state->deleted,
@@ -90,14 +91,14 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * @todo Get rid of the variable_get() here.
    */
   public function getLimit() {
-    return variable_get('feeds_process_limit', FEEDS_PROCESS_LIMIT);
+    return variable_get('feeds_process_limit', self::PROCESS_LIMIT);
   }
 
   /**
    * {@inheritdoc}
    */
   public function expire(FeedInterface $feed, $time = NULL) {
-    $state = $feed->state(FEEDS_PROCESS_EXPIRE);
+    $state = $feed->state(StateInterface::EXPIRE);
     if ($time === NULL) {
       $time = $this->expiryTime();
     }
@@ -180,7 +181,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * ProcessorBase::setTargetElement().
    */
   protected function map(FeedInterface $feed, array $item, $target_item, $item_info) {
-
     // @todo Revisit static cache.
 
     $sources = $this->importer->getParser()->getMappingSources();
@@ -190,7 +190,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     // Many mappers add to existing fields rather than replacing them. Hence we
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
-    foreach ($this->configuration['mappings'] as $mapping) {
+    foreach ($this->importer->getMappings() as $mapping) {
       list($field) = explode(':', $mapping['target']);
       unset($target_item->$field);
     }
@@ -207,7 +207,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
     $value = array();
 
-    foreach ($this->configuration['mappings'] as $mapping) {
+    foreach ($this->importer->getMappings() as $mapping) {
 
       list($key, $subkey) = explode(':', $mapping['target'] . ':value');
 
@@ -247,7 +247,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       }
     }
 
-    foreach ($this->configuration['mappings'] as $mapping) {
+    foreach ($this->importer->getMappings() as $mapping) {
 
       list($key, $subkey) = explode(':', $mapping['target'] . ':value');
 
@@ -279,8 +279,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    */
   protected function getDefaultConfiguration() {
     $defaults = array(
-      'mappings' => array(),
-      'update_existing' => FEEDS_SKIP_EXISTING,
+      'update_existing' => ProcessorInterface::SKIP_EXISTING,
       'input_format' => 'plain_text',
       'skip_hash_check' => FALSE,
     );
@@ -320,23 +319,16 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   /**
    * {@inheritdoc}
    */
-  public function getMappings() {
-    return $this->configuration['mappings'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getMappingTargets() {
 
     return array(
       'url' => array(
-        'name' => t('URL'),
+        'label' => t('URL'),
         'description' => t('The external URL of the item. E. g. the feed item URL in the case of a syndication feed. May be unique.'),
         'optional_unique' => TRUE,
       ),
       'guid' => array(
-        'name' => t('GUID'),
+        'label' => t('GUID'),
         'description' => t('The globally unique identifier of the item. E. g. the feed item GUID in the case of a syndication feed. May be unique.'),
         'optional_unique' => TRUE,
       ),
@@ -415,7 +407,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   public function uniqueTargets(FeedInterface $feed, ParserResultInterface $result) {
     $parser = $this->importer->getParser();
     $targets = array();
-    foreach ($this->configuration['mappings'] as $mapping) {
+    foreach ($this->importer->getMappings() as $mapping) {
       if (!empty($mapping['unique'])) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
@@ -443,7 +435,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * @todo I really doubt the above is still true. Plus, who cares.
    */
   protected function hash(array $item) {
-    return hash('md5', serialize($item) . serialize($this->configuration['mappings']));
+    return hash('md5', serialize($item) . serialize($this->importer->getMappings()));
   }
 
   /**

@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\Result\FetcherResultInterface.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Result;
 
 /**
  * Defines the interface for result objects returned by fetcher pluings.

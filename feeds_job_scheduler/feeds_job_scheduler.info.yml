@@ -1,0 +1,7 @@
+name: Feeds Job Scheduler
+description: 'Integrates Feeds with Job Scheduler to allow advanced scheduling.'
+package: Feeds
+type: module
+core: 8.x
+dependencies:
+  - job_scheduler

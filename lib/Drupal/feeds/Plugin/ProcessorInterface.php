@@ -16,6 +16,34 @@ use Drupal\feeds\Result\ParserResultInterface;
 interface ProcessorInterface extends FeedsPluginInterface {
 
   /**
+   * Default limit for creating items on a page load.
+   *
+   * @var int
+   */
+  const PROCESS_LIMIT = 50;
+
+  /**
+   * Skip items that exist already.
+   *
+   * @var int
+   */
+  const SKIP_EXISTING = 0;
+
+  /**
+   * Replace items that exist already.
+   *
+   * @var int
+   */
+  const REPLACE_EXISTING = 1;
+
+  /**
+   * Update items that exist already.
+   *
+   * @var int
+   */
+  const UPDATE_EXISTING = 2;
+
+  /**
    * Processes the results from a parser.
    *
    * @param \Drupal\feeds\FeedInterface $feed
@@ -55,8 +83,8 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *   internal configuration. Defaults to null.
    *
    * @return float
-   *   FEEDS_BATCH_COMPLETE if all items have been processed, a float between 0
-   *   and 0.99* indicating progress otherwise.
+   *   StateInterface::BATCH_COMPLETE if all items have been processed, a float
+   *   between 0 and 0.99* indicating progress otherwise.
    *
    * @todo Move this to a separate interface.
    */

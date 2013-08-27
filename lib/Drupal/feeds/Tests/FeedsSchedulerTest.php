@@ -216,7 +216,7 @@ class FeedsSchedulerTest extends FeedsWebTestBase {
     $this->assertText('Created 86 nodes');
 
     // Run batch twice with two different process limits.
-    // 50 = FEEDS_PROCESS_LIMIT.
+    // 50 = ProcessorInterface::PROCESS_LIMIT.
     foreach (array(10, 50) as $limit) {
       variable_set('feeds_process_limit', $limit);
 

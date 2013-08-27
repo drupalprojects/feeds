@@ -40,8 +40,8 @@ function feeds_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'title' => array(
-        'description' => 'The title of this feed, always treated as non-markup plain text.',
+      'name' => array(
+        'description' => 'The name of this feed, always treated as non-markup plain text.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,

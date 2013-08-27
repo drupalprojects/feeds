@@ -11,6 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\ProcessorInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 
 /**
@@ -131,7 +132,7 @@ class NodeHandler extends PluginBase {
   public function entityPrepare(FeedInterface $feed, $node) {
     $update_existing = $this->importer->getProcessor()->getConfiguration('update_existing');
 
-    if ($update_existing != FEEDS_UPDATE_EXISTING) {
+    if ($update_existing != ProcessorInterface::UPDATE_EXISTING) {
       $node->uid = $this->configuration['author'];
     }
 
@@ -145,7 +146,7 @@ class NodeHandler extends PluginBase {
     }
 
     // Populate properties that are set by node_object_prepare().
-    if ($update_existing == FEEDS_UPDATE_EXISTING) {
+    if ($update_existing == ProcessorInterface::UPDATE_EXISTING) {
       $node->log = 'Updated by FeedsNodeProcessor';
     }
     else {

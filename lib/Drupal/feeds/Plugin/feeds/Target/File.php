@@ -19,15 +19,11 @@ use Drupal\field\Entity\FieldInstance;
  *
  * @Plugin(
  *   id = "file",
- *   title = @Translation("File")
+ *   title = @Translation("File"),
+ *   field_types = {"file", "image"}
  * )
  */
 class File extends FieldTargetBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $fieldTypes = array('file', 'image');
 
   /**
    * {@inheritdoc}

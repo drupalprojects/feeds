@@ -12,7 +12,8 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedsElement;
-use Drupal\feeds\Plugin\TargetBase;
+use Drupal\feeds\Plugin\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\TargetInterface;
 
 /**
  * Defines a path field mapper.
@@ -22,7 +23,7 @@ use Drupal\feeds\Plugin\TargetBase;
  *   title = @Translation("Path")
  * )
  */
-class Path extends TargetBase {
+class Path extends ConfigurablePluginBase implements TargetInterface {
 
   /**
    * {@inheritdoc}
@@ -38,9 +39,6 @@ class Path extends TargetBase {
         $targets['path_alias'] = array(
           'name' => t('Path alias'),
           'description' => t('URL path alias of the node.'),
-          'callback' => array($this, 'setTarget'),
-          'summary_callback' => array($this, 'summary'),
-          'form_callback' => array($this, 'form'),
         );
         break;
     }
@@ -74,7 +72,7 @@ class Path extends TargetBase {
     $entity->path['pathauto'] = FALSE;
     // Allow pathauto to set the path alias if the option is set, and this value
     // is empty.
-    if (!empty($mapping['pathauto_override']) && !$value) {
+    if ($this->getConfiguration('pathauto_override') && !$value) {
       $entity->path['pathauto'] = TRUE;
     }
     else {
@@ -85,15 +83,14 @@ class Path extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  public function summary($mapping, $target, $form, $form_state) {
+  public function summary(array $form, array $form_state, array $target) {
     if (!module_exists('pathauto')) {
       return;
     }
 
-    if (empty($mapping['pathauto_override'])) {
+    if (!$this->getConfiguration('pathauto_override')) {
       return t('Do not allow Pathauto if empty.');
     }
-
     else {
       return t('Allow Pathauto if empty.');
     }
@@ -102,14 +99,21 @@ class Path extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  public function form($mapping, $target, $form, $form_state) {
-    return array(
-      'pathauto_override' => array(
-        '#type' => 'checkbox',
-        '#title' => t('Allow Pathauto to set the alias if the value is empty.'),
-        '#default_value' => !empty($mapping['pathauto_override']),
-      ),
+  public function buildConfigurationForm(array $form, array &$form_state, array $target = array()) {
+    $form['pathauto_override'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow Pathauto to set the alias if the value is empty.'),
+      '#default_value' => $this->getConfiguration('pathauto_override'),
     );
+
+    return $form;
+  }
+
+  /**
+   * {inheritdoc}
+   */
+  protected function getDefaultConfiguration() {
+    return array('pathauto_override' => FALSE);
   }
 
 }

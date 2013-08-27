@@ -14,6 +14,7 @@ use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\FetcherInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * Defines a directory fetcher.
@@ -38,7 +39,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
     }
 
     // Batch if this is a directory.
-    $state = $feed->state(FEEDS_FETCH);
+    $state = $feed->state(StateInterface::FETCH);
     $files = array();
     if (!isset($state->files)) {
       $state->files = $this->listFiles($feed_config['source']);

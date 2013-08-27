@@ -93,7 +93,16 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   );
 
   /**
+   * The list of source to target mappings.
+   *
+   * @var array
+   */
+  protected $mappings;
+
+  /**
    * The plugin bags that store feeds plugins keyed by plugin type.
+   *
+   * These are lazily instantiated on-demand.
    *
    * @var \Drupal\Component\Plugin\DefaultSinglePluginBag[]
    */
@@ -118,19 +127,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     }
 
     parent::__construct($values, $entity_type);
-
-    // Setup plugins.
-    foreach ($this->getPluginTypes() as $type) {
-      $id = $this->plugins[$type]['id'];
-
-      $configuration = array('importer' => $this);
-      if (isset($this->plugins[$type]['configuration'])) {
-        $configuration += $this->plugins[$type]['configuration'];
-      }
-      $manager = \Drupal::service("plugin.manager.feeds.$type");
-
-      $this->pluginBags[$type] = new DefaultSinglePluginBag($manager, array($id), $configuration);
-    }
   }
 
   /**
@@ -144,7 +140,87 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getMappings() {
-    return $this->getProcessor()->getMappings();
+    if ($this->mappings === NULL) {
+      $this->mappings = $this->buildDefaultMappings();
+    }
+
+    return $this->mappings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMappings(array $mappings) {
+    $this->mappings = $mappings;
+  }
+
+  /**
+   * Builds a default mapping configuration based off of suggestions.
+   *
+   * @return array
+   *   The mapping array.
+   */
+  protected function buildDefaultMappings() {
+    $mappings = array();
+    $targets = $this->getProcessor()->getMappingTargets();
+    $sources = $this->getParser()->getMappingSources();
+
+    // // Remove sources with no suggestions.
+    $suggested = array();
+    foreach ($sources as $source_id => $source) {
+      if (!empty($source['suggestions']) && !empty($source['suggestions']['targets'])) {
+        $suggested[$source_id] = $source;
+      }
+    }
+
+    if ($suggested) {
+      foreach ($targets as $target_id => $target) {
+        foreach ($suggested as $source_id => $source) {
+          if (in_array($target_id, $source['suggestions']['targets'])) {
+            $mappings[] = array('source' => $source_id, 'target' => $target_id);
+            unset($targets[$target_id]);
+            unset($sources[$source_id]);
+            unset($suggested[$source_id]);
+            break;
+          }
+        }
+      }
+    }
+
+    $suggested = array();
+    foreach ($sources as $source_id => $source) {
+      if (!empty($source['suggestions']) && !empty($source['suggestions']['types'])) {
+        $suggested[$source_id] = $source;
+      }
+    }
+
+    if ($suggested) {
+      foreach ($targets as $target_id => $target) {
+
+        if (!isset($target['type'])) {
+          continue;
+        }
+
+        foreach ($suggested as $source_id => $source) {
+          if (isset($source['suggestions']['types'][$target['type']])) {
+            foreach ($source['suggestions']['types'][$target['type']] as $key => $value) {
+              if (isset($target['settings'][$key]) && $target['settings'][$key] == $value) {
+                continue;
+              }
+              else {
+                break 2;
+              }
+            }
+            $mappings[] = array('source' => $source_id, 'target' => $target_id);
+            unset($targets[$target_id]);
+            unset($sources[$source_id]);
+            unset($suggested[$source_id]);
+          }
+        }
+      }
+    }
+
+    return $mappings;
   }
 
   /**
@@ -200,7 +276,29 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getPlugin($plugin_type) {
+    if (!isset($this->pluginBags[$plugin_type])) {
+      $this->initPluginBag($plugin_type);
+    }
     return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
+  }
+
+  /**
+   * Initializes a plugin bag for a plugin type.
+   *
+   * @param string $plugin_type
+   *   The plugin type to initialize.
+   */
+  protected function initPluginBag($plugin_type) {
+    $id = $this->plugins[$plugin_type]['id'];
+
+    $configuration = array('importer' => $this);
+    if (isset($this->plugins[$plugin_type]['configuration'])) {
+      $configuration += $this->plugins[$plugin_type]['configuration'];
+    }
+
+    $manager = \Drupal::service("plugin.manager.feeds.$type");
+
+    $this->pluginBags[$plugin_type] = new DefaultSinglePluginBag($manager, array($id), $configuration);
   }
 
   /**
@@ -218,6 +316,9 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public function getExportProperties() {
     $properties = parent::getExportProperties();
     $properties += $this->plugins;
+    if ($this->mappings) {
+      $properties['mappings'] = $this->mappings;
+    }
     return $properties;
   }
 
@@ -238,20 +339,23 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public static function reschedule($importer_id = NULL) {
+    // Get current reschedule list.
     $reschedule = \Drupal::state()->get('feeds.reschedule') ? : FALSE;
 
+    // If Importer::reschedule(TRUE), or Importer::reschedule(FALSE) then set
+    // the reschedule state to that. TRUE meaning all importers and FALSE
+    // meaning none.
     if ($importer_id === TRUE || $importer_id === FALSE) {
       $reschedule = $importer_id;
     }
+    // We are adding an importer to the reschedule list. Only add if all
+    // importers weren't already flagged.
     elseif (is_string($importer_id) && $reschedule !== TRUE) {
       $reschedule = is_array($reschedule) ? $reschedule : array();
       $reschedule[$importer_id] = $importer_id;
     }
 
     \Drupal::state()->set('feeds.reschedule', $reschedule);
-    if ($reschedule === TRUE) {
-      return entity_load_multiple('feeds_importer');
-    }
 
     return $reschedule;
   }

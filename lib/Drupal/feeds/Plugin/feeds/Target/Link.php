@@ -18,15 +18,11 @@ use Drupal\field\Entity\FieldInstance;
  *
  * @Plugin(
  *   id = "link",
- *   title = @Translation("Link")
+ *   title = @Translation("Link"),
+ *   field_types = {"link"}
  * )
  */
 class Link extends FieldTargetBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $fieldTypes = array('link');
 
   /**
    * {@inheritdoc}

@@ -8,8 +8,10 @@
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds;
 use Drupal\feeds\Utility\HTTPRequest;
 use Drupal\feeds\Entity\Importer;
+use Drupal\feeds\StateInterface;
 use Guzzle\Http\Exception\RequestException;
 use Guzzle\Http\Exception\BadResponseException;
 use Zend\Feed\Reader\Reader;
@@ -23,35 +25,6 @@ const FEEDS_SCHEDULE_NEVER = -1;
  * Never expire feed items.
  */
 const FEEDS_EXPIRE_NEVER = -1;
-
-/**
- * Batch operation complete.
- */
-const FEEDS_BATCH_COMPLETE = 1.0;
-
-/**
- * Batch operation active.
- */
-const FEEDS_BATCH_ACTIVE = 0.0;
-
-/**
- * Denote a import or clearing stage. Used for multi page processing.
- */
-const FEEDS_START = 'start_time';
-const FEEDS_FETCH = 'fetch';
-const FEEDS_PARSE = 'parse';
-const FEEDS_PROCESS = 'process';
-const FEEDS_CLEAR = 'process_clear';
-const FEEDS_PROCESS_EXPIRE = 'process_expire';
-
-// Update mode for existing items.
-const FEEDS_SKIP_EXISTING = 0;
-const FEEDS_REPLACE_EXISTING = 1;
-const FEEDS_UPDATE_EXISTING = 2;
-
-// Default limit for creating items on a page load, not respected by all
-// processors.
-const FEEDS_PROCESS_LIMIT = 50;
 
 /**
  * Implements hook_help().
@@ -96,7 +69,8 @@ function feeds_cron() {
       $feeds = db_query("SELECT fid FROM {feeds_feed} WHERE importer IN (:ids)", array(':ids' => $importers));
     }
     foreach ($feeds as $feed) {
-      entity_load('feeds_feed', $feed->fid)->schedule();
+      $feed = entity_load('feeds_feed', $feed->id());
+      Feeds::scheduler()->schedule($feed);
     }
     Importer::reschedule(FALSE);
   }
@@ -108,50 +82,10 @@ function feeds_cron() {
 }
 
 /**
- * Implements hook_cron_job_scheduler_info().
- *
- * Compare queue names with key names in feeds_cron_queue_info().
- */
-function feeds_cron_job_scheduler_info() {
-  $info = array();
-  $info['feeds_feed_import'] = array(
-    'queue name' => 'feeds_feed_import',
-  );
-  $info['feeds_feed_clear'] = array(
-    'queue name' => 'feeds_feed_clear',
-  );
-  $info['feeds_feed_expire'] = array(
-    'queue name' => 'feeds_feed_expire',
-  );
-  return $info;
-}
-
-/**
  * Implements hook_queue_info().
  */
 function feeds_queue_info() {
   return array(
-    'feeds_feed_import' => array(
-      'title' => t('Feeds source import'),
-      'worker callback' => 'feeds_feed_import',
-      'cron' => array(
-        'time' => 60,
-      ),
-    ),
-    'feeds_feed_clear' => array(
-      'title' => t('Feeds source clear'),
-      'worker callback' => 'feeds_feed_clear',
-      'cron' => array(
-        'time' => 60,
-      ),
-    ),
-    'feeds_feed_expire' => array(
-      'title' => t('Feeds source expire'),
-      'worker callback' => 'feeds_feed_expire',
-      'cron' => array(
-        'time' => 60,
-      ),
-    ),
     'feeds_push_unsubscribe' => array(
       'title' => t('Feeds push unsubscribe'),
       'worker callback' => 'feeds_push_unsubscribe',
@@ -170,58 +104,6 @@ function feeds_queue_info() {
 }
 
 /**
- * Scheduler callback for importing from a source.
- */
-function feeds_feed_import(array $job) {
-  if ($feed = entity_load('feeds_feed', $job['id'])) {
-    try {
-      $feed->existing()->import();
-    }
-    catch (FeedsNotExistingException $e) {
-      // Do nothing.
-    }
-    catch (Exception $e) {
-      $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
-    }
-    $feed->scheduleImport();
-  }
-}
-
-/**
- * Scheduler callback for deleting all items from a feed.
- */
-function feeds_feed_clear(array $job) {
-  $feed = entity_load('feeds_feed', $job['id']);
-  try {
-    $feed->existing()->clear();
-  }
-  catch (FeedsNotExistingException $e) {
-    // Do nothing.
-  }
-  catch (Exception $e) {
-    $feed->log('clear', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-  $feed->scheduleClear();
-}
-
-/**
- * Scheduler callback for expiring content.
- */
-function feeds_feed_expire(array $job) {
-  $feed = entity_load('feeds_feed', $job['id']);
-  try {
-    $feed->existing()->expire();
-  }
-  catch (FeedsNotExistingException $e) {
-    // Do nothing.
-  }
-  catch (Exception $e) {
-    $feed->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-  $feed->scheduleExpire();
-}
-
-/**
  * Scheduler callback for unsubscribing from PuSH hubs.
  *
  * @todo This isn't working yet.
@@ -236,12 +118,12 @@ function feeds_push_unsubscribe(array $job) {
  */
 function feeds_push_subscribe(array $job) {
   if ($feed = entity_load('feeds_feed', $job['id'])) {
-    $feed_config = $feed->getConfiguration();
+    $feed_config = $feed->get('config');
 
     if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
 
-      if (isset($feed_config[$job['type']])) {
-        $http = new HTTPRequest($feed_config[$job['type']]['source']);
+      if (isset($feed_config['fetcher'])) {
+        $http = new HTTPRequest($feed_config['fetcher']['source']);
 
         $response = $http->get();
         Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
@@ -305,7 +187,7 @@ function feeds_push_subscribe(array $job) {
  * @see Feed::startBatchAPIJob()
  */
 function feeds_batch($method, $fid, array &$context) {
-  $context['finished'] = FEEDS_BATCH_COMPLETE;
+  $context['finished'] = StateInterface::BATCH_COMPLETE;
   try {
     $context['finished'] = entity_load('feeds_feed', $fid)->$method();
   }
@@ -315,7 +197,7 @@ function feeds_batch($method, $fid, array &$context) {
 }
 
 /**
- * Implements feeds_permission().
+ * Implements hook_permission().
  */
 function feeds_permission() {
   $perms = array(
@@ -463,22 +345,6 @@ function feeds_admin_paths() {
 }
 
 /**
- * Implements hook_menu_local_tasks().
- */
-function feeds_menu_local_tasks(array &$data, $router_item, $root_path) {
-  // Add action link to 'feeds/add' on 'admin/content/feed' page.
-  if ($root_path == 'admin/content/feed') {
-    $item = menu_get_item('feed/add');
-    if ($item['access']) {
-      $data['actions'][] = array(
-        '#theme' => 'menu_local_action',
-        '#link' => $item,
-      );
-    }
-  }
-}
-
-/**
  * Implements hook_theme().
  */
 function feeds_theme() {
@@ -494,22 +360,6 @@ function feeds_theme() {
         'imported' => NULL,
         'count' => NULL,
       ),
-      'file' => 'feeds.theme.inc',
-    ),
-    'feeds_mapping_form' => array(
-      'render element' => 'form',
-      'file' => 'feeds.theme.inc',
-    ),
-    'feeds_edit_page' => array(
-      'variables' => array('info' => NULL, 'active' => NULL),
-      'file' => 'feeds.theme.inc',
-    ),
-    'feeds_plugin_form' => array(
-      'render element' => 'form',
-      'file' => 'feeds.theme.inc',
-    ),
-    'feeds_container' => array(
-      'variables' => array('container' => NULL),
       'file' => 'feeds.theme.inc',
     ),
   );
@@ -626,4 +476,8 @@ function feeds_valid_url($url, $absolute = FALSE) {
   else {
     return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
   }
+}
+
+function feeds_entity_info_alter($info) {
+  dpm($info);
 }

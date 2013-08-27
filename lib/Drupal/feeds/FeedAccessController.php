@@ -10,6 +10,7 @@ namespace Drupal\feeds;
 use Drupal\Core\Entity\EntityAccessController;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * Defines an access controller for the feeds_feed entity.
@@ -31,7 +32,7 @@ class FeedAccessController extends EntityAccessController {
     if ($operation === 'unlock') {
       // If there is no need to unlock the feed, then the user does not have
       // access.
-      if ($feed->progressImporting() == FEEDS_BATCH_COMPLETE && $feed->progressClearing() == FEEDS_BATCH_COMPLETE) {
+      if ($feed->progressImporting() == StateInterface::BATCH_COMPLETE && $feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
         return FALSE;
       }
     }
