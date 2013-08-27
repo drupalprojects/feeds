@@ -76,17 +76,6 @@ interface FeedInterface extends ContentEntityInterface {
   public function getImportedTime();
 
   /**
-   * Sets the feed imported timestamp.
-   *
-   * @param int $timestamp
-   *   The feed imported timestamp.
-   *
-   * @return \Drupal\feeds\FeedInterface
-   *   The called feed entity.
-   */
-  public function setImportedTime($timestamp);
-
-  /**
    * Runs the fetch and parse stages.
    *
    * @return \Drupal\feeds\Result\ParserResultInterface
