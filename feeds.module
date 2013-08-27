@@ -477,7 +477,3 @@ function feeds_valid_url($url, $absolute = FALSE) {
     return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
   }
 }
-
-function feeds_entity_info_alter($info) {
-  dpm($info);
-}
