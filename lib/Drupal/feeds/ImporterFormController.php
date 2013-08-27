@@ -85,10 +85,6 @@ class ImporterFormController extends EntityFormController {
    */
   public function form(array $form, array &$form_state) {
 
-    $feed = entity_load('feeds_feed', 1);
-
-    \Drupal\feeds\Utility\HTTPRequest::executeNonBlocking($feed, 'feeds.test');
-
     $form['#tree'] = TRUE;
 
     $form['basics'] = array(
@@ -256,7 +252,7 @@ class ImporterFormController extends EntityFormController {
     }
 
     // Build the importer object from the submitted values.
-    return parent::validate($form, $form_state);
+    parent::validate($form, $form_state);
   }
 
   /**

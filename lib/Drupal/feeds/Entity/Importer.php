@@ -296,7 +296,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
       $configuration += $this->plugins[$plugin_type]['configuration'];
     }
 
-    $manager = \Drupal::service("plugin.manager.feeds.$type");
+    $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
 
     $this->pluginBags[$plugin_type] = new DefaultSinglePluginBag($manager, array($id), $configuration);
   }

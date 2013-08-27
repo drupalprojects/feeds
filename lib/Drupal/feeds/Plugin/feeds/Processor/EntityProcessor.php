@@ -14,6 +14,7 @@ use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Plugin\ProcessorBase;
+use Drupal\feeds\Plugin\ProcessorInterface;
 use Drupal\feeds\StateInterface;
 
 /**
