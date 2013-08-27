@@ -1,22 +1,28 @@
-feeds_importer_add_action:
+feeds_importer.add_action:
   route_name: feeds_importer.create
   title: Add importer
   appears_on:
     - feeds_importer.list
 
-feeds_feed_import_action:
+feeds_feed.create_action:
+  route_name: feeds_feed.create_list
+  title: Add feed
+  appears_on:
+    - feeds_feed.list
+
+feeds_feed.import_action:
   route_name: feeds_feed.import
   title: Import
   appears_on:
-    - feeds_feed_view
+    - feeds_feed.view
 
-feeds_feed_clear_action:
+feeds_feed.clear_action:
   route_name: feeds_feed.clear
   title: Delete items
   appears_on:
     - feeds_feed.view
 
-feeds_feed_unlock_action:
+feeds_feed.unlock_action:
   route_name: feeds_feed.unlock
   title: Delete items
   appears_on:
