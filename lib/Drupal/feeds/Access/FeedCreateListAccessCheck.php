@@ -18,16 +18,6 @@ use Symfony\Component\Routing\Route;
 class FeedCreateListAccessCheck implements StaticAccessCheckInterface {
 
   /**
-   * Cache for access checks.
-   *
-   * This is only here since access() gets called 5 times per page. Hopefully
-   * that will go away.
-   *
-   * @var array
-   */
-  protected $access = array();
-
-  /**
    * The importer storage controller.
    *
    * @var \Drupal\Core\Entity\EntityStorageControllerInterface
@@ -35,13 +25,23 @@ class FeedCreateListAccessCheck implements StaticAccessCheckInterface {
   protected $importerStorage;
 
   /**
+   * The feed access controller.
+   *
+   * @var \Drupal\Core\Entity\EntityAccessControllerInterface
+   */
+  protected $feedAccessController;
+
+  /**
    * Constructs a FeedCreateListAccessCheck object.
    *
    * @param \Drupal\Core\Entity\EntityManager $entity_manager
    *   The Entity manager.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The currently logged in user.
    */
   public function __construct(EntityManager $entity_manager) {
     $this->importerStorage = $entity_manager->getStorageController('feeds_importer');
+    $this->feedAccessController = $entity_manager->getAccessController('feeds_feed');
   }
 
   /**
@@ -55,33 +55,12 @@ class FeedCreateListAccessCheck implements StaticAccessCheckInterface {
    * {@inheritdoc}
    */
   public function access(Route $route, Request $request) {
-    $account = $request->attributes->get('_account');
-
-    // @todo Remove this when user service is added.
-    if (!$account) {
-      $account = $GLOBALS['user'];
-    }
-
-    // @todo Revisit this cache to see if it's necessary.
-    if (isset($this->access[$account->id()])) {
-      return $this->access[$account->id()];
-    }
-
-    $this->access[$account->id()] = self::DENY;
-
-    if ($account->hasPermission('administer feeds')) {
-      $this->access[$account->id()] = self::ALLOW;
-    }
-
     // @todo Perhaps read config directly rather than load all importers.
     foreach ($this->importerStorage->loadEnabled() as $importer) {
-      if ($account->hasPermission("create {$importer->id()} feeds")) {
-        $this->access[$account->id()] = self::ALLOW;
-        break;
+      if ($this->feedAccessController->createAccess($importer->id())) {
+        return self::ALLOW;
       }
     }
-
-    return $this->access[$account->id()];
   }
 
 }
