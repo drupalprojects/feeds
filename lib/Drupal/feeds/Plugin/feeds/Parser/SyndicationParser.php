@@ -40,7 +40,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
     }
     catch (ExceptionInterface $e) {
       watchdog_exception('feeds', $e);
-      drupal_set_message(t('The feed from %site seems to be broken because of error "%error".', array('%site' => $feed->label(), '%error' => $e->getMessage())), 'error');
+      drupal_set_message($this->t('The feed from %site seems to be broken because of error "%error".', array('%site' => $feed->label(), '%error' => $e->getMessage())), 'error');
       return $result;
     }
 
@@ -81,8 +81,8 @@ class SyndicationParser extends PluginBase implements ParserInterface {
   public function getMappingSources() {
     return array(
       'title' => array(
-        'label' => t('Title'),
-        'description' => t('Title of the feed item.'),
+        'label' => $this->t('Title'),
+        'description' => $this->t('Title of the feed item.'),
         'suggestions' => array(
           'targets' => array('title'),
           'types' => array(
@@ -91,8 +91,8 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         ),
       ),
       'description' => array(
-        'label' => t('Description'),
-        'description' => t('Description of the feed item.'),
+        'label' => $this->t('Description'),
+        'description' => $this->t('Description of the feed item.'),
         'suggested' => array('body'),
         'suggestions' => array(
           'targets' => array('body'),
@@ -102,8 +102,8 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         ),
       ),
       'author_name' => array(
-        'label' => t('Author name'),
-        'description' => t('Name of the feed item\'s author.'),
+        'label' => $this->t('Author name'),
+        'description' => $this->t('Name of the feed item\'s author.'),
         'suggestions' => array(
           'types' => array(
             'entity_reference_field' => array('target_type' => 'user'),
@@ -111,29 +111,29 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         ),
       ),
       'timestamp' => array(
-        'label' => t('Published date'),
-        'description' => t('Published date as UNIX time GMT of the feed item.'),
+        'label' => $this->t('Published date'),
+        'description' => $this->t('Published date as UNIX time GMT of the feed item.'),
         'suggestions' => array(
           'targets' => array('created'),
         ),
       ),
       'url' => array(
-        'label' => t('Item URL (link)'),
-        'description' => t('URL of the feed item.'),
+        'label' => $this->t('Item URL (link)'),
+        'description' => $this->t('URL of the feed item.'),
         'suggestions' => array(
           'targets' => array('url'),
         ),
       ),
       'guid' => array(
-        'label' => t('Item GUID'),
-        'description' => t('Global Unique Identifier of the feed item.'),
+        'label' => $this->t('Item GUID'),
+        'description' => $this->t('Global Unique Identifier of the feed item.'),
         'suggestions' => array(
           'targets' => array('guid'),
         ),
       ),
       'tags' => array(
-        'label' => t('Categories'),
-        'description' => t('An array of categories that have been assigned to the feed item.'),
+        'label' => $this->t('Categories'),
+        'description' => $this->t('An array of categories that have been assigned to the feed item.'),
         'suggestions' => array(
           'targets' => array('field_tags'),
           'types' => array(
@@ -142,12 +142,12 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         ),
       ),
       'geolocations' => array(
-        'label' => t('Geo Locations'),
-        'description' => t('An array of geographic locations with a name and a position.'),
+        'label' => $this->t('Geo Locations'),
+        'description' => $this->t('An array of geographic locations with a name and a position.'),
       ),
       'enclosures' => array(
-        'label' => t('Enclosures'),
-        'description' => t('A list of enclosures attached to the feed item.'),
+        'label' => $this->t('Enclosures'),
+        'description' => $this->t('A list of enclosures attached to the feed item.'),
         'suggestions' => array(
           'types' => array(
             'field_item:file' => array(),

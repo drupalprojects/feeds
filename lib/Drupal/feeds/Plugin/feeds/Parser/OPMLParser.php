@@ -100,20 +100,20 @@ class OPMLParser extends PluginBase implements ParserInterface {
   public function getMappingSources() {
     return array(
       'title' => array(
-        'name' => t('Title'),
-        'description' => t('Title of the feed.'),
+        'name' => $this->t('Title'),
+        'description' => $this->t('Title of the feed.'),
       ),
       'xmlurl' => array(
-        'name' => t('URL'),
-        'description' => t('URL of the feed.'),
+        'name' => $this->t('URL'),
+        'description' => $this->t('URL of the feed.'),
       ),
       'categories' => array(
-        'name' => t('Categories'),
-        'description' => t('The categories of the feed.'),
+        'name' => $this->t('Categories'),
+        'description' => $this->t('The categories of the feed.'),
       ),
       'htmlurl' => array(
-        'name' => t('Site URL'),
-        'description' => t('The URL of the site that provides the feed.'),
+        'name' => $this->t('Site URL'),
+        'description' => $this->t('The URL of the site that provides the feed.'),
       ),
     );
   }

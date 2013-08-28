@@ -146,10 +146,10 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
       }
     }
 
-    $output = t('Import !csv_files with one or more of these columns: !columns.', array('!csv_files' => l(t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '!columns' => implode(', ', $feeds)));
+    $output = $this->t('Import !csv_files with one or more of these columns: !columns.', array('!csv_files' => l($this->t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '!columns' => implode(', ', $feeds)));
     $items = array();
-    $items[] = format_plural(count($uniques), t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
-    $items[] = l(t('Download a template'), 'import/' . $this->importer->id() . '/template');
+    $items[] = format_plural(count($uniques), $this->t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), $this->t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
+    $items[] = l($this->t('Download a template'), 'import/' . $this->importer->id() . '/template');
     $form['parser']['help'] = array(
       '#prefix' => '<div class="help">',
       '#suffix' => '</div>',
@@ -165,8 +165,8 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     );
     $form['parser']['delimiter'] = array(
       '#type' => 'select',
-      '#title' => t('Delimiter'),
-      '#description' => t('The character that delimits fields in the CSV file.'),
+      '#title' => $this->t('Delimiter'),
+      '#description' => $this->t('The character that delimits fields in the CSV file.'),
       '#options'  => array(
         ',' => ',',
         ';' => ';',
@@ -178,8 +178,8 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     );
     $form['parser']['no_headers'] = array(
       '#type' => 'checkbox',
-      '#title' => t('No Headers'),
-      '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
+      '#title' => $this->t('No Headers'),
+      '#description' => $this->t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
       '#default_value' => isset($feed_config['no_headers']) ? $feed_config['no_headers'] : 0,
     );
     return $form;
@@ -201,8 +201,8 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   public function buildConfigurationForm(array $form, array &$form_state) {
     $form['delimiter'] = array(
       '#type' => 'select',
-      '#title' => t('Default delimiter'),
-      '#description' => t('Default field delimiter.'),
+      '#title' => $this->t('Default delimiter'),
+      '#description' => $this->t('Default field delimiter.'),
       '#options' => array(
         ',' => ',',
         ';' => ';',
@@ -214,8 +214,8 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     );
     $form['no_headers'] = array(
       '#type' => 'checkbox',
-      '#title' => t('No headers'),
-      '#description' => t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
+      '#title' => $this->t('No headers'),
+      '#description' => $this->t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
       '#default_value' => $this->configuration['no_headers'],
     );
 
