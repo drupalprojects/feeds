@@ -24,7 +24,7 @@ use Drupal\feeds\Plugin\PluginBase;
  *
  * @Plugin(
  *   id = "opml",
- *   title = @Translation("OPML parser"),
+ *   title = @Translation("OPML"),
  *   description = @Translation("Parse OPML files.")
  * )
  */

@@ -101,14 +101,14 @@ function feeds_queue_info() {
       ),
     ),
     'feeds_feed_import' => array(
-      'title' => t('Feeds source import'),
+      'title' => t('Feed import'),
       'worker callback' => 'feeds_feed_import',
       'cron' => array(
         'time' => 60,
       ),
     ),
     'feeds_feed_expire' => array(
-      'title' => t('Feeds source expire'),
+      'title' => t('Feed expire'),
       'worker callback' => 'feeds_feed_expire',
       'cron' => array(
         'time' => 60,
@@ -240,14 +240,13 @@ function feeds_push_subscribe(array $job) {
  * @todo Harmonize Job Scheduler API callbacks with Batch API callbacks?
  *
  * @param string $method
- *   Method to execute on importer; one of 'import' or 'clear'.
+ *   Method to execute on the feed.
  * @param int $fid
- *   If importer is attached to content type, feed node id identifying the
- *   source to be imported.
+ *   The feed id.
  * @param array $context
  *   Batch context.
  *
- * @see Feed::startBatchAPIJob()
+ * @see \Drupal\feeds\Plugin\feeds\Manager\Background::startBatchAPIJob()
  */
 function feeds_batch($method, $fid, array &$context) {
   $context['finished'] = StateInterface::BATCH_COMPLETE;

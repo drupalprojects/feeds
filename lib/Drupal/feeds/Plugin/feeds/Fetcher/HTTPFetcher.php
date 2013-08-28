@@ -27,7 +27,7 @@ use Drupal\feeds\RawFetcherResult;
  *
  * @Plugin(
  *   id = "http",
- *   title = @Translation("HTTP fetcher"),
+ *   title = @Translation("Download"),
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */

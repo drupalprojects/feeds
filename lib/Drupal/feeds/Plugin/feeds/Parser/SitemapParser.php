@@ -20,7 +20,7 @@ use Drupal\feeds\Plugin\PluginBase;
  *
  * @Plugin(
  *   id = "sitemap",
- *   title = @Translation("Sitemap parser"),
+ *   title = @Translation("Sitemap XML"),
  *   description = @Translation("Parse Sitemap XML format feeds.")
  * )
  */

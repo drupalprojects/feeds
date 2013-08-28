@@ -24,7 +24,7 @@ use Drupal\feeds\StateInterface;
  *
  * @Plugin(
  *   id = "csv",
- *   title = @Translation("CSV parser"),
+ *   title = @Translation("CSV"),
  *   description = @Translation("Parse CSV files.")
  * )
  */

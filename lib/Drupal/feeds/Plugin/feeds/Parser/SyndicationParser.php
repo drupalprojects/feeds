@@ -22,7 +22,7 @@ use Zend\Feed\Reader\Exception\ExceptionInterface;
  *
  * @Plugin(
  *   id = "syndication",
- *   title = @Translation("Syndication parser"),
+ *   title = @Translation("RSS/Atom"),
  *   description = @Translation("Default parser for RSS, Atom and RDF feeds.")
  * )
  */

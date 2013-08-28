@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @Plugin(
  *   id = "upload",
- *   title = @Translation("Upload fetcher"),
+ *   title = @Translation("Upload"),
  *   description = @Translation("Upload content from a local file.")
  * )
  */

@@ -21,7 +21,7 @@ use Drupal\feeds\StateInterface;
  *
  * @Plugin(
  *   id = "directory",
- *   title = @Translation("Directory fetcher"),
+ *   title = @Translation("Directory"),
  *   description = @Translation("Uses a directory, or file, on the server.")
  * )
  */

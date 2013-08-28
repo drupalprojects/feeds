@@ -159,7 +159,7 @@ interface FeedInterface extends ContentEntityInterface {
    * Removes all items from a feed.
    *
    * This method only executes the current batch chunk, then returns. If you are
-   * looking to delete all items of a source, use FeedInterface::startClear()
+   * looking to delete all items of a feed, use FeedInterface::startClear()
    * instead.
    *
    * @return float
