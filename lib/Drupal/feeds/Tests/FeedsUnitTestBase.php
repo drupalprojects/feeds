@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\feeds\Utility\HTTPRequest;
 use Drupal\simpletest\DrupalUnitTestBase;
 
 /**
@@ -57,7 +58,7 @@ class FeedsUnitTestBase extends DrupalUnitTestBase {
     foreach ($url_schemes as $scheme) {
       foreach ($valid_absolute_urls as $url) {
         $test_url = $scheme . '://' . $url;
-        $valid_url = feeds_valid_url($test_url, TRUE);
+        $valid_url = HTTPRequest::validUrl($test_url, TRUE);
         $this->assertTrue($valid_url, t('@url is a valid url.', array('@url' => $test_url)));
       }
     }
@@ -71,7 +72,7 @@ class FeedsUnitTestBase extends DrupalUnitTestBase {
     foreach ($url_schemes as $scheme) {
       foreach ($invalid_ablosule_urls as $url) {
         $test_url = $scheme . '://' . $url;
-        $valid_url = feeds_valid_url($test_url, TRUE);
+        $valid_url = HTTPRequest::validUrl($test_url, TRUE);
         $this->assertFalse($valid_url, t('@url is NOT a valid url.', array('@url' => $test_url)));
       }
     }

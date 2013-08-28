@@ -218,7 +218,7 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
 
-    if (!feeds_valid_url($values['source'], TRUE)) {
+    if (!HTTPRequest::validUrl($values['source'], TRUE)) {
       $form_key = 'feeds][' . get_class($this) . '][source';
       form_set_error($form_key, $this->t('The URL %source is invalid.', array('%source' => $values['source'])));
     }

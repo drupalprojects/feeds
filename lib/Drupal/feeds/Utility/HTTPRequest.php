@@ -116,7 +116,7 @@ class HTTPRequest {
     $username = $this->settings['username'];
     $password = $this->settings['password'];
 
-    if (!$username && feeds_valid_url($url, TRUE)) {
+    if (!$username && $this->validUrl($url, TRUE)) {
       // Handle password protected feeds.
       $url_parts = parse_url($url);
       if (!empty($url_parts['user']) && !empty($url_parts['pass'])) {
@@ -279,6 +279,37 @@ class HTTPRequest {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Copy of valid_url() that supports the webcal scheme.
+   *
+   * @see valid_url()
+   *
+   * @todo Replace with valid_url() when http://drupal.org/node/295021 is fixed.
+   */
+  public static function validUrl($url, $absolute = FALSE) {
+    if ($absolute) {
+      return (bool) preg_match("
+        /^                                                      # Start at the beginning of the text
+        (?:ftp|https?|feed|webcal):\/\/                         # Look for ftp, http, https, feed or webcal schemes
+        (?:                                                     # Userinfo (optional) which is typically
+          (?:(?:[\w\.\-\+!$&'\(\)*\+,;=]|%[0-9a-f]{2})+:)*      # a username or a username and password
+          (?:[\w\.\-\+%!$&'\(\)*\+,;=]|%[0-9a-f]{2})+@          # combination
+        )?
+        (?:
+          (?:[a-z0-9\-\.]|%[0-9a-f]{2})+                        # A domain name or a IPv4 address
+          |(?:\[(?:[0-9a-f]{0,4}:)*(?:[0-9a-f]{0,4})\])         # or a well formed IPv6 address
+        )
+        (?::[0-9]+)?                                            # Server port number (optional)
+        (?:[\/|\?]
+          (?:[|\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})   # The path and query (optional)
+        *)?
+      $/xi", $url);
+    }
+    else {
+      return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
+    }
   }
 
 }
