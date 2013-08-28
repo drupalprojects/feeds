@@ -105,7 +105,6 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
   }
 
   public function sourceSave(FeedInterface $feed) {
-    // dpm($feed->getConfigurationFor($this));
   }
 
   /**

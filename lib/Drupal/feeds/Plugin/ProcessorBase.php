@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
+use Drupal\feeds\SchedulerInterface;
 use Drupal\feeds\StateInterface;
 
 /**
@@ -102,7 +103,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     if ($time === NULL) {
       $time = $this->expiryTime();
     }
-    if ($time == FEEDS_EXPIRE_NEVER) {
+    if ($time == SchedulerInterface::EXPIRE_NEVER) {
       return;
     }
 
@@ -271,7 +272,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * {@inheritdoc}
    */
   public function expiryTime() {
-    return FEEDS_EXPIRE_NEVER;
+    return SchedulerInterface::EXPIRE_NEVER;
   }
 
   /**
@@ -494,7 +495,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *   A string in the format, "After (time)" or "Never."
    */
   public function formatExpire($timestamp) {
-    if ($timestamp == FEEDS_EXPIRE_NEVER) {
+    if ($timestamp == SchedulerInterface::EXPIRE_NEVER) {
       return t('Never');
     }
     return t('after !time', array('!time' => format_interval($timestamp)));

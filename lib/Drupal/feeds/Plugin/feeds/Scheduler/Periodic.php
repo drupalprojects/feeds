@@ -100,7 +100,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($period == FEEDS_SCHEDULE_NEVER) {
+    if ($period == SchedulerInterface::SCHEDULE_NEVER) {
       $this->jobController->remove($job);
     }
     else {
@@ -132,7 +132,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($feed->getImporter()->getProcessor()->expiryTime() == FEEDS_EXPIRE_NEVER) {
+    if ($feed->getImporter()->getProcessor()->expiryTime() == SchedulerInterface::EXPIRE_NEVER) {
       $this->jobController->remove($job);
     }
     else {
@@ -179,7 +179,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       $p = t('Every !p', array('!p' => $p));
     }
     $period = array(
-      FEEDS_SCHEDULE_NEVER => t('Off'),
+      SchedulerInterface::SCHEDULE_NEVER => t('Off'),
       0 => t('As often as possible'),
     ) + $period;
 

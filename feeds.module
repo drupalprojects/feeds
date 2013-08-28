@@ -17,16 +17,6 @@ use Guzzle\Http\Exception\BadResponseException;
 use Zend\Feed\Reader\Reader;
 
 /**
- * Do not schedule a feed for refresh.
- */
-const FEEDS_SCHEDULE_NEVER = -1;
-
-/**
- * Never expire feed items.
- */
-const FEEDS_EXPIRE_NEVER = -1;
-
-/**
  * Implements hook_help().
  */
 function feeds_help($path, $arg) {

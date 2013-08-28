@@ -222,10 +222,9 @@ class ImporterFormController extends EntityFormController {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    $importer = $this->entity;
-    unset($importer->plugin_settings);
-    unset($importer->actions);
-    $importer->save();
+    unset($this->entity->plugin_settings);
+    unset($this->entity->actions);
+    $this->entity->save();
     drupal_set_message($this->t('Your changes have been saved.'));
   }
 

@@ -2,18 +2,31 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Scheduler\Periodic.
+ * Contains \Drupal\feeds\Plugin\feeds\Plugin\SchedulerInterface.
  */
 
 namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\SchedulerInterface;
 
 /**
  * Defines the Feeds scheduler plugin interface.
  */
 interface SchedulerInterface extends FeedsPluginInterface {
+
+  /**
+   * Never expire feed items.
+   *
+   * @var int
+   */
+  const EXPIRE_NEVER = -1;
+
+  /**
+   * Do not schedule a feed for refresh.
+   *
+   * @var int
+   */
+  const SCHEDULE_NEVER = -1;
 
   /**
    * Schedules a feed for import.
