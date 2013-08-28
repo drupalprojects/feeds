@@ -43,9 +43,13 @@ class EntityProcessor implements DerivativeInterface {
    */
   public function getDerivativeDefinitions(array $base_plugin_definition) {
     foreach (entity_get_info() as $entity_type => $entity_info) {
-      $this->derivatives[$entity_type] = $base_plugin_definition;
-      $this->derivatives[$entity_type]['title'] = $entity_info['label'];
-      $this->derivatives[$entity_type]['entity type'] = $entity_type;
+
+      // Only show content entities for now.
+      if (empty($entity_info['config_prefix'])) {
+        $this->derivatives[$entity_type] = $base_plugin_definition;
+        $this->derivatives[$entity_type]['title'] = $entity_info['label'];
+        $this->derivatives[$entity_type]['entity type'] = $entity_type;
+      }
     }
 
     $this->sortDerivatives();
