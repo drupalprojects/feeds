@@ -34,4 +34,12 @@ interface PuSHFetcherInterface {
    */
   public function push(FeedInterface $feed, $raw);
 
+  /**
+   * Overrides the import period set by the importer.
+   *
+   * @return int
+   *   The import period.
+   */
+  public function importPeriod(FeedInterface $feed);
+
 }
