@@ -59,7 +59,7 @@ class ImporterFormController extends EntityFormController {
     $form['#tree'] = TRUE;
 
     $form['basics'] = array(
-      '#title' => t('Basic settings'),
+      '#title' => $this->t('Basic settings'),
       '#type' => 'details',
       '#tree' => FALSE,
       '#collapsed' => !$this->entity->isNew(),
@@ -67,19 +67,19 @@ class ImporterFormController extends EntityFormController {
 
     $form['basics']['label'] = array(
       '#type' => 'textfield',
-      '#title' => t('Label'),
+      '#title' => $this->t('Label'),
       '#default_value' => $this->entity->label(),
       '#maxlength' => '255',
-      '#description' => t('A unique label for this importer. This label will be displayed in the interface.'),
+      '#description' => $this->t('A unique label for this importer. This label will be displayed in the interface.'),
     );
 
     $form['basics']['id'] = array(
       '#type' => 'machine_name',
-      '#title' => t('Machine name'),
+      '#title' => $this->t('Machine name'),
       '#default_value' => $this->entity->id(),
       '#disabled' => !$this->entity->isNew(),
       '#maxlength' => 64,
-      '#description' => t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
+      '#description' => $this->t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
       '#machine_name' => array(
         'exists' => array($this, 'exists'),
         'source' => array('basics', 'label'),
@@ -87,8 +87,8 @@ class ImporterFormController extends EntityFormController {
     );
     $form['basics']['description'] = array(
       '#type' => 'textfield',
-      '#title' => t('Description'),
-      '#description' => t('A description of this importer.'),
+      '#title' => $this->t('Description'),
+      '#description' => $this->t('A description of this importer.'),
       '#default_value' => $this->entity->description,
     );
 
@@ -122,7 +122,7 @@ class ImporterFormController extends EntityFormController {
       else {
         $form[$type]['id'] = array(
           '#type' => 'select',
-          '#title' => t('@type', array('@type' => ucfirst($type))),
+          '#title' => $this->t('@type', array('@type' => ucfirst($type))),
           '#options' => $options,
           '#default_value' => $plugin->getPluginId(),
           '#ajax' => array(
@@ -154,7 +154,7 @@ class ImporterFormController extends EntityFormController {
           $form[$type . '_configuration'] = array(
             '#type' => 'details',
             '#group' => 'plugin_settings',
-            '#title' => t('@type settings', array('@type' => ucfirst($type))),
+            '#title' => $this->t('@type settings', array('@type' => ucfirst($type))),
             '#parents' => array($type, 'configuration'),
           );
           // $form[$type . '_configuration']['#prefix'] = '<span id="feeds-' . $type . '-details">';
@@ -226,7 +226,7 @@ class ImporterFormController extends EntityFormController {
     unset($importer->plugin_settings);
     unset($importer->actions);
     $importer->save();
-    drupal_set_message(t('Your changes have been saved.'));
+    drupal_set_message($this->t('Your changes have been saved.'));
   }
 
   /**
