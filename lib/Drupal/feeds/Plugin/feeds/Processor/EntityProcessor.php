@@ -201,7 +201,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     }
     if (empty($messages)) {
       $messages[] = array(
-        'message' => t('There are no new @entities.', array('@entities' => strtolower($info['label_plural']))),
+        'message' => $this->t('There are no new @entities.', array('@entities' => strtolower($info['label_plural']))),
       );
     }
     foreach ($messages as $message) {
@@ -451,13 +451,13 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
 
     $form['update_existing'] = array(
       '#type' => 'radios',
-      '#title' => t('Update existing @entities', $tokens),
+      '#title' => $this->t('Update existing @entities', $tokens),
       '#description' =>
-        t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
+        $this->t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
       '#options' => array(
-        ProcessorInterface::SKIP_EXISTING => t('Do not update existing @entities', $tokens),
-        ProcessorInterface::REPLACE_EXISTING => t('Replace existing @entities', $tokens),
-        ProcessorInterface::UPDATE_EXISTING => t('Update existing @entities', $tokens),
+        ProcessorInterface::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
+        ProcessorInterface::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
+        ProcessorInterface::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->configuration['update_existing'],
     );
@@ -492,9 +492,9 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     // The bundle has not been selected.
     if (!$this->bundle()) {
       $info = $this->entityInfo();
-      $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : t('bundle');
+      $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : $this->t('bundle');
       $url = url('admin/structure/feeds/manage/' . $this->importer->id() . '/settings/processor');
-      drupal_set_message(t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
+      drupal_set_message($this->t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
     }
 
     $targets = parent::getMappingTargets();
@@ -557,7 +557,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       $form['values'][$bundle_key] = array(
         '#type' => 'select',
         '#options' => $this->bundleOptions(),
-        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : t('Bundle'),
+        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : $this->t('Bundle'),
         '#required' => TRUE,
         '#default_value' => $this->bundle(),
       );
