@@ -12,7 +12,6 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
@@ -31,13 +30,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, ContainerFactoryPluginInterface, FetcherInterface {
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $account;
 
   /**
    * The file usage backend.
@@ -60,16 +52,13 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    *   The plugin configuration.
    * @param string $plugin_id
    *   The plugin id.
-   * @param AccountInterface $account
-   *   The current user.
-   * @param FileUsageInterface $file_usage
+   * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
    *   The file usage backend.
-   * @param EntityStorageControllerInterface $file_storage
+   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $file_storage
    *   The file storage controller.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, AccountInterface $account, FileUsageInterface $file_usage, EntityStorageControllerInterface $file_storage) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageControllerInterface $file_storage) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->account = $account;
     $this->fileUsage = $file_usage;
     $this->fileStorage = $file_storage;
   }
@@ -103,6 +92,9 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     throw new \Exception(String::format('Resource is not a file: %source', array('%source' => $feed_config['source'])));
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function sourceDefaults() {
     return array('fid' => 0, 'source' => '');
   }
@@ -127,6 +119,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
       '#upload_location' => $this->configuration['directory'],
       '#required' => TRUE,
     );
+
     return $form;
   }
 
@@ -209,27 +202,20 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     $values =& $form_state['values']['fetcher']['configuration'];
 
     $values['directory'] = trim($values['directory']);
-
-    // Ensure that the upload directory field is not empty.
-    if (!$values['directory']) {
-      form_set_error('directory', $this->t('Please specify an upload directory.'));
-      // Do not continue validating the directory if none was specified.
-      return;
-    }
+    $values['allowed_extensions'] = trim($values['allowed_extensions']);
 
     // Validate the URI scheme of the upload directory.
     $scheme = file_uri_scheme($values['directory']);
     if (!$scheme || !in_array($scheme, $this->getSchemes())) {
-      form_set_error('directory', $this->t('Please enter a valid scheme into the directory location.'));
-
-      // Return here so that attempts to create the directory below don't
-      // throw warnings.
+      form_error($form['fetcher_configuration']['directory'], $this->t('Please enter a valid scheme into the directory location.'));
+      // Return here so that attempts to create the directory below don't throw
+      // warnings.
       return;
     }
 
     // Ensure that the upload directory exists.
     if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      form_set_error('directory', $this->t('The chosen directory does not exist and attempts to create it failed.'));
+      form_error($form['fetcher_configuration']['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
     }
   }
 
@@ -241,17 +227,12 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * @param int $feed_id
    *   The feed id.
    *
-   * @return bool|array
-   *   TRUE for success, FALSE in the event of an error, or an array if the file
-   *   is being used by any modules.
-   *
    * @see file_delete()
    */
   protected function deleteFile($file_id, $feed_id) {
     if ($file = $this->fileStorage->load($file_id)) {
       $this->fileUsage->delete($file, 'feeds', $this->pluginType(), $feed_id);
     }
-    return FALSE;
   }
 
   /**
@@ -264,6 +245,6 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     return array_keys(file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE));
   }
 
-  public function importPeriod(){}
+  public function importPeriod() {}
 
 }
