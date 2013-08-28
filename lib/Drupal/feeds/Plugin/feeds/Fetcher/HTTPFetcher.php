@@ -10,6 +10,8 @@ namespace Drupal\feeds\Plugin\feeds\Fetcher;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Queue\QueueInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
@@ -19,7 +21,9 @@ use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ClearableInterface;
 use Drupal\feeds\Plugin\FetcherInterface;
 use Drupal\feeds\PuSH\PuSHFetcherInterface;
+use Drupal\feeds\PuSH\SubscriptionInterface;
 use Drupal\feeds\RawFetcherResult;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines an HTTP fetcher.
@@ -32,7 +36,67 @@ use Drupal\feeds\RawFetcherResult;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface, PuSHFetcherInterface {
+class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface, PuSHFetcherInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * The subscribe queue.
+   *
+   * @var \Drupal\Core\Queue\QueueInterface
+   */
+  protected $subscribeQueue;
+
+  /**
+   * The unsubscribe queue.
+   *
+   * @var \Drupal\Core\Queue\QueueInterface
+   */
+  protected $unsubscribeQueue;
+
+  /**
+   * The subscription controller.
+   *
+   * @var \Drupal\feeds\PuSH\SubscriptionInterface
+   */
+  protected $subscription;
+
+  /**
+   * Constructs an UploadFetcher object.
+   *
+   * @param array $configuration
+   *   The plugin configuration.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param array $plugin_definition
+   *   The plugin definition.
+   * @param \Drupal\Core\Queue\QueueInterface $subscribe_queue
+   *   The queue to use for subscriptions.
+   * @param \Drupal\Core\Queue\QueueInterface $unsubscribe_queue
+   *   The queue to use to unsubscribe.
+   * @param \Drupal\feeds\PuSH\SubscriptionInterface $subscription
+   *   The subscription controller.
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, QueueInterface $subscribe_queue, QueueInterface $unsubscribe_queue, SubscriptionInterface $subscription) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->subscribeQueue = $subscribe_queue;
+    $this->unsubscribeQueue = $unsubscribe_queue;
+    $this->subscription = $subscription;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Merge the two queues.
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('queue')->get('feeds_push_subscribe'),
+      $container->get('queue')->get('feeds_push_unsubscribe'),
+      $container->get('feeds.subscription.crud')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -168,6 +232,8 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Refactor this like woah.
    */
   public function sourceSave(FeedInterface $feed) {
     if (!$this->configuration['use_pubsubhubbub']) {
@@ -182,32 +248,28 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     );
 
     // Subscription does not exist yet.
-    if (!$subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
+    if (!$subscription = $this->subscription->getSubscription($feed->id())) {
       $sub = array(
         'id' => $feed->id(),
         'state' => 'unsubscribed',
         'hub' => '',
         'topic' => $feed_config['source'],
       );
-
-      \Drupal::service('feeds.subscription.crud')->setSubscription($sub);
-
+      $this->subscription->setSubscription($sub);
       // Subscribe to new topic.
-      \Drupal::queue('feeds_push_subscribe')->createItem($item);
+      $this->subscribeQueue->createItem($item);
     }
 
     // Source has changed.
     elseif ($subscription['topic'] !== $feed_config['source']) {
       // Subscribe to new topic.
-      \Drupal::queue('feeds_push_subscribe')->createItem($item);
-
+      $this->subscribeQueue->createItem($item);
       // Unsubscribe from old topic.
       $item['data'] = $subscription['topic'];
-      \Drupal::queue('feeds_push_unsubscribe')->createItem($item);
-
+      $this->unsubscribeQueue->createItem($item);
       // Save new topic to subscription.
       $subscription['topic'] = $feed_config['source'];
-      \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
+      $this->subscription->setSubscription($subscription);
     }
 
     // Hub exists, but we aren't subscribed.
@@ -216,12 +278,14 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     // Maintain a retry count so that we don't keep trying indefinitely.
     elseif ($subscription['hub']) {
       switch ($subscription['state']) {
+
+        // Don't do anything if we are in the process of subscribing.
         case 'subscribe':
         case 'subscribed':
           break;
 
         default:
-          \Drupal::queue('feeds_push_subscribe')->createItem($item);
+          $this->subscribeQueue->createItem($item);
           break;
       }
     }
@@ -239,9 +303,8 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
         'type' => $this->getPluginId(),
         'id' => $feed->id(),
       );
-
       // Unsubscribe from feed.
-      \Drupal::queue('feeds_push_unsubscribe')->createItem($item);
+      $this->unsubscribeQueue->createItem($item);
     }
   }
 
@@ -249,7 +312,7 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    * {@inheritdoc}
    */
   public function importPeriod(FeedInterface $feed) {
-    $sub = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id());
+    $sub = $this->subscription->getSubscription($feed->id());
     if ($sub && $sub['state'] == 'subscribed') {
       // Delay for three days if there is a successful subscription.
       return 259200;
