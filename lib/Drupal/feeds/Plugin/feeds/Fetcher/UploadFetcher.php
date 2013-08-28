@@ -46,6 +46,15 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   protected $fileStorage;
 
   /**
+   * The feed configuration.
+   *
+   * Used only during form processing.
+   *
+   * @var array
+   */
+  protected $feedConfig;
+
+  /**
    * Constructs an UploadFetcher object.
    *
    * @param array $configuration
@@ -72,7 +81,6 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $account,
       $container->get('file.usage'),
       $container->get('plugin.manager.entity')->getStorageController('file')
     );
@@ -103,14 +111,14 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * {@inheritdoc}
    */
   public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
+    $this->feedConfig = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['upload'] = array(
       '#type' => 'managed_file',
       '#title' => $this->t('File'),
       '#description' => $this->t('Select a file from your local system.'),
-      '#default_value' => array($feed_config['fid']),
+      '#default_value' => array($this->feedConfig['fid']),
       '#upload_validators' => array(
         'file_validate_extensions' => array(
           $this->configuration['allowed_extensions'],
@@ -127,25 +135,34 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * {@inheritdoc}
    */
   public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-    $values =& $form_state['values']['fetcher'];
-    $new_fid = reset($values['upload']);
+    // We need to store this for later so that we have the feed id.
+    $this->feedConfig['new_fid'] = reset($form_state['values']['fetcher']['upload']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function sourceSave(FeedInterface $feed) {
+    // We are only interested in continuing if we came from a form submit.
+    if (!$this->feedConfig) {
+      return;
+    }
 
     // New file found.
-    if ($new_fid != $feed_config['fid']) {
-      $this->deleteFile($feed_config['fid'], $feed->id());
+    if ($this->feedConfig['new_fid'] != $this->feedConfig['fid']) {
+      $this->deleteFile($this->feedConfig['fid'], $feed->id());
 
-      if ($new_fid) {
-        $file = $this->fileStorage->load($new_fid);
+      if ($this->feedConfig['new_fid']) {
+        $file = $this->fileStorage->load($this->feedConfig['new_fid']);
 
         $this->fileUsage->add($file, 'feeds', $this->pluginType(), $feed->id());
 
         $file->setPermanent();
         $file->save();
 
-        $feed_config['fid'] = $new_fid;
-        $feed_config['source'] = $file->getFileUri();
-        $feed->setConfigurationFor($this, $feed_config);
+        $this->feedConfig['fid'] = $this->feedConfig['new_fid'];
+        $this->feedConfig['source'] = $file->getFileUri();
+        $feed->setConfigurationFor($this, $this->feedConfig);
       }
     }
   }
@@ -244,7 +261,5 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   protected function getSchemes() {
     return array_keys(file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE));
   }
-
-  public function importPeriod() {}
 
 }
