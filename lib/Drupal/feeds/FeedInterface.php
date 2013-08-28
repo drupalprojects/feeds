@@ -307,14 +307,6 @@ interface FeedInterface extends ContentEntityInterface {
   public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE);
 
   /**
-   * Returns the configuration for this Feed.
-   *
-   * @return array
-   *   The configuration array.
-   */
-  public function getConfiguration();
-
-  /**
    * Returns the feed author user entity.
    *
    * @return \Drupal\user\UserInterface
@@ -364,6 +356,9 @@ interface FeedInterface extends ContentEntityInterface {
 
   /**
    * Unlocks a feed.
+   *
+   * @return \Drupal\feeds\FeedInterface
+   *   The called feed entity.
    */
   public function unlock();
 

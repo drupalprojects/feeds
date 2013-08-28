@@ -69,7 +69,7 @@ use Drupal\job_scheduler\JobScheduler;
 class Feed extends EntityNG implements FeedInterface {
 
   /**
-   * The cached result from getImporter() since that gets called many times.
+   * The cached result from getImporter() since it gets called many times.
    *
    * @var \Drupal\feeds\ImporterInterface
    */
@@ -187,11 +187,11 @@ class Feed extends EntityNG implements FeedInterface {
       $parser_result = $this->getImporter()->getParser()->parse($this, $this->get('fetcher_result')->value);
       module_invoke_all('feeds_after_parse', $this, $parser_result);
 
-      // // Process.
+      // Process.
       $this->getImporter()->getProcessor()->process($this, $parser_result);
     }
     catch (Exception $e) {
-      // Do nothing.
+      // Do nothing. Will thow later.
     }
     $this->releaseLock();
 
@@ -203,6 +203,8 @@ class Feed extends EntityNG implements FeedInterface {
       $this->set('imported', time());
       $this->log('import', 'Imported in !s s', array('!s' => $this->get('imported')->value - $state[StateInterface::START]), WATCHDOG_INFO);
       module_invoke_all('feeds_after_import', $this);
+
+      // Unset.
       $this->get('fetcher_result')->setValue(NULL);
       $this->get('state')->setValue(NULL);
     }
@@ -218,6 +220,8 @@ class Feed extends EntityNG implements FeedInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Should we acquire a lock here? If not, we shouldn't lose $raw.
    */
   public function importRaw($raw) {
     // Fetch.
@@ -232,6 +236,7 @@ class Feed extends EntityNG implements FeedInterface {
 
       // // Process.
       $importer->getProcessor()->process($this, $parser_result);
+      module_invoke_all('feeds_after_import', $this);
     }
     else {
       throw new InterfaceNotImplementedException();
@@ -339,6 +344,7 @@ class Feed extends EntityNG implements FeedInterface {
   public function progressImporting() {
     $fetcher = $this->state(StateInterface::FETCH);
     $parser = $this->state(StateInterface::PARSE);
+
     if ($fetcher->progress == StateInterface::BATCH_COMPLETE && $parser->progress == StateInterface::BATCH_COMPLETE) {
       return StateInterface::BATCH_COMPLETE;
     }
@@ -378,6 +384,8 @@ class Feed extends EntityNG implements FeedInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Perform some validation.
    */
   public function existing() {
     return $this;
@@ -408,22 +416,6 @@ class Feed extends EntityNG implements FeedInterface {
     $this->set('config', $this_config);
 
     return $this;
-  }
-
-  /**
-   * Returns the default configuration for this feed.
-   *
-   * @return array
-   *   The defualt configuration for the feed plus plugins.
-   */
-  protected function getDefaultConfiguration() {
-    // Collect information from plugins.
-    $defaults = array();
-    foreach ($this->getImporter()->getPlugins() as $plugin) {
-      $defaults[$plugin->pluginType()] = $plugin->sourceDefaults();
-    }
-
-    return $defaults;
   }
 
   /**
@@ -481,15 +473,8 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function getConfiguration() {
-    return $this->config->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getSource() {
-    $configuration = $this->getConfiguration();
+    $configuration = $this->get('config')->value;
     if (isset($configuration['fetcher']) && isset($configuration['fetcher']['source'])) {
       return $configuration['fetcher']['source'];
     }
@@ -538,7 +523,7 @@ class Feed extends EntityNG implements FeedInterface {
   public function preSave(EntityStorageControllerInterface $storage_controller) {
     // $feed->state = isset($feed->state) ? $feed->state : FALSE;
     // $feed->fetcher_result = isset($feed->fetcher_result) ? $feed->fetcher_result : FALSE;
-    // Before saving the feeds, set changed and revision times.
+    // Before saving the feed, set changed time.
     $this->set('changed', REQUEST_TIME);
   }
 
@@ -550,24 +535,12 @@ class Feed extends EntityNG implements FeedInterface {
     foreach ($this->getImporter()->getPlugins() as $plugin) {
       $plugin->sourceSave($this);
     }
-    $config = $this->getConfiguration();
 
     // Store the source property of the fetcher in a separate column so that we
     // can do fast lookups on it.
-    $source = '';
-    if (isset($config['fetcher']['source'])) {
-      $source = $config['fetcher']['source'];
-    }
-    $this->set('source', $source);
+    $this->set('source', $this->getSource());
 
-    // @todo move this to the storage controller.
-    db_update('feeds_feed')
-      ->condition('fid', $this->id())
-      ->fields(array(
-        'source' => $source,
-        'config' => serialize($config),
-      ))
-      ->execute();
+    $storage_controller->updateFeedConfig($this);
   }
 
   /**
@@ -583,18 +556,11 @@ class Feed extends EntityNG implements FeedInterface {
       ->execute();
 
     // Alert plugins that we are deleting.
+    // @todo Expand sourceDelete() to accept multiple feeds.
     foreach ($feeds as $feed) {
       foreach ($feed->getImporter()->getPlugins() as $plugin) {
         $plugin->sourceDelete($feed);
       }
-
-      // Remove from schedule.
-      $job = array(
-        'type' => $feed->bundle(),
-        'id' => $feed->id(),
-      );
-      JobScheduler::get('feeds_feed_import')->remove($job);
-      JobScheduler::get('feeds_feed_expire')->remove($job);
     }
   }
 
@@ -602,7 +568,9 @@ class Feed extends EntityNG implements FeedInterface {
    * {@inheritdoc}
    */
   public function unlock() {
-    \Drupal::entityManager()->getStorageController($this->entityType)->unlock($this);
+    \Drupal::entityManager()->getStorageController($this->entityType)->unlockFeed($this);
+
+    return $this;
   }
 
   /**

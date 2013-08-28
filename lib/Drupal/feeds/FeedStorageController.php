@@ -22,10 +22,28 @@ class FeedStorageController extends DatabaseStorageControllerNG {
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to unlock.
    */
-  public function unlock(FeedInterface $feed) {
-    $this->database->update('feeds_feed')
+  public function unlockFeed(FeedInterface $feed) {
+    $this->database->update($this->entityInfo['base_table'])
       ->condition('fid', $feed->id())
       ->fields(array('state' => FALSE))
+      ->execute();
+  }
+
+  /**
+   * Updates the config and source fields of a feed.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to unlock.
+   *
+   * @todo Figure out a better way to do this.
+   */
+  public function updateFeedConfig(FeedInterface $feed) {
+    $this->database->update($this->entityInfo['base_table'])
+      ->condition('fid', $feed->id())
+      ->fields(array(
+        'source' => $feed->get('source')->value,
+        'config' => serialize($feed->get('config')->value),
+      ))
       ->execute();
   }
 
