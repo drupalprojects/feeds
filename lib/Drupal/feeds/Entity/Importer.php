@@ -70,7 +70,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *
    * @todo Make this dynamic?
    */
-  protected $pluginTypes = array('fetcher', 'parser', 'processor');
+  protected $pluginTypes = array('scheduler', 'fetcher', 'parser', 'processor');
 
   /**
    * Plugin ids and configuration.
@@ -78,6 +78,10 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * @todo Move this to sotrage controller.
    */
   protected $plugins = array(
+    'scheduler' => array(
+      'id' => 'periodic',
+      'configuration' => array(),
+    ),
     'fetcher' => array(
       'id' => 'http',
       'configuration' => array(),
@@ -108,8 +112,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   protected $pluginBags = array();
 
-  public $import_period = 1800;
-  public $expire_period = 3600;
   public $import_on_create = TRUE;
   public $process_in_background = FALSE;
 
@@ -280,6 +282,17 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
       $this->initPluginBag($plugin_type);
     }
     return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
+  }
+
+  public function getPluginOptionsList($plugin_type) {
+    $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
+
+    $options = array();
+    foreach ($manager->getDefinitions() as $id => $definition) {
+      $options[$id] = check_plain($definition['title']);
+    }
+
+    return $options;
   }
 
   /**

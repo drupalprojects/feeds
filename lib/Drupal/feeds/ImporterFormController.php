@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Component\Utility\MapArray;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityFormController;
@@ -31,13 +29,6 @@ class ImporterFormController extends EntityFormController {
   protected $importerStorage;
 
   /**
-   * The plugin managers keyed by plugin type.
-   *
-   * @var \Drupal\Component\Plugin\PluginManagerInterface[]
-   */
-  protected $managers = array();
-
-  /**
    * The plugngs that provide configuration forms.
    *
    * @var array
@@ -49,42 +40,22 @@ class ImporterFormController extends EntityFormController {
    *
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $importer_storage
    *   The importer storage controller.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $fetcher_manager
-   *   The fetcher plugin manager.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $parser_manager
-   *   The parser plugin manager.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $processer_manager
-   *   The processor plugin manager.
    */
-  public function __construct(
-    EntityStorageControllerInterface $importer_storage,
-    PluginManagerInterface $fetcher_manager,
-    PluginManagerInterface $parser_manager,
-    PluginManagerInterface $processer_manager) {
-
+  public function __construct(EntityStorageControllerInterface $importer_storage) {
     $this->importerStorage = $importer_storage;
-    $this->managers['fetcher'] = $fetcher_manager;
-    $this->managers['parser'] = $parser_manager;
-    $this->managers['processor'] = $processer_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('plugin.manager.entity')->getStorageController('feeds_importer'),
-      $container->get('plugin.manager.feeds.fetcher'),
-      $container->get('plugin.manager.feeds.parser'),
-      $container->get('plugin.manager.feeds.processor')
-    );
+    return new static($container->get('entity.manager')->getStorageController('feeds_importer'));
   }
 
   /**
    * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
-
     $form['#tree'] = TRUE;
 
     $form['basics'] = array(
@@ -120,31 +91,13 @@ class ImporterFormController extends EntityFormController {
       '#description' => t('A description of this importer.'),
       '#default_value' => $this->entity->description,
     );
-
-    $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-    $period = MapArray::copyValuesToKeys(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
-
-    foreach ($period as &$p) {
-      $p = t('Every !p', array('!p' => $p));
-    }
-    $period = array(
-      FEEDS_SCHEDULE_NEVER => t('Off'),
-      0 => t('As often as possible'),
-    ) + $period;
-
-    $form['import_period'] = array(
-      '#type' => 'select',
-      '#title' => t('Periodic import'),
-      '#options' => $period,
-      '#description' => t('Choose how often a source should be imported periodically.') . $cron_required,
-      '#default_value' => $this->entity->import_period,
-    );
     $form['import_on_create'] = array(
       '#type' => 'checkbox',
       '#title' => t('Import on submission'),
       '#description' => t('Check if import should be started at the moment a standalone form or node form is submitted.'),
       '#default_value' => $this->entity->import_on_create,
     );
+    $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
     $form['process_in_background'] = array(
       '#type' => 'checkbox',
       '#title' => t('Process in background'),
@@ -169,29 +122,34 @@ class ImporterFormController extends EntityFormController {
     }
 
     foreach ($this->entity->getPlugins() as $type => $plugin) {
-      $definitions = $this->managers[$type]->getDefinitions();
 
-      $options = array();
-      foreach ($definitions as $key => $definition) {
-        $options[$key] = check_plain($definition['title']);
+      $options = $this->entity->getPluginOptionsList($type);
+
+      if (count($options) === 1) {
+        $form[$type]['id'] = array(
+          '#type' => 'value',
+          '#value' => $plugin->getPluginId(),
+          '#plugin_type' => $type,
+        );
       }
-
-      $form[$type]['id'] = array(
-        '#type' => 'select',
-        '#title' => t('@type', array('@type' => ucfirst($type))),
-        '#options' => $options,
-        '#default_value' => $plugin->getPluginId(),
-        '#ajax' => array(
-          'callback' => array($this, 'ajaxCallback'),
-          'wrapper' => 'feeds-ajax-form-wrapper',
-          'effect' => 'none',
-          'progress' => 'none',
-        ),
-        '#attached' => array(
-          'library' => array(array('feeds', 'feeds')),
-        ),
-        '#plugin_type' => $type,
-      );
+      else {
+        $form[$type]['id'] = array(
+          '#type' => 'select',
+          '#title' => t('@type', array('@type' => ucfirst($type))),
+          '#options' => $options,
+          '#default_value' => $plugin->getPluginId(),
+          '#ajax' => array(
+            'callback' => array($this, 'ajaxCallback'),
+            'wrapper' => 'feeds-ajax-form-wrapper',
+            'effect' => 'none',
+            'progress' => 'none',
+          ),
+          '#attached' => array(
+            'library' => array(array('feeds', 'feeds')),
+          ),
+          '#plugin_type' => $type,
+        );
+      }
 
       // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
@@ -205,16 +163,18 @@ class ImporterFormController extends EntityFormController {
       if ($plugin instanceof PluginFormInterface) {
         $this->configurablePlugins[$type] = $plugin;
 
-        $form[$type . '_configuration'] = array(
-          '#type' => 'details',
-          '#group' => 'plugin_settings',
-          '#title' => t('@type settings', array('@type' => ucfirst($type))),
-          '#parents' => array($type, 'configuration'),
-        );
-        // $form[$type . '_configuration']['#prefix'] = '<span id="feeds-' . $type . '-details">';
-        // $form[$type . '_configuration']['#suffix'] = '</span>';
+        if ($plugin_form = $plugin->buildConfigurationForm(array(), $form_state)) {
+          $form[$type . '_configuration'] = array(
+            '#type' => 'details',
+            '#group' => 'plugin_settings',
+            '#title' => t('@type settings', array('@type' => ucfirst($type))),
+            '#parents' => array($type, 'configuration'),
+          );
+          // $form[$type . '_configuration']['#prefix'] = '<span id="feeds-' . $type . '-details">';
+          // $form[$type . '_configuration']['#suffix'] = '</span>';
 
-        $form[$type . '_configuration'] += $plugin->buildConfigurationForm(array(), $form_state);
+          $form[$type . '_configuration'] += $plugin_form;
+        }
       }
     }
 
@@ -242,6 +202,9 @@ class ImporterFormController extends EntityFormController {
     // Moved advanced settings to regular settings.
     foreach ($this->entity->getPluginTypes() as $type) {
       if (isset($form_state['values'][$type]['advanced'])) {
+        if (!isset($form_state['values'][$type]['configuration'])) {
+          $form_state['values'][$type]['configuration'] = array();
+        }
         $form_state['values'][$type]['configuration'] += $form_state['values'][$type]['advanced'];
         unset($form_state['values'][$type]['advanced']);
       }
@@ -262,10 +225,6 @@ class ImporterFormController extends EntityFormController {
 
     foreach ($this->configurablePlugins as $plugin) {
       $plugin->submitConfigurationForm($form, $form_state);
-    }
-
-    if ($this->entity->import_period != $form_state['values']['import_period']) {
-      $this->entity->reschedule($this->entity->id());
     }
 
     // Build the importer object from the submitted values.

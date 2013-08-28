@@ -295,6 +295,28 @@ class Feed extends EntityNG implements FeedInterface {
   /**
    * {@inheritdoc}
    */
+  public function schedule() {
+    $this->scheduleImport();
+    $this->scheduleExpire();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function scheduleImport() {
+    $this->getImporter()->getPlugin('scheduler')->scheduleImport($this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function scheduleExpire() {
+    $this->getImporter()->getPlugin('scheduler')->scheduleExpire($this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function state($stage) {
     $state = $this->get('state')->value;
     if (!isset($state[$stage])) {

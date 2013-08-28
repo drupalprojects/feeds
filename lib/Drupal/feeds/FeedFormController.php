@@ -179,7 +179,7 @@ class FeedFormController extends EntityFormControllerNG {
       cache_invalidate_tags(array('feeds' => TRUE));
 
       // Schedule jobs for this feed.
-      Feeds::scheduler()->schedule($feed);
+      $feed->schedule();
 
       if ($insert && $importer->import_on_create) {
         $feed->startImport();

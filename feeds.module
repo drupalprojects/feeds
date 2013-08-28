@@ -70,7 +70,7 @@ function feeds_cron() {
     }
     foreach ($feeds as $feed) {
       $feed = entity_load('feeds_feed', $feed->id());
-      Feeds::scheduler()->schedule($feed);
+      $feed->schedule();
     }
     Importer::reschedule(FALSE);
   }
@@ -100,7 +100,70 @@ function feeds_queue_info() {
         'time' => 60,
       ),
     ),
+    'feeds_feed_import' => array(
+      'title' => t('Feeds source import'),
+      'worker callback' => 'feeds_feed_import',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
+    'feeds_feed_expire' => array(
+      'title' => t('Feeds source expire'),
+      'worker callback' => 'feeds_feed_expire',
+      'cron' => array(
+        'time' => 60,
+      ),
+    ),
   );
+}
+
+/**
+ * Implements hook_cron_job_scheduler_info().
+ */
+function feeds_cron_job_scheduler_info() {
+  $info = array();
+  $info['feeds_feed_import'] = array(
+    'queue name' => 'feeds_feed_import',
+  );
+  $info['feeds_feed_expire'] = array(
+    'queue name' => 'feeds_feed_expire',
+  );
+  return $info;
+}
+
+/**
+ * Scheduler callback for importing from a source.
+ */
+function feeds_feed_import(array $job) {
+  _feeds_job_scheduler_helper('import', $job);
+}
+
+/**
+ * Scheduler callback for expiring content.
+ */
+function feeds_feed_expire(array $job) {
+  _feeds_job_scheduler_helper('expire', $job);
+}
+
+/**
+ * Executes a job_scheduler job.
+ */
+function _feeds_job_scheduler_helper($action, array $job) {
+  $feed = \Drupal::entityManager()->getStorageController('feeds_feed')->load($job['id']);
+
+  if ($feed) {
+    try {
+      $feed->existing()->$action();
+    }
+    catch (FeedsNotExistingException $e) {
+      // Do nothing.
+    }
+    catch (Exception $e) {
+      $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
+    }
+    $method = 'schedule' . ucfirst($action);
+    $feed->$method();
+  }
 }
 
 /**

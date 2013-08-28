@@ -1,4 +1,7 @@
 services:
+  plugin.manager.feeds.scheduler:
+    class: Drupal\feeds\Plugin\FeedsPluginManager
+    arguments: ['scheduler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.fetcher:
     class: Drupal\feeds\Plugin\FeedsPluginManager
     arguments: ['fetcher', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
