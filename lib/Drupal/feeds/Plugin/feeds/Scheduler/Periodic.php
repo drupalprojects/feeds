@@ -12,6 +12,7 @@ use Drupal\Component\Utility\MapArray;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\StateInterface;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\SchedulerInterface;
 
@@ -75,12 +76,12 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($period == FEEDS_SCHEDULE_NEVER) {
-      $this->jobController->remove($job);
-    }
-    else {
-      $this->jobController->set($job);
-    }
+    // if ($period == FEEDS_SCHEDULE_NEVER) {
+    //   $this->jobController->remove($job);
+    // }
+    // else {
+    //   $this->jobController->set($job);
+    // }
   }
 
   /**
@@ -102,12 +103,12 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($feed->getImporter()->getProcessor()->expiryTime() == FEEDS_EXPIRE_NEVER) {
-      $this->jobController->remove($job);
-    }
-    else {
-      $this->jobController->set($job);
-    }
+    // if ($feed->getImporter()->getProcessor()->expiryTime() == FEEDS_EXPIRE_NEVER) {
+    //   $this->jobController->remove($job);
+    // }
+    // else {
+    //   $this->jobController->set($job);
+    // }
   }
 
   /**
@@ -131,9 +132,9 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
 
     $form['import_period'] = array(
       '#type' => 'select',
-      '#title' => t('Periodic import'),
+      '#title' => t('Import period'),
       '#options' => $period,
-      '#description' => t('Choose how often a source should be imported periodically.') . $cron_required,
+      '#description' => t('Choose how often a feed should be imported.') . $cron_required,
       '#default_value' => $this->configuration['import_period'],
     );
 

@@ -9,7 +9,7 @@ namespace Drupal\feeds\Controller;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\feeds\FeedInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\feeds\StateInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class JobController {
@@ -29,26 +29,16 @@ class JobController {
   protected $lockBackend;
 
   /**
-   * The container.
-   *
-   * @var \Symfony\Component\DependencyInjection\ContainerInterface
-   */
-  protected $container;
-
-  /**
    * Constructs a JobController object.
    *
    * @param \Drupal\Core\KeyValueStore\KeyValueStoreInterface $state
    *   The state object that holds our token.
    * @param \Drupal\Core\Lock\LockBackendInterface $lock_backend
    *   The lock backend to use.
-   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-   *   The container, so that we can get the correct service.
    */
-  public function __construct(KeyValueStoreInterface $state, LockBackendInterface $lock_backend, ContainerInterface $container) {
+  public function __construct(KeyValueStoreInterface $state, LockBackendInterface $lock_backend) {
     $this->state = $state;
     $this->lockBackend = $lock_backend;
-    $this->container = $container;
   }
 
   /**
@@ -58,16 +48,27 @@ class JobController {
    *   The Feed we are executing a job for.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object to grab POST params from.
+   *
+   * @todo Configure a time limit.
+   * @todo Really awesome error handling.
    */
   public function execute(FeedInterface $feeds_feed, Request $request) {
     $cid = 'feeds_feed:' . $feeds_feed->id();
 
     if ($token = $request->request->get('token') && $job = $this->state->get($cid)) {
       if ($job['token'] == $token && $lock = $this->lockBackend->acquire($cid)) {
+        $method = $job['method'];
+
+        $this->state->delete($cid);
+
         ignore_user_abort(TRUE);
         set_time_limit(0);
-        $this->container->get($job['service'])->execute($feeds_feed);
-        $this->state->delete($cid);
+
+        while ($feeds_feed->$method() != StateInterface::BATCH_COMPLETE) {
+          // Reset static caches in between runs to avoid memory leaks.
+          drupal_reset_static();
+        }
+
         $this->lockBackend->release($cid);
       }
     }

@@ -180,10 +180,6 @@ class FeedFormController extends EntityFormControllerNG {
 
       // Schedule jobs for this feed.
       $feed->schedule();
-
-      if ($insert && $importer->import_on_create) {
-        $feed->startImport();
-      }
     }
     else {
       // In the unlikely case something went wrong on save, the feed will be

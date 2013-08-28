@@ -91,19 +91,6 @@ class ImporterFormController extends EntityFormController {
       '#description' => t('A description of this importer.'),
       '#default_value' => $this->entity->description,
     );
-    $form['import_on_create'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Import on submission'),
-      '#description' => t('Check if import should be started at the moment a standalone form or node form is submitted.'),
-      '#default_value' => $this->entity->import_on_create,
-    );
-    $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-    $form['process_in_background'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Process in background'),
-      '#description' => t('For very large imports. If checked, import and delete tasks started from the web UI will be handled by a cron task in the background rather than by the browser. This does not affect periodic imports, they are handled by a cron task in any case.') . $cron_required,
-      '#default_value' => $this->entity->process_in_background,
-    );
 
     $form['plugin_settings'] = array(
       '#type' => 'vertical_tabs',

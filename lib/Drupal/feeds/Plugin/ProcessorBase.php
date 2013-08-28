@@ -91,7 +91,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * @todo Get rid of the variable_get() here.
    */
   public function getLimit() {
-    return variable_get('feeds_process_limit', self::PROCESS_LIMIT);
+    return variable_get('feeds_process_limit', ProcessorInterface::PROCESS_LIMIT);
   }
 
   /**
@@ -294,8 +294,8 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
     $form['skip_hash_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Skip hash check'),
-      '#description' => t('Force update of items even if item source data did not change.'),
+      '#title' => t('Force update'),
+      '#description' => t('Forces the update of items even if the feed did not change.'),
       '#default_value' => $this->configuration['skip_hash_check'],
     );
 

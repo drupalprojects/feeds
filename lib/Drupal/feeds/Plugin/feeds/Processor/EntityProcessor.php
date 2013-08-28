@@ -72,7 +72,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    * {@inheritdoc}
    */
   public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
-    $state = $feed->state(FEEDS_PROCESS);
+    $state = $feed->state(StateInterface::PROCESS);
 
     while ($item = $parser_result->shiftItem()) {
 

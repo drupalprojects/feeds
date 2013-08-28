@@ -150,7 +150,7 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function startImport() {
     module_invoke_all('feeds_before_import', $this);
-    $this->batchManager->startImport($this);
+    $this->getImporter()->getPlugin('manager')->startImport($this);
   }
 
   /**
@@ -158,7 +158,7 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function startClear() {
     module_invoke_all('feeds_before_clear', $this);
-    $this->batchManager->startClear($this);
+    $this->getImporter()->getPlugin('manager')->startClear($this);
   }
 
   /**

@@ -70,7 +70,13 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *
    * @todo Make this dynamic?
    */
-  protected $pluginTypes = array('scheduler', 'fetcher', 'parser', 'processor');
+  protected $pluginTypes = array(
+    'manager',
+    'scheduler',
+    'fetcher',
+    'parser',
+    'processor',
+  );
 
   /**
    * Plugin ids and configuration.
@@ -78,6 +84,10 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * @todo Move this to sotrage controller.
    */
   protected $plugins = array(
+    'manager' => array(
+      'id' => 'background',
+      'configuration' => array(),
+    ),
     'scheduler' => array(
       'id' => 'periodic',
       'configuration' => array(),
@@ -111,9 +121,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * @var \Drupal\Component\Plugin\DefaultSinglePluginBag[]
    */
   protected $pluginBags = array();
-
-  public $import_on_create = TRUE;
-  public $process_in_background = FALSE;
 
   /**
    * Constructs a new Importer object.

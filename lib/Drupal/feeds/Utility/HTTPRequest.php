@@ -281,21 +281,4 @@ class HTTPRequest {
     return FALSE;
   }
 
-  /**
-   * Executes a non-blocking request for a feed.
-   */
-  public static function executeNonBlocking($feed, $service) {
-    $cid = 'feeds_feed:' . $feed->id();
-    $token = Crypt::randomStringHashed(55);
-
-    \Drupal::state()->set($cid, array('token' => $token, 'service' => $service));
-
-    $client = \Drupal::httpClient();
-    $client->addSubscriber(new AsyncPlugin());
-    $request = $client->post(url('feed/' . $feed->id() . '/execute', array('absolute' => TRUE)))
-      ->addPostFields(array('token' => $token));
-
-    $request->send();
-  }
-
 }

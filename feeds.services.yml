@@ -1,4 +1,7 @@
 services:
+  plugin.manager.feeds.manager:
+    class: Drupal\feeds\Plugin\FeedsPluginManager
+    arguments: ['manager', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.scheduler:
     class: Drupal\feeds\Plugin\FeedsPluginManager
     arguments: ['scheduler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
@@ -31,14 +34,8 @@ services:
   feeds.subscription.controller:
     class: Drupal\feeds\Controller\SubscriptionController
     arguments: ['@feeds.subscription.crud']
-  feeds.batch_manager.batch:
-    class: Drupal\feeds\BatchManager
-    arguments: ['@string_translation']
-  feeds.batch_manager.background:
-    class: Drupal\feeds\BackgroundManager
-    arguments: ['@string_translation']
-  feeds.job.controller:
+  feeds.job_controller:
     class: Drupal\feeds\Controller\JobController
-    arguments: ['@state', '@lock', '@service_container']
+    arguments: ['@state', '@lock']
   feeds.test:
     class: Drupal\feeds\Controller\Test

@@ -97,7 +97,7 @@ feeds_feed.subscribe:
 feeds_feed.execute:
   pattern: '/feed/{feeds_feed}/execute'
   defaults:
-    _controller: 'feeds.job.controller:execute'
+    _controller: 'feeds.job_controller:execute'
   requirements:
     _access: 'TRUE'
     feeds_feed:  \d+
