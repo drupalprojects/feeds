@@ -389,18 +389,21 @@ class Feed extends EntityNG implements FeedInterface {
   public function getConfigurationFor(FeedsPluginInterface $client) {
     $type = $client->pluginType();
 
-    if (isset($this->get('config')->value[$type])) {
-      return $this->get('config')->value[$type];
+    if (isset($this->config->value[$type])) {
+      $configuration = $this->config->value[$type];
+    }
+    else {
+      $configuration = array();
     }
 
-    return $client->sourceDefaults();
+    return array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
   }
 
   /**
    * {@inheritdoc}
    */
   public function setConfigurationFor(FeedsPluginInterface $client, array $config) {
-    $this_config = $this->get('config')->value;
+    $this_config = $this->config->value;
     $this_config[$client->pluginType()] = $config;
     $this->set('config', $this_config);
 
@@ -479,7 +482,7 @@ class Feed extends EntityNG implements FeedInterface {
    * {@inheritdoc}
    */
   public function getConfiguration() {
-    return $this->get('config')->value;
+    return $this->config->value;
   }
 
   /**

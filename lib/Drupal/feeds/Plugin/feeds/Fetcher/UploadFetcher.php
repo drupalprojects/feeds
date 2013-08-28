@@ -103,6 +103,10 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     throw new \Exception(String::format('Resource is not a file: %source', array('%source' => $feed_config['source'])));
   }
 
+  public function sourceDefaults() {
+    return array('fid' => 0, 'source' => '');
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -110,21 +114,18 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
-    $form['fetcher']['fid'] = array(
-      '#type' => 'value',
-      '#value' => empty($feed_config['fid']) ? 0 : $feed_config['fid'],
-    );
-    $form['fetcher']['source'] = array(
-      '#type' => 'value',
-      '#value' => empty($feed_config['source']) ? '' : $feed_config['source'],
-    );
     $form['fetcher']['upload'] = array(
-      '#type' => 'file',
+      '#type' => 'managed_file',
       '#title' => $this->t('File'),
-      '#description' => empty($feed_config['source']) ? $this->t('Select a file from your local system.') : $this->t('Select a different file from your local system.'),
-      '#theme' => 'feeds_upload',
-      '#file_info' => empty($feed_config['fid']) ? NULL : $this->fileStorage->load($feed_config['fid']),
-      '#size' => 10,
+      '#description' => $this->t('Select a file from your local system.'),
+      '#default_value' => array($feed_config['fid']),
+      '#upload_validators' => array(
+        'file_validate_extensions' => array(
+          $this->configuration['allowed_extensions'],
+        ),
+      ),
+      '#upload_location' => $this->configuration['directory'],
+      '#required' => TRUE,
     );
     return $form;
   }
@@ -132,60 +133,27 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
-    // @todo
-    $values =& $form_state['values']['fetcher'];
-
-    $feed_dir = $this->configuration['directory'];
-    $validators = array(
-      'file_validate_extensions' => array(
-        $this->configuration['allowed_extensions'],
-      ),
-    );
-
-    if (!file_prepare_directory($feed_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      if ($this->account->hasPermission('administer feeds')) {
-        $link = url('admin/structure/feeds/manage/' . $this->getPluginId() . '/settings/fetcher');
-        form_set_error('feeds][upload][source', $this->t('Upload failed. Please check the upload <a href="@link">settings.</a>', array('@link' => $link)));
-      }
-      else {
-        form_set_error('feeds][upload][source', $this->t('Upload failed. Please contact your site administrator.'));
-      }
-      watchdog('feeds', 'The upload directory %directory required by a feed could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', array('%directory' => $feed_dir));
-    }
-    // Validate and save uploaded file.
-    elseif ($file = file_save_upload('fetcher', $validators, $feed_dir, 0)) {
-      $values['source'] = $file->getFileUri();
-      $values['file'] = $file;
-    }
-    elseif (!$values['fid']) {
-      form_set_error('files][fetcher', $this->t('Please upload a file.'));
-    }
-    else {
-      // File present from previous upload. Nothing to validate.
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function sourceSave(FeedInterface $feed) {
+  public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
+    $values =& $form_state['values']['fetcher'];
+    $new_fid = reset($values['upload']);
 
-    // If a new file is present, delete the old one and replace it with the new
-    // one.
-    if (isset($feed_config['file'])) {
-      $file = $feed_config['file'];
-      if (isset($feed_config['fid'])) {
-        $this->deleteFile($feed_config['fid'], $feed->id());
+    // New file found.
+    if ($new_fid != $feed_config['fid']) {
+      $this->deleteFile($feed_config['fid'], $feed->id());
+
+      if ($new_fid) {
+        $file = $this->fileStorage->load($new_fid);
+
+        $this->fileUsage->add($file, 'feeds', $this->pluginType(), $feed->id());
+
+        $file->setPermanent();
+        $file->save();
+
+        $feed_config['fid'] = $new_fid;
+        $feed_config['source'] = $file->getFileUri();
+        $feed->setConfigurationFor($this, $feed_config);
       }
-      $file->setPermanent();
-      $this->fileUsage->add($file, 'feeds', $this->getPluginId(), $feed->id());
-
-      $feed_config['fid'] = $file->id();
-      unset($feed_config['file']);
-      $feed->setConfigurationFor($this, $feed_config);
-      $file->save();
     }
   }
 
@@ -194,7 +162,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function sourceDelete(FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
-    if (isset($feed_config['fid'])) {
+    if ($feed_config['fid']) {
       $this->deleteFile($feed_config['fid'], $feed->id());
     }
   }
@@ -281,7 +249,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   protected function deleteFile($file_id, $feed_id) {
     if ($file = $this->fileStorage->load($file_id)) {
-      $this->fileUsage->delete($file, 'feeds', $this->getPluginId(), $feed_id);
+      $this->fileUsage->delete($file, 'feeds', $this->pluginType(), $feed_id);
     }
     return FALSE;
   }
@@ -295,5 +263,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   protected function getSchemes() {
     return array_keys(file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE));
   }
+
+  public function importPeriod(){}
 
 }
