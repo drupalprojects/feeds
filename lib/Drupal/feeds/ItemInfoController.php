@@ -53,11 +53,24 @@ class ItemInfoController implements ItemInfoControllerInterface {
    * {@inheritdoc}
    */
   public function load($entity_type, $entity_id) {
-    return $this->connection->query(
+    $result = $this->connection->query(
       'SELECT * FROM {' . $this->escapedTable . '}
       WHERE entity_type = :entity_type AND entity_id = :entity_id',
       array(':entity_type' => $entity_type, ':entity_id' => $entity_id)
-    )->fetchObject();
+    )->fetchArray();
+
+    if ($result) {
+      return (object) array(
+        'entityType' => $result->entity_type,
+        'entityId' => $result->entity_id,
+        'fid' => $result->fid,
+        'imported' => $result->imported,
+        'url' => $result->url,
+        'guid' => $result->guid,
+        'hash' => $result->hash,
+      );
+    }
+    return FALSE;
   }
 
   /**

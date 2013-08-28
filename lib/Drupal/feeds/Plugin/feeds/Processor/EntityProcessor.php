@@ -100,13 +100,14 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       try {
 
         // Load an existing entity.
+        // @todo Clean this up.
         if ($entity_id) {
           $entity = $this->entityLoad($feed, $entity_id);
-
-          // The feeds_item table is always updated with the info for the most
-          // recently processed entity. The only carryover is the entity_id.
-          $item_info = $this->newItemInfo($entity, $feed, $hash);
-          $item_info->entityId = $entity_id;
+          $item_info = \Drupal::service('feeds.item_info')->load($this->entityType(), $entity_id);
+          $item_info->fid = $feed->id();
+          $item_info->hash = $hash;
+          $item_info->url = '';
+          $item_info->guid = '';
         }
 
         // Build a new entity.
