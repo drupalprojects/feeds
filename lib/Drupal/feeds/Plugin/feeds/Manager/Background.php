@@ -14,7 +14,7 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Guzzle\AsyncPlugin;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ManagerInterface;
-use Drupal\feeds\Utility\HTTPRequest;
+use Drupal\feeds\Utility\HttpRequest;
 
 /**
  * Defines a Feeds manager plugin that performs background jobs.

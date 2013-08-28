@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Utility\HTTPRequest.
+ * Contains \Drupal\feeds\Utility\HttpRequest.
  *
  * @todo Remove this.
  */
@@ -18,7 +18,7 @@ use Zend\Feed\Reader\Reader;
  * Support caching, HTTP Basic Authentication, detection of RSS/Atom feeds,
  * redirects.
  */
-class HTTPRequest {
+class HttpRequest {
 
   /**
    * In memory download cache.

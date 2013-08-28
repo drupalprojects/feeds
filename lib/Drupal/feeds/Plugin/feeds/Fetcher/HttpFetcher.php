@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Fetcher\HTTPFetcher.
+ * Contains \Drupal\feeds\Plugin\feeds\Fetcher\HttpFetcher.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
@@ -16,7 +16,7 @@ use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\Result\FetcherResult;
-use Drupal\feeds\Utility\HTTPRequest;
+use Drupal\feeds\Utility\HttpRequest;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ClearableInterface;
 use Drupal\feeds\Plugin\FetcherInterface;
@@ -36,7 +36,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface, PuSHFetcherInterface, ContainerFactoryPluginInterface {
+class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface, PuSHFetcherInterface, ContainerFactoryPluginInterface {
 
   /**
    * The subscribe queue.
@@ -104,7 +104,7 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
   public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
-    $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->configuration['request_timeout']));
+    $http = new HttpRequest($feed_config['source'], array('timeout' => $this->configuration['request_timeout']));
     $result = $http->get();
     if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
       throw new \Exception(String::format('Download of @url failed with code !code.', array('@url' => $feed_config['source'], '!code' => $result->code)));
@@ -218,12 +218,12 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
 
-    if (!HTTPRequest::validUrl($values['source'], TRUE)) {
+    if (!HttpRequest::validUrl($values['source'], TRUE)) {
       $form_key = 'feeds][' . get_class($this) . '][source';
       form_set_error($form_key, $this->t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
     elseif ($this->configuration['auto_detect_feeds']) {
-      $http = new HTTPRequest($values['source']);
+      $http = new HttpRequest($values['source']);
       if ($url = $http->getCommonSyndication()) {
         $values['source'] = $url;
       }
