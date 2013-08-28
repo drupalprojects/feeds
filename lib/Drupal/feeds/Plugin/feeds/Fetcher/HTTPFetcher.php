@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
@@ -42,7 +43,7 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     $http = new HTTPRequest($feed_config['source'], array('timeout' => $this->configuration['request_timeout']));
     $result = $http->get();
     if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
-      throw new \Exception(t('Download of @url failed with code !code.', array('@url' => $feed_config['source'], '!code' => $result->code)));
+      throw new \Exception(String::format('Download of @url failed with code !code.', array('@url' => $feed_config['source'], '!code' => $result->code)));
     }
     // Update source if there was a permanent redirect.
     if ($result->redirect) {
@@ -92,20 +93,20 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
   public function buildConfigurationForm(array $form, array &$form_state) {
     $form['auto_detect_feeds'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Auto detect feeds'),
-      '#description' => t('If the supplied URL does not point to a feed but an HTML document, attempt to extract a feed URL from the document.'),
+      '#title' => $this->t('Auto detect feeds'),
+      '#description' => $this->t('If the supplied URL does not point to a feed but an HTML document, attempt to extract a feed URL from the document.'),
       '#default_value' => $this->configuration['auto_detect_feeds'],
     );
     $form['use_pubsubhubbub'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use PubSubHubbub'),
-      '#description' => t('Attempt to use a <a href="http://en.wikipedia.org/wiki/PubSubHubbub">PubSubHubbub</a> subscription if available.'),
+      '#title' => $this->t('Use PubSubHubbub'),
+      '#description' => $this->t('Attempt to use a <a href="http://en.wikipedia.org/wiki/PubSubHubbub">PubSubHubbub</a> subscription if available.'),
       '#default_value' => $this->configuration['use_pubsubhubbub'],
     );
     $form['designated_hub'] = array(
       '#type' => 'textfield',
-      '#title' => t('Designated hub'),
-      '#description' => t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
+      '#title' => $this->t('Designated hub'),
+      '#description' => $this->t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
       '#default_value' => $this->configuration['designated_hub'],
       '#dependency' => array(
         'edit-use-pubsubhubbub' => array(1),
@@ -114,8 +115,8 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     // Per importer override of global http request timeout setting.
     $form['request_timeout'] = array(
       '#type' => 'number',
-      '#title' => t('Request timeout'),
-      '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>
+      '#title' => $this->t('Request timeout'),
+      '#description' => $this->t('Timeout in seconds to wait for an HTTP get request to finish.</br>
                          <b>Note:</b> this setting will override the global setting.</br>
                          When left empty, the global value is used.'),
       '#default_value' => $this->configuration['request_timeout'],
@@ -136,8 +137,8 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['source'] = array(
       '#type' => 'textfield',
-      '#title' => t('URL'),
-      '#description' => t('Enter a feed URL.'),
+      '#title' => $this->t('URL'),
+      '#description' => $this->t('Enter a feed URL.'),
       '#default_value' => isset($feed_config['source']) ? $feed_config['source'] : '',
       '#maxlength' => NULL,
       '#required' => TRUE,
@@ -155,7 +156,7 @@ class HTTPFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
 
     if (!feeds_valid_url($values['source'], TRUE)) {
       $form_key = 'feeds][' . get_class($this) . '][source';
-      form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $values['source'])));
+      form_set_error($form_key, $this->t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
     elseif ($this->configuration['auto_detect_feeds']) {
       $http = new HTTPRequest($values['source']);

@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -99,7 +100,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     }
 
     // File does not exist.
-    throw new \Exception(t('Resource is not a file: %source', array('%source' => $feed_config['source'])));
+    throw new \Exception(String::format('Resource is not a file: %source', array('%source' => $feed_config['source'])));
   }
 
   /**
@@ -119,8 +120,8 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     );
     $form['fetcher']['upload'] = array(
       '#type' => 'file',
-      '#title' => t('File'),
-      '#description' => empty($feed_config['source']) ? t('Select a file from your local system.') : t('Select a different file from your local system.'),
+      '#title' => $this->t('File'),
+      '#description' => empty($feed_config['source']) ? $this->t('Select a file from your local system.') : $this->t('Select a different file from your local system.'),
       '#theme' => 'feeds_upload',
       '#file_info' => empty($feed_config['fid']) ? NULL : $this->fileStorage->load($feed_config['fid']),
       '#size' => 10,
@@ -145,10 +146,10 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     if (!file_prepare_directory($feed_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       if ($this->account->hasPermission('administer feeds')) {
         $link = url('admin/structure/feeds/manage/' . $this->getPluginId() . '/settings/fetcher');
-        form_set_error('feeds][upload][source', t('Upload failed. Please check the upload <a href="@link">settings.</a>', array('@link' => $link)));
+        form_set_error('feeds][upload][source', $this->t('Upload failed. Please check the upload <a href="@link">settings.</a>', array('@link' => $link)));
       }
       else {
-        form_set_error('feeds][upload][source', t('Upload failed. Please contact your site administrator.'));
+        form_set_error('feeds][upload][source', $this->t('Upload failed. Please contact your site administrator.'));
       }
       watchdog('feeds', 'The upload directory %directory required by a feed could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', array('%directory' => $feed_dir));
     }
@@ -158,7 +159,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
       $values['file'] = $file;
     }
     elseif (!$values['fid']) {
-      form_set_error('files][fetcher', t('Please upload a file.'));
+      form_set_error('files][fetcher', $this->t('Please upload a file.'));
     }
     else {
       // File present from previous upload. Nothing to validate.
@@ -217,14 +218,14 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   public function buildConfigurationForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
-      '#title' => t('Allowed file extensions'),
-      '#description' => t('Allowed file extensions for upload.'),
+      '#title' => $this->t('Allowed file extensions'),
+      '#description' => $this->t('Allowed file extensions for upload.'),
       '#default_value' => $this->configuration['allowed_extensions'],
     );
     $form['directory'] = array(
       '#type' => 'textfield',
-      '#title' => t('Upload directory'),
-      '#description' => t('Directory where uploaded files get stored. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->getSchemes()))),
+      '#title' => $this->t('Upload directory'),
+      '#description' => $this->t('Directory where uploaded files get stored. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->getSchemes()))),
       '#default_value' => $this->configuration['directory'],
       '#required' => TRUE,
     );
@@ -243,7 +244,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
 
     // Ensure that the upload directory field is not empty.
     if (!$values['directory']) {
-      form_set_error('directory', t('Please specify an upload directory.'));
+      form_set_error('directory', $this->t('Please specify an upload directory.'));
       // Do not continue validating the directory if none was specified.
       return;
     }
@@ -251,7 +252,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     // Validate the URI scheme of the upload directory.
     $scheme = file_uri_scheme($values['directory']);
     if (!$scheme || !in_array($scheme, $this->getSchemes())) {
-      form_set_error('directory', t('Please enter a valid scheme into the directory location.'));
+      form_set_error('directory', $this->t('Please enter a valid scheme into the directory location.'));
 
       // Return here so that attempts to create the directory below don't
       // throw warnings.
@@ -260,7 +261,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
 
     // Ensure that the upload directory exists.
     if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      form_set_error('directory', t('The chosen directory does not exist and attempts to create it failed.'));
+      form_set_error('directory', $this->t('The chosen directory does not exist and attempts to create it failed.'));
     }
   }
 

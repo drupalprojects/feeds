@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\feeds\Fetcher;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
@@ -51,7 +52,8 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
       return new FetcherResult($file);
     }
 
-    throw new \Exception(t('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
+    // @todo Better exception.
+    throw new \Exception(String::format('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
   }
 
   /**
@@ -86,8 +88,8 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['source'] = array(
       '#type' => 'textfield',
-      '#title' => t('File'),
-      '#description' => t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))),
+      '#title' => $this->t('File'),
+      '#description' => $this->t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))),
       '#default_value' => empty($feed_config['source']) ? '' : $feed_config['source'],
     );
     return $form;
@@ -102,11 +104,11 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
     // Check if chosen url scheme is allowed.
     $scheme = file_uri_scheme($values['source']);
     if (!$scheme || !in_array($scheme, $this->configuration['allowed_schemes'])) {
-      form_set_error('feeds][directory][source', t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
+      form_set_error('feeds][directory][source', $this->t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
     }
     // Check wether the given path exists.
     elseif (!file_exists($values['source'])) {
-      form_set_error('feeds][directory][source', t('The specified file or directory does not exist.'));
+      form_set_error('feeds][directory][source', $this->t('The specified file or directory does not exist.'));
     }
   }
 
@@ -126,16 +128,16 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   public function buildConfigurationForm(array $form, array &$form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
-      '#title' => t('Allowed file extensions'),
-      '#description' => t('Allowed file extensions for upload.'),
+      '#title' => $this->t('Allowed file extensions'),
+      '#description' => $this->t('Allowed file extensions for upload.'),
       '#default_value' => implode(' ', $this->configuration['allowed_extensions']),
     );
     $form['allowed_schemes'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Allowed schemes'),
+      '#title' => $this->t('Allowed schemes'),
       '#default_value' => $this->configuration['allowed_schemes'],
       '#options' => $this->getSchemeOptions(),
-      '#description' => t('Select the schemes you want to allow for direct upload.'),
+      '#description' => $this->t('Select the schemes you want to allow for direct upload.'),
     );
 
     return $form;
