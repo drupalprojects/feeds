@@ -100,6 +100,9 @@ class ImporterFormController extends EntityFormController {
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
+    // Reset configurable plugins for ajax requests.
+    $this->configurablePlugins = array();
+
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
     if (isset($form_state['values'])) {
