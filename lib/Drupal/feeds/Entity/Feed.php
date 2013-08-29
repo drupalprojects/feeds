@@ -166,6 +166,7 @@ class Feed extends EntityNG implements FeedInterface {
    */
   public function import() {
     $this->acquireLock();
+
     try {
       $state = $this->get('state')->value;
       // If fetcher result is empty, we are starting a new import, log.
@@ -174,9 +175,11 @@ class Feed extends EntityNG implements FeedInterface {
         $this->set('state', $state);
       }
 
+      $importer = $this->getImporter();
+
       // Fetch.
       if (empty($this->get('fetcher_result')->value) || $this->progressParsing() == StateInterface::BATCH_COMPLETE) {
-        $this->set('fetcher_result', $this->getImporter()->getFetcher()->fetch($this));
+        $this->set('fetcher_result', $importer->getFetcher()->fetch($this));
         // Clean the parser's state, we are parsing an entirely new file.
         $state = $this->get('state')->value;
         unset($state[StateInterface::PARSE]);
@@ -184,21 +187,26 @@ class Feed extends EntityNG implements FeedInterface {
       }
 
       // Parse.
-      $parser_result = $this->getImporter()->getParser()->parse($this, $this->get('fetcher_result')->value);
+      $parser_result = $importer->getParser()->parse($this, $this->get('fetcher_result')->value);
       module_invoke_all('feeds_after_parse', $this, $parser_result);
 
       // Process.
-      $this->getImporter()->getProcessor()->process($this, $parser_result);
+      // @todo Create a ProcessorWrapper plugin?
+      $processor_state = $this->state(StateInterface::PROCESS);
+      $processor = $importer->getProcessor();
+      $processor->process($this, $processor_state, $parser_result);
     }
     catch (Exception $e) {
       // Do nothing. Will thow later.
     }
+
     $this->releaseLock();
 
     // Clean up.
     $result = $this->progressImporting();
 
     if ($result == StateInterface::BATCH_COMPLETE || isset($e)) {
+      $processor->setMessages($this, $processor_state);
       $state = $this->get('state')->value;
       $this->set('imported', time());
       $this->log('import', 'Imported in !s s', array('!s' => $this->get('imported')->value - $state[StateInterface::START]), WATCHDOG_INFO);

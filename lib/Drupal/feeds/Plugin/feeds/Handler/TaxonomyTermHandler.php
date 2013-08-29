@@ -86,9 +86,9 @@ class TaxonomyTermHandler extends PluginBase {
   /**
    * Get id of an existing feed item term if available.
    */
-  public function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
+  public function existingEntityId(FeedInterface $feed, array $item) {
     // The only possible unique target is name.
-    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
+    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $item) as $target => $value) {
       if ($target == 'name') {
         if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $this->importer->getProcessor()->bundle()))->fetchField()) {
           return $tid;

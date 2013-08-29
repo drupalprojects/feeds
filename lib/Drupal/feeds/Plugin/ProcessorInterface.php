@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * Interface for Feeds processor plugins.
@@ -51,7 +52,7 @@ interface ProcessorInterface extends FeedsPluginInterface {
    * @param Drupal\feeds\Result\ParserResultInterface $parser_result
    *   The result from the parser.
    */
-  public function process(FeedInterface $feed, ParserResultInterface $parser_result);
+  public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result);
 
   /**
    * Reports the number of items that can be processed per call.
@@ -110,17 +111,6 @@ interface ProcessorInterface extends FeedsPluginInterface {
    * @todo Move this to a separate interface.
    */
   public function expiryTime();
-
-  /**
-   * Returns the mappings for this processor.
-   *
-   * @return array
-   *   The mappings for this importer.
-   *
-   * @todo Processors shouldn't control mappings. They should be an importer
-   *   level configuration.
-   */
-  public function getMappings();
 
   /**
    * Declares the possible mapping targets that this processor exposes.

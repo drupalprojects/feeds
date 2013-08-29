@@ -230,6 +230,10 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     }
   }
 
+  public function sourceDefaults() {
+    return array('source' => '');
+  }
+
   /**
    * {@inheritdoc}
    *

@@ -12,6 +12,7 @@ use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\ProcessorInterface;
+use Drupal\feeds\Plugin\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 
 /**
@@ -75,7 +76,7 @@ class NodeHandler extends PluginBase {
     $defaults = array();
     $defaults['author'] = 0;
     $defaults['authorize'] = TRUE;
-    $defaults['expire'] = FEEDS_EXPIRE_NEVER;
+    $defaults['expire'] = SchedulerInterface::EXPIRE_NEVER;
     $defaults['status'] = 1;
 
     return $defaults;
@@ -98,7 +99,7 @@ class NodeHandler extends PluginBase {
       '#default_value' => $this->configuration['authorize'],
     );
 
-    $period = drupal_map_assoc(array(FEEDS_EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this->importer->getProcessor(), 'formatExpire'));
+    $period = drupal_map_assoc(array(SchedulerInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this->importer->getProcessor(), 'formatExpire'));
 
     $form['expire'] = array(
       '#type' => 'select',
@@ -247,11 +248,11 @@ class NodeHandler extends PluginBase {
   /**
    * Get nid of an existing feed item node if available.
    */
-  public function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
+  public function existingEntityId(FeedInterface $feed, array $item) {
     $nid = FALSE;
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
-    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
+    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $item) as $target => $value) {
 
       switch ($target) {
         case 'nid':

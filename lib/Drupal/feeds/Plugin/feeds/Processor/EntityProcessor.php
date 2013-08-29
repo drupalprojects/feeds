@@ -15,6 +15,7 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Plugin\ProcessorBase;
 use Drupal\feeds\Plugin\ProcessorInterface;
+use Drupal\feeds\Plugin\SchedulerInterface;
 use Drupal\feeds\StateInterface;
 
 /**
@@ -29,7 +30,7 @@ use Drupal\feeds\StateInterface;
  *   derivative = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
  * )
  */
-class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterface {
+class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterface, ProcessorInterface {
 
   /**
    * The plugin definition.
@@ -60,107 +61,114 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
   protected $handlers = array();
 
   /**
+   * Whether or not we should continue processing existing items.
+   *
+   * @var bool
+   */
+  protected $skipExisting;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     $this->pluginDefinition = $plugin_definition;
     $this->loadHandlers($configuration);
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->skipExisting = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
-    $state = $feed->state(StateInterface::PROCESS);
-
+  public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result) {
     while ($item = $parser_result->shiftItem()) {
-
-      // Check if this item already exists.
-      $entity_id = $this->existingEntityId($feed, $parser_result);
-      $skip_existing = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
-
-      module_invoke_all('feeds_before_update', $feed, $item, $entity_id);
-
-      // If it exists, and we are not updating, pass onto the next item.
-      if ($entity_id && $skip_existing) {
-        continue;
-      }
-
-      $hash = $this->hash($item);
-      $changed = ($hash !== $this->getHash($entity_id));
-      $force_update = $this->configuration['skip_hash_check'];
-
-      // Do not proceed if the item exists, has not changed, and we're not
-      // forcing the update.
-      if ($entity_id && !$changed && !$force_update) {
-        continue;
-      }
-
-      try {
-
-        // Load an existing entity.
-        // @todo Clean this up.
-        if ($entity_id) {
-          $entity = $this->entityLoad($feed, $entity_id);
-          $item_info = \Drupal::service('feeds.item_info')->load($this->entityType(), $entity_id);
-          $item_info->fid = $feed->id();
-          $item_info->hash = $hash;
-          $item_info->url = '';
-          $item_info->guid = '';
-        }
-
-        // Build a new entity.
-        else {
-          $entity = $this->newEntity($feed);
-          $item_info = $this->newItemInfo($entity, $feed, $hash);
-        }
-
-        // Set property and field values.
-        $this->map($feed, $item, $entity, $item_info);
-        $this->entityValidate($entity);
-
-        // Allow modules to alter the entity before saving.
-        module_invoke_all('feeds_presave', $feed, $entity, $item, $item_info);
-
-        // Enable modules to skip saving at all.
-        if (!empty($item_info->skip)) {
-          continue;
-        }
-
-        // This will throw an exception on failure.
-        $this->entitySaveAccess($entity);
-        $this->entitySave($entity);
-
-        $item_info->entityId = $entity->id();
-        \Drupal::service('feeds.item_info')->save($item_info);
-
-        // Allow modules to perform operations using the saved entity data.
-        // $entity contains the updated entity after saving.
-        module_invoke_all('feeds_after_save', $feed, $entity, $item, $entity_id);
-
-        // Track progress.
-        if (empty($entity_id)) {
-          $state->created++;
-        }
-        else {
-          $state->updated++;
-        }
-      }
-
-      // Something bad happened, log it.
-      catch (\Exception $e) {
-        $state->failed++;
-        drupal_set_message($e->getMessage(), 'warning');
-        $message = $this->createLogMessage($e, $entity, $item);
-        $feed->log('import', $message, array(), WATCHDOG_ERROR);
-      }
+      $this->processItem($feed, $state, $item);
     }
+  }
 
-    // Set messages if we're done.
-    if ($feed->progressImporting() != StateInterface::BATCH_COMPLETE) {
+  /**
+   * Processes a single item.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed being processed.
+   * @param \Drupal\feeds\StateInterface $state
+   *   The state object.
+   * @param array $item
+   *   The item being processed.
+   */
+  protected function processItem(FeedInterface $feed, StateInterface $state, array $item) {
+    // Check if this item already exists.
+    $entity_id = $this->existingEntityId($feed, $item);
+
+    // If it exists, and we are not updating, pass onto the next item.
+    if ($entity_id && $this->skipExisting) {
       return;
     }
+
+    $hash = $this->hash($item);
+    $changed = ($hash !== $this->getHash($entity_id));
+
+    // Do not proceed if the item exists, has not changed, and we're not
+    // forcing the update.
+    if ($entity_id && !$changed && !$this->configuration['skip_hash_check']) {
+      return;
+    }
+
+    try {
+      // Load an existing entity.
+      // @todo Clean this up.
+      if ($entity_id) {
+        $entity = $this->entityLoad($feed, $entity_id);
+        $item_info = \Drupal::service('feeds.item_info')->load($this->entityType(), $entity_id);
+        $item_info->fid = $feed->id();
+        $item_info->hash = $hash;
+        $item_info->url = '';
+        $item_info->guid = '';
+      }
+
+      // Build a new entity.
+      else {
+        $entity = $this->newEntity($feed);
+        $item_info = $this->newItemInfo($entity, $feed, $hash);
+      }
+
+      // Set property and field values.
+      $this->map($feed, $item, $entity, $item_info);
+      $this->entityValidate($entity);
+
+      // This will throw an exception on failure.
+      $this->entitySaveAccess($entity);
+      $this->entitySave($entity);
+
+      $item_info->entityId = $entity->id();
+      \Drupal::service('feeds.item_info')->save($item_info);
+
+      // Track progress.
+      if ($entity_id) {
+        $state->updated++;
+      }
+      else {
+        $state->created++;
+      }
+    }
+
+    // Something bad happened, log it.
+    catch (\Exception $e) {
+      $state->failed++;
+      drupal_set_message($e->getMessage(), 'warning');
+      $message = $this->createLogMessage($e, $entity, $item);
+      $feed->log('import', $message, array(), WATCHDOG_ERROR);
+    }
+  }
+
+  /**
+   * Called after processing all items to display messages.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed being processed.
+   */
+  public function setMessages(FeedInterface $feed) {
+    $state = $feed->state(StateInterface::PROCESS);
 
     $info = $this->entityInfo();
     $tokens = array(
@@ -432,7 +440,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       'values' => array(
         $this->bundleKey() => NULL,
       ),
-      'expire' => FEEDS_EXPIRE_NEVER,
+      'expire' => SchedulerInterface::EXPIRE_NEVER,
     ) + parent::getDefaultConfiguration();
 
     $defaults += $this->apply(__FUNCTION__);
@@ -518,8 +526,14 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
   /**
    * {@inheritdoc}
    */
-  public function setTargetElement(FeedInterface $feed, $entity, $target_element, $values, $mapping, \stdClass $item_info) {
-    $entity->get($target_element)->setValue($values);
+  public function setTargetElement(FeedInterface $feed, $entity, $field_name, $values, $mapping, \stdClass $item_info) {
+    $properties = $this->getProperties();
+    if (isset($properties[$field_name])) {
+      $entity->get($field_name)->setValue($values);
+    }
+    else {
+      parent::setTargetElementFeedInterface($feed, $entity, $field_name, $values, $mapping, $item_info);
+    }
   }
 
   /**
@@ -535,12 +549,31 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     return $select;
   }
 
-  protected function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
-    if ($id = parent::existingEntityId($feed, $result)) {
-      return $id;
+  protected function existingEntityId(FeedInterface $feed, array $item) {
+    $query = db_select('feeds_item')
+      ->fields('feeds_item', array('entity_id'))
+      ->condition('fid', $feed->id())
+      ->condition('entity_type', $this->entityType());
+
+    // Iterate through all unique targets and test whether they do already
+    // exist in the database.
+    foreach ($this->uniqueTargets($feed, $item) as $target => $value) {
+      switch ($target) {
+        case 'url':
+          $entity_id = $query->condition('url', $value)->execute()->fetchField();
+          break;
+
+        case 'guid':
+          $entity_id = $query->condition('guid', $value)->execute()->fetchField();
+          break;
+      }
+      if (isset($entity_id)) {
+        // Return with the content id found.
+        return $entity_id;
+      }
     }
 
-    $ids = array_filter($this->apply('existingEntityId', $feed, $result));
+    $ids = array_filter($this->apply('existingEntityId', $feed, $item));
 
     if ($ids) {
       return reset($ids);

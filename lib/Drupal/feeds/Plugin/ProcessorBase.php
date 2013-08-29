@@ -12,8 +12,8 @@ namespace Drupal\feeds\Plugin;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
-use Drupal\feeds\SchedulerInterface;
 use Drupal\feeds\StateInterface;
 
 /**
@@ -353,47 +353,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   }
 
   /**
-   * Retrieve the target entity's existing id if available. Otherwise return 0.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The Feed currently being imported.
-   * @param \Drupal\feeds\Result\ParserResultInterface $result
-   *   A parser result object.
-   *
-   * @return int
-   *   The serial id of an entity if found, 0 otherwise.
-   *
-   * @todo Move to EntityProcessor.
-   */
-  protected function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
-    $query = db_select('feeds_item')
-      ->fields('feeds_item', array('entity_id'))
-      ->condition('fid', $feed->id())
-      ->condition('entity_type', $this->entityType());
-
-    // Iterate through all unique targets and test whether they do already
-    // exist in the database.
-    foreach ($this->uniqueTargets($feed, $result) as $target => $value) {
-      switch ($target) {
-        case 'url':
-          $entity_id = $query->condition('url', $value)->execute()->fetchField();
-          break;
-
-        case 'guid':
-          $entity_id = $query->condition('guid', $value)->execute()->fetchField();
-          break;
-      }
-      if (isset($entity_id)) {
-        // Return with the content id found.
-        return $entity_id;
-      }
-    }
-
-    return 0;
-  }
-
-
-  /**
    * Iterates over a target array and retrieves all sources that are unique.
    *
    * @param \Drupal\feeds\FeedInterface $feed
@@ -405,14 +364,15 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *   An array where the keys are target field names and the values are the
    *   elements from the source item mapped to these targets.
    */
-  public function uniqueTargets(FeedInterface $feed, ParserResultInterface $result) {
+  public function uniqueTargets(FeedInterface $feed, array $item) {
     $parser = $this->importer->getParser();
     $targets = array();
+
     foreach ($this->importer->getMappings() as $mapping) {
       if (!empty($mapping['unique'])) {
         // Invoke the parser's getSourceElement to retrieve the value for this
         // mapping's source.
-        $targets[$mapping['target']] = $parser->getSourceElement($feed, $result->currentItem(), $mapping['source']);
+        $targets[$mapping['target']] = $parser->getSourceElement($feed, $item, $mapping['source']);
       }
     }
 

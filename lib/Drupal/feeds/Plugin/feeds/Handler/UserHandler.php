@@ -140,11 +140,11 @@ class UserHandler extends PluginBase {
   /**
    * Get id of an existing feed item term if available.
    */
-  public function existingEntityId(FeedInterface $feed, ParserResultInterface $result) {
+  public function existingEntityId(FeedInterface $feed, array $item) {
     $uid = FALSE;
     // Iterate through all unique targets and try to find a user for the
     // target's value.
-    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $result) as $target => $value) {
+    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $item) as $target => $value) {
 
       switch ($target) {
         case 'name':
