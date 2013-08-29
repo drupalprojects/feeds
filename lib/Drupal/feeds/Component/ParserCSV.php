@@ -191,7 +191,7 @@ class ParserCSV {
     $rows = array();
 
     $this->lastLinePos = 0;
-    $max_time = $this->timeout ? microtime() + $this->timeout ? FALSE;
+    $max_time = $this->timeout ? microtime() + $this->timeout : FALSE;
     $lines_parsed = 0;
 
     for ($line_iterator->rewind($this->startByte); $line_iterator->valid(); $line_iterator->next()) {
