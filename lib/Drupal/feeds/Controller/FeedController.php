@@ -25,7 +25,7 @@ class FeedController extends ControllerBase {
    *
    * @todo Return a render array/twig template?
    */
-  public function add() {
+  public function createList() {
     // Show add form if there is only one importer.
     $importers = $this->entityManager()
       ->getStorageController('feeds_importer')
@@ -66,29 +66,16 @@ class FeedController extends ControllerBase {
    * @return array
    *   A form array as expected by drupal_render().
    */
-  public function addForm(Importer $feeds_importer) {
-    $account = $this->currentUser();
+  public function createForm(Importer $feeds_importer) {
 
     $feed = $this->entityManager()->getStorageController('feeds_feed')->create(array(
-      'uid' => $account->id(),
+      'uid' => $this->currentUser(),
       'importer' => $feeds_importer->id(),
       'status' => 1,
       'created' => REQUEST_TIME,
     ));
 
     return $this->entityManager()->getForm($feed, 'create');
-  }
-
-  /**
-   * Presents the feed.
-   *
-   * @return array
-   *   A form array as expected by drupal_render().
-   */
-  public function view(Feed $feeds_feed) {
-    return $this->entityManager()
-      ->getRenderController('feeds_feed')
-      ->view($feeds_feed);
   }
 
 }
