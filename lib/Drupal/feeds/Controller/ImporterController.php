@@ -7,65 +7,25 @@
 
 namespace Drupal\feeds\Controller;
 
-use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Core\Controller\ControllerInterface;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Controller\ControllerBase;
 
 /**
- * Returns responses for feed routes.
+ * Returns responses for importer routes.
  */
-class ImporterController implements ControllerInterface {
+class ImporterController extends ControllerBase {
 
   /**
-   * The entity manager.
-   *
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
-   */
-  protected $entityManager;
-
-  /**
-   * The feed storage controller.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
-   */
-  protected $importerStorage;
-
-  /**
-   * Constructs a \Drupal\feeds\Controller\ImporterController object.
-   *
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $entity_manager
-   *   The Entity manager.
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $importer_storage
-   *   The feed importer controller.
-   */
-  public function __construct(PluginManagerInterface $entity_manager, EntityStorageControllerInterface $importer_storage) {
-    $this->entityManager = $entity_manager;
-    $this->importerStorage = $importer_storage;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    $entity_manager = $container->get('plugin.manager.entity');
-    return new static(
-      $entity_manager,
-      $entity_manager->getStorageController('feeds_importer')
-    );
-  }
-
-  /**
-   * Presents the feed creation form.
+   * Presents the importer creation form.
    *
    * @return array
    *   A form array as expected by drupal_render().
    */
-  public function createForm(Request $request) {
-    $importer = $this->importerStorage->create(array());
+  public function createForm() {
+    $importer = $this->entityManager()
+      ->getStorageController('feeds_importer')
+      ->create(array());
 
-    return $this->entityManager->getForm($importer, 'edit');
+    return $this->entityManager()->getForm($importer, 'edit');
   }
 
 }
