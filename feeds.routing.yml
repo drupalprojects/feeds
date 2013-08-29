@@ -1,29 +1,28 @@
 feeds_feed.list:
   pattern: '/admin/content/feed'
   defaults:
-    _content: 'Drupal\Core\Entity\Controller\EntityListController::listing'
-    entity_type: 'feeds_feed'
+    _entity_list: 'feeds_feed'
   requirements:
     _permission: 'administer feeds'
 
 feeds_feed.create_list:
   pattern: '/feed/add'
   defaults:
-    _content: 'Drupal\feeds\Controller\FeedController::add'
+    _content: 'Drupal\feeds\Controller\FeedController::createList'
   requirements:
     _access_feeds_feed_create_list: 'TRUE'
 
 feeds_feed.create:
   pattern: '/feed/add/{feeds_importer}'
   defaults:
-    _content: 'Drupal\feeds\Controller\FeedController::addForm'
+    _content: 'Drupal\feeds\Controller\FeedController::createForm'
   requirements:
     _entity_create_access: 'feeds_feed'
 
 feeds_feed:
   pattern: '/feed/{feeds_feed}'
   defaults:
-    _content: 'Drupal\feeds\Controller\FeedController::view'
+    _entity_view: 'feeds_feed'
   requirements:
     _entity_access: 'feeds_feed.view'
     feeds_feed:  \d+
@@ -31,7 +30,7 @@ feeds_feed:
 feeds_feed.view:
   pattern: '/feed/{feeds_feed}/view'
   defaults:
-    _content: 'Drupal\feeds\Controller\FeedController::view'
+    _entity_view: 'feeds_feed'
   requirements:
     _entity_access: 'feeds_feed.view'
     feeds_feed:  \d+
