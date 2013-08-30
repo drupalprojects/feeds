@@ -256,7 +256,9 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
       // Map the source element's value to the target.
       if (isset($targets[$target]['target'])) {
-        $plugin = \Drupal::service('plugin.manager.feeds.target')->createInstance($targets[$target]['target'], array('importer' => $this->importer));
+        $config = $targets[$target];
+        $config['importer'] = $this->importer;
+        $plugin = \Drupal::service('plugin.manager.feeds.target')->createInstance($targets[$target]['target'], $config);
         $plugin->prepareValues($new_values[$target]);
       }
 

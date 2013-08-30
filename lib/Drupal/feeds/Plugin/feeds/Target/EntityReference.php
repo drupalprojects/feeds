@@ -10,37 +10,59 @@ namespace Drupal\feeds\Plugin\feeds\Target;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\field\Entity\FieldInstance;
 
 /**
- * Defines a number field mapper.
+ * Defines an entity reference field mapper.
  *
  * @Plugin(
- *   id = "number",
+ *   id = "entity_reference",
  *   title = @Translation("EntityReference"),
- *   field_types = {
- *     "list_integer",
- *     "list_float",
- *     "list_boolean",
- *     "number_integer",
- *     "number_decimal",
- *     "number_float"
- *   }
+ *   field_types = {"entity_reference_field"}
  * )
  */
 class EntityReference extends FieldTargetBase {
 
-  public function prepareValues(array &$values) {
-    foreach ($values as $delta => $columns) {
-      foreach ($columns as $column => $value) {
-        if (is_numeric($value)) {
-          $values[$delta][$column] = $value;
-        }
-        else {
-          $values[$delta][$column] = '';
-        }
-      }
+  /**
+   * Constructs a ConfigurablePluginBase object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin id for the plugin instance.
+   * @param array $plugin_definition
+   *   The plugin implementation definition.
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->entityType = $this->getEntityType();
+    $info = \Drupal::entityManager()->getDefinition($this->entityType);
+    $this->bundleKey = FALSE;
+    if (!empty($info['bundle_keys'])) {
+      $this->bundleKey = $info['bundle_keys']['bundle'];
     }
+    $this->entityKeys = $info['entity_keys'];
+  }
+
+  protected function getEntityType() {
+    return $this->configuration['settings']['target_type'];
+  }
+
+  protected function prepareTarget(array &$target) {
+    // dpm($target);
+  }
+
+  protected function getByLabel($value) {
+    $query = \Drupal::entityQuery($this->entityType);
+
+    if ($this->bundle) {
+      $query->condition($this->bundleKey, $this->bundle);
+    }
+
+    return $query->condition($this->entityKeys['label'], $value)->range(0, 1)->execute();
+  }
+
+  protected function getDefaultConfiguration() {
+    return array('settings' => array('target_type' => 'user'));
   }
 
 }

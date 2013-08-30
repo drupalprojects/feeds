@@ -178,6 +178,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *   The mapping array.
    */
   protected function buildDefaultMappings() {
+    return array();
     $mappings = array();
     $targets = $this->getProcessor()->getMappingTargets();
     $sources = $this->getParser()->getMappingSources();

@@ -43,7 +43,9 @@ class MappingForm implements FormInterface {
    */
   public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
     $importer = $this->importer = $feeds_importer;
-    $this->mappings = $importer->getMappings();
+    if (empty($this->mappings)) {
+      $this->mappings = $importer->getMappings();
+    }
 
     $sources = $importer->getParser()->getMappingSources();
     $this->targets = $targets = $importer->getProcessor()->getMappingTargets();
@@ -59,8 +61,22 @@ class MappingForm implements FormInterface {
     foreach ($targets as $key => $info) {
       $target_options[$key] = $info['label'];
     }
+    if (isset($form_state['values'])) {
+      dpm($form_state);
+      $new_target = $form_state['values']['add_target'];
+      if ($new_target) {
+        $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
+        $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
+      }
+      unset($form_state['values']['add_target']);
+      foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
+        unset($this->mappings[$delta]);
+      }
+    }
 
     $form['#tree'] = TRUE;
+    $form['#prefix'] = '<div id="feeds-mapping-form-ajax-wrapper">';
+    $form['#suffix'] = '</div>';
 
     $table = array(
       '#type' => 'table',
@@ -106,6 +122,12 @@ class MappingForm implements FormInterface {
         '#default_value' => FALSE,
         '#title_display' => 'invisible',
         '#parents' => array('remove_mappings', $delta),
+        '#ajax' => array(
+          'callback' => array($this, 'ajaxCallback'),
+          'wrapper' => 'feeds-mapping-form-ajax-wrapper',
+          'effect' => 'none',
+          'progress' => 'none',
+        ),
       );
     }
 
@@ -118,6 +140,12 @@ class MappingForm implements FormInterface {
       '#options' => $target_options,
       '#empty_option' => t('- Select a target -'),
       '#parents' => array('add_target'),
+      '#ajax' => array(
+        'callback' => array($this, 'ajaxCallback'),
+        'wrapper' => 'feeds-mapping-form-ajax-wrapper',
+        'effect' => 'none',
+        'progress' => 'none',
+      ),
     );
     $table['add']['remove']['#markup'] = '';
 
@@ -185,6 +213,10 @@ class MappingForm implements FormInterface {
     asort($result);
 
     return $result;
+  }
+
+  public function ajaxCallback(array $form, array &$form_state) {
+    return $form;
   }
 
 }

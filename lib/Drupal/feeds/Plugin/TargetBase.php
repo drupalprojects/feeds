@@ -22,7 +22,7 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
    */
   abstract public function targets(array &$targets);
 
-  public function getDefaultConfiguration() {
+  protected function getDefaultConfiguration() {
     return array();
   }
 
