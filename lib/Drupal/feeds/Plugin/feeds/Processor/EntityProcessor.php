@@ -359,6 +359,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
         }
 
         $this->properties[$id] = $definition;
+        $this->properties[$id]['properties'] = $field->getPropertyDefinitions();
 
         // if (!empty($definition['configurable'])) {
         //   foreach ($field->getPropertyDefinitions() as $key => $info) {
