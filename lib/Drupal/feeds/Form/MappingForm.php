@@ -9,13 +9,13 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Form\FormBase;
 use Drupal\feeds\ImporterInterface;
 
 /**
  * Provides a form for mapping configuration.
  */
-class MappingForm implements FormInterface {
+class MappingForm extends FormBase {
 
   /**
    * The feeds importer.
@@ -50,7 +50,6 @@ class MappingForm implements FormInterface {
     $sources = $importer->getParser()->getMappingSources();
     $this->targets = $targets = $importer->getProcessor()->getMappingTargets();
 
-
     // Denormalize targets.
     $source_options = array();
     foreach ($sources as $key => $info) {
@@ -62,16 +61,8 @@ class MappingForm implements FormInterface {
       $target_options[$key] = $info['label'];
     }
     if (isset($form_state['values'])) {
-      dpm($form_state);
-      $new_target = $form_state['values']['add_target'];
-      if ($new_target) {
-        $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
-        $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
-      }
-      unset($form_state['values']['add_target']);
-      foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
-        unset($this->mappings[$delta]);
-      }
+      $this->processFormState($form_state);
+      drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
     }
 
     $form['#tree'] = TRUE;
@@ -80,7 +71,8 @@ class MappingForm implements FormInterface {
 
     $table = array(
       '#type' => 'table',
-      '#header' => array(t('Source'), t('Target'), t('Remove')),
+      '#header' => array($this->t('Source'), $this->t('Target'), $this->t('Remove')),
+      '#sticky' => TRUE,
     );
 
     foreach ($this->mappings as $delta => $mapping) {
@@ -104,7 +96,7 @@ class MappingForm implements FormInterface {
           '#type' => 'select',
           '#options' => $source_options,
           '#default_value' => $source,
-          '#empty_option' => t('- Select a source -'),
+          '#empty_option' => $this->t('- Select a source -'),
         );
 
         $label = check_plain($targets[$mapping['target']]['label']);
@@ -113,11 +105,11 @@ class MappingForm implements FormInterface {
           $label .= ': ' . $targets[$mapping['target']]['properties'][$column]['label'];
         }
 
-        $table[$delta]['targets']['#items'][] =  $label;
+        $table[$delta]['targets']['#items'][] = $label;
       }
 
       $table[$delta]['remove'] = array(
-        '#title' => t('Remove'),
+        '#title' => $this->t('Remove'),
         '#type' => 'checkbox',
         '#default_value' => FALSE,
         '#title_display' => 'invisible',
@@ -135,11 +127,12 @@ class MappingForm implements FormInterface {
 
     $table['add']['target'] = array(
       '#type' => 'select',
-      '#title' => t('Add a target'),
+      '#title' => $this->t('Add a target'),
       '#title_display' => 'invisible',
       '#options' => $target_options,
-      '#empty_option' => t('- Select a target -'),
+      '#empty_option' => $this->t('- Select a target -'),
       '#parents' => array('add_target'),
+      '#default_value' => NULL,
       '#ajax' => array(
         'callback' => array($this, 'ajaxCallback'),
         'wrapper' => 'feeds-mapping-form-ajax-wrapper',
@@ -152,17 +145,35 @@ class MappingForm implements FormInterface {
     $form['mappings'] = $table;
 
     $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $this->t('Save'),
+      '#button_type' => 'primary',
+    );
 
     return $form;
 
   }
 
   /**
-   * {@inheritdoc}
+   * Processes the form state, populating the mapping array.
+   *
+   * @param arary &$form_state
+   *   The form state array to process.
    */
-  public function validateForm(array &$form, array &$form_state) {
+  protected function processFormState(&$form_state) {
+    foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
+      unset($this->mappings[$delta]);
+    }
 
+    $new_target = $form_state['values']['add_target'];
+    if ($new_target) {
+      $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
+      $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
+    }
+
+    // Allow the #default_value of 'add_target' to be reset.
+    unset($form_state['input']['add_target']);
   }
 
   /**
@@ -171,17 +182,7 @@ class MappingForm implements FormInterface {
   public function submitForm(array &$form, array &$form_state) {
     $this->mappings = $form_state['values']['mappings'];
 
-    // Add new target.
-    $new_target = $form_state['values']['add_target'];
-    if ($new_target) {
-      $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
-      $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
-    }
-
-    // Remove existing mapping.
-    foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
-      unset($this->mappings[$delta]);
-    }
+    $this->processFormState($form_state);
 
     $this->importer->setMappings($this->mappings);
     $this->importer->save();
@@ -215,6 +216,9 @@ class MappingForm implements FormInterface {
     return $result;
   }
 
+  /**
+   * Callback for ajax requests.
+   */
   public function ajaxCallback(array $form, array &$form_state) {
     return $form;
   }
