@@ -7,42 +7,47 @@
 
 namespace Drupal\feeds\Plugin\Derivative;
 
-use Drupal\Component\Plugin\Derivative\DerivativeInterface;
+use Drupal\Component\Plugin\Derivative\DerivativeBase;
+use Drupal\Core\Entity\EntityManager;
+use Drupal\Core\Plugin\Discovery\ContainerDerivativeInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides processor definitions for entities.
  *
  * @see \Drupal\feeds\Plugin\feeds\Processor\EntityProcessor
  */
-class EntityProcessor implements DerivativeInterface {
+class EntityProcessor extends DerivativeBase implements ContainerDerivativeInterface {
 
   /**
-   * List of derivative definitions.
+   * The entity manager.
    *
-   * @var array
+   * @var \Drupal\Core\Entity\EntityManager
    */
-  protected $derivatives = array();
+  protected $entityManager;
 
   /**
-   * {@inheritdoc}
+   * Constructs an EntityProcessor object.
+   *
+   * @param \Drupal\Core\Entity\EntityManager $entity_manager
+   *   The entity manager.
    */
-  public function getDerivativeDefinition($derivative_id, array $base_plugin_definition) {
-    if ($this->derivatives && isset($this->derivatives[$derivative_id])) {
-      return $this->derivatives[$derivative_id];
-    }
-
-    $this->getDerivativeDefinitions($base_plugin_definition);
-
-    return $this->derivatives[$derivative_id];
+  public function __construct(EntityManager $entity_manager) {
+    $this->entityManager = $entity_manager;
   }
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Do we want to limit to content entities? There's a lot in the list.
+   */
+  public static function create(ContainerInterface $container, $base_plugin_id) {
+    return new static($container->get('entity.manager'));
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getDerivativeDefinitions(array $base_plugin_definition) {
-    foreach (entity_get_info() as $entity_type => $entity_info) {
+    foreach ($this->entityManager->getDefinitions() as $entity_type => $entity_info) {
 
       // Only show content entities for now.
       if (empty($entity_info['config_prefix'])) {
