@@ -150,7 +150,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getMappings() {
-    if ($this->mappings === NULL) {
+    if (!$this->mappings) {
       $this->mappings = $this->buildDefaultMappings();
     }
 
@@ -162,6 +162,13 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public function setMappings(array $mappings) {
     $this->mappings = $mappings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeMappings() {
+    $this->mappings = array();
   }
 
   /**
@@ -337,9 +344,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   public function getExportProperties() {
     $properties = parent::getExportProperties();
     $properties += $this->plugins;
-    if ($this->mappings) {
-      $properties['mappings'] = $this->mappings;
-    }
+    $properties['mappings'] = $this->mappings;
     return $properties;
   }
 

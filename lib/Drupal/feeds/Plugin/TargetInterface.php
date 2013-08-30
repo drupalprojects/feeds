@@ -23,6 +23,6 @@ interface TargetInterface {
    *
    * @todo Finish documenting this.
    */
-  public function targets();
+  public function targets(array &$targets);
 
 }

@@ -24,31 +24,8 @@ use Drupal\field\Entity\FieldInstance;
  */
 class Link extends FieldTargetBase {
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function applyTargets(FieldInstance $instance) {
-
-    $targets = array();
-
-    $targets[$instance->getFieldName()] = array(
-      'name' => t('@name: URL', array('@name' => $instance->label())),
-      'callback' => array($this, 'setTarget'),
-      'description' => t('The @label field of the entity.', array('@label' => $instance->label())),
-      'columns' => array('url'),
-    );
-    if ($instance->getFieldSetting('title')) {
-      $targets[$instance->getFieldName()]['columns'][] = 'title';
-    }
-
-    return $targets;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function defaults() {
-    return array('title' => '', 'url' => '');
+  protected function prepareTarget(array &$target) {
+    unset($target['properties']['attributes']);
   }
 
 }

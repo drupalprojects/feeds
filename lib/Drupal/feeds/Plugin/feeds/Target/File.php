@@ -25,71 +25,59 @@ use Drupal\field\Entity\FieldInstance;
  */
 class File extends FieldTargetBase {
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function applyTargets(FieldInstance $instance) {
-    $targets = array();
+  protected $instance;
 
-    $targets[$instance->getFieldName()] = array(
-      'name' => t('@label: URI', array('@label' => $instance->label())),
-      'callback' => array($this, 'setTarget'),
-      'description' => t('The URI of the @label field.', array('@label' => $instance->label())),
-      'columns' => array('uri'),
-    );
-
-    if ($instance->getFieldType() == 'image') {
-      $targets[$instance->getFieldName()]['columns'][] = 'title';
-      $targets[$instance->getFieldName()]['columns'][] = 'alt';
-    }
-
-    return $targets;
+  protected function prepareTarget(array &$target) {
+    unset($target['properties']['revision_id']);
+    $this->instance = $target['instance'];
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function validate($key, $value, array $mapping) {
-    switch ($key) {
-      case 'alt':
-      case 'title':
-        return parent::validate($key, $value, $mapping);
+  public function prepareValues(array &$values) {
+    foreach ($values as $delta => $columns) {
+      foreach ($columns as $column => $value) {
+        switch ($column) {
+          case 'alt':
+          case 'title':
+            $values[$delta][$column] = (string) $value;
+            break;
 
-      case 'uri':
-        $data = array();
-        if (!empty($this->entity->uid)) {
-          $data[$entity->entityType()] = $this->entity;
+          case 'width':
+          case 'height':
+            $values[$delta][$column] = (int) $value;
+            break;
+
+          case 'target_id':
+            $values[$delta][$column] = $this->getFile($value);
+            break;
+
+          case 'display':
+            $values[$delta][$column] = 1;
         }
-        $destination = file_field_widget_uri($this->instance->getFieldSettings(), $data);
-
-        try {
-          if (!($value instanceof FeedsEnclosure)) {
-            if (is_string($value)) {
-              $value = new FeedsEnclosure($value, file_get_mimetype($value));
-            }
-            else {
-              return '';
-            }
-          }
-
-          $file = $value->getFile($destination);
-
-          $this->defaults = array(
-            'entity' => $file,
-            'target_id' => $file->id(),
-            'display' => 1,
-          );
-        }
-        catch (Exception $e) {
-          watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
-          return FALSE;
-        }
-        return NULL;
+      }
     }
   }
 
-  protected function defaults() {
-    return $this->defaults;
+  protected function getFile($value) {
+    $data = array();
+    // $destination = file_field_widget_uri($this->instance->getFieldSettings(), $data);
+    $destination = 'public://';
+
+    try {
+      if (!($value instanceof FeedsEnclosure)) {
+        if (is_string($value)) {
+          $value = new FeedsEnclosure($value, file_get_mimetype($value));
+        }
+        else {
+          return '';
+        }
+      }
+
+      $file = $value->getFile($destination);
+      return $file->id();
+    }
+    catch (Exception $e) {
+      watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
+    }
   }
 
 }

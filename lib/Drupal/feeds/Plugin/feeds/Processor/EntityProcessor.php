@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Entity\Field\FieldItemInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\feeds\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
@@ -359,16 +360,17 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
         }
 
         $this->properties[$id] = $definition;
-        $this->properties[$id]['properties'] = $field->getPropertyDefinitions();
+        $field_properties = $field->getPropertyDefinitions();
+        $this->properties[$id]['properties'] = array_filter($field_properties, function($property) {
+          return empty($property['computed']);
+        });
 
-        // if (!empty($definition['configurable'])) {
-        //   foreach ($field->getPropertyDefinitions() as $key => $info) {
-        //     if (empty($info['computed'])) {
-        //       $info['label'] = $definition['label'] . ': ' . $info['label'];
-        //       $this->properties["$id:$key"] = $info;
-        //     }
-        //   }
-        // }
+        if ($instance = $field->getFieldDefinition()) {
+          $this->properties[$id]['label'] = $instance->getFieldLabel();
+          $this->properties[$id]['description'] = $instance->getFieldDescription();
+          $this->properties[$id]['type'] = $instance->getFieldType();
+          $this->properties[$id]['instance'] = $instance;
+        }
       }
     }
 
@@ -498,28 +500,17 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    */
   public function getMappingTargets() {
 
-    // The bundle has not been selected.
-    if (!$this->bundle()) {
-      $info = $this->entityInfo();
-      $bundle_name = !empty($info['bundle_name']) ? drupal_strtolower($info['bundle_name']) : $this->t('bundle');
-      $url = url('admin/structure/feeds/manage/' . $this->importer->id() . '/settings/processor');
-      drupal_set_message($this->t('Please <a href="@url">select a @bundle_name</a>.', array('@url' => $url, '@bundle_name' => $bundle_name)), 'warning', FALSE);
-    }
-
     $targets = parent::getMappingTargets();
 
-    foreach ($this->getProperties() as $id => $field) {
-      $targets[$id] = $field;
-    }
-
-    // $this->apply('getMappingTargets', $targets);
+    $targets += $this->getProperties();
 
     // Let other modules expose mapping targets.
-    // $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
-    // foreach ($definitions as $definition) {
-    //   $mapper = \Drupal::service('plugin.manager.feeds.target')->createInstance($definition['id'], array('importer' => $this->importer));
-    //   $targets += $mapper->targets();
-    // }
+    $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
+
+    foreach ($definitions as $definition) {
+      $mapper = \Drupal::service('plugin.manager.feeds.target')->createInstance($definition['id'], array('importer' => $this->importer));
+      $mapper->targets($targets);
+    }
 
     return $targets;
   }
@@ -533,7 +524,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       $entity->get($field_name)->setValue($values);
     }
     else {
-      parent::setTargetElementFeedInterface($feed, $entity, $field_name, $values, $mapping, $item_info);
+      parent::setTargetElement($feed, $entity, $field_name, $values, $mapping, $item_info);
     }
   }
 

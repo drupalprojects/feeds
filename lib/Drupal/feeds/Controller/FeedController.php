@@ -35,7 +35,7 @@ class FeedController extends ControllerBase {
     // must be it.
     if ($importers && count($importers) == 1) {
       $importer = reset($importers);
-      return $this->addForm($importer);
+      return $this->createForm($importer);
     }
 
     // @todo Don't show link for non-admins.
@@ -69,7 +69,7 @@ class FeedController extends ControllerBase {
   public function createForm(Importer $feeds_importer) {
 
     $feed = $this->entityManager()->getStorageController('feeds_feed')->create(array(
-      'uid' => $this->currentUser(),
+      'uid' => $this->currentUser()->id(),
       'importer' => $feeds_importer->id(),
       'status' => 1,
       'created' => REQUEST_TIME,

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Target\Number.
+ * Contains \Drupal\feeds\Plugin\feeds\Target\EntityReference.
  */
 
 namespace Drupal\feeds\Plugin\feeds\Target;
@@ -17,7 +17,7 @@ use Drupal\field\Entity\FieldInstance;
  *
  * @Plugin(
  *   id = "number",
- *   title = @Translation("Number"),
+ *   title = @Translation("EntityReference"),
  *   field_types = {
  *     "list_integer",
  *     "list_float",
@@ -28,7 +28,7 @@ use Drupal\field\Entity\FieldInstance;
  *   }
  * )
  */
-class Number extends FieldTargetBase {
+class EntityReference extends FieldTargetBase {
 
   public function prepareValues(array &$values) {
     foreach ($values as $delta => $columns) {

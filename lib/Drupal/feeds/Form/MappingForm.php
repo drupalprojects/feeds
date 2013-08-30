@@ -46,8 +46,10 @@ class MappingForm implements FormInterface {
     $this->mappings = $importer->getMappings();
 
     $sources = $importer->getParser()->getMappingSources();
-    $targets = $importer->getProcessor()->getMappingTargets();
+    $this->targets = $targets = $importer->getProcessor()->getMappingTargets();
 
+
+    // Denormalize targets.
     $source_options = array();
     foreach ($sources as $key => $info) {
       $source_options[$key] = $info['label'];
@@ -62,29 +64,48 @@ class MappingForm implements FormInterface {
 
     $table = array(
       '#type' => 'table',
-      '#header' => array(
-        t('Source'),
-        t('Target'),
-        t('Remove'),
-      ),
+      '#header' => array(t('Source'), t('Target'), t('Remove')),
     );
 
-    $rows = array();
     foreach ($this->mappings as $delta => $mapping) {
-      $table[$delta]['source'] = array(
-        '#type' => 'select',
-        '#options' => $source_options,
-        '#default_value' => $mapping['source'],
-        '#empty_option' => t('- Select a source -'),
+
+      $table[$delta]['map'] = array(
+        '#type' => 'container',
       );
-      $table[$delta]['target_display'] = array(
-        '#markup' => check_plain($targets[$mapping['target']]['label']),
+      $table[$delta]['targets'] = array(
+        '#theme' => 'item_list',
+        '#items' => array(),
       );
+      // Keep the target values out of the table so that the columns align.
+      $form['targets'][$delta]['target'] = array(
+        '#type' => 'value',
+        '#value' => $mapping['target'],
+        '#parents' => array('mappings', $delta, 'target'),
+      );
+
+      foreach ($mapping['map'] as $column => $source) {
+        $table[$delta]['map'][$column] = array(
+          '#type' => 'select',
+          '#options' => $source_options,
+          '#default_value' => $source,
+          '#empty_option' => t('- Select a source -'),
+        );
+
+        $label = check_plain($targets[$mapping['target']]['label']);
+
+        if (count($mapping['map']) > 1) {
+          $label .= ': ' . $targets[$mapping['target']]['properties'][$column]['label'];
+        }
+
+        $table[$delta]['targets']['#items'][] =  $label;
+      }
+
       $table[$delta]['remove'] = array(
         '#title' => t('Remove'),
         '#type' => 'checkbox',
         '#default_value' => FALSE,
         '#title_display' => 'invisible',
+        '#parents' => array('remove_mappings', $delta),
       );
     }
 
@@ -120,21 +141,18 @@ class MappingForm implements FormInterface {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    // Add new target.
-    if ($form_state['values']['add_target']) {
-      $this->mappings[] = array('source' => NULL, 'target' => $form_state['values']['add_target']);
-    }
+    $this->mappings = $form_state['values']['mappings'];
 
-    // Set sources for existing mappings.
-    foreach ($form_state['values']['mappings'] as $delta => $mapping) {
-      $this->mappings[$delta]['source'] = $mapping['source'];
+    // Add new target.
+    $new_target = $form_state['values']['add_target'];
+    if ($new_target) {
+      $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
+      $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
     }
 
     // Remove existing mapping.
-    foreach ($form_state['values']['mappings'] as $delta => $mapping) {
-      if ($mapping['remove']) {
-        unset($this->mappings[$delta]);
-      }
+    foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
+      unset($this->mappings[$delta]);
     }
 
     $this->importer->setMappings($this->mappings);
@@ -165,6 +183,7 @@ class MappingForm implements FormInterface {
       }
     }
     asort($result);
+
     return $result;
   }
 

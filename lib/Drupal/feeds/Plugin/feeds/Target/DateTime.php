@@ -24,31 +24,28 @@ use Drupal\field\Entity\FieldInstance;
  */
 class DateTime extends FieldTargetBase {
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function applyTargets(FieldInstance $instance) {
-    return array(
-      $instance->getFieldName() => array(
-        'name' => $instance->label(),
-        'description' => t('The start date for the @name field. Also use if mapping both start and end.', array('@name' => $instance->label())),
-      ),
-    );
-  }
+  public function prepareValues(array &$values) {
+    foreach ($values as $delta => $columns) {
+      foreach ($columns as $column => $value) {
+        $date = FALSE;
+        if (is_numeric($value)) {
+          $date = DrupalDateTime::createFromTimestamp($value);
+        }
+        elseif ($value instanceof \DateTime) {
+          $date = DrupalDateTime::createFromDateTime($value);
+        }
+        elseif ($value = strtotime($value)) {
+          $date = DrupalDateTime::createFromTimestamp($value);
+        }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function validate($key, $value, array $mapping) {
-    $value = parent::validate($key, $value, $mapping);
-
-    $value = new DrupalDateTime($value);
-
-    if (!$value->hasErrors()) {
-      return $value->format(DATETIME_DATETIME_STORAGE_FORMAT);
+        if ($date && !$date->hasErrors()) {
+          $values[$delta][$column] = $date->format(DATETIME_DATETIME_STORAGE_FORMAT);
+        }
+        else {
+          $values[$delta][$column] = '';
+        }
+      }
     }
-
-    return FALSE;
   }
 
 }

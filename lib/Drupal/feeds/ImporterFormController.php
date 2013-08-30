@@ -106,6 +106,9 @@ class ImporterFormController extends EntityFormController {
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
     if (isset($form_state['values'])) {
+      if ($form_state['values']['processor']['id'] != $this->entity->getProcessor()->getPluginId()) {
+        $this->entity->removeMappings();
+      }
       foreach ($this->entity->getPluginTypes() as $type) {
         $this->entity->setPlugin($type, $form_state['values'][$type]['id']);
       }
@@ -225,8 +228,7 @@ class ImporterFormController extends EntityFormController {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    unset($this->entity->plugin_settings);
-    unset($this->entity->actions);
+
     $this->entity->save();
     drupal_set_message($this->t('Your changes have been saved.'));
   }

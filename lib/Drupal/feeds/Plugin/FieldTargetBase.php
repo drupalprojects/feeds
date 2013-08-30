@@ -19,107 +19,27 @@ use Drupal\field\Field;
  */
 abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
-  protected $cardinality = -1;
-
-  protected $importer;
-
-  protected $instance;
-
-  protected $entity;
-
   /**
    * {@inheritdoc}
    */
-  public function targets() {
+  public function targets(array &$targets) {
 
-    $targets = array();
-
-    $processor = $this->importer->getProcessor();
-    $entity_type = $processor->entityType();
-    $bundle = $processor->bundle();
-
-    foreach (Field::fieldInfo()->getBundleInstances($entity_type, $bundle) as $name => $instance) {
-      if (in_array($instance->getFieldType(), $this->fieldTypes)) {
-        $targets += $this->applyTargets($instance);
+    foreach ($targets as &$target) {
+      if (!empty($target['type']) && in_array($target['type'], $this->pluginDefinition['field_types'])) {
+        $this->prepareTarget($target);
+        $target['target'] = $this->getPluginId();
       }
     }
-
-    return $targets;
   }
 
-  /**
-   * Sets the targets for the supported field types.
-   *
-   * @param array $targets
-   *   The targets array.
-   * @param \Drupal\field\Entity\FieldInstance $instance
-   *   The field instance.
-   */
-  abstract protected function applyTargets(FieldInstance $instance);
+  protected function prepareTarget(array &$target) {}
 
-  /**
-   * {@inheritdoc}
-   */
-  public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $value, array $mapping) {
-    $this->instance = field_info_instance($entity->entityType(), $field_name, $entity->bundle());
-
-    $this->cardinality = $this->instance->getFieldCardinality();
-
-    $this->entity = $entity;
-
-    // Set a very high cardinality to make comparison simpler.
-    if ($this->cardinality == -1) {
-      $this->cardinality = 100000000;
-    }
-
-    $field = $entity->get($field_name);
-
-    $this->buildField($field, $value, $mapping);
-  }
-
-  /**
-   * Bulds a field for an entity.
-   *
-   * @param array $field
-   *   The field to populate.
-   * @param array $values
-   *   The values to put in the column.
-   * @param array $mapping
-   *   The settings for this mapping.
-   *
-   * @return array
-   *   The newly constructed field.
-   */
-  protected function buildField($field, $values, array $mapping) {
-    $new_values = array();
-
-    foreach ($values as $delta => $value) {
-      foreach ($value as $key => $v) {
-        if (($v = $this->validate($key, $v, $mapping)) !== FALSE) {
-          $new_values[$delta][$key] = $v;
-          $new_values[$delta] += $this->defaults();
-        }
+  public function prepareValues(array &$values) {
+    foreach ($values as $delta => $columns) {
+      foreach ($columns as $column => $value) {
+        $values[$delta][$column] = (string) $value;
       }
     }
-
-    $field->setValue($new_values);
-  }
-
-  /**
-   * Validates a field value.
-   *
-   * @param mixed $value
-   *   The field value.
-   *
-   * @return mixed|false
-   *   The value, or false if validation failed.
-   */
-  protected function validate($key, $value, array $mapping) {
-    return (string) $value;
-  }
-
-  protected function defaults() {
-    return array();
   }
 
 }

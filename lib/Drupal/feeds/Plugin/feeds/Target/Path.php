@@ -25,26 +25,7 @@ use Drupal\feeds\Plugin\TargetInterface;
  */
 class Path extends ConfigurablePluginBase implements TargetInterface {
 
-  /**
-   * {@inheritdoc}
-   */
-  public function targets() {
-
-    $targets = array();
-
-    switch ($this->importer->getProcessor()->entityType()) {
-      case 'node':
-      case 'taxonomy_term':
-      case 'user':
-        $targets['path_alias'] = array(
-          'name' => t('Path alias'),
-          'description' => t('URL path alias of the node.'),
-        );
-        break;
-    }
-
-    return $targets;
-  }
+  public function targets(array &$targets) {}
 
   /**
    * {@inheritdoc}

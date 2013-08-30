@@ -192,8 +192,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     // need to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
     foreach ($this->importer->getMappings() as $mapping) {
-      list($field) = explode(':', $mapping['target']);
-      unset($target_item->$field);
+      unset($target_item->{$mapping['target']});
     }
 
     /*
@@ -206,43 +205,46 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     setTargetElement().
     */
 
-    $value = array();
+    $values = array();
 
     foreach ($this->importer->getMappings() as $mapping) {
+      $target = $mapping['target'];
 
-      list($key, $subkey) = explode(':', $mapping['target'] . ':value');
+      foreach ($mapping['map'] as $column => $source) {
 
-      if (!isset($value[$key][$subkey])) {
-        $value[$key][$subkey] = array();
+        if (!isset($values[$target][$column])) {
+          $values[$target][$column] = array();
+        }
+
+        // Retrieve source element's value from parser.
+        if (isset($sources[$source]) &&
+            is_array($sources[$source]) &&
+            isset($sources[$source]['callback']) &&
+            is_callable($sources[$source]['callback'])) {
+
+          $callback = $sources[$source]['callback'];
+          $value = $callback($feed, $item, $source);
+        }
+        else {
+          $value = $parser->getSourceElement($feed, $item, $source);
+        }
+
+        if (!is_array($value)) {
+          $values[$target][$column][] = $value;
+        }
+        else {
+          $values[$target][$column] = array_merge($values[$target][$column], $value);
+        }
       }
-
-      // Retrieve source element's value from parser.
-      if (isset($sources[$mapping['source']]) &&
-          is_array($sources[$mapping['source']]) &&
-          isset($sources[$mapping['source']]['callback']) &&
-          is_callable($sources[$mapping['source']]['callback'])) {
-
-        $callback = $sources[$mapping['source']]['callback'];
-        $new_value = $callback($feed, $item, $mapping['source']);
-      }
-      else {
-        $new_value = $parser->getSourceElement($feed, $item, $mapping['source']);
-      }
-
-      if (!is_array($new_value)) {
-        $new_value = array($new_value);
-      }
-
-      $value[$key][$subkey] = array_merge($value[$key][$subkey], $new_value);
     }
 
     // Rearrange values into Drupal's field structure.
-    $new_value = array();
-    foreach ($value as $key => $vs) {
-      foreach ($vs as $subkey => $v) {
+    $new_values = array();
+    foreach ($values as $target => $value) {
+      foreach ($value as $column => $v) {
         $delta = 0;
         foreach ($v as $avalue) {
-          $new_value[$key][$delta][$subkey] = $avalue;
+          $new_values[$target][$delta][$column] = $avalue;
           $delta++;
         }
       }
@@ -250,19 +252,15 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
     foreach ($this->importer->getMappings() as $mapping) {
 
-      list($key, $subkey) = explode(':', $mapping['target'] . ':value');
+      $target  = $mapping['target'];
 
       // Map the source element's value to the target.
-      if (isset($targets[$mapping['target']]) &&
-          is_array($targets[$mapping['target']]) &&
-          isset($targets[$mapping['target']]['callback']) &&
-          is_callable($targets[$mapping['target']]['callback'])) {
-        $callback = $targets[$mapping['target']]['callback'];
-        $callback($feed, $target_item, $key, $new_value[$key], $mapping, $item_info);
+      if (isset($targets[$target]['target'])) {
+        $plugin = \Drupal::service('plugin.manager.feeds.target')->createInstance($targets[$target]['target'], array('importer' => $this->importer));
+        $plugin->prepareValues($new_values[$target]);
       }
-      else {
-        $this->setTargetElement($feed, $target_item, $key, $new_value[$key], $mapping, $item_info);
-      }
+
+      $this->setTargetElement($feed, $target_item, $target, $new_values[$target], $mapping, $item_info);
     }
 
     return $target_item;

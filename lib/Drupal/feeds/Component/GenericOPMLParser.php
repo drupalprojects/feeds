@@ -57,7 +57,10 @@ class GenericOPMLParser extends XMLParserBase {
       $return['head']['#expansionState'] = array_filter(explode(',', $head['#expansionState']));
     }
 
-    $return['outlines'] = $this->getOutlines($this->xpath->evaluate('/opml/body', $this->doc)->item(0));
+    $return['outlines'] = array();
+    if ($content = $this->xpath->evaluate('/opml/body', $this->doc)->item(0)) {
+      $return['outlines'] = $this->getOutlines();
+    }
 
     return $return;
   }

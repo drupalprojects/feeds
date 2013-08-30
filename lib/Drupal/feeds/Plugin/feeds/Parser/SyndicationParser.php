@@ -84,10 +84,10 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         'label' => $this->t('Title'),
         'description' => $this->t('Title of the feed item.'),
         'suggestions' => array(
-          'targets' => array('title'),
+          'targets' => array('subject', 'title', 'label', 'name'),
           'types' => array(
             'field_item:text' => array(),
-          )
+          ),
         ),
       ),
       'description' => array(

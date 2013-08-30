@@ -48,9 +48,8 @@ class EntityProcessor extends DerivativeBase implements ContainerDerivativeInter
    */
   public function getDerivativeDefinitions(array $base_plugin_definition) {
     foreach ($this->entityManager->getDefinitions() as $entity_type => $entity_info) {
-
       // Only show content entities for now.
-      if (empty($entity_info['config_prefix'])) {
+      if (is_subclass_of($entity_info['class'], '\Drupal\Core\Entity\ContentEntityInterface')) {
         $this->derivatives[$entity_type] = $base_plugin_definition;
         $this->derivatives[$entity_type]['title'] = $entity_info['label'];
         $this->derivatives[$entity_type]['entity type'] = $entity_type;
