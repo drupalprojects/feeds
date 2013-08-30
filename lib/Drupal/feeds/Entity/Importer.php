@@ -37,7 +37,8 @@ use Drupal\feeds\ImporterInterface;
  *     "label" = "label",
  *     "uuid" = "uuid",
  *     "status" = "status"
- *   }
+ *   },
+ *   bundle_of = "feeds_feed"
  * )
  */
 class Importer extends ConfigEntityBase implements ImporterInterface {
