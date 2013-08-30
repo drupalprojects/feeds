@@ -42,4 +42,8 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
     }
   }
 
+  public function getSummary() {
+    return '';
+  }
+
 }

@@ -300,6 +300,17 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
   }
 
+  public function getTargetPlugin($delta) {
+    $targets = $this->getProcessor()->getMappingTargets();
+    $target_key = $this->mappings[$delta]['target'];
+    if (isset($targets[$target_key]) && isset($targets[$target_key]['target'])) {
+      $configuration = $this->mappings[$delta];
+      $configuration['importer'] = $this;
+      $target_plugin = \Drupal::service('plugin.manager.feeds.target')->createInstance($targets[$target_key]['target'], $configuration);
+      return $target_plugin;
+    }
+  }
+
   public function getPluginOptionsList($plugin_type) {
     $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
 

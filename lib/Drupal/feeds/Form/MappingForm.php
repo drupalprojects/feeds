@@ -60,18 +60,39 @@ class MappingForm extends FormBase {
     foreach ($targets as $key => $info) {
       $target_options[$key] = $info['label'];
     }
-    if (isset($form_state['values'])) {
-      $this->processFormState($form_state);
-      drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
-    }
 
     $form['#tree'] = TRUE;
+
+    $ajax_delta = -1;
+    if (isset($form_state['values'])) {
+      if (isset($form_state['triggering_element']['#delta'])) {
+        $delta = $form_state['triggering_element']['#delta'];
+        if (empty($form_state['triggering_element']['#saved'])) {
+          $ajax_delta = $delta;
+        }
+        else {
+          $data = $form_state['values']['mappings'][$delta]['configuration'];
+          $form_state['mapping_configuration'][$delta] = $data;
+        }
+      }
+
+      elseif ($form_state['triggering_element']['#name'] == 'add_target' || !empty($form_state['triggering_element']['#remove'])) {
+        $this->processFormState($form_state);
+        drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
+      }
+    }
+
     $form['#prefix'] = '<div id="feeds-mapping-form-ajax-wrapper">';
     $form['#suffix'] = '</div>';
 
     $table = array(
       '#type' => 'table',
-      '#header' => array($this->t('Source'), $this->t('Target'), $this->t('Remove')),
+      '#header' => array(
+        $this->t('Source'),
+        $this->t('Target'),
+        $this->t('Configure'),
+        $this->t('Remove'),
+      ),
       '#sticky' => TRUE,
     );
 
@@ -108,6 +129,54 @@ class MappingForm extends FormBase {
         $table[$delta]['targets']['#items'][] = $label;
       }
 
+      $table[$delta]['configuration']['#markup'] = '';
+      if (isset($targets[$mapping['target']]['target'])) {
+        $table[$delta]['configuration'] = array(
+          '#type' => 'container',
+          '#id' => 'edit-mappings-' . $delta . '-configuration',
+        );
+        if ($delta == $ajax_delta) {
+          $table[$delta]['configuration']['thing'] = array(
+            '#type' => 'textfield',
+          );
+          $table[$delta]['configuration']['submit'] = array(
+            '#type' => 'submit',
+            '#value' => $this->t('Save'),
+            '#ajax' => array(
+              'callback' => array($this, 'configurationAjaxCallback'),
+              'wrapper' => 'edit-mappings-' . $delta . '-configuration',
+              'effect' => 'fade',
+              'progress' => 'none',
+            ),
+            '#name' => 'target-save-' . $delta,
+            '#delta' => $delta,
+            '#saved' => TRUE,
+            '#parents' => array('config_button', $delta),
+          );
+        }
+        else {
+          $plugin = $feeds_importer->getTargetPlugin($delta, $targets[$mapping['target']]['target']);
+          $table[$delta]['configuration']['summary'] = array(
+            '#type' => 'item',
+            '#markup' => $plugin->getSummary(),
+            '#parents' => array('config_summary', $delta),
+          );
+          $table[$delta]['configuration']['button'] = array(
+            '#type' => 'submit',
+            '#value' => $this->t('Configure'),
+            '#ajax' => array(
+              'callback' => array($this, 'configurationAjaxCallback'),
+              'wrapper' => 'edit-mappings-' . $delta . '-configuration',
+              'effect' => 'fade',
+              'progress' => 'none',
+            ),
+            '#name' => 'target-configuration-' . $delta,
+            '#delta' => $delta,
+            '#parents' => array('config_button', $delta),
+          );
+        }
+      }
+
       $table[$delta]['remove'] = array(
         '#title' => $this->t('Remove'),
         '#type' => 'checkbox',
@@ -120,6 +189,7 @@ class MappingForm extends FormBase {
           'effect' => 'none',
           'progress' => 'none',
         ),
+        '#remove' => TRUE,
       );
     }
 
@@ -140,6 +210,8 @@ class MappingForm extends FormBase {
         'progress' => 'none',
       ),
     );
+
+    $table['add']['configuration']['#markup'] = '';
     $table['add']['remove']['#markup'] = '';
 
     $form['mappings'] = $table;
@@ -162,6 +234,7 @@ class MappingForm extends FormBase {
    *   The form state array to process.
    */
   protected function processFormState(&$form_state) {
+    dd($form_state['values']);
     foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
       unset($this->mappings[$delta]);
     }
@@ -172,8 +245,16 @@ class MappingForm extends FormBase {
       $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
     }
 
+    $this->importer->setMappings($this->mappings);
+
     // Allow the #default_value of 'add_target' to be reset.
     unset($form_state['input']['add_target']);
+  }
+
+  public function validateForm(array &$form, array &$form_state) {
+    if (isset($form_state['triggering_element']['#delta'])) {
+      $form_state['rebuild'] = TRUE;
+    }
   }
 
   /**
@@ -181,8 +262,13 @@ class MappingForm extends FormBase {
    */
   public function submitForm(array &$form, array &$form_state) {
     $this->mappings = $form_state['values']['mappings'];
-
     $this->processFormState($form_state);
+
+    if (!empty($form_state['mapping_configuration'])) {
+      foreach ($form_state['mapping_configuration'] as $delta => $configuration) {
+        $this->mappings[$delta]['configuration'] = $configuration;
+      }
+    }
 
     $this->importer->setMappings($this->mappings);
     $this->importer->save();
@@ -221,6 +307,14 @@ class MappingForm extends FormBase {
    */
   public function ajaxCallback(array $form, array &$form_state) {
     return $form;
+  }
+
+  /**
+   * Callback for target configuration forms.
+   */
+  public function configurationAjaxCallback(array $form, array &$form_state) {
+    $delta = $form_state['triggering_element']['#delta'];
+    return $form['mappings'][$delta]['configuration'];
   }
 
 }

@@ -28,4 +28,8 @@ class Text extends FieldTargetBase {
     unset($target['properties']['format']);
   }
 
+  public function getSummary() {
+    return 'asdfasf';
+  }
+
 }
