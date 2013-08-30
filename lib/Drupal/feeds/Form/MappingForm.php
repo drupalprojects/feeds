@@ -55,11 +55,13 @@ class MappingForm extends FormBase {
     foreach ($sources as $key => $info) {
       $source_options[$key] = $info['label'];
     }
+    $source_options = $this->sortOptions($source_options);
 
     $target_options = array();
     foreach ($targets as $key => $info) {
       $target_options[$key] = $info['label'];
     }
+    $target_options = $this->sortOptions($target_options);
 
     $form['#tree'] = TRUE;
 
