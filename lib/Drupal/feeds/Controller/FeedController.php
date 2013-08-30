@@ -7,10 +7,9 @@
 
 namespace Drupal\feeds\Controller;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Entity\Feed;
-use Drupal\feeds\Entity\Importer;
 
 /**
  * Returns responses for feed routes.
@@ -23,7 +22,7 @@ class FeedController extends ControllerBase {
    * @return array
    *   A form array as expected by drupal_render().
    *
-   * @todo Return a render array/twig template?
+   * @todo When node page gets converted, look at the implementation.
    */
   public function createList() {
     // Show add form if there is only one importer.
@@ -39,7 +38,8 @@ class FeedController extends ControllerBase {
     }
 
     // @todo Don't show link for non-admins.
-    $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => url('admin/structure/feeds')));
+    $url = $this->urlGenerator()->generateFromRoute('feeds_importer.list');
+    $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => $url));
 
     $build = array(
       '#theme' => 'table',
@@ -52,9 +52,10 @@ class FeedController extends ControllerBase {
       if (!($importer->access('create'))) {
         continue;
       }
-      $link = 'feed/add/' . $importer->id();
-      $title = $importer->label();
-      $build['#rows'][] = array(l($title, $link), check_plain($importer->description));
+      $build['#rows'][] = array(
+        $this->l($importer->label(), 'feeds_feed.create', array('feeds_importer' => $importer->id())),
+        String::checkPlain($importer->description),
+      );
     }
 
     return $build;
