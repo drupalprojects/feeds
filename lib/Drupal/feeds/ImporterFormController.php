@@ -57,6 +57,7 @@ class ImporterFormController extends EntityFormController {
    */
   public function form(array $form, array &$form_state) {
     $form['#tree'] = TRUE;
+    $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
     $form['basics'] = array(
       '#title' => $this->t('Basic settings'),
@@ -97,7 +98,7 @@ class ImporterFormController extends EntityFormController {
       '#weight' => 99,
     );
 
-    $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper">';
+    $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
     // Reset configurable plugins for ajax requests.
@@ -117,6 +118,11 @@ class ImporterFormController extends EntityFormController {
     foreach ($this->entity->getPlugins() as $type => $plugin) {
 
       $options = $this->entity->getPluginOptionsList($type);
+
+      $form[$type] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('feeds-plugin-inline')),
+      );
 
       if (count($options) === 1) {
         $form[$type]['id'] = array(
@@ -230,6 +236,7 @@ class ImporterFormController extends EntityFormController {
   public function save(array $form, array &$form_state) {
 
     $this->entity->save();
+    $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id() . '/mapping';
     drupal_set_message($this->t('Your changes have been saved.'));
   }
 
