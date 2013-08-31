@@ -15,8 +15,9 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
+use Drupal\feeds\Guzzle\CachePlugin;
 use Drupal\feeds\Result\FetcherResult;
-use Drupal\feeds\Utility\HttpRequest;
+use Drupal\feeds\Utility\Feed;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\ClearableInterface;
 use Drupal\feeds\Plugin\FetcherInterface;
@@ -100,24 +101,95 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Make parsers be able to handle streams. Maybe exclusively.
+   * @todo Clean download cache directory.
    */
   public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
-    $http = new HttpRequest($feed_config['source'], array('timeout' => $this->configuration['request_timeout']));
-    $result = $http->get();
-    if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
-      throw new \Exception(String::format('Download of @url failed with code !code.', array('@url' => $feed_config['source'], '!code' => $result->code)));
+    $response = $this->get($feed_config['source']);
+
+    // 304, nothing to see here.
+    if ($response->getStatusCode() == 304) {
+      drupal_set_message($this->t('The feed has not been updated.'));
+      return;
     }
-    // Update source if there was a permanent redirect.
-    if ($result->redirect) {
-      $feed_config['source'] = $result->redirect;
-      $feed->setConfigurationFor($this, $feed_config);
+
+    // If there was a redirect, the url will be updated automagically.
+    if ($url = $response->getParams()->get('feeds.redirect')) {
+      $feed_config['source'] = $url;
+      $feed->setConfigFor($this, $feed_config);
     }
-    if ($result->code == 304) {
-      throw new NotModifiedException();
+
+    $tempname = $response->getBody()->getUri();
+    $response->getBody()->close();
+
+    $download_file = $this->prepareDirectory($feed_config['source']);
+    file_unmanaged_move($tempname, $download_file, FILE_EXISTS_REPLACE);
+
+    return new FetcherResult($download_file);
+  }
+
+  /**
+   * Performs a GET request.
+   *
+   * @param string $url
+   *   The URL to GET.
+   *
+   * @return \Guzzle\Http\Message\Response
+   *   A Guzzle response.
+   */
+  protected function get($url) {
+    $client = \Drupal::httpClient();
+
+    // Add our handy dandy cache plugin. It's magic.
+    $client->addSubscriber(new CachePlugin(\Drupal::cache()));
+
+    $request = $client->get($url);
+
+    // Stream to a file to provide the best scenario for intellegent parsers.
+    $tempname = drupal_tempnam('temporary://', 'feeds_download_cache_');
+    $request->setResponseBody($tempname);
+
+    try {
+      $response = $request->send();
     }
-    return new FetcherResult($result->file);
+    catch (BadResponseException $e) {
+      $response = $e->getResponse();
+      $args = array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase());
+      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_WARNING);
+      drupal_set_message($this->t('The feed %url seems to be broken because of error "%error".', $args, 'warning'));
+      return FALSE;
+    }
+    catch (RequestException $e) {
+      $args = array('%url' => $url, '%error' => $e->getMessage());
+      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_WARNING);
+      drupal_set_message($this->t('The feed %url seems to be broken because of error "%error".', $args), 'warning');
+      return FALSE;
+    }
+
+    return $response;
+  }
+
+  /**
+   * Prepares a destination for file download.
+   *
+   * @param string $url
+   *   The URL to find a spot for.
+   *
+   * @return string
+   *   The filepath of the destination.
+   */
+  protected function prepareDirectory($url) {
+    $download_dir = 'public://feeds_download_cache';
+    if (\Drupal::config('system.file')->get('path.private')) {
+      $download_dir = 'private://feeds_download_cache';
+    }
+
+    file_prepare_directory($download_dir, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
+
+    return $download_dir . '/' . md5($url);
   }
 
   /**
@@ -136,7 +208,8 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
   public function clear(FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
     $url = $feed_config['source'];
-    cache()->delete('feeds_http_download_' . md5($url));
+    \Drupal::cache()->delete('feeds_http_download:' . md5($url));
+    file_unmanaged_delete($this->prepareDirectory($url));
   }
 
   /**
@@ -218,12 +291,12 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
 
-    if (!HttpRequest::validUrl($values['source'], TRUE)) {
+    if (!Feed::validUrl($values['source'], TRUE)) {
       $form_key = 'feeds][' . get_class($this) . '][source';
       form_set_error($form_key, $this->t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
     elseif ($this->configuration['auto_detect_feeds']) {
-      $http = new HttpRequest($values['source']);
+      $http = new Feed($values['source']);
       if ($url = $http->getCommonSyndication()) {
         $values['source'] = $url;
       }
@@ -310,6 +383,9 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
       // Unsubscribe from feed.
       $this->unsubscribeQueue->createItem($item);
     }
+
+    // Remove caches and files for this feed.
+    $this->clear($feed);
   }
 
   /**

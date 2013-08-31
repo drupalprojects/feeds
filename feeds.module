@@ -9,7 +9,6 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds;
-use Drupal\feeds\Utility\HttpRequest;
 use Drupal\feeds\Entity\Importer;
 use Drupal\feeds\StateInterface;
 use Guzzle\Http\Exception\RequestException;
@@ -176,18 +175,18 @@ function feeds_push_subscribe(array $job) {
     if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
 
       if (isset($feed_config['fetcher'])) {
-        $http = new HttpRequest($feed_config['fetcher']['source']);
 
-        $response = $http->get();
+        // @todo Error handling.
+        $client = \Drupal::httpClient();
+        $response = $client->get($feed_config['fetcher']['source'])->send();
+
         Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
-        $channel = Reader::importFile($response->file);
+        $channel = Reader::importString($response->getBody(TRUE));
 
         if ($hubs = $channel->getHubs()) {
           $subscription['hub'] = reset($hubs);
           $subscription['state'] = 'subscribe';
           \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
-
-          $client = \Drupal::httpClient();
 
           $request = $client
             ->post($subscription['hub'])

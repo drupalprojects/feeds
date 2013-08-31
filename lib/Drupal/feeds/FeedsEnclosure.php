@@ -10,7 +10,6 @@
 namespace Drupal\feeds;
 
 use Drupal\Component\Utility\String;
-use Drupal\feeds\Utility\HttpRequest;
 
 /**
  * Enclosure element, can be part of the result array.
@@ -88,12 +87,14 @@ class FeedsEnclosure extends FeedsElement {
    *
    * @throws \RuntimeException
    *   Thrown if the download failed.
+   *
+   * @todo Better error handling.
    */
   public function getContent() {
-    $http = new HttpRequest($this->getUrlEncodedValue());
-    $result = $http->get();
-    if ($result->code != 200) {
-      throw new \RuntimeException(String::format('Download of @url failed with code !code.', array('@url' => $this->getUrlEncodedValue(), '!code' => $result->code)));
+    $response = \Drupal::httpClient()->get($this->getUrlEncodedValue())->send();
+
+    if ($response->getStatusCode() != 200) {
+      throw new \RuntimeException(String::format('Download of @url failed with code !code.', array('@url' => $this->getUrlEncodedValue(), '!code' => $response->getStatusCode())));
     }
 
     return file_get_contents($result->file);
