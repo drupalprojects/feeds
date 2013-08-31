@@ -272,7 +272,8 @@ class MappingForm extends FormBase {
       }
     }
 
-    $this->importer->setMappings($this->mappings);
+    // Keep our mapping configuration file clean.
+    $this->importer->setMappings(array_values($this->mappings));
     $this->importer->save();
 
   }
