@@ -36,13 +36,6 @@ class CachePlugin implements EventSubscriberInterface {
   protected $cacheBackend;
 
   /**
-   * The cached response.
-   *
-   * @var \stdClass
-   */
-  protected $cache;
-
-  /**
    * Constructs a CachePlugin object.
    *
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
@@ -52,62 +45,97 @@ class CachePlugin implements EventSubscriberInterface {
     $this->cacheBackend = $cache_backend;
   }
 
+  /**
+   * Intervenes before a request starts to add cache headers.
+   *
+   * @param \Guzzle\Common\Event $event
+   *   The Guzzle event object.
+   */
   public function onRequestBeforeSend(Event $event) {
     $request = $event['request'];
 
+    // We're only handling GET requests for now. That's all we do anyway.
     if ($request->getMethod() != RequestInterface::GET) {
       return;
     }
 
-    $cid = $this->getCacheKey($request->getUrl());
+    $url = $request->getUrl();
 
-    if ($cache = $this->cacheBackend->get($cid)) {
+    // In-memory download cache. Sometimes we fetch the same URL more than
+    // once in a page load.
+    // @todo Be smarter.
+    if (isset(self::$downloadCache[$url])) {
+      $request->setResponse(self::$downloadCache[$url]);
+      return;
+    }
 
+    if ($cache = $this->cacheBackend->get($this->getCacheKey($url))) {
+
+      // Add any headers that could be useful.
+      // @todo Look at Guzzle's own cache plugin, or add a smarter cache here.
       if (!empty($cache->data->headers['etag'])) {
         $request->addHeader('If-None-Match', $cache->data->headers['etag']);
-
       }
       if (!empty($cache->data->headers['last-modified'])) {
         $request->addHeader('If-Modified-Since', $cache->data->headers['last-modified']);
       }
     }
-
   }
 
+  /**
+   * Responds after a request has finished, but before it is sent to the client.
+   *
+   * @param \Guzzle\Common\Event $event
+   *   The Guzzle event object.
+   */
   public function onRequestSent(Event $event) {
     $request = $event['request'];
     $response = $event['response'];
 
-    $url = $request->getUrl();
-    // Handle permanent redirects by setting the redirected URL.
+    // Handle permanent redirects by setting the redirected URL so that the
+    // client can grab it quickly.
     $redirect = FALSE;
+    $url = $old_url = $request->getUrl();
     if ($previous_response = $response->getPreviousResponse()) {
       if ($previous_response->getStatusCode() == 301 && $location = $previous_response->getLocation()) {
         $response->getParams()->set('feeds.redirect', $location);
         $redirect = TRUE;
-        $url = $location;
+        $url = $request->getUrl();
       }
     }
 
-    // If we were redirected, we want to create a new cache entry. Otherwise,
-    // peace.
-    if (!$redirect && $response->getStatusCode() == 304) {
-      return;
-    }
+    $cache_hit = $response->getStatusCode() == 304;
 
     if ($redirect) {
-      $this->cacheBackend->delete($this->getCacheKey($request->getUrl()));
+      // Delete the old cache entry.
+      $this->cacheBackend->delete($this->getCacheKey($old_url));
+      // Not sure if the repeated requests are smart enough to find the
+      // redirect, so cache the old URL with the new response.
+      self::$downloadCache[$old_url] = $response;
     }
 
-    $cache = new \stdClass();
-    $cache->headers = array_change_key_case($response->getHeaders()->toArray());
-    // @todo We should only cache for certain status codes.
-    $cache->code = $response->getStatusCode();
+    if ($redirect || !$cache_hit) {
+      $cache = new \stdClass();
+      $cache->headers = array_change_key_case($response->getHeaders()->toArray());
+      // @todo We should only cache for certain status codes.
+      $cache->code = $response->getStatusCode();
 
-    $cid = $this->getCacheKey($url);
-    $this->cacheBackend->set($cid, $cache);
+      $this->cacheBackend->set($this->getCacheKey($url), $cache);
+    }
+
+    // Set in-page download cache.
+    self::$downloadCache[$url] = $response;
   }
 
+  /**
+   * Returns the cache key for a give URL.
+   *
+   * @param string $url
+   *   The URL.
+   *
+   * @return string
+   *   The cache key for the given URL.
+   */
   protected function getCacheKey($url) {
     return 'feeds_http_download:' . md5($url);
   }
