@@ -43,7 +43,12 @@ class ParserCSVIterator implements \Iterator {
    *   The path to the CSV file to iterate.
    */
   public function __construct($filepath) {
-    $this->handle = fopen($filepath, 'r');
+    if (is_resource($filepath)) {
+      $this->handle = $filepath;
+    }
+    else {
+      $this->handle = fopen($filepath, 'r');
+    }
   }
 
   /**
