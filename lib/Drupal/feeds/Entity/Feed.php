@@ -51,7 +51,7 @@ use Drupal\job_scheduler\JobScheduler;
  *   entity_keys = {
  *     "id" = "fid",
  *     "bundle" = "importer",
- *     "label" = "name",
+ *     "label" = "title",
  *     "uuid" = "uuid"
  *   },
  *   bundle_keys = {
@@ -86,7 +86,7 @@ class Feed extends EntityNG implements FeedInterface {
    * {@inheritdoc}
    */
   public function label($langcode = NULL) {
-    return $this->get('name')->value;
+    return $this->get('title')->value;
   }
 
   /**
@@ -603,9 +603,9 @@ class Feed extends EntityNG implements FeedInterface {
       'type' => 'string_field',
       'read-only' => TRUE,
     );
-    $properties['name'] = array(
-      'label' => t('Name'),
-      'description' => t('The name of this feed, always treated as non-markup plain text.'),
+    $properties['title'] = array(
+      'label' => t('Title'),
+      'description' => t('The title of this feed, always treated as non-markup plain text.'),
       'type' => 'string_field',
     );
     $properties['uid'] = array(
