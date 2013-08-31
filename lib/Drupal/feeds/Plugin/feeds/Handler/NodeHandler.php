@@ -45,7 +45,7 @@ class NodeHandler extends PluginBase {
   /**
    * Creates a new user account in memory and returns it.
    */
-  public function newEntityValues(FeedInterface $feed, &$values) {
+  public function newEntityValues(FeedInterface $feed, $values) {
     $node_settings = entity_load('node_type', $this->importer->getProcessor()->bundle())->getModuleSettings('node');
 
     // Ensure default settings.
@@ -59,12 +59,14 @@ class NodeHandler extends PluginBase {
     $values['status'] = (int) in_array('status', $node_settings['options']);
     $values['log'] = 'Created by FeedsNodeProcessor';
     $values['promote'] = (int) in_array('promote', $node_settings['options']);
+
+    return $values;
   }
 
   /**
    * Implements parent::entityInfo().
    */
-  public function entityInfoAlter(array &$info) {
+  public function entityInfo(array $info) {
     $info['label_plural'] = t('Nodes');
     return $info;
   }
@@ -91,12 +93,6 @@ class NodeHandler extends PluginBase {
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
       '#default_value' => check_plain($author->getUsername()),
-    );
-    $form['authorize'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Authorize'),
-      '#description' => t('Check that the author has permission to create the node.'),
-      '#default_value' => $this->configuration['authorize'],
     );
 
     $period = drupal_map_assoc(array(SchedulerInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this->importer->getProcessor(), 'formatExpire'));
@@ -152,44 +148,6 @@ class NodeHandler extends PluginBase {
     }
     else {
       $node->log = 'Replaced by FeedsNodeProcessor';
-    }
-  }
-
-  /**
-   * Validates a user account.
-   */
-  public function entityValidate($node) {
-  }
-
-  /**
-   * Check that the user has permission to save a node.
-   */
-  public function entitySaveAccess($entity) {
-    // The check will be skipped for anonymous nodes.
-    if ($this->configuration['authorize'] && !empty($entity->uid)) {
-
-      $author = user_load($entity->uid);
-
-      // If the uid was mapped directly, rather than by email or username, it
-      // could be invalid.
-      if (!$author) {
-        $message = 'User %uid is not a valid user.';
-        throw new EntityAccessException(t($message, array('%uid' => $entity->uid)));
-      }
-
-      if ($entity->isNew()) {
-        $op = 'create';
-        $access = node_access($op, $entity->bundle(), $author);
-      }
-      else {
-        $op = 'update';
-        $access = node_access($op, $entity, $author);
-      }
-
-      if (!$access) {
-        $message = 'User %name is not authorized to %op content type %content_type.';
-        throw new EntityAccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->bundle())));
-      }
     }
   }
 

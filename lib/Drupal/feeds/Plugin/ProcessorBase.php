@@ -281,7 +281,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   protected function getDefaultConfiguration() {
     $defaults = array(
       'update_existing' => ProcessorInterface::SKIP_EXISTING,
-      'input_format' => 'plain_text',
       'skip_hash_check' => FALSE,
     );
 
@@ -305,14 +304,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     foreach ($formats as $format) {
       $format_options[$format->format] = $format->name;
     }
-    $form['input_format'] = array(
-      '#type' => 'select',
-      '#title' => t('Text format'),
-      '#description' => t('Select the input format for the body field of the nodes to be created.'),
-      '#options' => $format_options,
-      '#default_value' => $this->configuration['input_format'],
-      '#required' => TRUE,
-    );
 
     return $form;
   }

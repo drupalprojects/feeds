@@ -8,16 +8,25 @@
 namespace Drupal\feeds\Plugin\feeds\Processor;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
 use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\AdvancedFormPluginInterface;
+use Drupal\feeds\ItemInfoControllerInterface;
+use Drupal\feeds\Exception\EntityAccessException;
+use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Plugin\ProcessorBase;
 use Drupal\feeds\Plugin\ProcessorInterface;
 use Drupal\feeds\Plugin\SchedulerInterface;
 use Drupal\feeds\StateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines an entity processor.
@@ -31,14 +40,14 @@ use Drupal\feeds\StateInterface;
  *   derivative = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
  * )
  */
-class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterface, ProcessorInterface {
+class EntityProcessor extends ProcessorBase implements ProcessorInterface, AdvancedFormPluginInterface, ContainerFactoryPluginInterface {
 
   /**
-   * The plugin definition.
+   * The entity storage controller for the entity type being processed.
    *
-   * @var array
+   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
    */
-  protected $pluginDefinition;
+  protected $storageController;
 
   /**
    * The entity info for the selected entity type.
@@ -46,6 +55,13 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    * @var array
    */
   protected $entityInfo;
+
+  /**
+   * The item info controller.
+   *
+   * @var \Drupal\feeds\ItemInfoControllerInterface
+   */
+  protected $itemController;
 
   /**
    * The properties for this entity.
@@ -69,19 +85,48 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
   protected $skipExisting;
 
   /**
-   * {@inheritdoc}
+   * Constructs an EntityProcessor object.
+   *
+   * @param array $configuration
+   *   The plugin configuration.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param array $plugin_definition
+   *   The plugin definition.
+   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage_controller
+   *   The storage controller for this processor.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
-    $this->pluginDefinition = $plugin_definition;
-    $this->loadHandlers($configuration);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $entity_info, EntityStorageControllerInterface $storage_controller, ItemInfoControllerInterface $item_controller) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    // $entityInfo has to be assinged before $this->loadHandlers() is called.
+    $this->entityInfo = $entity_info;
+    $this->storageController = $storage_controller;
+    $this->itemController = $item_controller;
     $this->skipExisting = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
+
+    $this->loadHandlers();
   }
 
   /**
    * {@inheritdoc}
    */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+    $entity_manager = $container->get('entity.manager');
+    $entity_info = $entity_manager->getDefinition($plugin_definition['entity type']);
+    $storage_controller = $entity_manager->getStorageController($plugin_definition['entity type']);
+    $item_controller = $container->get('feeds.item_info');
+
+    return new static($configuration, $plugin_id, $plugin_definition, $entity_info, $storage_controller, $item_controller);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Bulk load existing entity ids/entities.
+   */
   public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result) {
+    $this->getProperties();
     while ($item = $parser_result->shiftItem()) {
       $this->processItem($feed, $state, $item);
     }
@@ -120,7 +165,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       // @todo Clean this up.
       if ($entity_id) {
         $entity = $this->entityLoad($feed, $entity_id);
-        $item_info = \Drupal::service('feeds.item_info')->load($this->entityType(), $entity_id);
+        $item_info = $this->itemController->load($this->entityType(), $entity_id);
         $item_info->fid = $feed->id();
         $item_info->hash = $hash;
         $item_info->url = '';
@@ -142,15 +187,10 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       $this->entitySave($entity);
 
       $item_info->entityId = $entity->id();
-      \Drupal::service('feeds.item_info')->save($item_info);
+      $this->itemController->save($item_info);
 
       // Track progress.
-      if ($entity_id) {
-        $state->updated++;
-      }
-      else {
-        $state->created++;
-      }
+      $entity_id ? $state->updated++ : $state->created++;
     }
 
     // Something bad happened, log it.
@@ -219,7 +259,13 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     }
   }
 
-  protected function loadHandlers(array $configuration) {
+  /**
+   * Loads the handlers that apply to this processor.
+   *
+   * @todo Move this to PluginBase.
+   */
+  protected function loadHandlers() {
+    $configuration = $this->configuration + array('importer' => $this->importer);
     $definitions = \Drupal::service('plugin.manager.feeds.handler')->getDefinitions();
 
     foreach ($definitions as $definition) {
@@ -242,7 +288,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    * @param $hash
    *   The fingerprint of the feed item.
    */
-  protected function newItemInfo($entity, FeedInterface $feed, $hash = '') {
+  protected function newItemInfo(EntityInterface $entity, FeedInterface $feed, $hash = '') {
     $item_info = new \stdClass();
     $item_info->fid = $feed->id();
     $item_info->entityType = $entity->entityType();
@@ -254,6 +300,11 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     return $item_info;
   }
 
+  /**
+   * @todo Move to PluginBase.
+   *
+   * @todo Events?
+   */
   public function apply($action, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, &$arg4 = NULL) {
     $return = array();
 
@@ -284,13 +335,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    * {@inheritdoc}
    */
   protected function entityInfo() {
-    if (!isset($this->entityInfo)) {
-      $this->entityInfo = entity_get_info($this->entityType());
-    }
-
-    $this->apply('entityInfoAlter', $this->entityInfo);
-
-    return $this->entityInfo;
+    return $this->apply(__FUNCTION__, $this->entityInfo);
   }
 
   /**
@@ -301,7 +346,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    * @return string|null
    *   The bundle type this processor operates on, or null if it is undefined.
    */
-  public function bundleKey() {
+  protected function bundleKey() {
     $info = $this->entityInfo();
     if (!empty($info['entity_keys']['bundle'])) {
       return $info['entity_keys']['bundle'];
@@ -327,6 +372,15 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     return $this->entityType();
   }
 
+  protected function bundleLabel() {
+    $info = $this->entityInfo;
+    if (!empty($info['bundle_label'])) {
+      return $info['bundle_label'];
+    }
+
+    return $this->t('Bundle');
+  }
+
   /**
    * Provides a list of bundle options for use in select lists.
    *
@@ -349,7 +403,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
 
   public function getProperties() {
     if (!isset($this->properties)) {
-      $entity = entity_create($this->entityType(), $this->getConfiguration('values'))->getNGEntity();
+      $entity = $this->storageController->create($this->getConfiguration('values'))->getNGEntity();
 
       foreach ($entity as $id => $field) {
 
@@ -382,15 +436,15 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    */
   protected function newEntity(FeedInterface $feed) {
     $values = $this->configuration['values'];
-    $this->apply('newEntityValues', $feed, $values);
-    return entity_create($this->entityType(), $values)->getBCEntity();
+    $values = $this->apply('newEntityValues', $feed, $values);
+    return $this->storageController->create($values)->getNGEntity();
   }
 
   /**
    * {@inheritdoc}
    */
   protected function entityLoad(FeedInterface $feed, $entity_id) {
-    $entity = entity_load($this->entityType(), $entity_id)->getBCEntity();
+    $entity = $this->storageController->load($entity_id)->getNGEntity();
     $this->apply('entityPrepare', $feed, $entity);
 
     return $entity;
@@ -399,32 +453,63 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
   /**
    * {@inheritdoc}
    */
-  protected function entityValidate($entity) {
-    $this->apply('entityValidate', $entity);
+  protected function entityValidate(EntityInterface $entity) {
+    $this->apply(__FUNCTION__, $entity);
+
+    $violations = $entity->validate();
+    if (count($violations)) {
+      $info = $this->entityInfo();
+      $args = array(
+        '@entity' => Unicode::strtolower($info['label']),
+        '%label' => $entity->label(),
+        '@url' => $this->url('feeds_importer.mapping', array('feeds_importer' => $this->importer->id())),
+      );
+      throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
+    }
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function entitySaveAccess($entity) {
-    $this->apply('entitySaveAccess', $entity);
+  protected function entitySaveAccess(EntityInterface $entity) {
+    if ($this->configuration['authorize'] && !empty($entity->uid->value)) {
+
+      // If the uid was mapped directly, rather than by email or username, it
+      // could be invalid.
+      if (!($account = $entity->uid->entity)) {
+        $message = 'User %uid is not a valid user.';
+        throw new EntityAccessException(String::format($message, array('%uid' => $entity->uid->value)));
+      }
+
+
+      $op = $entity->isNew() ? 'create' : 'update';
+
+      if (!$entity->access($op, $account)) {
+        $args = array(
+          '%name' => $account->getUsername(),
+          '%op' => $op,
+          '@bundle' => Unicode::strtolower($this->bundleLabel()),
+          '%bundle' => $entity->bundle(),
+        );
+        throw new EntityAccessException(String::format('User %name is not authorized to %op @bundle %bundle.', $args));
+      }
+    }
+    $this->apply(__FUNCTION__, $entity);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function entitySave($entity) {
-    $this->apply('entityPreSave', $entity);
+  protected function entitySave(EntityInterface $entity) {
     $entity->save();
-    $this->apply('entityPostSave', $entity);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function entityDeleteMultiple($entity_ids) {
-    entity_delete_multiple($this->entityType(), $entity_ids);
-    $this->apply('entityDeleteMultiple', $entity_ids);
+  protected function entityDeleteMultiple(array $entity_ids) {
+    $entities = $this->storageController->loadMultiple($entity_ids);
+    $this->storageController->delete($entities);
   }
 
   /**
@@ -443,6 +528,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
       'values' => array(
         $this->bundleKey() => NULL,
       ),
+      'authorize' => TRUE,
       'expire' => SchedulerInterface::EXPIRE_NEVER,
     ) + parent::getDefaultConfiguration();
 
@@ -458,7 +544,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
     $info = $this->entityInfo();
 
     $label_plural = isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
-    $tokens = array('@entities' => drupal_strtolower($label_plural));
+    $tokens = array('@entities' => Unicode::strtolower($label_plural));
 
     $form['update_existing'] = array(
       '#type' => 'radios',
@@ -471,6 +557,12 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
         ProcessorInterface::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->configuration['update_existing'],
+    );
+    $form['authorize'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Authorize'),
+      '#description' => t('Check that the author has permission to create the node.'),
+      '#default_value' => $this->configuration['authorize'],
     );
 
     $form = parent::buildConfigurationForm($form, $form_state);
@@ -519,8 +611,7 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
    * {@inheritdoc}
    */
   public function setTargetElement(FeedInterface $feed, $entity, $field_name, $values, $mapping, \stdClass $item_info) {
-    $properties = $this->getProperties();
-    if (isset($properties[$field_name])) {
+    if (isset($this->properties[$field_name])) {
       $entity->get($field_name)->setValue($values);
     }
     else {
@@ -575,14 +666,13 @@ class EntityProcessor extends ProcessorBase implements AdvancedFormPluginInterfa
   }
 
   public function buildAdvancedForm(array $form, array &$form_state) {
-    $info = $this->entityInfo();
 
     $form['values']['#tree'] = TRUE;
     if ($bundle_key = $this->bundleKey()) {
       $form['values'][$bundle_key] = array(
         '#type' => 'select',
         '#options' => $this->bundleOptions(),
-        '#title' => !empty($info['bundle_label']) ? $info['bundle_label'] : $this->t('Bundle'),
+        '#title' => $this->bundleLabel(),
         '#required' => TRUE,
         '#default_value' => $this->bundle(),
       );

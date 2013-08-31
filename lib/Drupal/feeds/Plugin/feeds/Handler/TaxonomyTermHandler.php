@@ -38,6 +38,7 @@ class TaxonomyTermHandler extends PluginBase {
    */
   public function newEntityValues(FeedInterface $feed, &$values) {
     $values['input_format'] = $this->importer->getProcessor()->getConfiguration('input_format');
+    return $values;
   }
 
   /**

@@ -47,6 +47,8 @@ class UserHandler extends PluginBase {
     $values['uid'] = 0;
     $values['roles'] = array_filter(array_values($this->configuration['roles']));
     $values['status'] = $this->configuration['status'];
+
+    return $values;
   }
 
   /**
