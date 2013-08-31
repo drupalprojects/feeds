@@ -9,6 +9,7 @@ namespace Drupal\feeds\Controller;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\FeedInterface;
 
 /**
@@ -67,7 +68,7 @@ class FeedController extends ControllerBase {
    * @return array
    *   A form array as expected by drupal_render().
    */
-  public function createForm(Importer $feeds_importer) {
+  public function createForm(ImporterInterface $feeds_importer) {
 
     $feed = $this->entityManager()->getStorageController('feeds_feed')->create(array(
       'uid' => $this->currentUser()->id(),
