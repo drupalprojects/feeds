@@ -58,6 +58,8 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Get ridda this.
    */
   public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
     if (isset($item[$element_key])) {
@@ -149,6 +151,26 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   public function setTranslationManager(TranslationInterface $translation_manager) {
     $this->translationManager = $translation_manager;
     return $this;
+  }
+
+  /**
+   * Renders a link to a route given a route name and its parameters.
+   *
+   * @see \Drupal\Core\Controller\ControllerBase::l()
+   *
+   * @todo
+   */
+  protected function l($text, $route_name, array $parameters = array(), array $options = array()) {
+    return \Drupal::linkGenerator()->generate($text, $route_name, $parameters, $options);
+  }
+
+  /**
+   * Returns a URL give a route and its parameters.
+   *
+   * @todo
+   */
+  protected function url($name, $parameters = array(), $absolute = FALSE) {
+    return \Drupal::urlGenerator()->generate($name, $parameters, $absolute);
   }
 
 }
