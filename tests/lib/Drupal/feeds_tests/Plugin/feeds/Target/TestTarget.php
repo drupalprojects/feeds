@@ -26,9 +26,7 @@ class TestTarget extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  public function targets() {
-    $targets = array();
-
+  public function targets(array &$targets) {
     $targets['test_target'] = array(
       'name' => t('Test Target'),
       'description' => t('This is a test target.'),
@@ -36,8 +34,6 @@ class TestTarget extends TargetBase {
       'summary_callback' => array($this, 'summary'),
       'form_callback' => array($this, 'form'),
     );
-
-    return $targets;
   }
 
   /**

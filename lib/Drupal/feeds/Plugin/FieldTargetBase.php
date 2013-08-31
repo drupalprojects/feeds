@@ -27,7 +27,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
     foreach ($targets as &$target) {
       if (!empty($target['type']) && in_array($target['type'], $this->pluginDefinition['field_types'])) {
         $this->prepareTarget($target);
-        $target['target'] = $this->getPluginId();
+        $target['id'] = $this->getPluginId();
       }
     }
   }

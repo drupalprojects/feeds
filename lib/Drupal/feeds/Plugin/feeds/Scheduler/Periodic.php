@@ -100,6 +100,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       'period' => $period,
       'periodic' => TRUE,
     );
+
     if ($period == SchedulerInterface::SCHEDULE_NEVER) {
       $this->jobController->remove($job);
     }
@@ -144,6 +145,10 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
    * {@inheritdoc}
    */
   public function sourceDelete(FeedInterface $feed) {
+    if (!$this->jobController) {
+      return;
+    }
+
     // Remove from schedule.
     $job = array(
       'name' => 'feeds_feed_import',

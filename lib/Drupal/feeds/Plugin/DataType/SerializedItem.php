@@ -30,7 +30,7 @@ class SerializedItem extends FieldItemBase {
    *
    * @var array
    */
-  static $propertyDefinitions;
+  protected static $propertyDefinitions;
 
   /**
    * {@inheritdoc}

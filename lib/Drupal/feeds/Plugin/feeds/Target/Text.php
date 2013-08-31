@@ -19,7 +19,7 @@ use Drupal\feeds\Plugin\FieldTargetBase;
  * @Plugin(
  *   id = "text",
  *   title = @Translation("Text"),
- *   field_types = {"list_text", "text", "text_long", "text_with_summary"}
+ *   field_types = {"string_field", "list_text", "text", "text_long", "text_with_summary"}
  * )
  */
 class Text extends FieldTargetBase {

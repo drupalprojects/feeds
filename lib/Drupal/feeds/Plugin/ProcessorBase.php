@@ -153,7 +153,8 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       'fi',
       "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
         ':entity_type' => $this->entityType(),
-    ));
+      ),
+    );
     $select->condition('fi.fid', $feed->id());
 
     return $select;
@@ -180,10 +181,10 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    * hook_x_targets_alter() may have specified a callback for a mapping target
    * in which case the callback is asked to populate the target item instead of
    * ProcessorBase::setTargetElement().
+   *
+   * @todo Revisit static cache.
    */
   protected function map(FeedInterface $feed, array $item, $target_item, $item_info) {
-    // @todo Revisit static cache.
-
     $sources = $this->importer->getParser()->getMappingSources();
     $targets = $this->getMappingTargets();
     $parser = $this->importer->getParser();
@@ -348,7 +349,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being imported.
-   * @param \Drupal\feeds\Result\ParserResultInterface $result
+   * @param array $item
    *   The parser result object.
    *
    * @return array
@@ -430,7 +431,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
     include_once DRUPAL_ROOT . '/core/includes/utility.inc';
     $message = $e->getMessage();
     $message .= '<h3>Original item</h3>';
-    $message .= '<pre>' . drupal_var_export($item). '</pre>';
+    $message .= '<pre>' . drupal_var_export($item) . '</pre>';
     $message .= '<h3>Entity</h3>';
     $message .= '<pre>' . drupal_var_export($entity->getValue()) . '</pre>';
     return $message;

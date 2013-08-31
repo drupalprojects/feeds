@@ -36,8 +36,6 @@ class FeedCreateListAccessCheck implements StaticAccessCheckInterface {
    *
    * @param \Drupal\Core\Entity\EntityManager $entity_manager
    *   The Entity manager.
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The currently logged in user.
    */
   public function __construct(EntityManager $entity_manager) {
     $this->importerStorage = $entity_manager->getStorageController('feeds_importer');

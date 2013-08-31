@@ -25,12 +25,15 @@ use Drupal\feeds\Plugin\TargetInterface;
  */
 class Path extends ConfigurablePluginBase implements TargetInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   public function targets(array &$targets) {}
 
   /**
    * {@inheritdoc}
    */
-  function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $values, array $mapping) {
+  public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $values, array $mapping) {
     $value = '';
     foreach ($values as $value) {
       if (strlen(trim($value['value']))) {
@@ -91,7 +94,7 @@ class Path extends ConfigurablePluginBase implements TargetInterface {
   }
 
   /**
-   * {inheritdoc}
+   * {@inheritdoc}
    */
   protected function getDefaultConfiguration() {
     return array('pathauto_override' => FALSE);

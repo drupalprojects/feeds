@@ -19,6 +19,8 @@ use Drupal\field\Entity\FieldInstance;
  *   id = "number",
  *   title = @Translation("Number"),
  *   field_types = {
+ *     "boolean_field",
+ *     "integer_field",
  *     "list_integer",
  *     "list_float",
  *     "list_boolean",

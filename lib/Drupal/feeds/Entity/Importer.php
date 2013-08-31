@@ -123,6 +123,8 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   protected $pluginBags = array();
 
+  protected $mappingsBag;
+
   /**
    * Constructs a new Importer object.
    */
@@ -137,6 +139,9 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     }
 
     parent::__construct($values, $entity_type);
+
+    // $manager = \Drupal::service('feeds.plugin.manager.target');
+    // $this->mappingsBag = new DefaultPluginBag($manager, $this->configuration['mappings']);
   }
 
   /**
@@ -155,6 +160,10 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     }
 
     return $this->mappings;
+  }
+
+  public function getMappingsBag() {
+    return $this->mappingsBag;
   }
 
   /**
@@ -378,7 +387,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public static function reschedule($importer_id = NULL) {
     // Get current reschedule list.
-    $reschedule = \Drupal::state()->get('feeds.reschedule') ? : FALSE;
+    $reschedule = \Drupal::state()->get('feeds.reschedule') ?: FALSE;
 
     // If Importer::reschedule(TRUE), or Importer::reschedule(FALSE) then set
     // the reschedule state to that. TRUE meaning all importers and FALSE

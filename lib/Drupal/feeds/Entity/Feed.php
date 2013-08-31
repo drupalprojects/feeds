@@ -461,7 +461,7 @@ class Feed extends EntityNG implements FeedInterface {
       ))
       ->execute();
 
-      return $this;
+    return $this;
   }
 
   /**
@@ -544,8 +544,6 @@ class Feed extends EntityNG implements FeedInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageControllerInterface $storage_controller) {
-    // $feed->state = isset($feed->state) ? $feed->state : FALSE;
-    // $feed->fetcher_result = isset($feed->fetcher_result) ? $feed->fetcher_result : FALSE;
     // Before saving the feed, set changed time.
     $this->set('changed', REQUEST_TIME);
   }

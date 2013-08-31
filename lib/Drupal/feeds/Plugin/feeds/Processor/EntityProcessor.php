@@ -219,7 +219,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     $messages = array();
     if ($state->created) {
       $messages[] = array(
-       'message' => format_plural(
+        'message' => format_plural(
           $state->created,
           'Created @number @entity.',
           'Created @number @entities.',
@@ -229,7 +229,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     }
     if ($state->updated) {
       $messages[] = array(
-       'message' => format_plural(
+        'message' => format_plural(
           $state->updated,
           'Updated @number @entity.',
           'Updated @number @entities.',
@@ -239,7 +239,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     }
     if ($state->failed) {
       $messages[] = array(
-       'message' => format_plural(
+        'message' => format_plural(
           $state->failed,
           'Failed importing @number @entity.',
           'Failed importing @number @entities.',
@@ -281,11 +281,11 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    *
    * This is used to track entities created by Feeds.
    *
-   * @param $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object to be populated with new item info.
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed that produces this entity.
-   * @param $hash
+   * @param string $hash
    *   The fingerprint of the feed item.
    */
   protected function newItemInfo(EntityInterface $entity, FeedInterface $feed, $hash = '') {
@@ -301,6 +301,8 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   }
 
   /**
+   * Applies a function to listeners.
+   *
    * @todo Move to PluginBase.
    *
    * @todo Events?
@@ -372,6 +374,12 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     return $this->entityType();
   }
 
+  /**
+   * Reutns the bundle label for the entity being processed.
+   *
+   * @return string
+   *   The bundle label.
+   */
   protected function bundleLabel() {
     $info = $this->entityInfo;
     if (!empty($info['bundle_label'])) {
@@ -481,7 +489,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
         throw new EntityAccessException(String::format($message, array('%uid' => $entity->uid->value)));
       }
 
-
       $op = $entity->isNew() ? 'create' : 'update';
 
       if (!$entity->access($op, $account)) {
@@ -549,8 +556,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     $form['update_existing'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Update existing @entities', $tokens),
-      '#description' =>
-        $this->t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
+      '#description' => $this->t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
       '#options' => array(
         ProcessorInterface::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
         ProcessorInterface::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
@@ -593,6 +599,9 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   public function getMappingTargets() {
 
     $targets = parent::getMappingTargets();
+    foreach ($targets as &$target) {
+      $target['properties']['value']['label'] = '';
+    }
 
     $targets += $this->getProperties();
 
@@ -615,7 +624,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
       $entity->get($field_name)->setValue($values);
     }
     else {
-      parent::setTargetElement($feed, $entity, $field_name, $values, $mapping, $item_info);
+      parent::setTargetElement($feed, $entity, $field_name, $values[0]['value'], $mapping, $item_info);
     }
   }
 

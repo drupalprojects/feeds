@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @file Contains \Drupal\feeds\Controller\JobController.
+ * @file
+ * Contains \Drupal\feeds\Controller\JobController.
  */
 
 namespace Drupal\feeds\Controller;
@@ -12,6 +13,9 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\StateInterface;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Handles background taks for a feed.
+ */
 class JobController {
 
   /**

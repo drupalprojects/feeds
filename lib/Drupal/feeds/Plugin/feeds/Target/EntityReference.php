@@ -48,7 +48,6 @@ class EntityReference extends FieldTargetBase {
   }
 
   protected function prepareTarget(array &$target) {
-    // dpm($target);
   }
 
   protected function getByLabel($value) {

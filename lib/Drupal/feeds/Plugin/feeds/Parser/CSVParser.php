@@ -68,13 +68,17 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   }
 
   /**
-   * Get first line and use it for column names, convert them to lower case.
+   * Gets first line, uses it for column names and converts them to lower case.
+   *
    * Be aware that the $parser and iterator objects can be modified in this
    * function since they are passed in by reference
    *
    * @param ParserCSV $parser
+   *   The parser object.
    * @param ParserCSVIterator $iterator
-   * @return
+   *   The iterator object.
+   *
+   * @return array
    *   An array of lower-cased column names to use as keys for the parsed items.
    */
   protected function parseHeader(ParserCSV $parser, ParserCSVIterator $iterator) {
@@ -94,8 +98,15 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    * Parse all of the items from the CSV.
    *
    * @param ParserCSV $parser
+   *   The parser object.
    * @param ParserCSVIterator $iterator
-   * @return
+   *   The iterator object.
+   * @param int $start
+   *   (optional) The byte mark to start at. Defaults to 0.
+   * @param int $limit
+   *   (optional) The line limit. 0 for no limit. Defaults to 0.
+   *
+   * @return array
    *   An array of rows of the CSV keyed by the column names previously set
    */
   protected function parseItems(ParserCSV $parser, ParserCSVIterator $iterator, $start = 0, $limit = 0) {
@@ -146,7 +157,10 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
       }
     }
 
-    $output = $this->t('Import !csv_files with one or more of these columns: !columns.', array('!csv_files' => l($this->t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '!columns' => implode(', ', $feeds)));
+    $output = $this->t('Import !csv_files with one or more of these columns: !columns.', array(
+      '!csv_files' => l($this->t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'),
+      '!columns' => implode(', ', $feeds)),
+    );
     $items = array();
     $items[] = format_plural(count($uniques), $this->t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), $this->t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
     $items[] = l($this->t('Download a template'), 'import/' . $this->importer->id() . '/template');
@@ -222,6 +236,11 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     return $form;
   }
 
+  /**
+   * Prints the template for this CSV file.
+   *
+   * @todo Remove.
+   */
   public function getTemplate() {
     $mappings = $this->importer->getMappings();
     $feeds = $uniques = array();
@@ -245,7 +264,6 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $this->importer->id() . '_template.csv"');
     drupal_add_http_header('Content-type', 'text/csv; charset=utf-8');
     print implode($sep, $columns);
-    return;
   }
 
 }

@@ -182,16 +182,15 @@ class FeedsWebTestBase extends WebTestBase {
     $this->drupalGet('admin/structure/feeds');
     $this->clickLink('Add importer');
     $edit = array(
-      'name' => $name,
+      'label' => $name,
       'id' => $id,
+      'processor[advanced][values][type]' => 'article',
     );
-    $this->drupalPost('admin/structure/feeds/add', $edit, 'Create');
+    $this->drupalPost('admin/structure/feeds/add', $edit, 'Save');
 
     // Assert message and presence of default plugins.
-    $this->assertText('Your configuration has been created with default settings.');
+    $this->assertText('Your changes have been saved.');
     $this->assertPlugins($id, 'http', 'syndication', 'entity:node');
-    // Per default attached to article content type.
-    // $this->setSettings($id, 'processor', array('values[type]'' => 'article'));
   }
 
   /**

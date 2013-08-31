@@ -6,8 +6,8 @@
  */
 
 /**
-  * Implement hook_uninstall()
-  */
+ * Implements hook_uninstall().
+ */
 function feeds_uninstall() {
   variable_del('http_request_timeout');
 }
@@ -148,11 +148,12 @@ function feeds_schema() {
       'guid' => array(
         'type' => 'text',
         'not null' => TRUE,
-        'description' => 'Unique identifier for the feed item.'
+        'description' => 'Unique identifier for the feed item.',
       ),
       'hash' => array(
         'type' => 'varchar',
-        'length' => 32, // The length of an MD5 hash.
+        // The length of an MD5 hash.
+        'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The hash of the feed item.',
