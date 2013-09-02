@@ -31,11 +31,11 @@ class Feed {
    */
   public static function getCommonSyndication($url, $document) {
     // If this happens to be a feed then just return the url.
-    if (self::isFeed($document)) {
+    if (static::isFeed($document)) {
       return $url;
     }
 
-    return self::findFeed($url, $document);
+    return static::findFeed($url, $document);
   }
 
   /**

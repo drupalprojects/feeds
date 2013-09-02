@@ -25,7 +25,7 @@ class Text extends String implements ConfigurableTargetInterface {
   /**
    * {@inheritdoc}
    */
-  protected function prepareTarget(array &$target) {
+  protected static function prepareTarget(array &$target) {
     unset($target['properties']['format']);
   }
 

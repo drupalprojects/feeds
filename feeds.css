@@ -7,12 +7,6 @@ td .form-item.form-type-select {
   margin-bottom: 10px;
 }
 
-.feeds-ajax-configure-button {
-  margin-left: 0;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
 .feeds-ajax-save-button {
   margin-bottom: 10px;
   margin-left: 0;
@@ -22,6 +16,9 @@ table td {
   padding-bottom: 0;
 }
 
-.item-list ul li {
+#feeds-mapping-form .item-list ul li {
   margin-bottom: 13px;
+  list-style: none;
+  list-style-type: none;
+  margin-left: 0;
 }

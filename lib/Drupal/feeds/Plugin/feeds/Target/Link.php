@@ -23,7 +23,7 @@ class Link extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareTarget(array &$target) {
+  protected static function prepareTarget(array &$target) {
     unset($target['properties']['attributes']);
   }
 

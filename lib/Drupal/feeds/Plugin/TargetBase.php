@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\TargetInterface;
 
@@ -57,7 +58,6 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
   /**
    * {@inheritdoc}
    */
-  abstract public function targets(array &$targets);
 
   protected function getDefaultConfiguration() {
     return array();

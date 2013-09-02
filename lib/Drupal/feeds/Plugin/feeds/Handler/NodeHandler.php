@@ -66,9 +66,8 @@ class NodeHandler extends PluginBase {
   /**
    * Implements parent::entityInfo().
    */
-  public function entityInfo(array $info) {
+  public function entityInfo(array &$info) {
     $info['label_plural'] = t('Nodes');
-    return $info;
   }
 
   /**

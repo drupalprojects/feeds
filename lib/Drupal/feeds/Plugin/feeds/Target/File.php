@@ -46,8 +46,8 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
   /**
    * {@inheritdoc}
    */
-  protected function prepareTarget(array &$target) {
-    $target['properties']['target_id']['label'] = $this->t('Filepath, either a remote URL or local file.');
+  protected static function prepareTarget(array &$target) {
+    $target['properties']['target_id']['label'] = t('Filepath, either a remote URL or local file.');
     unset($target['properties']['revision_id']);
   }
 

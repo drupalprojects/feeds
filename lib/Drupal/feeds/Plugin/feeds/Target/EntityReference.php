@@ -16,7 +16,7 @@ use Drupal\feeds\Plugin\ConfigurableTargetInterface;
  *
  * @Plugin(
  *   id = "entity_reference",
- *   field_types = {"entity_reference"}
+ *   field_types = {"entity_reference_field", "entity_reference"}
  * )
  */
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
@@ -74,6 +74,8 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       $this->entityQuery = \Drupal::entityQuery($this->entityType);
       $this->conditionKey = $info['entity_keys'][$this->configuration['reference_by']];
     }
+    else {
+    }
   }
 
   protected function getEntityType() {
@@ -83,7 +85,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   /**
    * {@inheritdoc}
    */
-  protected function prepareTarget(array &$target) {
+  protected static function prepareTarget(array &$target) {
     unset($target['properties']['revision_id']);
   }
 

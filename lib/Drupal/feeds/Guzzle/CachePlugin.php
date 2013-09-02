@@ -64,8 +64,8 @@ class CachePlugin implements EventSubscriberInterface {
     // In-memory download cache. Sometimes we fetch the same URL more than
     // once in a page load.
     // @todo Be smarter.
-    if (isset(self::$downloadCache[$url])) {
-      $request->setResponse(self::$downloadCache[$url]);
+    if (isset(static::$downloadCache[$url])) {
+      $request->setResponse(static::$downloadCache[$url]);
       return;
     }
 
@@ -111,7 +111,7 @@ class CachePlugin implements EventSubscriberInterface {
       $this->cacheBackend->delete($this->getCacheKey($old_url));
       // Not sure if the repeated requests are smart enough to find the
       // redirect, so cache the old URL with the new response.
-      self::$downloadCache[$old_url] = $response;
+      static::$downloadCache[$old_url] = $response;
     }
 
     if ($redirect || !$cache_hit) {
@@ -124,7 +124,7 @@ class CachePlugin implements EventSubscriberInterface {
     }
 
     // Set in-page download cache.
-    self::$downloadCache[$url] = $response;
+    static::$downloadCache[$url] = $response;
   }
 
   /**

@@ -11,6 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\FeedsElement;
 use Drupal\feeds\Plugin\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\TargetInterface;
@@ -28,7 +29,7 @@ class Path extends ConfigurablePluginBase implements TargetInterface {
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets) {}
+  public static function targets(array &$targets, ImporterInterface $importer, array $definition) {}
 
   /**
    * {@inheritdoc}

@@ -261,6 +261,11 @@ function feeds_permission() {
     ),
   );
   $importers = feeds_entity_bundle_info();
+
+  if (!$importers) {
+    return $perms;
+  }
+
   foreach (array_keys($importers['feeds_feed']) as $importer) {
     $args = array('%name' => $importers['feeds_feed'][$importer]['label']);
 

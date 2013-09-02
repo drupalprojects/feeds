@@ -64,11 +64,11 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   protected $itemController;
 
   /**
-   * The properties for this entity.
+   * The targets for this processor.
    *
    * @var array
    */
-  protected $properties;
+  protected $targets;
 
   /**
    * The extenders that apply to this entity type.
@@ -337,7 +337,8 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * {@inheritdoc}
    */
   protected function entityInfo() {
-    return $this->apply(__FUNCTION__, $this->entityInfo);
+    $this->apply(__FUNCTION__, $this->entityInfo);
+    return $this->entityInfo;
   }
 
   /**
@@ -407,36 +408,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     }
 
     return $options;
-  }
-
-  public function getProperties() {
-    if (!isset($this->properties)) {
-      $entity = $this->storageController->create($this->getConfiguration('values'))->getNGEntity();
-
-      foreach ($entity as $id => $field) {
-
-        $definition = $field->getItemDefinition();
-
-        if (!empty($definition['read-only'])) {
-          continue;
-        }
-
-        $this->properties[$id] = $definition;
-        $field_properties = $field->getPropertyDefinitions();
-        $this->properties[$id]['properties'] = array_filter($field_properties, function($property) {
-          return empty($property['computed']);
-        });
-
-        if ($instance = $field->getFieldDefinition()) {
-          $this->properties[$id]['label'] = $instance->getFieldLabel();
-          $this->properties[$id]['description'] = $instance->getFieldDescription();
-          $this->properties[$id]['type'] = $instance->getFieldType();
-          $this->properties[$id]['instance'] = $instance;
-        }
-      }
-    }
-
-    return $this->properties;
   }
 
   /**
@@ -549,7 +520,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
     $info = $this->entityInfo();
-
     $label_plural = isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
     $tokens = array('@entities' => Unicode::strtolower($label_plural));
 
@@ -597,23 +567,22 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * {@inheritdoc}
    */
   public function getMappingTargets() {
+    if (!$this->targets) {
+      $this->targets = parent::getMappingTargets();
+      foreach ($this->targets as &$target) {
+        $target['properties']['value']['label'] = '';
+      }
 
-    $targets = parent::getMappingTargets();
-    foreach ($targets as &$target) {
-      $target['properties']['value']['label'] = '';
+      // Let other modules expose mapping targets.
+      $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
+
+      foreach ($definitions as $definition) {
+        $class = $definition['class'];
+        $class::targets($this->targets, $this->importer, $definition);
+      }
     }
 
-    $targets += $this->getProperties();
-
-    // Let other modules expose mapping targets.
-    $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
-
-    foreach ($definitions as $definition) {
-      $mapper = \Drupal::service('plugin.manager.feeds.target')->createInstance($definition['id'], array('importer' => $this->importer));
-      $mapper->targets($targets);
-    }
-
-    return $targets;
+    return $this->targets;
   }
 
   /**

@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\ImporterInterface;
 
 /**
  * Interface for Feed targets.s
@@ -23,6 +24,6 @@ interface TargetInterface {
    *
    * @todo Finish documenting this.
    */
-  public function targets(array &$targets);
+  public static function targets(array &$targets, ImporterInterface $importer, array $definition);
 
 }

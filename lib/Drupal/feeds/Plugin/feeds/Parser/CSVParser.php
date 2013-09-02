@@ -159,8 +159,8 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
 
     $output = $this->t('Import !csv_files with one or more of these columns: !columns.', array(
       '!csv_files' => l($this->t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'),
-      '!columns' => implode(', ', $feeds)),
-    );
+      '!columns' => implode(', ', $feeds),
+    ));
     $items = array();
     $items[] = format_plural(count($uniques), $this->t('Column <strong>!column</strong> is mandatory and considered unique: only one item per !column value will be created.', array('!column' => implode(', ', $uniques))), $this->t('Columns <strong>!columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('!columns' => implode(', ', $uniques))));
     $items[] = l($this->t('Download a template'), 'import/' . $this->importer->id() . '/template');
