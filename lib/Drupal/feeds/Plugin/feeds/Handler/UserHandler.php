@@ -54,8 +54,8 @@ class UserHandler extends PluginBase {
   /**
    * Implements parent::entityInfo().
    */
-  public function entityInfoAlter(array &$info) {
-    $info['label_plural'] = t('Users');
+  public function entityInfo(array &$info) {
+    $info['label_plural'] = $this->t('Users');
   }
 
   /**
@@ -73,9 +73,9 @@ class UserHandler extends PluginBase {
   public function buildConfigurationForm(array &$form, array &$form_state) {
     $form['status'] = array(
       '#type' => 'radios',
-      '#title' => t('Status'),
-      '#description' => t('Select whether users should be imported active or blocked.'),
-      '#options' => array(0 => t('Blocked'), 1 => t('Active')),
+      '#title' => $this->t('Status'),
+      '#description' => $this->t('Select whether users should be imported active or blocked.'),
+      '#options' => array(0 => $this->t('Blocked'), 1 => $this->t('Active')),
       '#default_value' => $this->configuration['status'],
     );
 
@@ -88,16 +88,16 @@ class UserHandler extends PluginBase {
     if ($options) {
       $form['roles'] = array(
         '#type' => 'checkboxes',
-        '#title' => t('Additional roles'),
-        '#description' => t('Every user is assigned the "authenticated user" role. Select additional roles here.'),
+        '#title' => $this->t('Additional roles'),
+        '#description' => $this->t('Every user is assigned the "authenticated user" role. Select additional roles here.'),
         '#default_value' => $this->configuration['roles'],
         '#options' => $options,
       );
     }
     $form['defuse_mail'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Defuse e-mail addresses'),
-      '#description' => t('This appends _test to all imported e-mail addresses to ensure they cannot be used as recipients.'),
+      '#title' => $this->t('Defuse e-mail addresses'),
+      '#description' => $this->t('This appends _test to all imported e-mail addresses to ensure they cannot be used as recipients.'),
       '#default_value' => $this->configuration['defuse_mail'],
     );
   }
@@ -115,7 +115,7 @@ class UserHandler extends PluginBase {
    */
   public function entityValidate($account) {
     if (empty($account->name) || empty($account->mail) || !valid_email_address($account->mail)) {
-      throw new ValidationException(t('User name missing or email not valid.'));
+      throw new ValidationException('User name missing or email not valid.');
     }
   }
 

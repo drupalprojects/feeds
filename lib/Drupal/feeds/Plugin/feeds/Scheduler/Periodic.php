@@ -177,22 +177,22 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       return;
     }
 
-    $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
+    $cron_required = ' ' . l($this->t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
     $period = MapArray::copyValuesToKeys(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
 
     foreach ($period as &$p) {
-      $p = t('Every !p', array('!p' => $p));
+      $p = $this->t('Every !p', array('!p' => $p));
     }
     $period = array(
-      SchedulerInterface::SCHEDULE_NEVER => t('Off'),
-      0 => t('As often as possible'),
+      SchedulerInterface::SCHEDULE_NEVER => $this->t('Off'),
+      0 => $this->t('As often as possible'),
     ) + $period;
 
     $form['import_period'] = array(
       '#type' => 'select',
-      '#title' => t('Import period'),
+      '#title' => $this->t('Import period'),
       '#options' => $period,
-      '#description' => t('Choose how often a feed should be imported.') . $cron_required,
+      '#description' => $this->t('Choose how often a feed should be imported.') . $cron_required,
       '#default_value' => $this->configuration['import_period'],
     );
 

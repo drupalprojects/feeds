@@ -74,10 +74,10 @@ class Path extends ConfigurablePluginBase implements TargetInterface {
     }
 
     if (!$this->getConfiguration('pathauto_override')) {
-      return t('Do not allow Pathauto if empty.');
+      return $this->t('Do not allow Pathauto if empty.');
     }
     else {
-      return t('Allow Pathauto if empty.');
+      return $this->t('Allow Pathauto if empty.');
     }
   }
 
@@ -87,7 +87,7 @@ class Path extends ConfigurablePluginBase implements TargetInterface {
   public function buildConfigurationForm(array $form, array &$form_state, array $target = array()) {
     $form['pathauto_override'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow Pathauto to set the alias if the value is empty.'),
+      '#title' => $this->t('Allow Pathauto to set the alias if the value is empty.'),
       '#default_value' => $this->getConfiguration('pathauto_override'),
     );
 

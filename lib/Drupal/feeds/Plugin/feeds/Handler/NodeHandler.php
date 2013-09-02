@@ -67,7 +67,7 @@ class NodeHandler extends PluginBase {
    * Implements parent::entityInfo().
    */
   public function entityInfo(array &$info) {
-    $info['label_plural'] = t('Nodes');
+    $info['label_plural'] = $this->t('Nodes');
   }
 
   /**
@@ -88,8 +88,8 @@ class NodeHandler extends PluginBase {
 
     $form['author'] = array(
       '#type' => 'textfield',
-      '#title' => t('Author'),
-      '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
+      '#title' => $this->t('Author'),
+      '#description' => $this->t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
       '#default_value' => check_plain($author->getUsername()),
     );
@@ -98,9 +98,9 @@ class NodeHandler extends PluginBase {
 
     $form['expire'] = array(
       '#type' => 'select',
-      '#title' => t('Expire nodes'),
+      '#title' => $this->t('Expire nodes'),
       '#options' => $period,
-      '#description' => t('Select after how much time nodes should be deleted. The node\'s published date will be used for determining the node\'s age, see Mapping settings.'),
+      '#description' => $this->t('Select after how much time nodes should be deleted. The node\'s published date will be used for determining the node\'s age, see Mapping settings.'),
       '#default_value' => $this->configuration['expire'],
     );
   }
@@ -184,12 +184,12 @@ class NodeHandler extends PluginBase {
   public function getMappingTargets(array &$targets) {
     $targets['title']['optional_unique'] = TRUE;
     $targets['user_name'] = array(
-      'name' => t('Username'),
-      'description' => t('The Drupal username of the node author.'),
+      'name' => $this->t('Username'),
+      'description' => $this->t('The Drupal username of the node author.'),
     );
     $targets['user_mail'] = array(
-      'name' => t('User email'),
-      'description' => t('The email address of the node author.'),
+      'name' => $this->t('User email'),
+      'description' => $this->t('The email address of the node author.'),
     );
   }
 

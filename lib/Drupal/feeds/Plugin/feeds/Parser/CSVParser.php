@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Component\ParserCSV;
 use Drupal\feeds\Component\ParserCSVIterator;
@@ -89,7 +90,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     }
     $header = array_shift($rows);
     foreach ($header as $i => $title) {
-      $header[$i] = trim(drupal_strtolower($title));
+      $header[$i] = trim(Unicode::strtolower($title));
     }
     return $header;
   }
@@ -127,7 +128,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    * {@inheritdoc}
    */
   public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
-    return parent::getSourceElement($feed, $item, drupal_strtolower($element_key));
+    return parent::getSourceElement($feed, $item, Unicode::strtolower($element_key));
   }
 
   /**

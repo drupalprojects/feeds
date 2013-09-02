@@ -32,10 +32,10 @@ class ImporterListController extends ConfigEntityListController {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $row['label'] = t('Label');
-    $row['id'] = t('Machine name');
-    $row['description'] = t('Description');
-    $row['operations'] = t('Operations');
+    $row['label'] = $this->t('Label');
+    $row['id'] = $this->t('Machine name');
+    $row['description'] = $this->t('Description');
+    $row['operations'] = $this->t('Operations');
     return $row;
   }
 

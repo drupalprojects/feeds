@@ -126,7 +126,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * @todo Bulk load existing entity ids/entities.
    */
   public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result) {
-    $this->getProperties();
     while ($item = $parser_result->shiftItem()) {
       $this->processItem($feed, $state, $item);
     }
@@ -210,11 +209,12 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    */
   public function setMessages(FeedInterface $feed) {
     $state = $feed->state(StateInterface::PROCESS);
+    $info = $this->entityInfo();
 
     $info = $this->entityInfo();
     $tokens = array(
-      '@entity' => strtolower($info['label']),
-      '@entities' => strtolower($info['label_plural']),
+      '@entity' => Unicode::strtolower($this->label()),
+      '@entities' => Unicode::strtolower($this->labelPlural()),
     );
     $messages = array();
     if ($state->created) {
@@ -250,7 +250,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     }
     if (empty($messages)) {
       $messages[] = array(
-        'message' => $this->t('There are no new @entities.', array('@entities' => strtolower($info['label_plural']))),
+        'message' => $this->t('There are no new @entities.', array('@entities' => Unicode::strtolower($this->labelPlural()))),
       );
     }
     foreach ($messages as $message) {
@@ -410,6 +410,16 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     return $options;
   }
 
+  protected function label() {
+    $info = $this->entityInfo();
+    return $info['label'];
+  }
+
+  protected function labelPlural() {
+    $info = $this->entityInfo();
+    return isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -520,8 +530,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
     $info = $this->entityInfo();
-    $label_plural = isset($info['label_plural']) ? $info['label_plural'] : $info['label'];
-    $tokens = array('@entities' => Unicode::strtolower($label_plural));
+    $tokens = array('@entities' => Unicode::strtolower($this->labelPlural()));
 
     $form['update_existing'] = array(
       '#type' => 'radios',
@@ -536,8 +545,8 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     );
     $form['authorize'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Authorize'),
-      '#description' => t('Check that the author has permission to create the node.'),
+      '#title' => $this->t('Authorize'),
+      '#description' => $this->t('Check that the author has permission to create the node.'),
       '#default_value' => $this->configuration['authorize'],
     );
 
@@ -589,12 +598,14 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * {@inheritdoc}
    */
   public function setTargetElement(FeedInterface $feed, $entity, $field_name, $values, $mapping, \stdClass $item_info) {
-    if (isset($this->properties[$field_name])) {
-      $entity->get($field_name)->setValue($values);
+    switch ($field_name) {
+      case 'url':
+      case 'guid':
+        $item_info->$field_name = $values[0]['value'];
+        return;
     }
-    else {
-      parent::setTargetElement($feed, $entity, $field_name, $values[0]['value'], $mapping, $item_info);
-    }
+
+    $entity->get($field_name)->setValue($values);
   }
 
   /**

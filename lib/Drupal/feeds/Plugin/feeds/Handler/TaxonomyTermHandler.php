@@ -9,6 +9,7 @@ namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Component\Utility\String;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
@@ -44,8 +45,8 @@ class TaxonomyTermHandler extends PluginBase {
   /**
    * Implements parent::entityInfo().
    */
-  public function entityInfoAlter(array &$info) {
-    $info['label_plural'] = t('Terms');
+  public function entityInfo(array &$info) {
+    $info['label_plural'] = $this->t('Taxonomy terms');
   }
 
   /**
@@ -53,7 +54,7 @@ class TaxonomyTermHandler extends PluginBase {
    */
   public function entityValidate($term) {
     if (drupal_strlen($term->label()) == 0) {
-      throw new ValidationException(t('Term name missing.'));
+      throw new ValidationException('Term name missing.');
     }
   }
 
@@ -63,7 +64,7 @@ class TaxonomyTermHandler extends PluginBase {
         $term->parent = reset($term->parent);
       }
       if ($term->id() && ($term->parent == $term->id() || (is_array($term->parent) && in_array($term->id(), $term->parent)))) {
-        throw new ValidationException(t("A term can't be its own child. GUID:@guid", array('@guid' => $term->feeds_item->guid)));
+        throw new ValidationException(String::format("A term can't be its own child. GUID:@guid", array('@guid' => $term->feeds_item->guid)));
       }
     }
   }
@@ -77,8 +78,8 @@ class TaxonomyTermHandler extends PluginBase {
     $targets['weight']['optional_unique'] = TRUE;
     $targets += array(
       'parentguid' => array(
-        'name' => t('Parent: GUID'),
-        'description' => t('The GUID of the parent taxonomy term.'),
+        'name' => $this->t('Parent: GUID'),
+        'description' => $this->t('The GUID of the parent taxonomy term.'),
         'optional_unique' => TRUE,
       ),
     );

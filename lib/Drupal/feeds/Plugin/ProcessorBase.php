@@ -9,6 +9,7 @@
 
 namespace Drupal\feeds\Plugin;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
@@ -73,15 +74,15 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
           'Deleted @number @entities',
           array(
             '@number' => $state->deleted,
-            '@entity' => strtolower($info['label']),
-            '@entities' => strtolower($info['label_plural']),
+            '@entity' => Unicode::strtolower($this->label()),
+            '@entities' => Unicode::strtolower($this->labelPlural()),
           )
         );
         $feed->log('clear', $message, array(), WATCHDOG_INFO);
         drupal_set_message($message);
       }
       else {
-        drupal_set_message(t('There are no @entities to be deleted.', array('@entities' => $info['label_plural'])));
+        drupal_set_message($this->t('There are no %entities to be deleted.', array('%entities' => $this->labelPlural())));
       }
     }
   }
@@ -292,8 +293,8 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
     $form['skip_hash_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Force update'),
-      '#description' => t('Forces the update of items even if the feed did not change.'),
+      '#title' => $this->t('Force update'),
+      '#description' => $this->t('Forces the update of items even if the feed did not change.'),
       '#default_value' => $this->configuration['skip_hash_check'],
     );
 
@@ -313,13 +314,13 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
 
     return array(
       'url' => array(
-        'label' => t('URL'),
-        'description' => t('The external URL of the item. E. g. the feed item URL in the case of a syndication feed. May be unique.'),
+        'label' => $this->t('URL'),
+        'description' => $this->t('The external URL of the item. E. g. the feed item URL in the case of a syndication feed. May be unique.'),
         'optional_unique' => TRUE,
       ),
       'guid' => array(
-        'label' => t('GUID'),
-        'description' => t('The globally unique identifier of the item. E. g. the feed item GUID in the case of a syndication feed. May be unique.'),
+        'label' => $this->t('GUID'),
+        'description' => $this->t('The globally unique identifier of the item. E. g. the feed item GUID in the case of a syndication feed. May be unique.'),
         'optional_unique' => TRUE,
       ),
     );
@@ -445,9 +446,9 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    */
   public function formatExpire($timestamp) {
     if ($timestamp == SchedulerInterface::EXPIRE_NEVER) {
-      return t('Never');
+      return $this->t('Never');
     }
-    return t('after !time', array('!time' => format_interval($timestamp)));
+    return $this->t('after !time', array('!time' => format_interval($timestamp)));
   }
 
 }
