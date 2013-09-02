@@ -8,10 +8,10 @@
 namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\String;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\PluginBase;
 use Drupal\feeds\Result\ParserResultInterface;
 
 /**
@@ -22,13 +22,6 @@ use Drupal\feeds\Result\ParserResultInterface;
  * )
  */
 class TaxonomyTermHandler extends PluginBase {
-
-  protected $config;
-
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->importer = $configuration['importer'];
-  }
 
   public static function applies($processor) {
     return $processor->entityType() == 'taxonomy_term';

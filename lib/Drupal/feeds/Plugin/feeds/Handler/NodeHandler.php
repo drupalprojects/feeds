@@ -8,9 +8,9 @@
 namespace Drupal\feeds\Plugin\feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\PluginBase;
 use Drupal\feeds\Plugin\ProcessorInterface;
 use Drupal\feeds\Plugin\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
@@ -24,14 +24,12 @@ use Drupal\feeds\Result\ParserResultInterface;
  */
 class NodeHandler extends PluginBase {
 
-  protected $config;
-
+  /**
+   * Crea
+   */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    $this->importer = $configuration['importer'];
     $this->configuration += $this->getDefaultConfiguration();
-    unset($this->configuration['importer']);
   }
 
   public function getConfiguration() {

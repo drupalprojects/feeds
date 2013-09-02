@@ -45,6 +45,8 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     $this->importer = $configuration['importer'];
+    unset($configuration['importer']);
+    $this->configuration = $configuration;
     $this->pluginId = $plugin_id;
     $this->pluginDefinition = $plugin_definition;
   }

@@ -70,8 +70,8 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       if ($state->deleted) {
         $message = format_plural(
           $state->deleted,
-          'Deleted @number @entity',
-          'Deleted @number @entities',
+          'Deleted @number @entity.',
+          'Deleted @number @entities.',
           array(
             '@number' => $state->deleted,
             '@entity' => Unicode::strtolower($this->label()),
@@ -82,7 +82,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
         drupal_set_message($message);
       }
       else {
-        drupal_set_message($this->t('There are no %entities to be deleted.', array('%entities' => $this->labelPlural())));
+        drupal_set_message($this->t('There are no @entities to be deleted.', array('@entities' => Unicode::strtolower($this->labelPlural()))));
       }
     }
   }

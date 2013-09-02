@@ -209,14 +209,14 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    */
   public function setMessages(FeedInterface $feed) {
     $state = $feed->state(StateInterface::PROCESS);
-    $info = $this->entityInfo();
 
-    $info = $this->entityInfo();
     $tokens = array(
       '@entity' => Unicode::strtolower($this->label()),
       '@entities' => Unicode::strtolower($this->labelPlural()),
     );
+
     $messages = array();
+
     if ($state->created) {
       $messages[] = array(
         'message' => format_plural(
