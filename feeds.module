@@ -48,17 +48,20 @@ function feeds_hook_info() {
 
 /**
  * Implements hook_cron().
+ *
+ * @todo This needs to be different, this could timeout easily. Perhaps a queue.
  */
 function feeds_cron() {
   if ($importers = Importer::reschedule()) {
+    $feed_controller = Drupal::entityManager()->getStorageController('feeds_feed');
+
     if ($importers === TRUE) {
-      $feeds = db_query("SELECT fid FROM {feeds_feed}");
+      $feeds = $feed_controller->loadMultiple();
     }
     else {
-      $feeds = db_query("SELECT fid FROM {feeds_feed} WHERE importer IN (:ids)", array(':ids' => $importers));
+      $feeds = $feed_controller->loadByProperties(array('importer' => $importers));
     }
     foreach ($feeds as $feed) {
-      $feed = entity_load('feeds_feed', $feed->id());
       $feed->schedule();
     }
     Importer::reschedule(FALSE);
@@ -138,7 +141,7 @@ function feeds_feed_expire(array $job) {
  * Executes a job_scheduler job.
  */
 function _feeds_job_scheduler_helper($action, array $job) {
-  $feed = \Drupal::entityManager()->getStorageController('feeds_feed')->load($job['id']);
+  $feed = Drupal::entityManager()->getStorageController('feeds_feed')->load($job['id']);
 
   if ($feed) {
     try {
@@ -161,7 +164,7 @@ function _feeds_job_scheduler_helper($action, array $job) {
  * @todo This isn't working yet.
  */
 function feeds_push_unsubscribe(array $job) {
-  $feed = entity_load('feeds_feed', $job['id']);
+  $feed = Drupal::entityManager()->getStorageController('feeds_feed')->load($job['id']);
   $feed->getImporter()->getFetcher()->unsubscribe($feed);
 }
 
@@ -172,21 +175,21 @@ function feeds_push_subscribe(array $job) {
   if ($feed = entity_load('feeds_feed', $job['id'])) {
     $feed_config = $feed->get('config');
 
-    if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
+    if ($subscription = Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
 
       if (isset($feed_config['fetcher'])) {
 
         // @todo Error handling.
-        $client = \Drupal::httpClient();
+        $client = Drupal::httpClient();
         $response = $client->get($feed_config['fetcher']['source'])->send();
 
-        Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
+        Reader::setExtensionManager(Drupal::service('feed.bridge.reader'));
         $channel = Reader::importString($response->getBody(TRUE));
 
         if ($hubs = $channel->getHubs()) {
           $subscription['hub'] = reset($hubs);
           $subscription['state'] = 'subscribe';
-          \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
+          Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
 
           $request = $client
             ->post($subscription['hub'])
@@ -257,7 +260,8 @@ function feeds_permission() {
       'description' => t('Create, update, delete importers, execute import and delete tasks on any importer.'),
     ),
   );
-  foreach (entity_load_multiple('feeds_importer') as $importer) {
+  $importers = Drupal::entityManager()->getStorageController('feeds_importer')->loadMulitple();
+  foreach ($importers as $importer) {
     $args = array('@name' => $importer->label());
 
     $perms["view {$importer->id()} feeds"] = array(
@@ -426,9 +430,11 @@ function feeds_entity_bundle_info() {
 
 /**
  * Implements hook_file_download().
+ *
+ * @todo This doesn't handle duplicate sources.
  */
 function feeds_file_download($uri) {
-  $fids = \Drupal::entityQuery('feeds_feed')
+  $fids = Drupal::entityQuery('feeds_feed')
     ->condition('source', $uri)
     ->range(0, 1)
     ->execute();
@@ -460,7 +466,8 @@ function feeds_file_download($uri) {
 
   $fid = reset($fids);
 
-  if (!entity_load('feeds_feed', $fid)->access('import')) {
+  $feed = Drupal::entityManager()->getStorageController('feeds_feed')->load($fid);
+  if (!$feed || !$feed->access('import')) {
     // User does not have permission to import this feed.
     return -1;
   }
@@ -473,7 +480,7 @@ function feeds_file_download($uri) {
  * Implements hook_entity_delete().
  */
 function feeds_entity_delete(EntityInterface $entity) {
-  \Drupal::service('feeds.item_info')->delete($entity->entityType(), $entity->id());
+  Drupal::service('feeds.item_info')->delete($entity->entityType(), $entity->id());
 }
 
 /**
