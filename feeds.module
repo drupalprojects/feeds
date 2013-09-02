@@ -260,30 +260,30 @@ function feeds_permission() {
       'description' => t('Create, update, delete importers, execute import and delete tasks on any importer.'),
     ),
   );
-  $importers = Drupal::entityManager()->getStorageController('feeds_importer')->loadMulitple();
-  foreach ($importers as $importer) {
-    $args = array('@name' => $importer->label());
+  $importers = feeds_entity_bundle_info();
+  foreach (array_keys($importers['feeds_feed']) as $importer) {
+    $args = array('%name' => $importers['feeds_feed'][$importer]['label']);
 
-    $perms["view {$importer->id()} feeds"] = array(
-      'title' => t('View @name feeds', $args),
+    $perms["view $importer feeds"] = array(
+      'title' => t('View %name feeds', $args),
     );
-    $perms["create {$importer->id()} feeds"] = array(
-      'title' => t('Add @name feeds', $args),
+    $perms["create $importer feeds"] = array(
+      'title' => t('Add %name feeds', $args),
     );
-    $perms["update {$importer->id()} feeds"] = array(
-      'title' => t('Edit @name feeds', $args),
+    $perms["update $importer feeds"] = array(
+      'title' => t('Edit %name feeds', $args),
     );
-    $perms["delete {$importer->id()} feeds"] = array(
-      'title' => t('Delete @name feeds', $args),
+    $perms["delete $importer feeds"] = array(
+      'title' => t('Delete %name feeds', $args),
     );
-    $perms["import {$importer->id()} feeds"] = array(
-      'title' => t('Import @name feeds', $args),
+    $perms["import $importer feeds"] = array(
+      'title' => t('Import %name feeds', $args),
     );
-    $perms["clear {$importer->id()} feeds"] = array(
-      'title' => t('Delete items from @name feeds', $args),
+    $perms["clear $importer feeds"] = array(
+      'title' => t('Delete items from %name feeds', $args),
     );
-    $perms["unlock {$importer->id()} feeds"] = array(
-      'title' => t('Unlock imports from @name feeds', $args),
+    $perms["unlock $importer feeds"] = array(
+      'title' => t('Unlock imports from %name feeds', $args),
       'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it.'),
     );
   }
@@ -423,7 +423,7 @@ function feeds_entity_bundle_info() {
   $bundles = array();
   foreach (config_get_storage_names_with_prefix('feeds.importer.') as $config_name) {
     $config = config($config_name);
-    $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('name');
+    $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('label');
   }
   return $bundles;
 }

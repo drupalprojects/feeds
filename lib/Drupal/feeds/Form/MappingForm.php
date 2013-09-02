@@ -46,11 +46,11 @@ class MappingForm extends FormBase {
     $importer = $this->importer = $feeds_importer;
     $this->targets = $targets = $importer->getProcessor()->getMappingTargets();
     // Denormalize targets.
-    $source_options = array();
+    $this->sourceOptions = array();
     foreach ($importer->getParser()->getMappingSources() as $key => $info) {
-      $source_options[$key] = $info['label'];
+      $this->sourceOptions[$key] = $info['label'];
     }
-    $source_options = $this->sortOptions($source_options);
+    $this->sourceOptions = $this->sortOptions($this->sourceOptions);
 
     $target_options = array();
     foreach ($targets as $key => $info) {
@@ -58,153 +58,33 @@ class MappingForm extends FormBase {
     }
     $target_options = $this->sortOptions($target_options);
 
-    $form['#tree'] = TRUE;
-
-    $ajax_delta = -1;
     if (isset($form_state['values'])) {
       $this->processFormState($form, $form_state);
 
-      if (isset($form_state['triggering_element']['#delta']) && empty($form_state['triggering_element']['#saved'])) {
-        $ajax_delta = $form_state['triggering_element']['#delta'];
-      }
-
-      elseif ($form_state['triggering_element']['#name'] == 'add_target' || !empty($form_state['triggering_element']['#remove'])) {
+      if ($form_state['triggering_element']['#name'] == 'add_target' || !empty($form_state['triggering_element']['#remove'])) {
         drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
       }
     }
 
+    $form['#tree'] = TRUE;
     $form['#prefix'] = '<div id="feeds-mapping-form-ajax-wrapper">';
     $form['#suffix'] = '</div>';
+    $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
     $table = array(
       '#type' => 'table',
       '#header' => array(
         $this->t('Source'),
         $this->t('Target'),
+        $this->t('Summary'),
         $this->t('Configure'),
-        $this->t('Unique'),
         $this->t('Remove'),
       ),
       '#sticky' => TRUE,
     );
 
     foreach ($importer->getMappings() as $delta => $mapping) {
-
-      $table[$delta]['map'] = array(
-        '#type' => 'container',
-      );
-      $table[$delta]['targets'] = array(
-        '#theme' => 'item_list',
-        '#items' => array(),
-      );
-      // Keep the target values out of the table so that the columns align.
-      $form['targets'][$delta]['target'] = array(
-        '#type' => 'value',
-        '#value' => $mapping['target'],
-        '#parents' => array('mappings', $delta, 'target'),
-      );
-
-      foreach ($mapping['map'] as $column => $source) {
-
-        if (!isset($targets[$mapping['target']]['properties'][$column])) {
-          unset($mapping['map'][$column]);
-          continue;
-        }
-
-        $table[$delta]['map'][$column] = array(
-          '#type' => 'select',
-          '#options' => $source_options,
-          '#default_value' => $source,
-          '#empty_option' => $this->t('- Select a source -'),
-        );
-
-        $label = check_plain($targets[$mapping['target']]['label']);
-
-        if (count($mapping['map']) > 1) {
-          $label .= ': ' . $targets[$mapping['target']]['properties'][$column]['label'];
-        }
-
-        $table[$delta]['targets']['#items'][] = $label;
-      }
-
-      $table[$delta]['settings']['#markup'] = '';
-
-      if ($plugin = $feeds_importer->getTargetPlugin($delta)) {
-        $table[$delta]['settings'] = array(
-          '#type' => 'container',
-          '#id' => 'edit-mappings-' . $delta . '-settings',
-        );
-
-        if ($plugin instanceof ConfigurableTargetInterface) {
-          if ($delta == $ajax_delta) {
-            $table[$delta]['settings'] += $plugin->buildConfigurationForm(array(), $form_state);
-            $table[$delta]['settings']['submit'] = array(
-              '#type' => 'submit',
-              '#value' => $this->t('Save'),
-              '#ajax' => array(
-                'callback' => array($this, 'settingsAjaxCallback'),
-                'wrapper' => 'edit-mappings-' . $delta . '-settings',
-                'effect' => 'fade',
-                'progress' => 'none',
-              ),
-              '#name' => 'target-save-' . $delta,
-              '#delta' => $delta,
-              '#saved' => TRUE,
-              '#parents' => array('config_button', $delta),
-            );
-          }
-          else {
-            $table[$delta]['settings']['summary'] = array(
-              '#type' => 'item',
-              '#markup' => $plugin->getSummary(),
-              '#parents' => array('config_summary', $delta),
-            );
-            $table[$delta]['settings']['button'] = array(
-              '#type' => 'submit',
-              '#value' => $this->t('Configure'),
-              '#ajax' => array(
-                'callback' => array($this, 'settingsAjaxCallback'),
-                'wrapper' => 'edit-mappings-' . $delta . '-settings',
-                'effect' => 'fade',
-                'progress' => 'none',
-              ),
-              '#name' => 'target-settings-' . $delta,
-              '#delta' => $delta,
-              '#parents' => array('config_button', $delta),
-            );
-          }
-        }
-      }
-
-      $table[$delta]['unique'] = array(
-        '#title' => $this->t('Unique'),
-        '#type' => 'checkbox',
-        '#default_value' => FALSE,
-        '#title_display' => 'invisible',
-        '#parents' => array('unique_mappings', $delta),
-        '#ajax' => array(
-          'callback' => array($this, 'ajaxCallback'),
-          'wrapper' => 'feeds-mapping-form-ajax-wrapper',
-          'effect' => 'none',
-          'progress' => 'none',
-        ),
-        '#unique' => TRUE,
-      );
-
-      $table[$delta]['remove'] = array(
-        '#title' => $this->t('Remove'),
-        '#type' => 'checkbox',
-        '#default_value' => FALSE,
-        '#title_display' => 'invisible',
-        '#parents' => array('remove_mappings', $delta),
-        '#ajax' => array(
-          'callback' => array($this, 'ajaxCallback'),
-          'wrapper' => 'feeds-mapping-form-ajax-wrapper',
-          'effect' => 'none',
-          'progress' => 'none',
-        ),
-        '#remove' => TRUE,
-      );
+      $table[$delta] = $this->buildRow($form, $form_state, $mapping, $delta);
     }
 
     $table['add']['source']['#markup'] = '';
@@ -225,9 +105,9 @@ class MappingForm extends FormBase {
       ),
     );
 
-    $table['add']['settings']['#markup'] = '';
-    $table['add']['unique']['#markup'] = '';
+    $table['add']['summary']['#markup'] = '';
     $table['add']['remove']['#markup'] = '';
+    $table['add']['configure']['#markup'] = '';
 
     $form['mappings'] = $table;
 
@@ -243,6 +123,128 @@ class MappingForm extends FormBase {
   }
 
   /**
+   *
+   */
+  protected function buildRow($form, $form_state, $mapping, $delta) {
+    $ajax_delta = -1;
+    if (isset($form_state['triggering_element']['#delta']) && empty($form_state['triggering_element']['#saved'])) {
+      $ajax_delta = $form_state['triggering_element']['#delta'];
+    }
+
+    $row = array(
+      '#attributes' => array(
+        'class' => array('draggable', 'tabledrag-leaf'),
+      ),
+    );
+    $row['map'] = array(
+      '#type' => 'container',
+    );
+    $row['targets'] = array(
+      '#theme' => 'item_list',
+      '#items' => array(),
+    );
+
+    foreach ($mapping['map'] as $column => $source) {
+      if (!isset($this->targets[$mapping['target']]['properties'][$column])) {
+        unset($mapping['map'][$column]);
+        continue;
+      }
+      $row['map'][$column] = array(
+        '#type' => 'select',
+        '#options' => $this->sourceOptions,
+        '#default_value' => $source,
+        '#empty_option' => $this->t('- Select a source -'),
+        '#attributes' => array('class' => array('feeds-table-select-list')),
+      );
+
+      $label = check_plain($this->targets[$mapping['target']]['label']);
+
+      if (count($mapping['map']) > 1) {
+        $label .= ': ' . $this->targets[$mapping['target']]['properties'][$column]['label'];
+      }
+      $row['targets']['#items'][] = $label;
+    }
+
+    if ($plugin = $this->importer->getTargetPlugin($delta)) {
+
+      $row['settings'] = array(
+        '#type' => 'container',
+        '#id' => 'edit-mappings-' . $delta . '-settings',
+      );
+
+      if ($plugin instanceof ConfigurableTargetInterface) {
+        if ($delta == $ajax_delta) {
+          $row['settings'] += $plugin->buildConfigurationForm(array(), $form_state);
+          $row['settings']['submit'] = array(
+            '#type' => 'submit',
+            '#value' => $this->t('Save'),
+            '#ajax' => array(
+              'callback' => array($this, 'settingsAjaxCallback'),
+              'wrapper' => 'edit-mappings-' . $delta . '-settings',
+              'effect' => 'fade',
+              'progress' => 'none',
+            ),
+            '#name' => 'target-save-' . $delta,
+            '#delta' => $delta,
+            '#saved' => TRUE,
+            '#parents' => array('config_button', $delta),
+            '#attributes' => array('class' => array('feeds-ajax-save-button')),
+          );
+        }
+        else {
+          $row['settings']['summary'] = array(
+            '#type' => 'item',
+            '#markup' => $plugin->getSummary(),
+            '#parents' => array('config_summary', $delta),
+            '#attributes' => array('class' => array('field-plugin-summary')),
+          );
+          $row['configure']['button'] = array(
+            '#type' => 'image_button',
+            '#op' => 'configure',
+            '#ajax' => array(
+              'callback' => array($this, 'settingsAjaxCallback'),
+              'wrapper' => 'edit-mappings-' . $delta . '-settings',
+              'effect' => 'fade',
+              'progress' => 'none',
+            ),
+            '#name' => 'target-settings-' . $delta,
+            '#delta' => $delta,
+            '#parents' => array('config_button', $delta),
+            '#attributes' => array('class' => array('feeds-ajax-configure-button')),
+            '#src' => 'core/misc/configure-dark.png',
+          );
+        }
+      }
+      else {
+        $row['configure']['#markup'] = '';
+      }
+    }
+    else {
+      $row['settings']['#markup'] = '';
+      $row['configure']['#markup'] = '';
+    }
+
+    if ($delta != $ajax_delta) {
+      $row['remove'] = array(
+        '#title' => $this->t('Remove'),
+        '#type' => 'checkbox',
+        '#default_value' => FALSE,
+        '#title_display' => 'invisible',
+        '#parents' => array('remove_mappings', $delta),
+        '#ajax' => array(
+          'callback' => array($this, 'ajaxCallback'),
+          'wrapper' => 'feeds-mapping-form-ajax-wrapper',
+          'effect' => 'none',
+          'progress' => 'none',
+        ),
+        '#remove' => TRUE,
+      );
+    }
+
+    return $row;
+  }
+
+  /**
    * Processes the form state, populating the mapping array.
    *
    * @param arary &$form_state
@@ -255,18 +257,21 @@ class MappingForm extends FormBase {
       $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
     }
 
-    foreach ($form_state['values']['mappings'] as $delta => $mapping) {
-      $this->importer->setMapping($delta, $mapping);
+    if ($form_state['values']['mappings']) {
+      foreach ($form_state['values']['mappings'] as $delta => $mapping) {
+        $this->importer->setMapping($delta, $mapping);
+      }
     }
 
     // Remove any mappings.
-    foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
-      $this->importer->removeMapping($delta);
+    if (!empty($form_state['values']['remove_mappings'])) {
+      foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
+        $this->importer->removeMapping($delta);
+      }
     }
 
     // Add any targets.
-    $new_target = $form_state['values']['add_target'];
-    if ($new_target) {
+    if ($new_target = $form_state['values']['add_target']) {
       $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
       $this->importer->addMapping(array(
         'target' => $form_state['values']['add_target'],
