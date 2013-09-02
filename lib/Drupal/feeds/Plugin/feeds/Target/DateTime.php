@@ -22,24 +22,36 @@ use Drupal\feeds\Plugin\FieldTargetBase;
 class DateTime extends FieldTargetBase {
 
   /**
+   * The datetime storage format.
+   *
+   * @var string
+   */
+  protected $storageFormat;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $settings, $plugin_id, array $plugin_definition) {
+    parent::__construct($settings, $plugin_id, $plugin_definition);
+    $datetime_type = $this->settings['instance']->getFieldSetting('datetime_type');
+    $this->storageFormat = $datetime_type == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
     $date = FALSE;
-    $value = $values['value'];
-
-    if (is_numeric($value)) {
-      $date = DrupalDateTime::createFromTimestamp($value);
+    $value = trim($values['value']);
+    if (is_numeric($value) || is_string($value) && $value = strtotime($value)) {
+      $date = DrupalDateTime::createFromTimestamp($value, DATETIME_STORAGE_TIMEZONE);
     }
     elseif ($value instanceof \DateTime) {
       $date = DrupalDateTime::createFromDateTime($value);
     }
-    elseif (is_string($value) && $value = strtotime($value)) {
-      $date = DrupalDateTime::createFromTimestamp($value);
-    }
 
     if ($date && !$date->hasErrors()) {
-      $values['value'] = $date->format(DATETIME_DATETIME_STORAGE_FORMAT);
+      $values['value'] = $date->format($this->storageFormat);
     }
     else {
       $values['value'] = '';
