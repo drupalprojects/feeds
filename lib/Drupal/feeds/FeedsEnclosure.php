@@ -5,6 +5,7 @@
  * Contains \Drupal\feeds\FeedsEnclosure.
  *
  * @todo Unit test the crap out of this. It has caused much pain over the years.
+ * @todo Split this into 2 separate classes.
  */
 
 namespace Drupal\feeds;
@@ -14,7 +15,16 @@ use Drupal\Component\Utility\String;
 /**
  * Enclosure element, can be part of the result array.
  */
-class FeedsEnclosure extends FeedsElement {
+class FeedsEnclosure {
+
+  /**
+   * The uri of the enclosure.
+   *
+   * This value can contain be a URL or a filepath.
+   *
+   * @var string
+   */
+  protected $uri;
 
   /**
    * The mimetype of this enclosure.
@@ -26,55 +36,21 @@ class FeedsEnclosure extends FeedsElement {
   /**
    * Constructs a FeedsEnclosure object.
    *
-   * @param string $value
+   * @param string $uri
    *   A path to a local file or a URL to a remote document.
    * @param string $mime_type
-   *   The mime type of the resource.
+   *   (optional) The mime type of the resource. If not provided, the mime type
+   *   will be guessed based on the file name.
    */
-  public function __construct($value, $mime_type) {
-    parent::__construct($value);
-    $this->mimeType = $mime_type;
-  }
+  public function __construct($uri, $mime_type = NULL) {
+    $this->uri = $uri;
 
-  /**
-   * Returns the mimetype of the enclosure.
-   *
-   * @return string
-   *   Mimetype of return value of getValue().
-   */
-  public function getMimeType() {
-    return $this->mimeType;
-  }
-
-  /**
-   * Returns a URL safe version of the file path.
-   *
-   * @return string
-   *   Value with encoded space characters to safely fetch the file from the
-   *   URL.
-   *
-   * @see FeedsElement::getValue()
-   *
-   * @todo What other characters can we encode? We can't just encode it because
-   * it's most likely already encoded, just missing spaces. What if we decoded
-   * it and then encoded it?
-   */
-  public function getUrlEncodedValue() {
-    return str_replace(' ', '%20', $this->getValue());
-  }
-
-  /**
-   * Returns a version of the value better suited for saving to the file system.
-   *
-   * @return string
-   *   Value with space characters changed to underscores.
-   *
-   * @see FeedsElement::getValue()
-   *
-   * @todo Remove this. This is dumb.
-   */
-  public function getLocalValue() {
-    return str_replace(' ', '_', $this->getValue());
+    if ($mime_type) {
+      $this->mimeType = $mime_type;
+    }
+    else {
+      $this->mimeType = file_get_mimetype($uri);
+    }
   }
 
   /**
@@ -91,26 +67,26 @@ class FeedsEnclosure extends FeedsElement {
    * @todo Better error handling.
    */
   public function getContent() {
-    $response = \Drupal::httpClient()->get($this->getUrlEncodedValue())->send();
+    $response = \Drupal::httpClient()->get($this->uri)->send();
 
     if ($response->getStatusCode() != 200) {
       $args = array(
-        '@url' => $this->getUrlEncodedValue(),
-        '!code' => $response->getStatusCode(),
+        '%url' => $this->uri,
+        '@code' => $response->getStatusCode(),
       );
-      throw new \RuntimeException(String::format('Download of @url failed with code !code.', $args));
+      throw new \RuntimeException(String::format('Download of %url failed with code @code.', $args));
     }
 
     return $response->getBody(TRUE);
   }
 
   /**
-   * Get a Drupal file object of the enclosed resource, download if necessary.
+   * Returns a Drupal file object of the enclosed resource.
    *
    * @param string $destination
    *   The path or uri specifying the target directory in which the file is
    *   expected. Don't use trailing slashes unless it's a streamwrapper scheme.
-   * @param $replace
+   * @param int $replace
    *   (optional) Replace behavior when the destination file already exists:
    *   - FILE_EXISTS_REPLACE - Replace the existing file. If a managed file with
    *       the destination name exists then its database entry will be updated.
@@ -120,7 +96,7 @@ class FeedsEnclosure extends FeedsElement {
    *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
    *   Defaults to FILE_EXISTS_RENAME.
    *
-   * @return \Drupal\file\Entity\File
+   * @return \Drupal\file\Entity\FileInterface
    *   A Drupal temporary file object of the enclosed resource.
    *
    * @throws \RuntimeException
@@ -131,54 +107,55 @@ class FeedsEnclosure extends FeedsElement {
   public function getFile($destination, $replace = FILE_EXISTS_RENAME) {
     $file = FALSE;
 
-    if ($this->getValue()) {
-      // Prepare destination directory.
-      file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
-      // Copy or save file depending on whether it is remote or local.
-      if (drupal_realpath($this->getValue())) {
-        $file = entity_create('file', array(
-          'uid' => 0,
-          'uri' => $this->getValue(),
-          'filemime' => $this->mimeType,
-          'filename' => basename($this->getValue()),
-        ));
-        if (dirname($file->getFileUri()) != $destination) {
-          $file = file_copy($file, $destination, $replace);
-        }
-        else {
-          // If file is not to be copied, check whether file already exists,
-          // as file_save() won't do that for us (compare file_copy() and
-          // file_save())
-          $existing_files = file_load_multiple(array(), array('uri' => $file->getFileUri()));
-          if (count($existing_files)) {
-            $existing = reset($existing_files);
-            $file->fid = $existing->id();
-            $file->setFilename($existing->getFilename());
-          }
-          $file->save();
-        }
+    if (!$this->uri) {
+      return $file;
+    }
+
+    // Prepare destination directory.
+    file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
+    // Copy or save file depending on whether it is remote or local.
+    if (drupal_realpath($this->uri)) {
+      $file = entity_create('file', array(
+        'uid' => 0,
+        'uri' => $this->uri,
+        'filemime' => $this->mimeType,
+        'filename' => basename($this->uri),
+      ));
+      if (drupal_dirname($file->getFileUri()) != $destination) {
+        $file = file_copy($file, $destination, $replace);
       }
       else {
-        $filename = basename($this->getLocalValue());
-        if (module_exists('transliteration')) {
-          require_once drupal_get_path('module', 'transliteration') . '/transliteration.inc';
-          $filename = transliteration_clean_filename($filename);
+        // If file is not to be copied, check whether file already exists,
+        // as file_save() won't do that for us (compare file_copy() and
+        // file_save())
+        $existing_files = file_load_multiple(array(), array('uri' => $file->getFileUri()));
+        if ($existing_files) {
+          return reset($existing_files);
         }
-        if (file_uri_target($destination)) {
-          $destination = trim($destination, '/') . '/';
-        }
-        try {
-          $file = file_save_data($this->getContent(), $destination . $filename, $replace);
-        }
-        catch (\Exception $e) {
-          watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
-        }
+        $file->save();
       }
+    }
+    // Downloading file.
+    else {
+      $filename = drupal_basename($this->uri);
+      if (module_exists('transliteration')) {
+        require_once drupal_get_path('module', 'transliteration') . '/transliteration.inc';
+        $filename = transliteration_clean_filename($filename);
+      }
+      if (file_uri_target($destination)) {
+        $destination = trim($destination, '/') . '/';
+      }
+      try {
+        $file = file_save_data($this->getContent(), $destination . $filename, $replace);
+      }
+      catch (\Exception $e) {
+        watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
+      }
+    }
 
-      // We couldn't make sense of this enclosure, throw an exception.
-      if (!$file) {
-        throw new \RuntimeException(String::format('Invalid enclosure %enclosure', array('%enclosure' => $this->getValue())));
-      }
+    // We couldn't make sense of this enclosure, throw an exception.
+    if (!$file) {
+      throw new \RuntimeException(String::format('Invalid enclosure %enclosure', array('%enclosure' => $this->uri)));
     }
 
     return $file;

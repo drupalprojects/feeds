@@ -94,7 +94,7 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
     if (!($value instanceof FeedsEnclosure)) {
       if (is_string($value)) {
         $value = trim($value);
-        $value = new FeedsEnclosure($value, file_get_mimetype($value));
+        $value = new FeedsEnclosure($value);
       }
       else {
         return '';
