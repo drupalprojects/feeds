@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Handler\UserHandler.
+ * Contains \Drupal\feeds\Feeds\Handler\UserHandler.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Handler;
+namespace Drupal\feeds\Feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\feeds\Exception\ValidationException;

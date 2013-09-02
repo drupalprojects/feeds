@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Target\EntityReference.
+ * Contains \Drupal\feeds\Feeds\Target\EntityReference.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Target;
+namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\feeds\Plugin\FieldTargetBase;

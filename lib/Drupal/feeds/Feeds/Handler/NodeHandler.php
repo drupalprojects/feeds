@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Handler\NodeHandler.
+ * Contains \Drupal\feeds\Feeds\Handler\NodeHandler.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Handler;
+namespace Drupal\feeds\Feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\feeds\Exception\EntityAccessException;

@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\FeedsMapperTestBase;
-use Drupal\feeds\Plugin\feeds\Target\Taxonomy;
+use Drupal\feeds\Feeds\Target\Taxonomy;
 
 /**
  * Class for testing Feeds <em>content</em> mapper.

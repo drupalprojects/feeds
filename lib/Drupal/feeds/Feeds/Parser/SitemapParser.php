@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Parser\SitemapParser.
+ * Contains \Drupal\feeds\Feeds\Parser\SitemapParser.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Parser;
+namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;

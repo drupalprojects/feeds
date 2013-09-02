@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Parser\CSVParser.
+ * Contains \Drupal\feeds\Feeds\Parser\CSVParser.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Parser;
+namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\Unicode;

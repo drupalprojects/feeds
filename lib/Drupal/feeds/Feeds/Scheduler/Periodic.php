@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Scheduler\Periodic.
+ * Contains \Drupal\feeds\Feeds\Scheduler\Periodic.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Scheduler;
+namespace Drupal\feeds\Feeds\Scheduler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\MapArray;

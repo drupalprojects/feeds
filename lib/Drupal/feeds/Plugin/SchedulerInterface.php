@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Plugin\SchedulerInterface.
+ * Contains \Drupal\feeds\Feeds\Plugin\SchedulerInterface.
  */
 
 namespace Drupal\feeds\Plugin;

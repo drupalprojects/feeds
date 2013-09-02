@@ -238,7 +238,7 @@ function feeds_push_subscribe(array $job) {
  * @param array $context
  *   Batch context.
  *
- * @see \Drupal\feeds\Plugin\feeds\Manager\Background::startBatchAPIJob()
+ * @see \Drupal\feeds\Feeds\Manager\Background::startBatchAPIJob()
  */
 function feeds_batch($method, $fid, array &$context) {
   $context['finished'] = StateInterface::BATCH_COMPLETE;

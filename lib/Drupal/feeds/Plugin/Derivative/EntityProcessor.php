@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides processor definitions for entities.
  *
- * @see \Drupal\feeds\Plugin\feeds\Processor\EntityProcessor
+ * @see \Drupal\feeds\Feeds\Processor\EntityProcessor
  */
 class EntityProcessor extends DerivativeBase implements ContainerDerivativeInterface {
 

@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Handler\TaxonomyTermHandler.
+ * Contains \Drupal\feeds\Feeds\Handler\TaxonomyTermHandler.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Handler;
+namespace Drupal\feeds\Feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\String;

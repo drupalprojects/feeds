@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Target\Path.
+ * Contains \Drupal\feeds\Feeds\Target\Path.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Target;
+namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;

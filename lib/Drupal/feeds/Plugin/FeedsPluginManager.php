@@ -45,7 +45,7 @@ class FeedsPluginManager extends DefaultPluginManager {
     $this->pluginType = $type;
 
     // Get us some proper namespaces.
-    parent::__construct('Plugin/feeds/' . ucfirst($type), $namespaces);
+    parent::__construct('Feeds/' . ucfirst($type), $namespaces);
     $this->alterInfo($module_handler, "feeds_{$type}_plugins");
     $this->setCacheBackend($cache_backend, $language_manager, "feeds_{$type}_plugins");
   }

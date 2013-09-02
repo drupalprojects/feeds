@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Manager\Background.
+ * Contains \Drupal\feeds\Feeds\Manager\Background.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Manager;
+namespace Drupal\feeds\Feeds\Manager;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\Crypt;

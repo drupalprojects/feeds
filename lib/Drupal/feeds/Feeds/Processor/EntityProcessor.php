@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Processor\EntityProcessor.
+ * Contains \Drupal\feeds\Feeds\Processor\EntityProcessor.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Processor;
+namespace Drupal\feeds\Feeds\Processor;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\String;

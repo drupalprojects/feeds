@@ -32,7 +32,7 @@ interface ClearableInterface {
    * @endcode
    *
    * @see \Drupal\feeds\Plugin\ProcessorBase::clear()
-   * @see \Drupal\feeds\Plugin\feeds\Fetcher::clear()
+   * @see \Drupal\feeds\Feeds\Fetcher::clear()
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being cleared. Implementers should only delete items pertaining

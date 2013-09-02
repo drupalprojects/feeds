@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Target\DateTime.
+ * Contains \Drupal\feeds\Feeds\Target\DateTime.
  */
 
-namespace Drupal\feeds\Plugin\feeds\Target;
+namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Datetime\DrupalDateTime;

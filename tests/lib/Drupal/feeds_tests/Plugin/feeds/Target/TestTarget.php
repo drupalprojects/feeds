@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\feeds\Target\TestTarget.
+ * Contains \Drupal\feeds\Feeds\Target\TestTarget.
  */
 
 namespace Drupal\feeds_tests\Plugin\feeds\Target;

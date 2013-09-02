@@ -12,7 +12,7 @@ use Drupal\Component\Plugin\Derivative\DerivativeInterface;
 /**
  * Provides processor definitions for entities.
  *
- * @see \Drupal\feeds\Plugin\feeds\Processor\FieldTarget
+ * @see \Drupal\feeds\Feeds\Processor\FieldTarget
  */
 class FieldTarget implements DerivativeInterface {
 
