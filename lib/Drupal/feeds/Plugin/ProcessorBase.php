@@ -153,7 +153,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       'fi',
       "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
         ':entity_type' => $this->entityType(),
-      ),
+      )
     );
     $select->condition('fi.fid', $feed->id());
 

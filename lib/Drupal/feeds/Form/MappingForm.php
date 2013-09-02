@@ -260,7 +260,6 @@ class MappingForm extends FormBase {
    *   The form state array to process.
    */
   protected function processFormState(&$form_state) {
-    dd($form_state['values']);
     foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
       unset($this->mappings[$delta]);
     }
