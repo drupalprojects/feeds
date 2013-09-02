@@ -199,16 +199,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       unset($target_item->{$mapping['target']});
     }
 
-
-    // This is where the actual mapping happens: For every mapping we envoke
-    // the parser's getSourceElement() method to retrieve the value of the source
-    // element and pass it to the processor's setTargetElement() to stick it
-    // on the right place of the target item.
-
-    // If the mapping specifies a callback method, use the callback instead of
-    // setTargetElement().
-
-
     $values = array();
 
     foreach ($this->importer->getMappings() as $mapping) {
@@ -299,12 +289,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       '#description' => $this->t('Forces the update of items even if the feed did not change.'),
       '#default_value' => $this->configuration['skip_hash_check'],
     );
-
-    global $user;
-    $formats = filter_formats($user);
-    foreach ($formats as $format) {
-      $format_options[$format->format] = $format->name;
-    }
 
     return $form;
   }

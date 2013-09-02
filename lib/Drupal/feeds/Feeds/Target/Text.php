@@ -8,19 +8,54 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a text field mapper.
  *
  * @Plugin(
  *   id = "text",
- *   title = @Translation("Text"),
  *   field_types = {"list_text", "text", "text_long", "text_with_summary"}
  * )
  */
-class Text extends String implements ConfigurableTargetInterface {
+class Text extends String implements ConfigurableTargetInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $user;
+
+  /**
+   * Constructs a Text object.
+   *
+   * @param array $settings
+   *   The plugin settings.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The current user.
+   */
+  public function __construct(array $settings, $plugin_id, array $plugin_definition, AccountInterface $user) {
+    parent::__construct($settings, $plugin_id, $plugin_definition);
+    $this->user = $user;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $settings, $plugin_id, array $plugin_definition) {
+    return new static(
+      $settings,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('current_user')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -46,13 +81,10 @@ class Text extends String implements ConfigurableTargetInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Inject $user.
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
-    global $user;
     $options = array();
-    foreach (filter_formats($user) as $id => $format) {
+    foreach (filter_formats($this->user) as $id => $format) {
       $options[$id] = $format->label();
     }
 
