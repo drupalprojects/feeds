@@ -8,61 +8,104 @@
 namespace Drupal\feeds\Plugin\feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Defines a taxonomy field mapper.
+ * Defines a taxonomy term field mapper.
  *
  * @Plugin(
  *   id = "taxonomy",
- *   title = @Translation("Taxonomy"),
  *   field_types = {"taxonomy_term_reference"}
  * )
  */
-class Taxonomy extends EntityReference {
+class Taxonomy extends EntityReference implements ContainerFactoryPluginInterface {
+
+  /**
+   * The taxonomy term storage controller.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
+   */
+  protected $termStorage;
+
+  /**
+   * Constructs a Taxonomy object.
+   *
+   * @param array $settings
+   *   The plugin settings.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $term_storage
+   *   The taxonomy term storage controller.
+   */
+  public function __construct(array $settings, $plugin_id, array $plugin_definition, EntityStorageControllerInterface $term_storage) {
+    parent::__construct($settings, $plugin_id, $plugin_definition);
+    $this->termStorage = $term_storage;
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity.manager')->getStorageController('taxonomy_term')
+    );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function getEntityType() {
     return 'taxonomy_term';
   }
 
-  protected function prepareTarget(array &$target) {
-    unset($target['properties']['revision_id']);
-  }
-
-  public function prepareValues(array &$values) {
-    foreach ($values as $delta => $columns) {
-      foreach ($columns as $column => $value) {
-        switch ($column) {
-          case 'target_id':
-            $values[$delta][$column] = $this->getTermId($value);
-            break;
-        }
-      }
-    }
-  }
-
   /**
-   * Returns a taxonomy term id.
+   * {@inheritdoc}
    */
-  protected function getTermId($value) {
-    if ($values = $this->getByLabel($value)) {
-      return reset($values);
+  protected function findEntity($value) {
+    if ($term_id = parent::findEntity($value)) {
+      return $term_id;
     }
-    $settings = $this->configuration['instance']->getFieldSettings();
-    $term = \Drupal::EntityManager()->getStorageController('taxonomy_term')->create(array('vid' => 'tags', 'name' => $value));
+
+    $term = $this->termStorage->create(array('vid' => 'tags', 'name' => $value));
     $term->save();
     return $term->id();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function getDefaultConfiguration() {
-    return array('instance' => NULL) + parent::getDefaultConfiguration();
+    return array('autocreate' => FALSE) + parent::getDefaultConfiguration();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, array &$form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    $form['autocreate'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Autocreate term'),
+      '#default_value' => $this->configuration['autocreate'],
+    );
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSummary() {
+    $summary = parent::getSummary();
+    $create = $this->configuration['autocreate'] ? 'Yes' : 'No';
+
+    return $summary . '<br>' . $this->t('Autocreate terms: %create', array('%create' => $create));
   }
 
 }

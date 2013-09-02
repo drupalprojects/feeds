@@ -8,76 +8,156 @@
 namespace Drupal\feeds\Plugin\feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
 use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\field\Entity\FieldInstance;
+use Drupal\feeds\Plugin\ConfigurableTargetInterface;
 
 /**
  * Defines a file field mapper.
  *
  * @Plugin(
  *   id = "file",
- *   title = @Translation("File"),
  *   field_types = {"file", "image"}
  * )
  */
-class File extends FieldTargetBase {
+class File extends FieldTargetBase implements ConfigurableTargetInterface {
 
-  protected $instance;
+  /**
+   * The file upload directory.
+   *
+   * @var string
+   */
+  protected $uploadDirectory;
 
-  protected function prepareTarget(array &$target) {
-    unset($target['properties']['revision_id']);
-    $this->instance = $target['instance'];
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $settings, $plugin_id, array $plugin_definition) {
+    parent::__construct($settings, $plugin_id, $plugin_definition);
+
+    // Calculate the upload directory.
+    if (isset($this->settings['instance'])) {
+      $this->uploadDirectory = $this->settings['instance']->getFieldSetting('uri_scheme');
+      $this->uploadDirectory .= '://' . $this->settings['instance']->getFieldSetting('file_directory');
+    }
   }
 
-  public function prepareValues(array &$values) {
-    foreach ($values as $delta => $columns) {
-      foreach ($columns as $column => $value) {
-        switch ($column) {
-          case 'alt':
-          case 'title':
-            $values[$delta][$column] = (string) $value;
-            break;
+  /**
+   * {@inheritdoc}
+   */
+  protected function prepareTarget(array &$target) {
+    $target['properties']['target_id']['label'] = $this->t('Filepath, either a remote URL or local file.');
+    unset($target['properties']['revision_id']);
+  }
 
-          case 'width':
-          case 'height':
-            $values[$delta][$column] = (int) $value;
-            break;
+  /**
+   * {@inheritdoc}
+   */
+  protected function prepareValue($delta, array &$values) {
+    foreach ($values as $column => $value) {
+      switch ($column) {
+        case 'alt':
+        case 'title':
+          $values[$column] = (string) $value;
+          break;
 
-          case 'target_id':
-            $values[$delta][$column] = $this->getFile($value);
-            break;
+        case 'width':
+        case 'height':
+          $values[$column] = '';
+          if ($value = (int) trim((string) $value)) {
+            $values[$column] = $value;
+          }
+          break;
 
-          case 'display':
-            $values[$delta][$column] = 1;
-        }
+        case 'target_id':
+          $values[$column] = $this->getFile($value);
+          break;
+
+        case 'display':
+          $values[$column] = 1;
+          break;
       }
     }
   }
 
+  /**
+   * Returns a file id given a url.
+   *
+   * @param string|\Drupal\feeds\FeedsEnclosure $value
+   *   A URL string or FeedsEnclosure object.
+   *
+   * @return int
+   *   The file id.
+   */
   protected function getFile($value) {
-    $data = array();
-    // $destination = file_field_widget_uri($this->instance->getFieldSettings(), $data);
-    $destination = 'public://';
+    if (!($value instanceof FeedsEnclosure)) {
+      if (is_string($value)) {
+        $value = trim($value);
+        $value = new FeedsEnclosure($value, file_get_mimetype($value));
+      }
+      else {
+        return '';
+      }
+    }
 
     try {
-      if (!($value instanceof FeedsEnclosure)) {
-        if (is_string($value)) {
-          $value = new FeedsEnclosure($value, file_get_mimetype($value));
-        }
-        else {
-          return '';
-        }
-      }
-
-      $file = $value->getFile($destination);
+      $file = $value->getFile($this->uploadDirectory, $this->configuration['existing']);
       return $file->id();
     }
     catch (Exception $e) {
       watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDefaultConfiguration() {
+    return array('existing' => FILE_EXISTS_RENAME);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Inject $user.
+   */
+  public function buildConfigurationForm(array $form, array &$form_state) {
+    $options = array(
+      FILE_EXISTS_REPLACE => $this->t('Replace'),
+      FILE_EXISTS_RENAME => $this->t('Rename'),
+      FILE_EXISTS_ERROR => $this->t('Ignore'),
+    );
+
+    $form['existing'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Handle existing files'),
+      '#options' => $options,
+      '#default_value' => $this->configuration['existing'],
+    );
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSummary() {
+    switch ($this->configuration['existing']) {
+      case FILE_EXISTS_REPLACE:
+        $message = 'Replace';
+        break;
+
+      case FILE_EXISTS_RENAME:
+        $message = 'Rename';
+        break;
+
+      case FILE_EXISTS_ERROR:
+        $message = 'Ignore';
+        break;
+    }
+
+    return $this->t('Exsting files: %existing', array('%existing' => $message));
   }
 
 }

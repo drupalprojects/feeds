@@ -14,6 +14,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\ConfigurableTargetInterface;
 
 /**
  * Defines the feeds importer entity.
@@ -112,7 +113,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *
    * @var array
    */
-  protected $mappings;
+  protected $mappings = array();
 
   /**
    * The plugin bags that store feeds plugins keyed by plugin type.
@@ -123,7 +124,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   protected $pluginBags = array();
 
-  protected $mappingsBag;
+  protected $targetPlugins = array();
 
   /**
    * Constructs a new Importer object.
@@ -171,6 +172,25 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public function setMappings(array $mappings) {
     $this->mappings = $mappings;
+  }
+
+  public function addMapping(array $mapping) {
+    $this->mappings[] = $mapping;
+  }
+
+  public function getMapping($delta) {
+    return $this->mappings[$delta];
+  }
+
+  public function setMapping($delta, $mapping) {
+    $this->mappings[$delta]['map'] = $mapping['map'];
+    return $this;
+  }
+
+  public function removeMapping($delta) {
+    unset($this->mappings[$delta]);
+    unset($this->targetPlugins[$delta]);
+    return $this;
   }
 
   /**
@@ -310,14 +330,26 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   }
 
   public function getTargetPlugin($delta) {
-    $targets = $this->getProcessor()->getMappingTargets();
-    $target_key = $this->mappings[$delta]['target'];
-    if (isset($targets[$target_key]) && isset($targets[$target_key]['target'])) {
-      $configuration = $this->mappings[$delta];
-      $configuration['importer'] = $this;
-      $target_plugin = \Drupal::service('plugin.manager.feeds.target')->createInstance($targets[$target_key]['target'], $configuration);
-      return $target_plugin;
+    if (!isset($this->targetPlugins[$delta])) {
+      $targets = $this->getProcessor()->getMappingTargets();
+      $target = $this->mappings[$delta]['target'];
+
+      if (isset($targets[$target]['id'])) {
+        $id = $targets[$target]['id'];
+        $settings = $targets[$target];
+        $settings['importer'] = $this;
+
+        if (isset($this->mappings[$delta]['settings'])) {
+          $settings['configuration'] = $this->mappings[$delta]['settings'];
+        }
+        $this->targetPlugins[$delta] = \Drupal::service('plugin.manager.feeds.target')->createInstance($id, $settings);
+      }
+      else {
+        $this->targetPlugins[$delta] = FALSE;
+      }
     }
+
+    return $this->targetPlugins[$delta];
   }
 
   public function getPluginOptionsList($plugin_type) {
@@ -422,6 +454,15 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
         unset($this->plugins[$type]['configuration']);
       }
     }
+    foreach ($this->targetPlugins as $delta => $target_plugin) {
+      if ($target_plugin instanceof ConfigurableTargetInterface) {
+        $this->mappings[$delta]['settings'] = $target_plugin->getConfiguration();
+      }
+      else {
+        unset($this->mappings[$delta]['settings']);
+      }
+    }
+    $this->mappings = array_values($this->mappings);
   }
 
 }

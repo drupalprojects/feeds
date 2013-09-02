@@ -251,15 +251,12 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
       }
     }
 
-    foreach ($this->importer->getMappings() as $mapping) {
+    foreach ($this->importer->getMappings() as $delta => $mapping) {
 
       $target  = $mapping['target'];
 
       // Map the source element's value to the target.
-      if (isset($targets[$target]['target'])) {
-        $config = $targets[$target];
-        $config['importer'] = $this->importer;
-        $plugin = \Drupal::service('plugin.manager.feeds.target')->createInstance($targets[$target]['target'], $config);
+      if ($plugin = $this->importer->getTargetPlugin($delta)) {
         $plugin->prepareValues($new_values[$target]);
       }
 

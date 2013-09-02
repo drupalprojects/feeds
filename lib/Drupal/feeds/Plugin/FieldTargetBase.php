@@ -23,7 +23,6 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
    * {@inheritdoc}
    */
   public function targets(array &$targets) {
-
     foreach ($targets as &$target) {
       if (!empty($target['type']) && in_array($target['type'], $this->pluginDefinition['field_types'])) {
         $this->prepareTarget($target);
@@ -35,15 +34,15 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
   protected function prepareTarget(array &$target) {}
 
   public function prepareValues(array &$values) {
-    foreach ($values as $delta => $columns) {
-      foreach ($columns as $column => $value) {
-        $values[$delta][$column] = (string) $value;
-      }
+    foreach ($values as $delta => &$columns) {
+      $this->prepareValue($delta, $columns);
     }
   }
 
-  public function getSummary() {
-    return '';
+  protected function prepareValue($delta, array &$values) {
+    foreach ($values as $column => $value) {
+      $values[$delta][$column] = (string) $value;
+    }
   }
 
 }

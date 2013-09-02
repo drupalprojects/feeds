@@ -94,10 +94,14 @@ class FeedsEnclosure extends FeedsElement {
     $response = \Drupal::httpClient()->get($this->getUrlEncodedValue())->send();
 
     if ($response->getStatusCode() != 200) {
-      throw new \RuntimeException(String::format('Download of @url failed with code !code.', array('@url' => $this->getUrlEncodedValue(), '!code' => $response->getStatusCode())));
+      $args = array(
+        '@url' => $this->getUrlEncodedValue(),
+        '!code' => $response->getStatusCode(),
+      );
+      throw new \RuntimeException(String::format('Download of @url failed with code !code.', $args));
     }
 
-    return file_get_contents($result->file);
+    return $response->getBody(TRUE);
   }
 
   /**
@@ -106,6 +110,15 @@ class FeedsEnclosure extends FeedsElement {
    * @param string $destination
    *   The path or uri specifying the target directory in which the file is
    *   expected. Don't use trailing slashes unless it's a streamwrapper scheme.
+   * @param $replace
+   *   (optional) Replace behavior when the destination file already exists:
+   *   - FILE_EXISTS_REPLACE - Replace the existing file. If a managed file with
+   *       the destination name exists then its database entry will be updated.
+   *       If no database entry is found then a new one will be created.
+   *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename
+   *       is unique.
+   *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
+   *   Defaults to FILE_EXISTS_RENAME.
    *
    * @return \Drupal\file\Entity\File
    *   A Drupal temporary file object of the enclosed resource.
@@ -115,7 +128,7 @@ class FeedsEnclosure extends FeedsElement {
    *
    * @todo Refactor this
    */
-  public function getFile($destination) {
+  public function getFile($destination, $replace = FILE_EXISTS_RENAME) {
     $file = FALSE;
 
     if ($this->getValue()) {
@@ -130,7 +143,7 @@ class FeedsEnclosure extends FeedsElement {
           'filename' => basename($this->getValue()),
         ));
         if (dirname($file->getFileUri()) != $destination) {
-          $file = file_copy($file, $destination);
+          $file = file_copy($file, $destination, $replace);
         }
         else {
           // If file is not to be copied, check whether file already exists,
@@ -155,7 +168,7 @@ class FeedsEnclosure extends FeedsElement {
           $destination = trim($destination, '/') . '/';
         }
         try {
-          $file = file_save_data($this->getContent(), $destination . $filename);
+          $file = file_save_data($this->getContent(), $destination . $filename, $replace);
         }
         catch (\Exception $e) {
           watchdog_exception('Feeds', $e, nl2br(check_plain($e)));

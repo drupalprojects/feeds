@@ -11,6 +11,7 @@ namespace Drupal\feeds\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\ConfigurableTargetInterface;
 
 /**
  * Provides a form for mapping settings.
@@ -43,16 +44,10 @@ class MappingForm extends FormBase {
    */
   public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
     $importer = $this->importer = $feeds_importer;
-    if (empty($this->mappings)) {
-      $this->mappings = $importer->getMappings();
-    }
-
-    $sources = $importer->getParser()->getMappingSources();
     $this->targets = $targets = $importer->getProcessor()->getMappingTargets();
-
     // Denormalize targets.
     $source_options = array();
-    foreach ($sources as $key => $info) {
+    foreach ($importer->getParser()->getMappingSources() as $key => $info) {
       $source_options[$key] = $info['label'];
     }
     $source_options = $this->sortOptions($source_options);
@@ -67,19 +62,13 @@ class MappingForm extends FormBase {
 
     $ajax_delta = -1;
     if (isset($form_state['values'])) {
-      if (isset($form_state['triggering_element']['#delta'])) {
-        $delta = $form_state['triggering_element']['#delta'];
-        if (empty($form_state['triggering_element']['#saved'])) {
-          $ajax_delta = $delta;
-        }
-        else {
-          $data = $form_state['values']['mappings'][$delta]['settings'];
-          $form_state['mapping_settings'][$delta] = $data;
-        }
+      $this->processFormState($form, $form_state);
+
+      if (isset($form_state['triggering_element']['#delta']) && empty($form_state['triggering_element']['#saved'])) {
+        $ajax_delta = $form_state['triggering_element']['#delta'];
       }
 
       elseif ($form_state['triggering_element']['#name'] == 'add_target' || !empty($form_state['triggering_element']['#remove'])) {
-        $this->processFormState($form_state);
         drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
       }
     }
@@ -99,7 +88,7 @@ class MappingForm extends FormBase {
       '#sticky' => TRUE,
     );
 
-    foreach ($this->mappings as $delta => $mapping) {
+    foreach ($importer->getMappings() as $delta => $mapping) {
 
       $table[$delta]['map'] = array(
         '#type' => 'container',
@@ -116,6 +105,12 @@ class MappingForm extends FormBase {
       );
 
       foreach ($mapping['map'] as $column => $source) {
+
+        if (!isset($targets[$mapping['target']]['properties'][$column])) {
+          unset($mapping['map'][$column]);
+          continue;
+        }
+
         $table[$delta]['map'][$column] = array(
           '#type' => 'select',
           '#options' => $source_options,
@@ -131,59 +126,53 @@ class MappingForm extends FormBase {
 
         $table[$delta]['targets']['#items'][] = $label;
       }
-      if (isset($targets[$mapping['target']]['id'])) {
-        $form['plugins_ids'][$delta] = array(
-          '#type' => 'value',
-          '#value' => $targets[$mapping['target']]['id'],
-          '#parents' => array('mappings', $delta, 'id'),
-        );
-      }
 
       $table[$delta]['settings']['#markup'] = '';
-      if (isset($targets[$mapping['target']]['target'])) {
+
+      if ($plugin = $feeds_importer->getTargetPlugin($delta)) {
         $table[$delta]['settings'] = array(
           '#type' => 'container',
           '#id' => 'edit-mappings-' . $delta . '-settings',
         );
-        if ($delta == $ajax_delta) {
-          $table[$delta]['settings']['thing'] = array(
-            '#type' => 'textfield',
-          );
-          $table[$delta]['settings']['submit'] = array(
-            '#type' => 'submit',
-            '#value' => $this->t('Save'),
-            '#ajax' => array(
-              'callback' => array($this, 'settingsAjaxCallback'),
-              'wrapper' => 'edit-mappings-' . $delta . '-settings',
-              'effect' => 'fade',
-              'progress' => 'none',
-            ),
-            '#name' => 'target-save-' . $delta,
-            '#delta' => $delta,
-            '#saved' => TRUE,
-            '#parents' => array('config_button', $delta),
-          );
-        }
-        else {
-          $plugin = $feeds_importer->getTargetPlugin($delta, $targets[$mapping['target']]['target']);
-          $table[$delta]['settings']['summary'] = array(
-            '#type' => 'item',
-            '#markup' => $plugin->getSummary(),
-            '#parents' => array('config_summary', $delta),
-          );
-          $table[$delta]['settings']['button'] = array(
-            '#type' => 'submit',
-            '#value' => $this->t('Configure'),
-            '#ajax' => array(
-              'callback' => array($this, 'settingsAjaxCallback'),
-              'wrapper' => 'edit-mappings-' . $delta . '-settings',
-              'effect' => 'fade',
-              'progress' => 'none',
-            ),
-            '#name' => 'target-settings-' . $delta,
-            '#delta' => $delta,
-            '#parents' => array('config_button', $delta),
-          );
+
+        if ($plugin instanceof ConfigurableTargetInterface) {
+          if ($delta == $ajax_delta) {
+            $table[$delta]['settings'] += $plugin->buildConfigurationForm(array(), $form_state);
+            $table[$delta]['settings']['submit'] = array(
+              '#type' => 'submit',
+              '#value' => $this->t('Save'),
+              '#ajax' => array(
+                'callback' => array($this, 'settingsAjaxCallback'),
+                'wrapper' => 'edit-mappings-' . $delta . '-settings',
+                'effect' => 'fade',
+                'progress' => 'none',
+              ),
+              '#name' => 'target-save-' . $delta,
+              '#delta' => $delta,
+              '#saved' => TRUE,
+              '#parents' => array('config_button', $delta),
+            );
+          }
+          else {
+            $table[$delta]['settings']['summary'] = array(
+              '#type' => 'item',
+              '#markup' => $plugin->getSummary(),
+              '#parents' => array('config_summary', $delta),
+            );
+            $table[$delta]['settings']['button'] = array(
+              '#type' => 'submit',
+              '#value' => $this->t('Configure'),
+              '#ajax' => array(
+                'callback' => array($this, 'settingsAjaxCallback'),
+                'wrapper' => 'edit-mappings-' . $delta . '-settings',
+                'effect' => 'fade',
+                'progress' => 'none',
+              ),
+              '#name' => 'target-settings-' . $delta,
+              '#delta' => $delta,
+              '#parents' => array('config_button', $delta),
+            );
+          }
         }
       }
 
@@ -259,18 +248,31 @@ class MappingForm extends FormBase {
    * @param arary &$form_state
    *   The form state array to process.
    */
-  protected function processFormState(&$form_state) {
-    foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
-      unset($this->mappings[$delta]);
+  protected function processFormState($form, &$form_state) {
+    // Process any plugin configuration.
+    if (isset($form_state['triggering_element']['#delta']) && !empty($form_state['triggering_element']['#saved'])) {
+      $delta = $form_state['triggering_element']['#delta'];
+      $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
     }
 
+    foreach ($form_state['values']['mappings'] as $delta => $mapping) {
+      $this->importer->setMapping($delta, $mapping);
+    }
+
+    // Remove any mappings.
+    foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
+      $this->importer->removeMapping($delta);
+    }
+
+    // Add any targets.
     $new_target = $form_state['values']['add_target'];
     if ($new_target) {
       $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
-      $this->mappings[] = array('target' => $form_state['values']['add_target'], 'map' => $map);
+      $this->importer->addMapping(array(
+        'target' => $form_state['values']['add_target'],
+        'map' => $map,
+      ));
     }
-
-    $this->importer->setMappings($this->mappings);
 
     // Allow the #default_value of 'add_target' to be reset.
     unset($form_state['input']['add_target']);
@@ -281,6 +283,8 @@ class MappingForm extends FormBase {
    */
   public function validateForm(array &$form, array &$form_state) {
     if (isset($form_state['triggering_element']['#delta'])) {
+      $delta = $form_state['triggering_element']['#delta'];
+      $this->importer->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
       $form_state['rebuild'] = TRUE;
     }
   }
@@ -289,17 +293,7 @@ class MappingForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $this->mappings = $form_state['values']['mappings'];
-    $this->processFormState($form_state);
-
-    if (!empty($form_state['mapping_settings'])) {
-      foreach ($form_state['mapping_settings'] as $delta => $settings) {
-        $this->mappings[$delta]['settings'] = $settings;
-      }
-    }
-
-    // Keep our mapping settings file clean.
-    $this->importer->setMappings(array_values($this->mappings));
+    $this->processFormState($form, $form_state);
     $this->importer->save();
 
   }
