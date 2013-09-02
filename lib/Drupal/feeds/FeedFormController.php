@@ -10,7 +10,6 @@ namespace Drupal\feeds;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFormControllerNG;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
-use Drupal\feeds\Feeds;
 
 /**
  * Form controller for the feed edit forms.
