@@ -9,7 +9,7 @@ namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\Plugin\ConfigurableTargetInterface;
+use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
  * Defines a text field mapper.

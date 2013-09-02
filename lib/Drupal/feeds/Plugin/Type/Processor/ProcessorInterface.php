@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\ProcessorInterface.
+ * Contains \Drupal\feeds\Plugin\Type\Processor\ProcessorInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Processor;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
 

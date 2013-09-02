@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\FeedsPluginInterface.
+ * Contains \Drupal\feeds\Plugin\Type\FeedsPluginInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
@@ -20,7 +20,7 @@ interface FeedsPluginInterface extends PluginInspectionInterface {
    * @return string
    *   The type of plugin. Usually, one of 'fetcher', 'parser', or 'processor'.
    *
-   * @see \Drupal\feeds\Plugin\FeedsPluginManager::processDefinition()
+   * @see \Drupal\feeds\Plugin\Type\FeedsPluginManager::processDefinition()
    */
   public function pluginType();
 

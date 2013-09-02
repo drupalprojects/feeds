@@ -16,8 +16,8 @@ use Drupal\feeds\Component\GenericOPMLParser;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResult;
-use Drupal\feeds\Plugin\ParserInterface;
-use Drupal\feeds\Plugin\PluginBase;
+use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
+use Drupal\feeds\Plugin\Type\PluginBase;
 
 /**
  * Defines an OPML feed parser.

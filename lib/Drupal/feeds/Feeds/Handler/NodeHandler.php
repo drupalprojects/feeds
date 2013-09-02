@@ -10,9 +10,9 @@ namespace Drupal\feeds\Feeds\Handler;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\PluginBase;
-use Drupal\feeds\Plugin\ProcessorInterface;
-use Drupal\feeds\Plugin\SchedulerInterface;
+use Drupal\feeds\Plugin\Type\PluginBase;
+use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
+use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 
 /**

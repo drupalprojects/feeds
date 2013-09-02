@@ -2,16 +2,15 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\FeedsPluginManager.
+ * Contains \Drupal\feeds\Plugin\Type\FeedsPluginManager.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\feeds\Plugin\PluginBase;
 
 /**
  * Manages Feeds plugins.
@@ -26,7 +25,7 @@ class FeedsPluginManager extends DefaultPluginManager {
   protected $pluginType;
 
   /**
-   * Constructs a new \Drupal\feeds\Plugin\FeedsPluginManager object.
+   * Constructs a new \Drupal\feeds\Plugin\Type\FeedsPluginManager object.
    *
    * @param string $type
    *   The plugin type. Either fetcher, parser, or processor, handler, source,

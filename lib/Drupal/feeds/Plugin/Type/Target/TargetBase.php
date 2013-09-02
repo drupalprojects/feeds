@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\TargetBase.
+ * Contains \Drupal\feeds\Plugin\Type\Target\TargetBase.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Target;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\ImporterInterface;
-use Drupal\feeds\Plugin\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\TargetInterface;
+use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\Type\Target\TargetInterface;
 
 /**
  * @todo Document this.

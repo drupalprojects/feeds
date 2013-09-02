@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\ConfigurablePluginBase.
+ * Contains \Drupal\feeds\Plugin\Type\ConfigurablePluginBase.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\feeds\Plugin\PluginBase;
+use Drupal\feeds\Plugin\Type\PluginBase;
 
 /**
  * Base class for Feeds plugins that have configuration.
@@ -69,7 +69,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    *   values are their default values. Any configuration that needs to be saved
    *   must have its keys declared here.
    *
-   * @see \Drupal\feeds\Plugin\ConfigurablePluginBase::setConfiguration()
+   * @see \Drupal\feeds\Plugin\Type\ConfigurablePluginBase::setConfiguration()
    */
   abstract protected function getDefaultConfiguration();
 

@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Feeds\Plugin\SchedulerInterface.
+ * Contains \Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Scheduler;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
 /**
  * Defines the Feeds scheduler plugin interface.

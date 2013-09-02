@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\FieldTargetBase.
+ * Contains \Drupal\feeds\Plugin\Type\Target\FieldTargetBase.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Target;
 
 use Drupal\feeds\ImporterInterface;
 

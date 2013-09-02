@@ -10,8 +10,8 @@ namespace Drupal\feeds\Feeds\Target;
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
-use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\feeds\Plugin\ConfigurableTargetInterface;
+use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
+use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
  * Defines a file field mapper.

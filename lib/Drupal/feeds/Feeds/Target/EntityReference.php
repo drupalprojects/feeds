@@ -8,8 +8,8 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\feeds\Plugin\FieldTargetBase;
-use Drupal\feeds\Plugin\ConfigurableTargetInterface;
+use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
+use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
  * Defines an entity reference field mapper.

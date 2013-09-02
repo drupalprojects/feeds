@@ -16,8 +16,8 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedPluginFormInterface;
 use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Result\FetcherResultInterface;
-use Drupal\feeds\Plugin\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\ParserInterface;
+use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
 use Drupal\feeds\StateInterface;
 
 /**

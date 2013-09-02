@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\ParserInterface.
+ * Contains \Drupal\feeds\Plugin\Type\Parser\ParserInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Parser;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 
 /**

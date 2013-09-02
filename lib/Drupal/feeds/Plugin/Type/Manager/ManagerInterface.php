@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\ManagerInterface.
+ * Contains \Drupal\feeds\Plugin\Type\Manager\ManagerInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Manager;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
 /**
  * Defines the Feeds manager plugin interface.

@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\FetcherInterface.
+ * Contains \Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Fetcher;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
 /**
  * Interface for Feeds fetchers.

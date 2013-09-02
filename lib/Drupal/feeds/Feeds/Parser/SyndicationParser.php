@@ -12,8 +12,8 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Result\FetcherResultInterface;
-use Drupal\feeds\Plugin\ParserInterface;
-use Drupal\feeds\Plugin\PluginBase;
+use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
+use Drupal\feeds\Plugin\Type\PluginBase;
 use Zend\Feed\Reader\Reader;
 use Zend\Feed\Reader\Exception\ExceptionInterface;
 

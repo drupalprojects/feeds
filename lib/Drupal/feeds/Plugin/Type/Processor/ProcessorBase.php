@@ -2,20 +2,22 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\ProcessorBase.
+ * Contains Drupal\feeds\Plugin\Type\Processor\ProcessorBase.
  *
  * @todo This needs to be sorted with EntityProcessor.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Processor;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\SchedulerInterface;
+use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
+use Drupal\feeds\Plugin\Type\ClearableInterface;
+use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 
 /**
  * Abstract class, defines helpers for processors.

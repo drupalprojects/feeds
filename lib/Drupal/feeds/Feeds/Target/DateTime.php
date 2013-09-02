@@ -9,7 +9,7 @@ namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\feeds\Plugin\FieldTargetBase;
+use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
  * Defines a dateime field mapper.

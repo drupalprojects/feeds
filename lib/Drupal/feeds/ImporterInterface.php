@@ -50,7 +50,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   /**
    * Returns the configured plugins for this importer.
    *
-   * @return \Drupal\feeds\Plugin\PluginBase[]
+   * @return \Drupal\feeds\Plugin\Type\PluginBase[]
    *   An array of plugins keyed by plugin type.
    */
   public function getPlugins();
@@ -58,7 +58,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   /**
    * Returns the configured fetcher for this importer.
    *
-   * @return \Drupal\feeds\Plugin\FetcherInterface
+   * @return \Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface
    *   The fetcher associated with this Importer.
    */
   public function getFetcher();
@@ -66,7 +66,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   /**
    * Returns the configured parser for this importer.
    *
-   * @return \Drupal\feeds\Plugin\ParserInterface
+   * @return \Drupal\feeds\Plugin\Type\Parser\ParserInterface
    *   The parser associated with this Importer.
    */
   public function getParser();
@@ -74,7 +74,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   /**
    * Returns the configured processor for this importer.
    *
-   * @return \Drupal\feeds\Plugin\ProcessorInterface
+   * @return \Drupal\feeds\Plugin\Type\Processor\ProcessorInterface
    *   The processor associated with this Importer.
    */
   public function getProcessor();

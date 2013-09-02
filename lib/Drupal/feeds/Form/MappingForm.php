@@ -11,7 +11,7 @@ namespace Drupal\feeds\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\feeds\ImporterInterface;
-use Drupal\feeds\Plugin\ConfigurableTargetInterface;
+use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
  * Provides a form for mapping settings.

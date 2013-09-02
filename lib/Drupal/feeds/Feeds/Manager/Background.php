@@ -12,8 +12,8 @@ use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Guzzle\AsyncPlugin;
-use Drupal\feeds\Plugin\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\ManagerInterface;
+use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\Type\Manager\ManagerInterface;
 
 /**
  * Defines a Feeds manager plugin that performs background jobs.

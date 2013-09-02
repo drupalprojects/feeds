@@ -14,7 +14,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\ImporterInterface;
-use Drupal\feeds\Plugin\ConfigurableTargetInterface;
+use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
  * Defines the feeds importer entity.

@@ -52,7 +52,7 @@ class ConfigurableTargetMapper extends TargetMapperBase {
    *   values are their default values. Any configuration that needs to be saved
    *   must have its keys declared here.
    *
-   * @see \Drupal\feeds\Plugin\ConfigurablePluginBase::setConfiguration()
+   * @see \Drupal\feeds\Plugin\Type\ConfigurablePluginBase::setConfiguration()
    */
   abstract protected function getDefaultConfiguration();
 

@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains Drupal\feeds\Plugin\ClearableInterface.
+ * Contains \Drupal\feeds\Plugin\Type\ClearableInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\feeds\FeedInterface;
 

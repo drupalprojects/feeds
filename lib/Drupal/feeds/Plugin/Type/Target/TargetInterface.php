@@ -2,17 +2,15 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\TargetInterface.
+ * Contains \Drupal\feeds\Plugin\Type\Target\TargetInterface.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type\Target;
 
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\feeds\FeedInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
- * Interface for Feed targets.s
+ * Interface for Feed targets.
  */
 interface TargetInterface {
 

@@ -8,7 +8,7 @@
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\feeds\Plugin\FeedsPluginInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
 /**
  * Provides an interface defining a feeds_feed entity.
@@ -244,7 +244,7 @@ interface FeedInterface extends ContentEntityInterface {
   /**
    * Returns the configuration for a specific client plugin.
    *
-   * @param \Drupal\feeds\Plugin\FeedsPluginInterface $client
+   * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $client
    *   A Feeds plugin.
    *
    * @return array
@@ -255,7 +255,7 @@ interface FeedInterface extends ContentEntityInterface {
   /**
    * Sets the configuration for a specific client plugin.
    *
-   * @param \Drupal\feeds\Plugin\FeedsPluginInterface $client
+   * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $client
    *   A Feeds plugin.
    * @param array $config
    *   The configuration for the plugin.

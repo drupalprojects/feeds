@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\PluginBase.
+ * Contains \Drupal\feeds\Plugin\Type\PluginBase.
  */
 
-namespace Drupal\feeds\Plugin;
+namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\feeds\FeedInterface;
 use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;

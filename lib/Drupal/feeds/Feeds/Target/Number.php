@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\feeds\Plugin\FieldTargetBase;
+use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
  * Defines a number field mapper.

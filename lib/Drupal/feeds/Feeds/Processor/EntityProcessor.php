@@ -22,9 +22,9 @@ use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\ParserResultInterface;
-use Drupal\feeds\Plugin\ProcessorBase;
-use Drupal\feeds\Plugin\ProcessorInterface;
-use Drupal\feeds\Plugin\SchedulerInterface;
+use Drupal\feeds\Plugin\Type\Processor\ProcessorBase;
+use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
+use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\StateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
