@@ -14,7 +14,7 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedPluginFormInterface;
+use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;

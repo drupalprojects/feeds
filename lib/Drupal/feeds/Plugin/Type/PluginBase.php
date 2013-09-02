@@ -79,7 +79,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * Stub for plugins implementing FeedPluginFormInterface.
    *
-   * @see \Drupal\feeds\FeedPluginFormInterface
+   * @see \Drupal\feeds\Plugin\Type\FeedPluginFormInterface
    */
   public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {}
 
@@ -88,7 +88,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    *
    * Most all plugins should get automatic submit handlers from this.
    *
-   * @see \Drupal\feeds\FeedPluginFormInterface
+   * @see \Drupal\feeds\Plugin\Type\FeedPluginFormInterface
    */
   public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
     if (isset($form_state['values'][$this->pluginType()])) {

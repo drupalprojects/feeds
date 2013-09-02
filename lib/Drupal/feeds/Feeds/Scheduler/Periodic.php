@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\MapArray;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\feeds\AdvancedFormPluginInterface;
+use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\StateInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;

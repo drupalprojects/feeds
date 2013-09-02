@@ -12,7 +12,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityFormController;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\feeds\AdvancedFormPluginInterface;
+use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\Ajax\SetHashCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

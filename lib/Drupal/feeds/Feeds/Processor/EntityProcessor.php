@@ -16,7 +16,7 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\feeds\AdvancedFormPluginInterface;
+use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\ItemInfoControllerInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;

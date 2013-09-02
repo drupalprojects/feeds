@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\FeedPluginFormInterface.
+ * Contains \Drupal\feeds\Plugin\Type\FeedPluginFormInterface.
  */
 
-namespace Drupal\feeds;
+namespace Drupal\feeds\Plugin\Type;
 
 /**
  * Plugins implement this interface if they provide forms on a feed edit page.

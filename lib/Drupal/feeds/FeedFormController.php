@@ -9,7 +9,7 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFormControllerNG;
-use Drupal\feeds\FeedPluginFormInterface;
+use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Feeds;
 
 /**

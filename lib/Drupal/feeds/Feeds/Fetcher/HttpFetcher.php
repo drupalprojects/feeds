@@ -14,7 +14,7 @@ use Drupal\Core\Queue\QueueInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedPluginFormInterface;
+use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Guzzle\CachePlugin;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Utility\Feed;
