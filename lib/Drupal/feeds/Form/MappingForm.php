@@ -44,8 +44,6 @@ class MappingForm extends FormBase {
    */
   public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
     $query = \Drupal::entityQuery('node');
-    dpm($query->count()->execute());
-    dpm($query->execute());
 
     $importer = $this->importer = $feeds_importer;
     $this->targets = $targets = $importer->getProcessor()->getMappingTargets();

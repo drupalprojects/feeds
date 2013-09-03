@@ -17,7 +17,7 @@ use Drupal\field\FieldInterface;
  *
  * @FieldType(
  *   id = "feeds_item",
- *   label = @Translation("Feeds item"),
+ *   label = @Translation("Feed"),
  *   description = @Translation("Blah blah blah."),
  *   instance_settings = {
  *     "title" = "1"
@@ -43,23 +43,23 @@ class FeedsItem extends ConfigFieldItemBase {
     if (!isset(static::$propertyDefinitions)) {
       static::$propertyDefinitions['fid'] = array(
         'type' => 'integer',
-        'label' => t('Feed id'),
+        'label' => t('ID'),
       );
       static::$propertyDefinitions['imported'] = array(
         'type' => 'integer',
-        'label' => t('Imported timestamp'),
+        'label' => t('Timestamp'),
       );
       static::$propertyDefinitions['url'] = array(
         'type' => 'uri',
-        'label' => t('Feed item URL'),
+        'label' => t('Item URL'),
       );
       static::$propertyDefinitions['guid'] = array(
         'type' => 'string',
-        'label' => t('Feed item GUID'),
+        'label' => t('Item GUID'),
       );
       static::$propertyDefinitions['hash'] = array(
         'type' => 'string',
-        'label' => t('Feed item hash'),
+        'label' => t('Item hash'),
       );
     }
     return static::$propertyDefinitions;
@@ -110,20 +110,6 @@ class FeedsItem extends ConfigFieldItemBase {
         'imported' => array('imported'),
       ),
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function instanceSettingsForm(array $form, array &$form_state) {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave() {
-
   }
 
   /**

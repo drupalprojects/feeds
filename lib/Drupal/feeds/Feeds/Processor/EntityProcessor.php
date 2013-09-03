@@ -14,7 +14,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
-use Drupal\Core\Entity\Query\QueryFactoryInterface;
+use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
@@ -52,7 +52,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   /**
    * The entity query factory object.
    *
-   * @var \Drupal\Core\Entity\Query\QueryFactoryInterface
+   * @var \Drupal\Core\Entity\Query\QueryFactory
    */
   protected $queryFactory;
 
@@ -68,7 +68,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    *
    * @var array
    */
-  protected $targets;
+  protected $targets = array();
 
   /**
    * The extenders that apply to this entity type.
@@ -96,7 +96,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage_controller
    *   The storage controller for this processor.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $entity_info, EntityStorageControllerInterface $storage_controller, QueryFactoryInterface $query_factory) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $entity_info, EntityStorageControllerInterface $storage_controller, QueryFactory $query_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     // $entityInfo has to be assinged before $this->loadHandlers() is called.
@@ -172,23 +172,9 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     }
 
     try {
-      // Load an existing entity.
-      // @todo Clean this up.
-      if ($entity_id) {
-        $entity->feeds_item->fid = $feed->id();
-        $entity->feeds_item->hash = $hash;
-        $entity->feeds_item->url = '';
-        $entity->feeds_item->guid = '';
-      }
-
       // Build a new entity.
-      else {
+      if (!$entity_id) {
         $entity = $this->newEntity($feed);
-        $entity->feeds_item->fid = $feed->id();
-        $entity->feeds_item->hash = $hash;
-        $entity->feeds_item->url = '';
-        $entity->feeds_item->guid = '';
-        $entity->feeds_item->imported = REQUEST_TIME;
       }
 
       // Set property and field values.
@@ -197,6 +183,13 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
 
       // This will throw an exception on failure.
       $this->entitySaveAccess($entity);
+
+      // Set the values that we absolutely need for this field.
+      $entity->get('feeds_item')->fid = $feed->id();
+      $entity->get('feeds_item')->hash = $hash;
+      $entity->get('feeds_item')->imported = REQUEST_TIME;
+
+      // And... Save! We made it.
       $entity->save();
 
       // Track progress.
@@ -219,7 +212,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     $state = $feed->state(StateInterface::CLEAR);
 
     // Build base select statement.
-    $query = $this->queryFactory($this->entityType())
+    $query = $this->queryFactory->get(($this->entityType()))
       ->condition('feeds_item.fid', $feed->id());
 
     // If there is no total, query it.
@@ -484,16 +477,15 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     $this->apply(__FUNCTION__, $entity);
 
     $violations = $entity->validate();
-    // if (count($violations)) {
-    //   dpm((string) $violations);
-    //   $info = $this->entityInfo();
-    //   $args = array(
-    //     '@entity' => Unicode::strtolower($info['label']),
-    //     '%label' => $entity->label(),
-    //     '@url' => $this->url('feeds_importer.mapping', array('feeds_importer' => $this->importer->id())),
-    //   );
-    //   throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
-    // }
+    if (count($violations)) {
+      $info = $this->entityInfo();
+      $args = array(
+        '@entity' => Unicode::strtolower($info['label']),
+        '%label' => $entity->label(),
+        '@url' => $this->url('feeds_importer.mapping', array('feeds_importer' => $this->importer->id())),
+      );
+      throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
+    }
   }
 
   /**
@@ -635,11 +627,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    */
   public function getMappingTargets() {
     if (!$this->targets) {
-      $this->targets = parent::getMappingTargets();
-      foreach ($this->targets as &$target) {
-        $target['properties']['value']['label'] = '';
-      }
-
       // Let other modules expose mapping targets.
       $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
 
@@ -679,7 +666,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
       return;
     }
 
-    $query = $this->queryFactory($this->entityType())
+    $query = $this->queryFactory->get(($this->entityType()))
       ->condition('feeds_item.fid', $feed->fid())
       ->condition('feeds_item.imported', REQUEST_TIME - $time, '<');
 
@@ -704,14 +691,14 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * {@inheritdoc}
    */
   public function getItemCount(FeedInterface $feed) {
-    return $this->queryFactory($this->entityType())
+    return $this->queryFactory->get(($this->entityType()))
       ->condition('feeds_item.fid', $feed->id())
       ->count()
       ->execute();
   }
 
   protected function existingEntityId(FeedInterface $feed, array $item) {
-    $query = $this->queryFactory($this->entityType())
+    $query = $this->queryFactory->get(($this->entityType()))
       ->condition('feeds_item.fid', $feed->id())
       ->range(0, 1);
 

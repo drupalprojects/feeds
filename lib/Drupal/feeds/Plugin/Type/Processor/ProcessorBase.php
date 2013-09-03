@@ -159,25 +159,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   /**
    * {@inheritdoc}
    */
-  public function getMappingTargets() {
-
-    return array(
-      'url' => array(
-        'label' => $this->t('URL'),
-        'description' => $this->t('The external URL of the item. E. g. the feed item URL in the case of a syndication feed. May be unique.'),
-        'optional_unique' => TRUE,
-      ),
-      'guid' => array(
-        'label' => $this->t('GUID'),
-        'description' => $this->t('The globally unique identifier of the item. E. g. the feed item GUID in the case of a syndication feed. May be unique.'),
-        'optional_unique' => TRUE,
-      ),
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping) {
     $target_item->$key = $value;
   }
