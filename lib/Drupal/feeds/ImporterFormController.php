@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityFormController;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
+use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Ajax\SetHashCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -148,6 +149,12 @@ class ImporterFormController extends EntityFormController {
           ),
           '#plugin_type' => $type,
         );
+      }
+
+      // Give lockable plugins a chance to lock themselves.
+      // @see \Drupal\feeds\Feeds\Processor\EntityProcessor::isLocked()
+      if ($plugin instanceof LockableInterface) {
+        $form[$type]['id']['#disabled'] = $plugin->isLocked();
       }
 
       // This is the small form that appears under the select box.

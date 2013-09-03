@@ -87,7 +87,6 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
     foreach (filter_formats($this->user) as $id => $format) {
       $options[$id] = $format->label();
     }
-
     $form['format'] = array(
       '#type' => 'select',
       '#title' => $this->t('Filter format'),

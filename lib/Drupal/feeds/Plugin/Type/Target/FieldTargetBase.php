@@ -45,10 +45,16 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
     $processor = $importer->getProcessor();
     $entity = entity_create($processor->entityType(), $processor->getConfiguration('values'));
 
+    $info = entity_get_info($processor->entityType());
+    $bundle_key = NULL;
+    if (isset($info['entity_keys']['bundle'])) {
+      $bundle_key = $info['entity_keys']['bundle'];
+    }
+
     foreach ($entity as $id => $field) {
       $definition = $field->getItemDefinition();
 
-      if (!empty($definition['read-only'])) {
+      if (!empty($definition['read-only']) || $id == $bundle_key) {
         continue;
       }
 

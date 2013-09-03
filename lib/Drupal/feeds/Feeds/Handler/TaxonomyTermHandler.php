@@ -12,14 +12,11 @@ use Drupal\Component\Utility\String;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
-use Drupal\feeds\Result\ParserResultInterface;
 
 /**
  * Handles special user entity operations.
  *
- * @Plugin(
- *   id = "taxonomy_term"
- * )
+ * @Plugin(id = "taxonomy_term")
  */
 class TaxonomyTermHandler extends PluginBase {
 
@@ -35,6 +32,32 @@ class TaxonomyTermHandler extends PluginBase {
     return $values;
   }
 
+  public function getMappingTargets(array &$targets) {
+    unset($targets['format']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultConfiguration() {
+    return array('format' => 'plain_text');
+  }
+
+  public function buildConfigurationForm(array &$form, array &$form_state) {
+    global $user;
+    $options = array();
+    foreach (filter_formats($user) as $id => $format) {
+      $options[$id] = $format->label();
+    }
+
+    $form['format'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Description format'),
+      '#options' => $options,
+      '#default_value' => $this->configuration['format'],
+    );
+  }
+
   /**
    * Implements parent::entityInfo().
    */
@@ -43,15 +66,9 @@ class TaxonomyTermHandler extends PluginBase {
   }
 
   /**
-   * Validates a user account.
+   * {@inheritdoc}
    */
   public function entityValidate($term) {
-    if (drupal_strlen($term->label()) == 0) {
-      throw new ValidationException('Term name missing.');
-    }
-  }
-
-  public function preSave($term) {
     if (isset($term->parent)) {
       if (is_array($term->parent) && count($term->parent) == 1) {
         $term->parent = reset($term->parent);
@@ -60,37 +77,8 @@ class TaxonomyTermHandler extends PluginBase {
         throw new ValidationException(String::format("A term can't be its own child. GUID:@guid", array('@guid' => $term->feeds_item->guid)));
       }
     }
-  }
 
-  /**
-   * Return available mapping targets.
-   */
-  public function getMappingTargets(array &$targets) {
-    $targets['name']['optional_unique'] = TRUE;
-    $targets['parent']['optional_unique'] = TRUE;
-    $targets['weight']['optional_unique'] = TRUE;
-    $targets += array(
-      'parentguid' => array(
-        'name' => $this->t('Parent: GUID'),
-        'description' => $this->t('The GUID of the parent taxonomy term.'),
-        'optional_unique' => TRUE,
-      ),
-    );
-  }
-
-  /**
-   * Get id of an existing feed item term if available.
-   */
-  public function existingEntityId(FeedInterface $feed, array $item) {
-    // The only possible unique target is name.
-    foreach ($this->importer->getProcessor()->uniqueTargets($feed, $item) as $target => $value) {
-      if ($target == 'name') {
-        if ($tid = db_query("SELECT tid FROM {taxonomy_term_data} WHERE name = :name AND vid = :vid", array(':name' => $value, ':vid' => $this->importer->getProcessor()->bundle()))->fetchField()) {
-          return $tid;
-        }
-      }
-    }
-    return 0;
+    $term->get('format')->value = $this->configuration['format'];
   }
 
 }

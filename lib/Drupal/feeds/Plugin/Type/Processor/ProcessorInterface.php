@@ -125,13 +125,4 @@ interface ProcessorInterface extends FeedsPluginInterface {
    */
   public function getMappingTargets();
 
-  /**
-   * Sets a concrete target element.
-   *
-   * Invoked from ProcessorBase::map().
-   *
-   * @todo Move this.
-   */
-  public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping);
-
 }
