@@ -110,8 +110,6 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
-    $cron_required = ' ' . l($this->t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-
     $form['import_on_create'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Import on submission'),
@@ -122,7 +120,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
     $form['process_in_background'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Process in background'),
-      '#description' => $this->t('For very large imports. If checked, import and delete tasks started from the web UI will be handled by a cron task in the background rather than by the browser. This does not affect periodic imports, they are handled by a cron task in any case.') . $cron_required,
+      '#description' => $this->t('For very large imports. If checked, import and delete tasks started from the web UI will be handled by a cron task in the background rather than by the browser.'),
       '#default_value' => $this->configuration['process_in_background'],
     );
 

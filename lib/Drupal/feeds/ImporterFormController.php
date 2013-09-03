@@ -243,7 +243,7 @@ class ImporterFormController extends EntityFormController {
   public function save(array $form, array &$form_state) {
 
     $this->entity->save();
-    $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id() . '/mapping';
+    // $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id() . '/mapping';
     drupal_set_message($this->t('Your changes have been saved.'));
   }
 

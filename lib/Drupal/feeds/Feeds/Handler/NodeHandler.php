@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Handler;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\Unicode;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
@@ -65,8 +66,8 @@ class NodeHandler extends PluginBase {
     $form['author'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Author'),
-      '#description' => $this->t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
-      '#autocomplete_path' => 'user/autocomplete',
+      '#description' => $this->t('Select the author of the nodes to be created. Leave blank for %anonymous.', array('%anonymous' => \Drupal::config('user.settings')->get('anonymous'))),
+      '#autocomplete_route_name' => 'user_autocomplete',
       '#default_value' => check_plain($author->getUsername()),
     );
   }
@@ -106,12 +107,17 @@ class NodeHandler extends PluginBase {
     }
   }
 
-  public function preSave($entity) {
-    if (!isset($entity->uid) || !is_numeric($entity->uid)) {
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Remove the title validation here and use constraints.
+   */
+  public function entityValidate($entity) {
+    if (!isset($entity->uid->value) || !is_numeric($entity->uid->value)) {
        $entity->uid = $this->configuration['author'];
     }
-    if (drupal_strlen($entity->title) > 255) {
-      $entity->title = drupal_substr($entity->title, 0, 255);
+    if (Unicode::strlen($entity->title->value) > 255) {
+      $entity->title = Unicode::substr($entity->title->value, 0, 255);
     }
   }
 

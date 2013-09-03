@@ -217,10 +217,10 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    */
   protected function getDefaultConfiguration() {
     return array(
-      'auto_detect_feeds' => FALSE,
+      'auto_detect_feeds' => TRUE,
       'use_pubsubhubbub' => FALSE,
       'designated_hub' => '',
-      'request_timeout' => NULL,
+      'request_timeout' => 30,
     );
   }
 
@@ -245,21 +245,19 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
       '#title' => $this->t('Designated hub'),
       '#description' => $this->t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
       '#default_value' => $this->configuration['designated_hub'],
-      '#dependency' => array(
-        'edit-use-pubsubhubbub' => array(1),
+      '#states' => array(
+        'visible' => array(
+          'input[name="fetcher[configuration][use_pubsubhubbub]"]' => array('checked' => TRUE),
+        ),
       ),
     );
     // Per importer override of global http request timeout setting.
     $form['request_timeout'] = array(
       '#type' => 'number',
       '#title' => $this->t('Request timeout'),
-      '#description' => $this->t('Timeout in seconds to wait for an HTTP get request to finish.</br>
-                         <b>Note:</b> this setting will override the global setting.</br>
-                         When left empty, the global value is used.'),
+      '#description' => $this->t('Timeout in seconds to wait for an HTTP request to finish.'),
       '#default_value' => $this->configuration['request_timeout'],
       '#min' => 0,
-      '#maxlength' => 3,
-      '#size' => 30,
     );
 
     return $form;

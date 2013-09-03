@@ -547,6 +547,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       'values' => array($this->bundleKey() => NULL),
       'authorize' => TRUE,
       'expire' => SchedulerInterface::EXPIRE_NEVER,
+      'process_limit' => ProcessorInterface::PROCESS_LIMIT,
     );
 
     $defaults += $this->apply(__FUNCTION__);
@@ -563,25 +564,13 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     $form['update_existing'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Update existing @entities', $tokens),
-      '#description' => $this->t('Existing @entities will be determined using mappings that are a "unique target".', $tokens),
+      '#description' => $this->t('Existing @entities will be determined using mappings that are <strong>unique</strong>.', $tokens),
       '#options' => array(
         ProcessorInterface::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
         ProcessorInterface::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
         ProcessorInterface::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->configuration['update_existing'],
-    );
-    $form['authorize'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Authorize'),
-      '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
-      '#default_value' => $this->configuration['authorize'],
-    );
-    $form['skip_hash_check'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Force update'),
-      '#description' => $this->t('Forces the update of items even if the feed did not change.'),
-      '#default_value' => $this->configuration['skip_hash_check'],
     );
     $period = drupal_map_assoc(array(SchedulerInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this, 'formatExpire'));
     $form['expire'] = array(
@@ -591,7 +580,36 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#description' => $this->t('Select after how much time @entities should be deleted.', $tokens),
       '#default_value' => $this->configuration['expire'],
     );
-
+    $form['advanced'] = array(
+      '#title' => $this->t('Advanced settings'),
+      '#type' => 'details',
+      '#collapsed' => TRUE,
+      '#collapsible' => TRUE,
+      '#weight' => 10,
+    );
+    $form['advanced']['authorize'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Authorize'),
+      '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
+      '#default_value' => $this->configuration['authorize'],
+      '#parents' => array('processor', 'configuration', 'authorize'),
+    );
+    $form['advanced']['skip_hash_check'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Force update'),
+      '#description' => $this->t('Forces the update of items even if the feed did not change.'),
+      '#default_value' => $this->configuration['skip_hash_check'],
+      '#parents' => array('processor', 'configuration', 'skip_hash_check'),
+    );
+    $form['advanced']['process_limit'] = array(
+      '#type' => 'number',
+      '#title' => $this->t('Process limit'),
+      '#description' => $this->t('The number of items to process in one request.'),
+      '#default_value' => $this->configuration['process_limit'],
+      '#parents' => array('processor', 'configuration', 'process_limit'),
+      '#min' => 1,
+      '#max' => 1000,
+    );
     $this->apply(__FUNCTION__, $form, $form_state);
 
     return $form;
@@ -773,11 +791,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
     foreach ($this->importer->getMappings() as $mapping) {
       if (!empty($mapping['unique'])) {
-        foreach ($mapping['unique'] as $source => $true) {
+        foreach ($mapping['unique'] as $key => $true) {
           // Invoke the parser's getSourceElement to retrieve the value for this
           // mapping's source.
-          $field = $mapping['target'] . '.' . $mapping['map'][$source];
-          $targets[$field] = $parser->getSourceElement($feed, $item, $source);
+          $field = $mapping['target'] . '.' . $key;
+          $targets[$field] = $parser->getSourceElement($feed, $item, $mapping['map'][$key]);
         }
       }
     }
@@ -891,7 +909,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * @todo Get rid of the variable_get() here.
    */
   public function getLimit() {
-    return variable_get('feeds_process_limit', ProcessorInterface::PROCESS_LIMIT);
+    return $this->configuration['process_limit'];
   }
 
   /**
