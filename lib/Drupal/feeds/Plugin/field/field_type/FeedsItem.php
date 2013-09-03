@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\field\field_type;
 
 use Drupal\Core\Entity\Annotation\FieldType;
 use Drupal\Core\Annotation\Translation;
-use Drupal\field\Plugin\Type\FieldType\ConfigFieldItemBase;
+use Drupal\field\Plugin\Type\FieldType\ConfigEntityReferenceItemBase;
 use Drupal\field\FieldInterface;
 
 /**
@@ -27,7 +27,7 @@ use Drupal\field\FieldInterface;
  *   no_ui = true
  * )
  */
-class FeedsItem extends ConfigFieldItemBase {
+class FeedsItem extends ConfigEntityReferenceItemBase {
 
   /**
    * Definitions of the contained properties.
@@ -40,29 +40,33 @@ class FeedsItem extends ConfigFieldItemBase {
    * {@inheritdoc}
    */
   public function getPropertyDefinitions() {
-    if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['fid'] = array(
-        'type' => 'integer',
-        'label' => t('ID'),
-      );
-      static::$propertyDefinitions['imported'] = array(
+    $this->definition['settings']['target_type'] = 'feeds_feed';
+    // Definitions vary by entity type and bundle, so key them accordingly.
+    $key = $this->definition['settings']['target_type'] . ':';
+    $key .= isset($this->definition['settings']['target_bundle']) ? $this->definition['settings']['target_bundle'] : '';
+
+    if (!isset(static::$propertyDefinitions[$key])) {
+      static::$propertyDefinitions[$key] = parent::getPropertyDefinitions();
+
+      static::$propertyDefinitions[$key]['imported'] = array(
         'type' => 'integer',
         'label' => t('Timestamp'),
       );
-      static::$propertyDefinitions['url'] = array(
+      static::$propertyDefinitions[$key]['url'] = array(
         'type' => 'uri',
         'label' => t('Item URL'),
       );
-      static::$propertyDefinitions['guid'] = array(
+      static::$propertyDefinitions[$key]['guid'] = array(
         'type' => 'string',
         'label' => t('Item GUID'),
       );
-      static::$propertyDefinitions['hash'] = array(
+      static::$propertyDefinitions[$key]['hash'] = array(
         'type' => 'string',
         'label' => t('Item hash'),
       );
     }
-    return static::$propertyDefinitions;
+
+    return static::$propertyDefinitions[$key];
   }
 
   /**
@@ -71,27 +75,23 @@ class FeedsItem extends ConfigFieldItemBase {
   public static function schema(FieldInterface $field) {
     return array(
       'columns' => array(
-        'fid' => array(
-          'description' => 'The {feeds_feed}.fid this record belongs to.',
+        'target_id' => array(
+          'description' => 'The ID of the target feed.',
           'type' => 'int',
-          'unsigned' => TRUE,
           'not null' => TRUE,
-          'default' => 0,
+          'unsigned' => TRUE,
         ),
         'imported' => array(
           'type' => 'int',
           'not null' => TRUE,
-          'default' => 0,
           'description' => 'Import date of the feed item, as a Unix timestamp.',
         ),
         'url' => array(
           'type' => 'text',
-          'not null' => TRUE,
           'description' => 'Link to the feed item.',
         ),
         'guid' => array(
           'type' => 'text',
-          'not null' => TRUE,
           'description' => 'Unique identifier for the feed item.',
         ),
         'hash' => array(
@@ -99,15 +99,20 @@ class FeedsItem extends ConfigFieldItemBase {
           // The length of an MD5 hash.
           'length' => 32,
           'not null' => TRUE,
-          'default' => '',
           'description' => 'The hash of the feed item.',
         ),
       ),
       'indexes' => array(
-        'fid' => array('fid'),
-        'lookup_url' => array('fid', array('url', 128)),
-        'lookup_guid' => array('fid', array('guid', 128)),
+        'target_id' => array('target_id'),
+        'lookup_url' => array('target_id', array('url', 128)),
+        'lookup_guid' => array('target_id', array('guid', 128)),
         'imported' => array('imported'),
+      ),
+      'foreign keys' => array(
+        'target_id' => array(
+          'table' => 'feeds_feed',
+          'columns' => array('target_id' => 'fid'),
+        ),
       ),
     );
   }
@@ -115,8 +120,12 @@ class FeedsItem extends ConfigFieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public function isEmpty() {
-    return !$this->get('fid')->getValue();
+  public function preSave() {
+    $this->url = trim($this->url);
+    $this->guid = trim($this->guid);
+
+    // Force the imported time.
+    $this->imported = REQUEST_TIME;
   }
 
 }

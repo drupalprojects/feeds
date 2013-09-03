@@ -188,9 +188,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
         $entity = $this->newEntity($feed);
       }
 
-      $entity->get('feeds_item')->url = '';
-      $entity->get('feeds_item')->guid = '';
-
       // Set property and field values.
       $this->map($feed, $entity, $item);
       $this->entityValidate($entity);
@@ -199,9 +196,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       $this->entitySaveAccess($entity);
 
       // Set the values that we absolutely need.
-      $entity->get('feeds_item')->fid = $feed->id();
+      $entity->get('feeds_item')->target_id = $feed->id();
       $entity->get('feeds_item')->hash = $hash;
-      $entity->get('feeds_item')->imported = REQUEST_TIME;
 
       // And... Save! We made it.
       $entity->save();
@@ -227,7 +223,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
     // Build base select statement.
     $query = $this->queryFactory->get($this->entityType())
-      ->condition('feeds_item.fid', $feed->id());
+      ->condition('feeds_item.target_id', $feed->id());
 
     // If there is no total, query it.
     if (!$state->total) {
@@ -615,6 +611,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function submitConfigurationForm(array &$form, array &$form_state) {
     $this->apply(__FUNCTION__, $form, $form_state);
+
+    $values =& $form_state['values']['processor']['configuration'];
+    if ($this->configuration['expire'] != $values['expire']) {
+      $this->importer->reschedule($this->importer->id());
+    }
+
     parent::submitConfigurationForm($form, $form_state);
     $this->prepareFeedsItemField();
   }
@@ -692,7 +694,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     $query = $this->queryFactory->get($this->entityType())
-      ->condition('feeds_item.fid', $feed->fid())
+      ->condition('feeds_item.target_id', $feed->fid())
       ->condition('feeds_item.imported', REQUEST_TIME - $time, '<');
 
     // If there is no total, query it.
@@ -717,7 +719,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function getItemCount(FeedInterface $feed) {
     return $this->queryFactory->get($this->entityType())
-      ->condition('feeds_item.fid', $feed->id())
+      ->condition('feeds_item.target_id', $feed->id())
       ->count()
       ->execute();
   }
@@ -735,7 +737,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   protected function existingEntityId(FeedInterface $feed, array $item) {
     $query = $this->queryFactory->get($this->entityType())
-      ->condition('feeds_item.fid', $feed->id())
+      ->condition('feeds_item.target_id', $feed->id())
       ->range(0, 1);
 
     // Iterate through all unique targets and test whether they do already

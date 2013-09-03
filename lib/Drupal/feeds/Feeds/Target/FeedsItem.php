@@ -24,17 +24,10 @@ class FeedsItem extends FieldTargetBase {
    * {@inheritdoc}
    */
   protected static function prepareTarget(array &$target) {
-    unset($target['properties']['fid']);
+    unset($target['properties']['target_id']);
+    unset($target['properties']['revision_id']);
     unset($target['properties']['imported']);
     unset($target['properties']['hash']);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function prepareValue($delta, array &$values) {
-    // $values['title'] = (string) $values['title'];
-    // $values['url'] = (string) $values['url'];
   }
 
 }

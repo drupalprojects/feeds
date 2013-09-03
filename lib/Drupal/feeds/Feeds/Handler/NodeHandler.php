@@ -23,6 +23,11 @@ class NodeHandler extends PluginBase {
     return $processor->entityType() == 'node';
   }
 
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->configuration += $this->getDefaultConfiguration();
+  }
+
   /**
    * Creates a new user account in memory and returns it.
    */
@@ -73,13 +78,6 @@ class NodeHandler extends PluginBase {
     }
     else {
       $values['author'] = 0;
-    }
-  }
-
-  public function submitConfigurationForm(array &$form, array &$form_state) {
-    $values =& $form_state['values']['processor']['configuration'];
-    if ($this->configuration['expire'] != $values['expire']) {
-      $this->importer->reschedule($this->importer->id());
     }
   }
 
