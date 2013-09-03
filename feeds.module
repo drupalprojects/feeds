@@ -481,13 +481,6 @@ function feeds_file_download($uri) {
 }
 
 /**
- * Implements hook_entity_delete().
- */
-function feeds_entity_delete(EntityInterface $entity) {
-  Drupal::service('feeds.item_info')->delete($entity->entityType(), $entity->id());
-}
-
-/**
  * Implements hook_library_info().
  */
 function feeds_library_info() {
@@ -502,5 +495,23 @@ function feeds_library_info() {
       array('system', 'drupal.ajax'),
     ),
   );
+
   return $libraries;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Remove our field from the Field UI overview form.
+ */
+function feeds_form_field_ui_field_overview_form_alter(array &$form, array &$form_state) {
+  if (in_array('feeds_item', $form['#fields'])) {
+
+    unset($form['#fields'][array_search('feeds_item', $form['#fields'])]);
+    unset($form['fields']['feeds_item']);
+
+    $rows_order = $form['fields']['#regions']['content']['rows_order'];
+    $key = array_search('feeds_item', $rows_order);
+    unset($form['fields']['#regions']['content']['rows_order'][$key]);
+  }
 }

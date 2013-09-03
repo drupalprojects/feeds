@@ -132,6 +132,6 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *
    * @todo Move this.
    */
-  public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping, \stdClass $item_info);
+  public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping);
 
 }

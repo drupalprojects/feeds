@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Plugin\Type;
 
+use Drupal\feeds\FeedInterface;
+
 /**
  * Plugins implement this interface if they provide forms on a feed edit page.
  */

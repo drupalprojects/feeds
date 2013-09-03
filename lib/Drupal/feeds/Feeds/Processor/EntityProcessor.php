@@ -14,10 +14,10 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
+use Drupal\Core\Entity\Query\QueryFactoryInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
-use Drupal\feeds\ItemInfoControllerInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
@@ -50,18 +50,18 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   protected $storageController;
 
   /**
+   * The entity query factory object.
+   *
+   * @var \Drupal\Core\Entity\Query\QueryFactoryInterface
+   */
+  protected $queryFactory;
+
+  /**
    * The entity info for the selected entity type.
    *
    * @var array
    */
   protected $entityInfo;
-
-  /**
-   * The item info controller.
-   *
-   * @var \Drupal\feeds\ItemInfoControllerInterface
-   */
-  protected $itemController;
 
   /**
    * The targets for this processor.
@@ -96,14 +96,14 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage_controller
    *   The storage controller for this processor.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $entity_info, EntityStorageControllerInterface $storage_controller, ItemInfoControllerInterface $item_controller) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $entity_info, EntityStorageControllerInterface $storage_controller, QueryFactoryInterface $query_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     // $entityInfo has to be assinged before $this->loadHandlers() is called.
     $this->entityInfo = $entity_info;
     $this->storageController = $storage_controller;
-    $this->itemController = $item_controller;
     $this->skipExisting = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
+    $this->queryFactory = $query_factory;
 
     $this->loadHandlers();
   }
@@ -115,9 +115,15 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     $entity_manager = $container->get('entity.manager');
     $entity_info = $entity_manager->getDefinition($plugin_definition['entity type']);
     $storage_controller = $entity_manager->getStorageController($plugin_definition['entity type']);
-    $item_controller = $container->get('feeds.item_info');
 
-    return new static($configuration, $plugin_id, $plugin_definition, $entity_info, $storage_controller, $item_controller);
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $entity_info,
+      $storage_controller,
+      $container->get('entity.query')
+    );
   }
 
   /**
@@ -150,8 +156,14 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
       return;
     }
 
+    $old_hash = FALSE;
+    if ($entity_id) {
+      $entity = $this->entityLoad($entity_id);
+      $old_hash = $entity->get('feeds_item')->hash;
+    }
+
     $hash = $this->hash($item);
-    $changed = ($hash !== $this->getHash($entity_id));
+    $changed = $old_hash && $old_hash === $hash;
 
     // Do not proceed if the item exists, has not changed, and we're not
     // forcing the update.
@@ -163,30 +175,29 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
       // Load an existing entity.
       // @todo Clean this up.
       if ($entity_id) {
-        $entity = $this->entityLoad($feed, $entity_id);
-        $item_info = $this->itemController->load($this->entityType(), $entity_id);
-        $item_info->fid = $feed->id();
-        $item_info->hash = $hash;
-        $item_info->url = '';
-        $item_info->guid = '';
+        $entity->feeds_item->fid = $feed->id();
+        $entity->feeds_item->hash = $hash;
+        $entity->feeds_item->url = '';
+        $entity->feeds_item->guid = '';
       }
 
       // Build a new entity.
       else {
         $entity = $this->newEntity($feed);
-        $item_info = $this->newItemInfo($entity, $feed, $hash);
+        $entity->feeds_item->fid = $feed->id();
+        $entity->feeds_item->hash = $hash;
+        $entity->feeds_item->url = '';
+        $entity->feeds_item->guid = '';
+        $entity->feeds_item->imported = REQUEST_TIME;
       }
 
       // Set property and field values.
-      $this->map($feed, $item, $entity, $item_info);
+      $this->map($feed, $item, $entity);
       $this->entityValidate($entity);
 
       // This will throw an exception on failure.
       $this->entitySaveAccess($entity);
-      $this->entitySave($entity);
-
-      $item_info->entityId = $entity->id();
-      $this->itemController->save($item_info);
+      $entity->save();
 
       // Track progress.
       $entity_id ? $state->updated++ : $state->created++;
@@ -198,6 +209,57 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
       drupal_set_message($e->getMessage(), 'warning');
       $message = $this->createLogMessage($e, $entity, $item);
       $feed->log('import', $message, array(), WATCHDOG_ERROR);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clear(FeedInterface $feed) {
+    $state = $feed->state(StateInterface::CLEAR);
+
+    // Build base select statement.
+    $query = $this->queryFactory($this->entityType())
+      ->condition('feeds_item.fid', $feed->id());
+
+    // If there is no total, query it.
+    if (!$state->total) {
+      $count_query = clone $query;
+      $state->total = $count_query->count()->execute();
+    }
+
+    // Delete a batch of entities.
+    $entity_ids = $query->range(0, $this->getLimit())->execute();
+
+    if ($entity_ids) {
+      $this->entityDeleteMultiple($entity_ids);
+      $state->deleted += count($entity_ids);
+      $state->progress($state->total, $state->deleted);
+    }
+    else {
+      $state->progress($state->total, $state->total);
+    }
+
+    // Report results when done.
+    if ($feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
+      if ($state->deleted) {
+        $message = format_plural(
+          $state->deleted,
+          'Deleted @number @entity from %title.',
+          'Deleted @number @entities from %title.',
+          array(
+            '@number' => $state->deleted,
+            '@entity' => Unicode::strtolower($this->label()),
+            '@entities' => Unicode::strtolower($this->labelPlural()),
+            '%title' => $feed->label(),
+          )
+        );
+        $feed->log('clear', $message, array(), WATCHDOG_INFO);
+        drupal_set_message($message);
+      }
+      else {
+        drupal_set_message($this->t('There are no @entities to be deleted.', array('@entities' => Unicode::strtolower($this->labelPlural()))));
+      }
     }
   }
 
@@ -277,30 +339,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   }
 
   /**
-   * Returns a new item info object.
-   *
-   * This is used to track entities created by Feeds.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object to be populated with new item info.
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed that produces this entity.
-   * @param string $hash
-   *   The fingerprint of the feed item.
-   */
-  protected function newItemInfo(EntityInterface $entity, FeedInterface $feed, $hash = '') {
-    $item_info = new \stdClass();
-    $item_info->fid = $feed->id();
-    $item_info->entityType = $entity->entityType();
-    $item_info->imported = REQUEST_TIME;
-    $item_info->hash = $hash;
-    $item_info->url = '';
-    $item_info->guid = '';
-
-    return $item_info;
-  }
-
-  /**
    * Applies a function to listeners.
    *
    * @todo Move to PluginBase.
@@ -376,7 +414,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   }
 
   /**
-   * Reutns the bundle label for the entity being processed.
+   * Returns the bundle label for the entity being processed.
    *
    * @return string
    *   The bundle label.
@@ -396,7 +434,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
    * @return array
    *   A keyed array of bundle => label.
    */
-  public function bundleOptions() {
+  protected function bundleOptions() {
     $options = array();
     foreach (entity_get_bundles($this->entityType()) as $bundle => $info) {
       if (!empty($info['label'])) {
@@ -446,15 +484,16 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     $this->apply(__FUNCTION__, $entity);
 
     $violations = $entity->validate();
-    if (count($violations)) {
-      $info = $this->entityInfo();
-      $args = array(
-        '@entity' => Unicode::strtolower($info['label']),
-        '%label' => $entity->label(),
-        '@url' => $this->url('feeds_importer.mapping', array('feeds_importer' => $this->importer->id())),
-      );
-      throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
-    }
+    // if (count($violations)) {
+    //   dpm((string) $violations);
+    //   $info = $this->entityInfo();
+    //   $args = array(
+    //     '@entity' => Unicode::strtolower($info['label']),
+    //     '%label' => $entity->label(),
+    //     '@url' => $this->url('feeds_importer.mapping', array('feeds_importer' => $this->importer->id())),
+    //   );
+    //   throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
+    // }
   }
 
   /**
@@ -482,14 +521,6 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
         throw new EntityAccessException(String::format('User %name is not authorized to %op @bundle %bundle.', $args));
       }
     }
-    $this->apply(__FUNCTION__, $entity);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function entitySave(EntityInterface $entity) {
-    $entity->save();
   }
 
   /**
@@ -570,6 +601,33 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   public function submitConfigurationForm(array &$form, array &$form_state) {
     $this->apply(__FUNCTION__, $form, $form_state);
     parent::submitConfigurationForm($form, $form_state);
+
+    // Make sure our field exists.
+    $entity_type = $this->entityType();
+    $bundle = $this->bundle();
+    $field = array(
+      'name' => 'feeds_item',
+      'entity_type' => $entity_type,
+      'type' => 'feeds_item',
+      'translatable' => FALSE,
+    );
+    $instance = array(
+      'field_name' => 'feeds_item',
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Feeds item',
+    );
+
+    // Create the field and instance.
+    $field_storage = \Drupal::entityManager()->getStorageController('field_entity');
+    $instance_storage = \Drupal::entityManager()->getStorageController('field_instance');
+
+    if (!$field_storage->load("$entity_type.feeds_item")) {
+      $field_storage->create($field)->save();
+    }
+    if (!$instance_storage->load("$entity_type.$bundle.feeds_item")) {
+      $instance_storage->create($instance)->save();
+    }
   }
 
   /**
@@ -597,14 +655,7 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
   /**
    * {@inheritdoc}
    */
-  public function setTargetElement(FeedInterface $feed, $entity, $field_name, $values, $mapping, \stdClass $item_info) {
-    switch ($field_name) {
-      case 'url':
-      case 'guid':
-        $item_info->$field_name = $values[0]['value'];
-        return;
-    }
-
+  public function setTargetElement(FeedInterface $feed, $entity, $field_name, $values, $mapping) {
     $entity->get($field_name)->setValue($values);
   }
 
@@ -615,34 +666,73 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     return $this->configuration['expire'];
   }
 
-  protected function expiryQuery(FeedInterface $feed, $time) {
-    $select = parent::expiryQuery($feed, $time);
-    $this->apply('expiryQuery', $feed, $select, $time);
-    return $select;
+  /**
+   * {@inheritdoc}
+   */
+  public function expire(FeedInterface $feed, $time = NULL) {
+    $state = $feed->state(StateInterface::EXPIRE);
+
+    if ($time === NULL) {
+      $time = $this->expiryTime();
+    }
+    if ($time == SchedulerInterface::EXPIRE_NEVER) {
+      return;
+    }
+
+    $query = $this->queryFactory($this->entityType())
+      ->condition('feeds_item.fid', $feed->fid())
+      ->condition('feeds_item.imported', REQUEST_TIME - $time, '<');
+
+    // If there is no total, query it.
+    if (!$state->total) {
+      $count_query = clone $query;
+      $state->total = $count_query->count()->execute();
+    }
+
+    // Delete a batch of entities.
+    if ($entity_ids = $query->range(0, $this->getLimit())->execute()) {
+      $this->entityDeleteMultiple($entity_ids);
+      $state->deleted += count($entity_ids);
+      $state->progress($state->total, $state->deleted);
+    }
+    else {
+      $state->progress($state->total, $state->total);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getItemCount(FeedInterface $feed) {
+    return $this->queryFactory($this->entityType())
+      ->condition('feeds_item.fid', $feed->id())
+      ->count()
+      ->execute();
   }
 
   protected function existingEntityId(FeedInterface $feed, array $item) {
-    $query = db_select('feeds_item')
-      ->fields('feeds_item', array('entity_id'))
-      ->condition('fid', $feed->id())
-      ->condition('entity_type', $this->entityType());
+    $query = $this->queryFactory($this->entityType())
+      ->condition('feeds_item.fid', $feed->id())
+      ->range(0, 1);
 
     // Iterate through all unique targets and test whether they do already
     // exist in the database.
     foreach ($this->uniqueTargets($feed, $item) as $target => $value) {
       switch ($target) {
         case 'url':
-          $entity_id = $query->condition('url', $value)->execute()->fetchField();
+          $entity_id = $query->condition('feeds_item.url', $value)->execute();
           break;
 
         case 'guid':
-          $entity_id = $query->condition('guid', $value)->execute()->fetchField();
+          $entity_id = $query->condition('feeds_item.guid', $value)->execute();
           break;
       }
+
       if (isset($entity_id)) {
-        // Return with the content id found.
-        return $entity_id;
+        return key($entity_id);
       }
+
+      $query = clone $query;
     }
 
     $ids = array_filter($this->apply('existingEntityId', $feed, $item));
@@ -654,9 +744,12 @@ class EntityProcessor extends ProcessorBase implements ProcessorInterface, Advan
     return 0;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildAdvancedForm(array $form, array &$form_state) {
-
     $form['values']['#tree'] = TRUE;
+
     if ($bundle_key = $this->bundleKey()) {
       $form['values'][$bundle_key] = array(
         '#type' => 'select',

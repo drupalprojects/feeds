@@ -42,9 +42,6 @@ class FeedClearForm extends EntityNGConfirmFormBase {
     $this->entity->startClear();
     $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
 
-    watchdog('feeds', '@importer: cleared %title.', $args);
-    drupal_set_message($this->t('The items from %title have been deleted.', $args));
-
     $form_state['redirect'] = $this->getCancelPath();
   }
 

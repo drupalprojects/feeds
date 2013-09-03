@@ -111,64 +111,6 @@ function feeds_schema() {
       'id_source' => array('importer', array('source', 128)),
     ),
   );
-  $schema['feeds_item'] = array(
-    'description' => 'Tracks items such as nodes, terms, users.',
-    'fields' => array(
-      'entity_type' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The entity type.',
-      ),
-      'entity_id' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'The imported entity\'s serial id.',
-      ),
-      'fid' => array(
-        'description' => 'The {feeds_feed}.fid this record belongs to.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'imported' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Import date of the feed item, as a Unix timestamp.',
-      ),
-      'url' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Link to the feed item.',
-      ),
-      'guid' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Unique identifier for the feed item.',
-      ),
-      'hash' => array(
-        'type' => 'varchar',
-        // The length of an MD5 hash.
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The hash of the feed item.',
-      ),
-    ),
-    'primary key' => array('entity_type', 'entity_id'),
-    'indexes' => array(
-      'fid' => array('fid'),
-      'lookup_url' => array('entity_type', 'fid', array('url', 128)),
-      'lookup_guid' => array('entity_type', 'fid', array('guid', 128)),
-      'global_lookup_url' => array('entity_type', array('url', 128)),
-      'global_lookup_guid' => array('entity_type', array('guid', 128)),
-      'imported' => array('imported'),
-    ),
-  );
   $schema['feeds_subscription'] = array(
     'description' => 'PubSubHubbub subscriptions.',
     'fields' => array(

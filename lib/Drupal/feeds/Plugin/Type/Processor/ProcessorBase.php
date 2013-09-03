@@ -27,147 +27,10 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   /**
    * {@inheritdoc}
    *
-   * @todo This should be moved to the EntityProcessor.
-   */
-  public function clear(FeedInterface $feed) {
-    $state = $feed->state(StateInterface::CLEAR);
-
-    // Build base select statement.
-    $info = $this->entityInfo();
-    $select = db_select($info['base_table'], 'e');
-    $select->addField('e', $info['entity_keys']['id'], 'entity_id');
-    $select->join(
-      'feeds_item',
-      'fi',
-      "e.{$info['entity_keys']['id']} = fi.entity_id AND fi.entity_type = '{$this->entityType()}'");
-    $select->condition('fi.fid', $feed->id());
-
-    // If there is no total, query it.
-    if (!$state->total) {
-      $state->total = $select->countQuery()
-        ->execute()
-        ->fetchField();
-    }
-
-    // Delete a batch of entities.
-    $entities = $select->range(0, $this->getLimit())->execute();
-    $entity_ids = array();
-    foreach ($entities as $entity) {
-      $entity_ids[$entity->entity_id] = $entity->entity_id;
-    }
-    $this->entityDeleteMultiple($entity_ids);
-
-    // Report progress, take into account that we may not have deleted as
-    // many items as we have counted at first.
-    if (count($entity_ids)) {
-      $state->deleted += count($entity_ids);
-      $state->progress($state->total, $state->deleted);
-    }
-    else {
-      $state->progress($state->total, $state->total);
-    }
-
-    // Report results when done.
-    if ($feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
-      if ($state->deleted) {
-        $message = format_plural(
-          $state->deleted,
-          'Deleted @number @entity.',
-          'Deleted @number @entities.',
-          array(
-            '@number' => $state->deleted,
-            '@entity' => Unicode::strtolower($this->label()),
-            '@entities' => Unicode::strtolower($this->labelPlural()),
-          )
-        );
-        $feed->log('clear', $message, array(), WATCHDOG_INFO);
-        drupal_set_message($message);
-      }
-      else {
-        drupal_set_message($this->t('There are no @entities to be deleted.', array('@entities' => Unicode::strtolower($this->labelPlural()))));
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   *
    * @todo Get rid of the variable_get() here.
    */
   public function getLimit() {
     return variable_get('feeds_process_limit', ProcessorInterface::PROCESS_LIMIT);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function expire(FeedInterface $feed, $time = NULL) {
-    $state = $feed->state(StateInterface::EXPIRE);
-    if ($time === NULL) {
-      $time = $this->expiryTime();
-    }
-    if ($time == SchedulerInterface::EXPIRE_NEVER) {
-      return;
-    }
-
-    $select = $this->expiryQuery($feed, $time);
-    // If there is no total, query it.
-    if (!$state->total) {
-      $state->total = $select->countQuery()->execute()->fetchField();
-    }
-
-    // Delete a batch of entities.
-    $entity_ids = $select->range(0, $this->getLimit())->execute()->fetchCol();
-    if ($entity_ids) {
-      $this->entityDeleteMultiple($entity_ids);
-      $state->deleted += count($entity_ids);
-      $state->progress($state->total, $state->deleted);
-    }
-    else {
-      $state->progress($state->total, $state->total);
-    }
-  }
-
-  /**
-   * Returns a database query used to select entities to expire.
-   *
-   * Processor classes should override this method to set the age portion of the
-   * query.
-   *
-   * @param FeedInterface $feed
-   *   The feed source.
-   * @param int $time
-   *   Delete entities older than this.
-   *
-   * @return SelectQuery
-   *   A select query to execute.
-   *
-   * @todo Move to EntityProcessor.
-   */
-  protected function expiryQuery(FeedInterface $feed, $time) {
-    // Build base select statement.
-    $info = $this->entityInfo();
-    $id_key = db_escape_field($info['entity_keys']['id']);
-
-    $select = db_select($info['base_table'], 'e');
-    $select->addField('e', $info['entity_keys']['id'], 'entity_id');
-    $select->join(
-      'feeds_item',
-      'fi',
-      "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
-        ':entity_type' => $this->entityType(),
-      )
-    );
-    $select->condition('fi.fid', $feed->id());
-
-    return $select;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getItemCount(FeedInterface $feed) {
-    return db_query("SELECT count(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $feed->id()))->fetchField();
   }
 
   /**
@@ -187,7 +50,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    *
    * @todo Revisit static cache.
    */
-  protected function map(FeedInterface $feed, array $item, $target_item, $item_info) {
+  protected function map(FeedInterface $feed, array $item, $target_item) {
     $sources = $this->importer->getParser()->getMappingSources();
     $targets = $this->getMappingTargets();
     $parser = $this->importer->getParser();
@@ -253,7 +116,7 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
         $plugin->prepareValues($new_values[$target]);
       }
 
-      $this->setTargetElement($feed, $target_item, $target, $new_values[$target], $mapping, $item_info);
+      $this->setTargetElement($feed, $target_item, $target, $new_values[$target], $mapping);
     }
 
     return $target_item;
@@ -315,17 +178,8 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
   /**
    * {@inheritdoc}
    */
-  public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping, \stdClass $item_info) {
-    switch ($key) {
-      case 'url':
-      case 'guid':
-        $item_info->$key = $value;
-        break;
-
-      default:
-        $target_item->$key = $value;
-        break;
-    }
+  public function setTargetElement(FeedInterface $feed, $target_item, $key, $value, $mapping) {
+    $target_item->$key = $value;
   }
 
   /**
@@ -373,26 +227,6 @@ abstract class ProcessorBase extends ConfigurablePluginBase implements Clearable
    */
   protected function hash(array $item) {
     return hash('md5', serialize($item) . serialize($this->importer->getMappings()));
-  }
-
-  /**
-   * Retrieves the MD5 hash of $entity_id from the database.
-   *
-   * @param int $entity_id
-   *   The entity id to get the hash for.
-   *
-   * @return string
-   *   Empty string if no item is found, hash otherwise.
-   *
-   * @todo Move to EntityProcessor.
-   */
-  protected function getHash($entity_id) {
-
-    if ($hash = db_query("SELECT hash FROM {feeds_item} WHERE entity_type = :type AND entity_id = :id", array(':type' => $this->entityType(), ':id' => $entity_id))->fetchField()) {
-      // Return with the hash.
-      return $hash;
-    }
-    return '';
   }
 
   /**
