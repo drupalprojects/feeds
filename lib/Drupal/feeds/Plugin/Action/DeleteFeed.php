@@ -11,7 +11,8 @@ use Drupal\Core\Annotation\Action;
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\user\TempStoreFactory;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\user\TempStore;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,7 +35,7 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
   protected $tempStore;
 
   /**
-   * Constructs a new DeleteFeed object.
+   * Constructs a DeleteFeed object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -42,27 +43,37 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
    *   The plugin ID for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\user\TempStoreFactory $temp_store_factory
+   * @param \Drupal\user\TempStore $temp_store
    *   The tempstore factory.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The current user.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, TempStoreFactory $temp_store_factory) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, TempStore $temp_store, AccountInterface $user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    $this->tempStore = $temp_store_factory->get('feeds_feed_multiple_delete_confirm');
+    $this->tempStore = $temp_store;
+    $this->user = $user;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.tempstore'));
+    $temp_store = $container->get('user.tempstore')->get('feeds_feed_multiple_delete_confirm');
+
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $temp_store,
+      $container->get('current_user')
+    );
   }
 
   /**
    * {@inheritdoc}
    */
   public function executeMultiple(array $entities) {
-    $this->tempStore->set($GLOBALS['user']->id(), $entities);
+    $this->tempStore->set($this->user->id(), $entities);
   }
 
   /**
