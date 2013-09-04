@@ -87,6 +87,20 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected $skipExisting;
 
   /**
+   * A cache of the existing entity ids, keyed by item delta.
+   *
+   * @var array
+   */
+  protected $existingEntityIds = array();
+
+  /**
+   * A cache of the existing entities, keyed by entity id.
+   *
+   * @var array
+   */
+  protected $existingEntities;
+
+  /**
    * Flag indicating that this processor is locked.
    *
    * @var bool
@@ -141,13 +155,24 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Bulk load existing entity ids/entities.
    */
   public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result) {
-    while ($item = $parser_result->shiftItem()) {
-      $this->processItem($feed, $state, $item);
+    foreach ($parser_result->items as $item) {
+      $this->existingEntityIds[] = $this->existingEntityId($feed, $item);
     }
+    // Bulk load existing entities to save on db queries.
+    if (!$this->skipExisting) {
+      $this->existingEntities = $this->storageController->loadMultiple(array_filter($this->existingEntityIds));
+      foreach ($this->existingEntities as $entity) {
+        $this->entityPrepare($feed, $entity);
+      }
+    }
+
+    foreach ($parser_result->items as $delta => $item) {
+      $this->processItem($feed, $state, $item, $this->existingEntityIds[$delta]);
+    }
+    unset($parser_result->items);
+    unset($this->existingEntities);
   }
 
   /**
@@ -159,22 +184,21 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The state object.
    * @param array $item
    *   The item being processed.
+   * @param int|fasle $existing_entity_id
+   *   The entity id if it already exists.
    */
-  protected function processItem(FeedInterface $feed, StateInterface $state, array $item) {
-    // Check if this item already exists.
-    $existing_entity_id = $this->existingEntityId($feed, $item);
-
+  protected function processItem(FeedInterface $feed, StateInterface $state, array $item, $existing_entity_id) {
     // If it exists, and we are not updating, pass onto the next item.
     if ($existing_entity_id && $this->skipExisting) {
       return;
     }
 
     if ($existing_entity_id) {
-      $entity = $this->entityLoad($existing_entity_id);
+      $entity = $this->existingEntities[$existing_entity_id];
     }
 
     $hash = $this->hash($item);
-    $changed = $existing_entity_id && $hash === $entity->get('feeds_item')->hash;
+    $changed = $existing_entity_id && ($hash !== $entity->get('feeds_item')->hash);
 
     // Do not proceed if the item exists, has not changed, and we're not
     // forcing the update.
@@ -210,8 +234,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     catch (\Exception $e) {
       $state->failed++;
       drupal_set_message($e->getMessage(), 'warning');
-      $message = $this->createLogMessage($e, $entity, $item);
-      $feed->log('import', $message, array(), WATCHDOG_ERROR);
+      $feed->log('import', $this->createLogMessage($e, $entity, $item), array(), WATCHDOG_ERROR);
     }
   }
 
@@ -478,10 +501,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  protected function entityLoad(FeedInterface $feed, $entity_id) {
-    $entity = $this->storageController->load($entity_id)->getNGEntity();
-    $this->apply('entityPrepare', $feed, $entity);
-
+  protected function entityPrepare(FeedInterface $feed, EntityInterface $entity) {
+    $this->apply(__FUNCTION__, $feed, $entity);
     return $entity;
   }
 
@@ -758,8 +779,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       ->condition('feeds_item.target_id', $feed->id())
       ->range(0, 1);
 
-    // Iterate through all unique targets and test whether they do already
-    // exist in the database.
+    // Iterate through all unique targets and test whether they already exist.
     foreach ($this->uniqueTargets($feed, $item) as $target => $value) {
       $entity_id = $query->condition($target, $value)->execute();
 
@@ -926,59 +946,57 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   protected function map(FeedInterface $feed, EntityInterface $entity, array $item) {
     $parser = $this->importer->getParser();
-    $sources = $parser->getMappingSources();
-    $targets = $this->getMappingTargets();
+    $mappings = $this->importer->getMappings();
 
     // Mappers add to existing fields rather than replacing them. Hence we need
     // to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
-    foreach ($this->importer->getMappings() as $mapping) {
+    foreach ($mappings as $mapping) {
       unset($entity->{$mapping['target']});
     }
 
-    // Gather all of the values values for this item.
-    $values = array();
-    foreach ($this->importer->getMappings() as $mapping) {
+    // Gather all of the values for this item.
+    $source_values = array();
+    foreach ($mappings as $mapping) {
       $target = $mapping['target'];
 
       foreach ($mapping['map'] as $column => $source) {
 
-        if (!isset($values[$target][$column])) {
-          $values[$target][$column] = array();
+        if (!isset($source_values[$target][$column])) {
+          $source_values[$target][$column] = array();
         }
 
         // Retrieve source element's value from parser.
         $value = $parser->getSourceElement($feed, $item, $source);
         if (!is_array($value)) {
-          $values[$target][$column][] = $value;
+          $source_values[$target][$column][] = $value;
         }
         else {
-          $values[$target][$column] = array_merge($values[$target][$column], $value);
+          $source_values[$target][$column] = array_merge($source_values[$target][$column], $value);
         }
       }
     }
 
     // Rearrange values into Drupal's field structure.
-    $new_values = array();
-    foreach ($values as $target => $value) {
-      foreach ($value as $column => $v) {
-        $delta = 0;
-        foreach ($v as $avalue) {
-          $new_values[$target][$delta][$column] = $avalue;
-          $delta++;
+    $field_values = array();
+    foreach ($source_values as $field => $field_value) {
+      foreach ($field_value as $column => $values) {
+        // Use array_values() here to keep our $delta clean.
+        foreach (array_values($values) as $delta => $value) {
+          $field_values[$field][$delta][$column] = $value;
         }
       }
     }
 
     // Set target values.
-    foreach ($this->importer->getMappings() as $delta => $mapping) {
-      $target = $mapping['target'];
+    foreach ($mappings as $delta => $mapping) {
+      $field = $mapping['target'];
       // Map the source element's value to the target.
       if ($plugin = $this->importer->getTargetPlugin($delta)) {
-        $plugin->prepareValues($new_values[$target]);
+        $plugin->prepareValues($field_values[$field]);
       }
       // Set the values on the entity.
-      $entity->get($target)->setValue($new_values[$target]);
+      $entity->get($field)->setValue($field_values[$field]);
     }
 
     return $entity;
