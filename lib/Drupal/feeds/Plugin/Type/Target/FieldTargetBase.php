@@ -83,7 +83,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
   protected function prepareValue($delta, array &$values) {
     foreach ($values as $column => $value) {
-      $values[$delta][$column] = (string) $value;
+      $values[$column] = (string) $value;
     }
   }
 

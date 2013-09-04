@@ -10,6 +10,7 @@ namespace Drupal\feeds;
 use Drupal\Component\Utility\String;
 use Drupal\simpletest\WebTestBase;
 use Drupal\feeds\Plugin\Type\PluginBase;
+use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 
 /**
  * Test basic Data API functionality.
@@ -184,12 +185,17 @@ class FeedsWebTestBase extends WebTestBase {
     $edit = array(
       'label' => $name,
       'id' => $id,
+      'scheduler[advanced][import_period]' => -1,
+      'fetcher[id]' => 'http',
+      'parser[id]' => 'syndication',
+      'processor[id]' => 'entity:node',
       'processor[advanced][values][type]' => 'article',
     );
     $this->drupalPost('admin/structure/feeds/add', $edit, 'Save');
 
     // Assert message and presence of default plugins.
     $this->assertText('Your changes have been saved.');
+    // $this->resetAll();
     $this->assertPlugins($id, 'http', 'syndication', 'entity:node');
   }
 
@@ -203,14 +209,18 @@ class FeedsWebTestBase extends WebTestBase {
    *   feeds_feeds_plugins()).
    */
   public function setPlugin($id, $type, $plugin_key) {
-    $edit = array(
-      $type . '[plugin_key]' => $plugin_key,
-    );
-    $this->drupalPost("admin/structure/feeds/manage/$id", $edit, 'Save');
+    $importer = entity_load('feeds_importer', $id, TRUE);
+    $importer->setPlugin($type, $plugin_key);
+    $importer->save();
+    $importer = entity_load('feeds_importer', $id, TRUE);
+    // $edit = array(
+    //   $type . '[id]' => $plugin_key,
+    // );
+    // $this->drupalPost("admin/structure/feeds/manage/$id", $edit, 'Save');
 
     // Assert actual configuration.
-    $config = config('feeds.importer.' . $id)->get('config');
-    $this->assertEqual($config[$type]['plugin_key'], $plugin_key, 'Verified correct ' . $type . ' (' . $plugin_key . ').');
+    $plugin_id = $importer->getPlugin($type)->getPluginId();
+    $this->assertEqual($plugin_id, $plugin_key, 'Verified correct ' . $type . ' (' . $plugin_key . ') is ' . $plugin_id . '.');
   }
 
   /**
@@ -221,8 +231,12 @@ class FeedsWebTestBase extends WebTestBase {
    * @param array $settings
    *   The settings to set.
    */
-  public function setSettings($id, array $setting) {
-    $this->drupalPost("admin/structure/feeds/manage/$id", $settings, 'Save');
+  public function setSettings($id, $plugin_type, array $settings) {
+    $edit = array();
+    foreach ($settings as $key => $value) {
+      $edit[$plugin_type . '[configuration][' . $key . ']'] = $value;
+    }
+    $this->drupalPost("admin/structure/feeds/manage/$id", $edit, 'Save');
     $this->assertText('Your changes have been saved.');
   }
 
@@ -255,7 +269,7 @@ class FeedsWebTestBase extends WebTestBase {
     $this->drupalPost('feed/add/' . $id, $edit, 'Save');
     $this->assertText('has been created.');
 
-    // Get the node id from URL.
+    // Get the feed id from URL.
     $fid = $this->getFid($this->getUrl());
 
     // Check whether feed got recorded in feeds_feed table.
@@ -276,9 +290,9 @@ class FeedsWebTestBase extends WebTestBase {
 
     $config = unserialize($source->config);
 
-    $plugin_type = isset($config['http']) ? 'http' : 'file';
+    // $plugin_type = $config['fetcher'] == '' : 'file';
 
-    $this->assertEqual($config[$plugin_type]['source'], $feed_url, t('URL in DB correct.'));
+    $this->assertEqual($config['fetcher']['source'], $feed_url, t('URL in DB correct.'));
 
     return $fid;
   }
@@ -306,12 +320,10 @@ class FeedsWebTestBase extends WebTestBase {
     $this->assertText('has been updated.');
 
     // Check that the URL was updated in the feeds_feed table.
-    $feed = db_query("SELECT * FROM {feeds_feed} WHERE fid = :fid", array(':fid' => $fid))->fetchObject();
+    $feed = db_query("SELECT source, config FROM {feeds_feed} WHERE fid = :fid", array(':fid' => $fid))->fetchObject();
     $config = unserialize($feed->config);
-
-    $plugin_type = isset($config['http']) ? 'http' : 'file';
-
-    $this->assertEqual($config[$plugin_type]['source'], $feed_url, t('URL in DB correct.'));
+    $this->assertEqual($config['fetcher']['source'], $feed_url, 'URL fetcher config is correct.');
+    $this->assertEqual($feed->source, $feed_url, 'URL feed source is correct.');
   }
 
   /**
@@ -355,14 +367,14 @@ class FeedsWebTestBase extends WebTestBase {
     $feed = db_query("SELECT * FROM {feeds_feed} WHERE importer = :id AND fid = :fid",  array(':id' => $id, ':fid' => $fid))->fetchObject();
     $config = unserialize($feed->config);
 
-    $this->assertEqual($config[$plugin_id]['source'], $feed_url, t('URL in DB correct.'));
+    $this->assertEqual($config['fetcher']['source'], $feed_url, t('URL in DB correct.'));
 
     // Check whether feed got properly added to scheduler.
     $this->assertEqual(1, db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_import' AND scheduled = 0", array(':id' => $id, ':fid' => $fid))->fetchField());
 
     // Check expire scheduler.
     $jobs = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = :id AND id = :fid AND name = 'feeds_feed_expire'", array(':id' => $id, ':fid' => $fid))->fetchField();
-    if (entity_load('feeds_importer', $id)->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
+    if (entity_load('feeds_importer', $id)->getProcessor()->expiryTime() == SchedulerInterface::EXPIRE_NEVER) {
       $this->assertEqual(0, $jobs);
     }
     else {
@@ -401,12 +413,15 @@ class FeedsWebTestBase extends WebTestBase {
   /**
    * Delete the items belonging to a feed.
    *
-   * @param $fid
+   * @param int $fid
    *   The fid to delete items for.
    */
   public function feedDeleteItems($fid) {
+    $entity_type = entity_load('feeds_feed', $fid)->getImporter()->getProcessor()->entityType();
+
+    $table = $entity_type . '__feeds_item';
     $this->drupalPost("feed/$fid/delete-items", array(), 'Delete items');
-    $count = db_query("SELECT COUNT(*) FROM {feeds_item} WHERE fid = :fid", array(':fid' => $fid))->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {$table} WHERE feeds_item_target_id = :fid", array(':fid' => $fid))->fetchField();
     $this->assertEqual($count, 0, String::format('@count items after running delete items.', array('@count' => $count)));
   }
 
@@ -440,11 +455,10 @@ class FeedsWebTestBase extends WebTestBase {
    */
   public function assertPlugins($id, $fetcher, $parser, $processor) {
     // Assert actual configuration.
-    $config = config('feeds.importer.' . $id)->get('config');
-
-    $this->assertEqual($config['fetcher']['plugin_key'], $fetcher, 'Correct fetcher');
-    $this->assertEqual($config['parser']['plugin_key'], $parser, 'Correct parser');
-    $this->assertEqual($config['processor']['plugin_key'], $processor, 'Correct processor');
+    $importer = entity_load('feeds_importer', $id);
+    $this->assertEqual($importer->getPlugin('fetcher')->getPluginId(), $fetcher, 'Correct fetcher');
+    $this->assertEqual($importer->getPlugin('parser')->getPluginId(), $parser, 'Correct parser');
+    $this->assertEqual($importer->getPlugin('processor')->getPluginId(), $processor, 'Correct processor');
   }
 
    /**
@@ -459,44 +473,25 @@ class FeedsWebTestBase extends WebTestBase {
     *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
     */
   public function addMappings($id, $mappings, $test_mappings = TRUE) {
-
-    $path = "admin/structure/feeds/manage/$id/mapping";
-
-    // Iterate through all mappings and add the mapping via the form.
-    foreach ($mappings as $i => $mapping) {
-
-      if ($test_mappings) {
-        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
-        $this->assertEqual($current_mapping_key, -1, 'Mapping does not exist before addition.');
-      }
-
-      // Get unique flag and unset it. Otherwise, drupalPost will complain that
-      // Split up config and mapping.
-      $config = $mapping;
-      unset($config['source'], $config['target']);
-      $mapping = array('source' => $mapping['source'], 'target' => $mapping['target']);
-
-      // Add mapping.
-      $this->drupalPost($path, $mapping, t('Save'));
-
-      // If there are other configuration options, set them.
-      if ($config) {
-        $this->drupalPostAJAX(NULL, array(), 'mapping_settings_edit_' . $i);
-
-        // Set some settings.
-        $edit = array();
-        foreach ($config as $key => $value) {
-          $edit["config[$i][settings][$key]"] = $value;
-        }
-        $this->drupalPostAJAX(NULL, $edit, 'mapping_settings_update_' . $i);
-        $this->drupalPost(NULL, array(), t('Save'));
-      }
-
-      if ($test_mappings) {
-        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
-        $this->assertTrue($current_mapping_key >= 0, 'Mapping exists after addition.');
-      }
+    $importer = entity_load('feeds_importer', $id, TRUE);
+    foreach ($mappings as $mapping) {
+      $importer->addMapping($mapping);
     }
+    $importer->save();
+    // $targets = array();
+    // $edit_map = array();
+    // // Iterate through all mappings and add the mapping via the form.
+    // foreach ($mappings as $i => $mapping) {
+    //   $targets[$mapping['target']] = $mapping['target'];
+    //   foreach ($mapping['map'] as $column => $source) {
+    //     $edit_map["mappings[$i][map][$column]"] = $source;
+    //   }
+    // }
+    // foreach ($targets as $target) {
+    //   $this->drupalPost($path, array('add_target' => $target), 'Save');
+    // }
+
+    // $this->drupalPost(NULL, $edit_map, 'Save');
   }
 
   /**

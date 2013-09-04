@@ -241,6 +241,9 @@ class ImporterFormController extends EntityFormController {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
+    if ($this->entity->isNew()) {
+      $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id();
+    }
 
     $this->entity->save();
     // $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id() . '/mapping';

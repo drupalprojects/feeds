@@ -113,7 +113,7 @@ class NodeHandler extends PluginBase {
    * @todo Remove the title validation here and use constraints.
    */
   public function entityValidate($entity) {
-    if (!isset($entity->uid->value) || !is_numeric($entity->uid->value)) {
+    if (empty($entity->uid->value) || !is_numeric($entity->uid->value)) {
        $entity->uid = $this->configuration['author'];
     }
     if (Unicode::strlen($entity->title->value) > 255) {
