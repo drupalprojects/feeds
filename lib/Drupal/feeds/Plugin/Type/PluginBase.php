@@ -99,7 +99,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * A feed is being saved.
    */
-  public function onFeedSave(FeedInterface $feed) {}
+  public function onFeedSave(FeedInterface $feed, $update) {}
 
   /**
    * A feed is being deleted.

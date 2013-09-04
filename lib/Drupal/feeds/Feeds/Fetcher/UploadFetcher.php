@@ -142,7 +142,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function onFeedSave(FeedInterface $feed) {
+  public function onFeedSave(FeedInterface $feed, $update) {
     // We are only interested in continuing if we came from a form submit.
     if (!$this->feedConfig) {
       return;

@@ -554,7 +554,7 @@ class Feed extends EntityNG implements FeedInterface {
   public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
     // Alert implementers of FeedInterface to the fact that we're saving.
     foreach ($this->getImporter()->getPlugins() as $plugin) {
-      $plugin->onFeedSave($this);
+      $plugin->onFeedSave($this, $update);
     }
 
     // Store the source property of the fetcher in a separate column so that we

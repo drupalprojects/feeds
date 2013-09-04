@@ -29,6 +29,15 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function onFeedSave(FeedInterface $feed, $update) {
+    if (!$update && $this->configuration['import_on_create']) {
+      $this->startImport($feed);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function startImport(FeedInterface $feed) {
     if ($this->configuration['process_in_background']) {
       $this->startBackgroundJob($feed, 'import');
@@ -101,9 +110,6 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
       'progress_message' => '',
     );
     batch_set($batch);
-  }
-
-  public function onFeedSave(FeedInterface $feed) {
   }
 
   /**

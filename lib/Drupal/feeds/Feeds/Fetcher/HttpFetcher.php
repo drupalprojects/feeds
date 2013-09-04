@@ -141,6 +141,11 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    *   A Guzzle response.
    */
   protected function get($url, $cache = TRUE) {
+    $url = strtr($url, array(
+      'feed://' => 'http://',
+      'webcal://' => 'http://',
+    ));
+
     $client = \Drupal::httpClient();
 
     // Add our handy dandy cache plugin. It's magic.
@@ -315,7 +320,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    *
    * @todo Refactor this like woah.
    */
-  public function onFeedSave(FeedInterface $feed) {
+  public function onFeedSave(FeedInterface $feed, $update) {
     if (!$this->configuration['use_pubsubhubbub']) {
       return;
     }
