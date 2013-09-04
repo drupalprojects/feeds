@@ -554,7 +554,7 @@ class Feed extends EntityNG implements FeedInterface {
   public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
     // Alert implementers of FeedInterface to the fact that we're saving.
     foreach ($this->getImporter()->getPlugins() as $plugin) {
-      $plugin->sourceSave($this);
+      $plugin->onFeedSave($this);
     }
 
     // Store the source property of the fetcher in a separate column so that we
@@ -576,11 +576,18 @@ class Feed extends EntityNG implements FeedInterface {
       ->condition('fid', $ids)
       ->execute();
 
-    // Alert plugins that we are deleting.
-    // @todo Expand sourceDelete() to accept multiple feeds.
+    // Group feeds by imporer.
+    $grouped = array();
     foreach ($feeds as $feed) {
+      $grouped[$feed->bundle()][] = $feed;
+    }
+
+    // Alert plugins that we are deleting.
+    foreach ($grouped as $group) {
+      // Grab the first feed to get its importer.
+      $feed = reset($group);
       foreach ($feed->getImporter()->getPlugins() as $plugin) {
-        $plugin->sourceDelete($feed);
+        $plugin->onFeedDeleteMultiple($group);
       }
     }
   }

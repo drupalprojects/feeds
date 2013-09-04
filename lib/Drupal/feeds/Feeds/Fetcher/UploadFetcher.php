@@ -142,7 +142,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function sourceSave(FeedInterface $feed) {
+  public function onFeedSave(FeedInterface $feed) {
     // We are only interested in continuing if we came from a form submit.
     if (!$this->feedConfig) {
       return;
@@ -170,10 +170,12 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function sourceDelete(FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-    if ($feed_config['fid']) {
-      $this->deleteFile($feed_config['fid'], $feed->id());
+  public function onFeedDeleteMultiple(array $feeds) {
+    foreach ($feeds as $feed) {
+      $feed_config = $feed->getConfigurationFor($this);
+      if ($feed_config['fid']) {
+        $this->deleteFile($feed_config['fid'], $feed->id());
+      }
     }
   }
 

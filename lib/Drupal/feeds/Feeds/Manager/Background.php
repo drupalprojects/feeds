@@ -103,7 +103,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
     batch_set($batch);
   }
 
-  public function sourceSave(FeedInterface $feed) {
+  public function onFeedSave(FeedInterface $feed) {
   }
 
   /**

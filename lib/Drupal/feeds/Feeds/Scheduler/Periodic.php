@@ -144,21 +144,23 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   /**
    * {@inheritdoc}
    */
-  public function sourceDelete(FeedInterface $feed) {
+  public function onFeedDeleteMultiple(array $feeds) {
     if (!$this->jobController) {
       return;
     }
 
-    // Remove from schedule.
-    $job = array(
-      'name' => 'feeds_feed_import',
-      'type' => $feed->bundle(),
-      'id' => $feed->id(),
-    );
-    $this->jobController->remove($job);
+    foreach ($feeds as $feed) {
+      // Remove from schedule.
+      $job = array(
+        'name' => 'feeds_feed_import',
+        'type' => $feed->bundle(),
+        'id' => $feed->id(),
+      );
+      $this->jobController->remove($job);
 
-    $job['name'] = 'feeds_feed_expire';
-    $this->jobController->remove($job);
+      $job['name'] = 'feeds_feed_expire';
+      $this->jobController->remove($job);
+    }
   }
 
   /**

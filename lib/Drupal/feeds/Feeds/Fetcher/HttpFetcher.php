@@ -140,11 +140,13 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    * @return \Guzzle\Http\Message\Response
    *   A Guzzle response.
    */
-  protected function get($url) {
+  protected function get($url, $cache = TRUE) {
     $client = \Drupal::httpClient();
 
     // Add our handy dandy cache plugin. It's magic.
-    $client->addSubscriber(new CachePlugin(\Drupal::cache()));
+    if ($cache) {
+      $client->addSubscriber(new CachePlugin(\Drupal::cache()));
+    }
 
     $request = $client->get($url);
 
@@ -294,8 +296,8 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
       form_set_error($form_key, $this->t('The URL %source is invalid.', array('%source' => $values['source'])));
     }
     elseif ($this->configuration['auto_detect_feeds']) {
-      $http = new Feed($values['source']);
-      if ($url = $http->getCommonSyndication()) {
+      $response = $this->get($values['source'], FALSE);
+      if ($url = Feed::getCommonSyndication($values['source'], $response->getBody(TRUE))) {
         $values['source'] = $url;
       }
     }
@@ -313,7 +315,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    *
    * @todo Refactor this like woah.
    */
-  public function sourceSave(FeedInterface $feed) {
+  public function onFeedSave(FeedInterface $feed) {
     if (!$this->configuration['use_pubsubhubbub']) {
       return;
     }
@@ -373,20 +375,23 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
    * {@inheritdoc}
    *
    * @todo Call sourceDelete() when changing plugins.
-   * @todo Clear cache when deleting.
    */
-  public function sourceDelete(FeedInterface $feed) {
+  public function onFeedDeleteMultiple(array $feeds) {
     if ($this->configuration['use_pubsubhubbub']) {
-      $item = array(
-        'type' => $this->getPluginId(),
-        'id' => $feed->id(),
-      );
-      // Unsubscribe from feed.
-      $this->unsubscribeQueue->createItem($item);
+      foreach ($feeds as $feed) {
+        $item = array(
+          'type' => $this->getPluginId(),
+          'id' => $feed->id(),
+        );
+        // Unsubscribe from feed.
+        $this->unsubscribeQueue->createItem($item);
+      }
     }
 
-    // Remove caches and files for this feed.
-    $this->clear($feed);
+    // Remove caches and files for this feeds.
+    foreach ($feeds as $feed) {
+      $this->clear($feed);
+    }
   }
 
   /**

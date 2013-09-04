@@ -1001,4 +1001,20 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     return $entity;
   }
 
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Sort this out so that we aren't calling db_delete() here.
+   */
+  public function onFeedDeleteMultiple(array $feeds) {
+    $fids = array();
+    foreach ($feeds as $feed) {
+      $fids[] = $feed->id();
+    }
+    $table = $this->entityType() . '__feeds_item';
+    db_delete($table)
+      ->condition('feeds_item_target_id', $fids)
+      ->execute();
+  }
+
 }
