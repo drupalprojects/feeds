@@ -845,17 +845,23 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
   /**
    * {@inheritdoc}
-   *
-   * @todo We could make this smarter and check if any feeds have items
-   *   imported.
    */
   public function isLocked() {
     if ($this->isLocked === NULL) {
-      $this->isLocked = (bool) $this->queryFactory
-        ->get('feeds_feed')
+      $this->isLocked = FALSE;
+
+      // Look for feeds.
+      $fids = $this->queryFactory->get('feeds_feed')
         ->condition('importer', $this->importer->id())
+        ->execute();
+
+      if ($fids) {
+        // Check to see if any feeds have imported entities.
+        $this->isLocked = (bool) $this->queryFactory->get($this->entityType())
+        ->condition('feeds_item.target_id', $fids)
         ->range(0, 1)
         ->execute();
+      }
     }
 
     return $this->isLocked;
@@ -871,11 +877,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The item to hash.
    *
    * @return string
-   *   Always returns a hash, even with empty, null, or false:
-   *   - Empty arrays return 40cd750bba9870f18aada2478b24840a
-   *   - Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
-   *
-   * @todo I really doubt the above is still true. Plus, who cares.
+   *   An MD5 hash.
    */
   protected function hash(array $item) {
     return hash('md5', serialize($item) . serialize($this->importer->getMappings()));
@@ -895,7 +897,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The message to log.
    *
    * @todo This no longer works due to circular references.
-   * @todo Move to EntityProcessor.
    */
   protected function createLogMessage(\Exception $e, EntityInterface $entity, array $item) {
     include_once DRUPAL_ROOT . '/core/includes/utility.inc';
@@ -925,8 +926,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Get rid of the variable_get() here.
    */
   public function getLimit() {
     return $this->configuration['process_limit'];
