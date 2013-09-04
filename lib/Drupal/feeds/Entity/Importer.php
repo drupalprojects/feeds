@@ -141,8 +141,10 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
     parent::__construct($values, $entity_type);
 
-    // $manager = \Drupal::service('feeds.plugin.manager.target');
-    // $this->mappingsBag = new DefaultPluginBag($manager, $this->configuration['mappings']);
+    // Prepare plugin bags. This has to be done after all configuration is done.
+    foreach ($this->getPluginTypes() as $type) {
+      $this->initPluginBag($type);
+    }
   }
 
   /**
@@ -323,9 +325,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getPlugin($plugin_type) {
-    if (!isset($this->pluginBags[$plugin_type])) {
-      $this->initPluginBag($plugin_type);
-    }
     return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
   }
 
