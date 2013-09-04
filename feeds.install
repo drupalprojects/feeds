@@ -165,6 +165,12 @@ function feeds_schema() {
       ),
     ),
     'primary key' => array('id'),
+    'foreign keys' => array(
+      'id' => array(
+        'table' => 'feeds_feed',
+        'columns' => array('id' => 'fid'),
+      ),
+    ),
   );
   $schema['feeds_log'] = array(
     'description' => 'Table that contains logs of feeds events.',
@@ -223,10 +229,15 @@ function feeds_schema() {
     ),
     'primary key' => array('flid'),
     'indexes' => array(
-      'fid' => array('fid'),
       'request_time' => array('request_time'),
       'log_time' => array('log_time'),
       'type' => array('type'),
+    ),
+    'foreign keys' => array(
+      'fid' => array(
+        'table' => 'feeds_feed',
+        'columns' => array('fid' => 'fid'),
+      ),
     ),
   );
 
