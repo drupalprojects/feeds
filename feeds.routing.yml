@@ -1,9 +1,9 @@
-feeds_feed.list:
-  pattern: '/admin/content/feed'
-  defaults:
-    _entity_list: 'feeds_feed'
-  requirements:
-    _permission: 'administer feeds'
+# feeds_feed.list:
+#   pattern: '/admin/content/feed'
+#   defaults:
+#     _entity_list: 'feeds_feed'
+#   requirements:
+#     _permission: 'administer feeds'
 
 feeds_feed.create_list:
   pattern: '/feed/add'
