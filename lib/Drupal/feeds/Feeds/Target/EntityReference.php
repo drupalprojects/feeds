@@ -12,11 +12,11 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
- * Defines an entity reference field mapper.
+ * Defines an entity reference mapper.
  *
  * @Plugin(
  *   id = "entity_reference",
- *   field_types = {"entity_reference_field", "entity_reference"}
+ *   field_types = {"entity_reference", "entity_reference_field"}
  * )
  */
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
@@ -61,25 +61,20 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    */
   public function __construct(array $settings, $plugin_id, array $plugin_definition) {
     parent::__construct($settings, $plugin_id, $plugin_definition);
-
     // Calculate the upload directory.
-    if (isset($this->settings['instance'])) {
-      $this->entityType = $this->getEntityType();
+    $this->entityType = $this->getEntityType();
 
-      // $this->availableEntities = \Drupal::service('plugin.manager.entity_reference.selection')
-      //   ->getInstance(array('field_definition' => $this->settings['instance']))
-      //   ->getReferenceableEntities();
+    // $this->availableEntities = \Drupal::service('plugin.manager.entity_reference.selection')
+    //   ->getInstance(array('field_definition' => $this->settings['instance']))
+    //   ->getReferenceableEntities();
 
-      $info = entity_get_info($this->entityType);
-      $this->entityQuery = \Drupal::entityQuery($this->entityType);
-      $this->conditionKey = $info['entity_keys'][$this->configuration['reference_by']];
-    }
-    else {
-    }
+    $info = entity_get_info($this->entityType);
+    $this->entityQuery = \Drupal::entityQuery($this->entityType);
+    $this->conditionKey = $info['entity_keys'][$this->configuration['reference_by']];
   }
 
   protected function getEntityType() {
-    return $this->settings['instance']->getFieldSetting('target_type');
+    return $this->settings['settings']['target_type'];
   }
 
   /**
@@ -124,7 +119,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * {@inheritdoc}
    */
   protected function getDefaultConfiguration() {
-    return array('reference_by' => 'label');
+    return array('reference_by' => 'id');
   }
 
   /**
