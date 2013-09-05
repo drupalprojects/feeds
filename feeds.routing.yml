@@ -5,13 +5,6 @@
 #   requirements:
 #     _permission: 'administer feeds'
 
-feeds_feed.multiple_delete_confirm:
-  pattern: '/admin/content/feed/delete'
-  defaults:
-    _form: '\Drupal\feeds\Form\DeleteMultiple'
-  requirements:
-    _permission: 'administer feeds'
-
 feeds_feed.create_list:
   pattern: '/feed/add'
   defaults:
@@ -57,6 +50,13 @@ feeds_feed.delete:
   requirements:
     _entity_access: 'feeds_feed.delete'
     feeds_feed:  \d+
+
+feeds_feed.multiple_delete_confirm:
+  pattern: '/admin/content/feed/delete'
+  defaults:
+    _form: '\Drupal\feeds\Form\DeleteMultiple'
+  requirements:
+    _permission: 'administer feeds'
 
 feeds_feed.import:
   pattern: '/feed/{feeds_feed}/import'

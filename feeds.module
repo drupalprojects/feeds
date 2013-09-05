@@ -20,8 +20,7 @@ use Zend\Feed\Reader\Reader;
 function feeds_help($path, $arg) {
   switch ($path) {
     case 'admin/structure/feeds':
-      $output = '<p>' . t('Create one or more Feed importers for pulling content into Drupal. You can use these importers from the <a href="@import">Import</a> page or - if you attach them to a content type - simply by creating a node from that content type.', array('@import' => url('import'))) . '</p>';
-      return $output;
+      return '<p>' . t('Create one or more Feed importers for pulling content into Drupal. You can use these importers from the <a href="@import">Import</a> page or - if you attach them to a content type - simply by creating a node from that content type.', array('@import' => url('import'))) . '</p>';
   }
 }
 

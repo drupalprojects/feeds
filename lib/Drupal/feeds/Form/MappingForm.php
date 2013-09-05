@@ -78,6 +78,7 @@ class MappingForm extends FormBase {
         $this->t('Target'),
         $this->t('Summary'),
         $this->t('Configure'),
+        $this->t('Unique'),
         $this->t('Remove'),
       ),
       '#sticky' => TRUE,
@@ -106,8 +107,9 @@ class MappingForm extends FormBase {
     );
 
     $table['add']['summary']['#markup'] = '';
-    $table['add']['remove']['#markup'] = '';
     $table['add']['configure']['#markup'] = '';
+    $table['add']['unique']['#markup'] = '';
+    $table['add']['remove']['#markup'] = '';
 
     $form['mappings'] = $table;
 
@@ -224,22 +226,36 @@ class MappingForm extends FormBase {
       $row['configure']['#markup'] = '';
     }
 
-    if ($delta != $ajax_delta) {
-      $row['remove'] = array(
-        '#title' => $this->t('Remove'),
-        '#type' => 'checkbox',
-        '#default_value' => FALSE,
-        '#title_display' => 'invisible',
-        '#parents' => array('remove_mappings', $delta),
-        '#ajax' => array(
-          'callback' => array($this, 'ajaxCallback'),
-          'wrapper' => 'feeds-mapping-form-ajax-wrapper',
-          'effect' => 'none',
-          'progress' => 'none',
-        ),
-        '#remove' => TRUE,
-      );
+    $mappings = $this->importer->getMappings();
+
+    foreach ($mapping['map'] as $column => $source) {
+      if (!empty($this->targets[$mapping['target']]['unique'][$column])) {
+        $row['unique'][$column] = array(
+          '#title' => $this->t('Unique'),
+          '#type' => 'checkbox',
+          '#default_value' => !empty($mappings[$delta]['unique'][$column]),
+          '#title_display' => 'invisible',
+        );
+      }
+      else {
+        $row['unique']['#markup'] = '';
+      }
     }
+
+    $row['remove'] = array(
+      '#title' => $this->t('Remove'),
+      '#type' => 'checkbox',
+      '#default_value' => FALSE,
+      '#title_display' => 'invisible',
+      '#parents' => array('remove_mappings', $delta),
+      '#ajax' => array(
+        'callback' => array($this, 'ajaxCallback'),
+        'wrapper' => 'feeds-mapping-form-ajax-wrapper',
+        'effect' => 'none',
+        'progress' => 'none',
+      ),
+      '#remove' => TRUE,
+    );
 
     return $row;
   }

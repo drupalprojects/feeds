@@ -28,6 +28,8 @@ class FeedsItem extends FieldTargetBase {
     unset($target['properties']['revision_id']);
     unset($target['properties']['imported']);
     unset($target['properties']['hash']);
+    $target['unique']['url'] = TRUE;
+    $target['unique']['guid'] = TRUE;
   }
 
 }

@@ -186,6 +186,9 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
   public function setMapping($delta, $mapping) {
     $this->mappings[$delta]['map'] = $mapping['map'];
+    if (!empty($mapping['unique'])) {
+      $this->mappings[$delta]['unique'] = array_filter($mapping['unique']);
+    }
     return $this;
   }
 

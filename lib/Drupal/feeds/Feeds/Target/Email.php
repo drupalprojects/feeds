@@ -25,7 +25,7 @@ class Email extends FieldTargetBase {
    */
   protected function prepareValue($delta, array &$values) {
     $values['value'] = trim($values['value']);
-    if (!filter_var($values['value'], FILTER_VALIDATE_EMAIL)){
+    if (!filter_var($values['value'], FILTER_VALIDATE_EMAIL)) {
       $values['value'] = '';
     }
   }

@@ -807,6 +807,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   protected function uniqueTargets(FeedInterface $feed, array $item) {
     $parser = $this->importer->getParser();
+    $mapping_targets = $this->importer->getProcessor()->getMappingTargets();
     $targets = array();
 
     foreach ($this->importer->getMappings() as $mapping) {
@@ -814,7 +815,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
         foreach ($mapping['unique'] as $key => $true) {
           // Invoke the parser's getSourceElement to retrieve the value for this
           // mapping's source.
-          $field = $mapping['target'] . '.' . $key;
+          if (empty($mapping_targets[$mapping['target']]['configurable'])) {
+            $field = $mapping['target'];
+          }
+          else {
+            $field = $mapping['target'] . '.' . $key;
+          }
           $targets[$field] = $parser->getSourceElement($feed, $item, $mapping['map'][$key]);
         }
       }
