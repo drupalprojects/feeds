@@ -8,9 +8,7 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
  * Defines a path field mapper.
@@ -24,6 +22,8 @@ class Path extends FieldTargetBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo  Support the pathauto configuration.
    */
   protected static function prepareTarget(array &$target) {
     unset($target['properties']['pid']);

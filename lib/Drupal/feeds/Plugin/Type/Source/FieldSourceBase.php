@@ -22,6 +22,7 @@ abstract class FieldSourceBase extends PluginBase implements SourceInterface {
    */
   public static function sources(array &$sources, ImporterInterface $importer, array $definition) {
     $field_definitions = \Drupal::entityManager()->getFieldDefinitions('feeds_feed', $importer->id());
+
     foreach ($field_definitions as $field => $field_definition) {
       if (in_array($field_definition['type'], $definition['field_types'])) {
         $field_definition['label'] = t('Feed: @label', array('@label' => $field_definition['label']));
