@@ -100,6 +100,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   protected $isLocked;
 
+  protected $uniqueQueries = array();
+
   /**
    * Constructs an EntityProcessor object.
    *
@@ -248,7 +250,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Delete a batch of entities.
-    $entity_ids = $query->range(0, $this->getLimit())->execute();
+    $entity_ids = $query->range(0, $this->importer->getLimit())->execute();
 
     if ($entity_ids) {
       $this->entityDeleteMultiple($entity_ids);
@@ -724,7 +726,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Delete a batch of entities.
-    if ($entity_ids = $query->range(0, $this->getLimit())->execute()) {
+    if ($entity_ids = $query->range(0, $this->importer->getLimit())->execute()) {
       $this->entityDeleteMultiple($entity_ids);
       $state->deleted += count($entity_ids);
       $state->progress($state->total, $state->deleted);
@@ -756,58 +758,23 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The integer of the entity, or false if not found.
    */
   protected function existingEntityId(FeedInterface $feed, array $item) {
-    $query = $this->queryFactory->get($this->entityType())
-      ->condition('feeds_item.target_id', $feed->id())
-      ->range(0, 1);
 
-    // Iterate through all unique targets and test whether they already exist.
-    foreach ($this->uniqueTargets($feed, $item) as $target => $value) {
-      $entity_id = $query->condition($target, $value)->execute();
-
-      if ($entity_id) {
-        return key($entity_id);
-      }
-
-      $query = clone $query;
-    }
-
-    return FALSE;
-  }
-
-  /**
-   * Iterates over a target array and retrieves all sources that are unique.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed being imported.
-   * @param array $item
-   *   The parser result object.
-   *
-   * @return array
-   *   An array where the keys are target field names and the values are the
-   *   elements from the source item mapped to these targets.
-   */
-  protected function uniqueTargets(FeedInterface $feed, array $item) {
     $parser = $this->importer->getParser();
-    $mapping_targets = $this->importer->getMappingTargets();
-    $targets = array();
 
-    foreach ($this->importer->getMappings() as $mapping) {
+    foreach ($this->importer->getMappings() as $delta => $mapping) {
       if (!empty($mapping['unique'])) {
         foreach ($mapping['unique'] as $key => $true) {
           // Invoke the parser's getSourceElement to retrieve the value for this
           // mapping's source.
-          if (empty($mapping_targets[$mapping['target']]['configurable'])) {
-            $field = $mapping['target'];
+          $value = $parser->getSourceElement($feed, $item, $mapping['map'][$key]);
+          $plugin = $this->importer->getTargetPlugin($delta);
+          $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $value);
+          if ($entity_id) {
+            return $entity_id;
           }
-          else {
-            $field = $mapping['target'] . '.' . $key;
-          }
-          $targets[$field] = $parser->getSourceElement($feed, $item, $mapping['map'][$key]);
         }
       }
     }
-
-    return $targets;
   }
 
   /**
@@ -982,7 +949,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     // Set target values.
     foreach ($mappings as $delta => $mapping) {
       $plugin = $this->importer->getTargetPlugin($delta);
-      $plugin->setTarget($feed, $entity, $field, $field_values[$mapping['target']]);
+      $plugin->setTarget($feed, $entity, $mapping['target'], $field_values[$mapping['target']]);
     }
 
     return $entity;
