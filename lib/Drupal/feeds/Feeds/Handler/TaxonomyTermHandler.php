@@ -32,10 +32,6 @@ class TaxonomyTermHandler extends PluginBase {
     return $values;
   }
 
-  public function getMappingTargets(array &$targets) {
-    unset($targets['format']);
-  }
-
   /**
    * {@inheritdoc}
    */

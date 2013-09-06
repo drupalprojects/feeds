@@ -207,8 +207,10 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // should now be assigned to feed node author.
     $this->addMappings('syndication', array(
       5 => array(
-        'source' => 'parent:uid',
         'target' => 'uid',
+        'map' => array(
+          'value' => 'parent:uid',
+        ),
       ),
     ));
     $this->feedImportItems($fid);
@@ -417,7 +419,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
    *
    * @todo User ref by name.
    */
-  public function ptestAuthorize() {
+  public function testAuthorize() {
 
     // Create a user with limited permissions.
    $account = $this->drupalCreateUser(array(), 'Development Seed');
@@ -455,7 +457,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
   /**
    * Tests expiring nodes.
    */
-  public function ptestExpiry() {
+  public function testExpiry() {
     // Create importer configuration.
     $this->setSettings('syndication', 'processor', array(
       'expire' => 3600,

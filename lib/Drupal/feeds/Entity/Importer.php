@@ -82,8 +82,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
   /**
    * Plugin ids and configuration.
-   *
-   * @todo Move this to sotrage controller.
    */
   protected $plugins = array(
     'manager' => array(
@@ -114,6 +112,20 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * @var array
    */
   protected $mappings = array();
+
+  /**
+   * The list of sources.
+   *
+   * @var array
+   */
+  protected $sources;
+
+  /**
+   * The list of targets;
+   *
+   * @var array
+   */
+  protected $targets;
 
   /**
    * The plugin bags that store feeds plugins keyed by plugin type.
@@ -152,6 +164,44 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public function getLimit() {
     return $this->getProcessor()->getLimit();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMappingSources() {
+    if ($this->sources === NULL) {
+      $this->sources = $this->getParser()->getMappingSources();
+      $definitions = \Drupal::service('plugin.manager.feeds.source')->getDefinitions();
+
+      foreach ($definitions as $definition) {
+        $class = $definition['class'];
+        $class::sources($this->sources, $this, $definition);
+      }
+
+      \Drupal::moduleHandler()->alter('feeds_sources', $this->sources, $this);
+    }
+
+    return $this->sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMappingTargets() {
+    if ($this->targets === NULL) {
+      $this->targets = $this->getProcessor()->getMappingTargets();
+      $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
+
+      foreach ($definitions as $definition) {
+        $class = $definition['class'];
+        $class::targets($this->targets, $this, $definition);
+      }
+
+      \Drupal::moduleHandler()->alter('feeds_targets', $this->targets, $this);
+    }
+
+    return $this->targets;
   }
 
   /**
@@ -210,12 +260,14 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *
    * @return array
    *   The mapping array.
+   *
+   * @todo Make this work again.
    */
   protected function buildDefaultMappings() {
     return array();
     $mappings = array();
-    $targets = $this->getProcessor()->getMappingTargets();
-    $sources = $this->getParser()->getMappingSources();
+    $targets = $this->getMappingTargets();
+    $sources = $this->getMappingSources();
 
     // // Remove sources with no suggestions.
     $suggested = array();
@@ -331,11 +383,17 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
   }
 
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Use plugin bag.
+   */
   public function getTargetPlugin($delta) {
     if (!isset($this->targetPlugins[$delta])) {
-      $targets = $this->getProcessor()->getMappingTargets();
+      $targets = $this->getMappingTargets();
       $target = $this->mappings[$delta]['target'];
 
+      // The target is a plugin.
       if (isset($targets[$target]['id'])) {
         $id = $targets[$target]['id'];
         $settings = $targets[$target];

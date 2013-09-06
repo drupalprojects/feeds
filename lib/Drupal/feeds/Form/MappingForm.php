@@ -44,10 +44,11 @@ class MappingForm extends FormBase {
    */
   public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
     $importer = $this->importer = $feeds_importer;
-    $this->targets = $targets = $importer->getProcessor()->getMappingTargets();
+    $this->targets = $targets = $importer->getMappingTargets();
+
     // Denormalize targets.
     $this->sourceOptions = array();
-    foreach ($importer->getParser()->getMappingSources() as $key => $info) {
+    foreach ($importer->getMappingSources() as $key => $info) {
       $this->sourceOptions[$key] = $info['label'];
     }
     $this->sourceOptions = $this->sortOptions($this->sourceOptions);

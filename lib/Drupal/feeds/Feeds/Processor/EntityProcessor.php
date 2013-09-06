@@ -66,13 +66,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected $entityInfo;
 
   /**
-   * The targets for this processor.
-   *
-   * @var array
-   */
-  protected $targets = array();
-
-  /**
    * The extenders that apply to this entity type.
    *
    * @var array
@@ -697,19 +690,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function getMappingTargets() {
-    if (!$this->targets) {
-      // Let other modules expose mapping targets.
-      $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
-
-      foreach ($definitions as $definition) {
-        $class = $definition['class'];
-        $class::targets($this->targets, $this->importer, $definition);
-      }
-
-      $this->apply(__FUNCTION__, $this->targets);
-    }
-
-    return $this->targets;
+    return array();
   }
 
   /**
@@ -807,7 +788,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   protected function uniqueTargets(FeedInterface $feed, array $item) {
     $parser = $this->importer->getParser();
-    $mapping_targets = $this->importer->getProcessor()->getMappingTargets();
+    $mapping_targets = $this->importer->getMappingTargets();
     $targets = array();
 
     foreach ($this->importer->getMappings() as $mapping) {

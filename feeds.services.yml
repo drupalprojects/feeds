@@ -14,6 +14,9 @@ services:
   plugin.manager.feeds.processor:
     class: Drupal\feeds\Plugin\Type\FeedsPluginManager
     arguments: ['processor', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+  plugin.manager.feeds.source:
+    class: Drupal\feeds\Plugin\Type\FeedsPluginManager
+    arguments: ['source', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   plugin.manager.feeds.target:
     class: Drupal\feeds\Plugin\Type\FeedsPluginManager
     arguments: ['target', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
@@ -34,5 +37,3 @@ services:
   feeds.job_controller:
     class: Drupal\feeds\Controller\JobController
     arguments: ['@state', '@lock']
-  feeds.test:
-    class: Drupal\feeds\Controller\Test
