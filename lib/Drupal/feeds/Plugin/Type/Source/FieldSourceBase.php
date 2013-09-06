@@ -26,6 +26,7 @@ abstract class FieldSourceBase extends PluginBase implements SourceInterface {
       if (in_array($field_definition['type'], $definition['field_types'])) {
         $field_definition['label'] = t('Feed: @label', array('@label' => $field_definition['label']));
         $sources['parent:' . $field] = $field_definition;
+        $sources['parent:' . $field]['id'] = $definition['id'];
       }
     }
   }

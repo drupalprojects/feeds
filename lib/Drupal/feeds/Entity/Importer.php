@@ -138,6 +138,8 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
   protected $targetPlugins = array();
 
+  protected $sourcePlugins = array();
+
   /**
    * Constructs a new Importer object.
    */
@@ -410,6 +412,28 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     }
 
     return $this->targetPlugins[$delta];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Use plugin bag.
+   */
+  public function getSourcePlugin($source) {
+    if (!isset($this->sourcePlugins[$source])) {
+      $sources = $this->getMappingSources();
+
+      // The source is a plugin.
+      if (isset($sources[$source]['id'])) {
+        $configuration = array('importer' => $this);
+        $this->sourcePlugins[$source] = \Drupal::service('plugin.manager.feeds.source')->createInstance($id, $configuration);
+      }
+      else {
+        $this->sourcePlugins[$source] = FALSE;
+      }
+    }
+
+    return $this->sourcePlugins[$source];
   }
 
   public function getPluginOptionsList($plugin_type) {

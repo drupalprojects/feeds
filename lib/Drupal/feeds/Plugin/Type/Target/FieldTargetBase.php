@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Type\Target;
 
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
@@ -75,7 +76,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
   protected static function prepareTarget(array &$target) {}
 
-  public function prepareValues(array &$values) {
+  protected function prepareValues(array &$values) {
     foreach ($values as $delta => &$columns) {
       $this->prepareValue($delta, $columns);
     }
@@ -85,6 +86,14 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
     foreach ($values as $column => $value) {
       $values[$column] = (string) $value;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setTarget(FeedInterface $feed, $entity, $field_name, array $values) {
+    $this->prepareValues($values);
+    $entity->get($field_name)->setValue($values);
   }
 
 }

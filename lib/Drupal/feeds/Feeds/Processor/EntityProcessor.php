@@ -952,8 +952,13 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
           $source_values[$target][$column] = array();
         }
 
-        // Retrieve source element's value from parser.
-        $value = $parser->getSourceElement($feed, $item, $source);
+        if ($plugin = $this->importer->getSourcePlugin($source)) {
+          $value = $parser->getSourceElement($feed, $item, $source);
+        }
+        else {
+          // Retrieve source element's value from parser.
+          $value = $parser->getSourceElement($feed, $item, $source);
+        }
         if (!is_array($value)) {
           $source_values[$target][$column][] = $value;
         }
@@ -976,13 +981,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
     // Set target values.
     foreach ($mappings as $delta => $mapping) {
-      $field = $mapping['target'];
-      // Map the source element's value to the target.
-      if ($plugin = $this->importer->getTargetPlugin($delta)) {
-        $plugin->prepareValues($field_values[$field]);
-      }
-      // Set the values on the entity.
-      $entity->get($field)->setValue($field_values[$field]);
+      $plugin = $this->importer->getTargetPlugin($delta);
+      $plugin->setTarget($feed, $entity, $field, $field_values[$mapping['target']]);
     }
 
     return $entity;

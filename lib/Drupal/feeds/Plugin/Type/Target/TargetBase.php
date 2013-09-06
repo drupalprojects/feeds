@@ -58,11 +58,13 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
   /**
    * {@inheritdoc}
    */
-
   protected function getDefaultConfiguration() {
     return array();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildConfigurationForm(array $form, array &$form_state) {
     return $form;
   }
