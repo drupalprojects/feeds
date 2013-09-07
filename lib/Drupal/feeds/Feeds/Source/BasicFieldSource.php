@@ -8,7 +8,6 @@
 namespace Drupal\feeds\Feeds\Source;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\Source\FieldSourceBase;
 
 /**
@@ -24,7 +23,9 @@ use Drupal\feeds\Plugin\Type\Source\FieldSourceBase;
  *     "list_float",
  *     "list_boolean",
  *     "datetime",
- *     "email_field"
+ *     "email_field",
+ *     "entity_reference",
+ *     "entity_reference_field"
  *   }
  * )
  */

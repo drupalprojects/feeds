@@ -22,7 +22,6 @@ abstract class FieldSourceBase extends PluginBase implements SourceInterface {
    */
   public static function sources(array &$sources, ImporterInterface $importer, array $definition) {
     $field_definitions = \Drupal::entityManager()->getFieldDefinitions('feeds_feed', $importer->id());
-
     foreach ($field_definitions as $field => $field_definition) {
       if (in_array($field_definition['type'], $definition['field_types'])) {
         $field_definition['label'] = t('Feed: @label', array('@label' => $field_definition['label']));
@@ -34,14 +33,17 @@ abstract class FieldSourceBase extends PluginBase implements SourceInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo I guess we could cache this since the value will be the same for
+   *   $element_key/$feed id combo.
    */
   public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
+    list(, $field) = explode(':', $element_key);
     $return = array();
-    if ($field = $feed->get($element_key)) {
-      foreach ($field->getValue() as $values) {
-        foreach ($values as $value) {
-          $return[] = $value['value'];
-        }
+
+    if ($field_list = $feed->get($field)) {
+      foreach ($field_list as $field) {
+        $return[] = $field->value;
       }
     }
 

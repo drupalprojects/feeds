@@ -920,7 +920,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
         }
 
         if ($plugin = $this->importer->getSourcePlugin($source)) {
-          $value = $parser->getSourceElement($feed, $item, $source);
+          $value = $plugin->getSourceElement($feed, $item, $source);
         }
         else {
           // Retrieve source element's value from parser.

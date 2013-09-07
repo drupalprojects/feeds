@@ -426,7 +426,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
       // The source is a plugin.
       if (isset($sources[$source]['id'])) {
         $configuration = array('importer' => $this);
-        $this->sourcePlugins[$source] = \Drupal::service('plugin.manager.feeds.source')->createInstance($id, $configuration);
+        $this->sourcePlugins[$source] = \Drupal::service('plugin.manager.feeds.source')->createInstance($sources[$source]['id'], $configuration);
       }
       else {
         $this->sourcePlugins[$source] = FALSE;
