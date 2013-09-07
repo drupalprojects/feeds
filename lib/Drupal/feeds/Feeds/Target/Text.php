@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
@@ -62,6 +63,8 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    */
   protected static function prepareTarget(array &$target) {
     unset($target['properties']['format']);
+    unset($target['properties']['processed']);
+    unset($target['properties']['summary_processed']);
   }
 
   /**
@@ -69,6 +72,21 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    */
   protected function prepareValue($delta, array &$values) {
     $values['value'] = (string) $values['value'];
+
+    // At todo. Maybe break these up into separate classes.
+    if (!empty($this->settings['settings']['allowed_values'])) {
+      if ($key = array_search($values['value'], $this->settings['settings']['allowed_values']) !== FALSE) {
+        $values['value'] = $key;
+      }
+      else {
+        $values['value'] = '';
+      }
+    }
+    // Trim the value if it's too long.
+    if (!empty($this->settings['settings']['max_length'])) {
+      $values['value'] = Unicode::substr($values['value'], 0, $this->settings['settings']['max_length']);
+    }
+
     $values['format'] = $this->configuration['format'];
   }
 

@@ -82,13 +82,14 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    */
   protected static function prepareTarget(array &$target) {
     unset($target['properties']['revision_id']);
+    unset($target['properties']['entity']);
   }
 
   /**
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $values['target_id'] = $this->findEntity(trim($values['value']));
+    $values['target_id'] = $this->findEntity(trim($values['target_id']));
   }
 
   /**
@@ -107,7 +108,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       $query->condition($this->entityKeys['bundle'], $this->bundle);
     }
 
-    $ids = $query->condition($this->conditionKey, $value)->range(0, 1)->execute();
+    $ids = array_filter($query->condition($this->conditionKey, $value)->range(0, 1)->execute());
     if ($ids) {
       return reset($ids);
     }
