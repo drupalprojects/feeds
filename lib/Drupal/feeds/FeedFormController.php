@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFormControllerNG;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
@@ -175,7 +176,7 @@ class FeedFormController extends EntityFormControllerNG {
       $form_state['redirect'] = 'feed/' . $feed->id();
 
       // Clear feed cache.
-      cache_invalidate_tags(array('feeds' => TRUE));
+      Cache::invalidateTags(array('feeds' => TRUE));
 
       // Schedule jobs for this feed.
       $feed->schedule();

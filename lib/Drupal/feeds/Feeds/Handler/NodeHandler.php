@@ -87,7 +87,6 @@ class NodeHandler extends PluginBase {
    */
   public function entityPrepare(FeedInterface $feed, $node) {
     $update_existing = $this->importer->getProcessor()->getConfiguration('update_existing');
-
     if ($update_existing != ProcessorInterface::UPDATE_EXISTING) {
       $node->uid = $this->configuration['author'];
     }
@@ -104,20 +103,6 @@ class NodeHandler extends PluginBase {
     }
     else {
       $node->log = 'Replaced by FeedsNodeProcessor';
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * @todo Remove the title validation here and use constraints.
-   */
-  public function entityValidate($entity) {
-    if (empty($entity->uid->value) || !is_numeric($entity->uid->value)) {
-       $entity->uid = $this->configuration['author'];
-    }
-    if (Unicode::strlen($entity->title->value) > 255) {
-      $entity->title = Unicode::substr($entity->title->value, 0, 255);
     }
   }
 

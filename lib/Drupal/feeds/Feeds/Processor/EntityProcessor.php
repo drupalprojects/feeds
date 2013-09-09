@@ -716,7 +716,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     $query = $this->queryFactory->get($this->entityType())
-      ->condition('feeds_item.target_id', $feed->fid())
+      ->condition('feeds_item.target_id', $feed->id())
       ->condition('feeds_item.imported', REQUEST_TIME - $time, '<');
 
     // If there is no total, query it.
@@ -768,6 +768,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
           // mapping's source.
           $value = $parser->getSourceElement($feed, $item, $mapping['map'][$key]);
           $plugin = $this->importer->getTargetPlugin($delta);
+
           $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $value);
           if ($entity_id) {
             return $entity_id;
