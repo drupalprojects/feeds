@@ -67,6 +67,10 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
     return new static($configuration, $plugin_id, $plugin_definition);
   }
 
+  public function getImportPeriod() {
+    return $this->configuration['import_period'];
+  }
+
   /**
    * Schedules periodic or background import tasks.
    *
@@ -76,19 +80,12 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
    *   The feed to schedule.
    */
   public function scheduleImport(FeedInterface $feed) {
-
     if (!$this->jobController) {
       return;
     }
 
     // Check whether any fetcher is overriding the import period.
-    $period = $this->configuration['import_period'];
-
-    // Allow fetcher to override the import period.
-    $fetcher = $feed->getImporter()->getFetcher();
-    if ($fetcher instanceof PuSHFetcherInterface && $fetcher_period = $fetcher->importPeriod($feed)) {
-      $period = $fetcher_period;
-    }
+    $period = $this->importer->getImportPeriod();
 
     // Schedule as soon as possible if a batch is active.
     $period = $feed->progressImporting() === StateInterface::BATCH_COMPLETE ? $period : 0;

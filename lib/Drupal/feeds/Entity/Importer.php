@@ -171,6 +171,22 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
+  public function getImportPeriod() {
+    // Check whether any fetcher is overriding the import period.
+    $period = $this->getPlugin('scheduler')->getImportPeriod();
+
+    // Allow fetcher to override the import period.
+    $fetcher = $this->getFetcher();
+    if ($fetcher instanceof PuSHFetcherInterface && $fetcher_period = $fetcher->importPeriod($feed)) {
+      $period = $fetcher_period;
+    }
+
+    return $period;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getMappingSources() {
     if ($this->sources === NULL) {
       $this->sources = $this->getParser()->getMappingSources();
