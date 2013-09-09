@@ -8,8 +8,9 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Annotation\Plugin;
-use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
+use Drupal\Component\Utility\String;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
+use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
  * Defines an entity reference mapper.
@@ -62,15 +63,25 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   public function __construct(array $settings, $plugin_id, array $plugin_definition) {
     parent::__construct($settings, $plugin_id, $plugin_definition);
     // Calculate the upload directory.
-    $this->entityType = $this->getEntityType();
 
     // $this->availableEntities = \Drupal::service('plugin.manager.entity_reference.selection')
     //   ->getInstance(array('field_definition' => $this->settings['instance']))
     //   ->getReferenceableEntities();
 
-    $info = entity_get_info($this->entityType);
-    $this->entityQuery = \Drupal::entityQuery($this->entityType);
-    $this->conditionKey = $info['entity_keys'][$this->configuration['reference_by']];
+    $this->entityQuery = \Drupal::entityQuery($this->getEntityType());
+  }
+
+  protected function getPotentialFields() {
+    $field_definitions = \Drupal::entityManager()->getFieldDefinitions($this->getEntityType());
+    $field_definitions = array_filter($field_definitions, function($field) {
+      return empty($field['configurable']) && empty($field['computed']) && $field['type'] != 'boolean_field';
+    });
+    $options = array();
+    foreach ($field_definitions as $id => $definition) {
+      $options[$id] = String::checkPlain($definition['label']);
+    }
+
+    return $options;
   }
 
   protected function getEntityType() {
@@ -108,7 +119,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       $query->condition($this->entityKeys['bundle'], $this->bundle);
     }
 
-    $ids = array_filter($query->condition($this->conditionKey, $value)->range(0, 1)->execute());
+    $ids = array_filter($query->condition($this->configuration['reference_by'], $value)->range(0, 1)->execute());
     if ($ids) {
       return reset($ids);
     }
@@ -120,18 +131,14 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * {@inheritdoc}
    */
   protected function getDefaultConfiguration() {
-    return array('reference_by' => 'id');
+    return array('reference_by' => NULL);
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, array &$form_state) {
-    $options = array(
-      'id' => $this->t('Entity id'),
-      'label' => $this->t('Entity label'),
-      'uuid' => $this->t('UUID'),
-    );
+    $options = $this->getPotentialFields();
 
     $form['reference_by'] = array(
       '#type' => 'select',
@@ -147,21 +154,12 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * {@inheritdoc}
    */
   public function getSummary() {
-    switch ($this->configuration['reference_by']) {
-      case 'id':
-        $message = 'Entity id';
-        break;
-
-      case 'label':
-        $message = 'Entity label';
-        break;
-
-      case 'uuid':
-        $message = 'Entity UUID';
-        break;
+    $options = $this->getPotentialFields();
+    if ($this->configuration['reference_by'] && isset($options[$this->configuration['reference_by']])) {
+      $options = $this->getPotentialFields();
+      return $this->t('Reference by: %message', array('%message' => $options[$this->configuration['reference_by']]));
     }
-
-    return $this->t('Reference by: %message', array('%message' => $message));
+    return $this->t('Please select a field to reference by.');
   }
 
 }
