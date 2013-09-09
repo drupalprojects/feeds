@@ -9,6 +9,7 @@ namespace Drupal\feeds\Tests;
 
 use Drupal\Component\Utility\String;
 use Drupal\feeds\FeedsWebTestBase;
+use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 
 /**
  * Test aggregating a feed as node items.
@@ -39,6 +40,8 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
 
     // Create an importer configuration.
     $this->createImporterConfiguration('Syndication', 'syndication');
+
+    drupal_flush_all_caches();
 
     $this->addMappings('syndication', array(
       0 => array(
@@ -175,7 +178,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->drupalGet('node');
     $this->assertPattern('/<span>' . check_plain($this->auth_user->getUsername()) . '<\/span>/');
     $count = db_query("SELECT COUNT(*) FROM {node__feeds_item} fi INNER JOIN {node_field_data} n ON fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->uid->value))->fetchField();
-    $this->assertEqual($count, 10, t('@count items in database.', array('@count' => $count)));
+    $this->assertEqual($count, 10, format_string('@count items in database.', array('@count' => $count)));
 
     // Assert input format.
 
@@ -184,12 +187,17 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // $this->assertEqual($format, filter_fallback_format() + 1, 'Set non-default Input format.');
 
     // Set to update existing, remove authorship of above nodes and import again.
-    $this->setSettings('syndication', 'processor', array('update_existing' => 2));
+    $this->setSettings('syndication', 'processor', array('update_existing' => ProcessorInterface::UPDATE_EXISTING));
+
     $nids = db_query("SELECT nid FROM {node} n INNER JOIN {node__feeds_item} fi ON n.nid = fi.entity_id")->fetchCol();
-    foreach (entity_load_multiple('node', $nids) as $node) {
-      $node->uid = 0;
+    foreach ($nids as $nid) {
+      $node = entity_load('node', $nid, TRUE);
+      $node->setAuthorId(0);
       $node->save();
     }
+    // $feed = entity_load('feeds_feed', $fid, TRUE);
+    // $feed->setAuthorId(0);
+    // $feed->save();
 
     db_update('node__feeds_item')
       ->fields(array('feeds_item_hash' => ''))
@@ -201,7 +209,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->drupalGet('node');
     $this->assertNoPattern('/<span>' . check_plain($this->auth_user->getUsername()) . '<\/span>/');
     $count = db_query("SELECT COUNT(*) FROM {node__feeds_item} fi JOIN {node_field_data} n ON fi.entity_id = n.nid WHERE n.uid = :uid", array(':uid' => $this->auth_user->id()))->fetchField();
-    $this->assertEqual($count, 0, t('@count items in database.', array('@count' => $count)));
+    $this->assertEqual($count, 0, format_string('@count items in database.', array('@count' => $count)));
 
     // Map feed's author to feed item author, update - feed node's items
     // should now be assigned to feed node author.
@@ -209,7 +217,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
       5 => array(
         'target' => 'uid',
         'map' => array(
-          'value' => 'parent:uid',
+          'target_id' => 'parent:uid',
         ),
       ),
     ));
@@ -218,7 +226,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->assertNoPattern('/<span>' . check_plain($this->auth_user->getUsername()) . '<\/span>/');
     $uid = db_query("SELECT uid FROM {feeds_feed} WHERE fid = :fid", array(':fid' => $fid))->fetchField();
     $count = db_query("SELECT COUNT(*) FROM {node_field_data} WHERE uid = :uid", array(':uid' => $uid))->fetchField();
-    $this->assertEqual($count, 10, t('@count feed item nodes are assigned to feed node author.', array('@count' => $count)));
+    $this->assertEqual($count, 10, format_string('@count feed item nodes are assigned to feed node author.', array('@count' => $count)));
 
     // Login with new user with only access content permissions.
     $this->drupalLogin($this->auth_user);
@@ -286,7 +294,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->assertFeedItemCount(10);
 
     // Enable replace existing and import updated feed file.
-    $this->setSettings('syndication_standalone', 'processor', array('update_existing' => 1));
+    $this->setSettings('syndication_standalone', 'processor', array('update_existing' => ProcessorInterface::REPLACE_EXISTING));
     $feed_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed_changes.rss2';
     $this->importURL('syndication_standalone', $feed_url, $fid);
     $this->assertText('Updated 2 ');
@@ -427,9 +435,12 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     // Adding a mapping to the user_name will invoke authorization.
     $this->addMappings('syndication', array(
       5 => array(
-        'target' => 'name',
+        'target' => 'uid',
         'map' => array(
-          'value' => 'author_name',
+          'target_id' => 'author_name',
+        ),
+        'settings' => array(
+          'reference_by' => 'name',
         ),
       ),
     ));
@@ -441,7 +452,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $node_count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
 
     // We should have 0 nodes.
-    $this->assertEqual($node_count, 0, t('@count of nodes in the database.', array('@count' => $node_count)));
+    $this->assertEqual($node_count, 0, format_string('@count of nodes in the database.', array('@count' => $node_count)));
 
     // Give the user super admin powers.
     user_delete($account->uid->value);
@@ -451,7 +462,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $this->feedImportItems($fid);
     $this->assertText('Created 10 ');
     $node_count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
-    $this->assertEqual($node_count, 10, t('@count of nodes in the database.', array('@count' => $node_count)));
+    $this->assertEqual($node_count, 10, format_string('@count of nodes in the database.', array('@count' => $node_count)));
   }
 
   /**
@@ -494,7 +505,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
     $row_count = db_query('SELECT COUNT(*) FROM {node__feeds_item}')->fetchField();
 
     // Check that number of feeds items is equal to the expected items.
-    $this->assertEqual($row_count, 2, t('@count nodes expired.', array('@count' => $node_count - $row_count)));
+    $this->assertEqual($row_count, 2, format_string('@count nodes expired.', array('@count' => $node_count - $row_count)));
   }
 
 }

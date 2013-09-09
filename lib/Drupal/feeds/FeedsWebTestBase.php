@@ -185,10 +185,6 @@ class FeedsWebTestBase extends WebTestBase {
     $edit = array(
       'label' => $name,
       'id' => $id,
-      'scheduler[advanced][import_period]' => -1,
-      'fetcher[id]' => 'http',
-      'parser[id]' => 'syndication',
-      'processor[id]' => 'entity:node',
       'processor[advanced][values][type]' => 'article',
     );
     $this->drupalPost('admin/structure/feeds/add', $edit, 'Save');
@@ -213,12 +209,6 @@ class FeedsWebTestBase extends WebTestBase {
     $importer->setPlugin($type, $plugin_key);
     $importer->save();
     $importer = entity_load('feeds_importer', $id, TRUE);
-    // $edit = array(
-    //   $type . '[id]' => $plugin_key,
-    // );
-    // $this->drupalPost("admin/structure/feeds/manage/$id", $edit, 'Save');
-
-    // Assert actual configuration.
     $plugin_id = $importer->getPlugin($type)->getPluginId();
     $this->assertEqual($plugin_id, $plugin_key, 'Verified correct ' . $type . ' (' . $plugin_key . ') is ' . $plugin_id . '.');
   }
@@ -421,7 +411,7 @@ class FeedsWebTestBase extends WebTestBase {
 
     $table = $entity_type . '__feeds_item';
     $this->drupalPost("feed/$fid/delete-items", array(), 'Delete items');
-    $count = db_query("SELECT COUNT(*) FROM {$table} WHERE feeds_item_target_id = :fid", array(':fid' => $fid))->fetchField();
+    $count = db_query("SELECT COUNT(*) FROM {" . $table . "} WHERE feeds_item_target_id = :fid", array(':fid' => $fid))->fetchField();
     $this->assertEqual($count, 0, String::format('@count items after running delete items.', array('@count' => $count)));
   }
 
@@ -455,7 +445,7 @@ class FeedsWebTestBase extends WebTestBase {
    */
   public function assertPlugins($id, $fetcher, $parser, $processor) {
     // Assert actual configuration.
-    $importer = entity_load('feeds_importer', $id);
+    $importer = entity_load('feeds_importer', $id, TRUE);
     $this->assertEqual($importer->getPlugin('fetcher')->getPluginId(), $fetcher, 'Correct fetcher');
     $this->assertEqual($importer->getPlugin('parser')->getPluginId(), $parser, 'Correct parser');
     $this->assertEqual($importer->getPlugin('processor')->getPluginId(), $processor, 'Correct processor');
