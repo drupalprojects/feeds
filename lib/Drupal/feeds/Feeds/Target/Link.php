@@ -27,12 +27,4 @@ class Link extends FieldTargetBase {
     unset($target['properties']['attributes']);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function prepareValue($delta, array &$values) {
-    $values['title'] = (string) $values['title'];
-    $values['url'] = (string) $values['url'];
-  }
-
 }

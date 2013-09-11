@@ -221,10 +221,17 @@ class FeedsWebTestBase extends WebTestBase {
    * @param array $settings
    *   The settings to set.
    */
-  public function setSettings($id, $plugin_type, array $settings) {
+  public function setSettings($id, $plugin_type, array $settings, $advanced = FALSE) {
     $edit = array();
-    foreach ($settings as $key => $value) {
-      $edit[$plugin_type . '[configuration][' . $key . ']'] = $value;
+    if (!$advanced) {
+      foreach ($settings as $key => $value) {
+        $edit[$plugin_type . '[configuration][' . $key . ']'] = $value;
+      }
+    }
+    else {
+      foreach ($settings as $key => $value) {
+        $edit[$plugin_type . '[advanced][' . $key . ']'] = $value;
+      }
     }
     $this->drupalPost("admin/structure/feeds/manage/$id", $edit, 'Save');
     $this->assertText('Your changes have been saved.');
@@ -385,7 +392,7 @@ class FeedsWebTestBase extends WebTestBase {
 
     $this->assertTrue(file_exists($file), 'Source file exists');
     $edit = array(
-      'files[fetcher]' => $file,
+      'files[fetcher_upload]' => $file,
     );
 
     if (!$fid) {

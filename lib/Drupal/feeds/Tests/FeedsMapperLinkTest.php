@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test case for CCK link mapper mappers/date.inc.
+ * Contains \Drupal\feeds\Tests\FeedsMapperLinkTest.
  */
 
 namespace Drupal\feeds\Tests;
@@ -10,7 +10,7 @@ namespace Drupal\feeds\Tests;
 use Drupal\feeds\FeedsMapperTestBase;
 
 /**
- * Class for testing Feeds <em>link</em> mapper.
+ * Class for testing Feeds link target.
  */
 class FeedsMapperLinkTest extends FeedsMapperTestBase {
 
@@ -59,46 +59,52 @@ class FeedsMapperLinkTest extends FeedsMapperTestBase {
 
     // Create importer configuration.
     $this->createImporterConfiguration();
-    $this->setSettings('syndication', 'processor', array('values[type]' => $typename));
+    $this->setSettings('syndication', 'processor', array('values][type' => $typename), TRUE);
     $this->addMappings('syndication', array(
       0 => array(
-        'source' => 'title',
         'target' => 'title',
+        'map' => array(
+          'value' => 'title',
+        ),
       ),
       1 => array(
-        'source' => 'timestamp',
         'target' => 'created',
+        'map' => array(
+          'value' => 'timestamp',
+        ),
       ),
       2 => array(
-        'source' => 'description',
         'target' => 'body',
+        'map' => array(
+          'value' => 'description',
+        ),
       ),
       3 => array(
-        'source' => 'url',
-        'target' => 'field_alpha:url',
+        'target' => 'field_alpha',
+        'map' => array(
+          'url' => 'url',
+          'title' => 'title',
+        ),
       ),
       4 => array(
-        'source' => 'title',
-        'target' => 'field_alpha:title',
+        'target' => 'field_beta',
+        'map' => array(
+          'url' => 'url',
+        ),
       ),
       5 => array(
-        'source' => 'url',
-        'target' => 'field_beta:url',
-      ),
-      6 => array(
-        'source' => 'url',
-        'target' => 'field_gamma:url',
-      ),
-      7 => array(
-        'source' => 'title',
-        'target' => 'field_gamma:title',
+        'target' => 'field_gamma',
+        'map' => array(
+          'url' => 'url',
+          'title' => 'title',
+        ),
       ),
     ));
 
     // Import RSS file.
     $fid = $this->createFeed();
     // Assert 10 items aggregated after creation of the node.
-    $this->assertText('Created 10 nodes');
+    $this->assertText('Created 10 ');
 
     // Edit the imported node.
     $this->drupalGet('node/1/edit');
