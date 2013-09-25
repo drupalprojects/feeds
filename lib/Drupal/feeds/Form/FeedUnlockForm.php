@@ -25,8 +25,11 @@ class FeedUnlockForm extends EntityNGConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelPath() {
-    return 'feed/' . $this->entity->id();
+  public function getCancelRoute() {
+    return array(
+      'route_name' => 'feeds_feed',
+      'route_parameters' => array('feeds_feed' => $this->entity->id()),
+    );
   }
 
   /**
@@ -46,7 +49,7 @@ class FeedUnlockForm extends EntityNGConfirmFormBase {
     watchdog('feeds', '@importer: unlocked %title.', $args);
     drupal_set_message($this->t('%title has been unlocked.', $args));
 
-    $form_state['redirect'] = $this->getCancelPath();
+    $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
   }
 
 }

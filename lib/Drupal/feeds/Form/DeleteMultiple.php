@@ -80,9 +80,13 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Set the correct route once views can override paths.
    */
-  public function getCancelPath() {
-    return 'admin/content/feed';
+  public function getCancelRoute() {
+    return array(
+      'route_name' => 'feeds_feed.create_list',
+    );
   }
 
   /**

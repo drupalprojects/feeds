@@ -23,9 +23,13 @@ class FeedDeleteForm extends EntityNGConfirmFormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Set the correct route once views can override paths.
    */
-  public function getCancelPath() {
-    return 'feed/' . $this->entity->id();
+  public function getCancelRoute() {
+    return array(
+      'route_name' => 'feeds_feed.create_list',
+    );
   }
 
   /**

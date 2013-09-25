@@ -24,8 +24,10 @@ class ImporterDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelPath() {
-    return 'admin/structure/feeds';
+  public function getCancelRoute() {
+    return array(
+      'route_name' => 'feeds_importer.list',
+    );
   }
 
   /**
@@ -45,7 +47,7 @@ class ImporterDeleteForm extends EntityConfirmFormBase {
     watchdog('feeds', 'Deleted importer: %importer.', $args);
     drupal_set_message($this->t('%importer has been deleted.', $args));
 
-    $form_state['redirect'] = $this->getCancelPath();
+    $form_state['redirect'] = $this->url('feeds_importer.list');
   }
 
 }

@@ -24,8 +24,11 @@ class FeedImportForm extends EntityNGConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelPath() {
-    return 'feed/' . $this->entity->id();
+  public function getCancelRoute() {
+    return array(
+      'route_name' => 'feeds_feed',
+      'route_parameters' => array('feeds_feed' => $this->entity->id()),
+    );
   }
 
   /**
@@ -41,7 +44,7 @@ class FeedImportForm extends EntityNGConfirmFormBase {
   public function save(array $form, array &$form_state) {
     // The import process will create its own messages.
     $this->entity->startImport();
-    $form_state['redirect'] = $this->getCancelPath();
+    $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
   }
 
 }

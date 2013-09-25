@@ -24,8 +24,11 @@ class FeedClearForm extends EntityNGConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelPath() {
-    return 'feed/' . $this->entity->id();
+  public function getCancelRoute() {
+    return array(
+      'route_name' => 'feeds_feed',
+      'route_parameters' => array('feeds_feed' => $this->entity->id()),
+    );
   }
 
   /**
@@ -42,7 +45,7 @@ class FeedClearForm extends EntityNGConfirmFormBase {
     $this->entity->startClear();
     $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
 
-    $form_state['redirect'] = $this->getCancelPath();
+    $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
   }
 
 }
