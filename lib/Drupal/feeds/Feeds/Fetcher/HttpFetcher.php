@@ -35,7 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterface, FetcherInterface, ClearableInterface, PuSHFetcherInterface, ContainerFactoryPluginInterface {
+class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, ClearableInterface, PuSHFetcherInterface, FeedPluginFormInterface, ContainerFactoryPluginInterface {
 
   /**
    * The subscribe queue.
