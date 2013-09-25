@@ -24,7 +24,7 @@ use Drupal\feeds\StateInterface;
  *   description = @Translation("Uses a directory, or file, on the server.")
  * )
  */
-class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterface {
+class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterface, FeedPluginFormInterface {
 
   /**
    * {@inheritdoc}
@@ -80,6 +80,13 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
+  public function sourceDefaults() {
+    return array('source' => '');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
@@ -88,7 +95,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
       '#type' => 'textfield',
       '#title' => $this->t('File'),
       '#description' => $this->t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))),
-      '#default_value' => empty($feed_config['source']) ? '' : $feed_config['source'],
+      '#default_value' => $feed_config['source'],
     );
     return $form;
   }
