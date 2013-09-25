@@ -69,7 +69,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
     // Check first item.
     date_default_timezone_set('GMT');
     $item = $items->fetchObject();
-    $node = node_load($item->entity_id)->getNGEntity();
+    $node = node_load($item->entity_id);
     $this->assertEqual($node->label(), 'monthly', 'Feed item 1 changefreq is correct.');
     $this->assertEqual($node->body->value, '0.8', 'Feed item 1 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2005-01-01'), 'Feed item 1 lastmod is correct.');
@@ -79,7 +79,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
 
     // Check second item.
     $item = $items->fetchObject();
-    $node = node_load($item->entity_id)->getNGEntity();
+    $node = node_load($item->entity_id);
     $this->assertEqual($node->label(), 'weekly', 'Feed item 2 changefreq is correct.');
     $this->assertEqual($node->body->value, '', 'Feed item 2 priority is correct.');
     // $node->created->value is... recently
@@ -89,7 +89,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
 
     // Check third item.
     $item = $items->fetchObject();
-    $node = node_load($item->entity_id)->getNGEntity();
+    $node = node_load($item->entity_id);
     $this->assertEqual($node->label(), 'weekly', 'Feed item 3 changefreq is correct.');
     $this->assertEqual($node->body->value, '', 'Feed item 3 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2004-12-23'), 'Feed item 3 lastmod is correct.');
@@ -99,7 +99,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
 
     // Check fourth item.
     $item = $items->fetchObject();
-    $node = node_load($item->entity_id)->getNGEntity();
+    $node = node_load($item->entity_id);
     $this->assertEqual($node->label(), '', 'Feed item 4 changefreq is correct.');
     $this->assertEqual($node->body->value, '0.3', 'Feed item 4 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2004-12-23T18:00:15+00:00'), 'Feed item 4 lastmod is correct.');
@@ -109,7 +109,7 @@ class FeedsSitemapParserTest extends FeedsWebTestBase {
 
     // Check fifth item.
     $item = $items->fetchObject();
-    $node = node_load($item->entity_id)->getNGEntity();
+    $node = node_load($item->entity_id);
     $this->assertEqual($node->label(), '', 'Feed item 5 changefreq is correct.');
     $this->assertEqual($node->body->value, '', 'Feed item 5 priority is correct.');
     $this->assertEqual($node->created->value, strtotime('2004-11-23'), 'Feed item 5 lastmod is correct.');

@@ -488,7 +488,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected function newEntity(FeedInterface $feed) {
     $values = $this->configuration['values'];
     $values = $this->apply('newEntityValues', $feed, $values);
-    return $this->storageController->create($values)->getNGEntity();
+    return $this->storageController->create($values);
   }
 
   /**
