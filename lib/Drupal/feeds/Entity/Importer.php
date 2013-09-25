@@ -37,7 +37,10 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *     "uuid" = "uuid",
  *     "status" = "status"
  *   },
- *   bundle_of = "feeds_feed"
+ *   bundle_of = "feeds_feed",
+ *   links = {
+ *     "edit-form" = "admin/structure/feeds/manage/{feeds_importer}"
+ *   }
  * )
  */
 class Importer extends ConfigEntityBase implements ImporterInterface {
