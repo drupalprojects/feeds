@@ -34,6 +34,20 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   protected $translationManager;
 
   /**
+   * The url generator.
+   *
+   * @var \Drupal\Core\Routing\UrlGeneratorInterface
+   */
+  protected $urlGenerator;
+
+  /**
+   * The link generator.
+   *
+   * @var \Drupal\Core\Utility\LinkGeneratorInterface
+   */
+  protected $linkGenerator;
+
+  /**
    * Constructs a PluginBase object.
    *
    * @param array $configuration
@@ -112,18 +126,44 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    * See the t() documentation for details.
    */
   protected function t($string, array $args = array(), array $options = array()) {
-    return $this->getTranslationManager()->translate($string, $args, $options);
+    return $this->translationManager()->translate($string, $args, $options);
   }
 
   /**
-   * Gets the translation manager.
+   * Renders a link to a route given a route name and its parameters.
+   *
+   * @see \Drupal\Core\Utility\LinkGeneratorInterface::generate() for details
+   *   on the arguments, usage, and possible exceptions.
+   *
+   * @return string
+   *   An HTML string containing a link to the given route and parameters.
+   */
+  protected function l($text, $route_name, array $parameters = array(), array $options = array()) {
+    return $this->linkGenerator()->generate($text, $route_name, $parameters, $options);
+  }
+
+  /**
+   * Generates a URL or path for a specific route based on the given parameters.
+   *
+   * @see \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
+   *   details on the arguments, usage, and possible exceptions.
+   *
+   * @return string
+   *   The generated URL for the given route.
+   */
+  protected function url($route_name, $route_parameters = array(), $options = array()) {
+    return $this->urlGenerator()->generateFromRoute($route_name, $route_parameters, $options);
+  }
+
+  /**
+   * Returns the translation manager.
    *
    * @return \Drupal\Core\StringTranslation\TranslationInterface
    *   The translation manager.
    */
-  protected function getTranslationManager() {
+  protected function translationManager() {
     if (!$this->translationManager) {
-      $this->translationManager = \Drupal::translation();
+      $this->translationManager = $this->container()->get('string_translation');
     }
     return $this->translationManager;
   }
@@ -143,23 +183,39 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   }
 
   /**
-   * Renders a link to a route given a route name and its parameters.
+   * Returns the link generator service.
    *
-   * @see \Drupal\Core\Controller\ControllerBase::l()
-   *
-   * @todo
+   * @return \Drupal\Core\Utility\LinkGeneratorInterface
+   *   The link generator service.
    */
-  protected function l($text, $route_name, array $parameters = array(), array $options = array()) {
-    return \Drupal::linkGenerator()->generate($text, $route_name, $parameters, $options);
+  protected function linkGenerator() {
+    if (!$this->linkGenerator) {
+      $this->linkGenerator = $this->container()->get('link_generator');
+    }
+    return $this->linkGenerator;
   }
 
   /**
-   * Returns a URL give a route and its parameters.
+   * Returns the URL generator service.
    *
-   * @todo
+   * @return \Drupal\Core\Routing\UrlGeneratorInterface
+   *   The URL generator service.
    */
-  protected function url($name, $parameters = array(), $absolute = FALSE) {
-    return \Drupal::urlGenerator()->generate($name, $parameters, $absolute);
+  protected function urlGenerator() {
+    if (!$this->urlGenerator) {
+      $this->urlGenerator = $this->container()->get('url_generator');
+    }
+    return $this->urlGenerator;
+  }
+
+  /**
+   * Returns the service container.
+   *
+   * @return \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   The service container.
+   */
+  private function container() {
+    return \Drupal::getContainer();
   }
 
 }

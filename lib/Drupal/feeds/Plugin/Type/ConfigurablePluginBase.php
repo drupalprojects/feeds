@@ -65,6 +65,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, array &$form_state) {
+    // Validation is optional.
   }
 
   /**
