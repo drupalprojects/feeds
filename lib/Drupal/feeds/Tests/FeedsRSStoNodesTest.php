@@ -219,6 +219,9 @@ class FeedsRSStoNodesTest extends FeedsWebTestBase {
         'map' => array(
           'target_id' => 'parent:uid',
         ),
+        'settings' => array(
+          'reference_by' => 'uid',
+        ),
       ),
     ));
     $this->feedImportItems($fid);

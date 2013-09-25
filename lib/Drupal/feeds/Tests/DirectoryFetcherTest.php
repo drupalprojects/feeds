@@ -33,12 +33,14 @@ class DirectoryFetcherTest extends FeedsWebTestBase {
 
     $this->addMappings('node', array(
       0 => array(
-        'source' => 'title',
         'target' => 'title',
+        'map' => array(
+          'value' => 'title',
+        ),
       ),
     ));
     $this->setSettings('node', 'fetcher', array(
-      'allowed_schemes[private]' => FALSE,
+      'allowed_schemes][private' => FALSE,
     ));
 
     // Verify that invalid paths are not accepted.
@@ -69,7 +71,7 @@ class DirectoryFetcherTest extends FeedsWebTestBase {
     variable_set('feeds_process_limit', 5);
 
     $this->importURL('node', $dir, NULL, 'directory');
-    $this->assertText('Created 18 nodes');
+    $this->assertText('Created 18 ');
     $count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
     $this->assertEqual($count, 18, t("@count nodes in the database.", array('@count' => $count)));
   }
@@ -85,13 +87,15 @@ class DirectoryFetcherTest extends FeedsWebTestBase {
     $this->setPlugin('node', 'parser', 'csv');
     $this->addMappings('node', array(
       0 => array(
-        'source' => 'title',
         'target' => 'title',
+        'map' => array(
+          'value' => 'title',
+        ),
       ),
     ));
 
     $this->setSettings('node', 'fetcher', array(
-      'allowed_schemes[public]' => FALSE,
+      'allowed_schemes][public' => FALSE,
     ));
 
     // Verify that invalid paths are not accepted.
@@ -121,7 +125,7 @@ class DirectoryFetcherTest extends FeedsWebTestBase {
     // too.
     variable_set('feeds_process_limit', 5);
     $this->importURL('node', $dir, NULL, 'directory');
-    $this->assertText('Created 18 nodes');
+    $this->assertText('Created 18 ');
     $count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
     $this->assertEqual($count, 18, t("@count nodes in the database.", array('@count' => $count)));
   }

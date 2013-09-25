@@ -2,18 +2,18 @@
 
 /**
  * @file
- * Test case for date field mapper mappers/date.inc.
+ * Contains \Drupal\feeds\Tests\FeedsMapperDateTest.
  */
 
 namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\FeedsMapperTestBase;
+use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 
 /**
- * Class for testing Feeds <em>content</em> mapper.
+ * Class for testing date target.
  *
- * @todo: Add test method iCal
- * @todo: Add test method for end date
+ * @todo: Add test method iCal.
  */
 class FeedsMapperDateTest extends FeedsMapperTestBase {
 
@@ -51,29 +51,35 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
    */
   public function test() {
     // Create content type.
-    $typename = $this->createContentType(array(), array(
-      'datetime' => 'datetime',
-    ));
+    $typename = $this->createContentType(array(), array('datetime' => 'datetime'));
 
     // Create and configure importer.
     $this->createImporterConfiguration('Date RSS', 'daterss');
-    $this->setSettings('daterss', NULL, array(
-      'import_period' => FEEDS_SCHEDULE_NEVER,
-    ));
+    $this->setSettings('daterss', 'scheduler', array('import_period' => SchedulerInterface::SCHEDULE_NEVER), TRUE);
     $this->setPlugin('daterss', 'fetcher', 'upload');
-    $this->setSettings('daterss', 'processor', array('values[type]' => $typename));
+    $edit = array(
+      'processor[advanced][values][type]' => $typename,
+    );
+    $this->drupalPost('admin/structure/feeds/manage/daterss', $edit, t('Save'));
+    // $this->setSettings('daterss', 'processor', array('values[type]' => $typename));
     $this->addMappings('daterss', array(
       0 => array(
-        'source' => 'title',
         'target' => 'title',
+        'map' => array(
+          'value' => 'title',
+        ),
       ),
       1 => array(
-        'source' => 'description',
         'target' => 'body',
+        'map' => array(
+          'value' => 'description',
+        ),
       ),
       2 => array(
-        'source' => 'timestamp',
         'target' => 'field_datetime',
+        'map' => array(
+          'value' => 'timestamp',
+        ),
       ),
     ));
 
@@ -81,7 +87,7 @@ class FeedsMapperDateTest extends FeedsMapperTestBase {
 
     // Import CSV file.
     $fid = $this->importFile('daterss', $this->absolutePath() . '/tests/feeds/googlenewstz.rss2');
-    $this->assertText('Created 6 nodes');
+    $this->assertText('Created 6 ');
 
     // Check the imported nodes.
     $dates = array(
