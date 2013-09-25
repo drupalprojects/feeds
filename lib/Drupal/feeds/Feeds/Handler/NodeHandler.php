@@ -67,7 +67,7 @@ class NodeHandler extends PluginBase {
       '#type' => 'textfield',
       '#title' => $this->t('Author'),
       '#description' => $this->t('Select the author of the nodes to be created. Leave blank for %anonymous.', array('%anonymous' => \Drupal::config('user.settings')->get('anonymous'))),
-      '#autocomplete_route_name' => 'user_autocomplete',
+      '#autocomplete_route_name' => 'user.autocomplete',
       '#default_value' => check_plain($author->getUsername()),
     );
   }
