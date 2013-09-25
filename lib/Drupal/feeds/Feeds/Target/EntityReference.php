@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\String as DrupalString;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
@@ -77,7 +77,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     });
     $options = array();
     foreach ($field_definitions as $id => $definition) {
-      $options[$id] = String::checkPlain($definition['label']);
+      $options[$id] = DrupalString::checkPlain($definition['label']);
     }
 
     return $options;
