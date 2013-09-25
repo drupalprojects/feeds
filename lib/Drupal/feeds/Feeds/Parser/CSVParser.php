@@ -7,17 +7,15 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Component\ParserCSV;
 use Drupal\feeds\Component\ParserCSVIterator;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
-use Drupal\feeds\Result\ParserResult;
-use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
+use Drupal\feeds\Result\FetcherResultInterface;
+use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\StateInterface;
 
 /**

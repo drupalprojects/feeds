@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\String;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;

@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;

@@ -7,15 +7,13 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Result\ParserResult;
-use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
-use Zend\Feed\Reader\Reader;
+use Drupal\feeds\Result\FetcherResultInterface;
+use Drupal\feeds\Result\ParserResult;
 use Zend\Feed\Reader\Exception\ExceptionInterface;
+use Zend\Feed\Reader\Reader;
 
 /**
  * Defines an RSS and Atom feed parser.

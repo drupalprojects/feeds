@@ -7,16 +7,14 @@
 
 namespace Drupal\feeds\Feeds\Scheduler;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\MapArray;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\StateInterface;
+use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\PuSH\PuSHFetcherInterface;
+use Drupal\feeds\StateInterface;
 use Drupal\job_scheduler\JobController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

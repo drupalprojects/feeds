@@ -10,14 +10,12 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\Component\GenericOPMLParser;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Result\FetcherResultInterface;
-use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
+use Drupal\feeds\Result\FetcherResultInterface;
+use Drupal\feeds\Result\ParserResult;
 
 /**
  * Defines an OPML feed parser.

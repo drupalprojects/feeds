@@ -8,7 +8,6 @@
 namespace Drupal\feeds\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\ActionBulkForm;
-use Drupal\Component\Annotation\PluginID;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityManager;
 

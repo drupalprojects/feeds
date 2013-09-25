@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Handler;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\String;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;

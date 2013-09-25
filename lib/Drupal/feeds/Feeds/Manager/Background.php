@@ -7,9 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Manager;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\Crypt;
-use Drupal\Core\Annotation\Translation;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Guzzle\AsyncPlugin;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;

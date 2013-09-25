@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Handler;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\Unicode;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;

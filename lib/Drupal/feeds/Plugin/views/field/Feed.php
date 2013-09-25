@@ -7,11 +7,10 @@
 
 namespace Drupal\feeds\Plugin\views\field;
 
-use Drupal\views\ResultRow;
-use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
-use Drupal\Component\Annotation\PluginID;
+use Drupal\views\ResultRow;
+use Drupal\views\ViewExecutable;
 
 /**
  * Field handler to provide simple renderer that allows linking to a feed.

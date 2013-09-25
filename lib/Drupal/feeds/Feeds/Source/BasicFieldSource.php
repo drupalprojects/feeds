@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Source;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;

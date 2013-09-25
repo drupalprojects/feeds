@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;

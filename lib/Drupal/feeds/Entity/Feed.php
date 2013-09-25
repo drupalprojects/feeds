@@ -8,15 +8,13 @@
 namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityNG;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\PuSH\PuSHFetcherInterface;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;

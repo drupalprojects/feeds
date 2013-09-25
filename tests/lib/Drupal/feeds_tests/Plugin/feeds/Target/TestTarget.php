@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds_tests\Plugin\feeds\Target;
 
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\TargetBase;

@@ -7,10 +7,8 @@
 
 namespace Drupal\feeds\Feeds\Processor;
 
-use Drupal\Component\Annotation\Plugin;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
