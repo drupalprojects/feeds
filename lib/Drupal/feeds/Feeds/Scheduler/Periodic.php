@@ -220,7 +220,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   /**
    * {@inheritdoc}
    */
-  public function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('import_period' => 3600);
   }
 

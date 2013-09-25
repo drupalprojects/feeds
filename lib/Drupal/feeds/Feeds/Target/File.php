@@ -113,7 +113,7 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('existing' => FILE_EXISTS_RENAME);
   }
 

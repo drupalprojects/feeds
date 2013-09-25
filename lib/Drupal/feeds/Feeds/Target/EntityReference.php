@@ -130,7 +130,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('reference_by' => NULL);
   }
 

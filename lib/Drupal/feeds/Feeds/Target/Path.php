@@ -32,7 +32,7 @@ class Path extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('pathauto_override' => FALSE);
   }
 

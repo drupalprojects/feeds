@@ -182,7 +182,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     $schemes = $this->getSchemes();
     $scheme = in_array('private', $schemes) ? 'private' : 'public';
 

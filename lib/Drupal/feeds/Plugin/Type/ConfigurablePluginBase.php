@@ -57,21 +57,9 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    * {@inheritdoc}
    */
   public function setConfiguration(array $configuration) {
-    $defaults = $this->getDefaultConfiguration();
+    $defaults = $this->defaultConfiguration();
     $this->configuration = array_intersect_key($configuration, $defaults) + $defaults;
   }
-
-  /**
-   * Returns the default configuration for a plugin.
-   *
-   * @return array
-   *   Array where keys are the variable names of the configuration elements and
-   *   values are their default values. Any configuration that needs to be saved
-   *   must have its keys declared here.
-   *
-   * @see \Drupal\feeds\Plugin\Type\ConfigurablePluginBase::setConfiguration()
-   */
-  abstract protected function getDefaultConfiguration();
 
   /**
    * {@inheritdoc}

@@ -35,7 +35,7 @@ class TaxonomyTermHandler extends PluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('format' => 'plain_text');
   }
 

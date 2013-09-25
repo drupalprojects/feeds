@@ -203,7 +203,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array(
       'delimiter' => ',',
       'no_headers' => 0,

@@ -143,7 +143,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('process_in_background' => FALSE, 'import_on_create' => TRUE);
   }
 

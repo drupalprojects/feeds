@@ -35,16 +35,16 @@ class UserHandler extends PluginBase {
   }
 
   /**
-   * Implements parent::entityInfo().
+   * {@inheritdoc}
    */
   public function entityInfo(array &$info) {
     $info['label_plural'] = $this->t('Users');
   }
 
   /**
-   * Override parent::getDefaultConfiguration().
+   * {@inheritdoc}
    */
-  public function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     $defaults = array();
     $defaults['roles'] = array();
     $defaults['status'] = 1;

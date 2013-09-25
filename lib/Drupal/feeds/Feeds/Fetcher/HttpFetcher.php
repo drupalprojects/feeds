@@ -222,7 +222,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FeedPluginFormInterf
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array(
       'auto_detect_feeds' => TRUE,
       'use_pubsubhubbub' => FALSE,

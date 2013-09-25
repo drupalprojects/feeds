@@ -79,8 +79,8 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
-    return array('autocreate' => FALSE) + parent::getDefaultConfiguration();
+  public function defaultConfiguration() {
+    return array('autocreate' => FALSE) + parent::defaultConfiguration();
   }
 
   /**

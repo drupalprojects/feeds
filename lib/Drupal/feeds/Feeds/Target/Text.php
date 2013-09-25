@@ -93,7 +93,7 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array('format' => 'plain_text');
   }
 

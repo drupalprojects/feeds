@@ -26,7 +26,7 @@ class NodeHandler extends PluginBase {
 
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->configuration += $this->getDefaultConfiguration();
+    $this->configuration += $this->defaultConfiguration();
   }
 
   /**
@@ -51,9 +51,9 @@ class NodeHandler extends PluginBase {
   }
 
   /**
-   * Override parent::getDefaultConfiguration().
+   * {@inheritdoc}
    */
-  public function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     $defaults = array();
     $defaults['author'] = 0;
     $defaults['status'] = 1;

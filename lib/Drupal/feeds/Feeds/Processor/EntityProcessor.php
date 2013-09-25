@@ -556,7 +556,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     $defaults = array(
       'update_existing' => ProcessorInterface::SKIP_EXISTING,
       'skip_hash_check' => FALSE,

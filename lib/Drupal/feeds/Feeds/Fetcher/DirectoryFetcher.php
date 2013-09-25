@@ -115,7 +115,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultConfiguration() {
+  public function defaultConfiguration() {
     return array(
       'allowed_extensions' => array('txt', 'csv', 'tsv', 'xml', 'opml'),
       'allowed_schemes' => $this->getSchemes(),
