@@ -102,7 +102,8 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
   public function buildForm(array $form, array &$form_state) {
     $this->feeds = $this->tempStoreFactory->get('feeds_feed_multiple_delete_confirm')->get($GLOBALS['user']->id());
     if (empty($this->feeds)) {
-      return new RedirectResponse(url($this->getCancelPath(), array('absolute' => TRUE)));
+      // @todo Set the correct route once views can override paths.
+      return new RedirectResponse(url('admin/content/feed', array('absolute' => TRUE)));
     }
 
     $form['feeds'] = array(
@@ -125,6 +126,7 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
       watchdog('content', 'Deleted @count feeds.', array('@count' => $count));
       drupal_set_message(format_plural($count, 'Deleted 1 feed.', 'Deleted @count posts.', array('@count' => $count)));
     }
+    // @todo Set the correct route once views can override paths.
     $form_state['redirect'] = 'admin/content/feed';
   }
 
