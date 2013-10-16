@@ -1,23 +1,24 @@
-# feeds_feed.list:
-#   path: '/admin/content/feed'
-#   defaults:
-#     _entity_list: 'feeds_feed'
-#   requirements:
-#     _permission: 'administer feeds'
+feeds_feed.list:
+  path: '/admin/content/feed'
+  defaults:
+    _entity_list: 'feeds_feed'
+  requirements:
+    _permission: 'administer feeds'
 
 feeds_feed.create_list:
   path: '/feed/add'
   defaults:
+    _title: 'Add feed'
     _content: 'Drupal\feeds\Controller\FeedController::createList'
   requirements:
-    _access_feeds_feed_create_list: 'TRUE'
+    _feeds_feed_add_access: 'feeds_feed'
 
 feeds_feed.create:
   path: '/feed/add/{feeds_importer}'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::createForm'
   requirements:
-    _entity_create_access: 'feeds_feed'
+    _entity_create_access: 'feeds_feed:{feeds_importer}'
 
 feeds_feed:
   path: '/feed/{feeds_feed}'
@@ -122,6 +123,7 @@ feeds_importer.create:
   path: '/admin/structure/feeds/add'
   defaults:
     _content: 'Drupal\feeds\Controller\ImporterController::createForm'
+    _title: 'Feeds importers'
   requirements:
     _entity_create_access: 'feeds_importer'
 
