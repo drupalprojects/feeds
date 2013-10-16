@@ -7,14 +7,13 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Entity\DatabaseStorageControllerNG;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableDatabaseStorageController;
 use Drupal\feeds\FeedInterface;
 
 /**
  * Controller class for Feed entities.
  */
-class FeedStorageController extends DatabaseStorageControllerNG {
+class FeedStorageController extends FieldableDatabaseStorageController {
 
   /**
    * Unlocks a feed.

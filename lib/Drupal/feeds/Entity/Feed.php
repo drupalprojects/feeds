@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Entity\EntityNG;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\Exception\LockException;
@@ -64,7 +64,7 @@ use Drupal\job_scheduler\JobScheduler;
  *   }
  * )
  */
-class Feed extends EntityNG implements FeedInterface {
+class Feed extends ContentEntityBase implements FeedInterface {
 
   /**
    * The cached result from getImporter() since it gets called many times.
