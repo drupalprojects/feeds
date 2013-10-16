@@ -228,11 +228,11 @@ function feeds_field_views_data(FieldInterface $field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     // Add the relationship only on the target_id field.
-    $data[$table_name][$field['field_name'] . '_target_id']['relationship'] = array(
+    $data[$table_name][$field->getFieldName() . '_target_id']['relationship'] = array(
       'id' => 'standard',
       'base' => 'feeds_feed',
       'base field' => 'fid',
-      'label' => t('feed from !field_name', array('!field_name' => $field['field_name'])),
+      'label' => t('feed from !field_name', array('!field_name' => $field->getFieldName())),
     );
   }
 
