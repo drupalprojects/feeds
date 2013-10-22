@@ -7,12 +7,12 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Core\Entity\EntityNGConfirmFormBase;
+use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 
 /**
  * Provides a form for importing a feed.
  */
-class FeedImportForm extends EntityNGConfirmFormBase {
+class FeedImportForm extends ContentEntityConfirmFormBase {
 
   /**
    * {@inheritdoc}

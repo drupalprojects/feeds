@@ -7,13 +7,13 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Core\Entity\EntityNGConfirmFormBase;
+use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides a form for unlocking a feed.
  */
-class FeedUnlockForm extends EntityNGConfirmFormBase {
+class FeedUnlockForm extends ContentEntityConfirmFormBase {
 
   /**
    * {@inheritdoc}

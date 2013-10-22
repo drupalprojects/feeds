@@ -9,13 +9,13 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityFormControllerNG;
+use Drupal\Core\Entity\ContentEntityFormController;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 
 /**
  * Form controller for the feed edit forms.
  */
-class FeedFormController extends EntityFormControllerNG {
+class FeedFormController extends ContentEntityFormController {
 
   /**
    * Plugins that provide configuration forms.
