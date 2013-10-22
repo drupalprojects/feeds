@@ -2,12 +2,12 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\field\field_type\FeedsItem.
+ * Contains \Drupal\feeds\Plugin\Field\FieldType\FeedsItem.
  */
 
-namespace Drupal\feeds\Plugin\field\field_type;
+namespace Drupal\feeds\Plugin\Field\FieldType;
 
-use Drupal\field\Plugin\Type\FieldType\ConfigEntityReferenceItemBase;
+use Drupal\Core\Field\ConfigEntityReferenceItemBase;
 use Drupal\field\FieldInterface;
 
 /**
