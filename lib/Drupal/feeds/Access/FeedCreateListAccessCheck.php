@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Access;
 
 use Drupal\Core\Entity\EntityCreateAccessCheck;
+use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 
@@ -24,11 +25,12 @@ class FeedCreateListAccessCheck extends EntityCreateAccessCheck {
   /**
    * {@inheritdoc}
    */
-  public function access(Route $route, Request $request) {
+  public function access(Route $route, Request $request, AccountInterface $account) {
     // @todo Perhaps read config directly rather than load all importers.
     $access_controller = $this->entityManager->getAccessController('feeds_feed');
+
     foreach ($this->entityManager->getStorageController('feeds_importer')->loadEnabled() as $importer) {
-      if ($access_controller->createAccess($importer->id())) {
+      if ($access_controller->createAccess($importer->id(), $account)) {
         return self::ALLOW;
       }
     }
