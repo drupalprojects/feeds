@@ -15,7 +15,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "string",
- *   field_types = {"string_field"}
+ *   field_types = {"field_item:string"}
  * )
  */
 class String extends FieldTargetBase {

@@ -18,7 +18,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @Plugin(
  *   id = "text",
- *   field_types = {"list_text", "text", "text_long", "text_with_summary"}
+ *   field_types = {
+ *     "field_item:list_text",
+ *     "field_item:text",
+ *     "field_item:text_long",
+ *     "field_item:text_with_summary"
+ *   }
  * )
  */
 class Text extends String implements ConfigurableTargetInterface, ContainerFactoryPluginInterface {

@@ -15,7 +15,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "datetime",
- *   field_types = {"datetime"}
+ *   field_types = {"field_item:datetime"}
  * )
  */
 class DateTime extends FieldTargetBase {

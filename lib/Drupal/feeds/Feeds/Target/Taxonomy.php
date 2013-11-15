@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @Plugin(
  *   id = "taxonomy",
- *   field_types = {"taxonomy_term_reference"}
+ *   field_types = {"field_item:taxonomy_term_reference"}
  * )
  */
 class Taxonomy extends EntityReference implements ContainerFactoryPluginInterface {

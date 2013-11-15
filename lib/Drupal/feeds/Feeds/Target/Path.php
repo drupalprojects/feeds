@@ -14,7 +14,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "path",
- *   field_types = {"path_field"}
+ *   field_types = {"field_item:path"}
  * )
  */
 class Path extends FieldTargetBase {

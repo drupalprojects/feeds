@@ -17,7 +17,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "file",
- *   field_types = {"file", "image"}
+ *   field_types = {"field_item:file", "field_item:image"}
  * )
  */
 class File extends FieldTargetBase implements ConfigurableTargetInterface {

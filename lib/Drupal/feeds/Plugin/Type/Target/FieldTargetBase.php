@@ -84,7 +84,6 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
       if ($instance) {
         static::$properties[$id]['label'] = $instance->getFieldLabel();
         static::$properties[$id]['description'] = $instance->getFieldDescription();
-        static::$properties[$id]['type'] = $instance->getFieldType();
         static::$properties[$id]['settings'] = $instance->getFieldSettings();
       }
     }

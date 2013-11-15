@@ -16,7 +16,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "entity_reference",
- *   field_types = {"entity_reference", "entity_reference_field"}
+ *   field_types = {"field_item:entity_reference"}
  * )
  */
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
