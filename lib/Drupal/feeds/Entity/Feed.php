@@ -31,6 +31,7 @@ use Drupal\job_scheduler\JobScheduler;
  *   controllers = {
  *     "storage" = "Drupal\feeds\FeedStorageController",
  *     "render" = "Drupal\feeds\FeedRenderController",
+ *     "view_builder" = "Drupal\feeds\FeedViewBuilder",
  *     "access" = "Drupal\feeds\FeedAccessController",
  *     "form" = {
  *       "create" = "Drupal\feeds\FeedFormController",
@@ -659,6 +660,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       'label' => t('Source'),
       'description' => t('The source of the feed.'),
       'type' => 'uri_field',
+      'settings' => array('default_value' => ''),
     );
     $properties['config'] = array(
       'label' => t('Config'),
