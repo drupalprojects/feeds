@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
-
+use Drupal\Core\TypedData\DataDefinition;
 
 /**
  * Defines the 'feeds_serialized' entity field item.
@@ -25,7 +25,7 @@ class SerializedItem extends FieldItemBase {
   /**
    * Definitions of the contained properties.
    *
-   * @see SerializedItem::getPropertyDefinitions()
+   * @see self::getPropertyDefinitions()
    *
    * @var array
    */
@@ -37,10 +37,8 @@ class SerializedItem extends FieldItemBase {
   public function getPropertyDefinitions() {
 
     if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['value'] = array(
-        'type' => 'map',
-        'label' => t('Serialized value'),
-      );
+      static::$propertyDefinitions['value'] = DataDefinition::create('map')
+        ->setLabel(t('Serialized value'));
     }
 
     return static::$propertyDefinitions;
@@ -55,6 +53,9 @@ class SerializedItem extends FieldItemBase {
     // given.
     if (is_string($values)) {
       $values = unserialize($values);
+      if (!is_array($values)) {
+        $values = array();
+      }
     }
 
     $values = array('value' => $values);

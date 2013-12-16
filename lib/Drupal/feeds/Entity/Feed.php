@@ -10,6 +10,7 @@ namespace Drupal\feeds\Entity;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Field\FieldDefinition;
 use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
@@ -604,84 +605,82 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions($entity_type) {
-    $properties['fid'] = array(
-      'label' => t('Feed ID'),
-      'description' => t('The feed ID.'),
-      'type' => 'integer_field',
-      'read-only' => TRUE,
-    );
-    $properties['uuid'] = array(
-      'label' => t('UUID'),
-      'description' => t('The feed UUID.'),
-      'type' => 'string_field',
-      'read-only' => TRUE,
-    );
-    $properties['importer'] = array(
-      'label' => t('Importer'),
-      'description' => t('The feeds importer.'),
-      'type' => 'string_field',
-      'read-only' => TRUE,
-    );
-    $properties['title'] = array(
-      'label' => t('Title'),
-      'description' => t('The title of this feed, always treated as non-markup plain text.'),
-      'type' => 'string_field',
-    );
-    $properties['uid'] = array(
-      'label' => t('User ID'),
-      'description' => t('The user ID of the feed author.'),
-      'type' => 'entity_reference_field',
-      'settings' => array(
+    $fields = array();
+
+    $fields['fid'] = FieldDefinition::create('integer')
+      ->setLabel(t('Feed ID'))
+      ->setDescription(t('The feed ID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The feed UUID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['importer'] = FieldDefinition::create('string')
+      ->setLabel(t('Importer'))
+      ->setDescription(t('The feeds importer.'))
+      ->setReadOnly(TRUE);
+
+    $fields['title'] = FieldDefinition::create('text')
+      ->setLabel(t('Title'))
+      ->setDescription(t('The title of this feed, always treated as non-markup plain text.'))
+      ->setRequired(TRUE)
+      // ->setTranslatable(TRUE)
+      ->setSettings(array(
+        'default_value' => '',
+        'max_length' => 255,
+        'text_processing' => 0,
+      ));
+
+    $fields['uid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('User ID'))
+      ->setDescription(t('The user ID of the feed author.'))
+      ->setSettings(array(
         'target_type' => 'user',
         'default_value' => 0,
-      ),
-    );
-    $properties['status'] = array(
-      'label' => t('Import status'),
-      'description' => t('A boolean indicating whether the feed is active.'),
-      'type' => 'boolean_field',
-    );
-    $properties['created'] = array(
-      'label' => t('Created'),
-      'description' => t('The time that the feed was created.'),
-      'type' => 'integer_field',
-    );
-    $properties['changed'] = array(
-      'label' => t('Changed'),
-      'description' => t('The time that the feed was last edited.'),
-      'type' => 'integer_field',
-    );
-    $properties['imported'] = array(
-      'label' => t('Imported'),
-      'description' => t('The time that the feed was last imported.'),
-      'type' => 'integer_field',
-    );
-    $properties['source'] = array(
-      'label' => t('Source'),
-      'description' => t('The source of the feed.'),
-      'type' => 'uri_field',
-      'settings' => array('default_value' => ''),
-    );
-    $properties['config'] = array(
-      'label' => t('Config'),
-      'description' => t('The config of the feed.'),
-      'type' => 'feeds_serialized_field',
-      'settings' => array('default_value' => array()),
-    );
-    $properties['fetcher_result'] = array(
-      'label' => t('Fetcher result'),
-      'description' => t('The source of the feed.'),
-      'type' => 'feeds_serialized_field',
-      'settings' => array('default_value' => array()),
-    );
-    $properties['state'] = array(
-      'label' => t('State'),
-      'description' => t('The source of the feed.'),
-      'type' => 'feeds_serialized_field',
-      'settings' => array('default_value' => array()),
-    );
+      ));
 
-    return $properties;
+    $fields['status'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Importing status'))
+      ->setDescription(t('A boolean indicating whether the feed is active.'));
+
+    // @todo Convert to a "created" field in https://drupal.org/feed/2145103.
+    $fields['created'] = FieldDefinition::create('integer')
+      ->setLabel(t('Created'))
+      ->setDescription(t('The time that the feed was created.'));
+
+    // @todo Convert to a "changed" field in https://drupal.org/feed/2145103.
+    $fields['changed'] = FieldDefinition::create('integer')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time that the feed was last edited.'))
+      ->setPropertyConstraints('value', array('EntityChanged' => array()));
+
+    $fields['imported'] = FieldDefinition::create('integer')
+      ->setLabel(t('Imported'))
+      ->setDescription(t('The time that the feed was imported.'));
+
+    $fields['source'] = FieldDefinition::create('uri')
+      ->setLabel(t('Source'))
+      ->setDescription(t('The source of the feed.'))
+      ->setSettings(array('default_value' => ''));
+
+    $fields['config'] = FieldDefinition::create('feeds_serialized')
+      ->setSettings(t('Config'))
+      ->setDescription(t('The config of the feed.'))
+      ->setSettings(array('default_value' => array()));
+
+    $fields['fetcher_result'] = FieldDefinition::create('feeds_serialized')
+      ->setLabel(t('Fetcher result'))
+      ->setDescription(t('The source of the feed.'))
+      ->setSettings(array('default_value' => array()));
+
+    $fields['state'] = FieldDefinition::create('feeds_serialized')
+      ->setLabel(t('State'))
+      ->setDescription(t('The source of the feed.'))
+      ->setSettings(array('default_value' => array()));
+
+    return $fields;
   }
 
 }
