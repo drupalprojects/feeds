@@ -25,7 +25,7 @@ services:
     arguments: ['handler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   access_check.feeds_feed.add_list:
     class: Drupal\feeds\Access\FeedCreateListAccessCheck
-    arguments: ['@plugin.manager.entity']
+    arguments: ['@entity.manager']
     tags:
       - { name: access_check }
   feeds.subscription.crud:
