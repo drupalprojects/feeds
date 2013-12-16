@@ -30,13 +30,6 @@ class ImporterFormController extends EntityFormController {
   protected $importerStorage;
 
   /**
-   * The plugngs that provide configuration forms.
-   *
-   * @var array
-   */
-  protected $configurablePlugins = array();
-
-  /**
    * Constructs an ImporterFormController object.
    *
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $importer_storage
@@ -102,9 +95,6 @@ class ImporterFormController extends EntityFormController {
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
-    // Reset configurable plugins for ajax requests.
-    $this->configurablePlugins = array();
-
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
     if (isset($form_state['values'])) {
@@ -160,14 +150,12 @@ class ImporterFormController extends EntityFormController {
       // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
         $form[$type]['advanced'] = $plugin->buildAdvancedForm(array(), $form_state);
-        $this->configurablePlugins[$type] = $plugin;
       }
 
       $form[$type]['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
       $form[$type]['advanced']['#suffix'] = '</div>';
 
       if ($plugin instanceof PluginFormInterface) {
-        $this->configurablePlugins[$type] = $plugin;
 
         if ($plugin_form = $plugin->buildConfigurationForm(array(), $form_state)) {
           $form[$type . '_configuration'] = array(
@@ -201,6 +189,26 @@ class ImporterFormController extends EntityFormController {
   }
 
   /**
+   * Returns the configurable plugins for this importer.
+   *
+   * @return array
+   *   A plugin array keyed by plugin type.
+   *
+   * @todo Consider moving this to Importer.
+   */
+  protected function getConfigurablePlugins() {
+    $plugins = array();
+
+    foreach ($this->entity->getPlugins() as $type => $plugin) {
+      if ($plugin instanceof PluginFormInterface || $plugin instanceof AdvancedFormPluginInterface) {
+        $plugins[$type] = $plugin;
+      }
+    }
+
+    return $plugins;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validate(array $form, array &$form_state) {
@@ -216,7 +224,7 @@ class ImporterFormController extends EntityFormController {
       }
     }
 
-    foreach ($this->configurablePlugins as $plugin) {
+    foreach ($this->getConfigurablePlugins() as $plugin) {
       $plugin->validateConfigurationForm($form, $form_state);
     }
 
@@ -229,7 +237,7 @@ class ImporterFormController extends EntityFormController {
    */
   public function submit(array $form, array &$form_state) {
 
-    foreach ($this->configurablePlugins as $plugin) {
+    foreach ($this->getConfigurablePlugins() as $plugin) {
       $plugin->submitConfigurationForm($form, $form_state);
     }
 
