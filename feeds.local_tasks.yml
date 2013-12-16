@@ -1,0 +1,14 @@
+feeds.feed_list:
+  route_name: feeds_feed.list
+  title: 'Feeds'
+  tab_root_id: feeds.feed_list
+
+feeds_importer.edit:
+  route_name: feeds_importer.edit
+  title: Edit
+  tab_root_id: feeds_importer.edit
+feeds_importer.mapping:
+  route_name: feeds_importer.mapping
+  title: Mapping
+  tab_root_id: feeds_importer.edit
+  weight: 10

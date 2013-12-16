@@ -127,15 +127,8 @@ feeds_importer.create:
   requirements:
     _entity_create_access: 'feeds_importer'
 
-feeds_importer:
-  path: '/admin/structure/feeds/manage/{feeds_importer}'
-  defaults:
-    _entity_form: 'feeds_importer.edit'
-  requirements:
-    _entity_access: 'feeds_importer.edit'
-
 feeds_importer.edit:
-  path: '/admin/structure/feeds/manage/{feeds_importer}/edit'
+  path: '/admin/structure/feeds/manage/{feeds_importer}'
   defaults:
     _entity_form: 'feeds_importer.edit'
   requirements:

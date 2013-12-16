@@ -327,7 +327,7 @@ function feeds_menu() {
     'title' => 'Edit',
     'route_name' => 'feeds_feed.update',
     'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'context' => MENU_CONTEXT_PAGE,
   );
   $items['feed/%feeds_feed/delete'] = array(
     'title' => 'Delete',
@@ -364,24 +364,10 @@ function feeds_menu() {
     'title' => 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/structure/feeds/add'] = array(
-    'route_name' => 'feeds_importer.create',
-    'type' => MENU_SIBLING_LOCAL_TASK,
-  );
   $items['admin/structure/feeds/manage/%feeds_importer'] = array(
     'title callback' => 'entity_page_label',
     'title arguments' => array(4),
-    'route_name' => 'feeds_importer',
-  );
-  $items['admin/structure/feeds/manage/%feeds_importer/edit'] = array(
-    'title' => 'Edit',
     'route_name' => 'feeds_importer.edit',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/structure/feeds/manage/%feeds_importer/mapping'] = array(
-    'title' => 'Mapping',
-    'route_name' => 'feeds_importer.mapping',
-    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
