@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\ConfigEntityReferenceItemBase;
+use Drupal\Core\TypedData\DataDefinition;
 use Drupal\field\FieldInterface;
 
 /**
@@ -46,22 +47,17 @@ class FeedsItem extends ConfigEntityReferenceItemBase {
     if (!isset(static::$propertyDefinitions[$key])) {
       static::$propertyDefinitions[$key] = parent::getPropertyDefinitions();
 
-      static::$propertyDefinitions[$key]['imported'] = array(
-        'type' => 'integer',
-        'label' => t('Timestamp'),
-      );
-      static::$propertyDefinitions[$key]['url'] = array(
-        'type' => 'uri',
-        'label' => t('Item URL'),
-      );
-      static::$propertyDefinitions[$key]['guid'] = array(
-        'type' => 'string',
-        'label' => t('Item GUID'),
-      );
-      static::$propertyDefinitions[$key]['hash'] = array(
-        'type' => 'string',
-        'label' => t('Item hash'),
-      );
+      static::$propertyDefinitions['imported'] = DataDefinition::create('integer')
+        ->setLabel(t('Timestamp'));
+
+      static::$propertyDefinitions['url'] = DataDefinition::create('uri')
+        ->setLabel(t('Item URL'));
+
+      static::$propertyDefinitions['guid'] = DataDefinition::create('string')
+        ->setLabel(t('Item GUID'));
+
+      static::$propertyDefinitions['hash'] = DataDefinition::create('string')
+        ->setLabel(t('Item hash'));
     }
 
     return static::$propertyDefinitions[$key];
