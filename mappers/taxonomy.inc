@@ -143,7 +143,7 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
           if ($tids = $name_query->propertyCondition('name', $term)->execute()) {
             $tid = key($tids['taxonomy_term']);
           }
-          elseif ($mapping['autocreate']) {
+          elseif ($mapping['autocreate'] && strlen(trim($term))) {
             $term = (object) array(
               'name' => $term,
               'vid' => key($cache['allowed_vocabularies'][$target]),
