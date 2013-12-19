@@ -221,7 +221,7 @@ interface FeedInterface extends ContentEntityInterface {
    * @return \Drupal\feeds\StateInterface
    *   The State object for the given stage.
    */
-  public function state($stage);
+  public function getState($stage);
 
   /**
    * Counts items imported by this feed.

@@ -38,7 +38,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
     }
 
     // Batch if this is a directory.
-    $state = $feed->state(StateInterface::FETCH);
+    $state = $feed->getState(StateInterface::FETCH);
     $files = array();
     if (!isset($state->files)) {
       $state->files = $this->listFiles($feed_config['source']);

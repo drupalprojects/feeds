@@ -24,7 +24,7 @@ interface ClearableInterface {
    * This operation supports batching in the same way that importing does. You
    * can get the state object from the feed.
    * @code
-   * $state = $feed->state(StateInterface::CLEAR);
+   * $state = $feed->getState(StateInterface::CLEAR);
    *
    * $state->total = find_total($feed->id());
    *

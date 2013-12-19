@@ -40,8 +40,8 @@ class FeedStorageController extends FieldableDatabaseStorageController {
     $this->database->update($this->entityInfo['base_table'])
       ->condition('fid', $feed->id())
       ->fields(array(
-        'source' => $feed->get('source')->value,
-        'config' => serialize($feed->get('config')->value),
+        'source' => $feed->getSource(),
+        'config' => serialize($feed->getConfiguration()),
       ))
       ->execute();
   }

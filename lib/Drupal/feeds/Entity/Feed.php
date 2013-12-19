@@ -168,11 +168,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->acquireLock();
 
     try {
-      $state = $this->get('state')->value;
       // If fetcher result is empty, we are starting a new import, log.
       if (empty($this->get('fetcher_result')->value)) {
-        $state[StateInterface::START] = time();
-        $this->set('state', $state);
+        $this->setState(StateInterface::START, time());
       }
 
       $importer = $this->getImporter();
@@ -189,9 +187,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
         $this->set('fetcher_result', $fetcher_result);
         // Clean the parser's state, we are parsing an entirely new file.
-        $state = $this->get('state')->value;
-        unset($state[StateInterface::PARSE]);
-        $this->set('state', $state);
+        $this->setState(StateInterface::PARSE, NULL);
       }
 
       // Parse.
@@ -200,7 +196,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
       // Process.
       // @todo Create a ProcessorWrapper plugin?
-      $processor_state = $this->state(StateInterface::PROCESS);
+      $processor_state = $this->getState(StateInterface::PROCESS);
       $processor = $importer->getProcessor();
       $processor->process($this, $processor_state, $parser_result);
     }
@@ -228,11 +224,10 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * Cleans up after an import.
    */
   protected function cleanUp() {
-    $processor_state = $this->state(StateInterface::PROCESS);
+    $processor_state = $this->getState(StateInterface::PROCESS);
     $this->getImporter()->getProcessor()->setMessages($this, $processor_state);
-    $state = $this->get('state')->value;
     $this->set('imported', time());
-    $this->log('import', 'Imported in !s s', array('!s' => $this->get('imported')->value - $state[StateInterface::START]), WATCHDOG_INFO);
+    $this->log('import', 'Imported in !s s', array('!s' => $this->get('imported')->value - $this->getState(StateInterface::START), WATCHDOG_INFO));
     module_invoke_all('feeds_after_import', $this);
 
     // Unset.
@@ -344,29 +339,36 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Convert to proper field item.
    */
-  public function state($stage) {
-    $state = $this->get('state')->value;
-    if (!isset($state[$stage])) {
-      $state[$stage] = new State();
+  public function getState($stage) {
+    $state = $this->get('state')->$stage;
+    if (!$state) {
+      $state = new State();
+      $this->get('state')->$stage = $state;
     }
-    $this->set('state', $state);
-    return $state[$stage];
+    return $state;
+  }
+
+  public function setState($stage, $state) {
+    $this->get('state')->$state = $state;
+    return $this;
   }
 
   /**
    * {@inheritdoc}
    */
   public function progressParsing() {
-    return $this->state(StateInterface::PARSE)->progress;
+    return $this->getState(StateInterface::PARSE)->progress;
   }
 
   /**
    * {@inheritdoc}
    */
   public function progressImporting() {
-    $fetcher = $this->state(StateInterface::FETCH);
-    $parser = $this->state(StateInterface::PARSE);
+    $fetcher = $this->getState(StateInterface::FETCH);
+    $parser = $this->getState(StateInterface::PARSE);
 
     if ($fetcher->progress == StateInterface::BATCH_COMPLETE && $parser->progress == StateInterface::BATCH_COMPLETE) {
       return StateInterface::BATCH_COMPLETE;
@@ -388,14 +390,14 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function progressClearing() {
-    return $this->state(StateInterface::CLEAR)->progress;
+    return $this->getState(StateInterface::CLEAR)->progress;
   }
 
   /**
    * {@inheritdoc}
    */
   public function progressExpiring() {
-    return $this->state(StateInterface::EXPIRE)->progress;
+    return $this->getState(StateInterface::EXPIRE)->progress;
   }
 
   /**
@@ -414,18 +416,18 @@ class Feed extends ContentEntityBase implements FeedInterface {
     return $this;
   }
 
+  public function getConfiguration() {
+    $configuration = $this->get('config')->getValue();
+    return reset($configuration);
+  }
+
   /**
    * {@inheritdoc}
    */
   public function getConfigurationFor(FeedsPluginInterface $client) {
     $type = $client->pluginType();
 
-    if (isset($this->config->value[$type])) {
-      $configuration = $this->config->value[$type];
-    }
-    else {
-      $configuration = array();
-    }
+    $configuration = $this->get('config')->$type;
 
     return array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
   }
@@ -433,10 +435,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function setConfigurationFor(FeedsPluginInterface $client, array $config) {
-    $this_config = $this->config->value;
-    $this_config[$client->pluginType()] = $config;
-    $this->set('config', $this_config);
+  public function setConfigurationFor(FeedsPluginInterface $client, array $configuration) {
+    $type = $client->pluginType();
+    $this->get('config')->$type = $configuration;
 
     return $this;
   }
@@ -497,9 +498,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getSource() {
-    $configuration = $this->get('config')->value;
-    if (isset($configuration['fetcher']) && isset($configuration['fetcher']['source'])) {
-      return $configuration['fetcher']['source'];
+    $configuration = $this->get('config')->fetcher;
+    if (isset($configuration['source'])) {
+      return $configuration['source'];
     }
   }
 
@@ -665,17 +666,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setDescription(t('The source of the feed.'))
       ->setSettings(array('default_value' => ''));
 
-    $fields['config'] = FieldDefinition::create('feeds_serialized')
+    $fields['config'] = FieldDefinition::create('map')
       ->setSettings(t('Config'))
-      ->setDescription(t('The config of the feed.'))
-      ->setSettings(array('default_value' => array()));
+      ->setDescription(t('The config of the feed.'));
 
     $fields['fetcher_result'] = FieldDefinition::create('feeds_serialized')
       ->setLabel(t('Fetcher result'))
-      ->setDescription(t('The source of the feed.'))
-      ->setSettings(array('default_value' => array()));
+      ->setDescription(t('The source of the feed.'));
 
-    $fields['state'] = FieldDefinition::create('feeds_serialized')
+    $fields['state'] = FieldDefinition::create('map')
       ->setLabel(t('State'))
       ->setDescription(t('The source of the feed.'))
       ->setSettings(array('default_value' => array()));

@@ -235,7 +235,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function clear(FeedInterface $feed) {
-    $state = $feed->state(StateInterface::CLEAR);
+    $state = $feed->getState(StateInterface::CLEAR);
 
     // Build base select statement.
     $query = $this->queryFactory->get($this->entityType())
@@ -289,7 +289,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The feed being processed.
    */
   public function setMessages(FeedInterface $feed) {
-    $state = $feed->state(StateInterface::PROCESS);
+    $state = $feed->getState(StateInterface::PROCESS);
 
     $tokens = array(
       '@entity' => Unicode::strtolower($this->entityLabel()),
@@ -704,7 +704,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function expire(FeedInterface $feed, $time = NULL) {
-    $state = $feed->state(StateInterface::EXPIRE);
+    $state = $feed->getState(StateInterface::EXPIRE);
 
     if ($time === NULL) {
       $time = $this->expiryTime();

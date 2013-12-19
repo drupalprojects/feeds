@@ -34,7 +34,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $feed_config = $feed->getConfigurationFor($this);
-    $state = $feed->state(StateInterface::PARSE);
+    $state = $feed->getState(StateInterface::PARSE);
 
     // Load and configure parser.
     $parser = new ParserCSV();
