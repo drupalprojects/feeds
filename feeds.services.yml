@@ -23,7 +23,7 @@ services:
   plugin.manager.feeds.handler:
     class: Drupal\feeds\Plugin\Type\FeedsPluginManager
     arguments: ['handler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
-  access_check.feeds_feed.add_list:
+  access_check.feeds_feed.add:
     class: Drupal\feeds\Access\FeedAddAccessCheck
     arguments: ['@entity.manager']
     tags:

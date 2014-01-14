@@ -171,7 +171,7 @@ function feeds_push_unsubscribe(array $job) {
  */
 function feeds_push_subscribe(array $job) {
   if ($feed = entity_load('feeds_feed', $job['id'])) {
-    $feed_config = $feed->get('config');
+    $feed_config = $feed->getConfiguration();
 
     if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
 
@@ -299,15 +299,9 @@ function feeds_permission() {
  */
 function feeds_menu() {
   $items = array();
-  $items['admin/content/feed'] = array(
-    'title' => 'Feeds',
-    'description' => 'Manage the feeds defined for your site.',
-    'route_name' => 'feeds_feed.list',
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-  );
   $items['feed/add'] = array(
     'title' => 'Add feed',
-    'route_name' => 'feeds_feed.create_list',
+    'route_name' => 'feeds_feed.add_page',
   );
   $items['feed/add/%feeds_importer'] = array(
     'title' => 'Add feed',
@@ -360,10 +354,6 @@ function feeds_menu() {
     'description' => 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.',
     'route_name' => 'feeds_importer.list',
   );
-  $items['admin/structure/feeds/list'] = array(
-    'title' => 'List',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
   $items['admin/structure/feeds/manage/%feeds_importer'] = array(
     'title callback' => 'entity_page_label',
     'title arguments' => array(4),
@@ -371,6 +361,22 @@ function feeds_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks().
+ */
+function feeds_menu_local_tasks(&$data, $route_name) {
+  // Add action link to 'feed/add' on 'admin/content' page.
+  if (current_path() == 'admin/content/feed') {
+    $item = menu_get_item('feed/add');
+    if ($item['access']) {
+      $data['actions'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
 }
 
 /**

@@ -1,4 +1,4 @@
-feeds_feed.create_list:
+feeds_feed.add_page:
   path: '/feed/add'
   defaults:
     _title: 'Add feed'
