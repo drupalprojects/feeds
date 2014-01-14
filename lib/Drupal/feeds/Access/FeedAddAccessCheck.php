@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Access\FeedCreateListAccessCheck.
+ * Contains \Drupal\feeds\Access\FeedAddAccessCheck.
  */
 
 namespace Drupal\feeds\Access;
 
-use Drupal\Core\Entity\EntityCreateAccessCheck;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
@@ -15,12 +16,24 @@ use Symfony\Component\Routing\Route;
 /**
  * Access check for feeds link add list routes.
  */
-class FeedCreateListAccessCheck extends EntityCreateAccessCheck {
+class FeedAddAccessCheck implements AccessInterface {
 
   /**
-   * {@inheritdoc}
+   * The entity manager.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface
    */
-  protected $requirementsKey = '_feeds_feed_add_access';
+  protected $entityManager;
+
+  /**
+   * Constructs a FeedAddAccessCheck object.
+   *
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   */
+  public function __construct(EntityManagerInterface $entity_manager) {
+    $this->entityManager = $entity_manager;
+  }
 
   /**
    * {@inheritdoc}
@@ -28,7 +41,6 @@ class FeedCreateListAccessCheck extends EntityCreateAccessCheck {
   public function access(Route $route, Request $request, AccountInterface $account) {
     // @todo Perhaps read config directly rather than load all importers.
     $access_controller = $this->entityManager->getAccessController('feeds_feed');
-
     foreach ($this->entityManager->getStorageController('feeds_importer')->loadEnabled() as $importer) {
       if ($access_controller->createAccess($importer->id(), $account)) {
         return self::ALLOW;

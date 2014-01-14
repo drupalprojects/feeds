@@ -24,10 +24,10 @@ services:
     class: Drupal\feeds\Plugin\Type\FeedsPluginManager
     arguments: ['handler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
   access_check.feeds_feed.add_list:
-    class: Drupal\feeds\Access\FeedCreateListAccessCheck
+    class: Drupal\feeds\Access\FeedAddAccessCheck
     arguments: ['@entity.manager']
     tags:
-      - { name: access_check }
+      - { name: access_check, applies_to: _feeds_feed_add_access_check }
   feeds.subscription.crud:
     class: Drupal\feeds\PuSH\Subscription
     arguments: ['@database', 'feeds_subscription']
