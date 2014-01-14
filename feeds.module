@@ -45,6 +45,21 @@ function feeds_hook_info() {
 }
 
 /**
+ * Entity URI callback.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $feeds_feed
+ *   A feed entity.
+ *
+ * @return array
+ *   An array with 'path' as the key and the path to the node as its value.
+ */
+function feeds_feed_uri(EntityInterface $feed) {
+  return array(
+    'path' => 'feed/' . $feed->id(),
+  );
+}
+
+/**
  * Implements hook_cron().
  *
  * @todo This needs to be different, this could timeout easily. Perhaps a queue.

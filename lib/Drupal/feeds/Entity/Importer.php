@@ -495,16 +495,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getExportProperties() {
-    $properties = parent::getExportProperties();
-    $properties += $this->plugins;
-    $properties['mappings'] = $this->mappings;
-    return $properties;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function uri() {
     return array(
       'path' => 'admin/structure/feeds/manage/' . $this->id(),
@@ -555,6 +545,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
         unset($this->plugins[$type]['configuration']);
       }
     }
+
     foreach ($this->targetPlugins as $delta => $target_plugin) {
       if ($target_plugin instanceof ConfigurableTargetInterface) {
         $this->mappings[$delta]['settings'] = $target_plugin->getConfiguration();
@@ -563,7 +554,18 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
         unset($this->mappings[$delta]['settings']);
       }
     }
+
     $this->mappings = array_values($this->mappings);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExportProperties() {
+    $properties = parent::getExportProperties();
+    $properties += $this->plugins;
+    $properties['mappings'] = $this->mappings;
+    return $properties;
   }
 
 }

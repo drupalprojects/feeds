@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
 
@@ -75,6 +76,21 @@ class SerializedItem extends FieldItemBase {
     elseif (isset($this->properties[$name])) {
       return $this->properties[$name]->getValue();
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function schema(FieldDefinitionInterface $field_definition) {
+    return array(
+      'columns' => array(
+        'value' => array(
+          'type' => 'blob',
+          'size' => 'big',
+          'serialize' => TRUE,
+        ),
+      ),
+    );
   }
 
 }

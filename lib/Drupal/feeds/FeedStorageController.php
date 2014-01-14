@@ -22,7 +22,7 @@ class FeedStorageController extends FieldableDatabaseStorageController {
    *   The feed to unlock.
    */
   public function unlockFeed(FeedInterface $feed) {
-    $this->database->update($this->entityInfo['base_table'])
+    $this->database->update($this->entityInfo->getBaseTable())
       ->condition('fid', $feed->id())
       ->fields(array('state' => FALSE))
       ->execute();
@@ -37,7 +37,7 @@ class FeedStorageController extends FieldableDatabaseStorageController {
    * @todo Figure out a better way to do this.
    */
   public function updateFeedConfig(FeedInterface $feed) {
-    $this->database->update($this->entityInfo['base_table'])
+    $this->database->update($this->entityInfo->getBaseTable())
       ->condition('fid', $feed->id())
       ->fields(array(
         'source' => $feed->getSource(),

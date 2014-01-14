@@ -66,25 +66,29 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
     $field_definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $processor->bundle());
 
-    foreach ($field_definitions as $id => $definition) {
-      if (!empty($definition['read-only']) || $id == $bundle_key) {
+    foreach ($field_definitions as $id => $field_definition) {
+      if ($field_definition->isReadOnly() || $id == $bundle_key) {
         continue;
       }
-      $field = \Drupal::typedData()->createInstance($definition['type'], $definition);
 
-      static::$properties[$id] = $definition;
-      static::$properties[$id]['properties'] = $field->getPropertyDefinitions();
+      static::$properties[$id] = $field_definition->getItemDefinition()->toArray();
+      static::$properties[$id]['label'] = $field_definition->getLabel();
+      static::$properties[$id]['description'] = $field_definition->getDescription();
+      static::$properties[$id]['settings'] = $field_definition->getSettings();
 
-      // static::$properties[$id]['properties'] = array_filter($field_properties, function($property) {
-      //   return empty($property['computed']);
-      // });
+      foreach (\Drupal::typedData()->create($field_definition->getItemDefinition())->getPropertyDefinitions() as $property => $data_definition) {
+        if (!$data_definition->isComputed()) {
+          static::$properties[$id]['properties'][$property] = $data_definition->toArray();
+        }
+      }
+
       $instance_id = $entity_type . '.' . $processor->bundle() . '.' . $id;
       $instance = \Drupal::entityManager()->getStorageController('field_instance')->load($instance_id);
 
       if ($instance) {
-        static::$properties[$id]['label'] = $instance->getFieldLabel();
-        static::$properties[$id]['description'] = $instance->getFieldDescription();
-        static::$properties[$id]['settings'] = $instance->getFieldSettings();
+        static::$properties[$id]['label'] = $instance->getLabel();
+        static::$properties[$id]['description'] = $instance->getDescription();
+        static::$properties[$id]['settings'] = $instance->getSettings();
       }
     }
   }

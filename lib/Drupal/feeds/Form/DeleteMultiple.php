@@ -85,7 +85,7 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
    */
   public function getCancelRoute() {
     return array(
-      'route_name' => 'feeds_feed.create_list',
+      'route_name' => 'feeds_feed.add_page',
     );
   }
 

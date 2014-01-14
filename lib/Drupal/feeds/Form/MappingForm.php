@@ -122,7 +122,6 @@ class MappingForm extends FormBase {
     );
 
     return $form;
-
   }
 
   /**

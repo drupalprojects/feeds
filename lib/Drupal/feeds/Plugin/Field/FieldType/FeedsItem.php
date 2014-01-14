@@ -8,8 +8,8 @@
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\ConfigEntityReferenceItemBase;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\field\FieldInterface;
 
 /**
  * Plugin implementation of the 'feeds_item' field type.
@@ -66,7 +66,7 @@ class FeedsItem extends ConfigEntityReferenceItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldInterface $field) {
+  public static function schema(FieldDefinitionInterface $field_definition) {
     return array(
       'columns' => array(
         'target_id' => array(
