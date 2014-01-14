@@ -7,10 +7,12 @@
 
 namespace Drupal\feeds\Feeds\Processor;
 
+use Doctrine\Common\Inflector\Inflector;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormInterface;
@@ -59,7 +61,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * The entity info for the selected entity type.
    *
-   * @var array
+   * @var \Drupal\Core\Entity\EntityTypeInterface
    */
   protected $entityInfo;
 
@@ -109,10 +111,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The plugin id.
    * @param array $plugin_definition
    *   The plugin definition.
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_info
+   *   The entity info.
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage_controller
    *   The storage controller for this processor.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $entity_info, EntityStorageControllerInterface $storage_controller, QueryFactory $query_factory) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeInterface $entity_info, EntityStorageControllerInterface $storage_controller, QueryFactory $query_factory) {
     // $entityInfo has to be assinged before $this->loadHandlers() is called.
     $this->entityInfo = $entity_info;
     $this->storageController = $storage_controller;
@@ -123,9 +127,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->skipExisting = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
-
-    // Let handlers modify the entity info.
-    $this->apply('entityInfo', $this->entityInfo);
   }
 
   /**
@@ -397,9 +398,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The bundle type this processor operates on, or null if it is undefined.
    */
   protected function bundleKey() {
-    if (!empty($this->entityInfo['entity_keys']['bundle'])) {
-      return $this->entityInfo['entity_keys']['bundle'];
-    }
+    return $this->entityInfo->getBundleKey('bundle');
   }
 
   /**
@@ -430,10 +429,9 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The bundle label.
    */
   protected function bundleLabel() {
-    if (!empty($this->entityInfo['bundle_label'])) {
-      return $this->entityInfo['bundle_label'];
+    if ($label = $this->entityInfo->getBundleLabel()) {
+      return $label;
     }
-
     return $this->t('Bundle');
   }
 
@@ -464,7 +462,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The label of the entity.
    */
   protected function entityLabel() {
-    return $this->entityInfo['label'];
+    return $this->entityInfo->getLabel();
   }
 
   /**
@@ -476,10 +474,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The plural label of the entity.
    */
   protected function entityLabelPlural() {
-    if (!empty($this->entityInfo['label_plural'])) {
-      return $this->entityInfo['label_plural'];
-    }
-    return $this->entityInfo['label'];
+    return Inflector::pluralize($this->entityLabel());
   }
 
   /**
