@@ -14,6 +14,7 @@ files[] = libraries/PuSHSubscriber.inc
 
 ; Plugins
 files[] = plugins/FeedsCSVParser.inc
+files[] = plugins/FeedsEntityProcessor.inc
 files[] = plugins/FeedsFetcher.inc
 files[] = plugins/FeedsFileFetcher.inc
 files[] = plugins/FeedsHTTPFetcher.inc

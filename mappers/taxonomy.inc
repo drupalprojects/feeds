@@ -70,6 +70,11 @@ function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle
       );
     }
   }
+  if ($entity_type == 'taxonomy_term') {
+    $targets['tid']['name'] = t('Term id');
+    $targets['tid']['description'] = t('The tid of the taxonomy term. NOTE: use this feature with care, node ids are usually assigned by Drupal.');
+    unset($targets['vocabulary']);
+  }
 }
 
 /**
