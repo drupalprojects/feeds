@@ -470,10 +470,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
     // mapping on a prepopulated item such as an existing node.
     foreach ($this->config['mappings'] as $mapping) {
       if (isset($targets[$this->id][$mapping['target']]['real_target'])) {
-        unset($target_item->{$targets[$this->id][$mapping['target']]['real_target']});
+        $target_item->{$targets[$this->id][$mapping['target']]['real_target']} = NULL;
       }
-      elseif (isset($target_item->{$mapping['target']})) {
-        unset($target_item->{$mapping['target']});
+      else {
+        $target_item->{$mapping['target']} = NULL;
       }
     }
 
