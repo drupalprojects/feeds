@@ -150,7 +150,7 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
           }
           elseif ($mapping['autocreate'] && strlen(trim($term))) {
             $term = (object) array(
-              'name' => drupal_substr(trim($term, 0, 255)),
+              'name' => drupal_substr(trim($term), 0, 255),
               'vid' => key($cache['allowed_vocabularies'][$target]),
               'vocabulary_machine_name' => reset($cache['allowed_vocabularies'][$target]),
             );
