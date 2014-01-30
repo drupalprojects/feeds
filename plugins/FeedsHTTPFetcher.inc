@@ -108,6 +108,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       'use_pubsubhubbub' => FALSE,
       'designated_hub' => '',
       'request_timeout' => NULL,
+      'auto_scheme' => 'http',
     );
   }
 
@@ -128,27 +129,40 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       '#description' => t('Attempt to use a <a href="http://en.wikipedia.org/wiki/PubSubHubbub">PubSubHubbub</a> subscription if available.'),
       '#default_value' => $this->config['use_pubsubhubbub'],
     );
-    $form['designated_hub'] = array(
+    $form['advanced'] = array(
+      '#title' => t('Advanced settings'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['advanced']['auto_scheme'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Automatically add scheme'),
+      '#description' => t('If the supplied URL does not contain the scheme, use this one automatically. Keep empty to force the user to input the scheme.'),
+      '#default_value' => $this->config['auto_scheme'],
+    );
+    $form['advanced']['designated_hub'] = array(
       '#type' => 'textfield',
       '#title' => t('Designated hub'),
       '#description' => t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
       '#default_value' => $this->config['designated_hub'],
-      '#dependency' => array(
-        'edit-use-pubsubhubbub' => array(1),
+      '#states' => array(
+        'visible' => array(':input[name="use_pubsubhubbub"]' => array('checked' => TRUE)),
       ),
     );
-   // Per importer override of global http request timeout setting.
-   $form['request_timeout'] = array(
-     '#type' => 'textfield',
-     '#title' => t('Request timeout'),
-     '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>' .
+    // Per importer override of global http request timeout setting.
+    $form['advanced']['request_timeout'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Request timeout'),
+      '#description' => t('Timeout in seconds to wait for an HTTP get request to finish.</br>' .
                          '<b>Note:</b> this setting will override the global setting.</br>' .
                          'When left empty, the global value is used.'),
-     '#default_value' => $this->config['request_timeout'],
-     '#element_validate' => array('element_validate_integer_positive'),
-     '#maxlength' => 3,
-     '#size'=> 30,
-   );
+      '#default_value' => $this->config['request_timeout'],
+      '#element_validate' => array('element_validate_integer_positive'),
+      '#maxlength' => 3,
+      '#size'=> 30,
+    );
+
     return $form;
   }
 
@@ -174,9 +188,17 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   public function sourceFormValidate(&$values) {
     $values['source'] = trim($values['source']);
 
+    // Keep a copy for error messages.
+    $original_url = $values['source'];
+
+    $parts = parse_url($values['source']);
+    if (empty($parts['scheme']) && $this->config['auto_scheme']) {
+      $values['source'] = $this->config['auto_scheme'] . '://' . $values['source'];
+    }
+
     if (!feeds_valid_url($values['source'], TRUE)) {
       $form_key = 'feeds][' . get_class($this) . '][source';
-      form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $values['source'])));
+      form_set_error($form_key, t('The URL %source is invalid.', array('%source' => $original_url)));
     }
     elseif ($this->config['auto_detect_feeds']) {
       feeds_include_library('http_request.inc', 'http_request');
