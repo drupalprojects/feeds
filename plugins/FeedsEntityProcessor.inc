@@ -60,8 +60,8 @@ class FeedsEntityProcessor extends FeedsProcessor {
     $info = $this->entityInfo();
     $values = $this->config['values'];
 
-    if (isset($info['entity keys']['bundle']) && isset($config['bundle'])) {
-      $values[$info['entity keys']['bundle']] = $config['bundle'];
+    if (isset($info['entity keys']['bundle']) && isset($this->config['bundle'])) {
+      $values[$info['entity keys']['bundle']] = $this->config['bundle'];
     }
 
     return entity_create($this->entityType(), $values);
