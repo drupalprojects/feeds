@@ -351,7 +351,11 @@ function http_request_find_feeds($html) {
     preg_match_all(HTTP_REQUEST_PCRE_TAG_ATTRIBUTES, $link_tag, $attributes, PREG_SET_ORDER);
     foreach ($attributes as $attribute) {
       // Find the key value pairs, attribute[1] is key and attribute[2] is the
-      // value.
+      // value.  However, if the link tag used single quotes, the value might
+      // be in attribute[3] instead.
+      if (empty($attribute[2])) {
+        $attribute[2] = $attribute[3];
+      }
       if (!empty($attribute[1]) && !empty($attribute[2])) {
         $candidate[drupal_strtolower($attribute[1])] = drupal_strtolower(decode_entities($attribute[2]));
       }
