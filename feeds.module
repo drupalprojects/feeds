@@ -46,20 +46,25 @@ function feeds_hook_info() {
  * Implements hook_cron().
  */
 function feeds_cron() {
-  if ($importers = feeds_reschedule()) {
-    foreach ($importers as $id) {
-      feeds_importer($id)->schedule();
-      $rows = db_query("SELECT feed_nid FROM {feeds_source} WHERE id = :id", array(':id' => $id));
-      foreach ($rows as $row) {
-        feeds_source($id, $row->feed_nid)->schedule();
-      }
-    }
-    feeds_reschedule(FALSE);
-  }
   // Expire old log entries.
   db_delete('feeds_log')
     ->condition('request_time', REQUEST_TIME - 604800, '<')
     ->execute();
+
+  // Find importers that need to be rescheduled.
+  if (!$importers = feeds_reschedule()) {
+    return;
+  }
+
+  // @todo Maybe we should queue this somehow as well. This could be potentially
+  // very long.
+  $sources = db_query("SELECT feed_nid, id FROM {feeds_source} WHERE id IN (:ids)", array(':ids' => $importers));
+
+  foreach ($sources as $source) {
+    feeds_source($source->id, $source->feed_nid)->schedule();
+  }
+
+  feeds_reschedule(FALSE);
 }
 
 /**
@@ -75,8 +80,8 @@ function feeds_cron_job_scheduler_info() {
   $info['feeds_source_clear'] = array(
     'queue name' => 'feeds_source_clear',
   );
-  $info['feeds_importer_expire'] = array(
-    'queue name' => 'feeds_importer_expire',
+  $info['feeds_source_expire'] = array(
+    'queue name' => 'feeds_source_expire',
   );
   $info['feeds_push_unsubscribe'] = array(
     'queue name' => 'feeds_push_unsubscribe',
@@ -91,72 +96,65 @@ function feeds_cron_queue_info() {
   $queues = array();
   $queues['feeds_source_import'] = array(
     'worker callback' => 'feeds_source_import',
-    'time' => 15,
   );
   $queues['feeds_source_clear'] = array(
     'worker callback' => 'feeds_source_clear',
-    'time' => 15,
   );
-  $queues['feeds_importer_expire'] = array(
-    'worker callback' => 'feeds_importer_expire',
-    'time' => 15,
+  $queues['feeds_source_expire'] = array(
+    'worker callback' => 'feeds_source_expire',
   );
   $queues['feeds_push_unsubscribe'] = array(
     'worker callback' => 'feeds_push_unsubscribe',
-    'time' => 15,
   );
+
   return $queues;
 }
 
 /**
  * Scheduler callback for importing from a source.
  */
-function feeds_source_import($job) {
-  $source = feeds_source($job['type'], $job['id']);
-  try {
-    $source->existing()->import();
-  }
-  catch (FeedsNotExistingException $e) {
-    // Do nothing.
-  }
-  catch (Exception $e) {
-    $source->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
+function feeds_source_import(array $job) {
+  $source = _feeds_queue_worker_helper($job, 'import');
   $source->scheduleImport();
 }
 
 /**
  * Scheduler callback for deleting all items from a source.
  */
-function feeds_source_clear($job) {
-  $source = feeds_source($job['type'], $job['id']);
-  try {
-    $source->existing()->clear();
-  }
-  catch (FeedsNotExistingException $e) {
-    // Do nothing.
-  }
-  catch (Exception $e) {
-    $source->log('clear', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
+function feeds_source_clear(array $job) {
+  $source = _feeds_queue_worker_helper($job, 'clear');
   $source->scheduleClear();
 }
 
 /**
  * Scheduler callback for expiring content.
  */
-function feeds_importer_expire($job) {
-  $importer = feeds_importer($job['type']);
+function feeds_source_expire(array $job) {
+  $source = _feeds_queue_worker_helper($job, 'expire');
+  $source->scheduleExpire();
+}
+
+/**
+ * Executes a method on a feed source.
+ *
+ * @param array $job
+ *   The job being run.
+ * @param string $method
+ *   The method to execute.
+ */
+function _feeds_queue_worker_helper(array $job, $method) {
+  $source = feeds_source($job['type'], $job['id']);
   try {
-    $importer->existing()->expire();
+    $source->existing()->$method();
   }
   catch (FeedsNotExistingException $e) {
     // Do nothing.
   }
   catch (Exception $e) {
-    $importer->log('expire', $e->getMessage(), array(), WATCHDOG_ERROR);
+    $source->log($method, $e->getMessage(), array(), WATCHDOG_ERROR);
   }
-  $importer->scheduleExpire();
+
+  return $source;
 }
 
 /**
@@ -198,28 +196,36 @@ function feeds_batch($method, $importer_id, $feed_nid = 0, &$context) {
 /**
  * Reschedule one or all importers.
  *
- * @param $importer_id
+ * @param string $importer_id
  *   If TRUE, all importers will be rescheduled, if FALSE, no importers will
  *   be rescheduled, if an importer id, only importer of that id will be
  *   rescheduled.
  *
- * @return
- *   TRUE if all importers need rescheduling. FALSE if no rescheduling is
- *   required. An array of importers that need rescheduling.
+ * @return array
+ *   An list of importers that need rescheduling.
  */
 function feeds_reschedule($importer_id = NULL) {
   $reschedule = variable_get('feeds_reschedule', FALSE);
+
   if ($importer_id === TRUE || $importer_id === FALSE) {
     $reschedule = $importer_id;
   }
   elseif (is_string($importer_id) && $reschedule !== TRUE) {
-    $reschedule = is_array($reschedule) ? $reschedule : array();
+    $reschedule = array_filter((array) $reschedule);
     $reschedule[$importer_id] = $importer_id;
   }
-  variable_set('feeds_reschedule', $reschedule);
+
+  if (isset($importer_id)) {
+    variable_set('feeds_reschedule', $reschedule);
+  }
+
   if ($reschedule === TRUE) {
     return feeds_enabled_importers();
   }
+  elseif ($reschedule === FALSE) {
+    return array();
+  }
+
   return $reschedule;
 }
 
@@ -617,9 +623,8 @@ function feeds_node_insert($node) {
     if (feeds_importer($importer_id)->config['import_on_create'] && !isset($node->feeds['suppress_import'])) {
       $source->startImport();
     }
-    // Schedule source and importer.
+    // Schedule the source.
     $source->schedule();
-    feeds_importer($importer_id)->schedule();
   }
 }
 

@@ -18,6 +18,7 @@ define('FEEDS_FETCH', 'fetch');
 define('FEEDS_PARSE', 'parse');
 define('FEEDS_PROCESS', 'process');
 define('FEEDS_PROCESS_CLEAR', 'process_clear');
+define('FEEDS_PROCESS_EXPIRE', 'process_expire');
 
 /**
  * Declares an interface for a class that defines default values and form
@@ -274,6 +275,7 @@ class FeedsSource extends FeedsConfigurable {
    */
   public function schedule() {
     $this->scheduleImport();
+    $this->scheduleExpire();
   }
 
   /**
@@ -286,11 +288,11 @@ class FeedsSource extends FeedsConfigurable {
     if (is_numeric($fetcher_period)) {
       $period = $fetcher_period;
     }
+    // Schedule as soon as possible if a batch is active.
     $period = $this->progressImporting() === FEEDS_BATCH_COMPLETE ? $period : 0;
     $job = array(
       'type' => $this->id,
       'id' => $this->feed_nid,
-      // Schedule as soon as possible if a batch is active.
       'period' => $period,
       'periodic' => TRUE,
     );
@@ -299,6 +301,27 @@ class FeedsSource extends FeedsConfigurable {
     }
     else {
       JobScheduler::get('feeds_source_import')->remove($job);
+    }
+  }
+
+  /**
+   * Schedule background expire tasks.
+   */
+  public function scheduleExpire() {
+    // Schedule as soon as possible if a batch is active.
+    $period = $this->progressExpiring() === FEEDS_BATCH_COMPLETE ? 3600 : 0;
+
+    $job = array(
+      'type' => $this->id,
+      'id' => $this->feed_nid,
+      'period' => $period,
+      'periodic' => TRUE,
+    );
+    if ($this->importer->processor->expiryTime() == FEEDS_EXPIRE_NEVER) {
+      JobScheduler::get('feeds_source_expire')->remove($job);
+    }
+    else {
+      JobScheduler::get('feeds_source_expire')->set($job);
     }
   }
 
@@ -417,6 +440,26 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Removes all expired items from a feed.
+   */
+  public function expire() {
+    $this->acquireLock();
+    try {
+      $result = $this->importer->processor->expire($this);
+    }
+    catch (Exception $e) {
+      // Will throw after the lock is released.
+    }
+    $this->releaseLock();
+
+    if (isset($e)) {
+      throw $e;
+    }
+
+    return $result;
+  }
+
+  /**
    * Report progress as float between 0 and 1. 1 = FEEDS_BATCH_COMPLETE.
    */
   public function progressParsing() {
@@ -448,6 +491,13 @@ class FeedsSource extends FeedsConfigurable {
    */
   public function progressClearing() {
     return $this->state(FEEDS_PROCESS_CLEAR)->progress;
+  }
+
+  /**
+   * Report progress on expiry.
+   */
+  public function progressExpiring() {
+    return $this->state(FEEDS_PROCESS_EXPIRE)->progress;
   }
 
   /**
@@ -556,6 +606,7 @@ class FeedsSource extends FeedsConfigurable {
       'id' => $this->feed_nid,
     );
     JobScheduler::get('feeds_source_import')->remove($job);
+    JobScheduler::get('feeds_source_expire')->remove($job);
   }
 
   /**
@@ -726,4 +777,5 @@ class FeedsSource extends FeedsConfigurable {
   protected function releaseLock() {
     lock_release("feeds_source_{$this->id}_{$this->feed_nid}");
   }
+
 }
