@@ -385,7 +385,7 @@ class FeedsEnclosure extends FeedsElement {
       }
 
       // We couldn't make sense of this enclosure, throw an exception.
-      if (!$file) {
+      if (!isset($file)) {
         throw new Exception(t('Invalid enclosure %enclosure', array('%enclosure' => $this->getValue())));
       }
     }
