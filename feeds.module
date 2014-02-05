@@ -359,6 +359,20 @@ function feeds_menu() {
 }
 
 /**
+ * Implements hook_admin_paths().
+ */
+function feeds_admin_paths() {
+  $paths = array(
+    'import' => TRUE,
+    'import/*' => TRUE,
+    'node/*/import' => TRUE,
+    'node/*/delete-items' => TRUE,
+    'node/*/log' => TRUE,
+  );
+  return $paths;
+}
+
+/**
  * Menu loader callback.
  */
 function feeds_importer_load($id) {
