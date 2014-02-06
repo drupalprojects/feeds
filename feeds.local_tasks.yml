@@ -1,9 +1,9 @@
-feeds_importer.edit:
-  route_name: feeds_importer.edit
+feeds.importer_edit:
+  route_name: feeds.importer_edit
   title: Edit
-  tab_root_id: feeds_importer.edit
-feeds_importer.mapping:
-  route_name: feeds_importer.mapping
+  base_route: feeds.importer_edit
+feeds.importer_mapping:
+  route_name: feeds.importer_mapping
   title: Mapping
-  tab_root_id: feeds_importer.edit
+  base_route: feeds.importer_edit
   weight: 10

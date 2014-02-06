@@ -316,66 +316,27 @@ function feeds_menu() {
   $items = array();
   $items['feed/add'] = array(
     'title' => 'Add feed',
-    'route_name' => 'feeds_feed.add_page',
+    'route_name' => 'feeds.add_page',
   );
-  $items['feed/add/%feeds_importer'] = array(
-    'title' => 'Add feed',
-    'route_name' => 'feeds_feed.create',
-  );
-  $items['feed/%feeds_feed'] = array(
-    'title callback' => 'entity_page_label',
-    'title arguments' => array(1),
-    'route_name' => 'feeds_feed',
-  );
-  $items['feed/%feeds_feed/view'] = array(
-    'title' => 'View',
-    'route_name' => 'feeds_feed.view',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['feed/%feeds_feed/edit'] = array(
-    'title' => 'Edit',
-    'route_name' => 'feeds_feed.update',
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE,
-  );
-  $items['feed/%feeds_feed/delete'] = array(
-    'title' => 'Delete',
-    'route_name' => 'feeds_feed.delete',
-    'type' => MENU_NORMAL_ITEM,
-    'context' => MENU_CONTEXT_PAGE,
-  );
-  $items['feed/%feeds_feed/import'] = array(
-    'title' => 'Import',
-    'route_name' => 'feeds_feed.import',
-    'type' => MENU_SIBLING_LOCAL_TASK,
-    'weight' => 10,
-  );
-  $items['feed/%feeds_feed/delete-items'] = array(
-    'title' => 'Delete items',
-    'route_name' => 'feeds_feed.clear',
-    'type' => MENU_SIBLING_LOCAL_TASK,
-    'weight' => 11,
-  );
-  $items['feed/%feeds_feed/unlock'] = array(
-    'title' => 'unlock',
-    'route_name' => 'feeds_feed.unlock',
-    'type' => MENU_SIBLING_LOCAL_TASK,
-    'weight' => 11,
-  );
-
-  // Admin UI.
-  $items['admin/structure/feeds'] = array(
-    'title' => 'Feeds importers',
-    'description' => 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.',
-    'route_name' => 'feeds_importer.list',
-  );
-  $items['admin/structure/feeds/manage/%feeds_importer'] = array(
-    'title callback' => 'entity_page_label',
-    'title arguments' => array(4),
-    'route_name' => 'feeds_importer.edit',
-  );
-
   return $items;
+}
+
+/**
+ * Implements hook_menu_link_defaults().
+ */
+function feeds_menu_link_defaults() {
+  $links = array();
+  $links['feeds.add_page'] = array(
+    'link_title' => 'Add feed',
+    'route_name' => 'feeds.add_page',
+  );
+  $links['feeds.importer_list'] = array(
+    'link_title' => 'Feeds importers',
+    'parent' => 'system.admin.structure',
+    'description' => 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.',
+    'route_name' => 'feeds.importer_list',
+  );
+  return $links;
 }
 
 /**
@@ -384,6 +345,7 @@ function feeds_menu() {
 function feeds_menu_local_tasks(&$data, $route_name) {
   // Add action link to 'feed/add' on 'admin/content' page.
   if (current_path() == 'admin/content/feed') {
+
     $item = menu_get_item('feed/add');
     if ($item['access']) {
       $data['actions'][] = array(

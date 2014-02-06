@@ -25,7 +25,7 @@ class FeedController extends ControllerBase {
    *
    * @todo When node page gets converted, look at the implementation.
    */
-  public function createList() {
+  public function addPage() {
     // Show add form if there is only one importer.
     $importers = $this->entityManager()
       ->getStorageController('feeds_importer')
@@ -39,7 +39,7 @@ class FeedController extends ControllerBase {
     }
 
     // @todo Don't show link for non-admins.
-    $url = $this->urlGenerator()->generateFromRoute('feeds_importer.list');
+    $url = $this->urlGenerator()->generateFromRoute('feeds.importer_list');
     $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => $url));
 
     $build = array(
@@ -54,7 +54,7 @@ class FeedController extends ControllerBase {
         continue;
       }
       $build['#rows'][] = array(
-        $this->l($importer->label(), 'feeds_feed.create', array('feeds_importer' => $importer->id())),
+        $this->l($importer->label(), 'feeds.add', array('feeds_importer' => $importer->id())),
         String::checkPlain($importer->description),
       );
     }

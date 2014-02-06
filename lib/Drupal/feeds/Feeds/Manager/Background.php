@@ -82,7 +82,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
 
     // Do not wait for a response.
     $client->addSubscriber(new AsyncPlugin());
-    $url = $this->url('feeds_feed.execute', array('feeds_feed' => $feed->id()), array('absolute' => TRUE));
+    $url = $this->url('feeds.execute', array('feeds_feed' => $feed->id()), array('absolute' => TRUE));
     $request = $client->post($url)
       ->addPostFields(array('token' => $token));
 

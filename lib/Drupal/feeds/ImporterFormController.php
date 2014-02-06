@@ -53,6 +53,10 @@ class ImporterFormController extends EntityFormController {
     $form['#tree'] = TRUE;
     $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
+    if ($this->operation == 'edit') {
+      $form['#title'] = $this->t('Edit %label', array('%label' => $this->entity->label()));
+    }
+
     $form['basics'] = array(
       '#title' => $this->t('Basic settings'),
       '#type' => 'details',

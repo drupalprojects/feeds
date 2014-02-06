@@ -26,6 +26,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *     "access" = "Drupal\feeds\ImporterAccessController",
  *     "list" = "Drupal\feeds\ImporterListController",
  *     "form" = {
+ *       "create" = "Drupal\feeds\ImporterFormController",
  *       "edit" = "Drupal\feeds\ImporterFormController",
  *       "delete" = "Drupal\feeds\Form\ImporterDeleteForm"
  *     }
@@ -39,7 +40,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   },
  *   bundle_of = "feeds_feed",
  *   links = {
- *     "edit-form" = "admin/structure/feeds/manage/{feeds_importer}"
+ *     "edit-form" = "feeds.importer_edit"
  *   }
  * )
  */

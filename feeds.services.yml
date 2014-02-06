@@ -23,11 +23,11 @@ services:
   plugin.manager.feeds.handler:
     class: Drupal\feeds\Plugin\Type\FeedsPluginManager
     arguments: ['handler', '@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
-  access_check.feeds_feed.add:
+  access_check.feeds.feed_add:
     class: Drupal\feeds\Access\FeedAddAccessCheck
     arguments: ['@entity.manager']
     tags:
-      - { name: access_check, applies_to: _feeds_feed_add_access_check }
+      - { name: access_check, applies_to: _feeds_feed_add_access }
   feeds.subscription.crud:
     class: Drupal\feeds\PuSH\Subscription
     arguments: ['@database', 'feeds_subscription']

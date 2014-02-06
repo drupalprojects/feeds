@@ -1,140 +1,136 @@
-feeds_feed.add_page:
+feeds.add_page:
   path: '/feed/add'
   defaults:
     _title: 'Add feed'
-    _content: 'Drupal\feeds\Controller\FeedController::createList'
+    _content: 'Drupal\feeds\Controller\FeedController::addPage'
+  options:
+    _access_mode: 'ANY'
   requirements:
-    _feeds_feed_add_access_check: 'feeds_feed'
+    _permission: 'administer feeds'
+    _feeds_feed_add_access: 'feeds_feed'
 
-feeds_feed.create:
+feeds.add:
   path: '/feed/add/{feeds_importer}'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::createForm'
   requirements:
     _entity_create_access: 'feeds_feed:{feeds_importer}'
 
-feeds_feed:
+feeds.view:
   path: '/feed/{feeds_feed}'
   defaults:
     _entity_view: 'feeds_feed'
   requirements:
     _entity_access: 'feeds_feed.view'
-    feeds_feed:  \d+
+    feeds_feed: \d+
 
-feeds_feed.view:
-  path: '/feed/{feeds_feed}/view'
-  defaults:
-    _entity_view: 'feeds_feed'
-  requirements:
-    _entity_access: 'feeds_feed.view'
-    feeds_feed:  \d+
-
-feeds_feed.update:
+feeds.edit:
   path: '/feed/{feeds_feed}/edit'
   defaults:
     _entity_form: 'feeds_feed.update'
   requirements:
     _entity_access: 'feeds_feed.update'
-    feeds_feed:  \d+
+    feeds_feed: \d+
 
-feeds_feed.delete:
+feeds.delete:
   path: '/feed/{feeds_feed}/delete'
   defaults:
     _entity_form: 'feeds_feed.delete'
   requirements:
     _entity_access: 'feeds_feed.delete'
-    feeds_feed:  \d+
+    feeds_feed: \d+
 
-feeds_feed.multiple_delete_confirm:
+feeds.multiple_delete_confirm:
   path: '/admin/content/feed/delete'
   defaults:
     _form: '\Drupal\feeds\Form\DeleteMultiple'
   requirements:
     _permission: 'administer feeds'
 
-feeds_feed.import:
+feeds.import:
   path: '/feed/{feeds_feed}/import'
   defaults:
     _entity_form: 'feeds_feed.import'
   requirements:
     _entity_access: 'feeds_feed.import'
-    feeds_feed:  \d+
+    feeds_feed: \d+
 
-feeds_feed.clear:
+feeds.clear:
   path: '/feed/{feeds_feed}/delete-items'
   defaults:
     _entity_form: 'feeds_feed.clear'
   requirements:
     _entity_access: 'feeds_feed.clear'
-    feeds_feed:  \d+
+    feeds_feed: \d+
 
-feeds_feed.unlock:
+feeds.unlock:
   path: '/feed/{feeds_feed}/unlock'
   defaults:
     _entity_form: 'feeds_feed.unlock'
   requirements:
     _entity_access: 'feeds_feed.unlock'
-    feeds_feed:  \d+
+    feeds_feed: \d+
 
-feeds_feed.receive:
+feeds.receive:
   path: '/feed/{feeds_feed}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:receive'
   requirements:
     _access: 'TRUE'
-    feeds_feed:  \d+
+    feeds_feed: \d+
     _method: 'POST'
 
-feeds_feed.subscribe:
+feeds.subscribe:
   path: '/feed/{feeds_feed}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:subscribe'
   requirements:
     _access: 'TRUE'
-    feeds_feed:  \d+
+    feeds_feed: \d+
     _method: 'GET'
 
-feeds_feed.execute:
+feeds.execute:
   path: '/feed/{feeds_feed}/execute'
   defaults:
     _controller: 'feeds.job_controller:execute'
   requirements:
     _access: 'TRUE'
-    feeds_feed:  \d+
+    feeds_feed: \d+
     _method: 'POST'
 
 # Admin UI routes.
 
-feeds_importer.list:
+feeds.importer_list:
   path: '/admin/structure/feeds'
   defaults:
+    _title: 'Feed importers'
     _entity_list: 'feeds_importer'
   requirements:
     _permission: 'administer feeds'
 
-feeds_importer.create:
+feeds.importer_add:
   path: '/admin/structure/feeds/add'
   defaults:
-    _content: 'Drupal\feeds\Controller\ImporterController::createForm'
-    _title: 'Feeds importers'
+    _title: 'Add feed importer'
+    _entity_form: 'feeds_importer.create'
   requirements:
-    _entity_create_access: 'feeds_importer'
+    _permission: 'administer feeds'
 
-feeds_importer.edit:
+feeds.importer_edit:
   path: '/admin/structure/feeds/manage/{feeds_importer}'
   defaults:
     _entity_form: 'feeds_importer.edit'
   requirements:
     _entity_access: 'feeds_importer.edit'
 
-feeds_importer.mapping:
+feeds.importer_mapping:
   path: '/admin/structure/feeds/manage/{feeds_importer}/mapping'
   defaults:
     _form: '\Drupal\feeds\Form\MappingForm'
   requirements:
     _entity_access: 'feeds_importer.mapping'
 
-feeds_importer.delete:
+feeds.importer_delete:
   path: '/admin/structure/feeds/manage/{feeds_importer}/delete'
   defaults:
     _entity_form: 'feeds_importer.delete'

@@ -63,6 +63,7 @@ use Drupal\job_scheduler\JobScheduler;
  *   links = {
  *     "canonical" = "/feed/{feeds_feed}",
  *     "edit-form" = "/feed/{feeds_feed}/edit",
+ *     "admin-form" = "feeds.importer_edit"
  *   }
  * )
  */
@@ -667,7 +668,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setSettings(array('default_value' => ''));
 
     $fields['config'] = FieldDefinition::create('map')
-      ->setSettings(t('Config'))
+      ->setLabel(t('Config'))
       ->setDescription(t('The config of the feed.'));
 
     $fields['fetcher_result'] = FieldDefinition::create('feeds_serialized')

@@ -1,29 +1,29 @@
-feeds_feed.create_action:
-  route_name: feeds_feed.add_page
+feeds.add_action:
+  route_name: feeds.add_page
   title: Add feed
   appears_on:
-    - feeds_feed.list
+    - feeds.feed_list
 
-feeds_feed.import_action:
-  route_name: feeds_feed.import
+feeds.import_action:
+  route_name: feeds.import
   title: Import
   appears_on:
-    - feeds_feed.view
+    - feeds.view
 
-feeds_feed.clear_action:
-  route_name: feeds_feed.clear
+feeds.clear_action:
+  route_name: feeds.clear
   title: Delete items
   appears_on:
-    - feeds_feed.view
+    - feeds.view
 
-feeds_feed.unlock_action:
-  route_name: feeds_feed.unlock
+feeds.unlock_action:
+  route_name: feeds.unlock
   title: Delete items
   appears_on:
-    - feeds_feed.view
+    - feeds.view
 
-feeds_importer.create:
-  route_name: feeds_importer.create
+feeds.importer_add:
+  route_name: feeds.importer_add
   title: Add importer
   appears_on:
-    - feeds_importer.list
+    - feeds.importer_list
