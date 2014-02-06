@@ -381,7 +381,7 @@ class FeedsSource extends FeedsConfigurable {
       $this->importer->processor->process($this, $parser_result);
     }
     catch (Exception $e) {
-      // Do nothing.
+      // $e is stored and re-thrown once we've had a chance to log our progress.
     }
     $this->releaseLock();
 
@@ -422,7 +422,7 @@ class FeedsSource extends FeedsConfigurable {
       $this->importer->processor->clear($this);
     }
     catch (Exception $e) {
-      // Do nothing.
+      // $e is stored and re-thrown once we've had a chance to log our progress.
     }
     $this->releaseLock();
 
