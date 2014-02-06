@@ -297,17 +297,16 @@ function hook_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
  *   An entity object, for instance a node object.
  * @param $target
  *   A string identifying the target on the node.
- * @param $value
+ * @param $values
  *   The value to populate the target with.
  * @param $mapping
  *  Associative array of the mapping settings from the per mapping
  *  configuration form.
  */
-function my_module_set_target($source, $entity, $target, $value, $mapping) {
-  $entity->{$target}[$entity->language][0]['value'] = $value;
+function my_module_set_target($source, $entity, $target, array $values, $mapping) {
+  $entity->{$target}[$entity->language][0]['value'] = reset($values);
   if (isset($source->importer->processor->config['input_format'])) {
-    $entity->{$target}[$entity->language][0]['format'] =
-      $source->importer->processor->config['input_format'];
+    $entity->{$target}[$entity->language][0]['format'] = $source->importer->processor->config['input_format'];
   }
 }
 

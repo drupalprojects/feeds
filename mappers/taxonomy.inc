@@ -82,18 +82,7 @@ function taxonomy_feeds_processor_targets_alter(&$targets, $entity_type, $bundle
  *
  * @todo Do not create new terms for non-autotag fields.
  */
-function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping = array()) {
-
-  // Allow mapping the string '0' to a term name.
-  if (empty($terms) && $terms != 0) {
-    return;
-  }
-
-  // Handle non-multiple values.
-  if (!is_array($terms)) {
-    $terms = array($terms);
-  }
-
+function taxonomy_feeds_set_target($source, $entity, $target, array $terms, $mapping = array()) {
   // Add in default values.
   $mapping += array(
     'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_NAME,
@@ -144,13 +133,14 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
 
         // Lookup by name.
         case FEEDS_TAXONOMY_SEARCH_TERM_NAME:
+          $term = trim($term);
           $name_query = clone $query;
-          if ($tids = $name_query->propertyCondition('name', $term)->execute()) {
+          if (strlen($term) && $tids = $name_query->propertyCondition('name', $term)->execute()) {
             $tid = key($tids['taxonomy_term']);
           }
-          elseif ($mapping['autocreate'] && strlen(trim($term))) {
+          elseif ($mapping['autocreate'] && strlen($term)) {
             $term = (object) array(
-              'name' => drupal_substr(trim($term), 0, 255),
+              'name' => drupal_substr($term, 0, 255),
               'vid' => key($cache['allowed_vocabularies'][$target]),
               'vocabulary_machine_name' => reset($cache['allowed_vocabularies'][$target]),
             );
@@ -176,7 +166,7 @@ function taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping =
     }
 
     if ($tid && isset($cache['allowed_values'][$target][$tid])) {
-      $field['und'][$delta]['tid'] = $tid;
+      $field['und'][] = array('tid' => $tid);
       $delta++;
     }
   }
