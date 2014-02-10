@@ -227,23 +227,17 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
 
       db_query("UPDATE {job_schedule} SET next = 0");
       $this->drupalPost('import/node/delete-items', array(), 'Delete');
-      $this->assertEqual(0, db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article'")->fetchField());
+      $node_count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article'")->fetchField();
+      $this->assertEqual(0, $node_count);
 
-      // Hit cron (item count / limit) times, assert correct number of articles.
-      for ($i = 0; $i < ceil(86 / $limit); $i++) {
+      // Hit cron for importing, until we have all items.
+      while ($node_count < 86) {
         $this->cronRun();
-        sleep(1);
-        if ($limit * ($i + 1) < 86) {
-          $count = $limit * ($i + 1);
-          $period = 0; // Import should be rescheduled for ASAP.
-        }
-        else {
-          $count = 86; // We've reached our total of 86.
-          $period = 1800; // Hence we should find the Source's default period.
-        }
-        $this->assertEqual($count, db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article'")->fetchField());
-        $this->assertEqual($period, db_query("SELECT period FROM {job_schedule} WHERE type = 'node' AND id = 0")->fetchField());
+        $node_count = db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article'")->fetchField();
       }
+      $this->assertEqual(86, db_query("SELECT COUNT(*) FROM {node} WHERE type = 'article'")->fetchField(), 'Number of nodes is correct after batched importing via cron.');
+      // Import should be rescheduled for 1800 seconds.
+      $this->assertEqual(1800, db_query("SELECT period FROM {job_schedule} WHERE type = 'node' AND id = 0")->fetchField());
     }
 
     // Delete a couple of nodes, then hit cron again. They should not be replaced

@@ -290,19 +290,23 @@ class FeedsSource extends FeedsConfigurable {
     if (is_numeric($fetcher_period)) {
       $period = $fetcher_period;
     }
-    // Schedule as soon as possible if a batch is active.
-    $period = $this->progressImporting() === FEEDS_BATCH_COMPLETE ? $period : 0;
     $job = array(
       'type' => $this->id,
       'id' => $this->feed_nid,
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($period != FEEDS_SCHEDULE_NEVER) {
+    if ($period == FEEDS_SCHEDULE_NEVER) {
+      JobScheduler::get('feeds_source_import')->remove($job);
+    }
+    elseif ($this->progressImporting() === FEEDS_BATCH_COMPLETE) {
       JobScheduler::get('feeds_source_import')->set($job);
     }
     else {
-      JobScheduler::get('feeds_source_import')->remove($job);
+      // Feed is not fully imported yet, so we put this job back in the queue
+      // immediately for further processing.
+      $queue = DrupalQueue::get('feeds_source_import');
+      $queue->createItem($job);
     }
   }
 

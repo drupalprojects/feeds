@@ -96,6 +96,7 @@ function feeds_cron_queue_info() {
   $queues = array();
   $queues['feeds_source_import'] = array(
     'worker callback' => 'feeds_source_import',
+    'time' => 60,
   );
   $queues['feeds_source_clear'] = array(
     'worker callback' => 'feeds_source_clear',
