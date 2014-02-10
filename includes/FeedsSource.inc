@@ -179,6 +179,9 @@ class FeedsSource extends FeedsConfigurable {
   // Timestamp when this source was imported the last time.
   protected $imported;
 
+  // Holds an exception object in case an exception occurs during importing.
+  protected $exception;
+
   /**
    * Instantiate a unique object per class/id/feed_nid. Don't use
    * directly, use feeds_source() instead.
@@ -379,9 +382,16 @@ class FeedsSource extends FeedsConfigurable {
 
       // Process.
       $this->importer->processor->process($this, $parser_result);
+
+      // Import finished without exceptions, so unset any potentially previously
+      // recorded exceptions.
+      unset($this->exception);
     }
     catch (Exception $e) {
       // $e is stored and re-thrown once we've had a chance to log our progress.
+      // Set the exception so that other modules can check if an exception
+      // occurred in hook_feeds_after_import().
+      $this->exception = $e;
     }
     $this->releaseLock();
 

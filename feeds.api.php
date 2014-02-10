@@ -188,6 +188,13 @@ function hook_feeds_after_save(FeedsSource $source, $entity, $item, $entity_id) 
  */
 function hook_feeds_after_import(FeedsSource $source) {
   // See geotaxonomy module's implementation for an example.
+
+  // We can also check for an exception in this hook. The exception should not
+  // be thrown here, Feeds will handle it.
+  if (isset($source->exception)) {
+    watchdog('mymodule', 'An exception occurred during importing!', array(), WATCHDOG_ERROR);
+    mymodule_panic_reaction($source);
+  }
 }
 
 /**
