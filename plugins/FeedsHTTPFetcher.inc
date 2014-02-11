@@ -11,8 +11,19 @@ feeds_include_library('PuSHSubscriber.inc', 'PuSHSubscriber');
  * Result of FeedsHTTPFetcher::fetch().
  */
 class FeedsHTTPFetcherResult extends FeedsFetcherResult {
+
+  /**
+   * The URL of the feed being fetched.
+   *
+   * @var string
+   */
   protected $url;
-  protected $file_path;
+
+  /**
+   * The timeout in seconds to wait for a download.
+   *
+   * @var int
+   */
   protected $timeout;
 
   /**
@@ -20,19 +31,22 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
    */
   public function __construct($url = NULL) {
     $this->url = $url;
-    parent::__construct('');
   }
 
   /**
    * Overrides FeedsFetcherResult::getRaw();
    */
   public function getRaw() {
-    feeds_include_library('http_request.inc', 'http_request');
-    $result = http_request_get($this->url, NULL, NULL, NULL, $this->timeout);
-    if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
-      throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->url, '!code' => $result->code)));
+    if (!isset($this->raw)) {
+      feeds_include_library('http_request.inc', 'http_request');
+      $result = http_request_get($this->url, NULL, NULL, NULL, $this->timeout);
+      if (!in_array($result->code, array(200, 201, 202, 203, 204, 205, 206))) {
+        throw new Exception(t('Download of @url failed with code !code.', array('@url' => $this->url, '!code' => $result->code)));
+      }
+      $this->raw = $result->data;
     }
-    return $this->sanitizeRaw($result->data);
+
+    return $this->sanitizeRaw($this->raw);
   }
 
   public function getTimeout() {
