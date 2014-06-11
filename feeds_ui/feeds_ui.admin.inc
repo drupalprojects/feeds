@@ -819,7 +819,7 @@ function _feeds_ui_format_options($options) {
   $result = array();
   foreach ($options as $k => $v) {
     if (is_array($v) && !empty($v['name'])) {
-      $result[$k] = $v['name'];
+      $result[$k] = $v['name'] . ' (' . $k . ')';
     }
     elseif (is_array($v)) {
       $result[$k] = $k;
@@ -1064,7 +1064,7 @@ function theme_feeds_ui_mapping_form($variables) {
   $rows = array();
   foreach (element_children($form['legendset']['legend']['targets']) as $k) {
     $rows[] = array(
-      check_plain(drupal_render($form['legendset']['legend']['targets'][$k]['name'])),
+      check_plain(drupal_render($form['legendset']['legend']['targets'][$k]['name']) . ' (' . $k . ')'),
       check_plain(drupal_render($form['legendset']['legend']['targets'][$k]['description'])),
     );
   }
