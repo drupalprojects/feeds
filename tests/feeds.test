@@ -395,7 +395,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     * @param bool $test_mappings
     *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
     */
-  public function addMappings($id, $mappings, $test_mappings = TRUE) {
+  public function addMappings($id, array $mappings, $test_mappings = TRUE) {
 
     $path = "admin/structure/feeds/$id/mapping";
 
@@ -439,16 +439,18 @@ class FeedsWebTestCase extends DrupalWebTestCase {
   /**
    * Remove mappings from a given configuration.
    *
+   * @param string $id
+   *   ID of the importer.
    * @param array $mappings
    *   An array of mapping arrays. Each mapping array must have a source and
    *   a target key and can have a unique key.
    * @param bool $test_mappings
    *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
    */
-  public function removeMappings($id, $mappings, $test_mappings = TRUE) {
+  public function removeMappings($id, array $mappings, $test_mappings = TRUE) {
     $path = "admin/structure/feeds/$id/mapping";
 
-    $current_mappings = $this->getCurrentMappings($id);
+    $edit = array();
 
     // Iterate through all mappings and remove via the form.
     foreach ($mappings as $i => $mapping) {
@@ -458,17 +460,11 @@ class FeedsWebTestCase extends DrupalWebTestCase {
         $this->assertEqual($current_mapping_key, $i, 'Mapping exists before removal.');
       }
 
-      $remove_mapping = array("remove_flags[$i]" => 1);
-
-      $this->drupalPost($path, $remove_mapping, t('Save'));
-
-      $this->assertText('Your changes have been saved.');
-
-      if ($test_mappings) {
-        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
-        $this->assertEqual($current_mapping_key, -1, 'Mapping does not exist after removal.');
-      }
+      $edit["remove_flags[$i]"] = 1;
     }
+
+    $this->drupalPost($path, $edit, t('Save'));
+    $this->assertText('Your changes have been saved.');
   }
 
   /**
