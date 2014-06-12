@@ -97,13 +97,15 @@ class FeedsEntityProcessor extends FeedsProcessor {
       }
 
       if (!$access) {
-        $message = 'User %name is not authorized to %op entity %entity.';
-        $args = array(
+        $message = t('The user %name is not authorized to %op entity %entity_type. To import this item, the user "@name" (owner of the item) must be given the permission to @op entity @entity_type.', array(
           '%name' => $author->name,
           '%op' => $op,
-          '%entity' => $this->entityType(),
-        );
-        throw new FeedsAccessException(t($message, $args));
+          '%entity_type' => $this->entityType(),
+          '@name' => $author->name,
+          '@op' => $op,
+          '@entity_type' => $this->entityType(),
+        ));
+        throw new FeedsAccessException($message);
       }
     }
   }

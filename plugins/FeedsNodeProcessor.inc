@@ -104,8 +104,15 @@ class FeedsNodeProcessor extends FeedsProcessor {
       }
 
       if (!$access) {
-        $message = 'User %name is not authorized to %op content type %content_type.';
-        throw new FeedsAccessException(t($message, array('%name' => $author->name, '%op' => $op, '%content_type' => $entity->type)));
+        $message = t('The user %name is not authorized to %op content of type %content_type. To import this item, either the user "@name" (author of the item) must be given the permission to @op content of type @content_type, or the option "Authorize" on the Node processor settings must be turned off.', array(
+          '%name' => $author->name,
+          '%op' => $op,
+          '%content_type' => $entity->type,
+          '@name' => $author->name,
+          '@op' => $op,
+          '@content_type' => $entity->type,
+        ));
+        throw new FeedsAccessException($message);
       }
     }
   }

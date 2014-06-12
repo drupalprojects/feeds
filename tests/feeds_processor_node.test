@@ -437,7 +437,7 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $nid = $this->createFeedNode();
 
     $this->assertText('Failed importing 10 nodes.');
-    $this->assertText('User ' . $account->name . ' is not authorized to create content type article.');
+    $this->assertText('The user ' . $account->name . ' is not authorized to create content of type article.');
     $node_count = db_query("SELECT COUNT(*) FROM {node}")->fetchField();
 
     // We should have 1 node, the feed node.
