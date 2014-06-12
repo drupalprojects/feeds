@@ -296,7 +296,7 @@ class FeedsSource extends FeedsConfigurable {
       'period' => $period,
       'periodic' => TRUE,
     );
-    if ($period == FEEDS_SCHEDULE_NEVER) {
+    if ($period == FEEDS_SCHEDULE_NEVER && $this->progressImporting() === FEEDS_BATCH_COMPLETE) {
       JobScheduler::get('feeds_source_import')->remove($job);
     }
     elseif ($this->progressImporting() === FEEDS_BATCH_COMPLETE) {
