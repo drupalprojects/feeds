@@ -48,6 +48,7 @@ files[] = tests/feeds_processor_term.test
 files[] = tests/feeds_processor_user.test
 files[] = tests/feeds_scheduler.test
 files[] = tests/feeds_mapper_link.test
+files[] = tests/feeds_mapper_summary.test
 files[] = tests/feeds_mapper_taxonomy.test
 files[] = tests/http_request.test
 files[] = tests/parser_csv.test
