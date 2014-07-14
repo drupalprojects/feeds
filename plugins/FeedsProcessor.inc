@@ -663,7 +663,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $form['input_format'] = array(
       '#type' => 'select',
       '#title' => t('Text format'),
-      '#description' => t('Select the input format for the body field of the nodes to be created.'),
+      '#description' => t('Select the default input format for the text fields of the nodes to be created.'),
       '#options' => $format_options,
       '#default_value' => isset($this->config['input_format']) ? $this->config['input_format'] : 'plain_text',
       '#required' => TRUE,

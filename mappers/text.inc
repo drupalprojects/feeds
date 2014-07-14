@@ -36,17 +36,26 @@ function text_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
         );
       }
     }
+
+    if (!empty($instance['settings']['text_processing'])) {
+      $targets[$name]['summary_callback'] = 'text_feeds_summary_callback';
+      $targets[$name]['form_callback'] = 'text_feeds_form_callback';
+    }
   }
 }
 
 /**
  * Callback for mapping text fields.
  */
-function text_feeds_set_target($source, $entity, $target, array $values) {
+function text_feeds_set_target(FeedsSource $source, $entity, $target, array $values, array $mapping = array()) {
   list($field_name, $column) = explode(':', $target . ':value');
 
   if ($column === 'value' && isset($source->importer->processor->config['input_format'])) {
     $format = $source->importer->processor->config['input_format'];
+    // Add in default values.
+    $mapping += array(
+      'format' => $format,
+    );
   }
 
   $field = isset($entity->$field_name) ? $entity->$field_name : array('und' => array());
@@ -63,8 +72,8 @@ function text_feeds_set_target($source, $entity, $target, array $values) {
 
       $field['und'][$delta][$column] = (string) $value;
 
-      if (isset($format)) {
-        $field['und'][$delta]['format'] = $format;
+      if (isset($mapping['format'])) {
+        $field['und'][$delta]['format'] = $mapping['format'];
       }
     }
 
@@ -72,4 +81,59 @@ function text_feeds_set_target($source, $entity, $target, array $values) {
   }
 
   $entity->$field_name = $field;
+}
+
+/**
+ * Summary callback for text field targets.
+ *
+ * Displays which text format will be used for the text field target.
+ *
+ * @see text_feeds_processor_targets_alter()
+ * @see text_feeds_form_callback()
+ */
+function text_feeds_summary_callback(array $mapping, $target, array $form, array $form_state) {
+  global $user;
+  $formats = filter_formats($user);
+
+  // Processor-wide input format setting.
+  $importer = feeds_importer($form['#importer']);
+  $default_format = !empty($importer->processor->config['input_format']) ? $importer->processor->config['input_format'] : filter_fallback_format();
+  $mapping += array(
+    'format' => $default_format,
+  );
+
+  return t('Text format: %format', array('%format' => $formats[$mapping['format']]->name));
+}
+
+/**
+ * Form callback for text field targets.
+ *
+ * Allows to select a text format for the text field target.
+ *
+ * @see text_feeds_processor_targets_alter()
+ * @see text_feeds_summary_callback()
+ */
+function text_feeds_form_callback(array $mapping, $target, array $form, array $form_state) {
+  global $user;
+  $formats_options = array();
+  $formats = filter_formats($user);
+  foreach ($formats as $id => $format) {
+    $formats_options[$id] = $format->name;
+  }
+
+  // Processor-wide text format setting.
+  $importer = feeds_importer($form['#importer']);
+  $default_format = !empty($importer->processor->config['input_format']) ? $importer->processor->config['input_format'] : filter_fallback_format();
+  $mapping += array(
+    'format' => $default_format,
+  );
+
+  return array(
+    'format' => array(
+      '#type' => 'select',
+      '#title' => t('Text format'),
+      '#options' => $formats_options,
+      '#default_value' => $mapping['format'],
+    ),
+  );
 }
