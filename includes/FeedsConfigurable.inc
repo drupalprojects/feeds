@@ -170,6 +170,17 @@ abstract class FeedsConfigurable {
   }
 
   /**
+   * Returns whether or not the configurable has a config form.
+   *
+   * @return bool
+   *   True if the configurable has a config form, and false if not.
+   */
+  public function hasConfigForm() {
+    $form_state = array();
+    return (bool) $this->configForm($form_state);
+  }
+
+  /**
    * Return configuration form for this object. The keys of the configuration
    * form must match the keys of the array returned by configDefaults().
    *
