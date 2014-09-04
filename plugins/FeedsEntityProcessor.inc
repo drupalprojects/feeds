@@ -131,6 +131,7 @@ class FeedsEntityProcessor extends FeedsProcessor {
     return array(
       'mappings' => array(),
       'update_existing' => FEEDS_SKIP_EXISTING,
+      'update_non_existent' => FEEDS_SKIP_NON_EXISTENT,
       'input_format' => NULL,
       'skip_hash_check' => FALSE,
       'bundle' => NULL,
