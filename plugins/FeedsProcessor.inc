@@ -850,12 +850,6 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   The serial id of an entity if found, 0 otherwise.
    */
   protected function existingEntityId(FeedsSource $source, FeedsParserResult $result) {
-    $query = db_select('feeds_item')
-      ->fields('feeds_item', array('entity_id'))
-      ->condition('feed_nid', $source->feed_nid)
-      ->condition('entity_type', $this->entityType())
-      ->condition('id', $source->id);
-
     $targets = &drupal_static('FeedsProcessor::existingEntityId', array());
     if (!isset($targets[$this->id])) {
       $targets[$this->id] = $this->getMappingTargets();
@@ -867,7 +861,14 @@ abstract class FeedsProcessor extends FeedsPlugin {
     // the database.
     foreach ($this->uniqueTargets($source, $result) as $target => $value) {
       if ($target === 'guid' || $target === 'url') {
-        $entity_id = $query->condition($target, $value)->execute()->fetchField();
+        $entity_id = db_select('feeds_item')
+          ->fields('feeds_item', array('entity_id'))
+          ->condition('feed_nid', $source->feed_nid)
+          ->condition('entity_type', $this->entityType())
+          ->condition('id', $source->id)
+          ->condition($target, $value)
+          ->execute()
+          ->fetchField();
       }
 
       if (!$entity_id && !empty($targets[$this->id][$target]['unique_callbacks'])) {
