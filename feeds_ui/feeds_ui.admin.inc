@@ -493,6 +493,16 @@ function feeds_ui_mapping_form($form, &$form_state, $importer) {
   $form['#prefix'] = '<div id="feeds-ui-mapping-form-wrapper">';
   $form['#suffix'] = '</div>';
 
+  // Show message when target configuration gets changed.
+  if (!empty($form_state['mapping_settings'])) {
+    $form['#mapping_settings'] = $form_state['mapping_settings'];
+    $form['changed'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('messages', 'warning')),
+      '#markup' => t('* Changes made to target configuration are stored temporarily. Click Save to make your changes permanent.'),
+    );
+  }
+
   // Get mapping sources from parsers and targets from processor, format them
   // for output.
   // Some parsers do not define mapping sources but let them define on the fly.
@@ -1016,6 +1026,10 @@ function theme_feeds_ui_mapping_form($variables) {
       // Some parsers do not define source options.
       $source = isset($form['source']['#options'][$mapping['source']]) ? $form['source']['#options'][$mapping['source']] : $mapping['source'];
       $target = isset($form['target']['#options'][$mapping['target']]) ? check_plain($form['target']['#options'][$mapping['target']]) : '<em>' . t('Missing') . '</em>';
+      // Add indicator to target if target configuration changed.
+      if (isset($form['#mapping_settings'][$i])) {
+        $target .= '<span class="warning">*</span>';
+      }
       $rows[] = array(
         'data' => array(
           check_plain($source),
@@ -1043,7 +1057,12 @@ function theme_feeds_ui_mapping_form($variables) {
     drupal_render($form['add']),
     '',
   );
-  $output = '<div class="help feeds-admin-ui">' . drupal_render($form['help']) . '</div>';
+  $output = '';
+  if (!empty($form['changed'])) {
+    // This form element is only available if target configuration changed.
+    $output .= drupal_render($form['changed']);
+  }
+  $output .= '<div class="help feeds-admin-ui">' . drupal_render($form['help']) . '</div>';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'feeds-ui-mapping-overview')));
 
   // Build the help table that explains available sources.
