@@ -63,11 +63,10 @@ function feeds_page() {
 /**
  * Render a feeds import form on import/[config] pages.
  */
-function feeds_import_form($form, &$form_state, $importer_id) {
-  $source = feeds_source($importer_id, empty($form['nid']['#value']) ? 0 : $form['nid']['#value']);
+function feeds_import_form(array $form, array &$form_state, FeedsImporter $importer) {
+  $source = feeds_source($importer->id);
 
-  $form = array();
-  $form['#importer_id'] = $importer_id;
+  $form['#importer_id'] = $importer->id;
   // @todo Move this into fetcher?
   $form['#attributes']['enctype'] = 'multipart/form-data';
   $form['source_status'] = array(
@@ -169,9 +168,9 @@ function feeds_import_tab_form_submit($form, &$form_state) {
  * Used on both node pages and configuration pages.
  * Therefore $node may be missing.
  */
-function feeds_delete_tab_form($form, &$form_state, $importer_id, $node = NULL) {
+function feeds_delete_tab_form(array $form, array &$form_state, FeedsImporter $importer = NULL, $node = NULL) {
   if (empty($node)) {
-    $source = feeds_source($importer_id);
+    $source = feeds_source($importer->id);
     $form['#redirect'] = 'import/' . $source->id;
   }
   else {
@@ -213,9 +212,9 @@ function feeds_delete_tab_form_submit($form, &$form_state) {
  * Used on both node pages and configuration pages.
  * Therefore $node may be missing.
  */
-function feeds_unlock_tab_form($form, &$form_state, $importer_id, $node = NULL) {
+function feeds_unlock_tab_form($form, &$form_state, FeedsImporter $importer = NULL, $node = NULL) {
   if (empty($node)) {
-    $source = feeds_source($importer_id);
+    $source = feeds_source($importer->id);
     $form['#redirect'] = 'import/' . $source->id;
   }
   else {
@@ -284,8 +283,7 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
 /**
  * Template generation
  */
-function feeds_importer_template($importer_id) {
-  $importer = feeds_importer($importer_id);
+function feeds_importer_template(FeedsImporter $importer) {
   if ($importer->parser instanceof FeedsCSVParser) {
     return $importer->parser->getTemplate();
   }

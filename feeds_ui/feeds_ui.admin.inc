@@ -273,10 +273,10 @@ function feeds_ui_export_form($form, &$form_state, $importer) {
 /**
  * Edit feed configuration.
  */
-function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
-
+function feeds_ui_edit_page(FeedsImporter $importer, $active = 'help', $plugin_key = '') {
   // Get plugins and configuration.
   $plugins = FeedsPlugin::all();
+
   $config = $importer->config;
   // Base path for changing the active container.
   $path = 'admin/structure/feeds/' . $importer->id;
@@ -291,12 +291,14 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
       $active_container['body'] = '<div class="help feeds-admin-ui">' . feeds_ui_edit_help() . '</div>';
       unset($active_container['actions']);
       break;
+
     case 'fetcher':
     case 'parser':
     case 'processor':
       $active_container['title'] = t('Select a !plugin_type', array('!plugin_type' => $active));
       $active_container['body'] = drupal_get_form('feeds_ui_plugin_form', $importer, $active);
       break;
+
     case 'settings':
       drupal_add_js(drupal_get_path('module', 'ctools') . '/js/dependent.js');
       ctools_include('dependent');
@@ -311,6 +313,7 @@ function feeds_ui_edit_page($importer, $active = 'help', $plugin_key = '') {
         $active_container['body'] = feeds_get_form($plugin, 'configForm');
       }
       break;
+
     case 'mapping':
       $active_container['title'] = t('Mapping for !processor', array('!processor' => $plugins[$config['processor']['plugin_key']]['name']));
       $active_container['body'] = drupal_get_form('feeds_ui_mapping_form', $importer);

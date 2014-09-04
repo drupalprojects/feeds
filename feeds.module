@@ -281,7 +281,7 @@ function feeds_menu() {
     'access callback' => 'feeds_page_access',
     'file' => 'feeds.pages.inc',
   );
-  $items['import/%'] = array(
+  $items['import/%feeds_importer'] = array(
     'title callback' => 'feeds_importer_title',
     'title arguments' => array(1),
     'page callback' => 'drupal_get_form',
@@ -290,12 +290,12 @@ function feeds_menu() {
     'access arguments' => array('import', 1),
     'file' => 'feeds.pages.inc',
   );
-  $items['import/%/import'] = array(
+  $items['import/%feeds_importer/import'] = array(
     'title' => 'Import',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['import/%/delete-items'] = array(
+  $items['import/%feeds_importer/delete-items'] = array(
     'title' => 'Delete items',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('feeds_delete_tab_form', 1),
@@ -304,7 +304,7 @@ function feeds_menu() {
     'file' => 'feeds.pages.inc',
     'type' => MENU_LOCAL_TASK,
   );
-  $items['import/%/unlock'] = array(
+  $items['import/%feeds_importer/unlock'] = array(
     'title' => 'Unlock',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('feeds_unlock_tab_form', 1),
@@ -313,7 +313,7 @@ function feeds_menu() {
     'file' => 'feeds.pages.inc',
     'type' => MENU_LOCAL_TASK,
   );
-  $items['import/%/template'] = array(
+  $items['import/%feeds_importer/template'] = array(
     'page callback' => 'feeds_importer_template',
     'page arguments' => array(1),
     'access callback' => 'feeds_access',
@@ -377,14 +377,18 @@ function feeds_admin_paths() {
  * Menu loader callback.
  */
 function feeds_importer_load($id) {
-  return feeds_importer($id);
+  try {
+    return feeds_importer($id)->existing();
+  }
+  catch (FeedsNotExistingException $e) {
+    return FALSE;
+  }
 }
 
 /**
  * Title callback.
  */
-function feeds_importer_title($id) {
-  $importer = feeds_importer($id);
+function feeds_importer_title(FeedsImporter $importer) {
   return $importer->config['name'];
 }
 
@@ -426,8 +430,12 @@ function feeds_access($action, $param) {
     return FALSE;
   }
 
+  $importer_id = FALSE;
   if (is_string($param)) {
     $importer_id = $param;
+  }
+  elseif ($param instanceof FeedsImporter) {
+    $importer_id = $param->id;
   }
   elseif ($param->type) {
     $importer_id = feeds_get_importer_id($param->type);
