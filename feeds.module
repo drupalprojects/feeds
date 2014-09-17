@@ -393,7 +393,7 @@ function feeds_theme() {
  */
 function feeds_entity_bundle_info() {
   $bundles = array();
-  foreach (config_get_storage_names_with_prefix('feeds.importer.') as $config_name) {
+  foreach (\Drupal::configFactory()->listAll('feeds.importer.') as $config_name) {
     $config = config($config_name);
     $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('label');
   }
