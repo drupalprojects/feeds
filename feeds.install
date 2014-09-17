@@ -9,7 +9,6 @@
  * Implements hook_uninstall().
  */
 function feeds_uninstall() {
-  variable_del('http_request_timeout');
 }
 
 /**
@@ -18,99 +17,6 @@ function feeds_uninstall() {
 function feeds_schema() {
   $schema = array();
 
-  $schema['feeds_feed'] = array(
-    'description' => 'Source definitions for feeds.',
-    'fields' => array(
-      'fid' => array(
-        'description' => 'The primary identifier for a feed.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'uuid' => array(
-        'description' => 'Unique Key: Universally unique identifier for this entity.',
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => FALSE,
-      ),
-      'importer' => array(
-        'description' => 'The {feeds_importer}.id of this feed.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'title' => array(
-        'description' => 'The title of this feed, always treated as non-markup plain text.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'uid' => array(
-        'description' => 'The {users}.uid that owns this feed; initially, this is the user that created it.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'status' => array(
-        'description' => 'Boolean indicating whether the feed is active.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 1,
-      ),
-      'created' => array(
-        'description' => 'The Unix timestamp when the feed was created.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'changed' => array(
-        'description' => 'The Unix timestamp when the feed was most recently saved.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'imported' => array(
-        'description' => 'The Unix timestamp when the feed was most recently imported.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'config' => array(
-        'type' => 'blob',
-        'size' => 'big',
-        'not null' => FALSE,
-        'description' => 'Configuration of the feed.',
-        'serialize' => TRUE,
-      ),
-      'source' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Main source resource identifier. E. g. a path or a URL.',
-      ),
-      'state' => array(
-        'type' => 'blob',
-        'size' => 'big',
-        'not null' => FALSE,
-        'description' => 'State of import or clearing batches.',
-        'serialize' => TRUE,
-      ),
-      'fetcher_result' => array(
-        'type' => 'blob',
-        'size' => 'big',
-        'not null' => FALSE,
-        'description' => 'Cache for fetcher result.',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('fid'),
-    'indexes' => array(
-      'id' => array('importer'),
-      'id_source' => array('importer', array('source', 128)),
-    ),
-  );
   $schema['feeds_subscription'] = array(
     'description' => 'PubSubHubbub subscriptions.',
     'fields' => array(
