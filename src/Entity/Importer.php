@@ -10,14 +10,14 @@ namespace Drupal\feeds\Entity;
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\DefaultSinglePluginBag;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
  * Defines the feeds importer entity.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "feeds_importer",
  *   label = @Translation("Feed importer"),
  *   module = "feeds",
@@ -534,7 +534,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller) {
     parent::preSave($storage_controller);
 
     foreach ($this->getPlugins() as $type => $plugin) {

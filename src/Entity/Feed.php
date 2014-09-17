@@ -9,8 +9,9 @@ namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\feeds\Exception\InterfaceNotImplementedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
@@ -24,7 +25,7 @@ use Drupal\job_scheduler\JobScheduler;
 /**
  * Defines the feed entity class.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "feeds_feed",
  *   label = @Translation("Feed"),
  *   bundle_label = @Translation("Importer"),
@@ -545,7 +546,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller) {
     // Before saving the feed, set changed time.
     $this->set('changed', REQUEST_TIME);
   }
@@ -553,7 +554,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
+  public function postSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     // Alert implementers of FeedInterface to the fact that we're saving.
     foreach ($this->getImporter()->getPlugins() as $plugin) {
       $plugin->onFeedSave($this, $update);
@@ -569,7 +570,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public static function postDelete(EntityStorageControllerInterface $storage_controller, array $feeds) {
+  public static function postDelete(EntityStorageInterface $storage_controller, array $feeds) {
     // Delete values from other tables also referencing these feeds.
     $ids = array_keys($feeds);
 
@@ -606,25 +607,25 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public static function baseFieldDefinitions($entity_type) {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = array();
 
-    $fields['fid'] = FieldDefinition::create('integer')
+    $fields['fid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Feed ID'))
       ->setDescription(t('The feed ID.'))
       ->setReadOnly(TRUE);
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The feed UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['importer'] = FieldDefinition::create('string')
+    $fields['importer'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Importer'))
       ->setDescription(t('The feeds importer.'))
       ->setReadOnly(TRUE);
 
-    $fields['title'] = FieldDefinition::create('text')
+    $fields['title'] = BaseFieldDefinition::create('text')
       ->setLabel(t('Title'))
       ->setDescription(t('The title of this feed, always treated as non-markup plain text.'))
       ->setRequired(TRUE)
@@ -635,7 +636,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
         'text_processing' => 0,
       ));
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('User ID'))
       ->setDescription(t('The user ID of the feed author.'))
       ->setSettings(array(
@@ -643,39 +644,39 @@ class Feed extends ContentEntityBase implements FeedInterface {
         'default_value' => 0,
       ));
 
-    $fields['status'] = FieldDefinition::create('boolean')
+    $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Importing status'))
       ->setDescription(t('A boolean indicating whether the feed is active.'));
 
     // @todo Convert to a "created" field in https://drupal.org/feed/2145103.
-    $fields['created'] = FieldDefinition::create('integer')
+    $fields['created'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the feed was created.'));
 
     // @todo Convert to a "changed" field in https://drupal.org/feed/2145103.
-    $fields['changed'] = FieldDefinition::create('integer')
+    $fields['changed'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the feed was last edited.'))
       ->setPropertyConstraints('value', array('EntityChanged' => array()));
 
-    $fields['imported'] = FieldDefinition::create('integer')
+    $fields['imported'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Imported'))
       ->setDescription(t('The time that the feed was imported.'));
 
-    $fields['source'] = FieldDefinition::create('uri')
+    $fields['source'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Source'))
       ->setDescription(t('The source of the feed.'))
       ->setSettings(array('default_value' => ''));
 
-    $fields['config'] = FieldDefinition::create('map')
+    $fields['config'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Config'))
       ->setDescription(t('The config of the feed.'));
 
-    $fields['fetcher_result'] = FieldDefinition::create('feeds_serialized')
+    $fields['fetcher_result'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Fetcher result'))
       ->setDescription(t('The source of the feed.'));
 
-    $fields['state'] = FieldDefinition::create('map')
+    $fields['state'] = BaseFieldDefinition::create('map')
       ->setLabel(t('State'))
       ->setDescription(t('The source of the feed.'))
       ->setSettings(array('default_value' => array()));

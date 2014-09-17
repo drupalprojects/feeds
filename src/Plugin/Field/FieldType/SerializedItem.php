@@ -7,8 +7,8 @@
 
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
@@ -35,7 +35,7 @@ class SerializedItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
+  public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
 
     if (!isset(static::$propertyDefinitions)) {
       static::$propertyDefinitions['value'] = DataDefinition::create('map')
@@ -81,7 +81,7 @@ class SerializedItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldDefinitionInterface $field_definition) {
+  public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return array(
       'columns' => array(
         'value' => array(
