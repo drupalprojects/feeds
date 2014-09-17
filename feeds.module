@@ -323,24 +323,6 @@ function feeds_menu() {
 }
 
 /**
- * Implements hook_menu_link_defaults().
- */
-function feeds_menu_link_defaults() {
-  $links = array();
-  $links['feeds.add_page'] = array(
-    'link_title' => 'Add feed',
-    'route_name' => 'feeds.add_page',
-  );
-  $links['feeds.importer_list'] = array(
-    'link_title' => 'Feeds importers',
-    'parent' => 'system.admin.structure',
-    'description' => 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.',
-    'route_name' => 'feeds.importer_list',
-  );
-  return $links;
-}
-
-/**
  * Implements hook_menu_local_tasks().
  */
 function feeds_menu_local_tasks(&$data, $route_name) {
