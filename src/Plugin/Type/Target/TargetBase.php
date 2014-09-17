@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\Type\Target;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
@@ -65,14 +66,14 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, array &$form_state) {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $delta = $form_state['triggering_element']['#delta'];
     $configuration = $form_state['values']['mappings'][$delta]['settings'];
     // $configuration = $form_state['values'][$this->pluginType()]['configuration'];

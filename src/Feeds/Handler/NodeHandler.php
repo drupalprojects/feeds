@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Handler;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
@@ -60,7 +61,7 @@ class NodeHandler extends PluginBase {
     return $defaults;
   }
 
-  public function buildConfigurationForm(array &$form, array &$form_state) {
+  public function buildConfigurationForm(array &$form, FormStateInterface $form_state) {
     $author = user_load($this->configuration['author']);
     $form['author'] = array(
       '#type' => 'textfield',
@@ -71,7 +72,7 @@ class NodeHandler extends PluginBase {
     );
   }
 
-  public function validateConfigurationForm(array &$form, array &$form_state) {
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $values =& $form_state['values']['processor']['configuration'];
     if ($author = user_load_by_name($values['author'])) {
       $values['author'] = $author->id();

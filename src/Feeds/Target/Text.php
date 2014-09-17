@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
@@ -104,7 +105,7 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = array();
     foreach (filter_formats($this->user) as $id => $format) {
       $options[$id] = $format->label();

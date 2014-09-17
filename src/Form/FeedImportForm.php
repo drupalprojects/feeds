@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for importing a feed.
@@ -41,7 +42,7 @@ class FeedImportForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     // The import process will create its own messages.
     $this->entity->startImport();
     $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));

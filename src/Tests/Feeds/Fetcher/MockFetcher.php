@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Tests\Feeds\Fetcher;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
@@ -50,21 +51,21 @@ class MockFetcher implements FetcherInterface, FeedPluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
     return array();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
+  public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
 
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
+  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
 
   }
 

@@ -11,10 +11,11 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityFormController;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\feeds\Ajax\SetHashCommand;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\Plugin\Type\LockableInterface;
-use Drupal\feeds\Ajax\SetHashCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -49,7 +50,7 @@ class ImporterFormController extends EntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form['#tree'] = TRUE;
     $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
@@ -215,7 +216,7 @@ class ImporterFormController extends EntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
 
     // Moved advanced settings to regular settings.
     foreach ($this->entity->getPluginTypes() as $type) {
@@ -239,7 +240,7 @@ class ImporterFormController extends EntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
 
     foreach ($this->getConfigurablePlugins() as $plugin) {
       $plugin->submitConfigurationForm($form, $form_state);
@@ -252,7 +253,7 @@ class ImporterFormController extends EntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     if ($this->entity->isNew()) {
       $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id();
     }
@@ -265,7 +266,7 @@ class ImporterFormController extends EntityFormController {
   /**
    * Sends an ajax response.
    */
-  public function ajaxCallback(array $form, array &$form_state) {
+  public function ajaxCallback(array $form, FormStateInterface $form_state) {
     $type = $form_state['triggering_element']['#plugin_type'];
     $response = new AjaxResponse();
 

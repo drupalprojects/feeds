@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Handler;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
@@ -38,7 +39,7 @@ class TaxonomyTermHandler extends PluginBase {
     return array('format' => 'plain_text');
   }
 
-  public function buildConfigurationForm(array &$form, array &$form_state) {
+  public function buildConfigurationForm(array &$form, FormStateInterface $form_state) {
     global $user;
     $options = array();
     foreach (filter_formats($user) as $id => $format) {

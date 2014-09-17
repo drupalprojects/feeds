@@ -9,8 +9,9 @@ namespace Drupal\feeds\Controller;
 
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\Core\Lock\LockBackendInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\StateInterface;
+use Drupal\feeds\FeedStateInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -35,12 +36,12 @@ class JobController {
   /**
    * Constructs a JobController object.
    *
-   * @param \Drupal\Core\KeyValueStore\KeyValueStoreInterface $state
+   * @param \Drupal\Core\State\StateInterface $state
    *   The state object that holds our token.
    * @param \Drupal\Core\Lock\LockBackendInterface $lock_backend
    *   The lock backend to use.
    */
-  public function __construct(KeyValueStoreInterface $state, LockBackendInterface $lock_backend) {
+  public function __construct(StateInterface $state, LockBackendInterface $lock_backend) {
     $this->state = $state;
     $this->lockBackend = $lock_backend;
   }
@@ -68,7 +69,7 @@ class JobController {
         ignore_user_abort(TRUE);
         set_time_limit(0);
 
-        while ($feeds_feed->$method() != StateInterface::BATCH_COMPLETE) {
+        while ($feeds_feed->$method() != FeedStateInterface::BATCH_COMPLETE) {
           // Reset static caches in between runs to avoid memory leaks.
           drupal_reset_static();
         }

@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
@@ -87,7 +88,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -103,7 +104,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
+  public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
     // Check if chosen url scheme is allowed.
@@ -130,7 +131,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Allowed file extensions'),
@@ -151,7 +152,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, array &$form_state) {
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $values =& $form_state['values']['fetcher']['configuration'];
     $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
     // Convert allowed_extensions to an array for storage.

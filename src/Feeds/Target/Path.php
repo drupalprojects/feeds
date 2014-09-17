@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
@@ -38,7 +39,7 @@ class Path extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state, array $target = array()) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state, array $target = array()) {
     if (module_exists('path_auto')) {
       $form['pathauto_override'] = array(
         '#type' => 'checkbox',

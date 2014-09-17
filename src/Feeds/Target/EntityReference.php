@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\String as DrupalString;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
@@ -136,7 +137,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = $this->getPotentialFields();
 
     $form['reference_by'] = array(

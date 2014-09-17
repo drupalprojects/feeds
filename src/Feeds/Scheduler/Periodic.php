@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Scheduler;
 
 use Drupal\Component\Utility\MapArray;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
@@ -161,14 +162,14 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildAdvancedForm(array $form, array &$form_state) {
+  public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
 
     if (!$this->jobController) {
       return;
@@ -199,7 +200,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, array &$form_state) {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
 
     if (!$this->jobController) {
       return;

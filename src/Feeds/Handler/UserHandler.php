@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Handler;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
@@ -52,7 +53,7 @@ class UserHandler extends PluginBase {
     return $defaults;
   }
 
-  public function buildConfigurationForm(array &$form, array &$form_state) {
+  public function buildConfigurationForm(array &$form, FormStateInterface $form_state) {
     $form['status'] = array(
       '#type' => 'radios',
       '#title' => $this->t('Status'),

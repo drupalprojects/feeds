@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\views\field;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
@@ -47,7 +48,7 @@ class Feed extends FieldPluginBase {
   /**
    * Provides link to feed option.
    */
-  public function buildOptionsForm(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['link_to_feed'] = array(
       '#title' => t('Link this field to the feed'),
       '#description' => t("Enable to override this field's links."),

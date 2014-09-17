@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
@@ -121,7 +122,7 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
    *
    * @todo Inject $user.
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = array(
       FILE_EXISTS_REPLACE => $this->t('Replace'),
       FILE_EXISTS_RENAME => $this->t('Rename'),

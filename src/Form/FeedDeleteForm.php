@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting a Feed.
@@ -42,7 +43,7 @@ class FeedDeleteForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     $this->entity->delete();
     $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
 

@@ -9,6 +9,7 @@ namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
@@ -108,7 +109,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
     $this->feedConfig = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -132,7 +133,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
+  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     // We need to store this for later so that we have the feed id.
     $this->feedConfig['new_fid'] = reset($form_state['values']['fetcher']['upload']);
   }
@@ -193,7 +194,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['allowed_extensions'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Allowed file extensions'),
@@ -214,7 +215,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, array &$form_state) {
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
 
     $values =& $form_state['values']['fetcher']['configuration'];
 

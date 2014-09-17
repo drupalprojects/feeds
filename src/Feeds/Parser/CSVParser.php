@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Component\ParserCSV;
 use Drupal\feeds\Component\ParserCSVIterator;
 use Drupal\feeds\FeedInterface;
@@ -142,7 +143,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
     $form['parser']['#tree'] = TRUE;
     $form['parser']['#weight'] = -10;
@@ -211,7 +212,7 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['delimiter'] = array(
       '#type' => 'select',
       '#title' => $this->t('Default delimiter'),

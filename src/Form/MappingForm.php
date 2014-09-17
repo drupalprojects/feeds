@@ -10,6 +10,7 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
@@ -42,7 +43,7 @@ class MappingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, ImporterInterface $feeds_importer = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ImporterInterface $feeds_importer = NULL) {
     $importer = $this->importer = $feeds_importer;
     $this->targets = $targets = $importer->getMappingTargets();
 
@@ -263,10 +264,10 @@ class MappingForm extends FormBase {
   /**
    * Processes the form state, populating the mapping array.
    *
-   * @param arary &$form_state
+   * @param FormStateInterface $form_state
    *   The form state array to process.
    */
-  protected function processFormState($form, &$form_state) {
+  protected function processFormState(array $form, FormStateInterface $form_state) {
     // Process any plugin configuration.
     if (isset($form_state['triggering_element']['#delta']) && !empty($form_state['triggering_element']['#saved'])) {
       $delta = $form_state['triggering_element']['#delta'];
@@ -302,7 +303,7 @@ class MappingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     if (isset($form_state['triggering_element']['#delta'])) {
       $delta = $form_state['triggering_element']['#delta'];
       $this->importer->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
@@ -313,7 +314,7 @@ class MappingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->processFormState($form, $form_state);
     $this->importer->save();
 
@@ -349,14 +350,14 @@ class MappingForm extends FormBase {
   /**
    * Callback for ajax requests.
    */
-  public function ajaxCallback(array $form, array &$form_state) {
+  public function ajaxCallback(array $form, FormStateInterface $form_state) {
     return $form;
   }
 
   /**
    * Callback for target settings forms.
    */
-  public function settingsAjaxCallback(array $form, array &$form_state) {
+  public function settingsAjaxCallback(array $form, FormStateInterface $form_state) {
     $delta = $form_state['triggering_element']['#delta'];
     return $form['mappings'][$delta]['settings'];
   }

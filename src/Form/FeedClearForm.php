@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting the items from a feed.
@@ -41,7 +42,7 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $this->entity->startClear();
     $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
 

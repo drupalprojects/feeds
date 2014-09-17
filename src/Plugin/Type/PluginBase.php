@@ -7,8 +7,9 @@
 
 namespace Drupal\feeds\Plugin\Type;
 
-use Drupal\feeds\FeedInterface;
 use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\feeds\FeedInterface;
 
 /**
  * The base class for the fetcher, parser, and processor plugins.
@@ -95,7 +96,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    *
    * @see \Drupal\feeds\Plugin\Type\FeedPluginFormInterface
    */
-  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {}
+  public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {}
 
   /**
    * Stub for plugins implementing FeedPluginFormInterface.
@@ -104,7 +105,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    *
    * @see \Drupal\feeds\Plugin\Type\FeedPluginFormInterface
    */
-  public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
+  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     if (isset($form_state['values'][$this->pluginType()])) {
       $feed->setConfigurationFor($this, $form_state['values'][$this->pluginType()]);
     }

@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Type;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 
 /**
@@ -19,7 +20,7 @@ interface FeedPluginFormInterface {
    *
    * @param array $form
    *   An associative array containing the structure of the form.
-   * @param array &$form_state
+   * @param FormStateInterface $form_state
    *   An associative array containing the current state of the form.
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed currently being edited.
@@ -27,7 +28,7 @@ interface FeedPluginFormInterface {
    * @return array
    *   The form structure.
    */
-  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed);
+  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed);
 
   /**
    * Form validation handler.
@@ -42,7 +43,7 @@ interface FeedPluginFormInterface {
    * @return array
    *   The form structure.
    */
-  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed);
+  public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed);
 
   /**
    * Form submit handler.
@@ -57,6 +58,6 @@ interface FeedPluginFormInterface {
    * @return array
    *   The form structure.
    */
-  public function submitFeedForm(array &$form, array &$form_state, FeedInterface $feed);
+  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed);
 
 }

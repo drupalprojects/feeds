@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Manager;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Guzzle\AsyncPlugin;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
@@ -113,7 +114,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['import_on_create'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Import on submission'),
@@ -134,7 +135,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, array &$form_state) {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     parent::submitConfigurationForm($form, $form_state);
   }
 

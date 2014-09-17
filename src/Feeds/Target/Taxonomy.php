@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -85,7 +86,7 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['autocreate'] = array(

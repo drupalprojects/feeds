@@ -16,6 +16,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
@@ -567,7 +568,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $tokens = array('@entity' => Unicode::strtolower($this->entityLabel()), '@entities' => Unicode::strtolower($this->entityLabelPlural()));
 
     $form['update_existing'] = array(
@@ -627,7 +628,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, array &$form_state) {
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->apply(__FUNCTION__, $form, $form_state);
   }
 
@@ -636,7 +637,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *
    * @todo We need an importer save/update/delete API.
    */
-  public function submitConfigurationForm(array &$form, array &$form_state) {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->apply(__FUNCTION__, $form, $form_state);
 
     $values =& $form_state['values']['processor']['configuration'];
@@ -774,7 +775,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public function buildAdvancedForm(array $form, array &$form_state) {
+  public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
     $form['values']['#tree'] = TRUE;
 
     if ($bundle_key = $this->bundleKey()) {

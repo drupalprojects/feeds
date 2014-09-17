@@ -10,6 +10,7 @@ namespace Drupal\feeds;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityFormController;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 
 /**
@@ -27,7 +28,7 @@ class FeedFormController extends ContentEntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $feed = $this->entity;
 
     $importer = $feed->getImporter();
@@ -113,7 +114,7 @@ class FeedFormController extends ContentEntityFormController {
    *
    * @todo Don't call buildEntity() here.
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
 
     $feed = $this->buildEntity($form, $form_state);
 
@@ -142,7 +143,7 @@ class FeedFormController extends ContentEntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     // Build the feed object from the submitted values.
     $feed = parent::submit($form, $form_state);
 
@@ -154,7 +155,7 @@ class FeedFormController extends ContentEntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $feed = $this->entity;
     $insert = !(bool) $feed->id();
     $importer = $feed->getImporter();
@@ -192,7 +193,7 @@ class FeedFormController extends ContentEntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function delete(array $form, array &$form_state) {
+  public function delete(array $form, FormStateInterface $form_state) {
     $destination = array();
     $query = $this->getRequest()->query;
 

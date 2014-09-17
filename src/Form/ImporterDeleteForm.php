@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting an Importer.
@@ -40,7 +41,7 @@ class ImporterDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     $this->entity->delete();
     $args = array('%importer' => $this->entity->label());
 

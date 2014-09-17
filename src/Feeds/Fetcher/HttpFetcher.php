@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueInterface;
 use Drupal\feeds\Exception\NotModifiedException;
@@ -232,7 +233,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, array &$form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['auto_detect_feeds'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Auto detect feeds'),
@@ -271,7 +272,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
   /**
    * {@inheritdoc}
    */
-  public function buildFeedForm(array $form, array &$form_state, FeedInterface $feed) {
+  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
@@ -290,7 +291,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
   /**
    * {@inheritdoc}
    */
-  public function validateFeedForm(array &$form, array &$form_state, FeedInterface $feed) {
+  public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     $values =& $form_state['values']['fetcher'];
     $values['source'] = trim($values['source']);
 
