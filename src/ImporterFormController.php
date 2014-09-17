@@ -9,8 +9,8 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Entity\EntityFormController;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\feeds\Ajax\SetHashCommand;
@@ -21,22 +21,22 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Form controller for the importer edit forms.
  */
-class ImporterFormController extends EntityFormController {
+class ImporterFormController extends EntityForm {
 
   /**
    * The importer storage controller.
    *
-   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $importerStorage;
 
   /**
    * Constructs an ImporterFormController object.
    *
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $importer_storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $importer_storage
    *   The importer storage controller.
    */
-  public function __construct(EntityStorageControllerInterface $importer_storage) {
+  public function __construct(EntityStorageInterface $importer_storage) {
     $this->importerStorage = $importer_storage;
   }
 
@@ -44,13 +44,14 @@ class ImporterFormController extends EntityFormController {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity.manager')->getStorageController('feeds_importer'));
+    return new static($container->get('entity.manager')->getStorage('feeds_importer'));
   }
 
   /**
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
     $form['#tree'] = TRUE;
     $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
@@ -99,17 +100,16 @@ class ImporterFormController extends EntityFormController {
 
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
     $form['plugin_settings']['#suffix'] = '</div>';
-
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
-    if (isset($form_state['values'])) {
-      if ($form_state['values']['processor']['id'] != $this->entity->getProcessor()->getPluginId()) {
-        $this->entity->removeMappings();
-      }
-      foreach ($this->entity->getPluginTypes() as $type) {
-        $this->entity->setPlugin($type, $form_state['values'][$type]['id']);
-      }
-    }
+    // if (!empty($values)) {
+    //   if ($values['processor']['id'] != $this->entity->getProcessor()->getPluginId()) {
+    //     $this->entity->removeMappings();
+    //   }
+    //   foreach ($this->entity->getPluginTypes() as $type) {
+    //     $this->entity->setPlugin($type, $values[$type]['id']);
+    //   }
+    // }
 
     foreach ($this->entity->getPlugins() as $type => $plugin) {
 
@@ -217,15 +217,16 @@ class ImporterFormController extends EntityFormController {
    * {@inheritdoc}
    */
   public function validate(array $form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
 
     // Moved advanced settings to regular settings.
     foreach ($this->entity->getPluginTypes() as $type) {
-      if (isset($form_state['values'][$type]['advanced'])) {
-        if (!isset($form_state['values'][$type]['configuration'])) {
-          $form_state['values'][$type]['configuration'] = array();
+      if (isset($values[$type]['advanced'])) {
+        if (!isset($values[$type]['configuration'])) {
+          $values[$type]['configuration'] = array();
         }
-        $form_state['values'][$type]['configuration'] += $form_state['values'][$type]['advanced'];
-        unset($form_state['values'][$type]['advanced']);
+        $values[$type]['configuration'] += $values[$type]['advanced'];
+        unset($values[$type]['advanced']);
       }
     }
 

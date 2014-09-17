@@ -7,9 +7,9 @@
 
 namespace Drupal\feeds\Plugin\Derivative;
 
-use Drupal\Component\Plugin\Derivative\DerivativeBase;
+use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Entity\EntityManager;
-use Drupal\Core\Plugin\Discovery\ContainerDerivativeInterface;
+use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,7 +17,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @see \Drupal\feeds\Feeds\Processor\EntityProcessor
  */
-class EntityProcessor extends DerivativeBase implements ContainerDerivativeInterface {
+class EntityProcessor extends DeriverBase implements ContainerDeriverInterface {
+
+  /**
+   * List of derivative definitions.
+   *
+   * @var array
+   */
+  protected $derivatives;
 
   /**
    * The entity manager.
@@ -46,7 +53,7 @@ class EntityProcessor extends DerivativeBase implements ContainerDerivativeInter
   /**
    * {@inheritdoc}
    */
-  public function getDerivativeDefinitions(array $base_plugin_definition) {
+  public function getDerivativeDefinitions($base_plugin_definition) {
     foreach ($this->entityManager->getDefinitions() as $entity_type => $entity_info) {
       // Only show content entities for now.
       if (!$entity_info->isSubclassOf('Drupal\Core\Config\Entity\ConfigEntityInterface')) {

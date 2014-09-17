@@ -599,7 +599,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function unlock() {
-    \Drupal::entityManager()->getStorageController($this->entityType)->unlockFeed($this);
+    \Drupal::entityManager()->getStorage($this->entityType)->unlockFeed($this);
 
     return $this;
   }

@@ -87,7 +87,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    *
    * @todo Merge the two queues.
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration,
       $plugin_id,

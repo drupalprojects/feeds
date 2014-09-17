@@ -40,7 +40,7 @@ class Path extends FieldTargetBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state, array $target = array()) {
-    if (module_exists('path_auto')) {
+    if (\Drupal::moduleHandler()->moduleExists('path_auto')) {
       $form['pathauto_override'] = array(
         '#type' => 'checkbox',
         '#title' => $this->t('Allow Pathauto to set the alias if the value is empty.'),
@@ -55,7 +55,7 @@ class Path extends FieldTargetBase {
    * {@inheritdoc}
    */
   public function summary() {
-    if (!module_exists('pathauto')) {
+    if (!\Drupal::moduleHandler()->moduleExists('pathauto')) {
       return;
     }
 

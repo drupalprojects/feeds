@@ -11,7 +11,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Field\FieldItemInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
@@ -40,7 +40,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "entity",
  *   title = @Translation("Entity processor"),
  *   description = @Translation("Creates entities from feed items."),
- *   derivative = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
+ *   deriver = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
  * )
  */
 class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterface, ClearableInterface, LockableInterface, AdvancedFormPluginInterface, ContainerFactoryPluginInterface {
@@ -48,7 +48,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * The entity storage controller for the entity type being processed.
    *
-   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
+   * @var
    */
   protected $storageController;
 
@@ -114,10 +114,10 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The plugin definition.
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_info
    *   The entity info.
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage_controller
+   * @param $storage_controller
    *   The storage controller for this processor.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeInterface $entity_info, EntityStorageControllerInterface $storage_controller, QueryFactory $query_factory) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeInterface $entity_info, EntityStorageInterface $storage_controller, QueryFactory $query_factory) {
     // $entityInfo has to be assinged before $this->loadHandlers() is called.
     $this->entityInfo = $entity_info;
     $this->storageController = $storage_controller;
@@ -133,10 +133,10 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $entity_manager = $container->get('entity.manager');
     $entity_info = $entity_manager->getDefinition($plugin_definition['entity type']);
-    $storage_controller = $entity_manager->getStorageController($plugin_definition['entity type']);
+    $storage_controller = $entity_manager->getStorage($plugin_definition['entity type']);
 
     return new static(
       $configuration,
@@ -399,7 +399,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The bundle type this processor operates on, or null if it is undefined.
    */
   protected function bundleKey() {
-    return $this->entityInfo->getBundleKey('bundle');
+    return $this->entityInfo->getBundleEntityType('bundle');
   }
 
   /**
@@ -659,8 +659,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     $entity_type = $this->entityType();
     $bundle = $this->bundle();
     // Create the field and instance.
-    $field_storage = \Drupal::entityManager()->getStorageController('field_entity');
-    $instance_storage = \Drupal::entityManager()->getStorageController('field_instance');
+    $field_storage = \Drupal::entityManager()->getStorage('field_entity');
+    $instance_storage = \Drupal::entityManager()->getStorage('field_instance');
 
     // Create field if it doesn't exist.
     if (!$field_storage->load("$entity_type.feeds_item")) {

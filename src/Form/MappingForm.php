@@ -9,6 +9,7 @@
 
 namespace Drupal\feeds\Form;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\ImporterInterface;
@@ -160,7 +161,7 @@ class MappingForm extends FormBase {
         '#attributes' => array('class' => array('feeds-table-select-list')),
       );
 
-      $label = check_plain($this->targets[$mapping['target']]['label']);
+      $label = String::checkPlain($this->targets[$mapping['target']]['label']);
 
       if (count($mapping['map']) > 1) {
         $label .= ': ' . $this->targets[$mapping['target']]['properties'][$column]['label'];

@@ -125,7 +125,7 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    */
   public function getSummary() {
     $formats = \Drupal::entityManager()
-      ->getStorageController('filter_format')
+      ->getStorage('filter_format')
       ->loadByProperties(array('status' => '1', 'format' => $this->configuration['format']));
     if ($formats) {
       $format = reset($formats);

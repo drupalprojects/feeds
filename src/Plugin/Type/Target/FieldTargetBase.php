@@ -83,7 +83,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
       }
 
       $instance_id = $entity_type . '.' . $processor->bundle() . '.' . $id;
-      $instance = \Drupal::entityManager()->getStorageController('field_instance')->load($instance_id);
+      $instance = \Drupal::entityManager()->getStorage('field_instance')->load($instance_id);
 
       if ($instance) {
         static::$properties[$id]['label'] = $instance->getLabel();

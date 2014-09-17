@@ -138,7 +138,7 @@ class FeedsEnclosure {
     // Downloading file.
     else {
       $filename = drupal_basename($this->uri);
-      if (module_exists('transliteration')) {
+      if (\Drupal::moduleHandler()->moduleExists('transliteration')) {
         require_once drupal_get_path('module', 'transliteration') . '/transliteration.inc';
         $filename = transliteration_clean_filename($filename);
       }
@@ -149,7 +149,7 @@ class FeedsEnclosure {
         $file = file_save_data($this->getContent(), $destination . $filename, $replace);
       }
       catch (\Exception $e) {
-        watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
+        watchdog_exception('Feeds', $e, nl2br(String::checkPlain($e)));
       }
     }
 

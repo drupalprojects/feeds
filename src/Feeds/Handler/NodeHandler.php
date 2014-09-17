@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Handler;
 
+use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
@@ -68,7 +69,7 @@ class NodeHandler extends PluginBase {
       '#title' => $this->t('Author'),
       '#description' => $this->t('Select the author of the nodes to be created. Leave blank for %anonymous.', array('%anonymous' => \Drupal::config('user.settings')->get('anonymous'))),
       '#autocomplete_route_name' => 'user.autocomplete',
-      '#default_value' => check_plain($author->getUsername()),
+      '#default_value' => String::checkPlain($author->getUsername()),
     );
   }
 

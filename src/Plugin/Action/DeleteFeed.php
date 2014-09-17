@@ -55,7 +55,7 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $temp_store = $container->get('user.tempstore')->get('feeds_feed_multiple_delete_confirm');
 
     return new static(

@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
+use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Component\ParserCSV;
@@ -151,9 +152,9 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     $mappings = $this->importer->getMappings();
     // $feeds = $uniques = array();
     // foreach ($mappings as $mapping) {
-    //   $feeds[] = check_plain($mapping['source']);
+    //   $feeds[] = String::checkPlain($mapping['source']);
     //   if (!empty($mapping['unique'])) {
-    //     $uniques[] = check_plain($mapping['source']);
+    //     $uniques[] = String::checkPlain($mapping['source']);
     //   }
     // }
 
@@ -246,10 +247,10 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     $feeds = $uniques = array();
     foreach ($mappings as $mapping) {
       if (!empty($mapping['unique'])) {
-        $uniques[] = check_plain($mapping['source']);
+        $uniques[] = String::checkPlain($mapping['source']);
       }
       else {
-        $feeds[] = check_plain($mapping['source']);
+        $feeds[] = String::checkPlain($mapping['source']);
       }
     }
     $sep = ',';

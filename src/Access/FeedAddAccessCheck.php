@@ -41,7 +41,7 @@ class FeedAddAccessCheck implements AccessInterface {
   public function access(Route $route, Request $request, AccountInterface $account) {
     // @todo Perhaps read config directly rather than load all importers.
     $access_controller = $this->entityManager->getAccessController('feeds_feed');
-    foreach ($this->entityManager->getStorageController('feeds_importer')->loadEnabled() as $importer) {
+    foreach ($this->entityManager->getStorage('feeds_importer')->loadEnabled() as $importer) {
       if ($access_controller->createAccess($importer->id(), $account)) {
         return self::ALLOW;
       }

@@ -28,7 +28,7 @@ class FeedController extends ControllerBase {
   public function addPage() {
     // Show add form if there is only one importer.
     $importers = $this->entityManager()
-      ->getStorageController('feeds_importer')
+      ->getStorage('feeds_importer')
       ->loadEnabled();
     // There is an access checker on this route that determines if the user can
     // create at least one importer. If there is only one enabled importer, this
@@ -70,7 +70,7 @@ class FeedController extends ControllerBase {
    */
   public function createForm(ImporterInterface $feeds_importer) {
 
-    $feed = $this->entityManager()->getStorageController('feeds_feed')->create(array(
+    $feed = $this->entityManager()->getStorage('feeds_feed')->create(array(
       'uid' => $this->currentUser()->id(),
       'importer' => $feeds_importer->id(),
       'status' => 1,

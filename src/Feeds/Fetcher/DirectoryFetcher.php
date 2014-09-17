@@ -179,7 +179,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
   protected function getSchemeOptions() {
     $options = array();
     foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-      $options[$scheme] = check_plain($scheme . ': ' . $info['description']);
+      $options[$scheme] = String::checkPlain($scheme . ': ' . $info['description']);
     }
     return $options;
   }

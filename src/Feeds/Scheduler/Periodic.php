@@ -58,8 +58,8 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
-    if (module_exists('job_scheduler')) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    if (\Drupal::moduleHandler()->moduleExists('job_scheduler')) {
       return new static($configuration, $plugin_id, $plugin_definition, $container->get('job_scheduler'));
     }
 

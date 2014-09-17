@@ -8,9 +8,10 @@
 namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
-use Drupal\Component\Plugin\DefaultSinglePluginBag;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Plugin\DefaultSinglePluginBag;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
@@ -134,7 +135,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    *
    * These are lazily instantiated on-demand.
    *
-   * @var \Drupal\Component\Plugin\DefaultSinglePluginBag[]
+   * @var \Drupal\Core\Plugin\DefaultSinglePluginBag[]
    */
   protected $pluginBags = array();
 
@@ -459,7 +460,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
     $options = array();
     foreach ($manager->getDefinitions() as $id => $definition) {
-      $options[$id] = check_plain($definition['title']);
+      $options[$id] = String::checkPlain($definition['title']);
     }
 
     return $options;
@@ -481,7 +482,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
 
     $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
 
-    $this->pluginBags[$plugin_type] = new DefaultSinglePluginBag($manager, array($id), $configuration);
+    $this->pluginBags[$plugin_type] = new DefaultSinglePluginBag($manager, $id, $configuration);
   }
 
   /**

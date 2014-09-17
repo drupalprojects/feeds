@@ -33,7 +33,7 @@ class Feed extends FieldPluginBase {
     // Don't add the additional fields to groupby
     if (!empty($this->options['link_to_feed'])) {
       $this->additional_fields['fid'] = array('table' => 'feeds_feed', 'field' => 'fid');
-      if (module_exists('translation')) {
+      if (\Drupal::moduleHandler()->moduleExists('translation')) {
         $this->additional_fields['langcode'] = array('table' => 'feeds_feed', 'field' => 'langcode');
       }
     }
