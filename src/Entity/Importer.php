@@ -21,10 +21,10 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   id = "feeds_importer",
  *   label = @Translation("Feed importer"),
  *   module = "feeds",
- *   controllers = {
+ *   handlers = {
  *     "storage" = "Drupal\feeds\ImporterStorageController",
  *     "access" = "Drupal\feeds\ImporterAccessController",
- *     "list" = "Drupal\feeds\ImporterListController",
+ *     "list_builder" = "Drupal\feeds\ImporterListController",
  *     "form" = {
  *       "create" = "Drupal\feeds\ImporterFormController",
  *       "edit" = "Drupal\feeds\ImporterFormController",

@@ -7,12 +7,12 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Config\Entity\ConfigStorageController;
+use Drupal\Core\Config\Entity\ConfigEntityStorage;
 
 /**
  * Defines the storage controller class for Importer entities.
  */
-class ImporterStorageController extends ConfigStorageController {
+class ImporterStorageController extends ConfigEntityStorage {
 
   /**
    * Loads all enabled importers.

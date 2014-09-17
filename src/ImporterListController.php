@@ -8,14 +8,14 @@
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Config\Entity\ConfigEntityListController;
+use Drupal\Core\Entity\EntityListBuilder;
 
 /**
  * Provides a listing of Importers.
  *
  * @todo Would making this sortable help in specifying the importance of a feed?
  */
-class ImporterListController extends ConfigEntityListController {
+class ImporterListController extends EntityListBuilder {
 
   /**
    * {@inheritdoc}
