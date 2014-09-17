@@ -307,7 +307,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if ($state->unpublished) {
       $messages[] = array(
         'message' => format_plural(
-            $state->updated,
+            $state->unpublished,
             'Unpublished @number @entity.',
             'Unpublished @number @entities.',
             array('@number' => $state->unpublished) + $tokens
