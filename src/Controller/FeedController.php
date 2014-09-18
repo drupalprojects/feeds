@@ -39,7 +39,7 @@ class FeedController extends ControllerBase {
     }
 
     // @todo Don't show link for non-admins.
-    $url = $this->urlGenerator()->generateFromRoute('feeds.importer_list');
+    $url = $this->url('feeds.importer_list');
     $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => $url));
 
     $build = array(

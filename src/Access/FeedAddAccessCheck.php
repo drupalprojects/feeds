@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Access;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -38,16 +39,18 @@ class FeedAddAccessCheck implements AccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function access(Route $route, Request $request, AccountInterface $account) {
+  public function access(AccountInterface $account) {
     // @todo Perhaps read config directly rather than load all importers.
-    $access_controller = $this->entityManager->getAccessController('feeds_feed');
+    $access_control_handler = $this->entityManager->getAccessControlHandler('feeds_feed');
+
     foreach ($this->entityManager->getStorage('feeds_importer')->loadEnabled() as $importer) {
-      if ($access_controller->createAccess($importer->id(), $account)) {
-        return self::ALLOW;
+      $access = $access_control_handler->createAccess($importer->id(), $account, [], TRUE);
+      if ($access->isAllowed()) {
+        return $access;
       }
     }
 
-    return static::DENY;
+    return AccessResult::create();
   }
 
 }
