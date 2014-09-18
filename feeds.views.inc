@@ -7,7 +7,7 @@
  * @ingroup views_module_handlers
  */
 
-use Drupal\field\FieldInterface;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Implements hook_views_data().
@@ -224,7 +224,7 @@ function feeds_views_data() {
  *
  * @see field_views_field_default_views_data()
  */
-function feeds_field_views_data(FieldInterface $field) {
+function feeds_field_views_data(FieldStorageConfig $field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     // Add the relationship only on the target_id field.

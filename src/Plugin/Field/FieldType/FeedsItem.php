@@ -7,9 +7,9 @@
 
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\ConfigEntityReferenceItemBase;
-use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\entity_reference\ConfigurableEntityReferenceItem;
 
 /**
  * Plugin implementation of the 'feeds_item' field type.
@@ -26,7 +26,7 @@ use Drupal\Core\TypedData\DataDefinition;
  *   no_ui = true
  * )
  */
-class FeedsItem extends ConfigEntityReferenceItemBase {
+class FeedsItem extends ConfigurableEntityReferenceItem {
 
   /**
    * Definitions of the contained properties.
@@ -66,7 +66,7 @@ class FeedsItem extends ConfigEntityReferenceItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldDefinitionInterface $field_definition) {
+  public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return array(
       'columns' => array(
         'target_id' => array(

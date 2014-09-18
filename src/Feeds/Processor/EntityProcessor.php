@@ -29,6 +29,8 @@ use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
+use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -645,7 +647,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     if ($this->configuration['expire'] != $values['expire']) {
       $this->importer->reschedule($this->importer->id());
     }
-
     parent::submitConfigurationForm($form, $form_state);
     $this->prepareFeedsItemField();
   }
@@ -656,29 +657,23 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * @todo How does ::load() behave for deleted fields?
    */
   protected function prepareFeedsItemField() {
-    // Make sure our field exists.
-    $entity_type = $this->entityType();
-    $bundle = $this->bundle();
-    // Create the field and instance.
-    $field_storage = \Drupal::entityManager()->getStorage('field_entity');
-    $instance_storage = \Drupal::entityManager()->getStorage('field_instance');
-
     // Create field if it doesn't exist.
-    if (!$field_storage->load("$entity_type.feeds_item")) {
-      $field_storage->create(array(
+    if (!FieldStorageConfig::loadByName($this->entityType(), 'feeds_item')) {
+      \Drupal::entityManager()->getStorage('field_storage_config')->create(array(
         'name' => 'feeds_item',
-        'entity_type' => $entity_type,
+        'entity_type' => $this->entityType(),
         'type' => 'feeds_item',
         'translatable' => FALSE,
       ))->save();
     }
     // Create field instance if it doesn't exist.
-    if (!$instance_storage->load("$entity_type.$bundle.feeds_item")) {
-      $instance_storage->create(array(
-        'field_name' => 'feeds_item',
-        'entity_type' => $entity_type,
-        'bundle' => $bundle,
+    if (!FieldInstanceConfig::loadByName($this->entityType(), $this->bundle(), 'feeds_item')) {
+      \Drupal::entityManager()->getStorage('field_instance_config')->create(array(
         'label' => 'Feeds item',
+        'description' => '',
+        'field_name' => 'feeds_item',
+        'entity_type' => $this->entityType(),
+        'bundle' => $this->bundle(),
       ))->save();
     }
   }
