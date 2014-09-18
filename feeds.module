@@ -432,25 +432,6 @@ function feeds_file_download($uri) {
 }
 
 /**
- * Implements hook_library_info().
- */
-function feeds_library_info() {
-  $libraries = array();
-  $libraries['feeds'] = array(
-    'title' => 'Feeds js.',
-    'version' => '1.0',
-    'js' => array(
-      drupal_get_path('module', 'feeds') . '/feeds.js' => array('group' => JS_LIBRARY, 'weight' => 2),
-    ),
-    'dependencies' => array(
-      array('system', 'drupal.ajax'),
-    ),
-  );
-
-  return $libraries;
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  *
  * Remove our field from the Field UI overview form.

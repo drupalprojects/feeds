@@ -1,0 +1,6 @@
+feeds:
+  version: VERSION
+  js:
+    feeds.js: {}
+  dependencies:
+    - core/drupal.ajax
