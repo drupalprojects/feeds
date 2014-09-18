@@ -10,6 +10,7 @@ namespace Drupal\feeds\Plugin\Type\Target;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessor;
 use Drupal\feeds\ImporterInterface;
+use Drupal\field\Entity\FieldInstanceConfig;
 
 /**
  * Helper class for field mappers.
@@ -60,8 +61,8 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
 
     $info = \Drupal::entityManager()->getDefinition($entity_type);
     $bundle_key = NULL;
-    if (isset($info['entity_keys']['bundle'])) {
-      $bundle_key = $info['entity_keys']['bundle'];
+    if ($info->getBundleEntityType()) {
+      $bundle_key = $info->getBundleEntityType();
     }
 
     $field_definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $processor->bundle());
@@ -76,14 +77,15 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
       static::$properties[$id]['description'] = $field_definition->getDescription();
       static::$properties[$id]['settings'] = $field_definition->getSettings();
 
-      foreach (\Drupal::typedData()->create($field_definition->getItemDefinition())->getPropertyDefinitions() as $property => $data_definition) {
+      // dpm($field_definition->getItemDefinition());
+
+      foreach ($field_definition->getItemDefinition()->getPropertyDefinitions() as $property => $data_definition) {
         if (!$data_definition->isComputed()) {
           static::$properties[$id]['properties'][$property] = $data_definition->toArray();
         }
       }
 
-      $instance_id = $entity_type . '.' . $processor->bundle() . '.' . $id;
-      $instance = \Drupal::entityManager()->getStorage('field_instance')->load($instance_id);
+      $instance = FieldInstanceConfig::loadByName($entity_type, $processor->bundle(), $id);
 
       if ($instance) {
         static::$properties[$id]['label'] = $instance->getLabel();

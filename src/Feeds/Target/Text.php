@@ -54,7 +54,7 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $settings, $plugin_id, array $plugin_definition) {
+  public static function create(ContainerInterface $container, array $settings, $plugin_id, $plugin_definition) {
     return new static(
       $settings,
       $plugin_id,

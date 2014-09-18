@@ -193,7 +193,7 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public function getMappingSources() {
     if ($this->sources === NULL) {
-      $this->sources = $this->getParser()->getMappingSources();
+      $this->sources = (array) $this->getParser()->getMappingSources();
       $definitions = \Drupal::service('plugin.manager.feeds.source')->getDefinitions();
 
       foreach ($definitions as $definition) {

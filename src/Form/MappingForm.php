@@ -131,8 +131,8 @@ class MappingForm extends FormBase {
    */
   protected function buildRow($form, $form_state, $mapping, $delta) {
     $ajax_delta = -1;
-    if (isset($form_state->triggeringElement()['#delta']) && empty($form_state->triggeringElement()['#saved'])) {
-      $ajax_delta = $form_state->triggeringElement()['#delta'];
+    if (isset($form_state->getTriggeringElement()['#delta']) && empty($form_state->getTriggeringElement()['#saved'])) {
+      $ajax_delta = $form_state->getTriggeringElement()['#delta'];
     }
 
     $row = array(
@@ -270,8 +270,8 @@ class MappingForm extends FormBase {
    */
   protected function processFormState(array $form, FormStateInterface $form_state) {
     // Process any plugin configuration.
-    if (isset($form_state->triggeringElement()['#delta']) && !empty($form_state->triggeringElement()['#saved'])) {
-      $delta = $form_state->triggeringElement()['#delta'];
+    if (isset($form_state->getTriggeringElement()['#delta']) && !empty($form_state->getTriggeringElement()['#saved'])) {
+      $delta = $form_state->getTriggeringElement()['#delta'];
       $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
     }
 
@@ -305,8 +305,8 @@ class MappingForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if (isset($form_state->triggeringElement()['#delta'])) {
-      $delta = $form_state->triggeringElement()['#delta'];
+    if (isset($form_state->getTriggeringElement()['#delta'])) {
+      $delta = $form_state->getTriggeringElement()['#delta'];
       $this->importer->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
       $form_state->setRebuild();
     }
@@ -359,7 +359,7 @@ class MappingForm extends FormBase {
    * Callback for target settings forms.
    */
   public function settingsAjaxCallback(array $form, FormStateInterface $form_state) {
-    $delta = $form_state->triggeringElement()['#delta'];
+    $delta = $form_state->getTriggeringElement()['#delta'];
     return $form['mappings'][$delta]['settings'];
   }
 

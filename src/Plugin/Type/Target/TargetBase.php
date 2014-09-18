@@ -74,7 +74,7 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $delta = $form_state->triggeringElement()['#delta'];
+    $delta = $form_state->getTriggeringElement()['#delta'];
     $configuration = $form_state->getValues(array('mappings', $delta, 'settings'));
     // $configuration = $form_state['values'][$this->pluginType()]['configuration'];
     $this->setConfiguration($configuration);
