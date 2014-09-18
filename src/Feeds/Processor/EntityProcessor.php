@@ -785,7 +785,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
         '#options' => $this->bundleOptions(),
         '#title' => $this->bundleLabel(),
         '#required' => TRUE,
-        '#default_value' => $this->bundle(),
+        '#default_value' => $this->bundle() ?: key($this->bundleOptions()),
         '#disabled' => $this->isLocked(),
       );
     }

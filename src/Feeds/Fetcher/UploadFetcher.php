@@ -75,13 +75,13 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $account = $container->get('request')->attributes->get('_account');
+    // $account = $container->get('current_user');
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->get('file.usage'),
-      $container->get('plugin.manager.entity')->getStorage('file')
+      $container->get('entity.manager')->getStorage('file')
     );
   }
 

@@ -10,7 +10,7 @@ namespace Drupal\feeds;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
@@ -37,15 +37,15 @@ class ImporterFormController extends EntityForm {
    * @param \Drupal\Core\Entity\EntityStorageInterface $importer_storage
    *   The importer storage controller.
    */
-  public function __construct(EntityStorageInterface $importer_storage) {
-    $this->importerStorage = $importer_storage;
+  public function __construct(EntityManagerInterface $entity_manager) {
+    $this->importerStorage = $entity_manager->getStorage('feeds_importer');
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity.manager')->getStorage('feeds_importer'));
+    return new static($container->get('entity.manager'));
   }
 
   /**
@@ -53,6 +53,7 @@ class ImporterFormController extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
+
     $form['#tree'] = TRUE;
     $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
@@ -64,15 +65,16 @@ class ImporterFormController extends EntityForm {
       '#title' => $this->t('Basic settings'),
       '#type' => 'details',
       '#tree' => FALSE,
-      '#collapsed' => !$this->entity->isNew(),
+      '#open' => $this->entity->isNew(),
     );
 
     $form['basics']['label'] = array(
       '#type' => 'textfield',
-      '#title' => $this->t('Label'),
+      '#title' => $this->t('Name'),
       '#default_value' => $this->entity->label(),
       '#maxlength' => '255',
       '#description' => $this->t('A unique label for this importer. This label will be displayed in the interface.'),
+      '#required' => TRUE,
     );
 
     $form['basics']['id'] = array(
@@ -83,9 +85,10 @@ class ImporterFormController extends EntityForm {
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#description' => $this->t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
       '#machine_name' => array(
-        'exists' => array($this, 'exists'),
+        'exists' => 'node_type_load',
         'source' => array('basics', 'label'),
       ),
+      '#required' => TRUE,
     );
     $form['basics']['description'] = array(
       '#type' => 'textfield',
@@ -134,12 +137,12 @@ class ImporterFormController extends EntityForm {
           '#title' => $this->t('@type', array('@type' => ucfirst($type))),
           '#options' => $options,
           '#default_value' => $plugin->getPluginId(),
-          // '#ajax' => array(
-          //   'callback' => 'afsdf',
-          //   'wrapper' => 'feeds-ajax-form-wrapper',
-          //   'effect' => 'none',
-          //   'progress' => 'none',
-          // ),
+          '#ajax' => array(
+            'callback' => '::ajaxCallback',
+            'wrapper' => 'feeds-ajax-form-wrapper',
+            // 'effect' => 'none',
+            'progress' => 'none',
+          ),
           '#attached' => array(
             'library' => array('feeds/feeds'),
           ),
@@ -162,7 +165,6 @@ class ImporterFormController extends EntityForm {
       $form[$type]['advanced']['#suffix'] = '</div>';
 
       if ($plugin instanceof PluginFormInterface) {
-
         if ($plugin_form = $plugin->buildConfigurationForm(array(), $form_state)) {
           $form[$type . '_configuration'] = array(
             '#type' => 'details',
@@ -242,14 +244,11 @@ class ImporterFormController extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
-
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
     foreach ($this->getConfigurablePlugins() as $plugin) {
       $plugin->submitConfigurationForm($form, $form_state);
     }
-
-    // Build the importer object from the submitted values.
-    return parent::submit($form, $form_state);
   }
 
   /**
@@ -257,7 +256,7 @@ class ImporterFormController extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     if ($this->entity->isNew()) {
-      $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id();
+      // $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id();
     }
 
     $this->entity->save();
@@ -269,7 +268,7 @@ class ImporterFormController extends EntityForm {
    * Sends an ajax response.
    */
   public function ajaxCallback(array $form, FormStateInterface $form_state) {
-    $type = $form_state['triggering_element']['#plugin_type'];
+    $type = $form_state->getTriggeringElement()['#plugin_type'];
     $response = new AjaxResponse();
 
     if (isset($form[$type . '_configuration']['#id'])) {

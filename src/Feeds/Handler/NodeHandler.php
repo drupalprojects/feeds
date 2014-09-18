@@ -74,7 +74,7 @@ class NodeHandler extends PluginBase {
   }
 
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state['values']['processor']['configuration'];
+    $values =& $form_state->getValue(array('processor', 'configuration'));
     if ($author = user_load_by_name($values['author'])) {
       $values['author'] = $author->id();
     }

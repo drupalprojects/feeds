@@ -32,16 +32,17 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *       "delete" = "Drupal\feeds\Form\ImporterDeleteForm"
  *     }
  *   },
- *   config_prefix = "feeds.importer",
+ *   config_prefix = "importer",
+ *   bundle_of = "feeds_feed",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
  *     "uuid" = "uuid",
  *     "status" = "status"
  *   },
- *   bundle_of = "feeds_feed",
  *   links = {
- *     "edit-form" = "feeds.importer_edit"
+ *     "edit-form" = "feeds.importer_edit",
+ *     "delete-form" = "feeds.importer_delete"
  *   }
  * )
  */
@@ -563,8 +564,8 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getExportProperties() {
-    $properties = parent::getExportProperties();
+  public function toArray() {
+    $properties = parent::toArray();
     $properties += $this->plugins;
     $properties['mappings'] = $this->mappings;
     return $properties;

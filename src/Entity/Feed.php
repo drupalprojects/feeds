@@ -44,7 +44,7 @@ use Drupal\job_scheduler\JobScheduler;
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
  *       "default" = "Drupal\feeds\FeedFormController"
  *     },
- *     "list" = "Drupal\Core\Entity\EntityListController"
+ *     "list_builder" = "Drupal\Core\Config\Entity\ConfigEntityListBuilder"
  *   },
  *   base_table = "feeds_feed",
  *   uri_callback = "feeds_feed_uri",
@@ -55,15 +55,13 @@ use Drupal\job_scheduler\JobScheduler;
  *     "label" = "title",
  *     "uuid" = "uuid"
  *   },
- *   bundle_keys = {
- *     "bundle" = "importer"
- *   },
- *   route_base_path = "admin/structure/feeds/manage/{bundle}",
- *   menu_base_path = "feed/%feed",
  *   permission_granularity = "bundle",
+ *   bundle_entity_type = "feeds_importer",
+ *   field_ui_base_route = "feeds.importer_edit",
  *   links = {
- *     "canonical" = "/feed/{feeds_feed}",
- *     "edit-form" = "/feed/{feeds_feed}/edit",
+ *     "canonical" = "feeds.view",
+ *     "delete-form" = "feeds.delete",
+ *     "edit-form" = "feeds.edit",
  *     "admin-form" = "feeds.importer_edit"
  *   }
  * )

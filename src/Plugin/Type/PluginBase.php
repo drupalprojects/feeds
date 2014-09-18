@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Type;
 
-use Drupal\Component\Plugin\PluginBase as DrupalPluginBase;
+use Drupal\Core\Plugin\PluginBase as DrupalPluginBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 
