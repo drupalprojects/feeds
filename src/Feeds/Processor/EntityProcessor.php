@@ -582,7 +582,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       ),
       '#default_value' => $this->configuration['update_existing'],
     );
-    $period = drupal_map_assoc(array(SchedulerInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000), array($this, 'formatExpire'));
+    $times = array(SchedulerInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000);
+    $period = array_map(array($this, 'formatExpire'), array_combine($times, $times));
     $form['expire'] = array(
       '#type' => 'select',
       '#title' => $this->t('Expire @entities', $tokens),
@@ -870,7 +871,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     if ($timestamp == SchedulerInterface::EXPIRE_NEVER) {
       return $this->t('Never');
     }
-    return $this->t('after !time', array('!time' => format_interval($timestamp)));
+    return $this->t('after !time', array('!time' => \Drupal::service('date.formatter')->formatInterval($timestamp)));
   }
 
   /**

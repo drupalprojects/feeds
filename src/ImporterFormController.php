@@ -11,6 +11,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\feeds\Ajax\SetHashCommand;
@@ -79,7 +80,7 @@ class ImporterFormController extends EntityForm {
       '#title' => $this->t('Machine name'),
       '#default_value' => $this->entity->id(),
       '#disabled' => !$this->entity->isNew(),
-      '#maxlength' => 64,
+      '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#description' => $this->t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
       '#machine_name' => array(
         'exists' => array($this, 'exists'),
@@ -100,19 +101,19 @@ class ImporterFormController extends EntityForm {
 
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
     $form['plugin_settings']['#suffix'] = '</div>';
+
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
-    // if (!empty($values)) {
-    //   if ($values['processor']['id'] != $this->entity->getProcessor()->getPluginId()) {
-    //     $this->entity->removeMappings();
-    //   }
-    //   foreach ($this->entity->getPluginTypes() as $type) {
-    //     $this->entity->setPlugin($type, $values[$type]['id']);
-    //   }
-    // }
+    if (!empty($values)) {
+      if ($values['processor']['id'] != $this->entity->getProcessor()->getPluginId()) {
+        $this->entity->removeMappings();
+      }
+      foreach ($this->entity->getPluginTypes() as $type) {
+        $this->entity->setPlugin($type, $values[$type]['id']);
+      }
+    }
 
     foreach ($this->entity->getPlugins() as $type => $plugin) {
-
       $options = $this->entity->getPluginOptionsList($type);
 
       $form[$type] = array(
@@ -133,14 +134,14 @@ class ImporterFormController extends EntityForm {
           '#title' => $this->t('@type', array('@type' => ucfirst($type))),
           '#options' => $options,
           '#default_value' => $plugin->getPluginId(),
-          '#ajax' => array(
-            'callback' => array($this, 'ajaxCallback'),
-            'wrapper' => 'feeds-ajax-form-wrapper',
-            'effect' => 'none',
-            'progress' => 'none',
-          ),
+          // '#ajax' => array(
+          //   'callback' => 'afsdf',
+          //   'wrapper' => 'feeds-ajax-form-wrapper',
+          //   'effect' => 'none',
+          //   'progress' => 'none',
+          // ),
           '#attached' => array(
-            'library' => array(array('feeds', 'feeds')),
+            'library' => array('feeds/feeds'),
           ),
           '#plugin_type' => $type,
         );

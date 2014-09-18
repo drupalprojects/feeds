@@ -176,7 +176,10 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
     }
 
     $cron_required = ' ' . l($this->t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-    $period = MapArray::copyValuesToKeys(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
+    $times = array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200);
+    $period = array_map(function($time) {
+      return \Drupal::service('date.formatter')->formatInterval($time);
+    }, array_combine($times, $times));
 
     foreach ($period as &$p) {
       $p = $this->t('Every !p', array('!p' => $p));
