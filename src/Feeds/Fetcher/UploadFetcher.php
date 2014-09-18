@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\FeedInterface;
@@ -40,7 +40,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * The file storage backend.
    *
-   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $fileStorage;
 
@@ -62,10 +62,10 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    *   The plugin id.
    * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
    *   The file usage backend.
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $file_storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $file_storage
    *   The file storage controller.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageControllerInterface $file_storage) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageInterface $file_storage) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->fileUsage = $file_usage;
     $this->fileStorage = $file_storage;

@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,7 +25,7 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
   /**
    * The taxonomy term storage controller.
    *
-   * @var \Drupal\Core\Entity\EntityStorageControllerInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $termStorage;
 
@@ -36,10 +36,10 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
    *   The plugin settings.
    * @param string $plugin_id
    *   The plugin id.
-   * @param \Drupal\Core\Entity\EntityStorageControllerInterface $term_storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $term_storage
    *   The taxonomy term storage controller.
    */
-  public function __construct(array $settings, $plugin_id, array $plugin_definition, EntityStorageControllerInterface $term_storage) {
+  public function __construct(array $settings, $plugin_id, array $plugin_definition, EntityStorageInterface $term_storage) {
     parent::__construct($settings, $plugin_id, $plugin_definition);
     $this->termStorage = $term_storage;
   }
