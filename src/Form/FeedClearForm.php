@@ -46,7 +46,7 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
     $this->entity->startClear();
     $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
 
-    $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
+    // $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
   }
 
 }

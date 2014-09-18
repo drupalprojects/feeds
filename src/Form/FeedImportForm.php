@@ -45,7 +45,7 @@ class FeedImportForm extends ContentEntityConfirmFormBase {
   public function save(array $form, FormStateInterface $form_state) {
     // The import process will create its own messages.
     $this->entity->startImport();
-    $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
+    // $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
   }
 
 }

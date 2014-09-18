@@ -174,7 +174,7 @@ class FeedFormController extends ContentEntityFormController {
     }
 
     if ($feed->id()) {
-      $form_state['redirect'] = 'feed/' . $feed->id();
+      // $form_state['redirect'] = 'feed/' . $feed->id();
 
       // Clear feed cache.
       Cache::invalidateTags(array('feeds' => TRUE));
@@ -186,7 +186,7 @@ class FeedFormController extends ContentEntityFormController {
       // In the unlikely case something went wrong on save, the feed will be
       // rebuilt and feed form redisplayed the same way as in preview.
       drupal_set_message($this->t('The feed could not be saved.'), 'error');
-      $form_state['rebuild'] = TRUE;
+      $form_state->setRebuild();
     }
   }
 
@@ -203,7 +203,7 @@ class FeedFormController extends ContentEntityFormController {
     }
 
     $feed = $this->entity;
-    $form_state['redirect'] = array('feed/' . $feed->id() . '/delete', array('query' => $destination));
+    // $form_state['redirect'] = array('feed/' . $feed->id() . '/delete', array('query' => $destination));
   }
 
 }

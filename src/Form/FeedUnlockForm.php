@@ -50,7 +50,7 @@ class FeedUnlockForm extends ContentEntityConfirmFormBase {
     watchdog('feeds', '@importer: unlocked %title.', $args);
     drupal_set_message($this->t('%title has been unlocked.', $args));
 
-    $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
+    // $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
   }
 
 }

@@ -641,7 +641,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->apply(__FUNCTION__, $form, $form_state);
 
-    $values =& $form_state['values']['processor']['configuration'];
+    $values =& $form_state->getValue(array('processor', 'configuration'));
     if ($this->configuration['expire'] != $values['expire']) {
       $this->importer->reschedule($this->importer->id());
     }

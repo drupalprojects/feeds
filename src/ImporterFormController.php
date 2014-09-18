@@ -220,7 +220,7 @@ class ImporterFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function validate(array $form, FormStateInterface $form_state) {
-    $values = $form_state->getValues();
+    $values =& $form_state->getValues();
 
     // Moved advanced settings to regular settings.
     foreach ($this->entity->getPluginTypes() as $type) {

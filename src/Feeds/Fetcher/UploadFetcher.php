@@ -135,7 +135,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     // We need to store this for later so that we have the feed id.
-    $this->feedConfig['new_fid'] = reset($form_state['values']['fetcher']['upload']);
+    $this->feedConfig['new_fid'] = reset($form_state->getValue(array('fetcher', 'upload')));
   }
 
   /**
@@ -217,7 +217,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
 
-    $values =& $form_state['values']['fetcher']['configuration'];
+    $values =& $form_state->getValue(array('fetcher', 'configuration'));
 
     $values['directory'] = trim($values['directory']);
     $values['allowed_extensions'] = trim($values['allowed_extensions']);

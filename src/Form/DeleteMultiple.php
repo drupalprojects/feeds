@@ -117,7 +117,7 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state['values']['confirm'] && !empty($this->feeds)) {
+    if ($form_state->getValue('confirm') && !empty($this->feeds)) {
       $this->storage->delete($this->feeds);
       $this->tempStoreFactory->get('feeds_multiple_delete_confirm')->delete($GLOBALS['user']->id());
       $count = count($this->feeds);
@@ -125,7 +125,7 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
       drupal_set_message(format_plural($count, 'Deleted 1 feed.', 'Deleted @count posts.', array('@count' => $count)));
     }
     // @todo Set the correct route once views can override paths.
-    $form_state['redirect'] = 'admin/content/feed';
+    // $form_state['redirect'] = 'admin/content/feed';
   }
 
 }

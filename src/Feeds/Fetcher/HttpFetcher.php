@@ -292,7 +292,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    * {@inheritdoc}
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    $values =& $form_state['values']['fetcher'];
+    $values =& $form_state->getValue('fetcher');
     $values['source'] = trim($values['source']);
 
     if (!Feed::validUrl($values['source'], TRUE)) {

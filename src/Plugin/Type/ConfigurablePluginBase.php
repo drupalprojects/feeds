@@ -73,7 +73,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $configuration = $form_state['values'][$this->pluginType()]['configuration'];
+    $configuration = $form_state->getValue(array($this->pluginType(), 'configuration'));
     $this->setConfiguration($configuration);
   }
 

@@ -105,7 +105,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    $values =& $form_state['values']['fetcher'];
+    $values =& $form_state->getValue('fetcher');
     $values['source'] = trim($values['source']);
     // Check if chosen url scheme is allowed.
     $scheme = file_uri_scheme($values['source']);
@@ -153,7 +153,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state['values']['fetcher']['configuration'];
+    $values =& $form_state->getValue(array('fetcher', 'configuration'));
     $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
     // Convert allowed_extensions to an array for storage.
     $values['allowed_extensions'] = explode(' ', preg_replace('/\s+/', ' ', trim($values['allowed_extensions'])));

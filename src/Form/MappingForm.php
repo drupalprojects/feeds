@@ -61,10 +61,10 @@ class MappingForm extends FormBase {
     }
     $target_options = $this->sortOptions($target_options);
 
-    if (isset($form_state['values'])) {
+    if ($form_state->getValues()) {
       $this->processFormState($form, $form_state);
 
-      if ($form_state['triggering_element']['#name'] == 'add_target' || !empty($form_state['triggering_element']['#remove'])) {
+      if ($form_state->getTriggeringElement()['#name'] == 'add_target' || !empty($form_state->getTriggeringElement()['#remove'])) {
         drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
       }
     }
@@ -131,8 +131,8 @@ class MappingForm extends FormBase {
    */
   protected function buildRow($form, $form_state, $mapping, $delta) {
     $ajax_delta = -1;
-    if (isset($form_state['triggering_element']['#delta']) && empty($form_state['triggering_element']['#saved'])) {
-      $ajax_delta = $form_state['triggering_element']['#delta'];
+    if (isset($form_state->triggeringElement()['#delta']) && empty($form_state->triggeringElement()['#saved'])) {
+      $ajax_delta = $form_state->triggeringElement()['#delta'];
     }
 
     $row = array(
@@ -270,45 +270,45 @@ class MappingForm extends FormBase {
    */
   protected function processFormState(array $form, FormStateInterface $form_state) {
     // Process any plugin configuration.
-    if (isset($form_state['triggering_element']['#delta']) && !empty($form_state['triggering_element']['#saved'])) {
-      $delta = $form_state['triggering_element']['#delta'];
+    if (isset($form_state->triggeringElement()['#delta']) && !empty($form_state->triggeringElement()['#saved'])) {
+      $delta = $form_state->triggeringElement()['#delta'];
       $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
     }
 
-    if ($form_state['values']['mappings']) {
-      foreach ($form_state['values']['mappings'] as $delta => $mapping) {
+    if ($form_state->getValue('mappings')) {
+      foreach ($form_state->getValue('mappings') as $delta => $mapping) {
         $this->importer->setMapping($delta, $mapping);
       }
     }
 
     // Remove any mappings.
-    if (!empty($form_state['values']['remove_mappings'])) {
-      foreach (array_keys(array_filter($form_state['values']['remove_mappings'])) as $delta) {
+    if (!empty($form_state->getValue('remove_mappings'))) {
+      foreach (array_keys(array_filter($form_state->getValue('remove_mappings'))) as $delta) {
         $this->importer->removeMapping($delta);
       }
     }
 
     // Add any targets.
-    if ($new_target = $form_state['values']['add_target']) {
+    if ($new_target = $form_state->getValue('add_target')) {
       $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
       $this->importer->addMapping(array(
-        'target' => $form_state['values']['add_target'],
+        'target' => $form_state->getValue('add_target'),
         'map' => $map,
       ));
     }
 
     // Allow the #default_value of 'add_target' to be reset.
-    unset($form_state['input']['add_target']);
+    // unset($form_state['input']['add_target']);
   }
 
   /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if (isset($form_state['triggering_element']['#delta'])) {
-      $delta = $form_state['triggering_element']['#delta'];
+    if (isset($form_state->triggeringElement()['#delta'])) {
+      $delta = $form_state->triggeringElement()['#delta'];
       $this->importer->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
-      $form_state['rebuild'] = TRUE;
+      $form_state->setRebuild();
     }
   }
 
@@ -359,7 +359,7 @@ class MappingForm extends FormBase {
    * Callback for target settings forms.
    */
   public function settingsAjaxCallback(array $form, FormStateInterface $form_state) {
-    $delta = $form_state['triggering_element']['#delta'];
+    $delta = $form_state->triggeringElement()['#delta'];
     return $form['mappings'][$delta]['settings'];
   }
 

@@ -209,7 +209,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       return;
     }
 
-    $values =& $form_state['values']['scheduler']['configuration'];
+    $values =& $form_state->getValue(array('scheduler', 'configuration'));
 
     if ($this->configuration['import_period'] != $values['import_period']) {
       $this->importer->reschedule($this->importer->id());

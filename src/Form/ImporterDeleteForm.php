@@ -48,7 +48,7 @@ class ImporterDeleteForm extends EntityConfirmFormBase {
     watchdog('feeds', 'Deleted importer: %importer.', $args);
     drupal_set_message($this->t('%importer has been deleted.', $args));
 
-    $form_state['redirect'] = $this->url('feeds.importer_list');
+    $form_state->setRedirect('feeds.importer_list');
   }
 
 }

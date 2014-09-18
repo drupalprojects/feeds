@@ -50,7 +50,7 @@ class FeedDeleteForm extends ContentEntityConfirmFormBase {
     watchdog('feeds', '@importer: deleted %title.', $args);
     drupal_set_message($this->t('%title has been deleted.', $args));
 
-    $form_state['redirect'] = 'admin/content/feed';
+    // $form_state['redirect'] = 'admin/content/feed';
   }
 
 }
