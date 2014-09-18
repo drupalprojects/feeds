@@ -340,21 +340,6 @@ function feeds_menu_local_tasks(&$data, $route_name) {
 }
 
 /**
- * Implements hook_admin_paths().
- */
-function feeds_admin_paths() {
-  return array(
-    'feed/*/edit' => TRUE,
-    'feed/*/delete' => TRUE,
-    'feed/*/import' => TRUE,
-    'feed/*/unlock' => TRUE,
-    'feed/*/delete-items' => TRUE,
-    'feed/add' => TRUE,
-    'feed/add/*' => TRUE,
-  );
-}
-
-/**
  * Implements hook_theme().
  */
 function feeds_theme() {
@@ -437,13 +422,13 @@ function feeds_file_download($uri) {
  * Remove our field from the Field UI overview form.
  */
 function feeds_form_field_ui_field_overview_form_alter(array &$form, FormStateInterface $form_state) {
-  if (in_array('feeds_item', $form['#fields'])) {
+  // if (in_array('feeds_item', $form['#fields'])) {
 
-    unset($form['#fields'][array_search('feeds_item', $form['#fields'])]);
-    unset($form['fields']['feeds_item']);
+  //   unset($form['#fields'][array_search('feeds_item', $form['#fields'])]);
+  //   unset($form['fields']['feeds_item']);
 
-    $rows_order = $form['fields']['#regions']['content']['rows_order'];
-    $key = array_search('feeds_item', $rows_order);
-    unset($form['fields']['#regions']['content']['rows_order'][$key]);
-  }
+  //   $rows_order = $form['fields']['#regions']['content']['rows_order'];
+  //   $key = array_search('feeds_item', $rows_order);
+  //   unset($form['fields']['#regions']['content']['rows_order'][$key]);
+  // }
 }

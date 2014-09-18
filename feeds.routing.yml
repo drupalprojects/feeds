@@ -5,6 +5,7 @@ feeds.add_page:
     _content: 'Drupal\feeds\Controller\FeedController::addPage'
   options:
     _access_mode: 'ANY'
+    _admin_route: TRUE
   requirements:
     _permission: 'administer feeds'
     _feeds_feed_add_access: 'feeds_feed'
@@ -13,6 +14,8 @@ feeds.add:
   path: '/feed/add/{feeds_importer}'
   defaults:
     _content: 'Drupal\feeds\Controller\FeedController::createForm'
+  options:
+    _admin_route: TRUE
   requirements:
     _entity_create_access: 'feeds_feed:{feeds_importer}'
 
@@ -28,6 +31,8 @@ feeds.edit:
   path: '/feed/{feeds_feed}/edit'
   defaults:
     _entity_form: 'feeds_feed.update'
+  options:
+    _admin_route: TRUE
   requirements:
     _entity_access: 'feeds_feed.update'
     feeds_feed: \d+
@@ -36,6 +41,8 @@ feeds.delete:
   path: '/feed/{feeds_feed}/delete'
   defaults:
     _entity_form: 'feeds_feed.delete'
+  options:
+    _admin_route: TRUE
   requirements:
     _entity_access: 'feeds_feed.delete'
     feeds_feed: \d+
@@ -51,6 +58,8 @@ feeds.import:
   path: '/feed/{feeds_feed}/import'
   defaults:
     _entity_form: 'feeds_feed.import'
+  options:
+    _admin_route: TRUE
   requirements:
     _entity_access: 'feeds_feed.import'
     feeds_feed: \d+
@@ -59,6 +68,8 @@ feeds.clear:
   path: '/feed/{feeds_feed}/delete-items'
   defaults:
     _entity_form: 'feeds_feed.clear'
+  options:
+    _admin_route: TRUE
   requirements:
     _entity_access: 'feeds_feed.clear'
     feeds_feed: \d+
@@ -67,6 +78,8 @@ feeds.unlock:
   path: '/feed/{feeds_feed}/unlock'
   defaults:
     _entity_form: 'feeds_feed.unlock'
+  options:
+    _admin_route: TRUE
   requirements:
     _entity_access: 'feeds_feed.unlock'
     feeds_feed: \d+
