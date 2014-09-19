@@ -18,10 +18,10 @@ class FeedViewBuilder extends EntityViewBuilder {
   /**
    * {@inheritdoc}
    */
-  protected function getBuildDefaults(EntityInterface $entity, $view_mode, $langcode) {
-    $defaults = parent::getBuildDefaults($entity, $view_mode, $langcode);
-    // $defaults['#theme'] = 'feeds_feed_source';
-    return $defaults;
-  }
+  // protected function getBuildDefaults(EntityInterface $entity, $view_mode, $langcode) {
+  //   $defaults = parent::getBuildDefaults($entity, $view_mode, $langcode);
+  //   // $defaults['#theme'] = 'feeds_feed_source';
+  //   return $defaults;
+  // }
 
 }

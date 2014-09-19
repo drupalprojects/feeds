@@ -38,13 +38,12 @@ class SerializedItem extends FieldItemBase {
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
 
     if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['value'] = DataDefinition::create('map')
+      static::$propertyDefinitions['value'] = DataDefinition::create('string')
         ->setLabel(t('Serialized value'));
     }
 
     return static::$propertyDefinitions;
   }
-
 
   /**
    * {@inheritdoc}
@@ -59,23 +58,53 @@ class SerializedItem extends FieldItemBase {
       }
     }
 
-    $values = array('value' => $values);
-
-    parent::setValue($values, $notify);
+    $this->values = $values;
+    // Notify the parent of any changes.
+    if ($notify && isset($this->parent)) {
+      $this->parent->onChange($this->name);
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function __get($name) {
-    // There is either a property object or a plain value - possibly for a
-    // not-defined property. If we have a plain value, directly return it.
-    if (isset($this->values[$name])) {
-      return $this->values[$name];
+    return $this->get($name);
+  }
+
+  public function get($property_name) {
+    if ($property_name === 'value') {
+      return $this->values;
     }
-    elseif (isset($this->properties[$name])) {
-      return $this->properties[$name]->getValue();
+    if (isset($this->values[$property_name])) {
+      return $this->values[$property_name];
     }
+    return array();
+  }
+
+  public function getValue() {
+    return $this->values;
+  }
+
+  public function getMainPropertyName() {
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __isset($name) {
+    if ($name === 'value') {
+      return TRUE;
+    }
+    return isset($this->values[$name]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function applyDefaultValue($notify = TRUE) {
+    return $this;
   }
 
   /**

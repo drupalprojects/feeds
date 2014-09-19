@@ -401,7 +401,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The bundle type this processor operates on, or null if it is undefined.
    */
   protected function bundleKey() {
-    return $this->entityInfo->getBundleEntityType('bundle');
+    return $this->entityInfo->getKey('bundle');
   }
 
   /**

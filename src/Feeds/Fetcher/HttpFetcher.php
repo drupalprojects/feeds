@@ -23,6 +23,7 @@ use Drupal\feeds\PuSH\SubscriptionInterface;
 use Drupal\feeds\RawFetcherResult;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Utility\Feed;
+use GuzzleHttp\Stream\Stream;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -107,7 +108,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
   public function fetch(FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
 
-    $response = $this->get($feed_config['source']);
+    $response = $this->get($feed->getSource());
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == 304) {
@@ -116,15 +117,15 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     }
 
     // If there was a redirect, the url will be updated automagically.
-    if ($url = $response->getParams()->get('feeds.redirect')) {
-      $feed_config['source'] = $url;
-      $feed->setConfigFor($this, $feed_config);
-    }
+    // if ($url = $response->getParams()->get('feeds.redirect')) {
+    //   $feed_config['source'] = $url;
+    //   $feed->setConfigFor($this, $feed_config);
+    // }
 
-    $tempname = $response->getBody()->getUri();
+    $tempname = $response->getBody()->getMetadata('uri');
     $response->getBody()->close();
 
-    $download_file = $this->prepareDirectory($feed_config['source']);
+    $download_file = $this->prepareDirectory($feed->getSource());
     file_unmanaged_move($tempname, $download_file, FILE_EXISTS_REPLACE);
 
     return new FetcherResult($download_file);
@@ -148,18 +149,16 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     $client = \Drupal::httpClient();
 
     // Add our handy dandy cache plugin. It's magic.
-    if ($cache) {
-      $client->addSubscriber(new CachePlugin(\Drupal::cache()));
-    }
+    // if ($cache) {
+    //   $client->addSubscriber(new CachePlugin(\Drupal::cache()));
+    // }
 
-    $request = $client->get($url);
-
-    // Stream to a file to provide the best scenario for intellegent parsers.
-    $tempname = drupal_tempnam('temporary://', 'feeds_download_cache_');
-    $request->setResponseBody($tempname);
+    $request = $client->createRequest('GET', $url, array(
+      'save_to' => drupal_tempnam('temporary://', 'feeds_download_cache_'),
+    ));
 
     try {
-      $response = $request->send();
+      $response = $client->send($request);
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
@@ -276,13 +275,10 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     $feed_config = $feed->getConfigurationFor($this);
 
     $form['fetcher']['#tree'] = TRUE;
-    $form['fetcher']['source'] = array(
+    $form['fetcher']['thing'] = array(
+      '#title' => 'tasdf',
       '#type' => 'textfield',
-      '#title' => $this->t('URL'),
-      '#description' => $this->t('Enter a feed URL.'),
-      '#default_value' => isset($feed_config['source']) ? $feed_config['source'] : '',
-      '#maxlength' => NULL,
-      '#required' => TRUE,
+      '#default_value' => $feed_config['thing'],
     );
 
     return $form;
@@ -293,25 +289,20 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     $values =& $form_state->getValue('fetcher');
-    $values['source'] = trim($values['source']);
 
-    if (!Feed::validUrl($values['source'], TRUE)) {
-      $form_key = 'feeds][' . get_class($this) . '][source';
-      form_set_error($form_key, $this->t('The URL %source is invalid.', array('%source' => $values['source'])));
-    }
-    elseif ($this->configuration['auto_detect_feeds']) {
-      $response = $this->get($values['source'], FALSE);
-      if ($url = Feed::getCommonSyndication($values['source'], $response->getBody(TRUE))) {
-        $values['source'] = $url;
-      }
-    }
+    // if ($this->configuration['auto_detect_feeds']) {
+    //   $response = $this->get($values['source'], FALSE);
+    //   if ($url = Feed::getCommonSyndication($values['source'], $response->getBody(TRUE))) {
+    //     $values['source'] = $url;
+    //   }
+    // }
   }
 
   /**
    * {@inheritdoc}
    */
   public function sourceDefaults() {
-    return array('source' => '');
+    return array('source' => '', 'thing' => '');
   }
 
   /**

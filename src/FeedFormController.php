@@ -9,14 +9,14 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\ContentEntityFormController;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 
 /**
  * Form controller for the feed edit forms.
  */
-class FeedFormController extends ContentEntityFormController {
+class FeedFormController extends ContentEntityForm {
 
   /**
    * Plugins that provide configuration forms.
@@ -35,20 +35,20 @@ class FeedFormController extends ContentEntityFormController {
 
     $args = array('@importer' => $importer->label(), '@title' => $feed->label());
     if ($this->operation == 'update') {
-      drupal_set_title($this->t('<em>Edit @importer</em> @title', $args), PASS_THROUGH);
+      $form['#title'] = $this->t('<em>Edit @importer</em> @title', $args);
     }
     elseif ($this->operation == 'create') {
-      drupal_set_title($this->t('<em>Add @importer</em>', $args), PASS_THROUGH);
+      $form['#title'] = $this->t('<em>Add @importer</em>', $args);
     }
 
     $user_config = \Drupal::config('user.settings');
 
-    $form['title'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Title'),
-      '#default_value' => $feed->label(),
-      '#required' => TRUE,
+    $form['advanced'] = array(
+      '#type' => 'vertical_tabs',
+      '#attributes' => array('class' => array('entity-meta')),
+      '#weight' => 99,
     );
+    $form = parent::form($form, $form_state);
 
     foreach ($importer->getPlugins() as $plugin) {
       if ($plugin instanceof FeedPluginFormInterface) {
@@ -58,38 +58,22 @@ class FeedFormController extends ContentEntityFormController {
       }
     }
 
-    $form['advanced'] = array(
-      '#type' => 'vertical_tabs',
-      '#weight' => 99,
-    );
-
-    // Feed author information for administrators.
     $form['author'] = array(
       '#type' => 'details',
-      '#access' => $this->currentUser()->hasPermission('administer feeds'),
-      '#title' => $this->t('Authoring information'),
-      '#collapsed' => TRUE,
+      '#title' => t('Authoring information'),
       '#group' => 'advanced',
+      '#attributes' => array(
+        'class' => array('feeds-feed-form-author'),
+      ),
       '#weight' => 90,
+      '#optional' => TRUE,
     );
-
-    $form['author']['name'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Authored by'),
-      '#maxlength' => 60,
-      '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => $feed->getAuthor()->getUsername(),
-      '#description' => $this->t('Leave blank for %anonymous.', array('%anonymous' => $user_config->get('anonymous'))),
-    );
-    $form['author']['date'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Authored on'),
-      '#maxlength' => 25,
-      '#description' => $this->t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array(
-        '%time' => format_date($feed->getCreatedTime(), 'custom', 'Y-m-d H:i:s O'),
-        '%timezone' => format_date($feed->getCreatedTime(), 'custom', 'O'),
-      )),
-    );
+    if (isset($form['uid'])) {
+      $form['uid']['#group'] = 'author';
+    }
+    if (isset($form['created'])) {
+      $form['created']['#group'] = 'author';
+    }
 
     // Feed options for administrators.
     $form['options'] = array(
@@ -106,7 +90,7 @@ class FeedFormController extends ContentEntityFormController {
       '#default_value' => $feed->isActive(),
     );
 
-    return parent::form($form, $form_state);
+    return $form;
   }
 
   /**
@@ -143,12 +127,12 @@ class FeedFormController extends ContentEntityFormController {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     // Build the feed object from the submitted values.
-    $feed = parent::submit($form, $form_state);
+    parent::submitForm($form, $form_state);
 
     foreach ($this->configurablePlugins as $plugin) {
-      $plugin->submitFeedForm($form, $form_state, $feed);
+      $plugin->submitFeedForm($form, $form_state, $this->entity);
     }
   }
 

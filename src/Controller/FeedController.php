@@ -69,15 +69,13 @@ class FeedController extends ControllerBase {
    *   A form array as expected by drupal_render().
    */
   public function createForm(ImporterInterface $feeds_importer) {
-
     $feed = $this->entityManager()->getStorage('feeds_feed')->create(array(
       'uid' => $this->currentUser()->id(),
       'importer' => $feeds_importer->id(),
-      'status' => 1,
+      // 'status' => 1,
       'created' => REQUEST_TIME,
     ));
-
-    return $this->entityManager()->getForm($feed, 'create');
+    return $this->entityFormBuilder()->getForm($feed);
   }
 
 }

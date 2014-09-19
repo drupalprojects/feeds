@@ -82,7 +82,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
     $client = \Drupal::httpClient();
 
     // Do not wait for a response.
-    $client->addSubscriber(new AsyncPlugin());
+    // $client->addSubscriber(new AsyncPlugin());
     $url = $this->url('feeds.execute', array('feeds_feed' => $feed->id()), array('absolute' => TRUE));
     $request = $client->post($url)
       ->addPostFields(array('token' => $token));

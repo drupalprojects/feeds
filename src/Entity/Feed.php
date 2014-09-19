@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Entity;
 
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -30,10 +31,9 @@ use Drupal\job_scheduler\JobScheduler;
  *   label = @Translation("Feed"),
  *   bundle_label = @Translation("Importer"),
  *   module = "feeds",
- *   controllers = {
+ *   handlers = {
  *     "storage" = "Drupal\feeds\FeedStorageController",
- *     "render" = "Drupal\feeds\FeedRenderController",
- *     "view_builder" = "Drupal\feeds\FeedViewBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "access" = "Drupal\feeds\FeedAccessController",
  *     "form" = {
  *       "create" = "Drupal\feeds\FeedFormController",
@@ -44,7 +44,7 @@ use Drupal\job_scheduler\JobScheduler;
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
  *       "default" = "Drupal\feeds\FeedFormController"
  *     },
- *     "list_builder" = "Drupal\Core\Config\Entity\ConfigEntityListBuilder"
+ *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder"
  *   },
  *   base_table = "feeds_feed",
  *   uri_callback = "feeds_feed_uri",
@@ -141,7 +141,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   public function preview() {
     $result = $this->getImporter()->getFetcher()->fetch($this);
     $result = $this->getImporter()->getParser()->parse($this, $result);
-    module_invoke_all('feeds_after_parse', $this, $result);
+    \Drupal::moduleHandler()->invokeAll('feeds_after_parse', array($this, $result));
     return $result;
   }
 
@@ -149,7 +149,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function startImport() {
-    module_invoke_all('feeds_before_import', $this);
+    \Drupal::moduleHandler()->invokeAll('feeds_before_import', array($this));
     $this->getImporter()->getPlugin('manager')->startImport($this);
   }
 
@@ -157,7 +157,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function startClear() {
-    module_invoke_all('feeds_before_clear', $this);
+    \Drupal::moduleHandler()->invokeAll('feeds_before_clear', array($this));
     $this->getImporter()->getPlugin('manager')->startClear($this);
   }
 
@@ -192,7 +192,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
       // Parse.
       $parser_result = $importer->getParser()->parse($this, $this->get('fetcher_result')->value);
-      module_invoke_all('feeds_after_parse', $this, $parser_result);
+      \Drupal::moduleHandler()->invokeAll('feeds_after_parse', array($this, $parser_result));
 
       // Process.
       // @todo Create a ProcessorWrapper plugin?
@@ -228,7 +228,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->getImporter()->getProcessor()->setMessages($this, $processor_state);
     $this->set('imported', time());
     $this->log('import', 'Imported in !s s', array('!s' => $this->get('imported')->value - $this->getState(StateInterface::START), WATCHDOG_INFO));
-    module_invoke_all('feeds_after_import', $this);
+    \Drupal::moduleHandler()->invokeAll('feeds_after_import', array($this));
 
     // Unset.
     $this->get('fetcher_result')->setValue(NULL);
@@ -250,11 +250,11 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
       // Parse.
       $parser_result = $importer->getParser()->parse($this, $fetcher_result);
-      module_invoke_all('feeds_after_parse', $this, $parser_result);
+      \Drupal::moduleHandler()->invokeAll('feeds_after_parse', array($this, $parser_result));
 
       // // Process.
       $importer->getProcessor()->process($this, $parser_result);
-      module_invoke_all('feeds_after_import', $this);
+      \Drupal::moduleHandler()->invokeAll('feeds_after_import', array($this));
     }
     else {
       throw new InterfaceNotImplementedException();
@@ -282,7 +282,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $result = $this->progressClearing();
 
     if ($result == StateInterface::BATCH_COMPLETE || isset($e)) {
-      module_invoke_all('feeds_after_clear', $this);
+      \Drupal::moduleHandler()->invokeAll('feeds_after_clear', array($this));
       $this->get('state')->setValue(NULL);
     }
 
@@ -426,9 +426,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function getConfigurationFor(FeedsPluginInterface $client) {
     $type = $client->pluginType();
-
     $configuration = $this->get('config')->$type;
-
     return array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
   }
 
@@ -438,7 +436,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   public function setConfigurationFor(FeedsPluginInterface $client, array $configuration) {
     $type = $client->pluginType();
     $this->get('config')->$type = $configuration;
-
     return $this;
   }
 
@@ -498,10 +495,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getSource() {
-    $configuration = $this->get('config')->fetcher;
-    if (isset($configuration['source'])) {
-      return $configuration['source'];
-    }
+    return $this->get('source')->value;
   }
 
   /**
@@ -557,12 +551,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
     foreach ($this->getImporter()->getPlugins() as $plugin) {
       $plugin->onFeedSave($this, $update);
     }
-
-    // Store the source property of the fetcher in a separate column so that we
-    // can do fast lookups on it.
-    $this->set('source', $this->getSource());
-
-    $storage_controller->updateFeedConfig($this);
   }
 
   /**
@@ -611,62 +599,98 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $fields['fid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Feed ID'))
       ->setDescription(t('The feed ID.'))
-      ->setReadOnly(TRUE);
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The feed UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['importer'] = BaseFieldDefinition::create('string')
+    $fields['importer'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Importer'))
-      ->setDescription(t('The feeds importer.'))
+      ->setDescription(t('The feed importer.'))
+      ->setSetting('target_type', 'feeds_importer')
       ->setReadOnly(TRUE);
 
-    $fields['title'] = BaseFieldDefinition::create('text')
+    $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
       ->setDescription(t('The title of this feed, always treated as non-markup plain text.'))
       ->setRequired(TRUE)
-      // ->setTranslatable(TRUE)
-      ->setSettings(array(
-        'default_value' => '',
-        'max_length' => 255,
-        'text_processing' => 0,
-      ));
+      ->setDefaultValue('')
+      ->setSetting('max_length', 255)
+      ->setDisplayOptions('view', array(
+        'label' => 'hidden',
+        'type' => 'string',
+        'weight' => -5,
+      ))
+      ->setDisplayOptions('form', array(
+        'type' => 'string_textfield',
+        'weight' => -5,
+      ))
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('User ID'))
+      ->setLabel(t('Authored by'))
       ->setDescription(t('The user ID of the feed author.'))
-      ->setSettings(array(
-        'target_type' => 'user',
-        'default_value' => 0,
-      ));
+      ->setRevisionable(TRUE)
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default')
+      ->setDefaultValueCallback(array('Drupal\feeds\Entity\Feed', 'getCurrentUserId'))
+      ->setDisplayOptions('view', array(
+        'label' => 'hidden',
+        'type' => 'author',
+        'weight' => 0,
+      ))
+      ->setDisplayOptions('form', array(
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 5,
+        'settings' => array(
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'autocomplete_type' => 'tags',
+          'placeholder' => '',
+        ),
+      ))
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Importing status'))
-      ->setDescription(t('A boolean indicating whether the feed is active.'));
+      ->setDescription(t('A boolean indicating whether the feed is active.'))
+      ->setDefaultValue(TRUE);
 
-    // @todo Convert to a "created" field in https://drupal.org/feed/2145103.
-    $fields['created'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Created'))
-      ->setDescription(t('The time that the feed was created.'));
+    $fields['created'] = BaseFieldDefinition::create('created')
+      ->setLabel(t('Authored on'))
+      ->setDescription(t('The time that the feed was created.'))
+      ->setDisplayOptions('view', array(
+        'label' => 'hidden',
+        'type' => 'timestamp',
+        'weight' => 0,
+      ))
+      ->setDisplayOptions('form', array(
+        'type' => 'datetime_timestamp',
+        'weight' => 10,
+      ))
+      ->setDisplayConfigurable('form', TRUE);
 
-    // @todo Convert to a "changed" field in https://drupal.org/feed/2145103.
-    $fields['changed'] = BaseFieldDefinition::create('integer')
+    $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the feed was last edited.'))
-      ->setPropertyConstraints('value', array('EntityChanged' => array()));
+      ->setDescription(t('The time that the feed was last edited.'));
 
-    $fields['imported'] = BaseFieldDefinition::create('integer')
+    $fields['imported'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Imported'))
       ->setDescription(t('The time that the feed was imported.'));
 
     $fields['source'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Source'))
       ->setDescription(t('The source of the feed.'))
-      ->setSettings(array('default_value' => ''));
+      ->setRequired(TRUE)
+      ->setDisplayOptions('form', array(
+        'type' => 'uri',
+        'weight' => -3,
+      ));
 
-    $fields['config'] = BaseFieldDefinition::create('map')
+    $fields['config'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Config'))
       ->setDescription(t('The config of the feed.'));
 
@@ -674,12 +698,24 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setLabel(t('Fetcher result'))
       ->setDescription(t('The source of the feed.'));
 
-    $fields['state'] = BaseFieldDefinition::create('map')
+    $fields['state'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('State'))
       ->setDescription(t('The source of the feed.'))
       ->setSettings(array('default_value' => array()));
 
     return $fields;
+  }
+
+  /**
+   * Default value callback for 'uid' base field definition.
+   *
+   * @see ::baseFieldDefinitions()
+   *
+   * @return array
+   *   An array of default values.
+   */
+  public static function getCurrentUserId() {
+    return array(\Drupal::currentUser()->id());
   }
 
 }

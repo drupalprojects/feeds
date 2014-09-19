@@ -110,11 +110,11 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
     // Check if chosen url scheme is allowed.
     $scheme = file_uri_scheme($values['source']);
     if (!$scheme || !in_array($scheme, $this->configuration['allowed_schemes'])) {
-      form_set_error('feeds][directory][source', $this->t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
+      $form_state->setErrorByName('feeds][directory][source', $this->t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
     }
     // Check wether the given path exists.
     elseif (!file_exists($values['source'])) {
-      form_set_error('feeds][directory][source', $this->t('The specified file or directory does not exist.'));
+      $form_state->setErrorByName('feeds][directory][source', $this->t('The specified file or directory does not exist.'));
     }
   }
 

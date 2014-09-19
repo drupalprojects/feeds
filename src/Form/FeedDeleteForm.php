@@ -9,6 +9,7 @@ namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides a form for deleting a Feed.
@@ -27,10 +28,8 @@ class FeedDeleteForm extends ContentEntityConfirmFormBase {
    *
    * @todo Set the correct route once views can override paths.
    */
-  public function getCancelRoute() {
-    return array(
-      'route_name' => 'feeds.add_page',
-    );
+  public function getCancelUrl() {
+    return $this->entity->urlInfo();
   }
 
   /**
@@ -43,14 +42,14 @@ class FeedDeleteForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
-    $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
 
-    watchdog('feeds', '@importer: deleted %title.', $args);
+    $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
+    $this->logger('feeds')->notice('@importer: deleted %title.', $args);
     drupal_set_message($this->t('%title has been deleted.', $args));
 
-    // $form_state['redirect'] = 'admin/content/feed';
+    $form_state->setRedirect('feeds.admin');
   }
 
 }

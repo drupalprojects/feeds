@@ -25,11 +25,8 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelRoute() {
-    return array(
-      'route_name' => 'feeds_feed',
-      'route_parameters' => array('feeds_feed' => $this->entity->id()),
-    );
+  public function getCancelUrl() {
+    return $this->entity->urlInfo();
   }
 
   /**
@@ -42,11 +39,9 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->startClear();
-    $args = array('@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label());
-
-    // $form_state['redirect'] = $this->url('feeds_feed', array('feeds_feed' => $this->entity->id()));
+    $form_state->setRedirectUrl($this->getCancelUrl());
   }
 
 }

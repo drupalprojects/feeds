@@ -7,7 +7,8 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Entity\EntityAccessController;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\StateInterface;
@@ -17,7 +18,7 @@ use Drupal\feeds\StateInterface;
  *
  * @see \Drupal\feeds\Entity\Feed
  */
-class FeedAccessController extends EntityAccessController {
+class FeedAccessController extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}
@@ -26,25 +27,27 @@ class FeedAccessController extends EntityAccessController {
     if (!in_array($operation, array('view', 'create', 'update', 'delete', 'import', 'clear', 'unlock'))) {
       // If $operation is not one of the supported actions, we return access
       // denied.
-      return FALSE;
+      AccessResult::forbidden();
     }
 
     if ($operation === 'unlock') {
       // If there is no need to unlock the feed, then the user does not have
       // access.
       if ($feed->progressImporting() == StateInterface::BATCH_COMPLETE && $feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
-        return FALSE;
+        return AccessResult::forbidden();
       }
     }
 
-    return $account->hasPermission('administer feeds') || $account->hasPermission("$operation {$feed->bundle()} feeds");
+    $has_perm = $account->hasPermission('administer feeds') || $account->hasPermission("$operation {$feed->bundle()} feeds");
+    return AccessResult::allowedIf($has_perm);
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return $account->hasPermission('administer feeds') || $account->hasPermission("create $entity_bundle feeds");
+    $has_perm = $account->hasPermission('administer feeds') || $account->hasPermission("create $entity_bundle feeds");
+    return AccessResult::allowedIf($has_perm);
   }
 
 }
