@@ -1,3 +1,11 @@
+feeds.admin:
+  path: '/admin/content/feed'
+  defaults:
+    _title: 'Feeds'
+    _entity_list: 'feeds_feed'
+  requirements:
+    _permission: 'administer feeds'
+
 feeds.add_page:
   path: '/feed/add'
   defaults:

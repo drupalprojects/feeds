@@ -2,8 +2,19 @@ feeds.importer_edit:
   route_name: feeds.importer_edit
   title: Edit
   base_route: feeds.importer_edit
+
 feeds.importer_mapping:
   route_name: feeds.importer_mapping
   title: Mapping
   base_route: feeds.importer_edit
   weight: 10
+
+feeds.admin:
+  route_name: feeds.admin
+  title: Feeds
+  base_route: system.admin_content
+
+feeds.edit:
+  route_name: feeds.edit
+  title: Edit
+  base_route: feeds.view
