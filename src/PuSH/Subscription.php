@@ -38,7 +38,6 @@ class Subscription implements SubscriptionInterface {
    */
   protected $tableEscaped;
 
-
   /**
    * Constructs a Subscription object.
    *
@@ -81,8 +80,8 @@ class Subscription implements SubscriptionInterface {
 
     // Creating a new subscription.
     else {
-      $data['secret'] = Crypt::randomStringHashed(55);
-      $data['token'] = Crypt::randomStringHashed(55);
+      $data['secret'] = substr(Crypt::randomBytesBase64(55), 0, 43);
+      $data['token'] = substr(Crypt::randomBytesBase64(55), 0, 43);
       $data['created'] = REQUEST_TIME;
 
       $this->connection->insert($this->table)
@@ -111,6 +110,17 @@ class Subscription implements SubscriptionInterface {
       'SELECT 1 FROM {' . $this->tableEscaped . '} WHERE id = :key',
       array(':key' => $key)
     )->fetchField();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasSubscriptions(array $keys) {
+    return $this->connection
+      ->select($this->table)
+      ->fields(array('id'))
+      ->condition('id', $keys)
+      ->fetchCol();
   }
 
   /**

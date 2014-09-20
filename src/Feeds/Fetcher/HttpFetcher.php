@@ -23,6 +23,7 @@ use Drupal\feeds\PuSH\SubscriptionInterface;
 use Drupal\feeds\RawFetcherResult;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Utility\Feed;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Stream\Stream;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -40,25 +41,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, ClearableInterface, PuSHFetcherInterface, FeedPluginFormInterface, ContainerFactoryPluginInterface {
 
   /**
-   * The subscribe queue.
+   * The Guzzle client.
    *
-   * @var \Drupal\Core\Queue\QueueInterface
+   * @var \GuzzleHttp\ClientInterface
    */
-  protected $subscribeQueue;
-
-  /**
-   * The unsubscribe queue.
-   *
-   * @var \Drupal\Core\Queue\QueueInterface
-   */
-  protected $unsubscribeQueue;
-
-  /**
-   * The subscription controller.
-   *
-   * @var \Drupal\feeds\PuSH\SubscriptionInterface
-   */
-  protected $subscription;
+  protected $client;
 
   /**
    * Constructs an UploadFetcher object.
@@ -69,18 +56,10 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    *   The plugin id.
    * @param array $plugin_definition
    *   The plugin definition.
-   * @param \Drupal\Core\Queue\QueueInterface $subscribe_queue
-   *   The queue to use for subscriptions.
-   * @param \Drupal\Core\Queue\QueueInterface $unsubscribe_queue
-   *   The queue to use to unsubscribe.
-   * @param \Drupal\feeds\PuSH\SubscriptionInterface $subscription
-   *   The subscription controller.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, QueueInterface $subscribe_queue, QueueInterface $unsubscribe_queue, SubscriptionInterface $subscription) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->subscribeQueue = $subscribe_queue;
-    $this->unsubscribeQueue = $unsubscribe_queue;
-    $this->subscription = $subscription;
+    $this->client = $client;
   }
 
   /**
@@ -93,9 +72,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('queue')->get('feeds_push_subscribe'),
-      $container->get('queue')->get('feeds_push_unsubscribe'),
-      $container->get('feeds.subscription.crud')
+      $container->get('http_client')
     );
   }
 
@@ -146,19 +123,17 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
       'webcal://' => 'http://',
     ));
 
-    $client = \Drupal::httpClient();
-
     // Add our handy dandy cache plugin. It's magic.
     // if ($cache) {
-    //   $client->addSubscriber(new CachePlugin(\Drupal::cache()));
+    //   $this->client->addSubscriber(new CachePlugin(\Drupal::cache()));
     // }
 
-    $request = $client->createRequest('GET', $url, array(
+    $request = $this->client->createRequest('GET', $url, array(
       'save_to' => drupal_tempnam('temporary://', 'feeds_download_cache_'),
     ));
 
     try {
-      $response = $client->send($request);
+      $response = $this->client->send($request);
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
@@ -211,10 +186,8 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    * {@inheritdoc}
    */
   public function clear(FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-    $url = $feed_config['source'];
-    \Drupal::cache()->delete('feeds_http_download:' . md5($url));
-    file_unmanaged_delete($this->prepareDirectory($url));
+    \Drupal::cache()->delete('feeds_http_download:' . md5($feed->getSource()));
+    file_unmanaged_delete($this->prepareDirectory($feed->getSource()));
   }
 
   /**
@@ -308,81 +281,9 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
   /**
    * {@inheritdoc}
    *
-   * @todo Refactor this like woah.
-   */
-  public function onFeedSave(FeedInterface $feed, $update) {
-    if (!$this->configuration['use_pubsubhubbub']) {
-      return;
-    }
-
-    $feed_config = $feed->getConfigurationFor($this);
-
-    $item = array(
-      'type' => $this->getPluginId(),
-      'id' => $feed->id(),
-    );
-
-    // Subscription does not exist yet.
-    if (!$subscription = $this->subscription->getSubscription($feed->id())) {
-      $sub = array(
-        'id' => $feed->id(),
-        'state' => 'unsubscribed',
-        'hub' => '',
-        'topic' => $feed_config['source'],
-      );
-      $this->subscription->setSubscription($sub);
-      // Subscribe to new topic.
-      $this->subscribeQueue->createItem($item);
-    }
-
-    // Source has changed.
-    elseif ($subscription['topic'] !== $feed_config['source']) {
-      // Subscribe to new topic.
-      $this->subscribeQueue->createItem($item);
-      // Unsubscribe from old topic.
-      $item['data'] = $subscription['topic'];
-      $this->unsubscribeQueue->createItem($item);
-      // Save new topic to subscription.
-      $subscription['topic'] = $feed_config['source'];
-      $this->subscription->setSubscription($subscription);
-    }
-
-    // Hub exists, but we aren't subscribed.
-    // @todo Is this the best way to handle this?
-    // @todo Periodically check for new hubs... Always check for new hubs...
-    // Maintain a retry count so that we don't keep trying indefinitely.
-    elseif ($subscription['hub']) {
-      switch ($subscription['state']) {
-
-        // Don't do anything if we are in the process of subscribing.
-        case 'subscribe':
-        case 'subscribed':
-          break;
-
-        default:
-          $this->subscribeQueue->createItem($item);
-          break;
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   *
    * @todo Call sourceDelete() when changing plugins.
    */
   public function onFeedDeleteMultiple(array $feeds) {
-    if ($this->configuration['use_pubsubhubbub']) {
-      foreach ($feeds as $feed) {
-        $item = array(
-          'type' => $this->getPluginId(),
-          'id' => $feed->id(),
-        );
-        // Unsubscribe from feed.
-        $this->unsubscribeQueue->createItem($item);
-      }
-    }
-
     // Remove caches and files for this feeds.
     foreach ($feeds as $feed) {
       $this->clear($feed);

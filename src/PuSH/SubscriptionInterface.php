@@ -58,6 +58,17 @@ interface SubscriptionInterface {
   public function hasSubscription($key);
 
   /**
+   * Returns the ids that have subscriptions given a list of keys.
+   *
+   * @param int[]
+   *   A list of Feed ids.
+   *
+   * @return int[]
+   *   A list of Feed ids that have a subscription.
+   */
+  public function hasSubscriptions(array $keys);
+
+  /**
    * Deletes a subscription.
    *
    * @param int $key

@@ -37,3 +37,11 @@ services:
   feeds.job_controller:
     class: Drupal\feeds\Controller\JobController
     arguments: ['@state', '@lock']
+  feeds.pubsubhubbub:
+    class: Drupal\feeds\EventSubscriber\PubSubHubbub
+    arguments: ['@queue', '@feeds.subscription.crud']
+    tags:
+      - { name: event_subscriber }
+  feeds.lock.persistent:
+    class: Drupal\feeds\Lock\PersistentDatabaseLockBackend
+    arguments: ['@database']

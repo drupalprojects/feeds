@@ -8,11 +8,12 @@
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\feeds\Entity\Importer;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\StateInterface;
-use Guzzle\Http\Exception\BadResponseException;
-use Guzzle\Http\Exception\RequestException;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use Zend\Feed\Reader\Reader;
 
 /**
@@ -175,68 +176,68 @@ function _feeds_job_scheduler_helper($action, array $job) {
 /**
  * Scheduler callback for unsubscribing from PuSH hubs.
  *
- * @todo This isn't working yet.
+ * @todo Perform actual unsubscribe.
  */
 function feeds_push_unsubscribe(array $job) {
-  $feed = \Drupal::entityManager()->getStorage('feeds_feed')->load($job['id']);
-  $feed->getImporter()->getFetcher()->unsubscribe($feed);
+  $subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($job['id']);
+
+  // Do the unsubscribe dance.
+
+  \Drupal::service('feeds.subscription.crud')->deleteSubscription($job['id']);
 }
 
 /**
  * Scheduler callback for subscribing from PuSH hubs.
  */
-function feeds_push_subscribe(array $job) {
-  if ($feed = entity_load('feeds_feed', $job['id'])) {
-    $feed_config = $feed->getConfiguration();
+function feeds_push_subscribe($fid) {
+  if (!$feed = entity_load('feeds_feed', $fid)) {
+    return;
+  }
+  if (!$subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
+    return;
+  }
 
-    if ($subscription = \Drupal::service('feeds.subscription.crud')->getSubscription($feed->id())) {
+  // @todo Error handling.
+  $feed_string = \Drupal::httpClient()
+    ->get($feed->getSource())
+    ->getBody(TRUE);
 
-      if (isset($feed_config['fetcher'])) {
+  Reader::setExtensionManager(Drupal::service('feed.bridge.reader'));
+  $channel = Reader::importString($feed_string);
 
-        // @todo Error handling.
-        $client = \Drupal::httpClient();
-        $response = $client->get($feed_config['fetcher']['source'])->send();
+  if (!$hubs = $channel->getHubs()) {
+    return;
+  }
 
-        Reader::setExtensionManager(Drupal::service('feed.bridge.reader'));
-        $channel = Reader::importString($response->getBody(TRUE));
+  $subscription['hub'] = reset($hubs);
+  $subscription['state'] = 'subscribe';
+  \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
 
-        if ($hubs = $channel->getHubs()) {
-          $subscription['hub'] = reset($hubs);
-          $subscription['state'] = 'subscribe';
-          \Drupal::service('feeds.subscription.crud')->setSubscription($subscription);
+  try {
+    \Drupal::httpClient()
+      ->post($subscription['hub'])
+      ->addPostFields(array(
+        'hub.callback' => Url::createFromPath('feed/' . $feed->id() . '/push_callback')->setAbsolute()->toString(),
+        'hub.callback' => 'http://twistor.me',
+        'hub.mode' => $subscription['state'],
+        'hub.topic' => $subscription['topic'],
+        'hub.verify_token' => $subscription['token'],
+        'hub.verify' => 'sync',
+        'hub.lease_seconds' => '',
+        'hub.secret' => $subscription['secret'],
+      )
+    );
+  }
+  catch (BadResponseException $e) {
+    $response = $e->getResponse();
+    watchdog('feeds', '%error', array('%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()), WATCHDOG_WARNING);
+  }
+  catch (RequestException $e) {
+    watchdog('feeds', '%error', array('%error' => $e->getMessage()), WATCHDOG_WARNING);
+  }
 
-          $request = $client
-            ->post($subscription['hub'])
-            ->addPostFields(array(
-              'hub.callback' => 'http://98.248.39.71:8080/feed/' . $feed->id() . '/push_callback',
-              'hub.mode' => $subscription['state'],
-              'hub.topic' => $subscription['topic'],
-              'hub.verify_token' => $subscription['token'],
-              'hub.verify' => 'sync',
-              'hub.lease_seconds' => '',
-              'hub.secret' => $subscription['secret'],
-            )
-          );
-
-          try {
-            $response = $request->send();
-          }
-          catch (BadResponseException $e) {
-            $response = $e->getResponse();
-            watchdog('feeds', '%error', array('%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()), WATCHDOG_WARNING);
-            drupal_set_message(t('%error', array('%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase())));
-          }
-          catch (RequestException $e) {
-            watchdog('feeds', '%error', array('%error' => $e->getMessage()), WATCHDOG_WARNING);
-            drupal_set_message(t('%error', array('%error' => $e->getMessage())));
-          }
-
-          if ($response->getStatusCode() != 204 || $response->getStatusCode() != 202) {
-            // There was an error, handle it.
-          }
-        }
-      }
-    }
+  if ($response->getStatusCode() != 204 || $response->getStatusCode() != 202) {
+    // There was an error, handle it.
   }
 }
 
@@ -311,35 +312,6 @@ function feeds_permission() {
 }
 
 /**
- * Implements hook_menu().
- */
-function feeds_menu() {
-  $items = array();
-  $items['feed/add'] = array(
-    'title' => 'Add feed',
-    'route_name' => 'feeds.add_page',
-  );
-  return $items;
-}
-
-/**
- * Implements hook_menu_local_tasks().
- */
-// function feeds_menu_local_tasks(&$data, $route_name) {
-//   // Add action link to 'feed/add' on 'admin/content' page.
-//   if (current_path() == 'admin/content/feed') {
-
-//     $item = menu_get_item('feed/add');
-//     if ($item['access']) {
-//       $data['actions'][] = array(
-//         '#theme' => 'menu_local_action',
-//         '#link' => $item,
-//       );
-//     }
-//   }
-// }
-
-/**
  * Implements hook_theme().
  */
 function feeds_theme() {
@@ -353,6 +325,10 @@ function feeds_theme() {
       ),
       'file' => 'feeds.theme.inc',
     ),
+    // 'feeds_feed' => array(
+    //   'render element' => 'elements',
+    //   'template' => 'feeds_feed',
+    // ),
   );
 }
 
