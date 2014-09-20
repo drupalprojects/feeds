@@ -24,25 +24,14 @@ use Drupal\Core\TypedData\DataDefinition;
 class SerializedItem extends FieldItemBase {
 
   /**
-   * Definitions of the contained properties.
-   *
-   * @see self::getPropertyDefinitions()
-   *
-   * @var array
-   */
-  protected static $propertyDefinitions;
-
-  /**
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
+    $properties = array();
+    $properties['value'] = DataDefinition::create('string')
+      ->setLabel(t('Serialized value'));
 
-    if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['value'] = DataDefinition::create('string')
-        ->setLabel(t('Serialized value'));
-    }
-
-    return static::$propertyDefinitions;
+    return $properties;
   }
 
   /**
@@ -84,10 +73,6 @@ class SerializedItem extends FieldItemBase {
 
   public function getValue() {
     return $this->values;
-  }
-
-  public function getMainPropertyName() {
-    return FALSE;
   }
 
   /**

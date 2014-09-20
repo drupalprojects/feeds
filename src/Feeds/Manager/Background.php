@@ -72,7 +72,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
    */
   protected function startBackgroundJob(FeedInterface $feed, $method) {
     $cid = 'feeds_feed:' . $feed->id();
-    $token = Crypt::randomStringHashed(55);
+    $token = Crypt::randomBytesBase64(55);
 
     \Drupal::state()->set($cid, array(
       'token' => $token,
