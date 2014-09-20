@@ -118,14 +118,7 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
-    try {
-      $feeds_feed->importRaw($raw);
-    }
-    catch (InterfaceNotImplementedException $e) {
-      // The fetcher does not support PuSH updates.
-      throw new NotFoundHttpException();
-    }
-
+    $feeds_feed->importRaw($raw);
     return new Response('', 200);
   }
 

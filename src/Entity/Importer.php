@@ -12,7 +12,15 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\DefaultSinglePluginBag;
+use Drupal\feeds\Event\ClearEvent;
+use Drupal\feeds\Event\EventDispatcherTrait;
+use Drupal\feeds\Event\ExpireEvent;
+use Drupal\feeds\Event\FeedsEvents;
+use Drupal\feeds\Event\FetchEvent;
+use Drupal\feeds\Event\ParseEvent;
+use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
@@ -47,6 +55,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  * )
  */
 class Importer extends ConfigEntityBase implements ImporterInterface {
+  use EventDispatcherTrait;
 
   /**
    * The importer ID.
@@ -493,6 +502,44 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
     $this->plugins[$plugin_type]['id'] = $plugin_id;
     $this->pluginBags[$plugin_type]->addInstanceID($plugin_id);
     return $this;
+  }
+
+  public function registerImportPlugins() {
+    $dispatcher = $this->getEventDispatcher();
+
+    $dispatcher->addListener(FeedsEvents::FETCH, function(FetchEvent $event) {
+      $result = $this->getFetcher()->fetch($event->getFeed());
+      $event->setFetcherResult($result);
+    });
+
+    $dispatcher->addListener(FeedsEvents::PARSE, function(ParseEvent $event) {
+      $result = $this->getParser()->parse($event->getFeed(), $event->getFetcherResult());
+      $event->setParserResult($result);
+    });
+
+    $dispatcher->addListener(FeedsEvents::PROCESS, function(ProcessEvent $event) {
+      $this->getProcessor()->process($event->getFeed(), $event->getParserResult());
+    });
+  }
+
+  public function registerClearPlugins() {
+    $dispatcher = $this->getEventDispatcher();
+
+    foreach ($this->getPlugins() as $plugin) {
+      if (!$plugin instanceof ClearableInterface) {
+        continue;
+      }
+
+      $dispatcher->addListener(FeedsEvents::CLEAR, function(ClearEvent $event) use ($plugin) {
+        $plugin->clear($event->getFeed());
+      });
+    }
+  }
+
+  public function registerExpirePlugins() {
+    $this->getEventDispatcher()->addListener(FeedsEvents::EXPIRE, function(ExpireEvent $event) {
+      $this->getProcessor()->expire($event->getFeed());
+    });
   }
 
   /**
