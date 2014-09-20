@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Item\SyndicationItem;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\FetcherResultInterface;
@@ -43,43 +44,45 @@ class SyndicationParser extends PluginBase implements ParserInterface {
       return $result;
     }
 
-    $result->title = $channel->getTitle();
-    $result->description = $channel->getDescription();
-    $result->link = $channel->getLink();
+    $result->set('feed_title', $channel->getTitle())
+           ->set('feed_description', $channel->getDescription())
+           ->set('feed_url', $channel->getLink());
 
-    foreach ($channel as $item) {
+    foreach ($channel as $entry) {
       // Reset the parsed item.
-      $parsed_item = array();
+      $item = new SyndicationItem();
       // Move the values to an array as expected by processors.
-      $parsed_item['title'] = $item->getTitle();
-      $parsed_item['guid'] = $item->getId();
-      $parsed_item['url'] = $item->getLink();
-      $parsed_item['description'] = $item->getDescription();
+      $item->set('title', $entry->getTitle())
+           ->set('guid', $entry->getId())
+           ->set('url', $entry->getLink())
+           ->set('guid', $entry->getId())
+           ->set('url', $entry->getLink())
+           ->set('description', $entry->getDescription());
 
-      if ($enclosure = $item->getEnclosure()) {
-        $parsed_item['enclosures'][] = urldecode($enclosure->url);
+      if ($enclosure = $entry->getEnclosure()) {
+        $item->set('enclosures', array(urldecode($enclosure->url)));
       }
 
-      if ($author = $item->getAuthor()) {
-        $parsed_item['author_name'] = $author['name'];
+      if ($author = $entry->getAuthor()) {
+        $item->set('author_name', $author['name']);
       }
-      if ($date = $item->getDateModified()) {
-        $parsed_item['timestamp'] = $date->getTimestamp();
+      if ($date = $entry->getDateModified()) {
+        $item->set('timestamp', $date->getTimestamp());
       }
-      $parsed_item['tags'] = $item->getCategories()->getValues();
+      $item->set('tags', $entry->getCategories()->getValues());
 
-      $result->items[] = $parsed_item;
+      $result->addItem($item);
     }
 
-    $state = $feed->getState(StateInterface::PARSE);
-    if (!$state->total) {
-      $state->total = count($result->items);
-    }
+    // $state = $feed->getState(StateInterface::PARSE);
+    // if (!$state->total) {
+    //   $state->total = count($result->items);
+    // }
 
-    $start = (int) $state->pointer;
-    $state->pointer = $start + $feed->getImporter()->getLimit();
-    $state->progress($state->total, $state->pointer);
-    $result->items = array_slice($result->items, $start, $feed->getImporter()->getLimit());
+    // $start = (int) $state->pointer;
+    // $state->pointer = $start + $feed->getImporter()->getLimit();
+    // $state->progress($state->total, $state->pointer);
+    // $result->items = array_slice($result->items, $start, $feed->getImporter()->getLimit());
 
     return $result;
   }
@@ -89,6 +92,18 @@ class SyndicationParser extends PluginBase implements ParserInterface {
    */
   public function getMappingSources() {
     return array(
+      'feed_title' => array(
+        'label' => $this->t('Feed title'),
+        'description' => $this->t('Title of the feed.'),
+      ),
+      'feed_description' => array(
+        'label' => $this->t('Feed description'),
+        'description' => $this->t('Description of the feed.'),
+      ),
+      'feed_url' => array(
+        'label' => $this->t('Feed URL (link)'),
+        'description' => $this->t('URL of the feed.'),
+      ),
       'title' => array(
         'label' => $this->t('Title'),
         'description' => $this->t('Title of the feed item.'),

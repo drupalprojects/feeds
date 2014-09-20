@@ -7,69 +7,31 @@
 
 namespace Drupal\feeds\Result;
 
+use Drupal\feeds\Feeds\Item\ItemInterface;
+
 /**
  * The result of a parsing stage.
  */
-class ParserResult implements ParserResultInterface {
+class ParserResult extends \SplDoublyLinkedList implements ParserResultInterface {
 
-  /**
-   * The title of the feed.
-   *
-   * @var string
-   */
-  public $title;
+  protected $data = array();
 
-  /**
-   * The description of the feed.
-   *
-   * @var $description
-   */
-  public $description;
+  public function get($field) {
+    return isset($this->data[$field]) ? $this->data[$field] : NULL;
+  }
 
-  /**
-   * The link of the feed.
-   *
-   * @var string
-   */
-  public $link;
-
-  /**
-   * The parsed items.
-   *
-   * @var array
-   */
-  public $items;
-
-  /**
-   * The current item being processed.
-   *
-   * @var array
-   */
-  public $currentItem;
-
-  /**
-   * Constructs a ParserResult object.
-   *
-   * @param array $items
-   *   (optional) The feed items to process. Defaults to an empty array.
-   */
-  public function __construct(array $items = array()) {
-    $this->items = $items;
+  public function set($field, $value) {
+    $this->data[$field] = $value;
+    return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function shiftItem() {
-    $this->currentItem = array_shift($this->items);
-    return $this->currentItem;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function currentItem() {
-    return $this->currentItem;
+  public function addItem(ItemInterface $item) {
+    $item->setResult($this);
+    $this->push($item);
+    return $this;
   }
 
 }

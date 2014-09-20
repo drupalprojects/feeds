@@ -21,6 +21,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
@@ -155,7 +156,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
     $state = $feed->getState(StateInterface::PROCESS);
-    foreach ($parser_result->items as $item) {
+    foreach ($parser_result as $item) {
       $this->existingEntityIds[] = $this->existingEntityId($feed, $item);
     }
     // Bulk load existing entities to save on db queries.
@@ -166,10 +167,9 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       }
     }
 
-    foreach ($parser_result->items as $delta => $item) {
+    foreach ($parser_result as $delta => $item) {
       $this->processItem($feed, $state, $item, $this->existingEntityIds[$delta]);
     }
-    unset($parser_result->items);
     unset($this->existingEntities);
   }
 
@@ -180,12 +180,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The feed being processed.
    * @param \Drupal\feeds\StateInterface $state
    *   The state object.
-   * @param array $item
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
    *   The item being processed.
    * @param int|fasle $existing_entity_id
    *   The entity id if it already exists.
    */
-  protected function processItem(FeedInterface $feed, StateInterface $state, array $item, $existing_entity_id) {
+  protected function processItem(FeedInterface $feed, StateInterface $state, ItemInterface $item, $existing_entity_id) {
     // If it exists, and we are not updating, pass onto the next item.
     if ($existing_entity_id && $this->skipExisting) {
       return;
@@ -739,25 +739,21 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being processed.
-   * @param array $item
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
    *   The item to find existing ids for.
    *
    * @return int|false
    *   The integer of the entity, or false if not found.
    */
-  protected function existingEntityId(FeedInterface $feed, array $item) {
+  protected function existingEntityId(FeedInterface $feed, ItemInterface $item) {
 
     $parser = $this->importer->getParser();
 
     foreach ($this->importer->getMappings() as $delta => $mapping) {
       if (!empty($mapping['unique'])) {
         foreach ($mapping['unique'] as $key => $true) {
-          // Invoke the parser's getSourceElement to retrieve the value for this
-          // mapping's source.
-          $value = $parser->getSourceElement($feed, $item, $mapping['map'][$key]);
           $plugin = $this->importer->getTargetPlugin($delta);
-
-          $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $value);
+          $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $item->get($mapping['map'][$key]));
           if ($entity_id) {
             return $entity_id;
           }
@@ -816,13 +812,13 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * Includes mappings so that items will be updated if the mapping
    * configuration has changed.
    *
-   * @param array $item
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
    *   The item to hash.
    *
    * @return string
    *   An MD5 hash.
    */
-  protected function hash(array $item) {
+  protected function hash(ItemInterface $item) {
     return hash('md5', serialize($item) . serialize($this->importer->getMappings()));
   }
 
@@ -886,7 +882,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * retrieve the source element, then ProcessorBase::setTargetElement() is
    * invoked to populate the target item properly.
    */
-  protected function map(FeedInterface $feed, EntityInterface $entity, array $item) {
+  protected function map(FeedInterface $feed, EntityInterface $entity, ItemInterface $item) {
     $parser = $this->importer->getParser();
     $mappings = $this->importer->getMappings();
 
@@ -908,13 +904,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
           $source_values[$target][$column] = array();
         }
 
-        if ($plugin = $this->importer->getSourcePlugin($source)) {
-          $value = $plugin->getSourceElement($feed, $item, $source);
-        }
-        else {
-          // Retrieve source element's value from parser.
-          $value = $parser->getSourceElement($feed, $item, $source);
-        }
+        $value = $item->get($source);
         if (!is_array($value)) {
           $source_values[$target][$column][] = $value;
         }

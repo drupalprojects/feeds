@@ -7,28 +7,19 @@
 
 namespace Drupal\feeds\Result;
 
+use Drupal\feeds\Feeds\Item\ItemInterface;
+
 /**
  * The result of a parsing stage.
- *
- * @todo Move the other items from ParserResult to methods on this interface so
- *   that processors can depend on them.
  */
-interface ParserResultInterface {
+interface ParserResultInterface extends \Iterator, \ArrayAccess, \Countable {
 
   /**
-   * Returns the next item to process.
+   * Adds an item to the result.
    *
-   * @return array|null
-   *   The next available item or null if there isn't one.
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
+   *   A parsed feed item.
    */
-  public function shiftItem();
-
-  /**
-   * Returns the current item being processed.
-   *
-   * @return array|null
-   *   The current result item, or null if there is no item.
-   */
-  public function currentItem();
+  public function addItem(ItemInterface $item);
 
 }
