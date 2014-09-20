@@ -153,7 +153,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result) {
+  public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
+    $state = $feed->getState(StateInterface::PROCESS);
     foreach ($parser_result->items as $item) {
       $this->existingEntityIds[] = $this->existingEntityId($feed, $item);
     }
@@ -287,10 +288,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   }
 
   /**
-   * Called after processing all items to display messages.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed being processed.
+   * {@inheritdoc}
    */
   public function setMessages(FeedInterface $feed) {
     $state = $feed->getState(StateInterface::PROCESS);

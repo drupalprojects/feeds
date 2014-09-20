@@ -53,7 +53,7 @@ interface ProcessorInterface extends FeedsPluginInterface {
    * @param Drupal\feeds\Result\ParserResultInterface $parser_result
    *   The result from the parser.
    */
-  public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result);
+  public function process(FeedInterface $feed, ParserResultInterface $parser_result);
 
   /**
    * Reports the number of items that can be processed per call.
@@ -124,5 +124,13 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *     - optional_unique: Set to true if this target supports unique values.
    */
   public function getMappingTargets();
+
+  /**
+   * Called after processing all items to display messages.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed being processed.
+   */
+  public function setMessages(FeedInterface $feed);
 
 }
