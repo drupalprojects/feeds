@@ -7,21 +7,19 @@
 
 namespace Drupal\feeds\Entity;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
-use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\feeds\Exception\InterfaceNotImplementedException;
-use Drupal\feeds\Exception\LockException;
+use Drupal\feeds\Event\DeleteFeedsEvent;
+use Drupal\feeds\Event\EventDispatcherTrait;
+use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
-use Drupal\feeds\PuSH\PuSHFetcherInterface;
+use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
-use Drupal\job_scheduler\JobScheduler;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the feed entity class.
@@ -44,7 +42,10 @@ use Drupal\job_scheduler\JobScheduler;
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
  *       "default" = "Drupal\feeds\FeedFormController"
  *     },
- *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder"
+ *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+ *     "feed_import" = "Drupal\feeds\FeedImportHandler",
+ *     "feed_clear" = "Drupal\feeds\FeedClearHandler",
+ *     "feed_expire" = "Drupal\feeds\FeedExpireHandler"
  *   },
  *   base_table = "feeds_feed",
  *   uri_callback = "feeds_feed_uri",
@@ -67,13 +68,7 @@ use Drupal\job_scheduler\JobScheduler;
  * )
  */
 class Feed extends ContentEntityBase implements FeedInterface {
-
-  /**
-   * The cached result from getImporter() since it gets called many times.
-   *
-   * @var \Drupal\feeds\ImporterInterface
-   */
-  protected $cachedImporter;
+  use EventDispatcherTrait;
 
   /**
    * {@inheritdoc}
@@ -92,6 +87,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSource() {
+    return $this->get('source')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -100,7 +102,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function setCreatedTime($timestamp) {
-    $this->set('created', $timestamp);
+    $this->set('created', (int) $timestamp);
     return $this;
   }
 
@@ -114,7 +116,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function getimportedTime() {
+  public function getImportedTime() {
     return $this->get('imported')->value;
   }
 
@@ -122,17 +124,52 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getImporter() {
+    return $this->get('importer')->entity;
+  }
 
-    if ($this->cachedImporter) {
-      return $this->cachedImporter;
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwner() {
+    return $this->get('uid')->entity;
+  }
 
-    if ($importer = entity_load('feeds_importer', $this->bundle())) {
-      $this->cachedImporter = $importer;
-      return $importer;
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
 
-    throw new \RuntimeException(String::format('The importer, @importer, for this feed does not exist.', array('@importer' => $this->bundle())));
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isActive() {
+    return (bool) $this->get('status')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setActive($active) {
+    $this->set('status', $active ? self::ACTIVE : self::INACTIVE);
+    return $this;
   }
 
   /**
@@ -165,154 +202,55 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function import() {
-    $this->acquireLock();
-
-    try {
-      // If fetcher result is empty, we are starting a new import, log.
-      if (empty($this->get('fetcher_result')->value)) {
-        $this->setState(StateInterface::START, time());
-      }
-
-      $importer = $this->getImporter();
-
-      // Fetch.
-      if (empty($this->get('fetcher_result')->value) || $this->progressParsing() == StateInterface::BATCH_COMPLETE) {
-        $fetcher_result = $importer->getFetcher()->fetch($this);
-
-        // If the fetcher did not return a result, then there's nothing to do.
-        if (!$fetcher_result) {
-          $this->cleanUp();
-          return StateInterface::BATCH_COMPLETE;
-        }
-
-        $this->set('fetcher_result', $fetcher_result);
-        // Clean the parser's state, we are parsing an entirely new file.
-        $this->setState(StateInterface::PARSE, NULL);
-      }
-
-      // Parse.
-      $parser_result = $importer->getParser()->parse($this, $this->get('fetcher_result')->value);
-      \Drupal::moduleHandler()->invokeAll('feeds_after_parse', array($this, $parser_result));
-
-      // Process.
-      // @todo Create a ProcessorWrapper plugin?
-      $processor_state = $this->getState(StateInterface::PROCESS);
-      $processor = $importer->getProcessor();
-      $processor->process($this, $processor_state, $parser_result);
-    }
-    catch (Exception $e) {
-      // Do nothing. Will thow later.
-    }
-
-    // Clean up.
-    $result = $this->progressImporting();
-
-    if ($result == StateInterface::BATCH_COMPLETE || isset($e)) {
-      $this->cleanUp();
-    }
-
-    $this->save();
-
-    if (isset($e)) {
-      throw $e;
-    }
-
-    return $result;
-  }
-
-  /**
-   * Cleans up after an import.
-   */
-  protected function cleanUp() {
-    $processor_state = $this->getState(StateInterface::PROCESS);
-    $this->getImporter()->getProcessor()->setMessages($this, $processor_state);
-    $this->set('imported', time());
-    $this->log('import', 'Imported in !s s', array('!s' => $this->get('imported')->value - $this->getState(StateInterface::START), WATCHDOG_INFO));
-    \Drupal::moduleHandler()->invokeAll('feeds_after_import', array($this));
-
-    // Unset.
-    $this->get('fetcher_result')->setValue(NULL);
-    $this->get('state')->setValue(NULL);
-    $this->releaseLock();
+    $this->getImporter()->registerImportPlugins();
+    return $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_import')
+      ->import($this);
   }
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Should we acquire a lock here? If not, we shouldn't lose $raw.
    */
   public function importRaw($raw) {
-    // Fetch.
-    $importer = $this->getImporter();
-    $fetcher = $importer->getFetcher();
-    if ($fetcher instanceof PuSHFetcherInterface) {
-      $fetcher_result = $fetcher->push($this, $raw);
-
-      // Parse.
-      $parser_result = $importer->getParser()->parse($this, $fetcher_result);
-      \Drupal::moduleHandler()->invokeAll('feeds_after_parse', array($this, $parser_result));
-
-      // // Process.
-      $importer->getProcessor()->process($this, $parser_result);
-      \Drupal::moduleHandler()->invokeAll('feeds_after_import', array($this));
-    }
-    else {
-      throw new InterfaceNotImplementedException();
-    }
+    $this->getImporter()->registerImportPlugins();
+    return $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_import')
+      ->pushImport($this, $raw);
   }
 
   /**
    * {@inheritdoc}
    */
   public function clear() {
-    $this->acquireLock();
-    try {
-      foreach ($this->getImporter()->getPlugins() as $plugin) {
-        if ($plugin instanceof ClearableInterface) {
-          $plugin->clear($this);
-        }
-      }
-    }
-    catch (Exception $e) {
-      // Do nothing yet.
-    }
-    $this->releaseLock();
-
-    // Clean up.
-    $result = $this->progressClearing();
-
-    if ($result == StateInterface::BATCH_COMPLETE || isset($e)) {
-      \Drupal::moduleHandler()->invokeAll('feeds_after_clear', array($this));
-      $this->get('state')->setValue(NULL);
-    }
-
-    $this->save();
-
-    if (isset($e)) {
-      throw $e;
-    }
-
-    return $result;
+    $this->getImporter()->registerClearPlugins();
+    return $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_clear')
+      ->clear($this);
   }
 
   /**
    * {@inheritdoc}
    */
   public function expire() {
-    $this->acquireLock();
-    try {
-      $result = $this->getImporter()->getProcessor()->expire($this);
-    }
-    catch (Exception $e) {
-      // Will throw after the lock is released.
-    }
-    $this->releaseLock();
+    $this->getImporter()->registerExpirePlugins();
+    return $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_expire')
+      ->expire($this);
+  }
 
-    if (isset($e)) {
-      throw $e;
-    }
+  /**
+   * Cleans up after an import.
+   */
+  public function cleanUp() {
+    $processor_state = $this->getState(StateInterface::PROCESS);
+    $this->getImporter()->getProcessor()->setMessages($this, $processor_state);
+    $this->imported = time();
 
-    return $result;
+    $this->log('import', 'Imported in !s s', array('!s' => $this->getImportedTime() - $this->getState(StateInterface::START), WATCHDOG_INFO));
+
+    // Unset.
+    $this->clearFetcherResult();
+    $this->clearState();
   }
 
   /**
@@ -351,8 +289,42 @@ class Feed extends ContentEntityBase implements FeedInterface {
     return $state;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setState($stage, $state) {
-    $this->get('state')->$state = $state;
+    $this->get('state')->$stage = $state;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clearState() {
+    $this->get('state')->setValue(NULL);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFetcherResult() {
+    return $this->get('fetcher_result')->result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setFetcherResult(FetcherResultInterface $result) {
+    $this->get('fetcher_result')->result = $result;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clearFetcherResult() {
+    $this->get('fetcher_result')->setValue(NULL);
     return $this;
   }
 
@@ -416,9 +388,12 @@ class Feed extends ContentEntityBase implements FeedInterface {
     return $this;
   }
 
-  public function getConfiguration() {
-    $configuration = $this->get('config')->getValue();
-    return reset($configuration);
+  /**
+   * {@inheritdoc}
+   */
+  public function unlock() {
+    $this->entityManager()->getStorage($this->entityType)->unlockFeed($this);
+    return $this;
   }
 
   /**
@@ -435,7 +410,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function setConfigurationFor(FeedsPluginInterface $client, array $configuration) {
     $type = $client->pluginType();
-    $this->get('config')->$type = $configuration;
+    $this->get('config')->$type = array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
     return $this;
   }
 
@@ -459,79 +434,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ))
       ->execute();
 
-    return $this;
-  }
-
-  /**
-   * Acquires a lock for this feed.
-   *
-   * @throws \Drupal\feeds\Exception\LockException
-   *   If a lock for the requested job could not be acquired.
-   *
-   * @return self
-   *   Returns the Feed for method chaining.
-   */
-  protected function acquireLock() {
-    if (!\Drupal::lock()->acquire("feeds_feed_{$this->id()}", 60.0)) {
-      throw new LockException(String::format('Cannot acquire lock for feed @id / @fid.', array('@id' => $this->getImporter()->id(), '@fid' => $this->id())));
-    }
-
-    return $this;
-  }
-
-  /**
-   * Releases a lock for this source.
-   *
-   * @return self
-   *   Returns the Feed for method chaining.
-   */
-  protected function releaseLock() {
-    \Drupal::lock()->release("feeds_feed_{$this->id()}");
-
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSource() {
-    return $this->get('source')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getAuthor() {
-    return $this->get('uid')->entity;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getAuthorId() {
-    return $this->get('uid')->target_id;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setAuthorId($uid) {
-    $this->set('uid', $uid);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isActive() {
-    return (bool) $this->get('status')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setActive($active) {
-    $this->set('status', $active ? self::ACTIVE : self::INACTIVE);
     return $this;
   }
 
@@ -567,8 +469,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
     // Group feeds by imporer.
     $grouped = array();
-    foreach ($feeds as $feed) {
-      $grouped[$feed->bundle()][] = $feed;
+    foreach ($feeds as $fid => $feed) {
+      $grouped[$feed->bundle()][$fid] = $feed;
     }
 
     // Alert plugins that we are deleting.
@@ -579,15 +481,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
         $plugin->onFeedDeleteMultiple($group);
       }
     }
-  }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function unlock() {
-    \Drupal::entityManager()->getStorage($this->entityType)->unlockFeed($this);
-
-    return $this;
+    $this->dispatchEvent(FeedsEvents::FEEDS_DELETE, new DeleteFeedsEvent($this));
   }
 
   /**

@@ -8,12 +8,15 @@
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
+use Drupal\feeds\Result\FetcherResultInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Provides an interface defining a feeds_feed entity.
  */
-interface FeedInterface extends ContentEntityInterface {
+interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
 
   /**
    * Represents an active feed.
@@ -28,6 +31,14 @@ interface FeedInterface extends ContentEntityInterface {
    * @var int
    */
   const INACTIVE = 0;
+
+  /**
+   * Returns the source of the feed.
+   *
+   * @return string
+   *   The source of a feed.
+   */
+  public function getSource();
 
   /**
    * Returns the Importer object that this feed is expected to be used with.
@@ -58,14 +69,6 @@ interface FeedInterface extends ContentEntityInterface {
    *   The called feed entity.
    */
   public function setCreatedTime($timestamp);
-
-  /**
-   * Returns the feed modification timestamp.
-   *
-   * @return int
-   *   Node creation timestamp.
-   */
-  public function getChangedTime();
 
   /**
    * Returns the feed imported timestamp.
@@ -184,6 +187,11 @@ interface FeedInterface extends ContentEntityInterface {
   public function expire();
 
   /**
+   * Cleans up after an import.
+   */
+  public function cleanUp();
+
+  /**
    * Reports the progress of the parsing stage.
    *
    * @return float
@@ -222,6 +230,31 @@ interface FeedInterface extends ContentEntityInterface {
    *   The State object for the given stage.
    */
   public function getState($stage);
+
+  /**
+   * @todo
+   */
+  public function setState($stage, $state);
+
+  /**
+   * @todo
+   */
+  public function clearState();
+
+  /**
+   * @todo
+   */
+  public function getFetcherResult();
+
+  /**
+   * @todo
+   */
+  public function setFetcherResult(FetcherResultInterface $result);
+
+  /**
+   * @todo
+   */
+  public function clearFetcherResult();
 
   /**
    * Counts items imported by this feed.
@@ -269,14 +302,6 @@ interface FeedInterface extends ContentEntityInterface {
   public function setConfigurationFor(FeedsPluginInterface $client, array $config);
 
   /**
-   * Returns the source of the feed.
-   *
-   * @return string
-   *   The source of a feed.
-   */
-  public function getSource();
-
-  /**
    * Writes to {feeds_log}.
    *
    * @param string $type
@@ -305,33 +330,6 @@ interface FeedInterface extends ContentEntityInterface {
    * @todo Figure out what Drupal 8 does with logging. Maybe we can use it.
    */
   public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE);
-
-  /**
-   * Returns the feed author user entity.
-   *
-   * @return \Drupal\user\UserInterface
-   *   The author user entity.
-   */
-  public function getAuthor();
-
-  /**
-   * Returns the feed author user ID.
-   *
-   * @return int
-   *   The author user ID.
-   */
-  public function getAuthorId();
-
-  /**
-   * Sets the feed author user ID.
-   *
-   * @param int $uid
-   *   The author user id.
-   *
-   * @return \Drupal\feeds\FeedInterface
-   *   The called feed entity.
-   */
-  public function setAuthorId($uid);
 
   /**
    * Returns the feed active status.
