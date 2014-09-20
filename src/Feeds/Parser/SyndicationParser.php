@@ -12,6 +12,7 @@ use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResult;
+use Drupal\feeds\StateInterface;
 use Zend\Feed\Reader\Exception\ExceptionInterface;
 use Zend\Feed\Reader\Reader;
 
@@ -69,6 +70,16 @@ class SyndicationParser extends PluginBase implements ParserInterface {
 
       $result->items[] = $parsed_item;
     }
+
+    $state = $feed->getState(StateInterface::PARSE);
+    if (!$state->total) {
+      $state->total = count($result->items);
+    }
+
+    $start = (int) $state->pointer;
+    $state->pointer = $start + $feed->getImporter()->getLimit();
+    $state->progress($state->total, $state->pointer);
+    $result->items = array_slice($result->items, $start, $feed->getImporter()->getLimit());
 
     return $result;
   }
