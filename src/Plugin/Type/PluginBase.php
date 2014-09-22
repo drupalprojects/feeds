@@ -74,17 +74,6 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   }
 
   /**
-   * {@inheritdoc}
-   *
-   * @todo Get ridda this.
-   */
-  public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
-    if (isset($item[$element_key])) {
-      return $item[$element_key];
-    }
-  }
-
-  /**
    * {@inheritodc}
    */
   public function sourceDefaults() {

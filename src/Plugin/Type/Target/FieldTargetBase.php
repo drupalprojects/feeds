@@ -77,8 +77,6 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
       static::$properties[$id]['description'] = $field_definition->getDescription();
       static::$properties[$id]['settings'] = $field_definition->getSettings();
 
-      // dpm($field_definition->getItemDefinition());
-
       foreach ($field_definition->getItemDefinition()->getPropertyDefinitions() as $property => $data_definition) {
         if (!$data_definition->isComputed()) {
           static::$properties[$id]['properties'][$property] = $data_definition->toArray();

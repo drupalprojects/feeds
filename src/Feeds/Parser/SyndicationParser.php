@@ -48,8 +48,25 @@ class SyndicationParser extends PluginBase implements ParserInterface {
            ->set('feed_description', $channel->getDescription())
            ->set('feed_url', $channel->getLink());
 
-    foreach ($channel as $entry) {
-      // Reset the parsed item.
+    $state = $feed->getState(StateInterface::PARSE);
+    $start = (int) $state->pointer;
+    $state->pointer = $start + $feed->getImporter()->getLimit();
+    $state->pointer = $start + 3;
+
+
+    if (!$state->total) {
+      $state->total = count($channel);
+    }
+
+    $state->progress($state->total, $state->pointer);
+    foreach ($channel as $delta => $entry) {
+      if ($delta < $start) {
+        continue;
+      }
+      if ($delta >= $state->pointer) {
+        break;
+      }
+
       $item = new SyndicationItem();
       // Move the values to an array as expected by processors.
       $item->set('title', $entry->getTitle())
@@ -73,16 +90,6 @@ class SyndicationParser extends PluginBase implements ParserInterface {
 
       $result->addItem($item);
     }
-
-    // $state = $feed->getState(StateInterface::PARSE);
-    // if (!$state->total) {
-    //   $state->total = count($result->items);
-    // }
-
-    // $start = (int) $state->pointer;
-    // $state->pointer = $start + $feed->getImporter()->getLimit();
-    // $state->progress($state->total, $state->pointer);
-    // $result->items = array_slice($result->items, $start, $feed->getImporter()->getLimit());
 
     return $result;
   }

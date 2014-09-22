@@ -45,27 +45,4 @@ interface ParserInterface extends FeedsPluginInterface {
    */
   public function getMappingSources();
 
-  /**
-   * Gets an element identified by $element_key of the given item.
-   *
-   * The element key corresponds to the values in the array returned by
-   * ParserInterface::getMappingSources().
-   *
-   * This method is invoked from ProcessorInterface::map() when a concrete item
-   * is processed.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed being parsed.
-   * @param array $item
-   *   The current item being processed.
-   * @param string $element_key
-   *   The key identifying the element that should be retrieved from $item.
-   *
-   * @return mixed
-   *   The source element from $item identified by $element_key.
-   *
-   * @todo $item should be generic, possible define an interface.
-   */
-  public function getSourceElement(FeedInterface $feed, array $item, $element_key);
-
 }

@@ -127,13 +127,6 @@ class CSVParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
-    return parent::getSourceElement($feed, $item, Unicode::strtolower($element_key));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function sourceDefaults() {
     return array(
       'delimiter' => $this->configuration['delimiter'],

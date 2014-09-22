@@ -26,7 +26,7 @@ class MockProcessor implements ProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function process(FeedInterface $feed, StateInterface $state, ParserResultInterface $parser_result) {
+  public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
   }
 
   /**
@@ -83,6 +83,10 @@ class MockProcessor implements ProcessorInterface {
    */
   public function getPluginDefinition() {
     return array();
+  }
+
+  public function setMessages(FeedInterface $feed) {
+
   }
 
 }

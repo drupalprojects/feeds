@@ -877,10 +877,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * processed, it is passed through map() where the properties of $source_item
    * are mapped onto $target_item following the processor's mapping
    * configuration.
-   *
-   * For each mapping ParserInterface::getSourceElement() is executed to
-   * retrieve the source element, then ProcessorBase::setTargetElement() is
-   * invoked to populate the target item properly.
    */
   protected function map(FeedInterface $feed, EntityInterface $entity, ItemInterface $item) {
     $parser = $this->importer->getParser();
