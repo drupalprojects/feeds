@@ -14,21 +14,14 @@ use Drupal\feeds\FeedInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @covers \Drupal\feeds\FeedExpireHandler
+ * @coversDefaultClass \Drupal\feeds\FeedExpireHandler
+ * @group Feeds
  */
 class FeedExpireHandlerTest extends UnitTestCase {
 
   protected $dispatcher;
   protected $lock;
   protected $feed;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Feed handler: Expire',
-      'description' => 'Tests the feed expire handler.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function setUp() {
     parent::setUp();

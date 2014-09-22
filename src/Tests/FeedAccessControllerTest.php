@@ -9,14 +9,15 @@ namespace Drupal\feeds\Tests;
 
 use Drupal\Core\Language\Language;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\feeds\FeedAccessController;
 use Drupal\feeds\StateInterface;
+use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\FeedAccessController
+ * @coversDefaultClass \Drupal\feeds\FeedAccessController
+ * @group Feeds
  */
-class FeedAccessControllerTest extends UnitTestCase {
+class FeedAccessControllerTest extends FeedsUnitTestCase {
 
   protected $entityType;
 
@@ -24,18 +25,7 @@ class FeedAccessControllerTest extends UnitTestCase {
 
   protected $moduleHandler;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Feeds: Feed access controller',
-      'description' => 'Tests the feed access controller.',
-      'group' => 'Feeds',
-    );
-  }
-
   public function setUp() {
-    if (!defined('WATCHDOG_NOTICE')) {
-      define('WATCHDOG_NOTICE', 5);
-    }
     $this->entityType = $this->getMock('\Drupal\Core\Entity\EntityTypeInterface');
     $this->entityType->expects($this->once())
                 ->method('id')

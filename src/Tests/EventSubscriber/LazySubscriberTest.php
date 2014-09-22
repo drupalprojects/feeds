@@ -19,7 +19,8 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @covers \Drupal\feeds\EventSubscriber\LazySubscriber
+ * @coversDefaultClass \Drupal\feeds\EventSubscriber\LazySubscriber
+ * @group Feeds
  */
 class LazySubscriberTest extends FeedsUnitTestCase {
 
@@ -30,15 +31,6 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   protected $fetcher;
   protected $parser;
   protected $processor;
-
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event subscriber: Lazy',
-      'description' => 'Tests for the lazy event subscriber.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function setUp() {
     parent::setUp();

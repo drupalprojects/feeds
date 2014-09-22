@@ -12,16 +12,10 @@ use Drupal\feeds\Feeds\Item\SyndicationItem;
 use Drupal\feeds\Result\ParserResult;
 
 /**
- * @covers \Drupal\feeds\Feeds\Item\SyndicationItem
+ * @coversDefaultClass \Drupal\feeds\Feeds\Item\SyndicationItem
+ * @group Feeds
  */
 class SyndicationItemTest extends UnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Feed item: Dynamic',
-      'description' => 'Tests dynamic feed item.',
-      'group' => 'Feeds',
-    );
-  }
 
   /**
    * Tests basic behavior.

@@ -10,47 +10,31 @@ namespace Drupal\feeds\Tests;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\ImporterAccessController
+ * @coversDefaultClass \Drupal\feeds\ImporterAccessController
+ * @group Feeds
  */
 class ImporterAccessControllerTest extends FeedsUnitTestCase {
 
-  protected $controller;
-
-  protected $importer;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Feeds: Importer access controller.',
-      'description' => 'Tests the access controller.',
-      'group' => 'Feeds',
-    );
-  }
-
   public function setUp() {
-    $this->controller = $this->getMockBuilder('\Drupal\feeds\ImporterAccessController')
-                             ->setMethods(NULL)
-                             ->disableOriginalConstructor()
-                             ->getMock();
+    $this->entity = $this->getMock('Drupal\Core\Entity\EntityInterface');
+    $this->account = $this->getMock('Drupal\Core\Session\AccountInterface');
+    $this->account->expects($this->once())
+      ->method('hasPermission')
+      ->with('administer feeds')
+      ->will($this->returnValue(TRUE));
+    $this->controller = $this->getMock('Drupal\feeds\ImporterAccessController', NULL, [], '', FALSE);
   }
 
-  public function testCheckAccess() {
-    $method = $this->getMethod('\Drupal\feeds\ImporterAccessController', 'checkAccess');
-
-    $account = $this->getMockAccount(array('administer feeds' => TRUE));
-    $this->assertTrue($method->invoke($this->controller, $this->getMockImporter(), 'op', 'language', $account));
-
-    $account = $this->getMockAccount(array('administer feeds' => FALSE));
-    $this->assertFalse($method->invoke($this->controller, $this->getMockImporter(), 'op', 'language', $account));
+  public function testCheckAccessTrue() {
+    $method = $this->getMethod('Drupal\feeds\ImporterAccessController', 'checkAccess');
+    $result = $method->invokeArgs($this->controller, [$this->entity, '', '', $this->account]);
+    $this->assertTrue($result->isAllowed());
   }
 
-  public function testCheckCreateAccess() {
-    $method = $this->getMethod('\Drupal\feeds\ImporterAccessController', 'checkCreateAccess');
-
-    $account = $this->getMockAccount(array('administer feeds' => TRUE));
-    $this->assertTrue($method->invoke($this->controller, $account, array()));
-
-    $account = $this->getMockAccount(array('administer feeds' => FALSE));
-    $this->assertFalse($method->invoke($this->controller, $account, array()));
+  public function testCheckCreateAccessTrue() {
+    $method = $this->getMethod('Drupal\feeds\ImporterAccessController', 'checkCreateAccess');
+    $result = $method->invokeArgs($this->controller, [$this->account, [], NULL]);
+    $this->assertTrue($result->isAllowed());
   }
 
 }

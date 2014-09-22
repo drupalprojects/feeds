@@ -10,7 +10,7 @@ namespace Drupal\feeds\Tests;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Tests the importer list controller.
+ * Base class for Feeds unit tests.
  */
 abstract class FeedsUnitTestCase extends UnitTestCase {
 

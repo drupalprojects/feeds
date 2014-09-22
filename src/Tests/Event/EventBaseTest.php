@@ -11,17 +11,10 @@ use Drupal\feeds\Event\EventBase;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Event\EventBase
+ * @coversDefaultClass \Drupal\feeds\Event\EventBase
+ * @group Feeds
  */
 class EventBaseTest extends FeedsUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event: Base class',
-      'description' => 'Tests the event base class.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');

@@ -12,16 +12,10 @@ use Drupal\feeds\Feeds\Item\DynamicItem;
 use Drupal\feeds\Result\ParserResult;
 
 /**
- * @covers \Drupal\feeds\Feeds\Item\DynamicItem
+ * @coversDefaultClass \Drupal\feeds\Feeds\Item\DynamicItem
+ * @group Feeds
  */
 class DynamicItemTest extends UnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Feed item: Dynamic',
-      'description' => 'Tests dynamic feed item.',
-      'group' => 'Feeds',
-    );
-  }
 
   /**
    * Tests basic behavior.

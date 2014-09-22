@@ -13,17 +13,10 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * @covers \Drupal\feeds\Event\EventDispatcherTrait
+ * @coversDefaultClass \Drupal\feeds\Event\EventDispatcherTrait
+ * @group Feeds
  */
 class EventDispatcherTraitTest extends FeedsUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event: Dispatcher trait',
-      'description' => 'Tests the event dispatcher trait.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function test() {
     $mock = $this->getMockForTrait('Drupal\feeds\Event\EventDispatcherTrait');

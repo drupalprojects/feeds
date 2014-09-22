@@ -14,21 +14,14 @@ use Drupal\feeds\FeedInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @covers \Drupal\feeds\FeedClearHandler
+ * @coversDefaultClass \Drupal\feeds\FeedClearHandler
+ * @group Feeds
  */
 class FeedClearHandlerTest extends UnitTestCase {
 
   protected $dispatcher;
   protected $lock;
   protected $feed;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Feed handler: Clear',
-      'description' => 'Tests the feed clear handler.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function setUp() {
     parent::setUp();

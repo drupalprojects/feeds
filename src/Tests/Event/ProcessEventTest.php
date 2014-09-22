@@ -11,17 +11,10 @@ use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Event\ProcessEvent
+ * @coversDefaultClass \Drupal\feeds\Event\ProcessEvent
+ * @group Feeds
  */
 class ProcessEventTest extends FeedsUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event: Process',
-      'description' => 'Tests the process event.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');

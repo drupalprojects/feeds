@@ -20,21 +20,14 @@ use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @covers \Drupal\feeds\FeedImportHandler
+ * @coversDefaultClass \Drupal\feeds\FeedImportHandler
+ * @group Feeds
  */
 class FeedImportHandlerTest extends UnitTestCase {
 
   protected $dispatcher;
   protected $lock;
   protected $feed;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Feed handler: Import',
-      'description' => 'Tests the feed import handler.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function setUp() {
     parent::setUp();

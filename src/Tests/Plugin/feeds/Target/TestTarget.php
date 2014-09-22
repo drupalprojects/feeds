@@ -5,11 +5,12 @@
  * Contains \Drupal\feeds\Feeds\Target\TestTarget.
  */
 
-namespace Drupal\feeds_tests\Plugin\feeds\Target;
+namespace Drupal\feeds\Tests\Plugin\feeds\Target;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\TargetBase;
+use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\Type\Target\TargetBase;
 
 /**
  * Defines a test_mapper field mapper.
@@ -24,7 +25,7 @@ class TestTarget extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  public function targets(array &$targets) {
+  public static function targets(array &$targets, ImporterInterface $importer, array $definition) {
     $targets['test_target'] = array(
       'name' => t('Test Target'),
       'description' => t('This is a test target.'),
@@ -37,7 +38,7 @@ class TestTarget extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, $value, array $mapping) {
+  function setTarget(FeedInterface $feed, $target_item, $target, array $values) {
     $entity->body['und'][0]['value'] = serialize($mapping);
   }
 

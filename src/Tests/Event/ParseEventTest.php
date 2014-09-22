@@ -11,17 +11,10 @@ use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Event\ParseEvent
+ * @coversDefaultClass \Drupal\feeds\Event\ParseEvent
+ * @group Feeds
  */
 class ParseEventTest extends FeedsUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event: Parse',
-      'description' => 'Tests the fetch event.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');

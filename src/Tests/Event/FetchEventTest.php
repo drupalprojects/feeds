@@ -11,17 +11,10 @@ use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Event\FetchEvent
+ * @coversDefaultClass \Drupal\feeds\Event\FetchEvent
+ * @group Feeds
  */
 class FetchEventTest extends FeedsUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event: Fetch',
-      'description' => 'Tests the fetch event.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');

@@ -11,17 +11,10 @@ use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Event\DeleteFeedsEvent
+ * @coversDefaultClass \Drupal\feeds\Event\DeleteFeedsEvent
+ * @group Feeds
  */
 class DeleteFeedsEventTest extends FeedsUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Event: Delete',
-      'description' => 'Tests the delete event.',
-      'group' => 'Feeds',
-    );
-  }
 
   public function test() {
     $feeds = array($this->getMock('Drupal\feeds\FeedInterface'));
