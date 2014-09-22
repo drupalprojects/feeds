@@ -42,15 +42,13 @@ class RawFetcherResult extends FetcherResult {
    * {@inheritdoc}
    */
   public function getFilePath() {
-
     // Write to a temporary file if the parser expects a file.
-    if (!$this->filePath) {
-      $this->filePath = drupal_tempnam('temporary://', 'feeds-raw');
-      if (file_put_contents($this->filePath, $this->getRaw()) === FALSE) {
-        $this->error('File %filepath is not writable.');
-      }
+    if ($this->filePath) {
+      return $this->filePath;
     }
 
+    $this->filePath = drupal_tempnam('temporary://', 'feeds-raw');
+    file_put_contents($this->filePath, $this->getRaw());
     return $this->filePath;
   }
 
