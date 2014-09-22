@@ -79,7 +79,7 @@ class State implements StateInterface {
       $this->progress = StateInterface::BATCH_COMPLETE;
     }
     elseif ($total) {
-      $this->progress = $progress / $total;
+      $this->progress = (float) $progress / $total;
       if ($this->progress == StateInterface::BATCH_COMPLETE && $total != $progress) {
         $this->progress = 0.99;
       }

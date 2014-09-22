@@ -7,23 +7,15 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
+use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\State
+ * @coversDefaultClass \Drupal\feeds\State
+ * @group Feeds
  */
-class StateTest extends UnitTestCase {
-
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Feeds: State',
-      'description' => 'Tests the state holder.',
-      'group' => 'Feeds',
-    );
-  }
+class StateTest extends FeedsUnitTestCase {
 
   public function testProgress() {
     $state = new State();
