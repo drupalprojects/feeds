@@ -10,6 +10,7 @@ namespace Drupal\feeds;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\FetcherEvent;
+use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ParserEvent;
 use Drupal\feeds\Event\ProcessEvent;
@@ -36,6 +37,8 @@ class FeedImportHandler extends FeedHandlerBase {
       if (!$feed->getState(StateInterface::START)) {
         $feed->setState(StateInterface::START, time());
       }
+
+      $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed));
 
       // Fetch.
       $fetcher_result = $feed->getFetcherResult();

@@ -9,11 +9,12 @@ namespace Drupal\feeds;
 
 use Drupal\feeds\Event\ClearEvent;
 use Drupal\feeds\Event\FeedsEvents;
+use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\StateInterface;
 
 /**
- * Deltees the items of a feed.
+ * Deletes the items of a feed.
  */
 class FeedClearHandler extends FeedHandlerBase {
 
@@ -23,6 +24,7 @@ class FeedClearHandler extends FeedHandlerBase {
   public function clear(FeedInterface $feed) {
     $this->acquireLock($feed);
     try {
+      $this->dispatchEvent(FeedsEvents::INIT_CLEAR, new InitEvent($feed));
       $this->dispatchEvent(FeedsEvents::CLEAR, new ClearEvent($feed));
     }
     catch (\Exception $exception) {

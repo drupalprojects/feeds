@@ -10,49 +10,65 @@ namespace Drupal\feeds\Event;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResultInterface;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
- *
+ * Fired to begin parsing.
  */
-class ParseEvent extends Event {
+class ParseEvent extends EventBase {
 
   /**
-   * The feed being imported.
+   * The fetcher result.
    *
-   * @var \Drupal\feeds\FeedInterface
+   * @var \Drupal\feeds\Result\FetcherResultInterface
    */
-  protected $feed;
-
   protected $fetcherResult;
 
   /**
-   * The result of the fetcher.
+   * The parser result.
    *
    * @var \Drupal\feeds\Result\ParserResultInterface
    */
   protected $parserResult;
 
   /**
-   * @param \Drupal\Core\Condition\ConditionPluginBag $conditions
+   * Constructs a ParseEvent object.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed.
+   * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
+   *   The fetcher result.
    */
   public function __construct(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $this->feed = $feed;
     $this->fetcherResult = $fetcher_result;
   }
 
-  public function getFeed() {
-    return $this->feed;
-  }
-
+  /**
+   * Returns the fetcher result.
+   *
+   * @return \Drupal\feeds\Result\FetcherResultInterface
+   *   The fetcher result.
+   */
   public function getFetcherResult() {
     return $this->fetcherResult;
   }
 
+  /**
+   * Returns the parser result.
+   *
+   * @return \Drupal\feeds\Result\ParserResultInterface
+   *   The parser result.
+   */
   public function getParserResult() {
     return $this->parserResult;
   }
 
+  /**
+   * Sets the parser result.
+   *
+   * @param \Drupal\feeds\Result\ParserResultInterface $result
+   *   The parser result.
+   */
   public function setParserResult(ParserResultInterface $result) {
     $this->parserResult = $result;
   }

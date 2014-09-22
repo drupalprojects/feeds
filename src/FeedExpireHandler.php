@@ -9,6 +9,7 @@ namespace Drupal\feeds;
 
 use Drupal\feeds\Event\ExpireEvent;
 use Drupal\feeds\Event\FeedsEvents;
+use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\FeedInterface;
 
 /**
@@ -22,6 +23,7 @@ class FeedExpireHandler extends FeedHandlerBase {
   public function expire(FeedInterface $feed) {
     $this->acquireLock($feed);
     try {
+      $this->dispatchEvent(FeedsEvents::INIT_EXPIRE, new InitEvent($feed));
       $this->dispatchEvent(FeedsEvents::EXPIRE, new ExpireEvent($feed));
     }
     catch (\Exception $exception) {

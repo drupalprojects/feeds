@@ -7,39 +7,36 @@
 
 namespace Drupal\feeds\Event;
 
-use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
- *
+ * Fired to begin fetching.
  */
-class FetchEvent extends Event {
+class FetchEvent extends EventBase {
 
   /**
-   * The feed being imported.
+   * The fetcher result.
    *
-   * @var \Drupal\feeds\FeedInterface
+   * @var \Drupal\feeds\Result\FetcherResultInterface
    */
-  protected $feed;
-
   protected $fetcherResult;
 
   /**
-   * @param \Drupal\feeds\FeedInterface $feed
+   * Returns the fetcher result.
+   *
+   * @return \Drupal\feeds\Result\FetcherResultInterface
+   *   The fetcher result.
    */
-  public function __construct(FeedInterface $feed) {
-    $this->feed = $feed;
-  }
-
-  public function getFeed() {
-    return $this->feed;
-  }
-
   public function getFetcherResult() {
     return $this->fetcherResult;
   }
 
+  /**
+   * Sets the fetcher result.
+   *
+   * @param \Drupal\feeds\Result\FetcherResultInterface $result
+   *   The fetcher result.
+   */
   public function setFetcherResult(FetcherResultInterface $result) {
     $this->fetcherResult = $result;
   }

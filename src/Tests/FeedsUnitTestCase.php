@@ -15,11 +15,19 @@ use Drupal\Tests\UnitTestCase;
 abstract class FeedsUnitTestCase extends UnitTestCase {
 
   public function setUp() {
+    parent::setUp();
+    if (!defined('WATCHDOG_NOTICE')) {
+      define('WATCHDOG_NOTICE', 5);
+    }
+    if (!defined('WATCHDOG_INFO')) {
+      define('WATCHDOG_INFO', 6);
+    }
     $this->cleanUpFiles();
   }
 
   public function tearDown() {
     $this->cleanUpFiles();
+    parent::tearDown();
   }
 
   protected function getMockImporter() {
@@ -81,6 +89,5 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
       }
     }
   }
-
 
 }

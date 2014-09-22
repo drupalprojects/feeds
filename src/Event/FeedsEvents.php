@@ -13,34 +13,24 @@ namespace Drupal\feeds\Event;
 final class FeedsEvents {
 
   /**
-   * Fired before fetching begins.
-   */
-  const PRE_FETCH = 'feeds.pre_fetch';
-
-  /**
    * Fired after fetching ends.
    */
   const POST_FETCH = 'feeds.post_fetch';
-
-  /**
-   * Fired before parsing begins.
-   */
-  const PRE_PARSE = 'feeds.pre_parse';
-
-  /**
-   * Fired after parsing ends.
-   */
-  const POST_PARSE = 'feeds.post_parse';
 
   /**
    * Fired when one or more feeds are deleted.
    */
   const FEEDS_DELETE = 'feeds.delete_multiple';
 
+  const INIT_IMPORT = 'feeds.init_import';
   const FETCH = 'feeds.fetch';
   const PARSE = 'feeds.parse';
   const PROCESS = 'feeds.process';
+
+  const INIT_CLEAR = 'feeds.init_clear';
   const CLEAR = 'feeds.clear';
+
+  const INIT_EXPIRE = 'feeds.init_expire';
   const EXPIRE = 'feeds.expire';
 
 }

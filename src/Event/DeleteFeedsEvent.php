@@ -10,12 +10,12 @@ namespace Drupal\feeds\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- *
+ * Fired when one or more feeds is being deleted.
  */
 class DeleteFeedsEvent extends Event {
 
   /**
-   * The feed being imported.
+   * The feeds being deleted.
    *
    * @var \Drupal\feeds\FeedInterface[]
    */

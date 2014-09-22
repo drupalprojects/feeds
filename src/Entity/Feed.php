@@ -202,7 +202,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function import() {
-    $this->getImporter()->registerImportPlugins();
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->import($this);
@@ -212,7 +211,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function importRaw($raw) {
-    $this->getImporter()->registerImportPlugins();
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->pushImport($this, $raw);
@@ -222,7 +220,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function clear() {
-    $this->getImporter()->registerClearPlugins();
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_clear')
       ->clear($this);
@@ -232,7 +229,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function expire() {
-    $this->getImporter()->registerExpirePlugins();
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_expire')
       ->expire($this);
