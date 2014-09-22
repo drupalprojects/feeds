@@ -41,8 +41,6 @@ class FeedFormController extends ContentEntityForm {
       $form['#title'] = $this->t('<em>Add @importer</em>', $args);
     }
 
-    $user_config = \Drupal::config('user.settings');
-
     $form['advanced'] = array(
       '#type' => 'vertical_tabs',
       '#attributes' => array('class' => array('entity-meta')),

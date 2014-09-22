@@ -17,14 +17,6 @@ class FetcherResultTest extends FeedsUnitTestCase {
 
   const FILE = 'tmp_file';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Result: fetcher',
-      'description' => 'Tests fetcher result.',
-      'group' => 'Feeds',
-    );
-  }
-
   public function testGetRaw() {
     file_put_contents(static::FILE, pack('CCC', 0xef, 0xbb, 0xbf) . 'I am test data.');
     $result = new FetcherResult(static::FILE);
