@@ -42,7 +42,18 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
       $this->startBackgroundJob($feed, 'import');
     }
     else {
-      $this->startBatchAPIJob($feed, $this->t('Importing'), 'import');
+      $batch = array(
+        'title' => $this->t('Importing %title', array('%title' => $feed->label())),
+        'init_message' => $this->t('Starting feed import.'),
+        'operations' => array(
+          array('feeds_batch', array('import', $feed->id())),
+        ),
+        'progress_message' => $this->t('Importing %title', array('%title' => $feed->label())),
+        'finished' => array(get_class($this), 'finishBatch'),
+        'error_message' => $this->t('An error occored while importing %title.', array('%title' => $feed->label())),
+      );
+
+      batch_set($batch);
     }
   }
 
@@ -54,7 +65,18 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
       $this->startBackgroundJob($feed, 'clear');
     }
     else {
-      $this->startBatchAPIJob($feed, $this->t('Deleting'), 'clear');
+      $batch = array(
+        'title' => $this->t('Deleting %title', array('%title' => $feed->label())),
+        'init_message' => $this->t('Starting feed clear.'),
+        'operations' => array(
+          array('feeds_batch', array('clear', $feed->id())),
+        ),
+        'progress_message' => $this->t('Deleting %title', array('%title' => $feed->label())),
+        'finished' => array(get_class($this), 'finishBatch'),
+        'error_message' => $this->t('An error occored while deleting %title.', array('%title' => $feed->label())),
+      );
+
+      batch_set($batch);
     }
   }
 
@@ -108,6 +130,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
       ),
       'progress_message' => '',
     );
+
     batch_set($batch);
   }
 
@@ -144,6 +167,21 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
    */
   public function defaultConfiguration() {
     return array('process_in_background' => FALSE, 'import_on_create' => TRUE);
+  }
+
+  /**
+   * Finish batch.
+   *
+   * This function is a static function to avoid serialising the Background
+   * object unnecessarily.
+   */
+  public static function finishBatch($success, $results, $operations) {
+    if ($success) {
+
+    }
+    else {
+
+    }
   }
 
 }
