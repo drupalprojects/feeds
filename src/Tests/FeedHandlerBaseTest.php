@@ -11,7 +11,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\FeedHandlerBase
+ * @covers \Drupal\feeds\FeedHandlerBase
  * @group Feeds
  */
 class FeedHandlerBaseTest extends FeedsUnitTestCase {

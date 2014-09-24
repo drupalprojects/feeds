@@ -14,7 +14,7 @@ use Drupal\feeds\StateInterface;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\FeedAccessController
+ * @covers \Drupal\feeds\FeedAccessController
  * @group Feeds
  */
 class FeedAccessControllerTest extends FeedsUnitTestCase {

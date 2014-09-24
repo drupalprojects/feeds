@@ -11,7 +11,7 @@ use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\Result\ParserResult
+ * @covers \Drupal\feeds\Result\ParserResult
  * @group Feeds
  */
 class ParserResultTest extends FeedsUnitTestCase {

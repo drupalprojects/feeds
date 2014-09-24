@@ -11,7 +11,7 @@ use Drupal\feeds\Event\EventBase;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\Event\EventBase
+ * @covers \Drupal\feeds\Event\EventBase
  * @group Feeds
  */
 class EventBaseTest extends FeedsUnitTestCase {

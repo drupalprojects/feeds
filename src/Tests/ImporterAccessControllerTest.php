@@ -10,7 +10,7 @@ namespace Drupal\feeds\Tests;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\ImporterAccessController
+ * @covers \Drupal\feeds\ImporterAccessController
  * @group Feeds
  */
 class ImporterAccessControllerTest extends FeedsUnitTestCase {

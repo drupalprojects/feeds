@@ -14,7 +14,7 @@ use Drupal\feeds\FeedInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @coversDefaultClass \Drupal\feeds\FeedExpireHandler
+ * @covers \Drupal\feeds\FeedExpireHandler
  * @group Feeds
  */
 class FeedExpireHandlerTest extends UnitTestCase {

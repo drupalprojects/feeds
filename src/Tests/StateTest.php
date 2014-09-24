@@ -12,7 +12,7 @@ use Drupal\feeds\StateInterface;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\State
+ * @covers \Drupal\feeds\State
  * @group Feeds
  */
 class StateTest extends FeedsUnitTestCase {

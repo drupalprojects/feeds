@@ -19,7 +19,7 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @coversDefaultClass \Drupal\feeds\EventSubscriber\LazySubscriber
+ * @covers \Drupal\feeds\EventSubscriber\LazySubscriber
  * @group Feeds
  */
 class LazySubscriberTest extends FeedsUnitTestCase {

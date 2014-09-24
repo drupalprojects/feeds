@@ -11,7 +11,7 @@ use Drupal\feeds\Result\RawFetcherResult;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\Result\RawFetcherResult
+ * @covers \Drupal\feeds\Result\RawFetcherResult
  * @group Feeds
  */
 class RawFetcherResultTest extends FeedsUnitTestCase {

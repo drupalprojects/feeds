@@ -13,7 +13,7 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * @coversDefaultClass \Drupal\feeds\Event\EventDispatcherTrait
+ * @covers \Drupal\feeds\Event\EventDispatcherTrait
  * @group Feeds
  */
 class EventDispatcherTraitTest extends FeedsUnitTestCase {

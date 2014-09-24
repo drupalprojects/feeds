@@ -20,7 +20,7 @@ use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @coversDefaultClass \Drupal\feeds\FeedImportHandler
+ * @covers \Drupal\feeds\FeedImportHandler
  * @group Feeds
  */
 class FeedImportHandlerTest extends UnitTestCase {

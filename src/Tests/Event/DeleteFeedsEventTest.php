@@ -11,7 +11,7 @@ use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\feeds\Event\DeleteFeedsEvent
+ * @covers \Drupal\feeds\Event\DeleteFeedsEvent
  * @group Feeds
  */
 class DeleteFeedsEventTest extends FeedsUnitTestCase {

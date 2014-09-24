@@ -14,7 +14,7 @@ use Drupal\feeds\FeedInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * @coversDefaultClass \Drupal\feeds\FeedClearHandler
+ * @covers \Drupal\feeds\FeedClearHandler
  * @group Feeds
  */
 class FeedClearHandlerTest extends UnitTestCase {
