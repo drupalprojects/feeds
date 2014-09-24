@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -45,13 +46,11 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   protected $fileStorage;
 
   /**
-   * The feed configuration.
+   * The UUID generator.
    *
-   * Used only during form processing.
-   *
-   * @var array
+   * @var \Drupal\Component\Uuid\UuidInterface
    */
-  protected $feedConfig;
+  protected $uuid;
 
   /**
    * Constructs an UploadFetcher object.
@@ -60,28 +59,31 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    *   The plugin configuration.
    * @param string $plugin_id
    *   The plugin id.
+   * @param array $plugin_definition
+   *   The plugin definition.
    * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
    *   The file usage backend.
    * @param \Drupal\Core\Entity\EntityStorageInterface $file_storage
    *   The file storage controller.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageInterface $file_storage) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageInterface $file_storage, UuidInterface $uuid) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->fileUsage = $file_usage;
     $this->fileStorage = $file_storage;
+    $this->uuid = $uuid;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    // $account = $container->get('current_user');
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->get('file.usage'),
-      $container->get('entity.manager')->getStorage('file')
+      $container->get('entity.manager')->getStorage('file'),
+      $container->get('uuid')
     );
   }
 
@@ -89,35 +91,36 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-
-    if (is_file($feed_config['source'])) {
-      return new FetcherResult($feed_config['source']);
+    if (is_file($feed->getSource())) {
+      return new FetcherResult($feed->getSource());
     }
 
     // File does not exist.
-    throw new \Exception(String::format('Resource is not a file: %source', array('%source' => $feed_config['source'])));
+    throw new \RuntimeException(String::format('Resource is not a file: %source', array('%source' => $feed->getSource())));
   }
 
   /**
    * {@inheritdoc}
    */
   public function sourceDefaults() {
-    return array('fid' => 0, 'source' => '');
+    return array('fid' => 0, 'usage_id' => '');
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
-    $this->feedConfig = $feed->getConfigurationFor($this);
+    $feed_config = $feed->getConfigurationFor($this);
+
+    $form['source']['widget'][0]['value']['#type'] = 'value';
+    $form['source']['widget'][0]['value']['#value'] = 'http://example.com';
 
     $form['fetcher']['#tree'] = TRUE;
     $form['fetcher']['upload'] = array(
       '#type' => 'managed_file',
       '#title' => $this->t('File'),
       '#description' => $this->t('Select a file from your local system.'),
-      '#default_value' => array($this->feedConfig['fid']),
+      '#default_value' => array($feed_config['fid']),
       '#upload_validators' => array(
         'file_validate_extensions' => array(
           $this->configuration['allowed_extensions'],
@@ -135,35 +138,30 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     // We need to store this for later so that we have the feed id.
-    $this->feedConfig['new_fid'] = reset($form_state->getValue(array('fetcher', 'upload')));
-  }
+    $new_fid = reset($form_state->getValue(array('fetcher', 'upload')));
+    $feed_config = $feed->getConfigurationFor($this);
 
-  /**
-   * {@inheritdoc}
-   */
-  public function onFeedSave(FeedInterface $feed, $update) {
-    // We are only interested in continuing if we came from a form submit.
-    if (!$this->feedConfig) {
+    // Generate a UUID that maps to this feed for file usage. We can't depend
+    // on the feed id since this could be called before an id is assigned.
+    $feed_config['usage_id'] = $feed_config['usage_id'] ?: $this->uuid->generate();
+
+    if ($new_fid == $feed_config['fid']) {
       return;
     }
 
-    // New file found.
-    if ($this->feedConfig['new_fid'] != $this->feedConfig['fid']) {
-      $this->deleteFile($this->feedConfig['fid'], $feed->id());
+    $this->deleteFile($feed_config['fid'], $feed_config['usage_id']);
 
-      if ($this->feedConfig['new_fid']) {
-        $file = $this->fileStorage->load($this->feedConfig['new_fid']);
+    if ($new_fid) {
+      $file = $this->fileStorage->load($new_fid);
+      $this->fileUsage->add($file, 'feeds', $this->pluginType(), $feed_config['usage_id']);
+      $file->setPermanent();
+      $file->save();
 
-        $this->fileUsage->add($file, 'feeds', $this->pluginType(), $feed->id());
-
-        $file->setPermanent();
-        $file->save();
-
-        $this->feedConfig['fid'] = $this->feedConfig['new_fid'];
-        $this->feedConfig['source'] = $file->getFileUri();
-        $feed->setConfigurationFor($this, $this->feedConfig);
-      }
+      $feed_config['fid'] = $new_fid;
+      $feed->setSource($file->getFileUri());
     }
+
+    $feed->setConfigurationFor($this, $feed_config);
   }
 
   /**
@@ -173,7 +171,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     foreach ($feeds as $feed) {
       $feed_config = $feed->getConfigurationFor($this);
       if ($feed_config['fid']) {
-        $this->deleteFile($feed_config['fid'], $feed->id());
+        $this->deleteFile($feed_config['fid'], $feed_config['usage_id']);
       }
     }
   }
@@ -225,7 +223,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     // Validate the URI scheme of the upload directory.
     $scheme = file_uri_scheme($values['directory']);
     if (!$scheme || !in_array($scheme, $this->getSchemes())) {
-      form_error($form['fetcher_configuration']['directory'], $this->t('Please enter a valid scheme into the directory location.'));
+      $form_state->setError($form['fetcher_configuration']['directory'], $this->t('Please enter a valid scheme into the directory location.'));
       // Return here so that attempts to create the directory below don't throw
       // warnings.
       return;
@@ -233,7 +231,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
 
     // Ensure that the upload directory exists.
     if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      form_error($form['fetcher_configuration']['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
+      $form_state->setError($form['fetcher_configuration']['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
     }
   }
 
@@ -242,14 +240,14 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    *
    * @param int $file_id
    *   The file id.
-   * @param int $feed_id
-   *   The feed id.
+   * @param string $uuid
+   *   The file UUID associated with this file.
    *
    * @see file_delete()
    */
-  protected function deleteFile($file_id, $feed_id) {
+  protected function deleteFile($file_id, $uuid) {
     if ($file = $this->fileStorage->load($file_id)) {
-      $this->fileUsage->delete($file, 'feeds', $this->pluginType(), $feed_id);
+      $this->fileUsage->delete($file, 'feeds', $this->pluginType(), $uuid);
     }
   }
 
