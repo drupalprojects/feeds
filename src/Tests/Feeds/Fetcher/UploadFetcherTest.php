@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\UploadFetcherTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Fetcher\UploadFetcherTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher {
+namespace Drupal\feeds\Tests\Feeds\Fetcher {
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;

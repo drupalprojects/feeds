@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\DirectoryFetcherTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Fetcher\DirectoryFetcherTest.
  */
 
 namespace Drupal\feeds\Tests\Feeds\Fetcher {

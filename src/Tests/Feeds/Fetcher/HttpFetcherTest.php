@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\HttpFetcherTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Fetcher\HttpFetcherTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher {
+namespace Drupal\feeds\Tests\Feeds\Fetcher {
 
 use Drupal\Core\Config\Config;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
