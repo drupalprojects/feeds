@@ -1,0 +1,13 @@
+feeds.importer.*:
+  type: config_entity
+  label: 'Feed importer'
+  mapping:
+    label:
+      type: label
+      label: 'Name'
+    id:
+      type: string
+      label: 'Machine-readable name'
+    description:
+      type: text
+      label: 'Description'
