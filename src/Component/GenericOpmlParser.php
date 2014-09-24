@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Component\GenericOPMLParser.
+ * Contains \Drupal\feeds\Component\GenericOpmlParser.
  */
 
 namespace Drupal\feeds\Component;
@@ -12,7 +12,8 @@ namespace Drupal\feeds\Component;
  *
  * @todo Move this to Github.
  */
-class GenericOPMLParser extends XMLParserBase {
+class GenericOpmlParser {
+  use XmlParserTrait;
 
   /**
    * The XPath query object.
@@ -29,20 +30,34 @@ class GenericOPMLParser extends XMLParserBase {
   protected $normalizeCase;
 
   /**
-   * Performs parsing of an OPML file.
+   * Constructs a GenericOpmlParser object.
+   *
+   * @param string $xml
+   *   The XML string.
+   */
+  public function __construct($xml) {
+    $this->startXmlErrorHandling();
+    $this->xpath = new \DOMXPath($this->getDomDocument($xml));
+    $this->stopXmlErrorHandling();
+  }
+
+  /**
+   * Parses the OPML file.
    *
    * @param bool $normalize_case
    *   (optional) True to convert all attributes to lowercase. False, to leave
    *   them as is. Defaults to false.
+   *
+   * @return array
+   *   A structed array.
+   *
+   * @todo Document the return value.
    */
-  protected function doParse($normalize_case = FALSE) {
+  public function parse($normalize_case = FALSE) {
     $this->normalizeCase = $normalize_case;
 
-    $this->xpath = new \DOMXPath($this->doc);
-
-    $return = array();
+    $return = ['head' => ['#title' => '']];
     // Title is a required field, let parsers assume its existence.
-    $return['head'] = array('#title' => '');
 
     foreach ($this->xpath->query('/opml/head/*') as $element) {
       if ($this->normalizeCase) {
@@ -54,12 +69,12 @@ class GenericOPMLParser extends XMLParserBase {
     }
 
     if (isset($return['head']['#expansionState'])) {
-      $return['head']['#expansionState'] = array_filter(explode(',', $head['#expansionState']));
+      $return['head']['#expansionState'] = array_filter(explode(',', $return['head']['#expansionState']));
     }
 
     $return['outlines'] = array();
-    if ($content = $this->xpath->evaluate('/opml/body', $this->doc)->item(0)) {
-      $return['outlines'] = $this->getOutlines();
+    if ($content = $this->xpath->evaluate('/opml/body', $this->xpath->document)->item(0)) {
+      $return['outlines'] = $this->getOutlines($content);
     }
 
     return $return;
@@ -82,10 +97,10 @@ class GenericOPMLParser extends XMLParserBase {
       if ($element->hasAttributes()) {
         foreach ($element->attributes as $attribute) {
           if ($this->normalizeCase) {
-            $outline['#' . $attribute->nodeName] = $attribute->nodeValue;
+            $outline['#' . strtolower($attribute->nodeName)] = $attribute->nodeValue;
           }
           else {
-            $outline['#' . strtolower($attribute->nodeName)] = $attribute->nodeValue;
+            $outline['#' . $attribute->nodeName] = $attribute->nodeValue;
           }
         }
       }
