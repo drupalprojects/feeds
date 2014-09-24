@@ -31,18 +31,16 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-
     // Just return a file fetcher result if this is a file.
-    if (is_file($feed_config['source'])) {
-      return new FetcherResult($feed_config['source']);
+    if (is_file($feed->getSource())) {
+      return new FetcherResult($feed->getSource());
     }
 
     // Batch if this is a directory.
     $state = $feed->getState(StateInterface::FETCH);
     $files = array();
     if (!isset($state->files)) {
-      $state->files = $this->listFiles($feed_config['source']);
+      $state->files = $this->listFiles($feed->getSource());
       $state->total = count($state->files);
     }
     if ($state->files) {
@@ -52,7 +50,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
     }
 
     // @todo Better exception.
-    throw new \Exception(String::format('Resource is not a file or it is an empty directory: %source', array('%source' => $feed_config['source'])));
+    throw new \RuntimeException(String::format('Resource is not a file or it is an empty directory: %source', array('%source' => $feed->getSource())));
   }
 
   /**
@@ -89,15 +87,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-
-    $form['fetcher']['#tree'] = TRUE;
-    $form['fetcher']['source'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('File'),
-      '#description' => $this->t('Specify a path to a file or a directory. Prefix the path with a scheme. Available schemes: @schemes.', array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))),
-      '#default_value' => $feed_config['source'],
-    );
+    $form['source']['widget'][0]['value']['#type'] = 'feeds_uri';
     return $form;
   }
 
@@ -105,16 +95,16 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    $values =& $form_state->getValue('fetcher');
-    $values['source'] = trim($values['source']);
+    $source =& $form_state->getValue(['source', 0, 'value']);
+
     // Check if chosen url scheme is allowed.
-    $scheme = file_uri_scheme($values['source']);
+    $scheme = file_uri_scheme($source);
     if (!$scheme || !in_array($scheme, $this->configuration['allowed_schemes'])) {
-      $form_state->setErrorByName('feeds][directory][source', $this->t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
+      $form_state->setError($form['source'], $this->t("The file needs to reside within the site's files directory, its path needs to start with scheme://. Available schemes: @schemes.", array('@schemes' => implode(', ', $this->configuration['allowed_schemes']))));
     }
     // Check wether the given path exists.
-    elseif (!file_exists($values['source'])) {
-      $form_state->setErrorByName('feeds][directory][source', $this->t('The specified file or directory does not exist.'));
+    elseif (!file_exists($source)) {
+      $form_state->setError($form['source'], $this->t('The specified file or directory does not exist.'));
     }
   }
 
@@ -153,11 +143,10 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state->getValue(array('fetcher', 'configuration'));
+    $values =& $form_state->getValue(array('fetcher', 'configuration',));
     $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
     // Convert allowed_extensions to an array for storage.
-    $values['allowed_extensions'] = explode(' ', preg_replace('/\s+/', ' ', trim($values['allowed_extensions'])));
-    $values['allowed_extensions'] = array_unique($values['allowed_extensions']);
+    $values['allowed_extensions'] = array_unique(explode(' ', preg_replace('/\s+/', ' ', trim($values['allowed_extensions']))));
   }
 
   /**
