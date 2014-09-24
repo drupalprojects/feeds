@@ -103,21 +103,12 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * A feed is being saved.
    */
-  public function onFeedSave(FeedInterface $feed, $update) {}
+  public function onFeedSave(FeedInterface $feed) {}
 
   /**
    * A feed is being deleted.
    */
   public function onFeedDeleteMultiple(array $feeds) {}
-
-  /**
-   * Translates a string to the current language or to a given language.
-   *
-   * See the t() documentation for details.
-   */
-  protected function t($string, array $args = array(), array $options = array()) {
-    return $this->translationManager()->translate($string, $args, $options);
-  }
 
   /**
    * Renders a link to a route given a route name and its parameters.
@@ -143,33 +134,6 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    */
   protected function url($route_name, $route_parameters = array(), $options = array()) {
     return $this->urlGenerator()->generateFromRoute($route_name, $route_parameters, $options);
-  }
-
-  /**
-   * Returns the translation manager.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslationInterface
-   *   The translation manager.
-   */
-  protected function translationManager() {
-    if (!$this->translationManager) {
-      $this->translationManager = $this->container()->get('string_translation');
-    }
-    return $this->translationManager;
-  }
-
-  /**
-   * Sets the translation manager for this form.
-   *
-   * @param \Drupal\Core\StringTranslation\TranslationInterface $translation_manager
-   *   The translation manager.
-   *
-   * @return self
-   *   The entity form.
-   */
-  public function setTranslationManager(TranslationInterface $translation_manager) {
-    $this->translationManager = $translation_manager;
-    return $this;
   }
 
   /**
