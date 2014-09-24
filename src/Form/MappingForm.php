@@ -282,7 +282,7 @@ class MappingForm extends FormBase {
     }
 
     // Remove any mappings.
-    if (!empty($form_state->getValue('remove_mappings'))) {
+    if ($form_state->getValue('remove_mappings')) {
       foreach (array_keys(array_filter($form_state->getValue('remove_mappings'))) as $delta) {
         $this->importer->removeMapping($delta);
       }
