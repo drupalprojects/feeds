@@ -94,6 +94,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
+  public function setSource($source) {
+    return $this->set('source', $source);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -436,16 +443,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     // Before saving the feed, set changed time.
     $this->set('changed', REQUEST_TIME);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function postSave(EntityStorageInterface $storage_controller, $update = TRUE) {
-    // Alert implementers of FeedInterface to the fact that we're saving.
     foreach ($this->getImporter()->getPlugins() as $plugin) {
       $plugin->onFeedSave($this, $update);
     }
@@ -478,7 +478,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       }
     }
 
-    $this->dispatchEvent(FeedsEvents::FEEDS_DELETE, new DeleteFeedsEvent($this));
+    \Drupal::service('event_dispatcher')->dispatch(FeedsEvents::FEEDS_DELETE, new DeleteFeedsEvent($feeds));
   }
 
   /**

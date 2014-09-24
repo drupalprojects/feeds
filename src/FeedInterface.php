@@ -41,6 +41,14 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function getSource();
 
   /**
+   * Sets the feed source.
+   *
+   * @param string $source
+   *   The feed source.
+   */
+  public function setSource($source);
+
+  /**
    * Returns the Importer object that this feed is expected to be used with.
    *
    * @return \Drupal\feeds\ImporterInterface
