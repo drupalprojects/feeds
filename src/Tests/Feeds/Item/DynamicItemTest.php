@@ -12,7 +12,7 @@ use Drupal\feeds\Feeds\Item\DynamicItem;
 use Drupal\feeds\Result\ParserResult;
 
 /**
- * @coversDefaultClass \Drupal\feeds\Feeds\Item\DynamicItem
+ * @covers \Drupal\feeds\Feeds\Item\DynamicItem
  * @group Feeds
  */
 class DynamicItemTest extends UnitTestCase {

@@ -7,12 +7,10 @@
 
 namespace Drupal\feeds\Feeds\Item;
 
-use Drupal\feeds\Result\ParserResultInterface;
-
 /**
  * Defines an item class for use with an RSS/Atom parser.
  */
-class SyndicationItem implements ItemInterface {
+class SyndicationItem extends BaseItem {
 
   protected $title;
   protected $description;
@@ -23,29 +21,5 @@ class SyndicationItem implements ItemInterface {
   protected $tags;
   protected $geolocations;
   protected $enclosures;
-
-  protected $result;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function get($field) {
-    return isset($this->$field) ? $this->$field : $this->result->get($field);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function set($field, $value) {
-    $this->$field = $value;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setResult(ParserResultInterface $result) {
-    $this->result = $result;
-  }
 
 }

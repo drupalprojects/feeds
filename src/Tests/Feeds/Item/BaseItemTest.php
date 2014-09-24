@@ -2,26 +2,25 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Feeds\Item\SyndicationItemTest
+ * Contains \Drupal\feeds\Tests\Feeds\Item\BaseItemTest
  */
 
 namespace Drupal\feeds\Tests\Feeds\Item;
 
-use Drupal\Tests\UnitTestCase;
-use Drupal\feeds\Feeds\Item\SyndicationItem;
 use Drupal\feeds\Result\ParserResult;
+use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Feeds\Item\SyndicationItem
+ * @covers \Drupal\feeds\Feeds\Item\BaseItem
  * @group Feeds
  */
-class SyndicationItemTest extends UnitTestCase {
+class BaseItemTest extends FeedsUnitTestCase {
 
   /**
    * Tests basic behavior.
    */
   public function test() {
-    $item = new SyndicationItem();
+    $item = $this->getMockForAbstractClass('Drupal\feeds\Feeds\Item\BaseItem');
     $item->set('field', 'value');
     $this->assertSame($item->get('field'), 'value');
     $item->setResult(new ParserResult());
