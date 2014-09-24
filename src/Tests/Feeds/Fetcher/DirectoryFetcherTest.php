@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\Tests\Fetcher\DirectoryFetcherTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher {
+namespace Drupal\feeds\Tests\Feeds\Fetcher {
 
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\DirectoryFetcher;
