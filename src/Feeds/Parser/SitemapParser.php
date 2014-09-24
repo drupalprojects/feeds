@@ -7,11 +7,15 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Item\SitemapItem;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResult;
+use Drupal\feeds\StateInterface;
+use Drupal\feeds\Xml\Utility;
 
 /**
  * Defines a SitemapXML feed parser.
@@ -31,21 +35,43 @@ class SitemapParser extends PluginBase implements ParserInterface {
     // Set time zone to GMT for parsing dates with strtotime().
     $tz = date_default_timezone_get();
     date_default_timezone_set('GMT');
+
+    $raw = trim($fetcher_result->getRaw());
+    if (!strlen($raw)) {
+      throw new EmptyFeedException();
+    }
+
     // Yes, using a DOM parser is a bit inefficient, but will do for now.
-    $xml = new \SimpleXMLElement($fetcher_result->getRaw());
+    // @todo XML error handling.
+    $xml = new \SimpleXMLElement(Utility::removeDefaultNamespaces($raw));
     $result = new ParserResult();
-    foreach ($xml->url as $url) {
-      $item = array('url' => (string) $url->loc);
+
+    $state = $feed->getState(StateInterface::PARSE);
+    if (!$state->total) {
+      $state->total = count($xml->url);
+    }
+
+    $start = (int) $state->pointer;
+    $state->pointer = $start + $feed->getImporter()->getLimit();
+    $state->progress($state->total, $state->pointer);
+
+    $query = "//url[position() > $start and position() <= {$state->pointer}]";
+
+    foreach ($xml->xpath($query) as $url) {
+      $item = new SitemapItem();
+
+      $item->set('url', (string) $url->loc);
       if ($url->lastmod) {
-        $item['lastmod'] = strtotime($url->lastmod);
+        $item->set('lastmod', strtotime($url->lastmod));
       }
       if ($url->changefreq) {
-        $item['changefreq'] = (string) $url->changefreq;
+        $item->set('changefreq', (string) $url->changefreq);
       }
       if ($url->priority) {
-        $item['priority'] = (string) $url->priority;
+        $item->set('priority', (string) $url->priority);
       }
-      $result->items[] = $item;
+
+      $result->addItem($item);
     }
     date_default_timezone_set($tz);
     return $result;
