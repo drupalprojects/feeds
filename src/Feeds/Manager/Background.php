@@ -28,7 +28,7 @@ class Background extends ConfigurablePluginBase implements ManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function onFeedSave(FeedInterface $feed, $update) {
+  public function onFeedSave(FeedInterface $feed, $update = TRUE) {
     if (!$update && $this->configuration['import_on_create']) {
       $this->startImport($feed);
     }

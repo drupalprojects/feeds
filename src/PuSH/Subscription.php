@@ -117,9 +117,10 @@ class Subscription implements SubscriptionInterface {
    */
   public function hasSubscriptions(array $keys) {
     return $this->connection
-      ->select($this->table)
-      ->fields(array('id'))
+      ->select($this->table, 's')
+      ->fields('s' , array('id'))
       ->condition('id', $keys)
+      ->execute()
       ->fetchCol();
   }
 

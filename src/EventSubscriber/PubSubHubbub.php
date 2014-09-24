@@ -3,6 +3,7 @@
 namespace Drupal\feeds\EventSubscriber;
 
 use Drupal\Core\Queue\QueueFactory;
+use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetcherEvent;
 use Drupal\feeds\PuSH\SubscriptionInterface;
