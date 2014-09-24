@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\SyndicationItem;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
@@ -35,13 +36,17 @@ class SyndicationParser extends PluginBase implements ParserInterface {
     $result = new ParserResult();
     Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
 
+    $raw = $fetcher_result->getRaw();
+    if (!strlen(trim($raw))) {
+      throw new EmptyFeedException();
+    }
+
     try {
-      $channel = Reader::importString($fetcher_result->getRaw());
+      $channel = Reader::importString($raw);
     }
     catch (ExceptionInterface $e) {
-      watchdog_exception('feeds', $e);
-      drupal_set_message($this->t('The feed from %site seems to be broken because of error "%error".', array('%site' => $feed->label(), '%error' => $e->getMessage())), 'error');
-      return $result;
+      $args = ['%site' => $feed->label(), '%error' => trim($e->getMessage())];
+      throw new \RuntimeException($this->t('The feed from %site seems to be broken because of error "%error".', $args));
     }
 
     $result->set('feed_title', $channel->getTitle())
@@ -51,8 +56,6 @@ class SyndicationParser extends PluginBase implements ParserInterface {
     $state = $feed->getState(StateInterface::PARSE);
     $start = (int) $state->pointer;
     $state->pointer = $start + $feed->getImporter()->getLimit();
-    $state->pointer = $start + 3;
-
 
     if (!$state->total) {
       $state->total = count($channel);
@@ -60,6 +63,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
 
     $state->progress($state->total, $state->pointer);
     foreach ($channel as $delta => $entry) {
+      // Do some janky batching.
       if ($delta < $start) {
         continue;
       }
@@ -82,6 +86,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
 
       if ($author = $entry->getAuthor()) {
         $item->set('author_name', $author['name']);
+        $item->set('author_email', $author['email']);
       }
       if ($date = $entry->getDateModified()) {
         $item->set('timestamp', $date->getTimestamp());
@@ -134,12 +139,16 @@ class SyndicationParser extends PluginBase implements ParserInterface {
       ),
       'author_name' => array(
         'label' => $this->t('Author name'),
-        'description' => $this->t('Name of the feed item\'s author.'),
+        'description' => $this->t("Name of the feed item's author."),
         'suggestions' => array(
           'types' => array(
             'entity_reference_field' => array('target_type' => 'user'),
           ),
         ),
+      ),
+      'author_email' => array(
+        'label' => $this->t('Author email'),
+        'description' => $this->t("Name of the feed item's email address."),
       ),
       'timestamp' => array(
         'label' => $this->t('Published date'),

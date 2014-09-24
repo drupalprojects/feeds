@@ -1,0 +1,113 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\feeds\Tests\Fetcher\SyndicationParserTest.
+ */
+
+namespace Drupal\feeds\Tests\Fetcher;
+
+use Drupal\Component\Bridge\ZfExtensionManagerSfContainer;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\feeds\Feeds\Parser\SyndicationParser;
+use Drupal\feeds\Result\RawFetcherResult;
+use Drupal\feeds\State;
+use Drupal\feeds\StateInterface;
+use Drupal\feeds\Tests\FeedsUnitTestCase;
+
+/**
+ * @covers \Drupal\feeds\Feeds\Parser\SyndicationParser
+ * @group Feeds
+ */
+class SyndicationParserTest extends FeedsUnitTestCase {
+
+  protected $parser;
+  protected $importer;
+  protected $feed;
+  protected $state;
+
+  protected $readerExtensions = [
+    'feed.reader.dublincoreentry' => 'Zend\Feed\Reader\Extension\DublinCore\Entry',
+    'feed.reader.dublincorefeed' => 'Zend\Feed\Reader\Extension\DublinCore\Feed',
+    'feed.reader.contententry' => 'Zend\Feed\Reader\Extension\Content\Entry',
+    'feed.reader.atomentry' => 'Zend\Feed\Reader\Extension\Atom\Entry',
+    'feed.reader.atomfeed' => 'Zend\Feed\Reader\Extension\Atom\Feed',
+    'feed.reader.slashentry' => 'Zend\Feed\Reader\Extension\Slash\Entry',
+    'feed.reader.wellformedwebentry' => 'Zend\Feed\Reader\Extension\WellFormedWeb\Entry',
+    'feed.reader.threadentry' => 'Zend\Feed\Reader\Extension\Thread\Entry',
+    'feed.reader.podcastentry' => 'Zend\Feed\Reader\Extension\Podcast\Entry',
+    'feed.reader.podcastfeed' => 'Zend\Feed\Reader\Extension\Podcast\Feed',
+  ];
+
+  public function setUp() {
+    parent::setUp();
+
+    $container = new ContainerBuilder();
+    $manager = new ZfExtensionManagerSfContainer('feed.reader.');
+
+    foreach ($this->readerExtensions as $key => $class) {
+      $container->set($key, new $class());
+    }
+
+    $manager->setContainer($container);
+    $container->set('feed.bridge.reader', $manager);
+    \Drupal::setContainer($container);
+
+    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $configuration = ['importer' => $this->importer];
+    $this->parser = new SyndicationParser($configuration, 'syndication', []);
+    $this->parser->setStringTranslation($this->getStringTranslationStub());
+
+    $this->state = new State();
+
+    $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
+    $this->feed->expects($this->any())
+      ->method('getState')
+      ->with(StateInterface::PARSE)
+      ->will($this->returnValue($this->state));
+    $this->feed->expects($this->any())
+      ->method('getImporter')
+      ->will($this->returnValue($this->importer));
+  }
+
+  public function testFetch() {
+    $this->importer->expects($this->any())
+      ->method('getLimit')
+      ->will($this->returnValue(3));
+
+    $file = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tests/resources/googlenewstz.rss2';
+    $fetcher_result = new RawFetcherResult(file_get_contents($file));
+
+    $result = $this->parser->parse($this->feed, $fetcher_result);
+    $this->assertSame(count($result), 3);
+    $this->assertSame($result[0]->get('author_name'), 'Person Name');
+
+    // Parse again. Tests batching.
+    $result = $this->parser->parse($this->feed, $fetcher_result);
+    $this->assertSame(count($result), 3);
+    $this->assertSame($result[0]->get('title'), 'NEWSMAKER-New Japan finance minister a fiery battler - Reuters');
+  }
+
+  /**
+   * @expectedException \RuntimeException
+   */
+  public function testInvalidFeed() {
+    $fetcher_result = new RawFetcherResult('beep boop');
+    $result = $this->parser->parse($this->feed, $fetcher_result);
+  }
+
+  /**
+   * @expectedException \Drupal\feeds\Exception\EmptyFeedException
+   */
+  public function testEmptyFeed() {
+    $result = new RawFetcherResult('');
+    $this->parser->parse($this->feed, $result);
+  }
+
+  public function testGetMappingSources() {
+    // Not really much to test here.
+    $this->assertSame(count($this->parser->getMappingSources()), 13);
+  }
+
+}
+
