@@ -8,9 +8,12 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueInterface;
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Guzzle\CachePlugin;
@@ -18,19 +21,18 @@ use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
-use Drupal\feeds\PuSH\PuSHFetcherInterface;
 use Drupal\feeds\PuSH\SubscriptionInterface;
 use Drupal\feeds\RawFetcherResult;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Stream\Stream;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines an HTTP fetcher.
- *
- * @todo Make a new subscriber interface.
  *
  * @Plugin(
  *   id = "http",
@@ -38,7 +40,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
  * )
  */
-class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, ClearableInterface, PuSHFetcherInterface, FeedPluginFormInterface, ContainerFactoryPluginInterface {
+class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, ClearableInterface, FeedPluginFormInterface, ContainerFactoryPluginInterface {
 
   /**
    * The Guzzle client.
@@ -46,6 +48,20 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    * @var \GuzzleHttp\ClientInterface
    */
   protected $client;
+
+  /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $config;
+
+  /**
+   * The cache backend.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
 
   /**
    * Constructs an UploadFetcher object.
@@ -56,10 +72,18 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    *   The plugin id.
    * @param array $plugin_definition
    *   The plugin definition.
+   * @param \GuzzleHttp\ClientInterface $client
+   *   The Guzzle client.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   The configuration factory.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The cache backend.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, ConfigFactoryInterface $config, CacheBackendInterface $cache) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->client = $client;
+    $this->config = $config;
+    $this->cache = $cache;
   }
 
   /**
@@ -72,7 +96,9 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('http_client')
+      $container->get('http_client'),
+      $container->get('config.factory'),
+      $container->get('cache.default')
     );
   }
 
@@ -83,21 +109,13 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    * @todo Clean download cache directory.
    */
   public function fetch(FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-
     $response = $this->get($feed->getSource());
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == 304) {
       drupal_set_message($this->t('The feed has not been updated.'));
-      return;
+      throw new EmptyFeedException();
     }
-
-    // If there was a redirect, the url will be updated automagically.
-    // if ($url = $response->getParams()->get('feeds.redirect')) {
-    //   $feed_config['source'] = $url;
-    //   $feed->setConfigFor($this, $feed_config);
-    // }
 
     $tempname = $response->getBody()->getMetadata('uri');
     $response->getBody()->close();
@@ -118,35 +136,28 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    *   A Guzzle response.
    */
   protected function get($url, $cache = TRUE) {
-    $url = strtr($url, array(
-      'feed://' => 'http://',
-      'webcal://' => 'http://',
-    ));
+    $url = strtr($url, ['feed://' => 'http://', 'webcal://' => 'http://']);
 
     // Add our handy dandy cache plugin. It's magic.
     // if ($cache) {
     //   $this->client->addSubscriber(new CachePlugin(\Drupal::cache()));
     // }
 
-    $request = $this->client->createRequest('GET', $url, array(
-      'save_to' => drupal_tempnam('temporary://', 'feeds_download_cache_'),
-    ));
-
     try {
-      $response = $this->client->send($request);
+      $response = $this->client->get($url, [
+        'save_to' => drupal_tempnam('temporary://', 'feeds_download_cache_'),
+      ]);
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
       $args = array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase());
-      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_WARNING);
-      drupal_set_message($this->t('The feed %url seems to be broken because of error "%error".', $args, 'warning'));
-      return FALSE;
+      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_ERROR);
+      throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
     catch (RequestException $e) {
       $args = array('%url' => $url, '%error' => $e->getMessage());
-      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_WARNING);
-      drupal_set_message($this->t('The feed %url seems to be broken because of error "%error".', $args), 'warning');
-      return FALSE;
+      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_ERROR);
+      throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
 
     return $response;
@@ -163,30 +174,19 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    */
   protected function prepareDirectory($url) {
     $download_dir = 'public://feeds_download_cache';
-    if (\Drupal::config('system.file')->get('path.private')) {
-      $download_dir = 'private://feeds_download_cache';
+    if ($path = $this->config->get('system.file')->get('path.private')) {
+      $download_dir = $path . '/feeds_download_cache';
     }
 
     file_prepare_directory($download_dir, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
-
     return $download_dir . '/' . md5($url);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function push(FeedInterface $feed, $raw) {
-    // Handle pubsubhubbub.
-    if ($this->configuration['use_pubsubhubbub']) {
-      return new RawFetcherResult($raw);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function clear(FeedInterface $feed) {
-    \Drupal::cache()->delete('feeds_http_download:' . md5($feed->getSource()));
+    $this->cache->delete('feeds_http_download:' . md5($feed->getSource()));
     file_unmanaged_delete($this->prepareDirectory($feed->getSource()));
   }
 
@@ -245,15 +245,6 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    * {@inheritdoc}
    */
   public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-
-    $form['fetcher']['#tree'] = TRUE;
-    $form['fetcher']['thing'] = array(
-      '#title' => 'tasdf',
-      '#type' => 'textfield',
-      '#default_value' => $feed_config['thing'],
-    );
-
     return $form;
   }
 
@@ -261,7 +252,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
    * {@inheritdoc}
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    $values =& $form_state->getValue('fetcher');
+    // $values =& $form_state->getValue('fetcher');
 
     // if ($this->configuration['auto_detect_feeds']) {
     //   $response = $this->get($values['source'], FALSE);
@@ -287,17 +278,6 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     // Remove caches and files for this feeds.
     foreach ($feeds as $feed) {
       $this->clear($feed);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function importPeriod(FeedInterface $feed) {
-    $sub = $this->subscription->getSubscription($feed->id());
-    if ($sub && $sub['state'] == 'subscribed') {
-      // Delay for three days if there is a successful subscription.
-      return 259200;
     }
   }
 
