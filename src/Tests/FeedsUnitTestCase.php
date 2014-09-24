@@ -16,11 +16,24 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
 
   public function setUp() {
     parent::setUp();
+    if (!defined('WATCHDOG_ERROR')) {
+      define('WATCHDOG_ERROR', 3);
+    }
     if (!defined('WATCHDOG_NOTICE')) {
       define('WATCHDOG_NOTICE', 5);
     }
     if (!defined('WATCHDOG_INFO')) {
       define('WATCHDOG_INFO', 6);
+    }
+    if (!defined('FILE_CREATE_DIRECTORY')) {
+      define('FILE_CREATE_DIRECTORY', 'FILE_CREATE_DIRECTORY');
+    }
+    if (!defined('FILE_MODIFY_PERMISSIONS')) {
+      define('FILE_MODIFY_PERMISSIONS', 'FILE_MODIFY_PERMISSIONS');
+    }
+
+    if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
+      define('STREAM_WRAPPERS_WRITE_VISIBLE', 1);
     }
     $this->cleanUpFiles();
   }
