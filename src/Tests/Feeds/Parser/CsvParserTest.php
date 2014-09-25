@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\CsvParserTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Parser\CsvParserTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher;
+namespace Drupal\feeds\Tests\Feeds\Parser;
 
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Parser\CsvParser;

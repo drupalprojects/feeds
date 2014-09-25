@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\SitemapParserTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Parser\SitemapParserTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher;
+namespace Drupal\feeds\Tests\Feeds\Parser;
 
 use Drupal\feeds\Feeds\Parser\SitemapParser;
 use Drupal\feeds\Result\RawFetcherResult;

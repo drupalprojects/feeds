@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\SyndicationParserTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Parser\SyndicationParserTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher;
+namespace Drupal\feeds\Tests\Feeds\Parser;
 
 use Drupal\Component\Bridge\ZfExtensionManagerSfContainer;
 use Drupal\Core\DependencyInjection\ContainerBuilder;

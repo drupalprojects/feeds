@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Fetcher\OpmlParserTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Parser\OpmlParserTest.
  */
 
-namespace Drupal\feeds\Tests\Fetcher;
+namespace Drupal\feeds\Tests\Feeds\Parser;
 
 use Drupal\feeds\Feeds\Parser\OpmlParser;
 use Drupal\feeds\Result\RawFetcherResult;
