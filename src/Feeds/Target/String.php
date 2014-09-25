@@ -31,20 +31,9 @@ class String extends FieldTargetBase {
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $values['value'] = (string) $values['value'];
-
-    // @todo We need to generalize this big time. We might be able to get rid of
-    // some target classes if property_constraints get used across the board.
-    if (!empty($this->settings['property_constraints'])) {
-      foreach ($this->settings['property_constraints'] as $key => $constraint) {
-        foreach ($constraint as $name => $condition) {
-          switch ($name) {
-            case 'Length':
-              $values[$key] = Unicode::substr($values[$key], 0, $condition['max']);
-              break;
-          }
-        }
-      }
+    // Trim the value if it's too long.
+    if (!empty($this->settings['settings']['max_length'])) {
+      $values['value'] = Unicode::substr($values['value'], 0, $this->settings['settings']['max_length']);
     }
   }
 

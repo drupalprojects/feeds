@@ -88,9 +88,8 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
         $values['value'] = '';
       }
     }
-    // Trim the value if it's too long.
-    if (!empty($this->settings['settings']['max_length'])) {
-      $values['value'] = Unicode::substr($values['value'], 0, $this->settings['settings']['max_length']);
+    else {
+      parent::prepareValue($delta, $values);
     }
 
     $values['format'] = $this->configuration['format'];
