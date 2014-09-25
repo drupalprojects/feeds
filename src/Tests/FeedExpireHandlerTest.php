@@ -7,17 +7,15 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\FeedExpireHandler;
-use Drupal\feeds\FeedInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * @covers \Drupal\feeds\FeedExpireHandler
  * @group Feeds
  */
-class FeedExpireHandlerTest extends UnitTestCase {
+class FeedExpireHandlerTest extends FeedsUnitTestCase {
 
   protected $dispatcher;
   protected $lock;

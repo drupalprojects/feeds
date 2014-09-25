@@ -7,15 +7,12 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedImportHandler;
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -23,7 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  * @covers \Drupal\feeds\FeedImportHandler
  * @group Feeds
  */
-class FeedImportHandlerTest extends UnitTestCase {
+class FeedImportHandlerTest extends FeedsUnitTestCase {
 
   protected $dispatcher;
   protected $lock;

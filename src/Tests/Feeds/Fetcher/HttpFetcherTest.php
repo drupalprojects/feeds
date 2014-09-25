@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests\Feeds\Fetcher {
 
-use Drupal\Core\Config\Config;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\HttpFetcher;

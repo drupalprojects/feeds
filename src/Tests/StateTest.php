@@ -9,7 +9,6 @@ namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
-use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
  * @covers \Drupal\feeds\State

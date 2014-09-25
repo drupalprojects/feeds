@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests\Event;
 
-use Drupal\feeds\Event\EventBase;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**

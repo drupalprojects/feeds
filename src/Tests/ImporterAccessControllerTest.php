@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\feeds\Tests\FeedsUnitTestCase;
-
 /**
  * @covers \Drupal\feeds\ImporterAccessController
  * @group Feeds

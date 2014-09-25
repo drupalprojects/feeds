@@ -8,7 +8,6 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
  * @covers \Drupal\feeds\FeedHandlerBase

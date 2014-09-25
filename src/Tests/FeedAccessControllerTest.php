@@ -8,10 +8,8 @@
 namespace Drupal\feeds\Tests;
 
 use Drupal\Core\Language\Language;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\FeedAccessController;
 use Drupal\feeds\StateInterface;
-use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
  * @covers \Drupal\feeds\FeedAccessController
