@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
@@ -32,39 +31,8 @@ class Path extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
-    return array('pathauto_override' => FALSE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state, array $target = array()) {
-    if (\Drupal::moduleHandler()->moduleExists('path_auto')) {
-      $form['pathauto_override'] = array(
-        '#type' => 'checkbox',
-        '#title' => $this->t('Allow Pathauto to set the alias if the value is empty.'),
-        '#default_value' => $this->getConfiguration('pathauto_override'),
-      );
-    }
-
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function summary() {
-    if (!\Drupal::moduleHandler()->moduleExists('pathauto')) {
-      return;
-    }
-
-    if (!$this->getConfiguration('pathauto_override')) {
-      return $this->t('Do not allow Pathauto if empty.');
-    }
-    else {
-      return $this->t('Allow Pathauto if empty.');
-    }
+  protected function prepareValue($delta, array &$values) {
+    $values['alias'] = trim($values['alias']);
   }
 
 }
