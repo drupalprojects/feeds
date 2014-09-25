@@ -130,6 +130,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
+  public function getImportStartedTime() {
+    return $this->get('import_started')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getImporter() {
     return $this->get('importer')->entity;
   }
@@ -209,6 +216,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function import() {
+    if (!$this->getImportStartedTime()) {
+      $this->set('import_started', time());
+    }
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->import($this);
@@ -245,15 +255,16 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * Cleans up after an import.
    */
   public function cleanUp() {
+    $this->set('imported', time());
     $processor_state = $this->getState(StateInterface::PROCESS);
     $this->getImporter()->getProcessor()->setMessages($this, $processor_state);
-    $this->imported = time();
 
-    $this->log('import', 'Imported in !s s', array('!s' => $this->getImportedTime() - $this->getState(StateInterface::START), WATCHDOG_INFO));
+    $this->log('import', 'Imported in !s s', array('!s' => $this->getImportedTime() - $this->getImportStartedTime(), WATCHDOG_INFO));
 
     // Unset.
     $this->clearFetcherResult();
     $this->clearState();
+    $this->set('import_started', NULL);
   }
 
   /**
@@ -568,7 +579,11 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the feed was last edited.'));
 
-    $fields['imported'] = BaseFieldDefinition::create('changed')
+    $fields['imported'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Imported'))
+      ->setDescription(t('The time that the feed was imported.'));
+
+    $fields['import_started'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Imported'))
       ->setDescription(t('The time that the feed was imported.'));
 

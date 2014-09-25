@@ -33,11 +33,6 @@ class FeedImportHandler extends FeedHandlerBase {
     $this->acquireLock($feed);
 
     try {
-      // We are starting a new import. Record the start time.
-      if (!$feed->getState(StateInterface::START)) {
-        $feed->setState(StateInterface::START, time());
-      }
-
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed));
 
       // Fetch.
