@@ -40,8 +40,13 @@ class DateTime extends FieldTargetBase {
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $date = FALSE;
-    $value = trim($values['value']);
+    $value = is_object($values['value']) ? $values['value'] : trim($values['value']);
+
+    // This is a year value.
+    if ((is_int($value) || ctype_digit($value)) && strlen($value) === 4) {
+      $value = 'January ' . $value;
+    }
+
     if (is_numeric($value) || is_string($value) && $value = strtotime($value)) {
       $date = DrupalDateTime::createFromTimestamp($value, DATETIME_STORAGE_TIMEZONE);
     }
@@ -49,7 +54,7 @@ class DateTime extends FieldTargetBase {
       $date = DrupalDateTime::createFromDateTime($value);
     }
 
-    if ($date && !$date->hasErrors()) {
+    if (isset($date) && !$date->hasErrors()) {
       $values['value'] = $date->format($this->storageFormat);
     }
     else {
