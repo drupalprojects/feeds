@@ -80,7 +80,8 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
 
     // At todo. Maybe break these up into separate classes.
     if (!empty($this->settings['settings']['allowed_values'])) {
-      if ($key = array_search($values['value'], $this->settings['settings']['allowed_values']) !== FALSE) {
+      $key = array_search($values['value'], $this->settings['settings']['allowed_values']);
+      if ($key !== FALSE) {
         $values['value'] = $key;
       }
       else {
