@@ -266,52 +266,6 @@ function feeds_batch($method, $fid, array &$context) {
 }
 
 /**
- * Implements hook_permission().
- */
-function feeds_permission() {
-  $perms = array(
-    'administer feeds' => array(
-      'title' => t('Administer Feeds'),
-      'description' => t('Create, update, delete importers, execute import and delete tasks on any importer.'),
-    ),
-  );
-  $importers = feeds_entity_bundle_info();
-
-  if (!$importers) {
-    return $perms;
-  }
-
-  foreach (array_keys($importers['feeds_feed']) as $importer) {
-    $args = array('%name' => $importers['feeds_feed'][$importer]['label']);
-
-    $perms["view $importer feeds"] = array(
-      'title' => t('View %name feeds', $args),
-    );
-    $perms["create $importer feeds"] = array(
-      'title' => t('Add %name feeds', $args),
-    );
-    $perms["update $importer feeds"] = array(
-      'title' => t('Edit %name feeds', $args),
-    );
-    $perms["delete $importer feeds"] = array(
-      'title' => t('Delete %name feeds', $args),
-    );
-    $perms["import $importer feeds"] = array(
-      'title' => t('Import %name feeds', $args),
-    );
-    $perms["clear $importer feeds"] = array(
-      'title' => t('Delete items from %name feeds', $args),
-    );
-    $perms["unlock $importer feeds"] = array(
-      'title' => t('Unlock imports from %name feeds', $args),
-      'description' => t('If a feed importation breaks for some reason, users with this permission can unlock it.'),
-    );
-  }
-
-  return $perms;
-}
-
-/**
  * Implements hook_theme().
  */
 function feeds_theme() {

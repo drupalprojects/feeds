@@ -1,0 +1,8 @@
+administer feeds:
+  title: 'Administer Feeds'
+  description: 'Create, update, delete importers, execute import and delete tasks on any importer.'
+  restrict access: TRUE
+
+permission_callbacks:
+  - \Drupal\feeds\FeedsPermissions::contentPermissions
+  - \Drupal\feeds\FeedsPermissions::importerPermissions
