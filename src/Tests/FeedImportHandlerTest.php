@@ -29,13 +29,6 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    if (!defined('WATCHDOG_NOTICE')) {
-      define('WATCHDOG_NOTICE', 5);
-    }
-    if (!defined('WATCHDOG_INFO')) {
-      define('WATCHDOG_INFO', 6);
-    }
-
     $this->dispatcher = new EventDispatcher();
     $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');

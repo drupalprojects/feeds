@@ -5,13 +5,12 @@
  * Contains \Drupal\feeds\Tests\Feeds\Fetcher\UploadFetcherTest.
  */
 
-namespace Drupal\feeds\Tests\Feeds\Fetcher {
+namespace Drupal\feeds\Tests\Feeds\Fetcher;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\UploadFetcher;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
-use org\bovigo\vfs\vfsStream;
 
 /**
  * @covers \Drupal\feeds\Feeds\Fetcher\UploadFetcher
@@ -44,7 +43,6 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   }
 
   public function testFetch() {
-    vfsStream::setup('feeds');
     touch('vfs://feeds/test_file');
 
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
@@ -58,7 +56,6 @@ class UploadFetcherTest extends FeedsUnitTestCase {
    * @expectedException \RuntimeException
    */
   public function testFetchException() {
-    vfsStream::setup('feeds');
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
       ->method('getSource')
@@ -109,8 +106,6 @@ class UploadFetcherTest extends FeedsUnitTestCase {
    *   objectified.
    */
   public function testBuildConfigurationForm() {
-    vfsStream::setup('feeds');
-
     $form_state = new FormState();
     $form = ['fetcher_configuration' => $this->fetcher->buildConfigurationForm([], $form_state)];
     $form['fetcher_configuration']['directory']['#parents'] = ['fetcher_configuration', 'directory'];
@@ -135,33 +130,4 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   }
 
 }
-}
 
-// @todo Remove.
-namespace {
-  if (!function_exists('file_get_stream_wrappers')) {
-    function file_get_stream_wrappers() {
-      return [
-        'vfs' => ['description' => 'VFS'],
-        'public' => ['description' => 'Public'],
-      ];
-    }
-  }
-
-  if (!function_exists('file_uri_scheme')) {
-    function file_uri_scheme($uri) {
-      $position = strpos($uri, '://');
-      return $position ? substr($uri, 0, $position) : FALSE;
-    }
-  }
-
-  if (!function_exists('file_prepare_directory')) {
-    function file_prepare_directory(&$directory) {
-      return mkdir($directory);
-    }
-  }
-
-  if (!function_exists('drupal_set_message')) {
-    function drupal_set_message() {}
-  }
-}

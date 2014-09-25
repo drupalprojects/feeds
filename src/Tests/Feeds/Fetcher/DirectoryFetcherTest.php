@@ -5,13 +5,12 @@
  * Contains \Drupal\feeds\Tests\Feeds\Fetcher\DirectoryFetcherTest.
  */
 
-namespace Drupal\feeds\Tests\Feeds\Fetcher {
+namespace Drupal\feeds\Tests\Feeds\Fetcher;
 
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\DirectoryFetcher;
 use Drupal\feeds\State;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
-use org\bovigo\vfs\vfsStream;
 
 /**
  * @covers \Drupal\feeds\Feeds\Fetcher\DirectoryFetcher
@@ -24,19 +23,13 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
-      define('STREAM_WRAPPERS_WRITE_VISIBLE', 'STREAM_WRAPPERS_WRITE_VISIBLE');
-    }
-
     $importer = $this->getMock('Drupal\feeds\ImporterInterface');
     $this->fetcher = new DirectoryFetcher(['importer' => $importer], 'directory', []);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
   }
 
   public function testFetchFile() {
-    vfsStream::setup('feeds');
     touch('vfs://feeds/test_file');
-
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
       ->method('getSource')
@@ -49,7 +42,6 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
    * @expectedException \RuntimeException
    */
   public function testFetchDir() {
-    vfsStream::setup('feeds');
     touch('vfs://feeds/test_file_1');
     touch('vfs://feeds/test_file_2');
 
@@ -85,8 +77,6 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   }
 
   public function testFeedForm() {
-    vfsStream::setup('feeds');
-
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
       ->method('getConfigurationFor')
@@ -113,31 +103,4 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $this->assertSame(count($form_state->getErrors()), 1);
   }
 
-}
-}
-
-// @todo Remove.
-namespace {
-  if (!function_exists('file_stream_wrapper_uri_normalize')) {
-    function file_stream_wrapper_uri_normalize($dir) {
-      return $dir;
-    }
-  }
-  if (!function_exists('file_get_stream_wrappers')) {
-    function file_get_stream_wrappers() {
-      return [
-        'vfs' => ['description' => 'VFS'],
-        'public' => ['description' => 'Public'],
-      ];
-    }
-  }
-  if (!function_exists('file_uri_scheme')) {
-    function file_uri_scheme($uri) {
-      $position = strpos($uri, '://');
-      return $position ? substr($uri, 0, $position) : FALSE;
-    }
-  }
-  if (!function_exists('drupal_set_message')) {
-    function drupal_set_message() {}
-  }
 }

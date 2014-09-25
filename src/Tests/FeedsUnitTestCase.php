@@ -5,9 +5,10 @@
  * Contains \Drupal\feeds\Tests\FeedsUnitTestCase.
  */
 
-namespace Drupal\feeds\Tests;
+namespace Drupal\feeds\Tests {
 
 use Drupal\Tests\UnitTestCase;
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Base class for Feeds unit tests.
@@ -16,41 +17,9 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
 
   public function setUp() {
     parent::setUp();
-    if (!defined('WATCHDOG_ERROR')) {
-      define('WATCHDOG_ERROR', 3);
-    }
-    if (!defined('WATCHDOG_NOTICE')) {
-      define('WATCHDOG_NOTICE', 5);
-    }
-    if (!defined('WATCHDOG_INFO')) {
-      define('WATCHDOG_INFO', 6);
-    }
-    if (!defined('FILE_CREATE_DIRECTORY')) {
-      define('FILE_CREATE_DIRECTORY', 'FILE_CREATE_DIRECTORY');
-    }
-    if (!defined('FILE_MODIFY_PERMISSIONS')) {
-      define('FILE_MODIFY_PERMISSIONS', 'FILE_MODIFY_PERMISSIONS');
-    }
 
-    if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
-      define('STREAM_WRAPPERS_WRITE_VISIBLE', 1);
-    }
-
-    if (!defined('DATETIME_STORAGE_TIMEZONE')) {
-      define('DATETIME_STORAGE_TIMEZONE', 'UTC');
-    }
-    if (!defined('DATETIME_DATETIME_STORAGE_FORMAT')) {
-      define('DATETIME_DATETIME_STORAGE_FORMAT', 'Y-m-d\TH:i:s');
-    }
-    if (!defined('DATETIME_DATE_STORAGE_FORMAT')) {
-      define('DATETIME_DATE_STORAGE_FORMAT', 'Y-m-d');
-    }
-    $this->cleanUpFiles();
-  }
-
-  public function tearDown() {
-    $this->cleanUpFiles();
-    parent::tearDown();
+    $this->defineConstants();
+    vfsStream::setup('feeds');
   }
 
   protected function getMockImporter() {
@@ -64,7 +33,7 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     return $importer;
   }
 
-  protected static function getMethod($class, $name) {
+  protected function getMethod($class, $name) {
     $class = new \ReflectionClass($class);
     $method = $class->getMethod($name);
     $method->setAccessible(TRUE);
@@ -96,30 +65,130 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
   }
 
   /**
-   * Removes files and directories based on class constants.
+   * Defines stub constants.
    */
-  protected function cleanUpFiles() {
-
-    $refl = new \ReflectionClass(get_class($this));
-    $files = array_flip($refl->getConstants());
-
-    $files = array_filter($files, function ($constant_name) {
-      return strpos($constant_name, 'FILE') === 0 || strpos($constant_name, 'DIRECTORY') === 0;
-    });
-
-    // Remove files first so directories will be empty.
-    foreach ($files as $file => $name) {
-      if (is_file($file)) {
-        unset($files[$name]);
-        unlink($file);
-      }
+  protected function defineConstants() {
+    if (!defined('WATCHDOG_ERROR')) {
+      define('WATCHDOG_ERROR', 3);
+    }
+    if (!defined('WATCHDOG_NOTICE')) {
+      define('WATCHDOG_NOTICE', 5);
+    }
+    if (!defined('WATCHDOG_INFO')) {
+      define('WATCHDOG_INFO', 6);
     }
 
-    foreach (array_keys($files) as $directory) {
-      if (is_dir($directory)) {
-        rmdir($directory);
-      }
+    if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
+      define('STREAM_WRAPPERS_WRITE_VISIBLE', 1);
+    }
+
+    if (!defined('DATETIME_STORAGE_TIMEZONE')) {
+      define('DATETIME_STORAGE_TIMEZONE', 'UTC');
+    }
+    if (!defined('DATETIME_DATETIME_STORAGE_FORMAT')) {
+      define('DATETIME_DATETIME_STORAGE_FORMAT', 'Y-m-d\TH:i:s');
+    }
+    if (!defined('DATETIME_DATE_STORAGE_FORMAT')) {
+      define('DATETIME_DATE_STORAGE_FORMAT', 'Y-m-d');
+    }
+
+    if (!defined('FILE_MODIFY_PERMISSIONS')) {
+      define('FILE_MODIFY_PERMISSIONS', 2);
+    }
+    if (!defined('FILE_CREATE_DIRECTORY')) {
+      define('FILE_CREATE_DIRECTORY', 1);
+    }
+    if (!defined('FILE_EXISTS_REPLACE')) {
+      define('FILE_EXISTS_REPLACE', 1);
     }
   }
 
+}
+}
+
+namespace {
+  use Drupal\Core\Session\AccountInterface;
+  use Drupal\Component\Utility\String;
+
+  if (!function_exists('t')) {
+    function t($string, array $args = array()) {
+      return String::format($string, $args);
+    }
+  }
+
+  if (!function_exists('drupal_set_message')) {
+    function drupal_set_message() {}
+  }
+
+  if (!function_exists('filter_formats')) {
+    function filter_formats(AccountInterface $account) {
+      return array('test_format' => new FeedsFilterStub('Test format'));
+    }
+  }
+
+  if (!function_exists('file_stream_wrapper_uri_normalize')) {
+    function file_stream_wrapper_uri_normalize($dir) {
+      return $dir;
+    }
+  }
+  if (!function_exists('file_get_stream_wrappers')) {
+    function file_get_stream_wrappers() {
+      return [
+        'vfs' => ['description' => 'VFS'],
+        'public' => ['description' => 'Public'],
+      ];
+    }
+  }
+  if (!function_exists('file_uri_scheme')) {
+    function file_uri_scheme($uri) {
+      $position = strpos($uri, '://');
+      return $position ? substr($uri, 0, $position) : FALSE;
+    }
+  }
+
+  if (!function_exists('drupal_tempnam')) {
+    function drupal_tempnam($scheme, $dir) {
+      mkdir('vfs://feeds/' . $dir);
+      $file = 'vfs://feeds/' . $dir . '/' . mt_rand(10, 1000);
+      touch($file);
+      return $file;
+    }
+  }
+
+  if (!function_exists('file_prepare_directory')) {
+    function file_prepare_directory(&$directory) {
+      return mkdir($directory);
+    }
+  }
+
+  if (!function_exists('file_unmanaged_move')) {
+    function file_unmanaged_move($old, $new) {
+      rename($old, $new);
+    }
+  }
+
+  if (!function_exists('watchdog')) {
+    function watchdog() {}
+  }
+
+  if (!function_exists('file_unmanaged_delete')) {
+    function file_unmanaged_delete() {}
+  }
+
+  if (!function_exists('drupal_get_user_timezone')) {
+    function drupal_get_user_timezone() {
+      return 'UTC';
+    }
+  }
+
+  class FeedsFilterStub {
+    public function __construct($label) {
+      $this->label = $label;
+    }
+
+    public function label() {
+      return $this->label;
+    }
+
+  }
 }

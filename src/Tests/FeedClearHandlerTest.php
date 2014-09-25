@@ -24,10 +24,6 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    if (!defined('WATCHDOG_NOTICE')) {
-      define('WATCHDOG_NOTICE', 5);
-    }
-
     $this->dispatcher = new EventDispatcher();
     $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
     $this->lock

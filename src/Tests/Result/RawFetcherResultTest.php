@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\Tests\Result\RawFetcherResultTest.
  */
 
-namespace Drupal\feeds\Tests\Result {
+namespace Drupal\feeds\Tests\Result;
 
 use Drupal\feeds\Result\RawFetcherResult;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
@@ -15,8 +15,6 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
  * @group Feeds
  */
 class RawFetcherResultTest extends FeedsUnitTestCase {
-
-  const FILE = 'feeds-tmp';
 
   public function testRaw() {
     $result = new RawFetcherResult('raw text');
@@ -32,18 +30,4 @@ class RawFetcherResultTest extends FeedsUnitTestCase {
   }
 
 }
-}
 
-namespace {
-  if (!function_exists('drupal_tempnam')) {
-    function drupal_tempnam() {
-      // Ensure only called once.
-      static $called = FALSE;
-      if ($called) {
-        throw new \Exception();
-      }
-      $called = TRUE;
-      return \Drupal\feeds\Tests\Result\RawFetcherResultTest::FILE;
-    }
-  }
-}

@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\Tests\Feeds\Target\DateTimeTest.
  */
 
-namespace Drupal\feeds\Tests\Feeds\Target {
+namespace Drupal\feeds\Tests\Feeds\Target;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Feeds\Target\DateTime;
@@ -18,8 +18,9 @@ class DateTimeTest extends FeedsUnitTestCase {
   protected $importer;
 
   public function setUp() {
-    parent::setUp();
     require_once DRUPAL_ROOT . '/core/includes/common.inc';
+
+    parent::setUp();
 
     $container = new ContainerBuilder();
     $language_manager = $this->getMock('Drupal\Core\Language\LanguageManagerInterface');
@@ -99,13 +100,4 @@ class DateTimeTest extends FeedsUnitTestCase {
     $this->assertSame($values['value'], '2000-01-01T00:00:00');
   }
 
-}
-}
-
-namespace {
-  if (!function_exists('drupal_get_user_timezone')) {
-    function drupal_get_user_timezone() {
-      return 'UTC';
-    }
-  }
 }

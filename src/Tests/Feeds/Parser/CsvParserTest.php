@@ -13,7 +13,6 @@ use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
-use org\bovigo\vfs\vfsStream;
 
 /**
  * @covers \Drupal\feeds\Feeds\Parser\CsvParser
@@ -72,7 +71,6 @@ class CsvParserTest extends FeedsUnitTestCase {
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyFeed() {
-    vfsStream::setup('feeds');
     touch('vfs://feeds/empty_file');
     $result = new FetcherResult('vfs://feeds/empty_file');
     $this->parser->parse($this->feed, $result);

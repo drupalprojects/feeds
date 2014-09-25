@@ -5,7 +5,7 @@
  * Contains \Drupal\feeds\Tests\Feeds\Target\TextTest.
  */
 
-namespace Drupal\feeds\Tests\Feeds\Target {
+namespace Drupal\feeds\Tests\Feeds\Target;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
@@ -106,23 +106,4 @@ class TextTest extends FeedsUnitTestCase {
   }
 
 }
-}
 
-namespace {
-  use Drupal\Core\Session\AccountInterface;
-
-  class FeedsFilterStub {
-    public function __construct($label) {
-      $this->label = $label;
-    }
-    public function label() {
-      return $this->label;
-    }
-  }
-
-  if (!function_exists('filter_formats')) {
-    function filter_formats(AccountInterface $account) {
-      return array('test_format' => new FeedsFilterStub('Test format'));
-    }
-  }
-}
