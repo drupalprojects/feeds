@@ -38,7 +38,7 @@ class TestTarget extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  function setTarget(FeedInterface $feed, $target_item, $target, array $values) {
+  function setTarget(FeedInterface $feed, EntityInterface $target_item, $target, array $values) {
     $entity->body['und'][0]['value'] = serialize($mapping);
   }
 

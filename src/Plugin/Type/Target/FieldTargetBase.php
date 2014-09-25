@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Type\Target;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessor;
 use Drupal\feeds\ImporterInterface;
@@ -35,17 +36,18 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
    * {@inheritdoc}
    */
   public static function targets(array &$targets, ImporterInterface $importer, array $definition) {
-    if ($importer->getProcessor() instanceof EntityProcessor) {
-      if (static::$properties === NULL) {
-        static::buildProperties($importer->getProcessor());
-      }
+    if (!$importer->getProcessor() instanceof EntityProcessor) {
+      return;
+    }
+    if (static::$properties === NULL) {
+      static::buildProperties($importer->getProcessor());
+    }
 
-      foreach (static::$properties as $id => $property) {
-        if (!empty($property['type']) && in_array($property['type'], $definition['field_types'])) {
-          static::prepareTarget($property);
-          $targets[$id] = $property;
-          $targets[$id]['id'] = $definition['id'];
-        }
+    foreach (static::$properties as $id => $property) {
+      if (!empty($property['type']) && in_array($property['type'], $definition['field_types'])) {
+        static::prepareTarget($property);
+        $targets[$id] = $property;
+        $targets[$id]['id'] = $definition['id'];
       }
     }
   }
@@ -83,9 +85,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
         }
       }
 
-      $instance = FieldInstanceConfig::loadByName($entity_type, $processor->bundle(), $id);
-
-      if ($instance) {
+      if ($instance = FieldInstanceConfig::loadByName($entity_type, $processor->bundle(), $id)) {
         static::$properties[$id]['label'] = $instance->getLabel();
         static::$properties[$id]['description'] = $instance->getDescription();
         static::$properties[$id]['settings'] = $instance->getSettings();
@@ -106,7 +106,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
   /**
    * {@inheritdoc}
    */
-  public function setTarget(FeedInterface $feed, $entity, $field_name, array $values) {
+  public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, array $values) {
     $this->prepareValues($values);
     $entity->get($field_name)->setValue($values);
   }

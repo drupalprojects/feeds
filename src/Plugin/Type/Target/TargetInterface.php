@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Type\Target;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\ImporterInterface;
 
@@ -35,6 +36,6 @@ interface TargetInterface {
    * @param array $values
    *   A list of values to set on the target.
    */
-  public function setTarget(FeedInterface $feed, $target_item, $target, array $values);
+  public function setTarget(FeedInterface $feed, EntityInterface $target_item, $target, array $values);
 
 }
