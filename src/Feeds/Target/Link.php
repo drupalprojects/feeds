@@ -31,8 +31,11 @@ class Link extends FieldTargetBase {
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $value = trim($values['url']);
-    $values['url'] = UrlHelper::isValid($value, TRUE) ? $value : '';
+    $values['url'] = trim($values['url']);
+
+    if (!UrlHelper::isValid($values['url'], TRUE)) {
+      $values['url'] = '';
+    }
   }
 
 }
