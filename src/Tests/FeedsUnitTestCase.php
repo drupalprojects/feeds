@@ -35,6 +35,16 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
       define('STREAM_WRAPPERS_WRITE_VISIBLE', 1);
     }
+
+    if (!defined('DATETIME_STORAGE_TIMEZONE')) {
+      define('DATETIME_STORAGE_TIMEZONE', 'UTC');
+    }
+    if (!defined('DATETIME_DATETIME_STORAGE_FORMAT')) {
+      define('DATETIME_DATETIME_STORAGE_FORMAT', 'Y-m-d\TH:i:s');
+    }
+    if (!defined('DATETIME_DATE_STORAGE_FORMAT')) {
+      define('DATETIME_DATE_STORAGE_FORMAT', 'Y-m-d');
+    }
     $this->cleanUpFiles();
   }
 
@@ -59,6 +69,15 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     $method = $class->getMethod($name);
     $method->setAccessible(TRUE);
     return $method;
+  }
+
+  protected function getProtectedClosure($object, $method) {
+    return $this->getMethod(get_class($object), $method)->getClosure($object);
+  }
+
+  protected function callProtectedMethod($object, $method, array $args) {
+    $closure = $this->getProtectedClosure($object, $method);
+    return call_user_func_array($closure, $args);
   }
 
   protected function getMockAccount(array $perms = array()) {
