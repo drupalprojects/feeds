@@ -26,6 +26,7 @@ class FeedAccessControllerTest extends FeedsUnitTestCase {
   protected $moduleHandler;
 
   public function setUp() {
+    parent::setUp();
     $this->entityType = $this->getMock('\Drupal\Core\Entity\EntityTypeInterface');
     $this->entityType->expects($this->once())
                 ->method('id')

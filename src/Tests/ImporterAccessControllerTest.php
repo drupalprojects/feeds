@@ -16,6 +16,8 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class ImporterAccessControllerTest extends FeedsUnitTestCase {
 
   public function setUp() {
+    parent::setUp();
+
     $this->entity = $this->getMock('Drupal\Core\Entity\EntityInterface');
     $this->account = $this->getMock('Drupal\Core\Session\AccountInterface');
     $this->account->expects($this->once())
