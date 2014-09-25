@@ -64,7 +64,7 @@ class MappingForm extends FormBase {
     if ($form_state->getValues()) {
       $this->processFormState($form, $form_state);
 
-      if ($form_state->getTriggeringElement()['#name'] == 'add_target' || !empty($form_state->getTriggeringElement()['#remove'])) {
+      if ($form_state->getTriggeringElement()['#name'] === 'add_target' || !empty($form_state->getTriggeringElement()['#remove'])) {
         drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
       }
     }
@@ -102,7 +102,7 @@ class MappingForm extends FormBase {
       '#parents' => array('add_target'),
       '#default_value' => NULL,
       '#ajax' => array(
-        'callback' => array($this, 'ajaxCallback'),
+        'callback' => '::ajaxCallback',
         'wrapper' => 'feeds-mapping-form-ajax-wrapper',
         'effect' => 'none',
         'progress' => 'none',
@@ -206,7 +206,7 @@ class MappingForm extends FormBase {
             '#type' => 'image_button',
             '#op' => 'configure',
             '#ajax' => array(
-              'callback' => array($this, 'settingsAjaxCallback'),
+              'callback' => '::settingsAjaxCallback',
               'wrapper' => 'edit-mappings-' . $delta . '-settings',
               'effect' => 'fade',
               'progress' => 'none',
@@ -265,6 +265,8 @@ class MappingForm extends FormBase {
   /**
    * Processes the form state, populating the mapping array.
    *
+   * @param array $form
+   *   The form.
    * @param FormStateInterface $form_state
    *   The form state array to process.
    */
@@ -298,7 +300,8 @@ class MappingForm extends FormBase {
     }
 
     // Allow the #default_value of 'add_target' to be reset.
-    // unset($form_state['input']['add_target']);
+    $input =& $form_state->getUserInput();
+    unset($input['add_target']);
   }
 
   /**
@@ -351,14 +354,14 @@ class MappingForm extends FormBase {
   /**
    * Callback for ajax requests.
    */
-  public function ajaxCallback(array $form, FormStateInterface $form_state) {
+  public static function ajaxCallback(array $form, FormStateInterface $form_state) {
     return $form;
   }
 
   /**
    * Callback for target settings forms.
    */
-  public function settingsAjaxCallback(array $form, FormStateInterface $form_state) {
+  public static function settingsAjaxCallback(array $form, FormStateInterface $form_state) {
     $delta = $form_state->getTriggeringElement()['#delta'];
     return $form['mappings'][$delta]['settings'];
   }
