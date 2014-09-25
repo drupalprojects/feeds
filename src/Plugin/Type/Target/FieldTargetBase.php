@@ -11,7 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessor;
 use Drupal\feeds\ImporterInterface;
-use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Helper class for field mappers.
@@ -85,7 +85,7 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
         }
       }
 
-      if ($instance = FieldInstanceConfig::loadByName($entity_type, $processor->bundle(), $id)) {
+      if ($instance = FieldConfig::loadByName($entity_type, $processor->bundle(), $id)) {
         static::$properties[$id]['label'] = $instance->getLabel();
         static::$properties[$id]['description'] = $instance->getDescription();
         static::$properties[$id]['settings'] = $instance->getSettings();

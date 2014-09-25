@@ -30,7 +30,7 @@ use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
-use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -673,8 +673,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       ))->save();
     }
     // Create field instance if it doesn't exist.
-    if (!FieldInstanceConfig::loadByName($this->entityType(), $this->bundle(), 'feeds_item')) {
-      \Drupal::entityManager()->getStorage('field_instance_config')->create(array(
+    if (!FieldConfig::loadByName($this->entityType(), $this->bundle(), 'feeds_item')) {
+      \Drupal::entityManager()->getStorage('field_config')->create(array(
         'label' => 'Feeds item',
         'description' => '',
         'field_name' => 'feeds_item',
