@@ -646,6 +646,14 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       $this->importer->reschedule($this->importer->id());
     }
     parent::submitConfigurationForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo We need an importer save/update/delete API.
+   */
+  public function onImporterSave($update = TRUE) {
     $this->prepareFeedsItemField();
   }
 
@@ -837,7 +845,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *
    * @todo This no longer works due to circular references.
    */
-  protected function createLogMessage(\Exception $e, EntityInterface $entity, array $item) {
+  protected function createLogMessage(\Exception $e, EntityInterface $entity, ItemInterface $item) {
     include_once DRUPAL_ROOT . '/core/includes/utility.inc';
     $message = $e->getMessage();
     $message .= '<h3>Original item</h3>';

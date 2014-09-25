@@ -111,6 +111,11 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   public function onFeedDeleteMultiple(array $feeds) {}
 
   /**
+   * The importer is being saved.
+   */
+  public function onImporterSave($update = TRUE) {}
+
+  /**
    * Renders a link to a route given a route name and its parameters.
    *
    * @see \Drupal\Core\Utility\LinkGeneratorInterface::generate() for details

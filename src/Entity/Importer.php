@@ -545,8 +545,12 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     parent::preSave($storage_controller);
+
+    foreach ($this->getPlugins() as $type => $plugin) {
+      $plugin->onImporterSave($update);
+    }
 
     foreach ($this->getPlugins() as $type => $plugin) {
       // If this plugin has any configuration, ensure that it is set.
