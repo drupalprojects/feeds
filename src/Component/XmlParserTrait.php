@@ -67,9 +67,7 @@ trait XmlParserTrait {
     $options = $options | LIBXML_NOENT | LIBXML_NONET | defined('LIBXML_COMPACT') ? LIBXML_COMPACT : 0;
     $option = $options | defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0;
 
-    if (!$document->loadXML(trim($source), $options)) {
-      throw new \RuntimeException('The XML document is invalid');
-    }
+    $document->loadXML($source, $options);
 
     return $document;
   }
@@ -107,7 +105,7 @@ trait XmlParserTrait {
    *
    * @see libxml_get_errors()
    */
-  public function getXmlErrors() {
+  protected function getXmlErrors() {
     return $this->_errors;
   }
 
@@ -120,7 +118,7 @@ trait XmlParserTrait {
    * @return string
    *   The XML string with the default namespaces removed.
    */
-  public function removeDefaultNamespaces($xml) {
+  protected function removeDefaultNamespaces($xml) {
     return preg_replace('/(<' . static::$_elementRegex . '[^>]*)\s+xmlns\s*=\s*("|\').*?(\2)([^>]*>)/u', '$1$4', $xml);
   }
 

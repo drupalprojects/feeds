@@ -66,14 +66,6 @@ class OpmlParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   * @expectedException \RuntimeException
-   */
-  public function testInvalidFeed() {
-    // We have to try extra hard to make an invalid XML document.
-    $this->parser->parse($this->feed,  new RawFetcherResult(chr(0)));
-  }
-
-  /**
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyFeed() {

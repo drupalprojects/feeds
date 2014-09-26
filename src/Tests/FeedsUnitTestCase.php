@@ -44,7 +44,7 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     return $this->getMethod(get_class($object), $method)->getClosure($object);
   }
 
-  protected function callProtectedMethod($object, $method, array $args) {
+  protected function callProtectedMethod($object, $method, array $args = []) {
     $closure = $this->getProtectedClosure($object, $method);
     return call_user_func_array($closure, $args);
   }
