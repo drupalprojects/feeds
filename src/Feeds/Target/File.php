@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\String as StringHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
@@ -107,7 +107,7 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
       return $file->id();
     }
     catch (Exception $e) {
-      watchdog_exception('Feeds', $e, nl2br(String::checkPlain($e)));
+      watchdog_exception('Feeds', $e, nl2br(StringHelper::checkPlain($e)));
     }
   }
 
