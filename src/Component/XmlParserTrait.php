@@ -65,7 +65,7 @@ trait XmlParserTrait {
     $document->recover = TRUE;
 
     $options = $options | LIBXML_NOENT | LIBXML_NONET | defined('LIBXML_COMPACT') ? LIBXML_COMPACT : 0;
-    $option = $options | defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0;
+    $options = $options | defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0;
 
     $document->loadXML($source, $options);
 

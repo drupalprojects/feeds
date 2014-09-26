@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
+use Drupal\feeds\Component\XmlParserTrait;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\SitemapItem;
@@ -15,7 +16,6 @@ use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\StateInterface;
-use Drupal\feeds\Xml\Utility;
 
 /**
  * Defines a SitemapXML feed parser.
@@ -27,6 +27,7 @@ use Drupal\feeds\Xml\Utility;
  * )
  */
 class SitemapParser extends PluginBase implements ParserInterface {
+  use XmlParserTrait;
 
   /**
    * {@inheritdoc}
@@ -43,7 +44,9 @@ class SitemapParser extends PluginBase implements ParserInterface {
 
     // Yes, using a DOM parser is a bit inefficient, but will do for now.
     // @todo XML error handling.
-    $xml = new \SimpleXMLElement(Utility::removeDefaultNamespaces($raw));
+    $this->startXmlErrorHandling();
+    $xml = new \SimpleXMLElement($this->removeDefaultNamespaces($raw));
+    $this->stopXmlErrorHandling();
     $result = new ParserResult();
 
     $state = $feed->getState(StateInterface::PARSE);
