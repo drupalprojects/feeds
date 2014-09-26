@@ -47,7 +47,7 @@ class FeedsItem extends ConfigurableEntityReferenceItem {
     if (!isset(static::$propertyDefinitions[$key])) {
       static::$propertyDefinitions[$key] = parent::getPropertyDefinitions();
 
-      static::$propertyDefinitions['imported'] = DataDefinition::create('integer')
+      static::$propertyDefinitions['imported'] = DataDefinition::create('timestamp')
         ->setLabel(t('Timestamp'));
 
       static::$propertyDefinitions['url'] = DataDefinition::create('uri')
@@ -78,6 +78,7 @@ class FeedsItem extends ConfigurableEntityReferenceItem {
         'imported' => array(
           'type' => 'int',
           'not null' => TRUE,
+          'unsigned' => TRUE,
           'description' => 'Import date of the feed item, as a Unix timestamp.',
         ),
         'url' => array(
