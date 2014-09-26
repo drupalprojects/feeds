@@ -92,17 +92,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function getImportStartedTime();
 
   /**
-   * Runs the fetch and parse stages.
-   *
-   * @return \Drupal\feeds\Result\ParserResultInterface
-   *   The result of the parsing stage.
-   *
-   * @throws
-   *   Throws \Exception if an error occurs when fetching or parsing.
-   */
-  public function preview();
-
-  /**
    * Starts importing a feed.
    *
    * This method starts an import job. Depending on the configuration of the
