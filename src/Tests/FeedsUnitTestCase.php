@@ -181,6 +181,10 @@ namespace {
     }
   }
 
+  if (!function_exists('batch_set')) {
+    function batch_set() {}
+  }
+
   class FeedsFilterStub {
     public function __construct($label) {
       $this->label = $label;

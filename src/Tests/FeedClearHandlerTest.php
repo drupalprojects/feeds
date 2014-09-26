@@ -26,12 +26,24 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
 
     $this->dispatcher = new EventDispatcher();
     $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
+    $this->handler = new FeedClearHandler($this->dispatcher, $this->lock);
+    $this->handler->setStringTranslation($this->getStringTranslationStub());
+
     $this->lock
       ->expects($this->any())
       ->method('acquire')
       ->will($this->returnValue(TRUE));
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
+  }
+
+  public function testStartBatchClear() {
+    $this->lock
+      ->expects($this->once())
+      ->method('acquire')
+      ->will($this->returnValue(TRUE));
+
+    $this->handler->startBatchClear($this->feed);
   }
 
   public function testClear() {
@@ -43,10 +55,9 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       ->expects($this->once())
       ->method('clearState');
 
-    $handler = new FeedClearHandler($this->dispatcher, $this->lock);
-    $result = $handler->clear($this->feed);
+    $result = $this->handler->clear($this->feed);
     $this->assertSame($result, 0.5);
-    $result = $handler->clear($this->feed);
+    $result = $this->handler->clear($this->feed);
     $this->assertSame($result, 1.0);
   }
 
@@ -62,8 +73,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       ->expects($this->once())
       ->method('clearState');
 
-    $handler = new FeedClearHandler($this->dispatcher, $this->lock);
-    $handler->clear($this->feed);
+    $this->handler->clear($this->feed);
   }
 
 }

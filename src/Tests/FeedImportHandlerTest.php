@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Tests;
 
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\ParseEvent;
@@ -31,6 +32,9 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
 
     $this->dispatcher = new EventDispatcher();
     $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
+    $this->handler = new FeedImportHandler($this->dispatcher, $this->lock);
+    $this->handler->setStringTranslation($this->getStringTranslationStub());
+
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
     $this->feed
       ->expects($this->any())
@@ -42,32 +46,16 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       ->will($this->returnValue('test_feed'));
   }
 
-  public function testImport() {
+  public function testStartBatchImport() {
     $this->lock
       ->expects($this->once())
       ->method('acquire')
       ->will($this->returnValue(TRUE));
 
-    $this->lock
-      ->expects($this->never())
-      ->method('release');
-
-    $this->feed
-      ->expects($this->once())
-      ->method('save');
-
-    $this->addDefaultEventListeners();
-
-    $handler = new FeedImportHandler($this->dispatcher, $this->lock);
-    $handler->import($this->feed);
+    $this->handler->startBatchImport($this->feed);
   }
 
   public function testBatchComplete() {
-    $this->lock
-      ->expects($this->once())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
-
     $this->addDefaultEventListeners();
 
     $this->feed
@@ -81,17 +69,11 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       ->method('progressImporting')
       ->will($this->returnValue(StateInterface::BATCH_COMPLETE));
 
-    $handler = new FeedImportHandler($this->dispatcher, $this->lock);
-    $result = $handler->import($this->feed);
+    $result = $this->handler->import($this->feed);
     $this->assertSame(StateInterface::BATCH_COMPLETE, $result);
   }
 
   public function testEmptyException() {
-    $this->lock
-      ->expects($this->once())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
-
     $this->feed
       ->expects($this->once())
       ->method('save');
@@ -100,19 +82,13 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       throw new EmptyFeedException();
     });
 
-    $handler = new FeedImportHandler($this->dispatcher, $this->lock);
-    $handler->import($this->feed);
+    $this->handler->import($this->feed);
   }
 
   /**
    * @expectedException \Exception
    */
   public function testException() {
-    $this->lock
-      ->expects($this->once())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
-
     $this->feed
       ->expects($this->once())
       ->method('save');
@@ -124,20 +100,7 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       throw new \Exception();
     });
 
-    $handler = new FeedImportHandler($this->dispatcher, $this->lock);
-    $handler->import($this->feed);
-  }
-
-  /**
-   * @expectedException \Drupal\feeds\Exception\LockException
-   * @expectedExceptionMessage Cannot acquire lock for feed test_feed / 10.
-   */
-  public function testLockException() {
-    $this->feed
-      ->expects($this->never())
-      ->method('save');
-    $handler = new FeedImportHandler($this->dispatcher, $this->lock);
-    $handler->import($this->feed);
+    $this->handler->import($this->feed);
   }
 
   public function testPushImport() {
@@ -177,8 +140,7 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       ->method('progressImporting')
       ->will($this->onConsecutiveCalls(0.5, 1.0));
 
-    $handler = new FeedImportHandler($this->dispatcher, $this->lock);
-    $handler->pushImport($this->feed, 'ABCD');
+    $this->handler->pushImport($this->feed, 'ABCD');
   }
 
   protected function addDefaultEventListeners() {

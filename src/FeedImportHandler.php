@@ -36,15 +36,13 @@ class FeedImportHandler extends FeedHandlerBase {
       'title' => $this->t('Importing %title', ['%title' => $feed->label()]),
       'init_message' => $this->t('Starting feed import.'),
       'operations' => [
-        [[get_class($this), 'contineBatchImport'], [$feed->id()]],
+        [[get_class($this), 'contineBatch'], [$feed->id(), 'import']],
       ],
       'progress_message' => $this->t('Importing %title', ['%title' => $feed->label()]),
-      'finished' => [get_class($this), 'finishBatch'],
       'error_message' => $this->t('An error occored while importing %title.', ['%title' => $feed->label()]),
     ];
 
     batch_set($batch);
-    $this->releaseLock($feed);
   }
 
   /**
@@ -104,51 +102,18 @@ class FeedImportHandler extends FeedHandlerBase {
 
     if ($result == StateInterface::BATCH_COMPLETE || isset($exception)) {
       $feed->cleanUp();
+      $feed->save();
       $this->releaseLock($feed);
     }
-
-    $feed->save();
+    else {
+      $feed->save();
+    }
 
     if (isset($exception)) {
       throw $exception;
     }
 
     return $result;
-  }
-
-  /**
-   * Continues a batch job.
-   *
-   * @param int $fid
-   *   The feed id being imported.
-   * @param array &$context
-   *   The batch context.
-   */
-  public static function contineBatchImport($fid, array &$context) {
-    $context['finished'] = StateInterface::BATCH_COMPLETE;
-    try {
-      if ($feed = entity_load('feeds_feed', $fid)) {
-        $context['finished'] = $feed->import();
-      }
-    }
-    catch (\Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
-    }
-  }
-
-  /**
-   * Finish batch.
-   *
-   * This function is a static function to avoid serialising the Background
-   * object unnecessarily.
-   */
-  public static function finishBatchImport($success, $results, $operations) {
-    if ($success) {
-
-    }
-    else {
-
-    }
   }
 
   protected function doFetch(FeedInterface $feed) {

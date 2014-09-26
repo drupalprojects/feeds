@@ -209,15 +209,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function startBatchClear() {
-    $this->entityManager()
-      ->getHandler('feeds_feed', 'feed_clear')
-      ->startBatchClear($this);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function import() {
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
@@ -231,6 +222,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->pushImport($this, $raw);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function startBatchClear() {
+    $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_clear')
+      ->startBatchClear($this);
   }
 
   /**
