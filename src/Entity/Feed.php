@@ -199,26 +199,26 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function startImport() {
-    \Drupal::moduleHandler()->invokeAll('feeds_before_import', array($this));
-    $this->getImporter()->getPlugin('manager')->startImport($this);
+  public function startBatchImport() {
+    $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_import')
+      ->startBatchImport($this);
+    $this->set('import_started', time());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function startClear() {
-    \Drupal::moduleHandler()->invokeAll('feeds_before_clear', array($this));
-    $this->getImporter()->getPlugin('manager')->startClear($this);
+  public function startBatchClear() {
+    $this->entityManager()
+      ->getHandler('feeds_feed', 'feed_clear')
+      ->startBatchClear($this);
   }
 
   /**
    * {@inheritdoc}
    */
   public function import() {
-    if (!$this->getImportStartedTime()) {
-      $this->set('import_started', time());
-    }
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->import($this);

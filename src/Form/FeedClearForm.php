@@ -40,7 +40,7 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->entity->startClear();
+    $this->entity->startBatchClear();
     $form_state->setRedirectUrl($this->getCancelUrl());
   }
 

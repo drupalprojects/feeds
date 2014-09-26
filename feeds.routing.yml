@@ -110,15 +110,6 @@ feeds.subscribe:
     feeds_feed: \d+
     _method: 'GET'
 
-feeds.execute:
-  path: '/feed/{feeds_feed}/execute'
-  defaults:
-    _controller: 'feeds.job_controller:execute'
-  requirements:
-    _access: 'TRUE'
-    feeds_feed: \d+
-    _method: 'POST'
-
 # Admin UI routes.
 
 feeds.importer_list:

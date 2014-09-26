@@ -16,7 +16,6 @@ use Drupal\feeds\Event\EventDispatcherTrait;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

@@ -41,7 +41,7 @@ class FeedImportForm extends ContentEntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // The import process will create its own messages.
-    $this->entity->startImport();
+    $this->entity->startBatchImport();
     $form_state->setRedirectUrl($this->getCancelUrl());
   }
 

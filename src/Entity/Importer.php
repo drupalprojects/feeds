@@ -86,7 +86,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * @todo Make this dynamic?
    */
   protected $pluginTypes = array(
-    'manager',
     'scheduler',
     'fetcher',
     'parser',
@@ -97,10 +96,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * Plugin ids and configuration.
    */
   protected $plugins = array(
-    'manager' => array(
-      'id' => 'background',
-      'configuration' => array(),
-    ),
     'scheduler' => array(
       'id' => 'periodic',
       'configuration' => array(),

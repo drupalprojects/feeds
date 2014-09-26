@@ -242,30 +242,6 @@ function feeds_push_subscribe($fid) {
 }
 
 /**
- * Batch API worker callback. Used by Feed::startBatchAPIJob().
- *
- * @todo Harmonize Job Scheduler API callbacks with Batch API callbacks?
- *
- * @param string $method
- *   Method to execute on the feed.
- * @param int $fid
- *   The feed id.
- * @param array $context
- *   Batch context.
- *
- * @see \Drupal\feeds\Feeds\Manager\Background::startBatchAPIJob()
- */
-function feeds_batch($method, $fid, array &$context) {
-  $context['finished'] = StateInterface::BATCH_COMPLETE;
-  try {
-    $context['finished'] = entity_load('feeds_feed', $fid)->$method();
-  }
-  catch (Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-  }
-}
-
-/**
  * Implements hook_theme().
  */
 function feeds_theme() {

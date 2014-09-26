@@ -29,9 +29,52 @@ class FeedImportHandler extends FeedHandlerBase {
   /**
    * {@inheritodc}
    */
-  public function import(FeedInterface $feed) {
+  public function startBatchImport(FeedInterface $feed) {
     $this->acquireLock($feed);
 
+    $batch = [
+      'title' => $this->t('Importing %title', ['%title' => $feed->label()]),
+      'init_message' => $this->t('Starting feed import.'),
+      'operations' => [
+        [[get_class($this), 'contineBatchImport'], [$feed->id()]],
+      ],
+      'progress_message' => $this->t('Importing %title', ['%title' => $feed->label()]),
+      'finished' => [get_class($this), 'finishBatch'],
+      'error_message' => $this->t('An error occored while importing %title.', ['%title' => $feed->label()]),
+    ];
+
+    batch_set($batch);
+    $this->releaseLock($feed);
+  }
+
+  /**
+   * Handles a push import.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed receiving the push.
+   * @param string $payload
+   *   The feed contents.
+   *
+   * @return float
+   *   The progress made.
+   *
+   * @todo Move this to a queue.
+   */
+  public function pushImport(FeedInterface $feed, $payload) {
+    $this->acquireLock($feed);
+
+    $fetcher_result = new RawFetcherResult($payload);
+    $feed->setFetcherResult($fetcher_result);
+
+    do {
+      $result = $this->import($feed);
+    } while ($result != StateInterface::BATCH_COMPLETE);
+  }
+
+  /**
+   * {@inheritodc}
+   */
+  public function import(FeedInterface $feed) {
     try {
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed));
 
@@ -74,23 +117,38 @@ class FeedImportHandler extends FeedHandlerBase {
   }
 
   /**
-   * Handles a push import.
+   * Continues a batch job.
    *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed receiving the push.
-   * @param string $payload
-   *   The feed contents.
-   *
-   * @return float
-   *   The progress made.
+   * @param int $fid
+   *   The feed id being imported.
+   * @param array &$context
+   *   The batch context.
    */
-  public function pushImport(FeedInterface $feed, $payload) {
-    $fetcher_result = new RawFetcherResult($payload);
-    $feed->setFetcherResult($fetcher_result);
+  public static function contineBatchImport($fid, array &$context) {
+    $context['finished'] = StateInterface::BATCH_COMPLETE;
+    try {
+      if ($feed = entity_load('feeds_feed', $fid)) {
+        $context['finished'] = $feed->import();
+      }
+    }
+    catch (\Exception $e) {
+      drupal_set_message($e->getMessage(), 'error');
+    }
+  }
 
-    do {
-      $result = $this->import($feed);
-    } while ($result != StateInterface::BATCH_COMPLETE);
+  /**
+   * Finish batch.
+   *
+   * This function is a static function to avoid serialising the Background
+   * object unnecessarily.
+   */
+  public static function finishBatchImport($success, $results, $operations) {
+    if ($success) {
+
+    }
+    else {
+
+    }
   }
 
   protected function doFetch(FeedInterface $feed) {

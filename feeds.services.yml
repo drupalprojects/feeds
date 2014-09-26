@@ -1,7 +1,4 @@
 services:
-  plugin.manager.feeds.manager:
-    class: Drupal\feeds\Plugin\Type\FeedsPluginManager
-    arguments: ['manager', '@container.namespaces', '@cache.default', '@language_manager', '@module_handler']
   plugin.manager.feeds.scheduler:
     class: Drupal\feeds\Plugin\Type\FeedsPluginManager
     arguments: ['scheduler', '@container.namespaces', '@cache.default', '@language_manager', '@module_handler']
@@ -34,9 +31,6 @@ services:
   feeds.subscription.controller:
     class: Drupal\feeds\Controller\SubscriptionController
     arguments: ['@feeds.subscription.crud']
-  feeds.job_controller:
-    class: Drupal\feeds\Controller\JobController
-    arguments: ['@state', '@lock']
   feeds.pubsubhubbub:
     class: Drupal\feeds\EventSubscriber\PubSubHubbub
     arguments: ['@queue', '@feeds.subscription.crud']

@@ -114,7 +114,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *   import will be executed on the current page request. This means that this
    *   method may throw the same exceptions as FeedInterface::import().
    */
-  public function startImport();
+  public function startBatchImport();
 
   /**
    * Start deleting all imported items of a feed.
@@ -128,7 +128,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *   clear task will be executed on the current page request. This means that
    *   this method may throw the same exceptions as FeedInterface::clear().
    */
-  public function startClear();
+  public function startBatchClear();
 
   /**
    * Imports a feed.
@@ -136,7 +136,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * Executes the fetching, parsing and processing stage.
    *
    * This method only executes the current batch chunk, then returns. If you are
-   * looking to import an entire source, use FeedInterface::startImport()
+   * looking to import an entire source, use FeedInterface::startBatchImport()
    * instead.
    *
    * @return float
@@ -175,7 +175,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * Removes all items from a feed.
    *
    * This method only executes the current batch chunk, then returns. If you are
-   * looking to delete all items of a feed, use FeedInterface::startClear()
+   * looking to delete all items of a feed, use FeedInterface::startBatchClear()
    * instead.
    *
    * @return float
