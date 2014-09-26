@@ -8,6 +8,8 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
@@ -15,7 +17,10 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "string",
- *   field_types = {"field_item:string"}
+ *   field_types = {
+ *     "string",
+ *     "string_long"
+ *   }
  * )
  */
 class String extends FieldTargetBase {
@@ -23,8 +28,14 @@ class String extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  protected static function prepareTarget(array &$target) {
-    $target['unique']['value'] = TRUE;
+  protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    $definition = FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('value');
+
+    if ($field_definition->getType() === 'string') {
+      $definition->markPropertyUnique('value');
+    }
+    return $definition;
   }
 
   /**
@@ -32,8 +43,8 @@ class String extends FieldTargetBase {
    */
   protected function prepareValue($delta, array &$values) {
     // Trim the value if it's too long.
-    if (!empty($this->settings['settings']['max_length'])) {
-      $values['value'] = Unicode::substr($values['value'], 0, $this->settings['settings']['max_length']);
+    if (!empty($this->settings['max_length'])) {
+      $values['value'] = Unicode::substr($values['value'], 0, $this->settings['max_length']);
     }
   }
 

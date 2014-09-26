@@ -8,22 +8,16 @@
 namespace Drupal\feeds\Plugin\Type\Target;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessor;
+use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\ImporterInterface;
-use Drupal\field\Entity\FieldConfig;
 
 /**
  * Helper class for field mappers.
  */
-abstract class FieldTargetBase extends TargetBase implements TargetInterface {
-
-  /**
-   * A static cache of entity properties.
-   *
-   * @var array
-   */
-  protected static $properties;
+abstract class FieldTargetBase extends TargetBase {
 
   /**
    * A static cache of entity query objects stored per feed id.
@@ -33,75 +27,57 @@ abstract class FieldTargetBase extends TargetBase implements TargetInterface {
   protected static $uniqueQueries;
 
   /**
+   * The field settings.
+   *
+   * @var array
+   */
+  protected $fieldSettings;
+
+  /**
    * {@inheritdoc}
    */
   public static function targets(array &$targets, ImporterInterface $importer, array $definition) {
-    if (!$importer->getProcessor() instanceof EntityProcessor) {
-      return;
-    }
-    if (static::$properties === NULL) {
-      static::buildProperties($importer->getProcessor());
-    }
+    $processor = $importer->getProcessor();
 
-    foreach (static::$properties as $id => $property) {
-      if (!empty($property['type']) && in_array($property['type'], $definition['field_types'])) {
-        static::prepareTarget($property);
-        $targets[$id] = $property;
-        $targets[$id]['id'] = $definition['id'];
-      }
-    }
-  }
-
-  /**
-   * Discovers all fields/properties of an entity.
-   *
-   * @param \Drupal\feeds\ImporterInterface $importer
-   *   The importer.
-   */
-  protected static function buildProperties(EntityProcessor $processor) {
-    $entity_type = $processor->entityType();
-
-    $info = \Drupal::entityManager()->getDefinition($entity_type);
-    $bundle_key = NULL;
-    if ($info->getBundleEntityType()) {
-      $bundle_key = $info->getBundleEntityType();
+    if (!$processor instanceof EntityProcessor) {
+      return $targets;
     }
 
-    $field_definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $processor->bundle());
+    $field_definitions = \Drupal::entityManager()->getFieldDefinitions($processor->entityType(), $processor->bundle());
 
     foreach ($field_definitions as $id => $field_definition) {
-      if ($field_definition->isReadOnly() || $id == $bundle_key) {
+      if ($field_definition->isReadOnly()) {
         continue;
       }
-
-      static::$properties[$id] = $field_definition->getItemDefinition()->toArray();
-      static::$properties[$id]['label'] = $field_definition->getLabel();
-      static::$properties[$id]['description'] = $field_definition->getDescription();
-      static::$properties[$id]['settings'] = $field_definition->getSettings();
-
-      foreach ($field_definition->getItemDefinition()->getPropertyDefinitions() as $property => $data_definition) {
-        if (!$data_definition->isComputed()) {
-          static::$properties[$id]['properties'][$property] = $data_definition->toArray();
-        }
-      }
-
-      if ($instance = FieldConfig::loadByName($entity_type, $processor->bundle(), $id)) {
-        static::$properties[$id]['label'] = $instance->getLabel();
-        static::$properties[$id]['description'] = $instance->getDescription();
-        static::$properties[$id]['settings'] = $instance->getSettings();
+      if (in_array($field_definition->getType(), $definition['field_types'])) {
+        $target = static::prepareTarget($field_definition);
+        $target->setPluginId($definition['id']);
+        $targets[$id] = $target;
       }
     }
   }
 
   /**
-   * Prepares the automatically generated target array.
+   * Prepares a target definition.
    *
-   * Subclasses of FieldTargetBase should use this to massage the target info.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition.
    *
-   * @param array $target
-   *   The target info array.
+   * @return \Drupal\feeds\FieldTargetDefinition
+   *   The target definition.
    */
-  protected static function prepareTarget(array &$target) {}
+  protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    return FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('value');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->settings = $this->targetDefinition->getFieldDefinition()->getSettings();
+  }
 
   /**
    * {@inheritdoc}

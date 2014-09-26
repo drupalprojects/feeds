@@ -15,8 +15,8 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  * @Plugin(
  *   id = "boolean",
  *   field_types = {
- *     "field_item:boolean",
- *     "field_item:list_boolean"
+ *     "boolean",
+ *     "list_boolean"
  *   }
  * )
  */

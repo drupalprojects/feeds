@@ -16,8 +16,14 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class BooleanTest extends FeedsUnitTestCase {
 
   public function test() {
-    $importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $target = new Boolean(['importer' => $importer], 'boolean', []);
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Boolean', 'prepareTarget')->getClosure();
+
+    $configuration = [
+      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'target_definition' =>  $method($this->getMockFieldDefinition()),
+    ];
+
+    $target = new Boolean($configuration, 'boolean', []);
     $values = ['value' => 'string'];
 
     $method = $this->getProtectedClosure($target, 'prepareValue');

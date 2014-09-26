@@ -2,38 +2,31 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Feeds\Target\Path.
+ * Contains \Drupal\feeds\Feeds\Target\Uri.
  */
 
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\feeds\FieldTargetDefinition;
-use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
- * Defines a path field mapper.
+ * Defines a string field mapper.
  *
  * @Plugin(
- *   id = "path",
- *   field_types = {"path"}
+ *   id = "uri",
+ *   field_types = {"uri"}
  * )
  */
-class Path extends FieldTargetBase {
+class Uri extends String {
 
   /**
    * {@inheritdoc}
    */
   protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
     return FieldTargetDefinition::createFromFieldDefinition($field_definition)
-      ->addProperty('alias');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function prepareValue($delta, array &$values) {
-    $values['alias'] = trim($values['alias']);
+      ->addProperty('value')
+      ->markPropertyUnique('value');
   }
 
 }

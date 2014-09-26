@@ -8,9 +8,11 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -20,10 +22,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @Plugin(
  *   id = "text",
  *   field_types = {
- *     "field_item:list_text",
- *     "field_item:text",
- *     "field_item:text_long",
- *     "field_item:text_with_summary"
+ *     "list_text",
+ *     "text",
+ *     "text_long",
+ *     "text_with_summary"
  *   }
  * )
  */
@@ -35,6 +37,15 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    * @var \Drupal\Core\Session\AccountInterface
    */
   protected $user;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    return FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('value')
+      ->addProperty('summary');
+  }
 
   /**
    * Constructs a Text object.
@@ -66,21 +77,12 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
   /**
    * {@inheritdoc}
    */
-  protected static function prepareTarget(array &$target) {
-    unset($target['properties']['format']);
-    unset($target['properties']['processed']);
-    unset($target['properties']['summary_processed']);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function prepareValue($delta, array &$values) {
     $values['value'] = (string) $values['value'];
 
     // At todo. Maybe break these up into separate classes.
-    if (!empty($this->settings['settings']['allowed_values'])) {
-      $key = array_search($values['value'], $this->settings['settings']['allowed_values']);
+    if (!empty($this->settings['allowed_values'])) {
+      $key = array_search($values['value'], $this->settings['allowed_values']);
       if ($key !== FALSE) {
         $values['value'] = $key;
       }

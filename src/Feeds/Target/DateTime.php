@@ -15,7 +15,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "datetime",
- *   field_types = {"field_item:datetime"}
+ *   field_types = {"datetime"}
  * )
  */
 class DateTime extends FieldTargetBase {
@@ -32,7 +32,7 @@ class DateTime extends FieldTargetBase {
    */
   public function __construct(array $settings, $plugin_id, array $plugin_definition) {
     parent::__construct($settings, $plugin_id, $plugin_definition);
-    $datetime_type = $this->settings['settings']['datetime_type'];
+    $datetime_type = $this->settings['datetime_type'];
     $this->storageFormat = $datetime_type == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
   }
 

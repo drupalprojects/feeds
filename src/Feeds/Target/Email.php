@@ -14,7 +14,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "email",
- *   field_types = {"field_item:email"}
+ *   field_types = {"email"}
  * )
  */
 class Email extends FieldTargetBase {

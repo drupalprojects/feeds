@@ -16,21 +16,19 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class PathTest extends FeedsUnitTestCase {
 
   public function testPrepareValue() {
-    $importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $target = new Path(['importer' => $importer], 'path', []);
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Path', 'prepareTarget')->getClosure();
+
+    $configuration = [
+      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'target_definition' =>  $method($this->getMockFieldDefinition()),
+    ];
+    $target = new Path($configuration, 'path', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $values = ['alias' => 'path '];
     $method(0, $values);
     $this->assertSame($values['alias'], 'path');
-  }
-
-  public function testPrepareTarget() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Path', 'prepareTarget')->getClosure();
-    $targets = ['properties' => ['pid' => '']];
-    $method($targets);
-    $this->assertSame($targets, ['properties' => []]);
   }
 
 }

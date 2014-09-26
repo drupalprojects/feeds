@@ -17,35 +17,46 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
  */
 class TextTest extends FeedsUnitTestCase {
 
+  protected $container;
+  protected $importer;
+  protected $targetDefinition;
+
   public function setUp() {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
     $this->container->set('current_user', $this->getMock('Drupal\Core\Session\AccountInterface'));
     $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
+
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Text', 'prepareTarget')->getClosure();
+    $this->targetDefinition = $method($this->getMockFieldDefinition());
   }
 
   public function test() {
-    $settings = [
+    $configuration = [
       'importer' => $this->importer,
-      'settings' => ['max_length' => 5],
+      'target_definition' => $this->targetDefinition,
     ];
-    $target = Text::create($this->container, $settings, 'text', []);
+
+    $target = Text::create($this->container, $configuration, 'text', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $values = ['value' => 'longstring'];
     $method(0, $values);
-    $this->assertSame($values['value'], 'longs');
+    $this->assertSame($values['value'], 'longstring');
     $this->assertSame($values['format'], 'plain_text');
   }
 
   public function testAllowedValues() {
-    $settings = [
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Text', 'prepareTarget')->getClosure();
+    $this->targetDefinition = $method($this->getMockFieldDefinition(['allowed_values' => ['key' => 'search value']]));
+
+    $configuration = [
       'importer' => $this->importer,
-      'settings' => ['allowed_values' => ['key' => 'search value']],
+      'target_definition' => $this->targetDefinition,
     ];
-    $target = Text::create($this->container, $settings, 'text', []);
+    $target = Text::create($this->container, $configuration, 'text', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
@@ -60,8 +71,11 @@ class TextTest extends FeedsUnitTestCase {
   }
 
   public function testBuildConfigurationForm() {
-    $settings = ['importer' => $this->importer];
-    $target = Text::create($this->container, $settings, 'text', []);
+    $configuration = [
+      'importer' => $this->importer,
+      'target_definition' => $this->targetDefinition,
+    ];
+    $target = Text::create($this->container, $configuration, 'text', []);
     $target->setStringTranslation($this->getStringTranslationStub());
 
     $form_state = new FormState();
@@ -70,8 +84,11 @@ class TextTest extends FeedsUnitTestCase {
   }
 
   public function testSummary() {
-    $settings = ['importer' => $this->importer];
-    $target = Text::create($this->container, $settings, 'text', []);
+    $configuration = [
+      'importer' => $this->importer,
+      'target_definition' => $this->targetDefinition,
+    ];
+    $target = Text::create($this->container, $configuration, 'text', []);
     $target->setStringTranslation($this->getStringTranslationStub());
 
 
@@ -90,19 +107,6 @@ class TextTest extends FeedsUnitTestCase {
 
     $this->assertSame($target->getSummary(), 'Format: <em class="placeholder">Test filter</em>');
     $this->assertEquals($target->getSummary(), '');
-  }
-
-  public function testPrepareTarget() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Text', 'prepareTarget')->getClosure();
-    $targets = [
-      'properties' => [
-        'format' => [],
-        'processed' => [],
-        'summary_processed' => [],
-      ],
-    ];
-    $method($targets);
-    $this->assertSame($targets, ['properties' => []]);
   }
 
 }

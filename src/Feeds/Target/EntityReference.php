@@ -8,7 +8,9 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\String as DrupalString;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
@@ -17,7 +19,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "entity_reference",
- *   field_types = {"field_item:entity_reference"}
+ *   field_types = {"entity_reference"}
  * )
  */
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
@@ -60,6 +62,14 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   /**
    * {@inheritdoc}
    */
+  protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    return FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('target_id');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function __construct(array $settings, $plugin_id, array $plugin_definition) {
     parent::__construct($settings, $plugin_id, $plugin_definition);
     // Calculate the upload directory.
@@ -85,15 +95,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   }
 
   protected function getEntityType() {
-    return $this->settings['settings']['target_type'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static function prepareTarget(array &$target) {
-    unset($target['properties']['revision_id']);
-    unset($target['properties']['entity']);
+    return $this->settings['target_type'];
   }
 
   /**

@@ -16,27 +16,22 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class StringTest extends FeedsUnitTestCase {
 
   public function testPrepareValue() {
-    $importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $settings = [
-      'importer' => $importer,
-      'settings' => [
-        'max_length' => 5,
-      ],
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\String', 'prepareTarget')->getClosure();
+    $field_definition = $this->getMockFieldDefinition(['max_length' => 5]);
+    $field_definition->expects($this->any())
+      ->method('getType')
+      ->will($this->returnValue('string'));
+    $configuration = [
+      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'target_definition' =>  $method($field_definition),
     ];
-    $target = new String($settings, 'link', []);
+    $target = new String($configuration, 'link', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $values = ['value' => 'longstring'];
     $method(0, $values);
     $this->assertSame($values['value'], 'longs');
-  }
-
-  public function testPrepareTarget() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\String', 'prepareTarget')->getClosure();
-    $targets = [];
-    $method($targets);
-    $this->assertTrue($targets['unique']['value']);
   }
 
 }

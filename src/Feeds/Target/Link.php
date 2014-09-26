@@ -8,6 +8,8 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
 /**
@@ -15,7 +17,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *
  * @Plugin(
  *   id = "link",
- *   field_types = {"field_item:link"}
+ *   field_types = {"link"}
  * )
  */
 class Link extends FieldTargetBase {
@@ -23,8 +25,10 @@ class Link extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  protected static function prepareTarget(array &$target) {
-    unset($target['properties']['attributes']);
+  protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    return FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('url')
+      ->addProperty('title');
   }
 
   /**

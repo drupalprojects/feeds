@@ -2,27 +2,27 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\Feeds\Target\NumberTest.
+ * Contains \Drupal\feeds\Tests\Feeds\Target\IntegerTest.
  */
 
 namespace Drupal\feeds\Tests\Feeds\Target;
 
-use Drupal\feeds\Feeds\Target\Number;
+use Drupal\feeds\Feeds\Target\Integer;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Feeds\Target\Number
+ * @covers \Drupal\feeds\Feeds\Target\Integer
  */
-class NumberTest extends FeedsUnitTestCase {
+class IntegerTest extends FeedsUnitTestCase {
 
   public function testPrepareValue() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Number', 'prepareTarget')->getClosure();
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Integer', 'prepareTarget')->getClosure();
 
     $configuration = [
       'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
       'target_definition' =>  $method($this->getMockFieldDefinition()),
     ];
-    $target = new Number($configuration, 'link', []);
+    $target = new Integer($configuration, 'link', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
@@ -32,7 +32,7 @@ class NumberTest extends FeedsUnitTestCase {
 
     $values = ['value' => '10'];
     $method(0, $values);
-    $this->assertSame($values['value'], '10');
+    $this->assertSame($values['value'], 10);
   }
 
 }

@@ -8,21 +8,21 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\String as StringHelper;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedsEnclosure;
-use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
-use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
+use Drupal\feeds\FieldTargetDefinition;
 
 /**
  * Defines a file field mapper.
  *
  * @Plugin(
  *   id = "file",
- *   field_types = {"field_item:file", "field_item:image"}
+ *   field_types = {"file"}
  * )
  */
-class File extends FieldTargetBase implements ConfigurableTargetInterface {
+class File extends EntityReference {
 
   /**
    * The file upload directory.
@@ -30,6 +30,15 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
    * @var string
    */
   protected $uploadDirectory;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    return FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('target_id')
+      ->addProperty('description');
+  }
 
   /**
    * {@inheritdoc}
@@ -42,14 +51,6 @@ class File extends FieldTargetBase implements ConfigurableTargetInterface {
       $this->uploadDirectory = $this->settings['instance']->getFieldSetting('uri_scheme');
       $this->uploadDirectory .= '://' . $this->settings['instance']->getFieldSetting('file_directory');
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static function prepareTarget(array &$target) {
-    $target['properties']['target_id']['label'] = t('Filepath, either a remote URL or local file.');
-    unset($target['properties']['revision_id']);
   }
 
   /**

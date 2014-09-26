@@ -16,8 +16,13 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class EmailTest extends FeedsUnitTestCase {
 
   public function test() {
-    $importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $target = new Email(['importer' => $importer], 'email', []);
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Email', 'prepareTarget')->getClosure();
+
+    $configuration = [
+      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'target_definition' =>  $method($this->getMockFieldDefinition()),
+    ];
+    $target = new Email($configuration, 'email', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 

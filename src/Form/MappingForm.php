@@ -56,8 +56,8 @@ class MappingForm extends FormBase {
     $this->sourceOptions = $this->sortOptions($this->sourceOptions);
 
     $target_options = array();
-    foreach ($targets as $key => $info) {
-      $target_options[$key] = $info['label'];
+    foreach ($targets as $key => $target) {
+      $target_options[$key] = $target->getLabel();
     }
     $target_options = $this->sortOptions($target_options);
 
@@ -149,7 +149,7 @@ class MappingForm extends FormBase {
     );
 
     foreach ($mapping['map'] as $column => $source) {
-      if (!isset($this->targets[$mapping['target']]['properties'][$column])) {
+      if (!$this->targets[$mapping['target']]->hasProperty($column)) {
         unset($mapping['map'][$column]);
         continue;
       }
@@ -161,10 +161,13 @@ class MappingForm extends FormBase {
         '#attributes' => array('class' => array('feeds-table-select-list')),
       );
 
-      $label = String::checkPlain($this->targets[$mapping['target']]['label']);
+      $label = String::checkPlain($this->targets[$mapping['target']]->getLabel());
 
       if (count($mapping['map']) > 1) {
-        $label .= ': ' . $this->targets[$mapping['target']]['properties'][$column]['label'];
+        $label .= ': ' . $this->targets[$mapping['target']]->getPropertyLabel($column);
+      }
+      else {
+        $label .= ': ' . $this->targets[$mapping['target']]->getDescription();
       }
       $row['targets']['#items'][] = $label;
     }
@@ -231,7 +234,7 @@ class MappingForm extends FormBase {
     $mappings = $this->importer->getMappings();
 
     foreach ($mapping['map'] as $column => $source) {
-      if (!empty($this->targets[$mapping['target']]['unique'][$column])) {
+      if ($this->targets[$mapping['target']]->isUnique($column)) {
         $row['unique'][$column] = array(
           '#title' => $this->t('Unique'),
           '#type' => 'checkbox',
@@ -292,7 +295,7 @@ class MappingForm extends FormBase {
 
     // Add any targets.
     if ($new_target = $form_state->getValue('add_target')) {
-      $map = array_fill_keys(array_keys($this->targets[$new_target]['properties']), '');
+      $map = array_fill_keys($this->targets[$new_target]->getProperties(), '');
       $this->importer->addMapping(array(
         'target' => $form_state->getValue('add_target'),
         'map' => $map,

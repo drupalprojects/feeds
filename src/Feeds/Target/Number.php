@@ -15,12 +15,9 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  * @Plugin(
  *   id = "number",
  *   field_types = {
- *     "field_item:integer",
- *     "field_item:list_integer",
- *     "field_item:list_float",
- *     "field_item:number_integer",
- *     "field_item:number_decimal",
- *     "field_item:number_float"
+ *     "decimal",
+ *     "float",
+ *     "list_float"
  *   }
  * )
  */

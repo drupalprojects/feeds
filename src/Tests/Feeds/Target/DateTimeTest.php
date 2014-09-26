@@ -15,7 +15,9 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
  * @covers \Drupal\feeds\Feeds\Target\DateTime
  */
 class DateTimeTest extends FeedsUnitTestCase {
+
   protected $importer;
+  protected $targetDefinition;
 
   public function setUp() {
     require_once DRUPAL_ROOT . '/core/includes/common.inc';
@@ -32,16 +34,19 @@ class DateTimeTest extends FeedsUnitTestCase {
     \Drupal::setContainer($container);
 
     $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\DateTime', 'prepareTarget')->getClosure();
+    $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'time']));
   }
 
   public function test() {
-    $settings = [
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\DateTime', 'prepareTarget')->getClosure();
+    $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'date']));
+
+    $configuration = [
       'importer' => $this->importer,
-      'settings' => [
-        'datetime_type' => 'date',
-      ],
+      'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($settings, 'boolean', []);
+    $target = new DateTime($configuration, 'boolean', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $values = ['value' => 1411606273];
@@ -50,13 +55,11 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   public function testFromDateTime() {
-    $settings = [
+    $configuration = [
       'importer' => $this->importer,
-      'settings' => [
-        'datetime_type' => 'time',
-      ],
+      'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($settings, 'boolean', []);
+    $target = new DateTime($configuration, 'boolean', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $time = time();
@@ -67,13 +70,11 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   public function testWithErrors() {
-    $settings = [
+    $configuration = [
       'importer' => $this->importer,
-      'settings' => [
-        'datetime_type' => 'time',
-      ],
+      'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($settings, 'boolean', []);
+    $target = new DateTime($configuration, 'boolean', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $time = time();
@@ -84,13 +85,11 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   public function testYearValue() {
-    $settings = [
+    $configuration = [
       'importer' => $this->importer,
-      'settings' => [
-        'datetime_type' => 'time',
-      ],
+      'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($settings, 'boolean', []);
+    $target = new DateTime($configuration, 'boolean', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $time = time();
