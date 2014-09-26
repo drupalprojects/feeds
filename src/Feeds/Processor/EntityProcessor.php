@@ -391,14 +391,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   }
 
   /**
-   * Bundle type this processor operates on.
-   *
-   * Defaults to the entity type for entities that do not define bundles.
+   * The entity's bundle key.
    *
    * @return string|null
    *   The bundle type this processor operates on, or null if it is undefined.
    */
-  protected function bundleKey() {
+  public function bundleKey() {
     return $this->entityInfo->getKey('bundle');
   }
 
@@ -413,14 +411,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * @todo We should be more careful about missing bundles.
    */
   public function bundle() {
-    if ($bundle_key = $this->bundleKey()) {
-      if (isset($this->configuration['values'][$bundle_key])) {
-        return $this->configuration['values'][$bundle_key];
-      }
-      return;
+    if (!$bundle_key = $this->bundleKey()) {
+      return $this->entityType();
     }
-
-    return $this->entityType();
+    if (isset($this->configuration['values'][$bundle_key])) {
+      return $this->configuration['values'][$bundle_key];
+    }
   }
 
   /**
@@ -795,20 +791,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function isLocked() {
     if ($this->isLocked === NULL) {
-      $this->isLocked = FALSE;
-
       // Look for feeds.
-      $fids = $this->queryFactory->get('feeds_feed')
+      $this->isLocked = (bool) $this->queryFactory->get('feeds_feed')
         ->condition('importer', $this->importer->id())
-        ->execute();
-
-      if ($fids) {
-        // Check to see if any feeds have imported entities.
-        $this->isLocked = (bool) $this->queryFactory->get($this->entityType())
-        ->condition('feeds_item.target_id', $fids)
         ->range(0, 1)
         ->execute();
-      }
     }
 
     return $this->isLocked;
