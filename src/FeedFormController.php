@@ -93,6 +93,27 @@ class FeedFormController extends ContentEntityForm {
 
   /**
    * {@inheritdoc}
+   */
+  protected function actions(array $form, FormStateInterface $form_state) {
+    $element = parent::actions($form, $form_state);
+
+    // Add an "Import" button.
+    if ($this->entity->access('import')) {
+      $element['submit']['#dropbutton'] = 'save';
+      $element['import'] = $element['submit'];
+      $element['import']['#dropbutton'] = 'save';
+      $element['import']['#value'] = t('Save and import');
+      $element['import']['#weight'] = 0;
+      array_unshift($element['import']['#submit'], '::import');
+    }
+
+    $element['delete']['#access'] = $this->entity->access('delete');
+
+    return $element;
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @todo Don't call buildEntity() here.
    */
@@ -170,6 +191,20 @@ class FeedFormController extends ContentEntityForm {
       drupal_set_message($this->t('The feed could not be saved.'), 'error');
       $form_state->setRebuild();
     }
+  }
+
+  /**
+   * Form submission handler for the 'import' action.
+   *
+   * @param $form
+   *   An associative array containing the structure of the form.
+   * @param $form_state
+   *   The current state of the form.
+   */
+  public function import(array $form, FormStateInterface $form_state) {
+    $feed = $this->entity;
+    $feed->startBatchImport();
+    return $feed;
   }
 
   /**
