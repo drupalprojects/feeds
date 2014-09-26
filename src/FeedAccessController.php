@@ -24,22 +24,27 @@ class FeedAccessController extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $feed, $operation, $langcode, AccountInterface $account) {
-    if (!in_array($operation, array('view', 'create', 'update', 'delete', 'import', 'clear', 'unlock'))) {
-      // If $operation is not one of the supported actions, we return access
-      // denied.
-      AccessResult::forbidden();
-    }
-
-    if ($operation === 'unlock') {
-      // If there is no need to unlock the feed, then the user does not have
-      // access.
-      if ($feed->progressImporting() == StateInterface::BATCH_COMPLETE && $feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
-        return AccessResult::forbidden();
-      }
-    }
-
     $has_perm = $account->hasPermission('administer feeds') || $account->hasPermission("$operation {$feed->bundle()} feeds");
-    return AccessResult::allowedIf($has_perm);
+
+    switch ($operation) {
+      case 'view':
+      case 'create':
+      case 'update':
+        return AccessResult::allowedIf($has_perm);
+
+      case 'import':
+      case 'clear':
+        return AccessResult::allowedIf($has_perm && !$feed->isLocked());
+
+      case 'unlock':
+        return AccessResult::allowedIf($has_perm && $feed->isLocked());
+
+      case 'delete':
+        return AccessResult::allowedIf($has_perm && !$feed->isLocked() && !$feed->getItemCount() && !$feed->isNew());
+
+      default:
+        return AccessResult::neutral();
+    }
   }
 
   /**
