@@ -43,15 +43,13 @@ abstract class ConfigurablePluginBase extends PluginBase implements Configurable
    * {@inheritdoc}
    */
   public function getConfiguration($key = NULL) {
-    if ($key) {
-      if (isset($this->configuration[$key])) {
-        return $this->configuration[$key];
-      }
-
-      return;
+    if ($key === NULL) {
+      return $this->configuration;
     }
 
-    return $this->configuration;
+    if (isset($this->configuration[$key])) {
+      return $this->configuration[$key];
+    }
   }
 
   /**
