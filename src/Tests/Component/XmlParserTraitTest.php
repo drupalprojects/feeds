@@ -18,12 +18,9 @@ class XmlParserTraitTest extends FeedsUnitTestCase {
   public function test() {
     $trait = $this->getMockForTrait('Drupal\feeds\Component\XmlParserTrait');
 
-    $this->callProtectedMethod($trait, 'startXmlErrorHandling');
-
     $doc = $this->callProtectedMethod($trait, 'getDomDocument', [' <thing></thing> ']);
     $this->assertSame('DOMDocument', get_class($doc));
 
-    $this->callProtectedMethod($trait, 'stopXmlErrorHandling');
     $errors = $this->callProtectedMethod($trait, 'getXmlErrors');
     $this->assertSame([], $errors);
   }
@@ -31,12 +28,9 @@ class XmlParserTraitTest extends FeedsUnitTestCase {
   public function testErrors() {
     $trait = $this->getMockForTrait('Drupal\feeds\Component\XmlParserTrait');
 
-    $this->callProtectedMethod($trait, 'startXmlErrorHandling');
-
     $doc = $this->callProtectedMethod($trait, 'getDomDocument', ['asdfasdf']);
     $this->assertSame('DOMDocument', get_class($doc));
 
-    $this->callProtectedMethod($trait, 'stopXmlErrorHandling');
     $errors = $this->callProtectedMethod($trait, 'getXmlErrors');
     $this->assertSame("Start tag expected, '<' not found", $errors[3][0]['message']);
   }

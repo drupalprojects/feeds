@@ -36,9 +36,7 @@ class GenericOpmlParser {
    *   The XML string.
    */
   public function __construct($xml) {
-    $this->startXmlErrorHandling();
     $this->xpath = new \DOMXPath($this->getDomDocument($xml));
-    $this->stopXmlErrorHandling();
   }
 
   /**
