@@ -9,7 +9,7 @@ namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Utility\String;
-use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\DefaultSinglePluginBag;
 use Drupal\feeds\Event\ClearEvent;
@@ -54,7 +54,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   }
  * )
  */
-class Importer extends ConfigEntityBase implements ImporterInterface {
+class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   use EventDispatcherTrait;
 
   /**
@@ -234,10 +234,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getMappings() {
-    if (!$this->mappings) {
-      $this->mappings = $this->buildDefaultMappings();
-    }
-
     return $this->mappings;
   }
 
@@ -279,78 +275,6 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    */
   public function removeMappings() {
     $this->mappings = array();
-  }
-
-  /**
-   * Builds a default mapping configuration based off of suggestions.
-   *
-   * @return array
-   *   The mapping array.
-   *
-   * @todo Make this work again.
-   */
-  protected function buildDefaultMappings() {
-    return array();
-    $mappings = array();
-    $targets = $this->getMappingTargets();
-    $sources = $this->getMappingSources();
-
-    // // Remove sources with no suggestions.
-    $suggested = array();
-    foreach ($sources as $source_id => $source) {
-      if (!empty($source['suggestions']) && !empty($source['suggestions']['targets'])) {
-        $suggested[$source_id] = $source;
-      }
-    }
-
-    if ($suggested) {
-      foreach ($targets as $target_id => $target) {
-        foreach ($suggested as $source_id => $source) {
-          if (in_array($target_id, $source['suggestions']['targets'])) {
-            $mappings[] = array('source' => $source_id, 'target' => $target_id);
-            unset($targets[$target_id]);
-            unset($sources[$source_id]);
-            unset($suggested[$source_id]);
-            break;
-          }
-        }
-      }
-    }
-
-    $suggested = array();
-    foreach ($sources as $source_id => $source) {
-      if (!empty($source['suggestions']) && !empty($source['suggestions']['types'])) {
-        $suggested[$source_id] = $source;
-      }
-    }
-
-    if ($suggested) {
-      foreach ($targets as $target_id => $target) {
-
-        if (!isset($target['type'])) {
-          continue;
-        }
-
-        foreach ($suggested as $source_id => $source) {
-          if (isset($source['suggestions']['types'][$target['type']])) {
-            foreach ($source['suggestions']['types'][$target['type']] as $key => $value) {
-              if (isset($target['settings'][$key]) && $target['settings'][$key] == $value) {
-                continue;
-              }
-              else {
-                break 2;
-              }
-            }
-            $mappings[] = array('source' => $source_id, 'target' => $target_id);
-            unset($targets[$target_id]);
-            unset($sources[$source_id]);
-            unset($suggested[$source_id]);
-          }
-        }
-      }
-    }
-
-    return $mappings;
   }
 
   /**
@@ -415,25 +339,23 @@ class Importer extends ConfigEntityBase implements ImporterInterface {
    * @todo Use plugin bag.
    */
   public function getTargetPlugin($delta) {
-    if (!isset($this->targetPlugins[$delta])) {
-      $targets = $this->getMappingTargets();
-      $target = $this->mappings[$delta]['target'];
-
-      // The target is a plugin.
-      if (isset($targets[$target]['id'])) {
-        $id = $targets[$target]['id'];
-        $settings = $targets[$target];
-        $settings['importer'] = $this;
-
-        if (isset($this->mappings[$delta]['settings'])) {
-          $settings['configuration'] = $this->mappings[$delta]['settings'];
-        }
-        $this->targetPlugins[$delta] = \Drupal::service('plugin.manager.feeds.target')->createInstance($id, $settings);
-      }
-      else {
-        $this->targetPlugins[$delta] = FALSE;
-      }
+    if (isset($this->targetPlugins[$delta])) {
+      return $this->targetPlugins[$delta];
     }
+
+    $targets = $this->getMappingTargets();
+    $target = $this->mappings[$delta]['target'];
+
+    // The target is a plugin.
+    $id = $targets[$target]->getPluginId();
+
+    $configuration = [];
+    $configuration['importer'] = $this;
+    $configuration['target_definition'] = $targets[$target];
+    if (isset($this->mappings[$delta]['settings'])) {
+      $configuration += $this->mappings[$delta]['settings'];
+    }
+    $this->targetPlugins[$delta] = \Drupal::service('plugin.manager.feeds.target')->createInstance($id, $configuration);
 
     return $this->targetPlugins[$delta];
   }
