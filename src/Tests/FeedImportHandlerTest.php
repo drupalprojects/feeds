@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\ParseEvent;
@@ -24,15 +23,13 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class FeedImportHandlerTest extends FeedsUnitTestCase {
 
   protected $dispatcher;
-  protected $lock;
   protected $feed;
 
   public function setUp() {
     parent::setUp();
 
     $this->dispatcher = new EventDispatcher();
-    $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
-    $this->handler = new FeedImportHandler($this->dispatcher, $this->lock);
+    $this->handler = new FeedImportHandler($this->dispatcher);
     $this->handler->setStringTranslation($this->getStringTranslationStub());
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
@@ -47,10 +44,10 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
   }
 
   public function testStartBatchImport() {
-    $this->lock
+    $this->feed
       ->expects($this->once())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
+      ->method('lock')
+      ->will($this->returnValue($this->feed));
 
     $this->handler->startBatchImport($this->feed);
   }
@@ -119,11 +116,10 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       $this->assertSame($event->getParserResult(), $parser_result);
     });
 
-    $this->lock
-      ->expects($this->any())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
-
+    $this->feed
+      ->expects($this->once())
+      ->method('lock')
+      ->will($this->returnValue($this->feed));
     $this->feed
       ->expects($this->once())
       ->method('setFetcherResult');

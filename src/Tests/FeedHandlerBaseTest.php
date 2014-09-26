@@ -81,31 +81,4 @@ class FeedHandlerBaseTest extends FeedsUnitTestCase {
     $this->assertSame(StateInterface::BATCH_COMPLETE, $context['finished']);
   }
 
-  public function testAcquireLock() {
-    $this->lock->expects($this->once())
-      ->method('acquire')
-      ->with("feeds_feed_{$this->feed->id()}", 60.0)
-      ->will($this->returnValue(TRUE));
-
-    $method = $this->getMethod('Drupal\feeds\FeedHandlerBase', 'acquireLock');
-    $method->invokeArgs($this->handler, [$this->feed]);
-  }
-
-  /**
-   * @expectedException \Drupal\feeds\Exception\LockException
-   */
-  public function testException() {
-    $method = $this->getMethod('Drupal\feeds\FeedHandlerBase', 'acquireLock');
-    $method->invokeArgs($this->handler, [$this->feed]);
-  }
-
-  public function testReleaseLock() {
-    $this->lock->expects($this->once())
-      ->method('release')
-      ->with("feeds_feed_{$this->feed->id()}")
-      ->will($this->returnValue(TRUE));
-    $method = $this->getMethod('Drupal\feeds\FeedHandlerBase', 'releaseLock');
-    $method->invokeArgs($this->handler, [$this->feed]);
-  }
-
 }

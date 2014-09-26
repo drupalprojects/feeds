@@ -30,7 +30,7 @@ class FeedImportHandler extends FeedHandlerBase {
    * {@inheritodc}
    */
   public function startBatchImport(FeedInterface $feed) {
-    $this->acquireLock($feed);
+    $feed->lock();
 
     $batch = [
       'title' => $this->t('Importing %title', ['%title' => $feed->label()]),
@@ -59,7 +59,7 @@ class FeedImportHandler extends FeedHandlerBase {
    * @todo Move this to a queue.
    */
   public function pushImport(FeedInterface $feed, $payload) {
-    $this->acquireLock($feed);
+    $feed->lock();
 
     $fetcher_result = new RawFetcherResult($payload);
     $feed->setFetcherResult($fetcher_result);
@@ -103,7 +103,7 @@ class FeedImportHandler extends FeedHandlerBase {
     if ($result == StateInterface::BATCH_COMPLETE || isset($exception)) {
       $feed->cleanUp();
       $feed->save();
-      $this->releaseLock($feed);
+      $feed->unlock();
     }
     else {
       $feed->save();

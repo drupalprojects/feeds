@@ -18,30 +18,23 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class FeedClearHandlerTest extends FeedsUnitTestCase {
 
   protected $dispatcher;
-  protected $lock;
   protected $feed;
 
   public function setUp() {
     parent::setUp();
 
     $this->dispatcher = new EventDispatcher();
-    $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
-    $this->handler = new FeedClearHandler($this->dispatcher, $this->lock);
+    $this->handler = new FeedClearHandler($this->dispatcher);
     $this->handler->setStringTranslation($this->getStringTranslationStub());
-
-    $this->lock
-      ->expects($this->any())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
   }
 
   public function testStartBatchClear() {
-    $this->lock
+    $this->feed
       ->expects($this->once())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
+      ->method('lock')
+      ->will($this->returnValue($this->feed));
 
     $this->handler->startBatchClear($this->feed);
   }
@@ -69,6 +62,9 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       throw new \Exception();
     });
 
+    $this->feed
+      ->expects($this->once())
+      ->method('unlock');
     $this->feed
       ->expects($this->once())
       ->method('clearState');

@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Entity;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -14,6 +15,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\EventDispatcherTrait;
 use Drupal\feeds\Event\FeedsEvents;
+use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
@@ -255,6 +257,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->clearFetcherResult();
     $this->clearState();
     $this->set('import_started', NULL);
+
+    return $this;
   }
 
   /**
@@ -395,9 +399,27 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function unlock() {
-    $this->entityManager()->getStorage($this->entityType)->unlockFeed($this);
+  public function lock() {
+    if (!\Drupal::lock('feeds.lock.persistent')->acquire("feeds_feed_{$this->id()}", 60.0)) {
+      $args = ['@id' => $this->bundle(), '@fid' => $this->id()];
+      throw new LockException(String::format('Cannot acquire lock for feed @id / @fid.', $args));
+    }
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function unlock() {
+    \Drupal::lock('feeds.lock.persistent')->release("feeds_feed_{$this->id()}");
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isLocked() {
+    return !\Drupal::lock('feeds.lock.persistent')->lockMayBeAvailable("feeds_feed_{$this->id()}");
   }
 
   /**
@@ -405,8 +427,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function getConfigurationFor(FeedsPluginInterface $client) {
     $type = $client->pluginType();
-    $configuration = $this->get('config')->$type;
-    return array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
+    return $this->get('config')->$type + $client->sourceDefaults();
   }
 
   /**

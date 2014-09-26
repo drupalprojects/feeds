@@ -190,6 +190,8 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
 
   /**
    * Cleans up after an import.
+   *
+   * @return $this
    */
   public function cleanUp();
 
@@ -267,16 +269,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function getItemCount();
 
   /**
-   * Only return source if configuration is persistent and valid.
-   *
-   * @return \Drupal\feeds\Entity\Feed
-   *   The Feed object.
-   *
-   * @todo Figure out how to handle this.
-   */
-  public function existing();
-
-  /**
    * Returns the configuration for a specific client plugin.
    *
    * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $client
@@ -295,8 +287,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * @param array $config
    *   The configuration for the plugin.
    *
-   * @return self
-   *   Returns the Feed for method chaining.
+   * @return $this
    *
    * @todo Refactor this. This can cause conflicts if different plugin types
    *   use the same id.
@@ -325,8 +316,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *   - WATCHDOG_DEBUG
    *   Defaults to WATCHDOG_NOTICE.
    *
-   * @return self
-   *   Returns the Feed for method chaining.
+   * @return $this
    *
    * @todo Redo the static thingy.
    * @todo Figure out what Drupal 8 does with logging. Maybe we can use it.
@@ -339,7 +329,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * Inactive feeds do not get imported.
    *
    * @return bool
-   *   TRUE if the feed is active.
+   *   Tur if the feed is active.
    */
   public function isActive();
 
@@ -349,17 +339,34 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * @param bool $active
    *   True to set this feed to active, false to set it to inactive.
    *
-   * @return \Drupal\feeds\FeedInterface
-   *   The called feed entity.
+   * @return $this
    */
   public function setActive($active);
 
   /**
+   * Locks a feed.
+   *
+   * @return $this
+   *
+   * @throws \Drupal\feeds\Exception\LockException
+   *   Thrown if the lock is unavailable.
+   */
+  public function lock();
+
+  /**
    * Unlocks a feed.
    *
-   * @return \Drupal\feeds\FeedInterface
-   *   The called feed entity.
+   * @return $this
    */
   public function unlock();
+
+  /**
+   * Checks whether a feed is locked.
+   *
+   * @return bool
+   *   Returns true if the feed is locked, and false if not.
+   */
+  public function isLocked();
+
 
 }

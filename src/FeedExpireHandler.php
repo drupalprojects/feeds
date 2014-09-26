@@ -21,7 +21,7 @@ class FeedExpireHandler extends FeedHandlerBase {
    * {@inheritodc}
    */
   public function expire(FeedInterface $feed) {
-    $this->acquireLock($feed);
+    $feed->lock();
     try {
       $this->dispatchEvent(FeedsEvents::INIT_EXPIRE, new InitEvent($feed));
       $this->dispatchEvent(FeedsEvents::EXPIRE, new ExpireEvent($feed));
@@ -29,7 +29,7 @@ class FeedExpireHandler extends FeedHandlerBase {
     catch (\Exception $exception) {
       // Will throw after the lock is released.
     }
-    $this->releaseLock($feed);
+    $feed->unlock();
 
     $result = $feed->progressExpiring();
 

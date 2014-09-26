@@ -39,6 +39,15 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function actions(array $form, FormStateInterface $form_state) {
+    $actions = parent::actions($form, $form_state);
+    $actions['submit']['#disabled'] = $this->entity->isLocked();
+    return $actions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->startBatchClear();
     $form_state->setRedirectUrl($this->getCancelUrl());

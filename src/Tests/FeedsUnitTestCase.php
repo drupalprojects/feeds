@@ -64,6 +64,14 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     return $account;
   }
 
+  protected function getMockFieldDefinition(array $settings = []) {
+    $definition = $this->getMock('Drupal\Core\Field\FieldDefinitionInterface');
+    $definition->expects($this->any())
+      ->method('getSettings')
+      ->will($this->returnValue($settings));
+    return $definition;
+  }
+
   /**
    * Defines stub constants.
    */

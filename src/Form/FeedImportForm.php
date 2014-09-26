@@ -39,6 +39,15 @@ class FeedImportForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function actions(array $form, FormStateInterface $form_state) {
+    $actions = parent::actions($form, $form_state);
+    $actions['submit']['#disabled'] = $this->entity->isLocked();
+    return $actions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // The import process will create its own messages.
     $this->entity->startBatchImport();

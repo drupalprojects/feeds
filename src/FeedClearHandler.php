@@ -22,7 +22,7 @@ class FeedClearHandler extends FeedHandlerBase {
    * {@inheritodc}
    */
   public function startBatchClear(FeedInterface $feed) {
-    $this->acquireLock($feed);
+    $feed->lock();
 
     $batch = [
       'title' => $this->t('Deleting items from: %title', ['%title' => $feed->label()]),
@@ -56,7 +56,7 @@ class FeedClearHandler extends FeedHandlerBase {
     if ($result == StateInterface::BATCH_COMPLETE || isset($exception)) {
       $feed->clearState();
       $feed->save();
-      $this->releaseLock($feed);
+      $feed->unlock();
     }
     else {
       $feed->save();
