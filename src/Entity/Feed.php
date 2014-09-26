@@ -44,7 +44,7 @@ use Drupal\user\UserInterface;
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
  *       "default" = "Drupal\feeds\FeedFormController"
  *     },
- *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+ *     "list_builder" = "Drupal\feeds\FeedListBuilder",
  *     "feed_import" = "Drupal\feeds\FeedImportHandler",
  *     "feed_clear" = "Drupal\feeds\FeedClearHandler",
  *     "feed_expire" = "Drupal\feeds\FeedExpireHandler"
@@ -65,7 +65,8 @@ use Drupal\user\UserInterface;
  *     "canonical" = "feeds.view",
  *     "delete-form" = "feeds.delete",
  *     "edit-form" = "feeds.edit",
- *     "admin-form" = "feeds.importer_edit"
+ *     "admin-form" = "feeds.importer_edit",
+ *     "import-form" = "feeds.import"
  *   }
  * )
  */
