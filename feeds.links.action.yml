@@ -2,7 +2,7 @@ feeds.add_action:
   route_name: feeds.add_page
   title: Add feed
   appears_on:
-    - feeds.feed_list
+    - feeds.admin
 
 feeds.import_action:
   route_name: feeds.import

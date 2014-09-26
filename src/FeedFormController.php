@@ -104,7 +104,7 @@ class FeedFormController extends ContentEntityForm {
       $element['import']['#dropbutton'] = 'save';
       $element['import']['#value'] = t('Save and import');
       $element['import']['#weight'] = 0;
-      array_unshift($element['import']['#submit'], '::import');
+      $element['import']['#submit'][] = '::import';
     }
 
     $element['delete']['#access'] = $this->entity->access('delete');
@@ -118,27 +118,11 @@ class FeedFormController extends ContentEntityForm {
    * @todo Don't call buildEntity() here.
    */
   public function validate(array $form, FormStateInterface $form_state) {
-
     $feed = $this->buildEntity($form, $form_state);
 
     foreach ($this->configurablePlugins as $plugin) {
       $plugin->validateFeedForm($form, $form_state, $feed);
     }
-
-    // Validate the "authored by" field.
-    // if (!empty($feed->name) && !($account = user_load_by_name($feed->name))) {
-    //   // The use of empty() is mandatory in the context of usernames
-    //   // as the empty string denotes the anonymous user. In case we
-    //   // are dealing with an anonymous user we set the user ID to 0.
-    //   form_set_error('name', t('The username %name does not exist.', array('%name' => $feed->name)));
-    // }
-
-    // Validate the "authored on" field.
-    // The date element contains the date object.
-    // $date = $feed->date instanceof DrupalDateTime ? $feed->date : new DrupalDateTime($feed->date);
-    // if ($date->hasErrors()) {
-    //   form_set_error('date', t('You have to specify a valid date.'));
-    // }
 
     parent::validate($form, $form_state);
   }
@@ -160,36 +144,38 @@ class FeedFormController extends ContentEntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $feed = $this->entity;
-    $insert = !(bool) $feed->id();
-    $importer = $feed->getImporter();
+    $insert = $feed->isNew();
     $feed->save();
 
     $feed_link = l($this->t('View'), 'feed/' . $feed->id());
-    $args = array('@importer' => $importer->label(), '%title' => $feed->label());
+    $context = ['@importer' => $feed->getImporter()->id(), '%title' => $feed->label(), 'link' => $feed_link];
+    $t_args = ['@importer' => $feed->getImporter()->label(), '%title' => $feed->label()];
 
     if ($insert) {
-      watchdog('feeds', '@importer: added %title.', $args, WATCHDOG_NOTICE, $feed_link);
-      drupal_set_message($this->t('%title has been created.', $args));
+      $this->logger('feeds')->notice('@importer: added %title.', $context);
+      drupal_set_message($this->t('%title has been created.', $t_args));
     }
     else {
-      watchdog('feeds', '@importer: updated %title.', $args, WATCHDOG_NOTICE, $feed_link);
-      drupal_set_message($this->t('%title has been updated.', $args));
+      $this->logger('feeds')->notice('@importer: updated %title.', $context);
+      drupal_set_message($this->t('%title has been updated.', $t_args));
     }
 
-    if ($feed->id()) {
-      // $form_state['redirect'] = 'feed/' . $feed->id();
-
-      // Clear feed cache.
-      Cache::invalidateTags(array('feeds' => TRUE));
-
-      // Schedule jobs for this feed.
-      $feed->schedule();
-    }
-    else {
+    if (!$feed->id()) {
       // In the unlikely case something went wrong on save, the feed will be
       // rebuilt and feed form redisplayed the same way as in preview.
       drupal_set_message($this->t('The feed could not be saved.'), 'error');
       $form_state->setRebuild();
+      return;
+    }
+
+    // Schedule jobs for this feed.
+    $feed->schedule();
+
+    if ($feed->access('view')) {
+      $form_state->setRedirect('feeds.view', ['feeds_feed' => $feed->id()]);
+    }
+    else {
+      $form_state->setRedirect('<front>');
     }
   }
 
@@ -205,22 +191,6 @@ class FeedFormController extends ContentEntityForm {
     $feed = $this->entity;
     $feed->startBatchImport();
     return $feed;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete(array $form, FormStateInterface $form_state) {
-    $destination = array();
-    $query = $this->getRequest()->query;
-
-    if ($query->has('destination')) {
-      $destination = drupal_get_destination();
-      $query->remove('destination');
-    }
-
-    $feed = $this->entity;
-    // $form_state['redirect'] = array('feed/' . $feed->id() . '/delete', array('query' => $destination));
   }
 
 }

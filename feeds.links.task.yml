@@ -1,3 +1,19 @@
+feeds.view:
+  route_name: feeds.view
+  base_route: feeds.view
+  title: 'View'
+
+feeds.edit:
+  route_name: feeds.edit
+  base_route: feeds.view
+  title: Edit
+
+feeds.delete:
+  route_name: feeds.delete
+  base_route: feeds.view
+  title: Delete
+  weight: 10
+
 feeds.importer_edit:
   route_name: feeds.importer_edit
   title: Edit
@@ -13,8 +29,3 @@ feeds.admin:
   route_name: feeds.admin
   title: Feeds
   base_route: system.admin_content
-
-feeds.edit:
-  route_name: feeds.edit
-  title: Edit
-  base_route: feeds.view
