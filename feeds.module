@@ -156,20 +156,15 @@ function feeds_feed_expire(array $job) {
  * Executes a job_scheduler job.
  */
 function _feeds_job_scheduler_helper($action, array $job) {
-  $feed = \Drupal::entityManager()->getStorage('feeds_feed')->load($job['id']);
+  if (!$feed = \Drupal::entityManager()->getStorage('feeds_feed')->load($job['id'])) {
+    return;
+  }
 
-  if ($feed) {
-    try {
-      $feed->existing()->$action();
-    }
-    catch (FeedsNotExistingException $e) {
-      // Do nothing.
-    }
-    catch (Exception $e) {
-      $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
-    }
-    $method = 'schedule' . ucfirst($action);
-    $feed->$method();
+  try {
+    $feed->$action();
+  }
+  catch (\Exception $e) {
+    $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
 }
 
@@ -260,18 +255,6 @@ function feeds_theme() {
     //   'template' => 'feeds_feed',
     // ),
   );
-}
-
-/**
- * Implements hook_entity_bundle_info().
- */
-function feeds_entity_bundle_info() {
-  $bundles = array();
-  foreach (\Drupal::configFactory()->listAll('feeds.importer.') as $config_name) {
-    $config = \Drupal::config($config_name);
-    $bundles['feeds_feed'][$config->get('id')]['label'] = $config->get('label');
-  }
-  return $bundles;
 }
 
 /**
