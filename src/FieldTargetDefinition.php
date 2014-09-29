@@ -95,8 +95,7 @@ class FieldTargetDefinition extends TargetDefinition {
    * {@inheritdoc}
    */
   public function getPropertyLabel($property) {
-    return $this->fieldDefinition
-      ->getItemDefinition()
+    return $this->fieldDefinition->getItemDefinition()
       ->getPropertyDefinition($property)
       ->getLabel();
   }
@@ -105,8 +104,7 @@ class FieldTargetDefinition extends TargetDefinition {
    * {@inheritdoc}
    */
   public function getPropertyDescription($property) {
-    return $this->fieldDefinition
-      ->getItemDefinition()
+    return $this->fieldDefinition->getItemDefinition()
       ->getPropertyDefinition($property)
       ->getDescription();
   }

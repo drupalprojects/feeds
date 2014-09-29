@@ -22,7 +22,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @Plugin(
  *   id = "text",
  *   field_types = {
- *     "list_text",
  *     "text",
  *     "text_long",
  *     "text_with_summary"
@@ -42,9 +41,13 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    * {@inheritdoc}
    */
   protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
-    return FieldTargetDefinition::createFromFieldDefinition($field_definition)
-      ->addProperty('value')
-      ->addProperty('summary');
+    $definition = FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('value');
+
+    if ($field_definition->getType() === 'text_with_summary') {
+      $definition->addProperty('summary');
+    }
+    return $definition;
   }
 
   /**
@@ -78,21 +81,8 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $values['value'] = (string) $values['value'];
-
     // At todo. Maybe break these up into separate classes.
-    if (!empty($this->settings['allowed_values'])) {
-      $key = array_search($values['value'], $this->settings['allowed_values']);
-      if ($key !== FALSE) {
-        $values['value'] = $key;
-      }
-      else {
-        $values['value'] = '';
-      }
-    }
-    else {
-      parent::prepareValue($delta, $values);
-    }
+    parent::prepareValue($delta, $values);
 
     $values['format'] = $this->configuration['format'];
   }

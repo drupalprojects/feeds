@@ -19,7 +19,8 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *   id = "string",
  *   field_types = {
  *     "string",
- *     "string_long"
+ *     "string_long",
+ *     "list_string"
  *   }
  * )
  */

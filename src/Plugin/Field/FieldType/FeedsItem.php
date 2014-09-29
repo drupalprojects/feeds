@@ -8,8 +8,8 @@
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\entity_reference\ConfigurableEntityReferenceItem;
 
 /**
  * Plugin implementation of the 'feeds_item' field type.
@@ -26,41 +26,37 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   no_ui = true
  * )
  */
-class FeedsItem extends ConfigurableEntityReferenceItem {
-
-  /**
-   * Definitions of the contained properties.
-   *
-   * @var array
-   */
-  static $propertyDefinitions;
+class FeedsItem extends EntityReferenceItem {
 
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
-    $this->definition['settings']['target_type'] = 'feeds_feed';
-    // Definitions vary by entity type and bundle, so key them accordingly.
-    $key = $this->definition['settings']['target_type'] . ':';
-    $key .= isset($this->definition['settings']['target_bundle']) ? $this->definition['settings']['target_bundle'] : '';
+  public static function defaultStorageSettings() {
+    return array(
+      'target_type' => 'feeds_feed',
+    ) + parent::defaultStorageSettings();
+  }
 
-    if (!isset(static::$propertyDefinitions[$key])) {
-      static::$propertyDefinitions[$key] = parent::getPropertyDefinitions();
 
-      static::$propertyDefinitions['imported'] = DataDefinition::create('timestamp')
-        ->setLabel(t('Timestamp'));
+  /**
+   * {@inheritdoc}
+   */
+  public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
+    $properties = parent::propertyDefinitions($field_definition);
 
-      static::$propertyDefinitions['url'] = DataDefinition::create('uri')
-        ->setLabel(t('Item URL'));
+    $properties['imported'] = DataDefinition::create('timestamp')
+      ->setLabel(t('Timestamp'));
 
-      static::$propertyDefinitions['guid'] = DataDefinition::create('string')
-        ->setLabel(t('Item GUID'));
+    $properties['url'] = DataDefinition::create('uri')
+      ->setLabel(t('Item URL'));
 
-      static::$propertyDefinitions['hash'] = DataDefinition::create('string')
-        ->setLabel(t('Item hash'));
-    }
+    $properties['guid'] = DataDefinition::create('string')
+      ->setLabel(t('Item GUID'));
 
-    return static::$propertyDefinitions[$key];
+    $properties['hash'] = DataDefinition::create('string')
+      ->setLabel(t('Item hash'));
+
+    return $properties;
   }
 
   /**

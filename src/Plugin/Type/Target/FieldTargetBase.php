@@ -46,7 +46,7 @@ abstract class FieldTargetBase extends TargetBase {
     $field_definitions = \Drupal::entityManager()->getFieldDefinitions($processor->entityType(), $processor->bundle());
 
     foreach ($field_definitions as $id => $field_definition) {
-      if ($field_definition->isReadOnly()) {
+      if ($field_definition->isReadOnly() || $id === $processor->bundleKey()) {
         continue;
       }
       if (in_array($field_definition->getType(), $definition['field_types'])) {
