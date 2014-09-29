@@ -41,7 +41,7 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
       ->will($this->onConsecutiveCalls(0.5, 1.0));
     $this->feed
       ->expects($this->once())
-      ->method('clearState');
+      ->method('clearStates');
 
     $handler = new FeedExpireHandler($this->dispatcher, $this->lock);
     $result = $handler->expire($this->feed);
@@ -60,7 +60,7 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
 
     $this->feed
       ->expects($this->once())
-      ->method('clearState');
+      ->method('clearStates');
 
     $handler = new FeedExpireHandler($this->dispatcher, $this->lock);
     $handler->expire($this->feed);

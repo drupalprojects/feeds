@@ -34,7 +34,7 @@ class FeedExpireHandler extends FeedHandlerBase {
     $result = $feed->progressExpiring();
 
     if ($result == StateInterface::BATCH_COMPLETE || isset($exception)) {
-      $feed->clearState();
+      $feed->clearStates();
     }
 
     $feed->save();

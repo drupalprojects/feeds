@@ -74,6 +74,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
   use EventDispatcherTrait;
 
   /**
+   * An array of import stage states keyed by state.
+   *
+   * @var array
+   */
+  protected $states;
+
+  /**
    * {@inheritdoc}
    */
   public function id() {
@@ -256,7 +263,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
     // Unset.
     $this->clearFetcherResult();
-    $this->clearState();
+    $this->clearStates();
     $this->set('import_started', NULL);
 
     return $this;
@@ -286,31 +293,41 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Convert to proper field item.
    */
   public function getState($stage) {
-    $state = $this->get('state')->$stage;
-    if (!$state) {
-      $state = new State();
-      $this->get('state')->$stage = $state;
+    if (!isset($this->states)) {
+      $this->states = \Drupal::state()->get('feeds_feed.' . $this->id(), []);
     }
-    return $state;
+    if (!isset($this->states[$stage])) {
+      $this->states[$stage] = new State();
+    }
+    return $this->states[$stage];
   }
 
   /**
    * {@inheritdoc}
    */
   public function setState($stage, $state) {
-    $this->get('state')->$stage = $state;
+    if (!isset($this->states)) {
+      $this->states = \Drupal::state()->get('feeds_feed.' . $this->id(), []);
+    }
+    $this->states[$stage] = $state;
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function clearState() {
-    $this->get('state')->setValue(NULL);
+  public function clearStates() {
+    $this->states = [];
+    \Drupal::state()->delete('feeds_feed.' . $this->id());
+    return $this;
+  }
+
+  public function saveStates() {
+    if (!empty($this->states)) {
+      \Drupal::state()->set('feeds_feed.' . $this->id(), $this->states);
+    }
     return $this;
   }
 

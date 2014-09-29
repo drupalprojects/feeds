@@ -46,7 +46,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       ->will($this->onConsecutiveCalls(0.5, 1.0));
     $this->feed
       ->expects($this->once())
-      ->method('clearState');
+      ->method('clearStates');
 
     $result = $this->handler->clear($this->feed);
     $this->assertSame($result, 0.5);
@@ -67,7 +67,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       ->method('unlock');
     $this->feed
       ->expects($this->once())
-      ->method('clearState');
+      ->method('clearStates');
 
     $this->handler->clear($this->feed);
   }

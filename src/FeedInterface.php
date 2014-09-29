@@ -240,10 +240,12 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    */
   public function setState($stage, $state);
 
+  public function saveStates();
+
   /**
    * @todo
    */
-  public function clearState();
+  public function clearStates();
 
   /**
    * @todo

@@ -106,6 +106,7 @@ class FeedImportHandler extends FeedHandlerBase {
       $feed->unlock();
     }
     else {
+      $feed->saveStates();
       $feed->save();
     }
 
