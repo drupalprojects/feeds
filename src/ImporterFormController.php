@@ -255,12 +255,8 @@ class ImporterFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    if ($this->entity->isNew()) {
-      // $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id();
-    }
-
     $this->entity->save();
-    // $form_state['redirect'] = 'admin/structure/feeds/manage/' . $this->entity->id() . '/mapping';
+    $form_state->setRedirect('feeds.importer_edit', ['feeds_importer' => $this->entity->id()]);
     drupal_set_message($this->t('Your changes have been saved.'));
   }
 

@@ -8,6 +8,8 @@
 namespace Drupal\feeds\Tests\Feeds;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -37,14 +39,13 @@ class RssNodeImport extends WebTestBase {
         [
           'target' => 'title',
           'map' => ['value' => 'title'],
+          'unique' => ['value' => TRUE],
         ],
-        // [
-        //   'target' => 'body',
-        //   'map' => ['value' => 'description'],
-        //   'settings' => [
-        //     'format' => 'basic_html',
-        //   ],
-        // ],
+        [
+          'target' => 'body',
+          'map' => ['value' => 'description'],
+          // 'settings' => ['format' => 'basic_html'],
+        ],
       ],
       'processor' => [
         'id' => 'entity:node',
@@ -59,27 +60,29 @@ class RssNodeImport extends WebTestBase {
   }
 
   public function testHttpImport() {
+    $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
+
     $feed = entity_create('feeds_feed', [
       'title' => $this->randomString(),
-      'source' => file_create_url(drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2'),
+      'source' => file_create_url($filepath),
       'importer' => $this->importer->id(),
     ]);
     $feed->save();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
+    $this->assertText('Created 6');
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
-    $titles = [
-      1 => "First thoughts: Dems' Black Tuesday - msnbc.com",
-      2 => 'Obama wants to fast track a final health care bill - USA Today',
-      3 => 'Why the Nexus One Makes Other Android Phones Obsolete - PC World',
-      4 => 'NEWSMAKER-New Japan finance minister a fiery battler - Reuters',
-      5 => 'Yemen Detains Al-Qaeda Suspects After Embassy Threats - Bloomberg',
-      6 => 'Egypt, Hamas exchange fire on Gaza frontier, 1 dead - Reuters',
-    ];
+
+    $xml = new \SimpleXMLElement($filepath, 0, TRUE);
 
     foreach (range(1, 6) as $nid) {
+      $item = $xml->channel->item[$nid - 1];
       $this->drupalGet('node/' . $nid . '/edit');
-      $this->assertFieldByName('title[0][value]', $titles[$nid]);
+      $this->assertFieldByName('title[0][value]', (string) $item->title);
+      $this->assertFieldByName('body[0][value]', (string) $item->description);
     }
+
+    $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
+    $this->assertText('There are no new');
   }
 
 }
