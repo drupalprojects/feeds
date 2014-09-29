@@ -72,10 +72,36 @@ class TargetDefinition implements TargetDefinitionInterface {
   }
 
   /**
+   * Sets the target definition label.
+   *
+   * @param string $label
+   *   The label.
+   *
+   * @return $this
+   */
+  public function setLabel($label) {
+    $this->label = $label;
+    return $this;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getDescription() {
     return $this->description;
+  }
+
+  /**
+   * Sets the target definition description.
+   *
+   * @param string $description
+   *   The description.
+   *
+   * @return $this
+   */
+  public function setDescription($description) {
+    $this->description = $description;
+    return $this;
   }
 
   /**
@@ -126,7 +152,7 @@ class TargetDefinition implements TargetDefinitionInterface {
    * @return $this
    */
   public function addProperty($property, $label = '', $description = '') {
-    $this->properties[$property] = ['label' => $label, 'description' => ''];
+    $this->properties[$property] = ['label' => $label, 'description' => $description];
     return $this;
   }
 
