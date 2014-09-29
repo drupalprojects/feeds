@@ -609,12 +609,19 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setDescription(t('The time that the feed was last edited.'));
 
     $fields['imported'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Imported'))
-      ->setDescription(t('The time that the feed was imported.'));
+      ->setLabel(t('Last imported'))
+      ->setDescription(t('The time that the feed was imported.'))
+      ->setDefaultValue(0)
+      ->setDisplayOptions('view', array(
+        'label' => 'inline',
+        'type' => 'timestamp_ago',
+        'weight' => 1,
+      ))
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['import_started'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Imported'))
-      ->setDescription(t('The time that the feed was imported.'));
+      ->setLabel(t('Import started'))
+      ->setDescription(t('The time that the import was started.'));
 
     $fields['source'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Source'))
@@ -623,7 +630,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setDisplayOptions('form', array(
         'type' => 'uri',
         'weight' => -3,
-      ));
+      ))
+      ->setDisplayOptions('view', array(
+        'label' => 'inline',
+        'weight' => -3,
+      ))
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['config'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Config'))

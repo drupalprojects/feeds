@@ -23,7 +23,7 @@ feeds.importer_mapping:
   route_name: feeds.importer_mapping
   title: Mapping
   base_route: feeds.importer_edit
-  weight: 10
+  weight: 0
 
 feeds.admin:
   route_name: feeds.admin

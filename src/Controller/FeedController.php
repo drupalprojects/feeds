@@ -9,8 +9,9 @@ namespace Drupal\feeds\Controller;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\feeds\ImporterInterface;
+use Drupal\Core\Url;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\ImporterInterface;
 
 /**
  * Returns responses for feed routes.
@@ -54,7 +55,7 @@ class FeedController extends ControllerBase {
         continue;
       }
       $build['#rows'][] = array(
-        $this->l($importer->label(), 'feeds.add', array('feeds_importer' => $importer->id())),
+        $this->l($importer->label(), new Url('feeds.add', ['feeds_importer' => $importer->id()])),
         String::checkPlain($importer->description),
       );
     }
