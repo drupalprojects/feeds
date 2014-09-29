@@ -33,6 +33,7 @@ use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -69,13 +70,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * @var \Drupal\Core\Entity\EntityTypeInterface
    */
   protected $entityInfo;
-
-  /**
-   * The extenders that apply to this entity type.
-   *
-   * @var array
-   */
-  protected $handlers = array();
 
   /**
    * Whether or not we should continue processing existing items.
@@ -127,8 +121,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     $this->storageController = $storage_controller;
     $this->queryFactory = $query_factory;
     $this->pluginDefinition = $plugin_definition;
-
-    $this->loadHandlers($configuration);
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->skipExisting = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
@@ -344,47 +336,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   }
 
   /**
-   * Loads the handlers that apply to this processor.
-   *
-   * @todo Move this to PluginBase.
-   */
-  protected function loadHandlers(array $configuration) {
-    $definitions = \Drupal::service('plugin.manager.feeds.handler')->getDefinitions();
-    foreach ($definitions as $definition) {
-      $class = $definition['class'];
-      if ($class::applies($this)) {
-        $this->handlers[] = \Drupal::service('plugin.manager.feeds.handler')->createInstance($definition['id'], $configuration);
-      }
-    }
-  }
-
-  /**
-   * Applies a function to listeners.
-   *
-   * @todo Move to PluginBase.
-   *
-   * @todo Events?
-   */
-  protected function apply($action, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, &$arg4 = NULL) {
-    $return = array();
-
-    foreach ($this->handlers as $handler) {
-      if (method_exists($handler, $action)) {
-        $callable = array($handler, $action);
-        $result = $callable($arg1, $arg2, $arg3, $arg4);
-        if (is_array($result)) {
-          $return = array_merge($return, $result);
-        }
-        else {
-          $return[] = $result;
-        }
-      }
-    }
-
-    return $return;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function entityType() {
@@ -480,15 +431,19 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   protected function newEntity(FeedInterface $feed) {
     $values = $this->configuration['values'];
-    $values = $this->apply('newEntityValues', $feed, $values);
-    return $this->storageController->create($values);
+    $entity = $this->storageController->create($values);
+    $entity->enforceIsNew();
+
+    if ($entity instanceof EntityOwnerInterface) {
+      $entity->setOwnerId($this->configuration['owner_id']);
+    }
+    return $entity;
   }
 
   /**
    * {@inheritdoc}
    */
   protected function entityPrepare(FeedInterface $feed, EntityInterface $entity) {
-    $this->apply(__FUNCTION__, $feed, $entity);
     return $entity;
   }
 
@@ -496,14 +451,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   protected function entityValidate(EntityInterface $entity) {
-    $this->apply(__FUNCTION__, $entity);
-
     $violations = $entity->validate();
     if (count($violations)) {
       $args = array(
         '@entity' => Unicode::strtolower($this->entityLabel()),
         '%label' => $entity->label(),
-        '@url' => $this->url('feeds_importer.mapping', array('feeds_importer' => $this->importer->id())),
+        '@url' => $this->url('feeds.importer_mapping', array('feeds_importer' => $this->importer->id())),
       );
       throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
     }
@@ -551,13 +504,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     $defaults = array(
       'update_existing' => ProcessorInterface::SKIP_EXISTING,
       'skip_hash_check' => FALSE,
-      'values' => array($this->bundleKey() => NULL),
+      'values' => [$this->bundleKey() => NULL],
       'authorize' => TRUE,
       'expire' => SchedulerInterface::EXPIRE_NEVER,
       'process_limit' => ProcessorInterface::PROCESS_LIMIT,
+      'owner_id' => 0,
     );
-
-    $defaults += $this->apply(__FUNCTION__);
 
     return $defaults;
   }
@@ -588,6 +540,16 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#description' => $this->t('Select after how much time @entities should be deleted.', $tokens),
       '#default_value' => $this->configuration['expire'],
     );
+    if ($this->entityInfo->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
+      $owner = user_load($this->configuration['owner_id']);
+      $form['owner_id'] = array(
+        '#type' => 'textfield',
+        '#title' => $this->t('Owner'),
+        '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', array('%anonymous' => \Drupal::config('user.settings')->get('anonymous'))),
+        '#autocomplete_route_name' => 'user.autocomplete',
+        '#default_value' => String::checkPlain($owner->getUsername()),
+      );
+    }
     $form['advanced'] = array(
       '#title' => $this->t('Advanced settings'),
       '#type' => 'details',
@@ -618,7 +580,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#min' => 1,
       '#max' => 1000,
     );
-    $this->apply(__FUNCTION__, $form, $form_state);
 
     return $form;
   }
@@ -627,7 +588,14 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $this->apply(__FUNCTION__, $form, $form_state);
+    $values =& $form_state->getValue(['processor', 'configuration']);
+
+    if ($owner = user_load_by_name($values['owner_id'])) {
+      $values['owner_id'] = $owner->id();
+    }
+    else {
+      $values['owner_id'] = 0;
+    }
   }
 
   /**
@@ -636,8 +604,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * @todo We need an importer save/update/delete API.
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $this->apply(__FUNCTION__, $form, $form_state);
-
     $values =& $form_state->getValue(array('processor', 'configuration'));
     if ($this->configuration['expire'] != $values['expire']) {
       $this->importer->reschedule($this->importer->id());
@@ -801,17 +767,16 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The integer of the entity, or false if not found.
    */
   protected function existingEntityId(FeedInterface $feed, ItemInterface $item) {
-
-    $parser = $this->importer->getParser();
-
     foreach ($this->importer->getMappings() as $delta => $mapping) {
-      if (!empty($mapping['unique'])) {
-        foreach ($mapping['unique'] as $key => $true) {
-          $plugin = $this->importer->getTargetPlugin($delta);
-          $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $item->get($mapping['map'][$key]));
-          if ($entity_id) {
-            return $entity_id;
-          }
+      if (empty($mapping['unique'])) {
+        continue;
+      }
+
+      foreach ($mapping['unique'] as $key => $true) {
+        $plugin = $this->importer->getTargetPlugin($delta);
+        $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $item->get($mapping['map'][$key]));
+        if ($entity_id) {
+          return $entity_id;
         }
       }
     }
@@ -889,7 +854,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     $message .= '<h3>Original item</h3>';
     $message .= '<pre>' . drupal_var_export($item) . '</pre>';
     $message .= '<h3>Entity</h3>';
-    $message .= '<pre>' . drupal_var_export($entity->getValue()) . '</pre>';
+    $message .= '<pre>' . drupal_var_export($entity->toArray()) . '</pre>';
     return $message;
   }
 
