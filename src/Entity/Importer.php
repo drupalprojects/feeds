@@ -21,6 +21,7 @@ use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
+use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
@@ -172,6 +173,19 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
+  public function isLocked() {
+    foreach ($this->getPlugins() as $plugin) {
+      if ($plugin instanceof LockableInterface && $plugin->isLocked()) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getLimit() {
     return $this->getProcessor()->getLimit();
   }
@@ -275,15 +289,6 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    */
   public function removeMappings() {
     $this->mappings = array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete() {
-    parent::delete();
-
-    $this->reschedule($this->id());
   }
 
   /**
@@ -489,6 +494,17 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
     }
 
     $this->mappings = array_values($this->mappings);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    foreach ($entities as $entity) {
+      foreach ($entity->getPlugins() as $plugin) {
+        $plugin->onImporterDelete();
+      }
+    }
   }
 
   /**

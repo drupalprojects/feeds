@@ -18,6 +18,7 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\feeds\Entity\Importer;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
@@ -646,11 +647,16 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
   /**
    * {@inheritdoc}
-   *
-   * @todo We need an importer save/update/delete API.
    */
   public function onImporterSave($update = TRUE) {
     $this->prepareFeedsItemField();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onImporterDelete() {
+    $this->removeFeedItemField();
   }
 
   /**
@@ -661,22 +667,67 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected function prepareFeedsItemField() {
     // Create field if it doesn't exist.
     if (!FieldStorageConfig::loadByName($this->entityType(), 'feeds_item')) {
-      \Drupal::entityManager()->getStorage('field_storage_config')->create(array(
-        'name' => 'feeds_item',
+      FieldStorageConfig::create([
+        'field_name' => 'feeds_item',
         'entity_type' => $this->entityType(),
         'type' => 'feeds_item',
         'translatable' => FALSE,
-      ))->save();
+      ])->save();
     }
     // Create field instance if it doesn't exist.
     if (!FieldConfig::loadByName($this->entityType(), $this->bundle(), 'feeds_item')) {
-      \Drupal::entityManager()->getStorage('field_config')->create(array(
+      FieldConfig::create([
         'label' => 'Feeds item',
         'description' => '',
         'field_name' => 'feeds_item',
         'entity_type' => $this->entityType(),
         'bundle' => $this->bundle(),
-      ))->save();
+      ])->save();
+    }
+  }
+
+  /**
+   * Deletes the feeds_item field.
+   */
+  protected function removeFeedItemField() {
+    $storage_in_use = FALSE;
+    $instance_in_use = FALSE;
+
+    foreach (Importer::loadMultiple() as $importer) {
+      if ($importer->id() === $this->importer->id()) {
+        continue;
+      }
+      $processor = $importer->getProcessor();
+      if (!$processor instanceof EntityProcessor) {
+        continue;
+      }
+
+      if ($processor->entityType() === $this->entityType()) {
+        $storage_in_use = TRUE;
+
+        if ($processor->bundle() === $this->bundle()) {
+          $instance_in_use = TRUE;
+          break;
+        }
+      }
+    }
+
+    if ($instance_in_use) {
+      return;
+    }
+
+    // Delete the field instance.
+    if ($config = FieldConfig::loadByName($this->entityType(), $this->bundle(), 'feeds_item')) {
+      $config->delete();
+    }
+
+    if ($storage_in_use) {
+      return;
+    }
+
+    // Delte the field storage.
+    if ($storage = FieldStorageConfig::loadByName($this->entityType(), 'feeds_item')) {
+      $storage->delete();
     }
   }
 
