@@ -25,7 +25,13 @@ class ImporterAccessController extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
-    return AccessResult::allowedIfHasPermission($account, 'administer feeds');
+    switch ($operation) {
+      case 'delete':
+        return AccessResult::allowedIf($account->hasPermission('administer feeds') && !$entity->isLocked());
+
+      default:
+        return AccessResult::allowedIfHasPermission($account, 'administer feeds');
+    }
   }
 
   /**

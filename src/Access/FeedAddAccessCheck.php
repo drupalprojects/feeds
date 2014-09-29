@@ -50,7 +50,7 @@ class FeedAddAccessCheck implements AccessInterface {
       }
     }
 
-    return AccessResult::create();
+    return AccessResult::neutral();
   }
 
 }
