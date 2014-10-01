@@ -7,17 +7,11 @@
 
 namespace Drupal\feeds\Feeds\Scheduler;
 
-use Drupal\Component\Utility\MapArray;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
-use Drupal\feeds\PuSH\PuSHFetcherInterface;
-use Drupal\feeds\StateInterface;
-use Drupal\job_scheduler\JobController;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a Feeds scheduler plugin with optional periodic scheduling.
@@ -28,43 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Schedules recurring imports.")
  * )
  */
-class Periodic extends ConfigurablePluginBase implements SchedulerInterface, AdvancedFormPluginInterface, ContainerFactoryPluginInterface {
-
-  /**
-   * The job_scheduler controller.
-   *
-   * @var \Drupal\job_scheduler\JobController
-   */
-  protected $jobController;
-
-  /**
-   * Constructs a Periodic object.
-   *
-   * @param array $configuration
-   *   The plugin configuration.
-   * @param string $plugin_id
-   *   The plugin id.
-   * @param array $plugin_definition
-   *   The plugin definition.
-   * @param \Drupal\job_scheduler\JobController $job_controller
-   *   (optional) A job_scheduler job controller if the job_scheduler module is
-   *   enabled.
-   */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, JobController $job_controller = NULL) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->jobController = $job_controller;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    if (\Drupal::moduleHandler()->moduleExists('job_scheduler')) {
-      return new static($configuration, $plugin_id, $plugin_definition, $container->get('job_scheduler'));
-    }
-
-    return new static($configuration, $plugin_id, $plugin_definition);
-  }
+class Periodic extends ConfigurablePluginBase implements SchedulerInterface, AdvancedFormPluginInterface {
 
   public function getImportPeriod() {
     return $this->configuration['import_period'];
@@ -73,90 +31,28 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   /**
    * Schedules periodic or background import tasks.
    *
-   * This is also used as a callback for job_scheduler integration.
-   *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to schedule.
    */
   public function scheduleImport(FeedInterface $feed) {
-    if (!$this->jobController) {
-      return;
-    }
 
-    // Check whether any fetcher is overriding the import period.
-    $period = $this->importer->getImportPeriod();
-
-    // Schedule as soon as possible if a batch is active.
-    $period = $feed->progressImporting() === StateInterface::BATCH_COMPLETE ? $period : 0;
-
-    $job = array(
-      'name' => 'feeds_feed_import',
-      'type' => $feed->bundle(),
-      'id' => $feed->id(),
-      'period' => $period,
-      'periodic' => TRUE,
-    );
-
-    if ($period == SchedulerInterface::SCHEDULE_NEVER) {
-      $this->jobController->remove($job);
-    }
-    else {
-      $this->jobController->set($job);
-    }
   }
 
   /**
    * Schedule background expire tasks.
-   *
-   * This is also used as a callback for job_scheduler integration.
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to schedule.
    */
   public function scheduleExpire(FeedInterface $feed) {
 
-    if (!$this->jobController) {
-      return;
-    }
-
-    // Schedule as soon as possible if a batch is active.
-    $period = $feed->progressExpiring() === StateInterface::BATCH_COMPLETE ? 3600 : 0;
-
-    $job = array(
-      'name' => 'feeds_feed_expire',
-      'type' => $feed->bundle(),
-      'id' => $feed->id(),
-      'period' => $period,
-      'periodic' => TRUE,
-    );
-    if ($feed->getImporter()->getProcessor()->expiryTime() == SchedulerInterface::EXPIRE_NEVER) {
-      $this->jobController->remove($job);
-    }
-    else {
-      $this->jobController->set($job);
-    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function onFeedDeleteMultiple(array $feeds) {
-    if (!$this->jobController) {
-      return;
-    }
 
-    foreach ($feeds as $feed) {
-      // Remove from schedule.
-      $job = array(
-        'name' => 'feeds_feed_import',
-        'type' => $feed->bundle(),
-        'id' => $feed->id(),
-      );
-      $this->jobController->remove($job);
-
-      $job['name'] = 'feeds_feed_expire';
-      $this->jobController->remove($job);
-    }
   }
 
   /**
@@ -170,11 +66,6 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
    * {@inheritdoc}
    */
   public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
-
-    if (!$this->jobController) {
-      return;
-    }
-
     $cron_required = ' ' . l($this->t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
     $times = array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200);
     $period = array_map(function($time) {
@@ -204,11 +95,6 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-
-    if (!$this->jobController) {
-      return;
-    }
-
     $values =& $form_state->getValue(array('scheduler', 'configuration'));
 
     if ($this->configuration['import_period'] != $values['import_period']) {
