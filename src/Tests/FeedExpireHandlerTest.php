@@ -18,19 +18,12 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class FeedExpireHandlerTest extends FeedsUnitTestCase {
 
   protected $dispatcher;
-  protected $lock;
   protected $feed;
 
   public function setUp() {
     parent::setUp();
 
     $this->dispatcher = new EventDispatcher();
-    $this->lock = $this->getMock('Drupal\Core\Lock\LockBackendInterface');
-    $this->lock
-      ->expects($this->any())
-      ->method('acquire')
-      ->will($this->returnValue(TRUE));
-
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
   }
 
@@ -43,7 +36,7 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
       ->expects($this->once())
       ->method('clearStates');
 
-    $handler = new FeedExpireHandler($this->dispatcher, $this->lock);
+    $handler = new FeedExpireHandler($this->dispatcher);
     $result = $handler->expire($this->feed);
     $this->assertSame($result, 0.5);
     $result = $handler->expire($this->feed);
@@ -62,7 +55,7 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
       ->expects($this->once())
       ->method('clearStates');
 
-    $handler = new FeedExpireHandler($this->dispatcher, $this->lock);
+    $handler = new FeedExpireHandler($this->dispatcher);
     $handler->expire($this->feed);
   }
 

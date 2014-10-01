@@ -22,7 +22,6 @@ class OpmlParserTest extends FeedsUnitTestCase {
   protected $parser;
   protected $importer;
   protected $feed;
-  protected $state;
 
   public function setUp() {
     parent::setUp();
@@ -32,37 +31,21 @@ class OpmlParserTest extends FeedsUnitTestCase {
     $this->parser = new OpmlParser($configuration, 'sitemap', []);
     $this->parser->setStringTranslation($this->getStringTranslationStub());
 
-    $this->state = new State();
-
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
-    $this->feed->expects($this->any())
-      ->method('getState')
-      ->with(StateInterface::PARSE)
-      ->will($this->returnValue($this->state));
     $this->feed->expects($this->any())
       ->method('getImporter')
       ->will($this->returnValue($this->importer));
   }
 
   public function testFetch() {
-    $this->importer->expects($this->any())
-      ->method('getLimit')
-      ->will($this->returnValue(3));
-
     $file = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tests/resources/opml-example.xml';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
     $result = $this->parser->parse($this->feed, $fetcher_result);
-    $this->assertSame(count($result), 3);
+    $this->assertSame(count($result), 13);
     $this->assertSame($result[0]->get('title'), 'CNET News.com');
-
-    $result = $this->parser->parse($this->feed, $fetcher_result);
-    $this->assertSame(count($result), 3);
-    $this->assertSame($result[0]->get('xmlurl'), 'http://rss.news.yahoo.com/rss/tech');
-
-    $result = $this->parser->parse($this->feed, $fetcher_result);
-    $this->assertSame(count($result), 3);
-    $this->assertSame($result[0]->get('htmlurl'), 'http://dictionary.reference.com/wordoftheday/');
+    $this->assertSame($result[3]->get('xmlurl'), 'http://rss.news.yahoo.com/rss/tech');
+    $this->assertSame($result[7]->get('htmlurl'), 'http://www.fool.com');
   }
 
   /**
@@ -74,7 +57,7 @@ class OpmlParserTest extends FeedsUnitTestCase {
 
   public function testGetMappingSources() {
     // Not really much to test here.
-    $this->assertSame(count($this->parser->getMappingSources()), 4);
+    $this->assertSame(count($this->parser->getMappingSources()), 5);
   }
 
 }

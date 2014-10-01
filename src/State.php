@@ -75,12 +75,12 @@ class State implements StateInterface {
    * {@inheritdoc}
    */
   public function progress($total, $progress) {
-    if ($progress > $total) {
+    if ($progress > $total || $total === $progress) {
       $this->progress = StateInterface::BATCH_COMPLETE;
     }
     elseif ($total) {
-      $this->progress = (float) $progress / $total;
-      if ($this->progress == StateInterface::BATCH_COMPLETE && $total != $progress) {
+      $this->progress = (float) ($progress / $total);
+      if ($this->progress === StateInterface::BATCH_COMPLETE && $total !== $progress) {
         $this->progress = 0.99;
       }
     }

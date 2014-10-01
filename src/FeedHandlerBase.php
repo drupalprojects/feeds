@@ -28,7 +28,7 @@ abstract class FeedHandlerBase extends EntityHandlerBase implements EntityHandle
    *   The event dispatcher.
    */
   public function __construct(EventDispatcherInterface $event_dispatcher) {
-    $this->eventDispatcher = $event_dispatcher;
+    $this->setEventDispatcher($event_dispatcher);
   }
 
   /**
@@ -38,26 +38,6 @@ abstract class FeedHandlerBase extends EntityHandlerBase implements EntityHandle
     return new static(
       $container->get('event_dispatcher')
     );
-  }
-
-  /**
-   * Continues a batch job.
-   *
-   * @param int $fid
-   *   The feed id being imported.
-   * @param array &$context
-   *   The batch context.
-   */
-  public static function contineBatch($fid, $method, array &$context) {
-    $context['finished'] = StateInterface::BATCH_COMPLETE;
-    try {
-      if ($feed = \Drupal::entityManager()->getStorage('feeds_feed')->load($fid)) {
-        $context['finished'] = $feed->$method();
-      }
-    }
-    catch (\Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
-    }
   }
 
 }

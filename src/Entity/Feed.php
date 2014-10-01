@@ -262,7 +262,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->log('import', 'Imported in !s s', array('!s' => $this->getImportedTime() - $this->getImportStartedTime(), WATCHDOG_INFO));
 
     // Unset.
-    $this->clearFetcherResult();
     $this->clearStates();
     $this->set('import_started', NULL);
 
@@ -295,11 +294,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getState($stage) {
-    if (!isset($this->states)) {
-      $this->states = \Drupal::state()->get('feeds_feed.' . $this->id(), []);
-    }
     if (!isset($this->states[$stage])) {
-      $this->states[$stage] = new State();
+      $this->states[$stage] = \Drupal::keyValue('feeds_feed.' . $this->id())->get($stage, new State());
     }
     return $this->states[$stage];
   }
@@ -308,9 +304,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function setState($stage, $state) {
-    if (!isset($this->states)) {
-      $this->states = \Drupal::state()->get('feeds_feed.' . $this->id(), []);
-    }
     $this->states[$stage] = $state;
     return $this;
   }
@@ -320,38 +313,23 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function clearStates() {
     $this->states = [];
-    \Drupal::state()->delete('feeds_feed.' . $this->id());
+    \Drupal::keyValue('feeds_feed.' . $this->id())->deleteAll();
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function saveStates() {
-    if (!empty($this->states)) {
-      \Drupal::state()->set('feeds_feed.' . $this->id(), $this->states);
-    }
+    \Drupal::keyValue('feeds_feed.' . $this->id())->setMultiple($this->states);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFetcherResult() {
-    return $this->get('fetcher_result')->result;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setFetcherResult(FetcherResultInterface $result) {
-    $this->get('fetcher_result')->result = $result;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function clearFetcherResult() {
-    $this->get('fetcher_result')->setValue(NULL);
-    return $this;
+  public function progressFetching() {
+    return $this->getState(StateInterface::FETCH)->progress;
   }
 
   /**
@@ -368,7 +346,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $fetcher = $this->getState(StateInterface::FETCH);
     $parser = $this->getState(StateInterface::PARSE);
 
-    if ($fetcher->progress == StateInterface::BATCH_COMPLETE && $parser->progress == StateInterface::BATCH_COMPLETE) {
+    if ($fetcher->progress === StateInterface::BATCH_COMPLETE && $parser->progress === StateInterface::BATCH_COMPLETE) {
       return StateInterface::BATCH_COMPLETE;
     }
     // Fetching envelops parsing.
@@ -567,7 +545,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
-      ->setDefaultValueCallback(array('Drupal\feeds\Entity\Feed', 'getCurrentUserId'))
+      ->setDefaultValueCallback('Drupal\feeds\Entity\Feed::getCurrentUserId')
       ->setDisplayOptions('view', array(
         'label' => 'hidden',
         'type' => 'author',

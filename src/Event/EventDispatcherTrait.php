@@ -26,7 +26,7 @@ trait EventDispatcherTrait {
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  protected $eventDispatcher;
+  private $_eventDispatcher;
 
   /**
    * Dispatches an event.
@@ -34,9 +34,12 @@ trait EventDispatcherTrait {
    * @param string $event_name
    *   The name of the event.
    * @param \Symfony\Component\EventDispatcher\Event $event
+   *
+   * @return \Symfony\Component\EventDispatcher\Event
+   *   The invoked event.
    */
   protected function dispatchEvent($event_name, Event $event = NULL) {
-    $this->getEventDispatcher()->dispatch($event_name, $event);
+    return $this->getEventDispatcher()->dispatch($event_name, $event);
   }
 
   /**
@@ -46,10 +49,10 @@ trait EventDispatcherTrait {
    *   The event dispatcher service.
    */
   protected function getEventDispatcher() {
-    if (!isset($this->eventDispatcher)) {
-      $this->eventDispatcher = \Drupal::service('event_dispatcher');
+    if (!isset($this->_eventDispatcher)) {
+      $this->_eventDispatcher = \Drupal::service('event_dispatcher');
     }
-    return $this->eventDispatcher;
+    return $this->_eventDispatcher;
   }
 
   /**
@@ -57,12 +60,9 @@ trait EventDispatcherTrait {
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The string translation service.
-   *
-   * @return $this
    */
   public function setEventDispatcher(EventDispatcherInterface $event_dispatcher) {
-    $this->eventDispatcher = $event_dispatcher;
-    return $this;
+    $this->_eventDispatcher = $event_dispatcher;
   }
 
 }

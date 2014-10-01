@@ -45,22 +45,11 @@ class SitemapParser extends PluginBase implements ParserInterface {
     // Yes, using a DOM parser is a bit inefficient, but will do for now.
     // @todo XML error handling.
     $this->startXmlErrorHandling();
-    $xml = new \SimpleXMLElement($this->removeDefaultNamespaces($raw));
+    $xml = new \SimpleXMLElement($raw);
     $this->stopXmlErrorHandling();
     $result = new ParserResult();
 
-    $state = $feed->getState(StateInterface::PARSE);
-    if (!$state->total) {
-      $state->total = count($xml->url);
-    }
-
-    $start = (int) $state->pointer;
-    $state->pointer = $start + $feed->getImporter()->getLimit();
-    $state->progress($state->total, $state->pointer);
-
-    $query = "//url[position() > $start and position() <= {$state->pointer}]";
-
-    foreach ($xml->xpath($query) as $url) {
+    foreach ($xml->url as $url) {
       $item = new SitemapItem();
 
       $item->set('url', (string) $url->loc);

@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests\Feeds\Item;
 
-use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
@@ -23,7 +22,6 @@ class BaseItemTest extends FeedsUnitTestCase {
     $item = $this->getMockForAbstractClass('Drupal\feeds\Feeds\Item\BaseItem');
     $item->set('field', 'value');
     $this->assertSame($item->get('field'), 'value');
-    $item->setResult(new ParserResult());
   }
 
 }

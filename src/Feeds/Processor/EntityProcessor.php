@@ -29,7 +29,6 @@ use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
-use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -147,45 +146,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public function process(FeedInterface $feed, ParserResultInterface $parser_result) {
-    $state = $feed->getState(StateInterface::PROCESS);
-    foreach ($parser_result as $item) {
-      $this->existingEntityIds[] = $this->existingEntityId($feed, $item);
-    }
+  public function process(FeedInterface $feed, ItemInterface $item) {
+    $existing_entity_id = $this->existingEntityId($feed, $item);
     // Bulk load existing entities to save on db queries.
-    if (!$this->skipExisting) {
-      $this->existingEntities = $this->storageController->loadMultiple(array_filter($this->existingEntityIds));
-      foreach ($this->existingEntities as $entity) {
-        $this->entityPrepare($feed, $entity);
-      }
-    }
-
-    foreach ($parser_result as $delta => $item) {
-      $this->processItem($feed, $state, $item, $this->existingEntityIds[$delta]);
-    }
-    unset($this->existingEntities);
-  }
-
-  /**
-   * Processes a single item.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed being processed.
-   * @param \Drupal\feeds\StateInterface $state
-   *   The state object.
-   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
-   *   The item being processed.
-   * @param int|fasle $existing_entity_id
-   *   The entity id if it already exists.
-   */
-  protected function processItem(FeedInterface $feed, StateInterface $state, ItemInterface $item, $existing_entity_id) {
-    // If it exists, and we are not updating, pass onto the next item.
-    if ($existing_entity_id && $this->skipExisting) {
+    if ($this->skipExisting && $existing_entity_id) {
       return;
-    }
-
-    if ($existing_entity_id) {
-      $entity = $this->existingEntities[$existing_entity_id];
     }
 
     $hash = $this->hash($item);
@@ -197,13 +162,18 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       return;
     }
 
+    $state = $feed->getState(StateInterface::PROCESS);
+
     try {
       // Build a new entity.
       if (!$existing_entity_id) {
         $entity = $this->newEntity($feed);
       }
+      else {
+        $entity = $this->storageController->load($existing_entity_id);
+      }
 
-      // Set property and field values.
+      // Set field values.
       $this->map($feed, $entity, $item);
       $this->entityValidate($entity);
 
@@ -215,7 +185,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       $entity->get('feeds_item')->hash = $hash;
 
       // And... Save! We made it.
-      $entity->save();
+      $this->storageController->save($entity);
 
       // Track progress.
       $existing_entity_id ? $state->updated++ : $state->created++;
@@ -242,7 +212,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     // If there is no total, query it.
     if (!$state->total) {
       $count_query = clone $query;
-      $state->total = $count_query->count()->execute();
+      $state->total = (int) $count_query->count()->execute();
     }
 
     // Delete a batch of entities.
@@ -253,12 +223,9 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       $state->deleted += count($entity_ids);
       $state->progress($state->total, $state->deleted);
     }
-    else {
-      $state->progress($state->total, $state->total);
-    }
 
     // Report results when done.
-    if ($feed->progressClearing() == StateInterface::BATCH_COMPLETE) {
+    if ($feed->progressClearing() === StateInterface::BATCH_COMPLETE) {
       if ($state->deleted) {
         $message = format_plural(
           $state->deleted,
@@ -437,13 +404,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     if ($entity instanceof EntityOwnerInterface) {
       $entity->setOwnerId($this->configuration['owner_id']);
     }
-    return $entity;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function entityPrepare(FeedInterface $feed, EntityInterface $entity) {
     return $entity;
   }
 
@@ -724,14 +684,15 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       return;
     }
 
-    $query = $this->queryFactory->get($this->entityType())
+    $query = $this->queryFactory
+      ->get($this->entityType())
       ->condition('feeds_item.target_id', $feed->id())
       ->condition('feeds_item.imported', REQUEST_TIME - $time, '<');
 
     // If there is no total, query it.
     if (!$state->total) {
       $count_query = clone $query;
-      $state->total = $count_query->count()->execute();
+      $state->total = (int) $count_query->count()->execute();
     }
 
     // Delete a batch of entities.
@@ -924,6 +885,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     // Rearrange values into Drupal's field structure.
     $field_values = array();
     foreach ($source_values as $field => $field_value) {
+      $field_values[$field] = [];
       foreach ($field_value as $column => $values) {
         // Use array_values() here to keep our $delta clean.
         foreach (array_values($values) as $delta => $value) {

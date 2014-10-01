@@ -41,22 +41,11 @@ class OpmlParser extends PluginBase implements ParserInterface {
 
     $parser = new GenericOpmlParser($fetcher_result->getRaw());
     $opml = $parser->parse(TRUE);
-    $items = $this->getItems($opml['outlines'], array());
 
-    $state = $feed->getState(StateInterface::PARSE);
-    if (!$state->total) {
-      $state->total = count($items);
-    }
-
-    $start = (int) $state->pointer;
-    $state->pointer = $start + $feed->getImporter()->getLimit();
-    $state->progress($state->total, $state->pointer);
-
-    foreach (array_slice($items, $start, $feed->getImporter()->getLimit()) as $item) {
+    foreach ($this->getItems($opml['outlines']) as $item) {
+      $item->set('feed_title', $opml['head']['#title']);
       $result->addItem($item);
     }
-
-    $result->set('title', $opml['head']['#title']);
 
     return $result;
   }
@@ -67,13 +56,13 @@ class OpmlParser extends PluginBase implements ParserInterface {
    * @param array $outlines
    *   A nested array of outlines.
    * @param array $categories
-   *   The parent categories.
+   *   For internal use only.
    *
    * @return array
    *   The flattened list of feed items.
    */
-  protected function getItems(array $outlines, array $categories) {
-    $items = array();
+  protected function getItems(array $outlines, array $categories = []) {
+    $items = [];
 
     foreach ($outlines as $outline) {
       // PHPunit is being weird about our array appending.
@@ -116,13 +105,17 @@ class OpmlParser extends PluginBase implements ParserInterface {
    */
   public function getMappingSources() {
     return array(
+      'feed_title' => array(
+        'label' => $this->t('Feed: Title of the OPML file'),
+        'description' => $this->t('Title of the feed.'),
+      ),
       'title' => array(
         'label' => $this->t('Title'),
         'description' => $this->t('Title of the feed.'),
         'suggestions' => array(
           'targets' => array('subject', 'title', 'label', 'name'),
           'types' => array(
-            'field_item:text' => array(),
+            'field_item:text' => [],
           ),
         ),
       ),
@@ -139,7 +132,7 @@ class OpmlParser extends PluginBase implements ParserInterface {
         'suggestions' => array(
           'targets' => array('field_tags'),
           'types' => array(
-            'field_item:taxonomy_term_reference' => array(),
+            'field_item:taxonomy_term_reference' => [],
           ),
         ),
       ),

@@ -26,9 +26,9 @@ class LazySubscriber implements EventSubscriberInterface {
   /**
    * Wether the import listeners have been added.
    *
-   * @var bool
+   * @var array
    */
-  protected $importInited = FALSE;
+  protected $importInited = [];
 
   /**
    * Wether the clear listeners have been added.
@@ -59,34 +59,44 @@ class LazySubscriber implements EventSubscriberInterface {
    * Adds import plugins as event listeners.
    */
   public function onInitImport(InitEvent $event, $event_name, EventDispatcherInterface $dispatcher) {
-    if ($this->importInited === TRUE) {
+    $stage = $event->getStage();
+
+    if (isset($this->importInited[$stage])) {
       return;
     }
-    $this->importInited = TRUE;
+    $this->importInited[$stage] = TRUE;
 
-    $dispatcher->addListener(FeedsEvents::FETCH, function(FetchEvent $event) {
-      $feed = $event->getFeed();
-      $result = $feed->getImporter()->getFetcher()->fetch($feed);
-      $event->setFetcherResult($result);
-    });
+    switch ($stage) {
+      case 'fetch':
+        $dispatcher->addListener(FeedsEvents::FETCH, function(FetchEvent $event) {
+          $feed = $event->getFeed();
+          $result = $feed->getImporter()->getFetcher()->fetch($feed);
+          $event->setFetcherResult($result);
+        });
+        break;
 
-    $dispatcher->addListener(FeedsEvents::PARSE, function(ParseEvent $event) {
-      $feed = $event->getFeed();
+      case 'parse':
+        $dispatcher->addListener(FeedsEvents::PARSE, function(ParseEvent $event) {
+          $feed = $event->getFeed();
 
-      $result = $feed
-        ->getImporter()
-        ->getParser()
-        ->parse($feed, $event->getFetcherResult());
-      $event->setParserResult($result);
-    });
+          $result = $feed
+            ->getImporter()
+            ->getParser()
+            ->parse($feed, $event->getFetcherResult());
+          $event->setParserResult($result);
+        });
+        break;
 
-    $dispatcher->addListener(FeedsEvents::PROCESS, function(ProcessEvent $event) {
-      $feed = $event->getFeed();
-      $feed
-        ->getImporter()
-        ->getProcessor()
-        ->process($feed, $event->getParserResult());
-    });
+      case 'process':
+        $dispatcher->addListener(FeedsEvents::PROCESS, function(ProcessEvent $event) {
+          $feed = $event->getFeed();
+          $feed
+            ->getImporter()
+            ->getProcessor()
+            ->process($feed, $event->getParserResult());
+        });
+        break;
+    }
   }
 
   /**

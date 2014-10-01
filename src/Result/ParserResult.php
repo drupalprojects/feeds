@@ -14,23 +14,22 @@ use Drupal\feeds\Feeds\Item\ItemInterface;
  */
 class ParserResult extends \SplDoublyLinkedList implements ParserResultInterface {
 
-  protected $data = array();
-
-  public function get($field) {
-    return isset($this->data[$field]) ? $this->data[$field] : NULL;
-  }
-
-  public function set($field, $value) {
-    $this->data[$field] = $value;
+  /**
+   * {@inheritdoc}
+   */
+  public function addItem(ItemInterface $item) {
+    $this->push($item);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function addItem(ItemInterface $item) {
-    $item->setResult($this);
-    $this->push($item);
+  public function addItems(array $items) {
+    foreach ($items as $item) {
+      $this->push($item);
+    }
+
     return $this;
   }
 

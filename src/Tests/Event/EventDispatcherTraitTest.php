@@ -27,7 +27,7 @@ class EventDispatcherTraitTest extends FeedsUnitTestCase {
     $method = $this->getMethod(get_class($mock), 'getEventDispatcher');
     $this->assertSame($dispatcher, $method->invokeArgs($mock, array()));
 
-    $this->assertSame($mock, $mock->setEventDispatcher($dispatcher));
+    $mock->setEventDispatcher($dispatcher);
     $this->assertSame($dispatcher, $method->invokeArgs($mock, array()));
 
     $event = new Event();

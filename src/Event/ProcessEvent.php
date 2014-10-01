@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Event;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Result\ParserResultInterface;
+use Drupal\feeds\Feeds\Item\ItemInterface;
 
 /**
  * Fired to begin processing.
@@ -20,19 +20,19 @@ class ProcessEvent extends EventBase {
    *
    * @var \Drupal\feeds\Result\ParserResultInterface
    */
-  protected $parserResult;
+  protected $item;
 
   /**
    * Constructs a ProcessEvent object.
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed.
-   * @param \Drupal\feeds\Result\ParserResultInterface $parser_result
-   *   The parser result.
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
+   *   The item to process.
    */
-  public function __construct(FeedInterface $feed, ParserResultInterface $parser_result) {
+  public function __construct(FeedInterface $feed, ItemInterface $item) {
     $this->feed = $feed;
-    $this->parserResult = $parser_result;
+    $this->item = $item;
   }
 
   /**
@@ -42,7 +42,7 @@ class ProcessEvent extends EventBase {
    *   The parser result.
    */
   public function getParserResult() {
-    return $this->parserResult;
+    return $this->item;
   }
 
 }

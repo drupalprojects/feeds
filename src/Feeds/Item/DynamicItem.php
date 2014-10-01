@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Item;
 
-use Drupal\feeds\Result\ParserResultInterface;
-
 /**
  * Defines an item class for when a parser has a dynamic set of fields.
  *
@@ -21,7 +19,7 @@ class DynamicItem implements ItemInterface {
    *
    * @var array
    */
-  protected $data = array();
+  protected $data = [];
 
   /**
    * {@inheritdoc}
@@ -36,13 +34,6 @@ class DynamicItem implements ItemInterface {
   public function set($field, $value) {
     $this->data[$field] = $value;
     return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setResult(ParserResultInterface $result) {
-    $this->result = $result;
   }
 
 }

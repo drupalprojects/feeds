@@ -15,6 +15,8 @@ use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
+use Drupal\feeds\Feeds\Item\DynamicItem;
+use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -62,23 +64,20 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   }
 
   public function testOnInitImport() {
-    $fetcherResult = $this->getMock('Drupal\feeds\Result\FetcherResultInterface');
-    $parserResult = $this->getMock('Drupal\feeds\Result\ParserResultInterface');
+    $fetcher_result = $this->getMock('Drupal\feeds\Result\FetcherResultInterface');
+    $parser_result = new ParserResult();
+    $parser_result->addItem(new DynamicItem());
 
-    $this->fetcher
-      ->expects($this->once())
+    $this->fetcher->expects($this->once())
       ->method('fetch')
       ->with($this->feed)
-      ->will($this->returnValue($fetcherResult));
-    $this->parser
-      ->expects($this->once())
+      ->will($this->returnValue($fetcher_result));
+    $this->parser->expects($this->once())
       ->method('parse')
-      ->with($this->feed, $fetcherResult)
-      ->will($this->returnValue($parserResult));
-    $this->processor
-      ->expects($this->once())
-      ->method('process')
-      ->with($this->feed, $parserResult);
+      ->with($this->feed, $fetcher_result)
+      ->will($this->returnValue($parser_result));
+    $this->processor->expects($this->once())
+      ->method('process');
 
     $this->importer->expects($this->once())
       ->method('getFetcher')
@@ -91,20 +90,22 @@ class LazySubscriberTest extends FeedsUnitTestCase {
       ->will($this->returnValue($this->processor));
 
     $subscriber = new LazySubscriber();
-    $subscriber->onInitImport(new InitEvent($this->feed), FeedsEvents::INIT_IMPORT, $this->dispatcher);
 
     // Fetch.
-    $fetch_event = new FetchEvent($this->feed);
-    $this->dispatcher->dispatch(FeedsEvents::FETCH, $fetch_event);
-    $this->assertSame($fetcherResult, $fetch_event->getFetcherResult());
+    $subscriber->onInitImport(new InitEvent($this->feed, 'fetch'), FeedsEvents::INIT_IMPORT, $this->dispatcher);
+    $fetch_event = $this->dispatcher->dispatch(FeedsEvents::FETCH, new FetchEvent($this->feed));
+    $this->assertSame($fetcher_result, $fetch_event->getFetcherResult());
 
     // Parse.
-    $parse_event = new ParseEvent($this->feed, $fetcherResult);
-    $this->dispatcher->dispatch(FeedsEvents::PARSE, $parse_event);
-    $this->assertSame($parserResult, $parse_event->getParserResult());
+    $subscriber->onInitImport(new InitEvent($this->feed, 'parse'), FeedsEvents::INIT_IMPORT, $this->dispatcher);
+    $parse_event = $this->dispatcher->dispatch(FeedsEvents::PARSE, new ParseEvent($this->feed, $fetcher_result));
+    $this->assertSame($parser_result, $parse_event->getParserResult());
 
     // Process.
-    $this->dispatcher->dispatch(FeedsEvents::PROCESS, new ProcessEvent($this->feed, $parserResult));
+    $subscriber->onInitImport(new InitEvent($this->feed, 'process'), FeedsEvents::INIT_IMPORT, $this->dispatcher);
+    foreach ($parse_event->getParserResult() as $item) {
+      $this->dispatcher->dispatch(FeedsEvents::PROCESS, new ProcessEvent($this->feed, $item));
+    }
 
     // Call again.
     $subscriber->onInitImport(new InitEvent($this->feed), FeedsEvents::INIT_IMPORT, $this->explodingDispatcher);

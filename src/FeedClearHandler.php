@@ -23,15 +23,15 @@ class FeedClearHandler extends FeedHandlerBase {
    */
   public function startBatchClear(FeedInterface $feed) {
     $feed->lock();
+    $feed->clearStates();
 
     $batch = [
       'title' => $this->t('Deleting items from: %title', ['%title' => $feed->label()]),
-      'init_message' => $this->t('Starting feed clear.'),
+      'init_message' => $this->t('Deleting items from: %title', ['%title' => $feed->label()]),
       'operations' => [
-        [[get_class($this), 'contineBatch'], [$feed->id(), 'clear']],
+        [[$this, 'clear'], [$feed]],
       ],
       'progress_message' => $this->t('Deleting items from: %title', ['%title' => $feed->label()]),
-      'finished' => [get_class($this), 'finishBatchClear'],
       'error_message' => $this->t('An error occored while clearing %title.', ['%title' => $feed->label()]),
     ];
 
@@ -53,13 +53,9 @@ class FeedClearHandler extends FeedHandlerBase {
     // Clean up.
     $result = $feed->progressClearing();
 
-    if ($result == StateInterface::BATCH_COMPLETE || isset($exception)) {
+    if ($result === StateInterface::BATCH_COMPLETE || isset($exception)) {
       $feed->clearStates();
-      $feed->save();
       $feed->unlock();
-    }
-    else {
-      $feed->save();
     }
 
     if (isset($exception)) {

@@ -71,21 +71,13 @@ class SyndicationParserTest extends FeedsUnitTestCase {
   }
 
   public function testFetch() {
-    $this->importer->expects($this->any())
-      ->method('getLimit')
-      ->will($this->returnValue(3));
-
     $file = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tests/resources/googlenewstz.rss2';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
     $result = $this->parser->parse($this->feed, $fetcher_result);
-    $this->assertSame(count($result), 3);
+    $this->assertSame(count($result), 6);
     $this->assertSame($result[0]->get('author_name'), 'Person Name');
-
-    // Parse again. Tests batching.
-    $result = $this->parser->parse($this->feed, $fetcher_result);
-    $this->assertSame(count($result), 3);
-    $this->assertSame($result[0]->get('title'), 'NEWSMAKER-New Japan finance minister a fiery battler - Reuters');
+    $this->assertSame($result[3]->get('title'), 'NEWSMAKER-New Japan finance minister a fiery battler - Reuters');
   }
 
   /**
@@ -106,7 +98,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
 
   public function testGetMappingSources() {
     // Not really much to test here.
-    $this->assertSame(count($this->parser->getMappingSources()), 13);
+    $this->assertSame(count($this->parser->getMappingSources()), 14);
   }
 
 }

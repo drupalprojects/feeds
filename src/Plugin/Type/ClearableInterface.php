@@ -26,7 +26,7 @@ interface ClearableInterface {
    * @code
    * $state = $feed->getState(StateInterface::CLEAR);
    *
-   * $state->total = find_total($feed->id());
+   * $state->total = (int) find_total($feed->id());
    *
    * $state->progress($state->total, $state->total - $deleted);
    * @endcode

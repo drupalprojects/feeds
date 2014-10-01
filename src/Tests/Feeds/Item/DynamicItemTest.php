@@ -7,15 +7,14 @@
 
 namespace Drupal\feeds\Tests\Feeds\Item;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\feeds\Feeds\Item\DynamicItem;
-use Drupal\feeds\Result\ParserResult;
+use Drupal\feeds\Tests\FeedsUnitTestCase;
 
 /**
  * @covers \Drupal\feeds\Feeds\Item\DynamicItem
  * @group Feeds
  */
-class DynamicItemTest extends UnitTestCase {
+class DynamicItemTest extends FeedsUnitTestCase {
 
   /**
    * Tests basic behavior.
@@ -24,7 +23,6 @@ class DynamicItemTest extends UnitTestCase {
     $item = new DynamicItem();
     $item->set('field', 'value');
     $this->assertSame($item->get('field'), 'value');
-    $item->setResult(new ParserResult());
   }
 
 }

@@ -49,49 +49,36 @@ class SyndicationParser extends PluginBase implements ParserInterface {
       throw new \RuntimeException($this->t('The feed from %site seems to be broken because of error "%error".', $args));
     }
 
-    $result->set('feed_title', $channel->getTitle())
-           ->set('feed_description', $channel->getDescription())
-           ->set('feed_url', $channel->getLink());
-
-    $state = $feed->getState(StateInterface::PARSE);
-    $start = (int) $state->pointer;
-    $state->pointer = $start + $feed->getImporter()->getLimit();
-
-    if (!$state->total) {
-      $state->total = count($channel);
-    }
-
-    $state->progress($state->total, $state->pointer);
     foreach ($channel as $delta => $entry) {
-      // Do some janky batching.
-      if ($delta < $start) {
-        continue;
-      }
-      if ($delta >= $state->pointer) {
-        break;
-      }
-
       $item = new SyndicationItem();
       // Move the values to an array as expected by processors.
-      $item->set('title', $entry->getTitle())
-           ->set('guid', $entry->getId())
-           ->set('url', $entry->getLink())
-           ->set('guid', $entry->getId())
-           ->set('url', $entry->getLink())
-           ->set('description', $entry->getDescription());
+      $item
+        ->set('title', $entry->getTitle())
+        ->set('guid', $entry->getId())
+        ->set('url', $entry->getLink())
+        ->set('guid', $entry->getId())
+        ->set('url', $entry->getLink())
+        ->set('description', $entry->getDescription())
+        ->set('tags', $entry->getCategories()->getValues())
+        ->set('feed_title', $channel->getTitle())
+        ->set('feed_description', $channel->getDescription())
+        ->set('feed_url', $channel->getLink());
+
+      if ($image = $channel->getImage()) {
+        $item->set('feed_image_uri', $image['uri']);
+      }
 
       if ($enclosure = $entry->getEnclosure()) {
         $item->set('enclosures', array(urldecode($enclosure->url)));
       }
 
       if ($author = $entry->getAuthor()) {
-        $item->set('author_name', $author['name']);
-        $item->set('author_email', $author['email']);
+        $item->set('author_name', $author['name'])
+             ->set('author_email', $author['email']);
       }
       if ($date = $entry->getDateModified()) {
         $item->set('timestamp', $date->getTimestamp());
       }
-      $item->set('tags', $entry->getCategories()->getValues());
 
       $result->addItem($item);
     }
@@ -111,6 +98,10 @@ class SyndicationParser extends PluginBase implements ParserInterface {
       'feed_description' => array(
         'label' => $this->t('Feed description'),
         'description' => $this->t('Description of the feed.'),
+      ),
+      'feed_image_uri' => array(
+        'label' => $this->t('Feed image'),
+        'description' => $this->t('The URL of the feed image.'),
       ),
       'feed_url' => array(
         'label' => $this->t('Feed URL (link)'),

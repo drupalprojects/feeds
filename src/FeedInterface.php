@@ -240,8 +240,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    */
   public function setState($stage, $state);
 
-  public function saveStates();
-
   /**
    * @todo
    */
@@ -250,17 +248,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   /**
    * @todo
    */
-  public function getFetcherResult();
-
-  /**
-   * @todo
-   */
-  public function setFetcherResult(FetcherResultInterface $result);
-
-  /**
-   * @todo
-   */
-  public function clearFetcherResult();
+  public function saveStates();
 
   /**
    * Counts items imported by this feed.

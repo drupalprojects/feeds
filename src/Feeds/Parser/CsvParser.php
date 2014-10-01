@@ -47,7 +47,7 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     $parser = CsvFileParser::createFromFilePath($fetcher_result->getFilePath())
       ->setDelimiter($feed_config['delimiter'] == 'TAB' ? "\t" : $feed_config['delimiter'])
       ->setHasHeader(!$feed_config['no_headers'])
-      ->setLineLimit($this->importer->getLimit())
+      ->setLineLimit($this->configuration['line_limit'])
       ->setStartByte((int) $state->pointer);
 
     $header = !$feed_config['no_headers'] ? $parser->getHeader() : array();
@@ -125,6 +125,7 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     return array(
       'delimiter' => ',',
       'no_headers' => 0,
+      'line_limit' => 100,
     );
   }
 

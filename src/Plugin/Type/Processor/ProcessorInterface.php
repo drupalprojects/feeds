@@ -8,8 +8,8 @@
 namespace Drupal\feeds\Plugin\Type\Processor;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
-use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\StateInterface;
 
 /**
@@ -50,10 +50,10 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being imported.
-   * @param Drupal\feeds\Result\ParserResultInterface $parser_result
-   *   The result from the parser.
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
+   *   The item to process.
    */
-  public function process(FeedInterface $feed, ParserResultInterface $parser_result);
+  public function process(FeedInterface $feed, ItemInterface $item);
 
   /**
    * Reports the number of items that can be processed per call.

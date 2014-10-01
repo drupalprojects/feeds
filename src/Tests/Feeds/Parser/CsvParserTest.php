@@ -29,7 +29,7 @@ class CsvParserTest extends FeedsUnitTestCase {
     parent::setUp();
 
     $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $configuration = ['importer' => $this->importer];
+    $configuration = ['importer' => $this->importer, 'line_limit' => 3];
     $this->parser = new CsvParser($configuration, 'csv', []);
     $this->parser->setStringTranslation($this->getStringTranslationStub());
 
@@ -46,9 +46,6 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   public function testFetch() {
-    $this->importer->expects($this->any())
-      ->method('getLimit')
-      ->will($this->returnValue(3));
     $this->feed->expects($this->any())
       ->method('getConfigurationFor')
       ->with($this->parser)

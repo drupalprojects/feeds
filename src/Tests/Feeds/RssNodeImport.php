@@ -8,9 +8,12 @@
 namespace Drupal\feeds\Tests\Feeds;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Integration test that imports nodes from an RSS feed.
@@ -24,11 +27,33 @@ class RssNodeImport extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = ['node', 'feeds'];
+  public static $modules = ['taxonomy', 'node', 'feeds'];
 
   protected function setUp() {
     parent::setUp();
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
+
+    Vocabulary::create(['vid' => 'tags', 'name' => 'Tags'])->save();
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_tags',
+      'entity_type' => 'node',
+      'type' => 'taxonomy_term_reference',
+      'settings' => [
+        'allowed_values' => [
+          ['vocabulary' => 'tags', 'parent' => 0],
+        ],
+      ],
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+    ])->save();
+
+    FieldConfig::create([
+      'label' => 'Tags',
+      'description' => '',
+      'field_name' => 'field_tags',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+    ])->save();
 
     $web_user = $this->drupalCreateUser(['administer feeds', 'bypass node access']);
     $this->drupalLogin($web_user);
@@ -39,12 +64,24 @@ class RssNodeImport extends WebTestBase {
         [
           'target' => 'title',
           'map' => ['value' => 'title'],
-          'unique' => ['value' => TRUE],
         ],
         [
           'target' => 'body',
           'map' => ['value' => 'description'],
-          // 'settings' => ['format' => 'basic_html'],
+        ],
+        [
+          'target' => 'feeds_item',
+          'map' => ['guid' => 'guid', 'url' => 'url'],
+          'unique' => ['guid' => TRUE],
+        ],
+        [
+          'target' => 'created',
+          'map' => ['value' => 'timestamp'],
+        ],
+        [
+          'target' => 'field_tags',
+          'map' => ['target_id' => 'tags'],
+          'settings' => ['autocreate' => TRUE],
         ],
       ],
       'processor' => [
@@ -68,7 +105,9 @@ class RssNodeImport extends WebTestBase {
       'importer' => $this->importer->id(),
     ]);
     $feed->save();
-    $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
+    $this->drupalGet('feed/' . $feed->id());
+    $this->clickLink(t('Import'));
+    $this->drupalPostForm(NULL, [], t('Import'));
     $this->assertText('Created 6');
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
 
@@ -76,13 +115,29 @@ class RssNodeImport extends WebTestBase {
 
     foreach (range(1, 6) as $nid) {
       $item = $xml->channel->item[$nid - 1];
-      $this->drupalGet('node/' . $nid . '/edit');
-      $this->assertFieldByName('title[0][value]', (string) $item->title);
-      $this->assertFieldByName('body[0][value]', (string) $item->description);
+      $node = node_load($nid);
+      $this->assertEqual($node->title->value, (string) $item->title);
+      $this->assertEqual($node->body->value, (string) $item->description);
+      $this->assertEqual($node->feeds_item->guid, (string) $item->guid);
+      $this->assertEqual($node->feeds_item->url, (string) $item->link);
+      $this->assertEqual($node->created->value, strtotime((string) $item->pubDate));
+
+      $terms = [];
+      foreach ($node->field_tags as $value) {
+        debug($value->target_id);
+        // $terms[] = Term::load([$value['target_id']])->label();
+      }
     }
 
+    // Import again.
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $this->assertText('There are no new');
+
+    // Delete items.
+    $this->clickLink(t('Delete items'));
+    $this->drupalPostForm(NULL, [], t('Delete items'));
+    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 0);
+    $this->assertText('Deleted 6');
   }
 
 }

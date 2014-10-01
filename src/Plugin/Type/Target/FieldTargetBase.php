@@ -10,6 +10,7 @@ namespace Drupal\feeds\Plugin\Type\Target;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessor;
@@ -85,15 +86,9 @@ abstract class FieldTargetBase extends TargetBase {
    * {@inheritdoc}
    */
   public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, array $values) {
-    try {
-      $this->prepareValues($values);
+    if ($values = $this->prepareValues($values)) {
+      $entity->get($field_name)->setValue($values);
     }
-    catch (TargetValidationException $e) {
-      // Validation failed.
-      drupal_set_message($e->getMessage(), 'error');
-      return;
-    }
-    $entity->get($field_name)->setValue($values);
   }
 
   /**
@@ -102,10 +97,22 @@ abstract class FieldTargetBase extends TargetBase {
    * @param array $values
    *   The values.
    */
-  protected function prepareValues(array &$values) {
-    foreach ($values as $delta => &$columns) {
-      $this->prepareValue($delta, $columns);
+  protected function prepareValues(array $values) {
+    $return = [];
+    foreach ($values as $delta => $columns) {
+      try {
+        $this->prepareValue($delta, $columns);
+        $return[] = $columns;
+      }
+      catch (EmptyFeedException $e) {
+        // Nothing wrong here.
+      }
+      catch (TargetValidationException $e) {
+        // Validation failed.
+        drupal_set_message($e->getMessage(), 'error');
+      }
     }
+    return $return;
   }
 
   /**

@@ -18,10 +18,10 @@ class ProcessEventTest extends FeedsUnitTestCase {
 
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
-    $result = $this->getMock('Drupal\feeds\Result\ParserResultInterface');
-    $event = new ProcessEvent($feed, $result);
+    $item = $this->getMock('Drupal\feeds\Feeds\Item\ItemInterface');
+    $event = new ProcessEvent($feed, $item);
 
-    $this->assertSame($result, $event->getParserResult());
+    $this->assertSame($item, $event->getParserResult());
   }
 
 }

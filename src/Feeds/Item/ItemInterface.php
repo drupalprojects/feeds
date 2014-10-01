@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Item;
 
-use Drupal\feeds\Result\ParserResultInterface;
-
 /**
  * The interface for a single feed item.
  */
@@ -36,17 +34,5 @@ interface ItemInterface {
    * @return $this
    */
   public function set($field, $value);
-
-  /**
-   * Sets the parser result this item belongs to.
-   *
-   * The parser is added so that items can look up values in the result object
-   * itself. Storing global, or feed-wide value on the result saves us from
-   * having to duplicate them on every item.
-   *
-   * @param \Drupal\feeds\Result\ParserResultInterface $result
-   *   The parser result.
-   */
-  public function setResult(ParserResultInterface $result);
 
 }
