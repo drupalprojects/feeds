@@ -285,35 +285,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function setConfigurationFor(FeedsPluginInterface $client, array $config);
 
   /**
-   * Writes to {feeds_log}.
-   *
-   * @param string $type
-   *   The log type.
-   * @param string $message
-   *   The log message.
-   * @param array $variables
-   *   (optioanl) Variables used when translating the log message. Defaults to
-   *   an empty array.
-   * @param int $severity
-   *   (optional) The severity of the log message. One of:
-   *   - WATCHDOG_EMERGENCY
-   *   - WATCHDOG_ALERT
-   *   - WATCHDOG_CRITICAL
-   *   - WATCHDOG_ERROR
-   *   - WATCHDOG_WARNING
-   *   - WATCHDOG_NOTICE
-   *   - WATCHDOG_INFO
-   *   - WATCHDOG_DEBUG
-   *   Defaults to WATCHDOG_NOTICE.
-   *
-   * @return $this
-   *
-   * @todo Redo the static thingy.
-   * @todo Figure out what Drupal 8 does with logging. Maybe we can use it.
-   */
-  public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE);
-
-  /**
    * Returns the feed active status.
    *
    * Inactive feeds do not get imported.

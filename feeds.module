@@ -83,11 +83,6 @@ function feeds_cron() {
     }
     Importer::reschedule(FALSE);
   }
-
-  // Expire old log entries.
-  db_delete('feeds_log')
-    ->condition('request_time', REQUEST_TIME - 604800, '<')
-    ->execute();
 }
 
 /**
@@ -165,9 +160,7 @@ function _feeds_job_scheduler_helper($action, array $job) {
   try {
     $feed->$action();
   }
-  catch (\Exception $e) {
-    $feed->log('import', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
+  catch (\Exception $e) {}
 }
 
 /**

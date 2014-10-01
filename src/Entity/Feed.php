@@ -263,8 +263,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
       $state->displayMessages();
     }
 
-    $this->log('import', 'Imported in !s s', array('!s' => $this->getImportedTime() - $this->getImportStartedTime(), WATCHDOG_INFO));
-
     // Unset.
     $this->clearStates();
     $this->set('import_started', NULL);
@@ -442,29 +440,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function log($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE) {
-    if ($severity < WATCHDOG_NOTICE) {
-      $error = &drupal_static('feeds_log_error', FALSE);
-      $error = TRUE;
-    }
-    db_insert('feeds_log')
-      ->fields(array(
-        'fid' => $this->id(),
-        'log_time' => time(),
-        'request_time' => REQUEST_TIME,
-        'type' => $type,
-        'message' => $message,
-        'variables' => serialize($variables),
-        'severity' => $severity,
-      ))
-      ->execute();
-
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     // Before saving the feed, set changed time.
     $this->set('changed', REQUEST_TIME);
@@ -479,11 +454,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   public static function postDelete(EntityStorageInterface $storage_controller, array $feeds) {
     // Delete values from other tables also referencing these feeds.
     $ids = array_keys($feeds);
-
-    // @todo Create a log controller or some sort of log handler that D8 uses.
-    db_delete('feeds_log')
-      ->condition('fid', $ids)
-      ->execute();
 
     // Group feeds by imporer.
     $grouped = array();
