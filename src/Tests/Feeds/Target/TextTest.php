@@ -48,28 +48,6 @@ class TextTest extends FeedsUnitTestCase {
     $this->assertSame($values['format'], 'plain_text');
   }
 
-  public function testAllowedValues() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Text', 'prepareTarget')->getClosure();
-    $this->targetDefinition = $method($this->getMockFieldDefinition(['allowed_values' => ['key' => 'search value']]));
-
-    $configuration = [
-      'importer' => $this->importer,
-      'target_definition' => $this->targetDefinition,
-    ];
-    $target = Text::create($this->container, $configuration, 'text', []);
-
-    $method = $this->getProtectedClosure($target, 'prepareValue');
-
-    $values = ['value' => 'search value'];
-    $method(0, $values);
-    $this->assertSame($values['value'], 'key');
-    $this->assertSame($values['format'], 'plain_text');
-
-    $values = ['value' => 'non value'];
-    $method(0, $values);
-    $this->assertSame($values['value'], '');
-  }
-
   public function testBuildConfigurationForm() {
     $configuration = [
       'importer' => $this->importer,

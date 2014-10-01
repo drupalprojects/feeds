@@ -10,6 +10,7 @@ namespace Drupal\feeds\Feeds\Target;
 use Drupal\Component\Utility\String as DrupalString;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
@@ -25,41 +26,6 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
 
   /**
-   * The entity being referenced.
-   *
-   * @var string
-   */
-  protected $entityType;
-
-  /**
-   * The entity keys of the entity being referenced.
-   *
-   * @var array
-   */
-  protected $entityKeys;
-
-  /**
-   * The bundle being referenced.
-   *
-   * @var string
-   */
-  protected $bundle;
-
-  /**
-   * Referenceable entities.
-   *
-   * @var array
-   */
-  protected $availableEntities;
-
-  /**
-   * The entity key to use as a condition.
-   *
-   * @var string
-   */
-  protected $conditionKey;
-
-  /**
    * {@inheritdoc}
    */
   protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
@@ -67,42 +33,52 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       ->addProperty('target_id');
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $settings, $plugin_id, array $plugin_definition) {
-    parent::__construct($settings, $plugin_id, $plugin_definition);
-    // Calculate the upload directory.
-
-    // $this->availableEntities = \Drupal::service('plugin.manager.entity_reference.selection')
-    //   ->getInstance(array('field_definition' => $this->settings['instance']))
-    //   ->getReferenceableEntities();
-
-    $this->entityQuery = \Drupal::entityQuery($this->getEntityType());
-  }
-
   protected function getPotentialFields() {
-    $field_definitions = \Drupal::entityManager()->getFieldDefinitions($this->getEntityType());
-    $field_definitions = array_filter($field_definitions, function($field) {
-      return empty($field['configurable']) && empty($field['computed']) && $field['type'] != 'boolean_field';
-    });
+    $field_definitions = \Drupal::entityManager()->getBaseFieldDefinitions($this->getEntityType());
+    $field_definitions = array_filter($field_definitions, [$this, 'filterFieldTypes']);
     $options = array();
     foreach ($field_definitions as $id => $definition) {
-      $options[$id] = DrupalString::checkPlain($definition['label']);
+      $options[$id] = DrupalString::checkPlain($definition->getLabel());
     }
 
     return $options;
+  }
+
+  protected function filterFieldTypes($field) {
+    if ($field->isComputed()) {
+      return FALSE;
+    }
+
+    switch ($field->getType()) {
+      case 'string':
+      case 'text_long':
+      case 'path':
+      case 'uuid':
+        return TRUE;
+
+      default:
+        return FALSE;
+    }
   }
 
   protected function getEntityType() {
     return $this->settings['target_type'];
   }
 
+  protected function getBundle() {
+    return $this->settings['target_bundle'];
+  }
+
   /**
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $values['target_id'] = $this->findEntity(trim($values['target_id']));
+    if ($target_id = $this->findEntity($values['target_id'], $this->configuration['reference_by'])) {
+      $values['target_id'] = $target_id;
+      return;
+    }
+
+    throw new EmptyFeedException();
   }
 
   /**
@@ -114,14 +90,18 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * @return int|false
    *   The entity id, or false, if not found.
    */
-  protected function findEntity($value) {
-    $query = clone $this->entityQuery;
+  protected function findEntity($value, $field) {
+    $query = \Drupal::entityQuery($this->getEntityType());
 
-    if ($this->bundle) {
-      $query->condition($this->entityKeys['bundle'], $this->bundle);
+    if ($bundle = $this->getBundle()) {
+      $bundle_key = \Drupal::entityManager()
+        ->getStorage($this->getEntityType())
+        ->getEntityType()
+        ->getKey('bundle');
+      $query->condition($bundle_key, $bundle);
     }
 
-    $ids = array_filter($query->condition($this->configuration['reference_by'], $value)->range(0, 1)->execute());
+    $ids = array_filter($query->condition($field, $value)->range(0, 1)->execute());
     if ($ids) {
       return reset($ids);
     }

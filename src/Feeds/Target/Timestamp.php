@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\feeds\Feeds\Target\Timestamp.
+ */
+
+namespace Drupal\feeds\Feeds\Target;
+
+/**
+ * Defines a timestamp field mapper.
+ *
+ * @Plugin(
+ *   id = "integer",
+ *   field_types = {
+ *     "created",
+ *     "timestamp"
+ *   }
+ * )
+ */
+class Timestamp extends Number {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function prepareValue($delta, array &$values) {
+    $value = trim($values['value']);
+
+    // This is a year value.
+    if (ctype_digit($value) && strlen($value) === 4) {
+      $value = strtotime('January ' . $value);
+    }
+    $values['value'] = is_numeric($value) ? (int) $value : '';
+  }
+
+}

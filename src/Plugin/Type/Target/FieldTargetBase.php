@@ -7,8 +7,10 @@
 
 namespace Drupal\feeds\Plugin\Type\Target;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessor;
 use Drupal\feeds\FieldTargetDefinition;
@@ -83,7 +85,14 @@ abstract class FieldTargetBase extends TargetBase {
    * {@inheritdoc}
    */
   public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, array $values) {
-    $this->prepareValues($values);
+    try {
+      $this->prepareValues($values);
+    }
+    catch (TargetValidationException $e) {
+      // Validation failed.
+      drupal_set_message($e->getMessage(), 'error');
+      return;
+    }
     $entity->get($field_name)->setValue($values);
   }
 
@@ -115,9 +124,8 @@ abstract class FieldTargetBase extends TargetBase {
 
   protected function getUniqueQuery(FeedInterface $feed) {
     if (!isset(static::$uniqueQueries[$feed->id()])) {
-      $entity_type = $feed->getImporter()->getProcessor()->entityType();
 
-      static::$uniqueQueries[$feed->id()] = \Drupal::entityQuery($entity_type)
+      static::$uniqueQueries[$feed->id()] = \Drupal::entityQuery($this->importer->getProcessor()->entityType())
         ->condition('feeds_item.target_id', $feed->id())
         ->range(0, 1);
     }
@@ -126,8 +134,9 @@ abstract class FieldTargetBase extends TargetBase {
   }
 
   public function getUniqueValue($feed, $target, $key, $value) {
+    $base_fields = \Drupal::entityManager()->getBaseFieldDefinitions($this->importer->getProcessor()->entityType());
 
-    if (empty($this->settings['configurable'])) {
+    if (isset($base_fields[$target])) {
       $field = $target;
     }
     else {

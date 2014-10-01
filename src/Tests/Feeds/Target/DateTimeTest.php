@@ -46,7 +46,7 @@ class DateTimeTest extends FeedsUnitTestCase {
       'importer' => $this->importer,
       'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($configuration, 'boolean', []);
+    $target = new DateTime($configuration, 'datetime', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
     $values = ['value' => 1411606273];
@@ -54,30 +54,13 @@ class DateTimeTest extends FeedsUnitTestCase {
     $this->assertSame($values['value'], date(DATETIME_DATE_STORAGE_FORMAT, 1411606273));
   }
 
-  public function testFromDateTime() {
-    $configuration = [
-      'importer' => $this->importer,
-      'target_definition' => $this->targetDefinition,
-    ];
-    $target = new DateTime($configuration, 'boolean', []);
-    $method = $this->getProtectedClosure($target, 'prepareValue');
-
-    $time = time();
-
-    $values = ['value' => new \DateTime("@$time")];
-    $method(0, $values);
-    $this->assertSame($values['value'], date(DATETIME_DATETIME_STORAGE_FORMAT, $time));
-  }
-
   public function testWithErrors() {
     $configuration = [
       'importer' => $this->importer,
       'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($configuration, 'boolean', []);
+    $target = new DateTime($configuration, 'datetime', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
-
-    $time = time();
 
     $values = ['value' => '2000-05-32'];
     $method(0, $values);
@@ -89,10 +72,8 @@ class DateTimeTest extends FeedsUnitTestCase {
       'importer' => $this->importer,
       'target_definition' => $this->targetDefinition,
     ];
-    $target = new DateTime($configuration, 'boolean', []);
+    $target = new DateTime($configuration, 'datetime', []);
     $method = $this->getProtectedClosure($target, 'prepareValue');
-
-    $time = time();
 
     $values = ['value' => '2000'];
     $method(0, $values);

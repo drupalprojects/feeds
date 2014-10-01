@@ -56,22 +56,33 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
     );
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEntityType() {
-    return 'taxonomy_term';
+  protected function getBundle() {
+    return $this->settings['allowed_values'][0]['vocabulary'];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function findEntity($value) {
-    if ($term_id = parent::findEntity($value)) {
+  protected function findEntity($value, $reference_by) {
+    if ($reference_by === 'name') {
+      $value = trim($value);
+      if (!strlen($value)) {
+        return FALSE;
+      }
+    }
+
+    if ($term_id = parent::findEntity($value, $reference_by)) {
       return $term_id;
     }
 
-    $term = $this->termStorage->create(array('vid' => 'tags', 'name' => $value));
+    if (!$this->configuration['autocreate'] || $reference_by !== 'name') {
+      return FALSE;
+    }
+
+    $term = $this->termStorage->create([
+      'vid' => $this->settings['allowed_values'][0]['vocabulary'],
+      'name' => $value,
+    ]);
     $term->save();
     return $term->id();
   }
@@ -80,7 +91,10 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array('autocreate' => FALSE) + parent::defaultConfiguration();
+    return [
+      'autocreate' => FALSE,
+      'reference_by' => 'name',
+    ] + parent::defaultConfiguration();
   }
 
   /**
@@ -103,9 +117,9 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
    */
   public function getSummary() {
     $summary = parent::getSummary();
-    $create = $this->configuration['autocreate'] ? 'Yes' : 'No';
+    $create = $this->configuration['autocreate'] ? $this->t('Yes') : $this->t('No');
 
-    return $summary . '<br>' . $this->t('Autocreate terms: %create', array('%create' => $create));
+    return $summary . '<br>' . $this->t('Autocreate terms: %create', ['%create' => $create]);
   }
 
 }

@@ -7,11 +7,10 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Utility\String as StringHelper;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Language\Language;
-use Drupal\feeds\FeedsEnclosure;
+use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FieldTargetDefinition;
 
 /**
@@ -31,6 +30,8 @@ class File extends EntityReference {
    */
   protected $uploadDirectory;
 
+  protected $fileExtensions;
+
   /**
    * {@inheritdoc}
    */
@@ -45,12 +46,7 @@ class File extends EntityReference {
    */
   public function __construct(array $settings, $plugin_id, array $plugin_definition) {
     parent::__construct($settings, $plugin_id, $plugin_definition);
-
-    // Calculate the upload directory.
-    if (isset($this->settings['instance'])) {
-      $this->uploadDirectory = $this->settings['instance']->getFieldSetting('uri_scheme');
-      $this->uploadDirectory .= '://' . $this->settings['instance']->getFieldSetting('file_directory');
-    }
+    $this->fileExtensions = array_filter(explode(' ', $this->settings['file_extensions']));
   }
 
   /**
@@ -59,64 +55,86 @@ class File extends EntityReference {
   protected function prepareValue($delta, array &$values) {
     foreach ($values as $column => $value) {
       switch ($column) {
-        case 'alt':
-        case 'title':
+        case 'description':
           $values[$column] = (string) $value;
-          break;
-
-        case 'width':
-        case 'height':
-          $values[$column] = '';
-          if ($value = (int) trim((string) $value)) {
-            $values[$column] = $value;
-          }
           break;
 
         case 'target_id':
           $values[$column] = $this->getFile($value);
           break;
-
-        case 'display':
-          $values[$column] = 1;
-          break;
       }
     }
+
+    $values['display'] = (int) $this->settings['display_default'];
   }
 
   /**
    * Returns a file id given a url.
    *
-   * @param string|\Drupal\feeds\FeedsEnclosure $value
-   *   A URL string or FeedsEnclosure object.
+   * @param string $value
+   *   A URL file object.
    *
    * @return int
    *   The file id.
    */
   protected function getFile($value) {
-    if (!($value instanceof FeedsEnclosure)) {
-      if (is_string($value)) {
-        $value = trim($value);
-        $value = new FeedsEnclosure($value);
-      }
-      else {
-        return '';
-      }
+    // Prepare destination directory.
+    $destination = $this->settings['uri_scheme'] . '://' . trim($this->settings['file_directory'], '/');
+    file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
+    $filepath = $destination . '/' . $this->getFileName($value);
+
+    switch ($this->configuration['existing']) {
+      case FILE_EXISTS_ERROR:
+        if (file_exists($filepath) && $fid = $this->findEntity($filepath, 'uri')) {
+          return $fid;
+        }
+        if ($file = file_save_data($this->getContent($value), $filepath, FILE_EXISTS_REPLACE)) {
+          return $file->id();
+        }
+        break;
+
+      default:
+        if ($file = file_save_data($this->getContent($value), $filepath, $this->configuration['existing'])) {
+          return $file->id();
+        }
     }
 
-    try {
-      $file = $value->getFile($this->uploadDirectory, $this->configuration['existing']);
-      return $file->id();
+    // Something bad happened while trying to save the file to the database. We
+    // need to throw an exception so that we don't save an incomplete field
+    // value.
+    throw new TargetValidationException('There was an error saving the file: %file', ['%file' => $filepath]);
+  }
+
+  protected function getFileName($url) {
+    $filename = trim(drupal_basename($url), " \t\n\r\0\x0B.");
+    $extension = substr($filename, strrpos($filename, '.') + 1);
+
+    if (!in_array($extension, $this->fileExtensions)) {
+      throw new TargetValidationException('The file, %url, failed to save because the extension, %ext, is invalid.', ['%url' => $url, '%ext' => $extension]);
     }
-    catch (Exception $e) {
-      watchdog_exception('Feeds', $e, nl2br(StringHelper::checkPlain($e)));
+
+    return $filename;
+  }
+
+  protected function getContent($url) {
+    $response = \Drupal::httpClient()->get($url);
+
+    if ($response->getStatusCode() !== '200') {
+      $args = array(
+        '%url' => $url,
+        '@code' => $response->getStatusCode(),
+      );
+      throw new TargetValidationException('Download of %url failed with code @code.', $args);
     }
+
+    return (string) $response->getBody();
   }
 
   /**
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array('existing' => FILE_EXISTS_RENAME);
+    return array('existing' => FILE_EXISTS_ERROR) + parent::defaultConfiguration();
   }
 
   /**
@@ -125,6 +143,7 @@ class File extends EntityReference {
    * @todo Inject $user.
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
     $options = array(
       FILE_EXISTS_REPLACE => $this->t('Replace'),
       FILE_EXISTS_RENAME => $this->t('Rename'),
@@ -145,6 +164,8 @@ class File extends EntityReference {
    * {@inheritdoc}
    */
   public function getSummary() {
+    $summary = parent::getSummary();
+
     switch ($this->configuration['existing']) {
       case FILE_EXISTS_REPLACE:
         $message = 'Replace';
@@ -159,7 +180,7 @@ class File extends EntityReference {
         break;
     }
 
-    return $this->t('Exsting files: %existing', array('%existing' => $message));
+    return $summary . '<br>' . $this->t('Exsting files: %existing', array('%existing' => $message));
   }
 
 }
