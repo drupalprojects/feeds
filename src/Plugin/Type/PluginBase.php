@@ -28,13 +28,6 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   protected $importer;
 
   /**
-   * The translation manager service.
-   *
-   * @var \Drupal\Core\StringTranslation\TranslationInterface
-   */
-  protected $translationManager;
-
-  /**
    * The url generator.
    *
    * @var \Drupal\Core\Routing\UrlGeneratorInterface

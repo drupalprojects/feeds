@@ -24,6 +24,7 @@ use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 use Drupal\feeds\PuSH\SubscriptionInterface;
 use Drupal\feeds\RawFetcherResult;
 use Drupal\feeds\Result\FetcherResult;
+use Drupal\feeds\StateInterface;
 use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
@@ -113,7 +114,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == 304) {
-      drupal_set_message($this->t('The feed has not been updated.'));
+      $feed->getState(StateInterface::FETCH)->setMessage($this->t('The feed has not been updated.'));
       throw new EmptyFeedException();
     }
 

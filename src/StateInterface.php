@@ -64,7 +64,7 @@ interface StateInterface {
   /**
    * Reports the progress of a batch.
    *
-   * When $total == $progress, the state of the task tracked by this state is
+   * When $total === $progress, the state of the task tracked by this state is
    * regarded to be complete.
    *
    * Should handle the following cases gracefully:
@@ -78,5 +78,36 @@ interface StateInterface {
    *   A number that is the progress made on $total.
    */
   public function progress($total, $progress);
+
+  /**
+   * Sets a message to display to the user.
+   *
+   * This should be used by plugins instead of drupal_set_message(). It will
+   * store messages and display them at the appropriate time.
+   *
+   * @param string $message
+   *   (optional) The translated message to be displayed to the user. For
+   *   consistency with other messages, it should begin with a capital letter
+   *   and end with a period.
+   * @param string $type
+   *   (optional) The message's type. Defaults to 'status'. These values are
+   *   supported:
+   *   - 'status'
+   *   - 'warning'
+   *   - 'error'
+   * @param bool $repeat
+   *   (optional) If this is FALSE and the message is already set, then the
+   *   message won't be repeated. Defaults to FALSE.
+   *
+   * @see drupal_set_message()
+   */
+  public function setMessage($message = NULL, $type = 'status', $repeat = FALSE);
+
+  /**
+   * Shows the messages to the user.
+   *
+   * @see \Drupal\feeds\StateInterface::setMessage()
+   */
+  public function displayMessages();
 
 }

@@ -194,8 +194,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     // Something bad happened, log it.
     catch (\Exception $e) {
       $state->failed++;
-      drupal_set_message($e->getMessage(), 'warning');
-      $feed->log('import', $this->createLogMessage($e, $entity, $item), array(), WATCHDOG_ERROR);
+      $state->setMessage($e->getMessage(), 'warning');
     }
   }
 
@@ -216,7 +215,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Delete a batch of entities.
-    $entity_ids = $query->range(0, $this->importer->getLimit())->execute();
+    $entity_ids = $query->range(0, 25)->execute();
 
     if ($entity_ids) {
       $this->entityDeleteMultiple($entity_ids);
@@ -226,23 +225,17 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
     // Report results when done.
     if ($feed->progressClearing() === StateInterface::BATCH_COMPLETE) {
+      $tokens = [
+        '@entity' => Unicode::strtolower($this->entityLabel()),
+        '@entities' => Unicode::strtolower($this->entityLabelPlural()),
+        '%title' => $feed->label(),
+      ];
+
       if ($state->deleted) {
-        $message = format_plural(
-          $state->deleted,
-          'Deleted @number @entity from %title.',
-          'Deleted @number @entities from %title.',
-          array(
-            '@number' => $state->deleted,
-            '@entity' => Unicode::strtolower($this->entityLabel()),
-            '@entities' => Unicode::strtolower($this->entityLabelPlural()),
-            '%title' => $feed->label(),
-          )
-        );
-        $feed->log('clear', $message, array(), WATCHDOG_INFO);
-        drupal_set_message($message);
+        $state->setMessage($this->formatPlural($state->deleted, 'Deleted @count @entity from %title.', 'Deleted @count @entities from %title.', $tokens));
       }
       else {
-        drupal_set_message($this->t('There are no @entities to delete.', array('@entities' => Unicode::strtolower($this->entityLabelPlural()))));
+        $state->setMessage($this->t('There are no @entities to delete.', $tokens));
       }
     }
   }
@@ -250,55 +243,30 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   /**
    * {@inheritdoc}
    */
-  public function setMessages(FeedInterface $feed) {
-    $state = $feed->getState(StateInterface::PROCESS);
+  public function finishImport(FeedInterface $feed) {
+    $this->setMessages($feed->getState(StateInterface::PROCESS));
+  }
 
-    $tokens = array(
+  /**
+   * Sets the messages.
+   */
+  protected function setMessages(StateInterface $state) {
+    $tokens = [
       '@entity' => Unicode::strtolower($this->entityLabel()),
       '@entities' => Unicode::strtolower($this->entityLabelPlural()),
-    );
-
-    $messages = array();
+    ];
 
     if ($state->created) {
-      $messages[] = array(
-        'message' => format_plural(
-          $state->created,
-          'Created @number @entity.',
-          'Created @number @entities.',
-          array('@number' => $state->created) + $tokens
-        ),
-      );
+      $state->setMessage($this->formatPlural($state->created, 'Created @count @entity.', 'Created @count @entities.', $tokens));
     }
     if ($state->updated) {
-      $messages[] = array(
-        'message' => format_plural(
-          $state->updated,
-          'Updated @number @entity.',
-          'Updated @number @entities.',
-          array('@number' => $state->updated) + $tokens
-        ),
-      );
+      $state->setMessage($this->formatPlural($state->updated, 'Created @count @entity.', 'Created @count @entities.', $tokens));
     }
     if ($state->failed) {
-      $messages[] = array(
-        'message' => format_plural(
-          $state->failed,
-          'Failed importing @number @entity.',
-          'Failed importing @number @entities.',
-          array('@number' => $state->failed) + $tokens
-        ),
-        'level' => WATCHDOG_ERROR,
-      );
+      $state->setMessage($this->formatPlural($state->failed, 'Created @count @entity.', 'Created @count @entities.', $tokens));
     }
-    if (!$messages) {
-      $messages[] = array(
-        'message' => $this->t('There are no new @entities.', array('@entities' => Unicode::strtolower($this->entityLabelPlural()))),
-      );
-    }
-    foreach ($messages as $message) {
-      drupal_set_message($message['message']);
-      $feed->log('import', $message['message'], array(), isset($message['level']) ? $message['level'] : WATCHDOG_INFO);
+    if (!$state->created && !$state->updated && !$state->failed) {
+      $state->setMessage($this->t('There are no new @entities.', $tokens));
     }
   }
 
@@ -467,7 +435,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       'values' => [$this->bundleKey() => NULL],
       'authorize' => TRUE,
       'expire' => SchedulerInterface::EXPIRE_NEVER,
-      'process_limit' => ProcessorInterface::PROCESS_LIMIT,
       'owner_id' => 0,
     );
 
@@ -530,15 +497,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#description' => $this->t('Forces the update of items even if the feed did not change.'),
       '#default_value' => $this->configuration['skip_hash_check'],
       '#parents' => array('processor', 'configuration', 'skip_hash_check'),
-    );
-    $form['advanced']['process_limit'] = array(
-      '#type' => 'number',
-      '#title' => $this->t('Process limit'),
-      '#description' => $this->t('The number of items to process in one request.'),
-      '#default_value' => $this->configuration['process_limit'],
-      '#parents' => array('processor', 'configuration', 'process_limit'),
-      '#min' => 1,
-      '#max' => 1000,
     );
 
     return $form;
@@ -696,7 +654,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Delete a batch of entities.
-    if ($entity_ids = $query->range(0, $this->importer->getLimit())->execute()) {
+    if ($entity_ids = $query->range(0, 50)->execute()) {
       $this->entityDeleteMultiple($entity_ids);
       $state->deleted += count($entity_ids);
       $state->progress($state->total, $state->deleted);
@@ -795,31 +753,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   }
 
   /**
-   * Creates a log message when an exception occured during import.
-   *
-   * @param \Exception $e
-   *   The exception that was thrown during processing.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object that was being processed.
-   * @param arary $item
-   *   The parser result for this entity.
-   *
-   * @return string
-   *   The message to log.
-   *
-   * @todo This no longer works due to circular references.
-   */
-  protected function createLogMessage(\Exception $e, EntityInterface $entity, ItemInterface $item) {
-    include_once DRUPAL_ROOT . '/core/includes/utility.inc';
-    $message = $e->getMessage();
-    $message .= '<h3>Original item</h3>';
-    $message .= '<pre>' . drupal_var_export($item) . '</pre>';
-    $message .= '<h3>Entity</h3>';
-    $message .= '<pre>' . drupal_var_export($entity->toArray()) . '</pre>';
-    return $message;
-  }
-
-  /**
    * Formats UNIX timestamps to readable strings.
    *
    * @param int $timestamp
@@ -833,13 +766,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       return $this->t('Never');
     }
     return $this->t('after !time', array('!time' => \Drupal::service('date.formatter')->formatInterval($timestamp)));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLimit() {
-    return $this->configuration['process_limit'];
   }
 
   /**

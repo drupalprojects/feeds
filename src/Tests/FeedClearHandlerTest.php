@@ -9,6 +9,8 @@ namespace Drupal\feeds\Tests;
 
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\FeedClearHandler;
+use Drupal\feeds\State;
+use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
@@ -27,7 +29,13 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
     $this->handler = new FeedClearHandler($this->dispatcher);
     $this->handler->setStringTranslation($this->getStringTranslationStub());
 
+    $state = new State();
+
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
+    $this->feed->expects($this->any())
+      ->method('getState')
+      ->with(StateInterface::CLEAR)
+      ->will($this->returnValue($state));
   }
 
   public function testStartBatchClear() {
@@ -40,12 +48,10 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
   }
 
   public function testClear() {
-    $this->feed
-      ->expects($this->exactly(2))
+    $this->feed->expects($this->exactly(2))
       ->method('progressClearing')
       ->will($this->onConsecutiveCalls(0.5, 1.0));
-    $this->feed
-      ->expects($this->once())
+    $this->feed->expects($this->once())
       ->method('clearStates');
 
     $result = $this->handler->clear($this->feed);
@@ -62,11 +68,9 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       throw new \Exception();
     });
 
-    $this->feed
-      ->expects($this->once())
+    $this->feed->expects($this->once())
       ->method('unlock');
-    $this->feed
-      ->expects($this->once())
+    $this->feed->expects($this->once())
       ->method('clearStates');
 
     $this->handler->clear($this->feed);

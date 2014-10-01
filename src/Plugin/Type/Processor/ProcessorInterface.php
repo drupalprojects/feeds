@@ -18,13 +18,6 @@ use Drupal\feeds\StateInterface;
 interface ProcessorInterface extends FeedsPluginInterface {
 
   /**
-   * Default limit for creating items on a page load.
-   *
-   * @var int
-   */
-  const PROCESS_LIMIT = 50;
-
-  /**
    * Skip items that exist already.
    *
    * @var int
@@ -56,20 +49,11 @@ interface ProcessorInterface extends FeedsPluginInterface {
   public function process(FeedInterface $feed, ItemInterface $item);
 
   /**
-   * Reports the number of items that can be processed per call.
+   * Called after an import is completed.
    *
-   * 0 means 'unlimited'.
-   *
-   * If a number other than 0 is given, Feeds parsers that support batching
-   * will only deliver this limit to the processor.
-   *
-   * @return int
-   *   The number of items to process in a single batch, or 0 for unlimited.
-   *
-   * @todo This should be an importer level option, with the option for
-   *   processors to override.
+   * @param \Drupal\feeds\FeedInterface $feed
    */
-  public function getLimit();
+  public function finishImport(FeedInterface $feed);
 
   /**
    * Deletes feed items older than REQUEST_TIME - $time.
@@ -124,13 +108,5 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *     - optional_unique: Set to true if this target supports unique values.
    */
   public function getMappingTargets();
-
-  /**
-   * Called after processing all items to display messages.
-   *
-   * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed being processed.
-   */
-  public function setMessages(FeedInterface $feed);
 
 }

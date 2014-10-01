@@ -11,6 +11,7 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 
 /**
@@ -147,8 +148,7 @@ class FeedFormController extends ContentEntityForm {
     $insert = $feed->isNew();
     $feed->save();
 
-    $feed_link = l($this->t('View'), 'feed/' . $feed->id());
-    $context = ['@importer' => $feed->getImporter()->id(), '%title' => $feed->label(), 'link' => $feed_link];
+    $context = ['@importer' => $feed->getImporter()->id(), '%title' => $feed->label(), 'link' => $feed->link($this->t('View'))];
     $t_args = ['@importer' => $feed->getImporter()->label(), '%title' => $feed->label()];
 
     if ($insert) {

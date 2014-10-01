@@ -10,6 +10,8 @@ namespace Drupal\feeds\Tests\Feeds\Fetcher;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\HttpFetcher;
+use Drupal\feeds\State;
+use Drupal\feeds\StateInterface;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -70,8 +72,17 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testFetch304() {
+    $state = new State();
+    $feed = $this->getMock('Drupal\feeds\FeedInterface');
+
+    $feed->expects($this->any())
+      ->method('getState')
+      ->with(StateInterface::FETCH)
+      ->will($this->returnValue($state));
+
     $this->client->getEmitter()->attach(new Mock([new Response(304)]));
-    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'));
+
+    $this->fetcher->fetch($feed);
   }
 
   /**

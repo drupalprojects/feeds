@@ -186,13 +186,6 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getLimit() {
-    return $this->getProcessor()->getLimit();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getImportPeriod() {
     // Check whether any fetcher is overriding the import period.
     $period = $this->getPlugin('scheduler')->getImportPeriod();

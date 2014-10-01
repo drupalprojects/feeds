@@ -72,6 +72,11 @@ class State implements StateInterface {
   public $failed = 0;
 
   /**
+   * The list of messages to display to the user.
+   */
+  protected $messages = [];
+
+  /**
    * {@inheritdoc}
    */
   public function progress($total, $progress) {
@@ -86,6 +91,26 @@ class State implements StateInterface {
     }
     else {
       $this->progress = StateInterface::BATCH_COMPLETE;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMessage($message = NULL, $type = 'status', $repeat = FALSE) {
+    $this->messages[] = [
+      'message' => $message,
+      'type' => $type,
+      'repeat' => $repeat,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function displayMessages() {
+    foreach ($this->messages as $message) {
+      drupal_set_message($message['message'], $message['type'], $message['repeat']);
     }
   }
 

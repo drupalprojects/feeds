@@ -19,19 +19,6 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface ImporterInterface extends ConfigEntityInterface {
 
   /**
-   * Reports how many items should be created on one page load by this importer.
-   *
-   * It depends on whether the parser implements batching if this limit is
-   * actually respected. If no limit is reported it doesn't mean that the number
-   * of items that can be created on one page load is actually without limit.
-   *
-   * @return int
-   *   A positive integer defining the number of items that can be created on
-   *   one page load, or 0 if this number is unlimited.
-   */
-  public function getLimit();
-
-  /**
    * Returns the mappings for this importer.
    *
    * @return array

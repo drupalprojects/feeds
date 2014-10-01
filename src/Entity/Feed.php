@@ -256,8 +256,12 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function cleanUp() {
     $this->set('imported', time());
-    $processor_state = $this->getState(StateInterface::PROCESS);
-    $this->getImporter()->getProcessor()->setMessages($this, $processor_state);
+
+    $this->getImporter()->getProcessor()->finishImport($this);
+
+    foreach ($this->states as $state) {
+      $state->displayMessages();
+    }
 
     $this->log('import', 'Imported in !s s', array('!s' => $this->getImportedTime() - $this->getImportStartedTime(), WATCHDOG_INFO));
 

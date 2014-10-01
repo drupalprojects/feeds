@@ -54,6 +54,8 @@ class FeedClearHandler extends FeedHandlerBase {
     $result = $feed->progressClearing();
 
     if ($result === StateInterface::BATCH_COMPLETE || isset($exception)) {
+      $state = $feed->getState(StateInterface::CLEAR);
+      $state->displayMessages();
       $feed->clearStates();
       $feed->unlock();
     }
