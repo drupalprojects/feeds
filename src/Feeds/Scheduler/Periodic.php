@@ -97,10 +97,6 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $values =& $form_state->getValue(array('scheduler', 'configuration'));
 
-    if ($this->configuration['import_period'] != $values['import_period']) {
-      $this->importer->reschedule($this->importer->id());
-    }
-
     // Intentionally call parent last so that we can access our old values.
     parent::submitConfigurationForm($form, $form_state);
   }

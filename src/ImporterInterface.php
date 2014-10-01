@@ -90,18 +90,4 @@ interface ImporterInterface extends ConfigEntityInterface {
    */
   public function setPlugin($plugin_type, $plugin_id);
 
-  /**
-   * Reschedules one or all importers.
-   *
-   * @param string $importer_id
-   *   If true, all importers will be rescheduled, if false, no importers will
-   *   be rescheduled, if an importer id, only the importer of that id will be
-   *   rescheduled.
-   *
-   * @return bool|array
-   *   Returns true if all importers need rescheduling, false if no rescheduling
-   *   is required, or an array of importers that need rescheduling.
-   */
-  public static function reschedule($importer_id = NULL);
-
 }

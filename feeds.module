@@ -65,24 +65,9 @@ function feeds_feed_uri(EntityInterface $feed) {
 
 /**
  * Implements hook_cron().
- *
- * @todo This needs to be different, this could timeout easily. Perhaps a queue.
  */
 function feeds_cron() {
-  if ($importers = Importer::reschedule()) {
-    $feed_controller = \Drupal::entityManager()->getStorage('feeds_feed');
 
-    if ($importers === TRUE) {
-      $feeds = $feed_controller->loadMultiple();
-    }
-    else {
-      $feeds = $feed_controller->loadByProperties(array('importer' => $importers));
-    }
-    foreach ($feeds as $feed) {
-      $feed->schedule();
-    }
-    Importer::reschedule(FALSE);
-  }
 }
 
 /**

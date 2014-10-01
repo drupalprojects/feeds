@@ -435,31 +435,6 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public static function reschedule($importer_id = NULL) {
-    // Get current reschedule list.
-    $reschedule = \Drupal::state()->get('feeds.reschedule') ?: FALSE;
-
-    // If Importer::reschedule(TRUE), or Importer::reschedule(FALSE) then set
-    // the reschedule state to that. TRUE meaning all importers and FALSE
-    // meaning none.
-    if ($importer_id === TRUE || $importer_id === FALSE) {
-      $reschedule = $importer_id;
-    }
-    // We are adding an importer to the reschedule list. Only add if all
-    // importers weren't already flagged.
-    elseif (is_string($importer_id) && $reschedule !== TRUE) {
-      $reschedule = is_array($reschedule) ? $reschedule : array();
-      $reschedule[$importer_id] = $importer_id;
-    }
-
-    \Drupal::state()->set('feeds.reschedule', $reschedule);
-
-    return $reschedule;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     parent::preSave($storage_controller);
 

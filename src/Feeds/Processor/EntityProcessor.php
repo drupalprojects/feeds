@@ -518,19 +518,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
 
   /**
    * {@inheritdoc}
-   *
-   * @todo We need an importer save/update/delete API.
-   */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state->getValue(array('processor', 'configuration'));
-    if ($this->configuration['expire'] != $values['expire']) {
-      $this->importer->reschedule($this->importer->id());
-    }
-    parent::submitConfigurationForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
    */
   public function onImporterSave($update = TRUE) {
     $this->prepareFeedsItemField();
