@@ -215,7 +215,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Delete a batch of entities.
-    $entity_ids = $query->range(0, 25)->execute();
+    $entity_ids = $query->range(0, 10)->execute();
 
     if ($entity_ids) {
       $this->entityDeleteMultiple($entity_ids);

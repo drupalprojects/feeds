@@ -21,11 +21,13 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
 
   protected $dispatcher;
   protected $feed;
+  protected $context;
 
   public function setUp() {
     parent::setUp();
 
     $this->dispatcher = new EventDispatcher();
+    $this->context = [];
     $this->handler = new FeedClearHandler($this->dispatcher);
     $this->handler->setStringTranslation($this->getStringTranslationStub());
 
@@ -54,10 +56,10 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
     $this->feed->expects($this->once())
       ->method('clearStates');
 
-    $result = $this->handler->clear($this->feed);
-    $this->assertSame($result, 0.5);
-    $result = $this->handler->clear($this->feed);
-    $this->assertSame($result, 1.0);
+    $this->handler->clear($this->feed, $this->context);
+    $this->assertSame($this->context['finished'], 0.5);
+    $this->handler->clear($this->feed, $this->context);
+    $this->assertSame($this->context['finished'], 1.0);
   }
 
   /**
@@ -73,7 +75,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
     $this->feed->expects($this->once())
       ->method('clearStates');
 
-    $this->handler->clear($this->feed);
+    $this->handler->clear($this->feed, $this->context);
   }
 
 }

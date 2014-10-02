@@ -187,16 +187,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getImportPeriod() {
-    // Check whether any fetcher is overriding the import period.
-    $period = $this->getPlugin('scheduler')->getImportPeriod();
-
-    // Allow fetcher to override the import period.
-    $fetcher = $this->getFetcher();
-    if ($fetcher instanceof PuSHFetcherInterface && $fetcher_period = $fetcher->importPeriod($feed)) {
-      $period = $fetcher_period;
-    }
-
-    return $period;
+    return (int) $this->getPlugin('scheduler')->getImportPeriod();
   }
 
   /**
@@ -253,16 +244,27 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    */
   public function setMappings(array $mappings) {
     $this->mappings = $mappings;
+    return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function addMapping(array $mapping) {
     $this->mappings[] = $mapping;
+    return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getMapping($delta) {
     return $this->mappings[$delta];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setMapping($delta, $mapping) {
     $this->mappings[$delta]['map'] = $mapping['map'];
     if (!empty($mapping['unique'])) {

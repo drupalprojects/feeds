@@ -9,6 +9,7 @@ namespace Drupal\feeds\Tests\Feeds;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\feeds\Entity\Feed;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
@@ -138,6 +139,31 @@ class RssNodeImport extends WebTestBase {
     $this->drupalPostForm(NULL, [], t('Delete items'));
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 0);
     $this->assertText('Deleted 6');
+  }
+
+  public function testCron() {
+    $mappings = $this->importer->getMappings();
+    unset($mappings[2]['unique']);
+    $this->importer->setMappings($mappings)->save();
+
+    $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
+
+    $feed = Feed::create([
+      'title' => $this->randomString(),
+      'source' => file_create_url($filepath),
+      'importer' => $this->importer->id(),
+    ]);
+    $feed->save();
+
+    $this->cronRun();
+    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+
+    $this->cronRun();
+    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+
+    // Check that items import normally.
+    $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
+    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 12);
   }
 
 }

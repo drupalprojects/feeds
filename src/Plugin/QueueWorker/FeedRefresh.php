@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\feeds\Plugin\QueueWorker\FeedRefresh.
+ */
+
+namespace Drupal\feeds\Plugin\QueueWorker;
+
+use Drupal\feeds\Event\FeedsEvents;
+use Drupal\feeds\Event\FetchEvent;
+use Drupal\feeds\Event\InitEvent;
+use Drupal\feeds\Exception\LockException;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\StateInterface;
+
+/**
+ * @QueueWorker(
+ *   id = "feeds_feed_import",
+ *   title = @Translation("Feed refresh"),
+ *   cron = {"time" = 60}
+ * )
+ */
+class FeedRefresh extends FeedQueueWorkerBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processItem($feed) {
+    if (!$feed instanceof FeedInterface) {
+      return;
+    }
+
+    try {
+      $feed->lock();
+    }
+    catch (LockException $e) {
+      // We don't really know when a queue item will execute, so it could be
+      // locked which is ok.
+      return;
+    }
+    $feed->clearStates();
+    try {
+      $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'fetch'));
+      $fetch_event = $this->dispatchEvent(FeedsEvents::FETCH, new FetchEvent($feed));
+      $feed->setState(StateInterface::PARSE, NULL);
+    }
+    catch (\Exception $exception) {
+      return $this->handleException($feed, $exception);
+    }
+
+    $feed->saveStates();
+    $this->queueFactory->get('feeds_feed_parse')->createItem([$feed, $fetch_event->getFetcherResult()]);
+  }
+
+}

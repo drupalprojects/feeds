@@ -18,6 +18,7 @@ use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
+use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
@@ -140,8 +141,16 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function getImportStartedTime() {
-    return $this->get('import_started')->value;
+  public function getQueuedTime() {
+    return $this->get('queued')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setQueuedTime($queued) {
+    $this->set('queued', $queued);
+    return $this;
   }
 
   /**
@@ -203,16 +212,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->startBatchImport($this);
-    $this->set('import_started', time());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function import() {
-    return $this->entityManager()
+  public function startCronImport() {
+    $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
-      ->import($this);
+      ->startCronImport($this);
   }
 
   /**
@@ -236,15 +244,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function clear() {
-    return $this->entityManager()
-      ->getHandler('feeds_feed', 'feed_clear')
-      ->clear($this);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function expire() {
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_expire')
@@ -255,17 +254,25 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * Cleans up after an import.
    */
   public function cleanUp() {
-    $this->set('imported', time());
-
     $this->getImporter()->getProcessor()->finishImport($this);
 
     foreach ($this->states as $state) {
       $state->displayMessages();
     }
 
-    // Unset.
     $this->clearStates();
-    $this->set('import_started', NULL);
+    $this->setQueuedTime(0);
+
+    $time = time();
+    $this->set('imported', $time);
+
+    $interval = $this->getImporter()->getImportPeriod();
+    if ($interval === SchedulerInterface::SCHEDULE_NEVER) {
+      $this->set('next', SchedulerInterface::SCHEDULE_NEVER);
+    }
+    else {
+      $this->set('next', $interval + $time);
+    }
 
     return $this;
   }
@@ -398,7 +405,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function lock() {
-    if (!\Drupal::lock('feeds.lock.persistent')->acquire("feeds_feed_{$this->id()}", 60.0)) {
+    if (!\Drupal::service('feeds.lock.persistent')->acquire("feeds_feed_{$this->id()}", 3600 * 12)) {
       $args = ['@id' => $this->bundle(), '@fid' => $this->id()];
       throw new LockException(String::format('Cannot acquire lock for feed @id / @fid.', $args));
     }
@@ -409,7 +416,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function unlock() {
-    \Drupal::lock('feeds.lock.persistent')->release("feeds_feed_{$this->id()}");
+    \Drupal::service('feeds.lock.persistent')->release("feeds_feed_{$this->id()}");
     return $this;
   }
 
@@ -417,7 +424,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function isLocked() {
-    return !\Drupal::lock('feeds.lock.persistent')->lockMayBeAvailable("feeds_feed_{$this->id()}");
+    return !\Drupal::service('feeds.lock.persistent')->lockMayBeAvailable("feeds_feed_{$this->id()}");
   }
 
   /**
@@ -445,6 +452,12 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->set('changed', REQUEST_TIME);
     foreach ($this->getImporter()->getPlugins() as $plugin) {
       $plugin->onFeedSave($this, $update);
+    }
+
+    // If this is a new node, 'next' and 'imported' will be zero which will
+    // queue it for the next run.
+    if ($this->getImporter()->getImportPeriod() === SchedulerInterface::SCHEDULE_NEVER) {
+      $this->set('next', SchedulerInterface::SCHEDULE_NEVER);
     }
   }
 
@@ -561,7 +574,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setDescription(t('The time that the feed was last edited.'));
 
     $fields['imported'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Last imported'))
+      ->setLabel(t('Last import'))
       ->setDescription(t('The time that the feed was imported.'))
       ->setDefaultValue(0)
       ->setDisplayOptions('view', array(
@@ -571,9 +584,21 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ))
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['import_started'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Import started'))
-      ->setDescription(t('The time that the import was started.'));
+    $fields['next'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Next import'))
+      ->setDescription(t('The time that the feed will import next.'))
+      ->setDefaultValue(0)
+      ->setDisplayOptions('view', array(
+        'label' => 'inline',
+        'type' => 'timestamp',
+        'weight' => 1,
+      ))
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['queued'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Queued'))
+      ->setDescription(t('Time when this feed was queued for refresh, 0 if not queued.'))
+      ->setDefaultValue(0);
 
     $fields['source'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Source'))
@@ -593,6 +618,17 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $fields['config'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Config'))
       ->setDescription(t('The config of the feed.'));
+
+    // $fields['item_count'] = BaseFieldDefinition::create('integer')
+    //   ->setLabel(t('Items imported'))
+    //   ->setDescription(t('The number of items imported.'))
+    //   ->setComputed(TRUE)
+    //   ->setCustomStorage(TRUE)
+    //   ->setDisplayOptions('view', array(
+    //     'label' => 'inline',
+    //     'type' => 'number_integer',
+    //     'weight' => 0,
+    //   ));
 
     $fields['fetcher_result'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Fetcher result'))

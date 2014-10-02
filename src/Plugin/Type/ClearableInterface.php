@@ -31,9 +31,6 @@ interface ClearableInterface {
    * $state->progress($state->total, $state->total - $deleted);
    * @endcode
    *
-   * @see \Drupal\feeds\Plugin\ProcessorBase::clear()
-   * @see \Drupal\feeds\Feeds\Fetcher::clear()
-   *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being cleared. Implementers should only delete items pertaining
    *   to this feed. The preferred way of determining whether an item pertains

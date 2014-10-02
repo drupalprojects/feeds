@@ -33,6 +33,11 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     return $importer;
   }
 
+  protected function getMockFeed() {
+    $feed = $this->getMock('Drupal\feeds\FeedInterface');
+    return $feed;
+  }
+
   protected function getMethod($class, $name) {
     $class = new \ReflectionClass($class);
     $method = $class->getMethod($name);

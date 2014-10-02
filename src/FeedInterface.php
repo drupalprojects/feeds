@@ -87,23 +87,38 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function getImportedTime();
 
   /**
-   * @todo
+   * Returns the time when this feed was queued for refresh, 0 if not queued.
+   *
+   * @return int
+   *   The timestamp of the last refresh.
    */
-  public function getImportStartedTime();
+  public function getQueuedTime();
 
   /**
-   * Starts importing a feed.
+   * Sets the time when this feed was queued for refresh, 0 if not queued.
    *
-   * This method starts an import job. Depending on the configuration of the
-   * importer, a Batch API job or a background job with Job Scheduler will be
-   * created.
+   * @param int $queued
+   *   The timestamp of the last refresh.
+   *
+   * @return $this
+   */
+  public function setQueuedTime($queued);
+
+  /**
+   * Starts importing a feed via the batch API.
    *
    * @throws \Exception
-   *   If processing in background is enabled, the first batch chunk of the
-   *   import will be executed on the current page request. This means that this
-   *   method may throw the same exceptions as FeedInterface::import().
+   *   Thrown if an un-recoverable error has occured.
    */
   public function startBatchImport();
+
+  /**
+   * Starts importing a feed via cron.
+   *
+   * @throws \Exception
+   *   Thrown if an un-recoverable error has occured.
+   */
+  public function startCronImport();
 
   /**
    * Start deleting all imported items of a feed.
@@ -114,28 +129,9 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *
    * @throws \Exception
    *   If processing in background is enabled, the first batch chunk of the
-   *   clear task will be executed on the current page request. This means that
-   *   this method may throw the same exceptions as FeedInterface::clear().
+   *   clear task will be executed on the current page request.
    */
   public function startBatchClear();
-
-  /**
-   * Imports a feed.
-   *
-   * Executes the fetching, parsing and processing stage.
-   *
-   * This method only executes the current batch chunk, then returns. If you are
-   * looking to import an entire source, use FeedInterface::startBatchImport()
-   * instead.
-   *
-   * @return float
-   *   StateInterface::BATCH_COMPLETE if the import process finished. A decimal
-   *   between 0.0 and 0.9 periodic if import is still in progress.
-   *
-   * @throws \Exception
-   *   Throws Exception if an error occurs when importing.
-   */
-  public function import();
 
   /**
    * Imports a raw string.
@@ -161,22 +157,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function importRaw($raw);
 
   /**
-   * Removes all items from a feed.
-   *
-   * This method only executes the current batch chunk, then returns. If you are
-   * looking to delete all items of a feed, use FeedInterface::startBatchClear()
-   * instead.
-   *
-   * @return float
-   *   StateInterface::BATCH_COMPLETE if the clearing process finished. A
-   *   decimal between 0.0 and 0.9 periodic if clearing is still in progress.
-   *
-   * @throws \Exception
-   *   Throws Exception if an error occurs when clearing.
-   */
-  public function clear();
-
-  /**
    * Removes all expired items from a feed.
    *
    * @return float
@@ -194,6 +174,14 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * @return $this
    */
   public function cleanUp();
+
+  /**
+   * Reports the progress of the fetching stage.
+   *
+   * @return float
+   *   A float between 0 and 1. 1 = StateInterface::BATCH_COMPLETE.
+   */
+  public function progressFetching();
 
   /**
    * Reports the progress of the parsing stage.

@@ -41,7 +41,7 @@ class FeedClearHandler extends FeedHandlerBase {
   /**
    * {@inheritodc}
    */
-  public function clear(FeedInterface $feed) {
+  public function clear(FeedInterface $feed, array &$context) {
     try {
       $this->dispatchEvent(FeedsEvents::INIT_CLEAR, new InitEvent($feed));
       $this->dispatchEvent(FeedsEvents::CLEAR, new ClearEvent($feed));
@@ -51,20 +51,20 @@ class FeedClearHandler extends FeedHandlerBase {
     }
 
     // Clean up.
-    $result = $feed->progressClearing();
+    $context['finished'] = $feed->progressClearing();
 
-    if ($result === StateInterface::BATCH_COMPLETE || isset($exception)) {
-      $state = $feed->getState(StateInterface::CLEAR);
-      $state->displayMessages();
+    if ($context['finished'] === StateInterface::BATCH_COMPLETE || isset($exception)) {
+      $feed->getState(StateInterface::CLEAR)->displayMessages();
       $feed->clearStates();
       $feed->unlock();
+    }
+    else {
+      $feed->saveStates();
     }
 
     if (isset($exception)) {
       throw $exception;
     }
-
-    return $result;
   }
 
 }

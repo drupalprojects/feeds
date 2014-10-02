@@ -66,7 +66,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
    * {@inheritdoc}
    */
   public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
-    $cron_required = ' ' . l($this->t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
+    // $cron_required = ' ' . l($this->t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
     $times = array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200);
     $period = array_map(function($time) {
       return \Drupal::service('date.formatter')->formatInterval($time);
@@ -84,7 +84,7 @@ class Periodic extends ConfigurablePluginBase implements SchedulerInterface, Adv
       '#type' => 'select',
       '#title' => $this->t('Import period'),
       '#options' => $period,
-      '#description' => $this->t('Choose how often a feed should be imported.') . $cron_required,
+      '#description' => $this->t('Choose how often a feed should be imported.'),
       '#default_value' => $this->configuration['import_period'],
     );
 
