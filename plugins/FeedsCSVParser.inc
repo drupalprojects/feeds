@@ -28,7 +28,7 @@ class FeedsCSVParser extends FeedsParser {
       // Get first line and use it for column names, convert them to lower case.
       $header = $this->parseHeader($parser, $iterator);
       if (!$header) {
-        return;
+        return FeedsParserResult();
       }
       $parser->setColumnNames($header);
     }
