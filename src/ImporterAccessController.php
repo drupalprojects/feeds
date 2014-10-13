@@ -34,11 +34,4 @@ class ImporterAccessController extends EntityAccessControlHandler {
     }
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'administer feeds');
-  }
-
 }

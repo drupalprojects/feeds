@@ -52,7 +52,8 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   links = {
  *     "edit-form" = "feeds.importer_edit",
  *     "delete-form" = "feeds.importer_delete"
- *   }
+ *   },
+ *   admin_permission = "administer feeds"
  * )
  */
 class Importer extends ConfigEntityBundleBase implements ImporterInterface {
