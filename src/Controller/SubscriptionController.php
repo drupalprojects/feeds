@@ -7,9 +7,7 @@
 
 namespace Drupal\feeds\Controller;
 
-use Drupal\feeds\Exception\InterfaceNotImplementedException;
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\PuSH\Subscription;
+use Drupal\feeds\SubscriptionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,27 +18,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class SubscriptionController {
 
   /**
-   * The subscription storage controller.
-   *
-   * @var \Drupal\feeds\PuSH\Subscription
-   */
-  protected $subscriptionCrud;
-
-  /**
-   * Constructs a SubscriptionController object.
-   *
-   * @param \Drupal\feeds\PuSH\Subscription $subscription_crud
-   *   The subscription controller.
-   */
-  public function __construct(Subscription $subscription_crud) {
-    $this->subscriptionCrud = $subscription_crud;
-  }
-
-  /**
    * Handles subscribe/unsubscribe requests.
    *
-   * @param \Drupal\feeds\FeedInterface $feeds_feed
-   *   The feed to perform the request on.
+   * @param \Drupal\feeds\SubscriptionInterface $feeds_subscription
+   *   The subscription entity.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -49,44 +30,36 @@ class SubscriptionController {
    *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown if the subscription was not found.
-   *
-   * @todo Verify query settings in an access controller?
    */
-  public function subscribe(FeedInterface $feeds_feed, Request $request) {
+  public function subscribe(SubscriptionInterface $feeds_subscription, Request $request) {
 
     // Verify the request has the proper attributes.
-    if ($request->query->get('hub_challenge') === NULL) {
+    if ($request->query->get('hub.challenge') === NULL) {
       throw new NotFoundHttpException();
     }
-    elseif (!$sub = $this->subscriptionCrud->getSubscription($feeds_feed->id())) {
+    elseif ($request->query->get('hub.topic') !== $feeds_subscription->getTopic()) {
       throw new NotFoundHttpException();
     }
-    elseif ($request->query->get('hub_topic') != $sub['topic']) {
-      throw new NotFoundHttpException();
-    }
-    elseif ($request->query->get('hub_verify_token') != $sub['token']) {
-      throw new NotFoundHttpException();
-    }
-    elseif (!in_array($request->query->get('hub_mode'), array('subscribe', 'unsubscribe'))) {
+    elseif (!in_array($request->query->get('hub.mode'), ['subscribe', 'unsubscribe'])) {
       throw new NotFoundHttpException();
     }
 
-    if ($lease_time = $request->query->get('hub_lease_seconds')) {
-      $sub['lease'] = $lease_time;
+    if ($lease_time = $request->query->get('hub.lease_seconds')) {
+      $feeds_subscription->setLease($lease_time);
+      $feeds_subscription->setExpire($lease_time + REQUEST_TIME);
     }
 
-    $sub['state'] = $request->query->get('hub_mode') . 'd';
+    $feeds_subscription->setState($request->query->get('hub.mode') . 'd');
+    $feeds_subscription->save();
 
-    $this->subscriptionCrud->setSubscription($sub);
-
-    return new Response($request->query->get('hub_challenge'), 200);
+    return new Response($request->query->get('hub.challenge'), 200);
   }
 
   /**
    * Receives a notification.
    *
-   * @param \Drupal\feeds\FeedInterface $feeds_feed
-   *   The feed to perform the request on.
+   * @param \Drupal\feeds\SubscriptionInterface $feeds_subscription
+   *   The subscription entity.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -97,7 +70,7 @@ class SubscriptionController {
    *   Thrown if the subscription was not found or the request parameters were
    *   invalid.
    */
-  public function receive(FeedInterface $feeds_feed, Request $request) {
+  public function receive(SubscriptionInterface $feeds_subscription, Request $request) {
     if (!$sig = $request->headers->get('X-Hub-Signature')) {
       throw new NotFoundHttpException();
     }
@@ -107,14 +80,9 @@ class SubscriptionController {
     if (empty($result['sha1'])) {
       throw new NotFoundHttpException();
     }
-
-    if (!$sub = $this->subscriptionCrud->getSubscription($feeds_feed->id())) {
-      throw new NotFoundHttpException();
-    }
-
     $raw = file_get_contents('php://input');
 
-    if ($result['sha1'] !== hash_hmac('sha1', $raw, $sub['secret'])) {
+    if (!$feeds_subscription->checkSignature($result['sha1'], $raw)) {
       throw new NotFoundHttpException();
     }
 

@@ -2,82 +2,12 @@
 
 /**
  * @file
- * Schema definitions install/update/uninstall hooks.
+ * Install/update/uninstall hooks.
  */
 
 /**
  * Implements hook_uninstall().
  */
 function feeds_uninstall() {
-}
-
-/**
- * Implements hook_schema().
- */
-function feeds_schema() {
-  $schema = array();
-
-  $schema['feeds_subscription'] = array(
-    'description' => 'PubSubHubbub subscriptions.',
-    'fields' => array(
-      'id' => array(
-        'description' => 'The {feeds_feed}.fid this record belongs to.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'topic' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'The topic URL (feed URL) of this subscription.',
-      ),
-      'hub' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'The URL of the hub endpoint of this subscription.',
-      ),
-      'created' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'The UNIX timestamp this subscription was originally created.',
-      ),
-      'lease' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'description' => 'The lease time in seconds.',
-      ),
-      'expires' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'description' => 'The UNIX timestamp this subscription will expire.',
-      ),
-      'token' => array(
-        'type' => 'varchar',
-        'length' => 43,
-        'description' => 'The token used to verify a subscribe request.',
-      ),
-      'secret' => array(
-        'type' => 'varchar',
-        'length' => 43,
-        'not null' => TRUE,
-        'description' => 'The secret used to verify a request.',
-      ),
-      'state' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'description' => 'Status of subscription.',
-      ),
-    ),
-    'primary key' => array('id'),
-    'foreign keys' => array(
-      'id' => array(
-        'table' => 'feeds_feed',
-        'columns' => array('id' => 'fid'),
-      ),
-    ),
-  );
-
-  return $schema;
+  // @todo remove keyvalue store and queue things.
 }

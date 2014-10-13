@@ -23,7 +23,7 @@ use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 use Drupal\feeds\PuSH\SubscriptionInterface;
 use Drupal\feeds\RawFetcherResult;
-use Drupal\feeds\Result\FetcherResult;
+use Drupal\feeds\Result\HttpFetcherResult;
 use Drupal\feeds\StateInterface;
 use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
@@ -124,7 +124,7 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     $download_file = $this->prepareDirectory($feed->getSource());
     file_unmanaged_move($tempname, $download_file, FILE_EXISTS_REPLACE);
 
-    return new FetcherResult($download_file);
+    return new HttpFetcherResult($download_file, $response->getHeaders());
   }
 
   /**

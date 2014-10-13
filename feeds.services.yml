@@ -22,15 +22,11 @@ services:
     arguments: ['@entity.manager']
     tags:
       - { name: access_check, applies_to: _feeds_feed_add_access }
-  feeds.subscription.crud:
-    class: Drupal\feeds\PuSH\Subscription
-    arguments: ['@database', 'feeds_subscription']
   feeds.subscription.controller:
     class: Drupal\feeds\Controller\SubscriptionController
-    arguments: ['@feeds.subscription.crud']
   feeds.pubsubhubbub:
     class: Drupal\feeds\EventSubscriber\PubSubHubbub
-    arguments: ['@queue', '@feeds.subscription.crud']
+    arguments: ['@queue', '@entity.manager']
     tags:
       - { name: event_subscriber }
   feeds.import_subscriber:

@@ -1,12 +1,19 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\EventSubscriber\PubSubHubbub.
+ */
+
 namespace Drupal\feeds\EventSubscriber;
 
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Queue\QueueFactory;
+use Drupal\feeds\Entity\Subscription;
 use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
-use Drupal\feeds\Event\FetcherEvent;
-use Drupal\feeds\PuSH\SubscriptionInterface;
+use Drupal\feeds\Event\FetchEvent;
+use Drupal\feeds\Result\HttpFetcherResultInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -22,23 +29,21 @@ class PubSubHubbub implements EventSubscriberInterface {
   protected $queueFactory;
 
   /**
-   * The subscription controller.
+   * The subscription storage controller.
    *
-   * @var \Drupal\feeds\PuSH\SubscriptionInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $subscription;
+  protected $storage;
 
   /**
    * Constructs a PubSubHubbub object.
    *
    * @param \Drupal\Core\Queue\QueueFactory $queue_factory
    *   The queue service.
-   * @param \Drupal\feeds\PuSH\SubscriptionInterface $subscription
    */
-  public function __construct(QueueFactory $queue_factory, SubscriptionInterface $subscription) {
+  public function __construct(QueueFactory $queue_factory, EntityManagerInterface $entity_manager) {
     $this->queueFactory = $queue_factory;
-    $this->subscription = $subscription;
-      // $container->get('queue')->get('feeds_push_unsubscribe'),
+    $this->storage = $entity_manager->getStorage('feeds_subscription');
   }
 
   /**
@@ -46,7 +51,7 @@ class PubSubHubbub implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     $events = array();
-    $events[FeedsEvents::POST_FETCH][] = 'onPostFetch';
+    $events[FeedsEvents::FETCH][] = ['onPostFetch', FeedsEvents::AFTER];
     $events[FeedsEvents::FEEDS_DELETE][] = 'onDeleteMultipleFeeds';
     return $events;
   }
@@ -54,65 +59,65 @@ class PubSubHubbub implements EventSubscriberInterface {
   /**
    * Subscribes to a feed.
    */
-  public function onPostFetch(FetcherEvent $event) {
+  public function onPostFetch(FetchEvent $event) {
     $feed = $event->getFeed();
     $fetcher = $feed->getImporter()->getFetcher();
-    $fetcher_result = $event->getFetcherResult();
+
+    $subscription = $this->storage->load($feed->id());
 
     if (!$fetcher->getConfiguration('use_pubsubhubbub')) {
+      if ($subscription) {
+        $subscription->delete();
+      }
       return;
     }
 
     // Subscription does not exist yet.
-    if (!$subscription = $this->subscription->getSubscription($feed->id())) {
-      $sub = array(
-        'id' => $feed->id(),
-        'state' => 'unsubscribed',
-        'hub' => '',
+    if (!$subscription) {
+      $this->storage->create([
+        'fid' => $feed->id(),
         'topic' => $feed->getSource(),
-      );
-      $this->subscription->setSubscription($sub);
-      // Subscribe to new topic.
-      $this->queueFactory->get('feeds_push_subscribe')->createItem($feed->id());
+        'hub' => $this->findHub($event->getFetcherResult()),
+      ])->save();
     }
+    elseif ($feed->getSource() !== $subscription->getTopic()) {
+      $subscription->delete();
 
-    // Source has changed.
-    elseif ($subscription['topic'] !== $feed->getSource()) {
-      // Subscribe to new topic.
-      $this->queueFactory->get('feeds_push_subscribe')->createItem($feed->id());
-      // Unsubscribe from old topic.
-      $this->queueFactory->get('feeds_push_unsubscribe')->createItem($feed->id());
-      // Save new topic to subscription.
-      $subscription['topic'] = $feed->getSource();
-      $this->subscription->setSubscription($subscription);
-    }
-
-    // Hub exists, but we aren't subscribed.
-    // @todo Is this the best way to handle this?
-    // @todo Periodically check for new hubs... Always check for new hubs...
-    // Maintain a retry count so that we don't keep trying indefinitely.
-    elseif ($subscription['hub']) {
-      switch ($subscription['state']) {
-        // Don't do anything if we are in the process of subscribing.
-        case 'subscribe':
-        case 'subscribed':
-          break;
-
-        default:
-          $this->queueFactory->get('feeds_push_subscribe')->createItem($feed->id());
-          break;
-      }
+      $this->storage->create([
+        'fid' => $feed->id(),
+        'topic' => $feed->getSource(),
+        'hub' => $this->findHub($event->getFetcherResult()),
+      ])->save();
     }
   }
 
-  public function onDeleteMultipleFeeds(DeleteFeedsEvent $event) {
-    $fids = array_keys($event->getFeeds());
-    foreach ($this->subscription->hasSubscriptions($fids) as $fid) {
-      // Add to unsubscribe queue.
-      $this->queueFactory->get('feeds_push_unsubscribe')->createItem(array(
-        'id' => $fid,
-      ));
+  /**
+   * Finds a hub from a fetcher result.
+   *
+   * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
+   *   The fetcher result.
+   *
+   * @return string|null
+   *   The hub URL or null if one wasn't found.
+   *
+   * @todo Log/retry when downloading fails.
+   */
+  protected function findHub(FetcherResultInterface $fetcher_result) {
+    if ($fetcher_result instanceof HttpFetcherResultInterface) {
+      if ($hub = HttpHelpers::findLinkHeader($fetcher_result->getHeaders(), 'hub')) {
+        return $hub;
+      }
     }
+
+    return HttpHelpers::findHubFromXml($fetcher_result->getRaw());
+  }
+
+  /**
+   * Deletes subscriptions when feeds are deleted.
+   */
+  public function onDeleteMultipleFeeds(DeleteFeedsEvent $event) {
+    $subscriptions = $this->storage->loadMultiple(array_keys($event->getFeeds()));
+    $this->storage->delete($subscriptions);
   }
 
 }

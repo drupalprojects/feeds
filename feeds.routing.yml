@@ -93,21 +93,21 @@ feeds.unlock:
     feeds_feed: \d+
 
 feeds.receive:
-  path: '/feed/{feeds_feed}/push_callback'
+  path: '/feed/{feeds_subscription}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:receive'
   requirements:
     _access: 'TRUE'
-    feeds_feed: \d+
+    feeds_subscription: \d+
     _method: 'POST'
 
 feeds.subscribe:
-  path: '/feed/{feeds_feed}/push_callback'
+  path: '/feed/{feeds_subscription}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:subscribe'
   requirements:
     _access: 'TRUE'
-    feeds_feed: \d+
+    feeds_subscription: \d+
     _method: 'GET'
 
 # Admin UI routes.
