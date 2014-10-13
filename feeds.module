@@ -83,26 +83,14 @@ function feeds_theme() {
 
 /**
  * Implements hook_file_download().
- *
- * @todo This doesn't handle duplicate sources.
  */
 function feeds_file_download($uri) {
-  $fids = \Drupal::entityQuery('feeds_feed')
-    ->condition('source', $uri)
-    ->range(0, 1)
-    ->execute();
-
-  if (!$fids) {
-    // File is not associated with a feed.
-    return;
-  }
-
   // Get the file record based on the URI. If not in the database just return.
   $files = \Drupal::entityManager()
     ->getStorage('file')
     ->loadByProperties(['uri' => $uri]);
 
-  foreach (File::loadMultiple($files) as $item) {
+  foreach ($files as $item) {
     // Since some database servers sometimes use a case-insensitive comparison
     // by default, double check that the filename is an exact match.
     if ($file->getFileUri() === $uri) {
@@ -120,14 +108,17 @@ function feeds_file_download($uri) {
     return;
   }
 
-  $feed = Feed::load(reset($fids));
-  if (!$feed || !$feed->access('import')) {
-    // User does not have permission to import this feed.
-    return -1;
+  $feeds = \Drupal::entityManager()
+    ->getStorage('feeds_feed')
+    ->loadByProperties(['source' => $uri]);
+
+  foreach ($feeds as $feed) {
+    if ($feed->getSource() === $uri && $feed->access('import')) {
+      return file_get_content_headers($file);
+    }
   }
 
-  // Return file headers.
-  return file_get_content_headers($file);
+  return -1;
 }
 
 /**
