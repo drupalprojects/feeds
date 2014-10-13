@@ -26,9 +26,13 @@ class DateTimeTest extends FeedsUnitTestCase {
 
     $container = new ContainerBuilder();
     $language_manager = $this->getMock('Drupal\Core\Language\LanguageManagerInterface');
+    $language = $this->getMock('Drupal\Core\Language\LanguageInterface');
+    $language->expects($this->any())
+      ->method('getId')
+      ->will($this->returnValue('en'));
     $language_manager->expects($this->any())
       ->method('getCurrentLanguage')
-      ->will($this->returnValue((object) ['id' => 'en']));
+      ->will($this->returnValue($language));
     $container->set('language_manager', $language_manager);
 
     \Drupal::setContainer($container);
