@@ -153,6 +153,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       return;
     }
 
+    // Delay building a new entity until necessary.
+    if ($existing_entity_id) {
+      $entity = $this->storageController->load($existing_entity_id);
+    }
+
     $hash = $this->hash($item);
     $changed = $existing_entity_id && ($hash !== $entity->get('feeds_item')->hash);
 
@@ -168,9 +173,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       // Build a new entity.
       if (!$existing_entity_id) {
         $entity = $this->newEntity($feed);
-      }
-      else {
-        $entity = $this->storageController->load($existing_entity_id);
       }
 
       // Set field values.
@@ -260,10 +262,10 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       $state->setMessage($this->formatPlural($state->created, 'Created @count @entity.', 'Created @count @entities.', $tokens));
     }
     if ($state->updated) {
-      $state->setMessage($this->formatPlural($state->updated, 'Created @count @entity.', 'Created @count @entities.', $tokens));
+      $state->setMessage($this->formatPlural($state->updated, 'Updated @count @entity.', 'Updated @count @entities.', $tokens));
     }
     if ($state->failed) {
-      $state->setMessage($this->formatPlural($state->failed, 'Created @count @entity.', 'Created @count @entities.', $tokens));
+      $state->setMessage($this->formatPlural($state->failed, 'Failed @count @entity.', 'Failed @count @entities.', $tokens));
     }
     if (!$state->created && !$state->updated && !$state->failed) {
       $state->setMessage($this->t('There are no new @entities.', $tokens));

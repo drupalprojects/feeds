@@ -134,6 +134,16 @@ class RssNodeImport extends WebTestBase {
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $this->assertText('There are no new');
 
+    // Test force-import.
+    $configuration = $this->importer->getProcessor()->getConfiguration();
+    $configuration['skip_hash_check'] = TRUE;
+    $configuration['update_existing'] = TRUE;
+    $this->importer->getProcessor()->setConfiguration($configuration);
+    $this->importer->save();
+    $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
+    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+    $this->assertText('Updated 6');
+
     // Delete items.
     $this->clickLink(t('Delete items'));
     $this->drupalPostForm(NULL, [], t('Delete items'));
