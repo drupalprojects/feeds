@@ -35,6 +35,12 @@ class PushSubscribeTest extends FeedsUnitTestCase {
     $this->client->getEmitter()->attach($this->mock);
 
     $container->set('http_client', $this->client);
+
+    $logger_factory = $this->getMock('Drupal\Core\Logger\LoggerChannelFactoryInterface');
+    $logger_factory->expects($this->any())
+      ->method('get')
+      ->will($this->returnValue($this->getMock('Drupal\Core\Logger\LoggerChannelInterface')));
+    $container->set('logger.factory', $logger_factory);
     $this->plugin = PushSubscribe::create($container, [], 'feeds_push_subscribe', []);
     $this->plugin->setUrlGenerator($this->getMock('Drupal\Core\Routing\UrlGeneratorInterface'));
   }

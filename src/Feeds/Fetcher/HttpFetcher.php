@@ -152,12 +152,10 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     catch (BadResponseException $e) {
       $response = $e->getResponse();
       $args = array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase());
-      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_ERROR);
       throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
     catch (RequestException $e) {
       $args = array('%url' => $url, '%error' => $e->getMessage());
-      watchdog('feeds', 'The feed %url seems to be broken due to "%error".', $args, WATCHDOG_ERROR);
       throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
 

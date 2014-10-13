@@ -81,19 +81,6 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
    * Defines stub constants.
    */
   protected function defineConstants() {
-    if (!defined('WATCHDOG_ERROR')) {
-      define('WATCHDOG_ERROR', 3);
-    }
-    if (!defined('WATCHDOG_WARNING')) {
-      define('WATCHDOG_WARNING', 4);
-    }
-    if (!defined('WATCHDOG_NOTICE')) {
-      define('WATCHDOG_NOTICE', 5);
-    }
-    if (!defined('WATCHDOG_INFO')) {
-      define('WATCHDOG_INFO', 6);
-    }
-
     if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
       define('STREAM_WRAPPERS_WRITE_VISIBLE', 1);
     }
@@ -181,10 +168,6 @@ namespace {
     function file_unmanaged_move($old, $new) {
       rename($old, $new);
     }
-  }
-
-  if (!function_exists('watchdog')) {
-    function watchdog() {}
   }
 
   if (!function_exists('file_unmanaged_delete')) {

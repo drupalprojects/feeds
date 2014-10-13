@@ -121,7 +121,7 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
       $this->storage->delete($this->feeds);
       $this->tempStoreFactory->get('feeds_multiple_delete_confirm')->delete($GLOBALS['user']->id());
       $count = count($this->feeds);
-      watchdog('content', 'Deleted @count feeds.', array('@count' => $count));
+      $this->logger('feeds')->notice('Deleted @count feeds.', array('@count' => $count));
       drupal_set_message(format_plural($count, 'Deleted 1 feed.', 'Deleted @count posts.', array('@count' => $count)));
     }
     // @todo Set the correct route once views can override paths.

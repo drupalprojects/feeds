@@ -49,7 +49,6 @@ class FeedProcess extends FeedQueueWorkerBase {
    * Finalizes the import.
    */
   protected function finish(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
-    watchdog('feeds', time());
     if ($feed->progressParsing() !== StateInterface::BATCH_COMPLETE) {
       $this->queueFactory->get('feeds_feed_import')->createItem($feed);
     }

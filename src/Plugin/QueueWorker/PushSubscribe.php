@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Plugin\QueueWorker;
 
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\Core\Routing\UrlGeneratorTrait;
@@ -29,6 +30,11 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
   protected $client;
 
   /**
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $loggerFactory;
+
+  /**
    * Constructs a PushSubscribe object.
    *
    * @param array $configuration
@@ -38,9 +44,10 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, LoggerChannelFactoryInterface $logger_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->client = $client;
+    $this->loggerFactory = $logger_factory;
   }
 
   /**
@@ -51,7 +58,8 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('http_client')
+      $container->get('http_client'),
+      $container->get('logger.factory')
     );
   }
 
@@ -87,7 +95,7 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
       $response = $this->client->post($subscription->getHub(), ['body' => $post_body]);
     }
     catch (RequestException $e) {
-      watchdog('feeds', '%error', ['%error' => $e->getMessage()], WATCHDOG_WARNING);
+      $this->loggerFactory->get('feeds')->warning('%error', ['%error' => $e->getMessage()]);
       return;
     }
 
