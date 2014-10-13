@@ -31,10 +31,4 @@ class ImporterAccessControllerTest extends FeedsUnitTestCase {
     $this->assertTrue($result->isAllowed());
   }
 
-  public function testCheckCreateAccessTrue() {
-    $method = $this->getMethod('Drupal\feeds\ImporterAccessController', 'checkCreateAccess');
-    $result = $method->invokeArgs($this->controller, [$this->account, [], NULL]);
-    $this->assertTrue($result->isAllowed());
-  }
-
 }
