@@ -51,7 +51,6 @@ use Drupal\user\UserInterface;
  *     "feed_expire" = "Drupal\feeds\FeedExpireHandler"
  *   },
  *   base_table = "feeds_feed",
- *   uri_callback = "feeds_feed_uri",
  *   fieldable = TRUE,
  *   entity_keys = {
  *     "id" = "fid",
