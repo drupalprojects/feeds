@@ -22,27 +22,28 @@ class CsvParserTest extends FeedsUnitTestCase {
   public function testAlternateLineEnding(array $expected, $ending) {
     $text = file_get_contents(dirname(dirname(dirname(dirname(__FILE__)))) . '/tests/resources/csv-example.xml');
     $text = str_replace("\r\n", $ending, $text);
-    $parser = CsvParser::createFromString($text)
-      ->setLineLimit(4);
+
+    $parser = new \LimitIterator(CsvParser::createFromString($text), 0, 4);
 
     $first = array_slice($expected, 0, 4);
+    $this->assertSame(count(iterator_to_array($parser)), 4);
+    $this->assertSame(count(iterator_to_array($parser)), 4);
 
-    $rows = $parser->parse();
-    $this->assertSame(count($rows), count($first));
-    foreach ($rows as $delta => $row) {
+    foreach ($parser as $delta => $row) {
       $this->assertSame($first[$delta], $row);
     }
 
     // Test second batch.
     $last_pos = $parser->lastLinePos();
 
-    $parser = CsvParser::createFromString($text)
-      ->setStartByte($last_pos);
-    $rows = $parser->parse();
+    $parser = (new \LimitIterator(CsvParser::createFromString($text), 0, 4))->setStartByte($last_pos);
 
     $second = array_slice($expected, 4);
-    $this->assertSame(count($rows), count($second));
-    foreach ($rows as $delta => $row) {
+
+    // // Test that rewinding works as expected.
+    $this->assertSame(count(iterator_to_array($parser)), 2);
+    $this->assertSame(count(iterator_to_array($parser)), 2);
+    foreach ($parser as $delta => $row) {
       $this->assertSame($second[$delta], $row);
     }
   }
@@ -77,20 +78,18 @@ class CsvParserTest extends FeedsUnitTestCase {
   public function testHasHeader() {
     $file = dirname(dirname(dirname(dirname(__FILE__)))) . '/tests/resources/csv-example.xml';
     $parser = CsvParser::createFromFilePath($file)
-      ->setLineLimit(10)
       ->setHasHeader();
 
-    $rows = $parser->parse();
-    $this->assertSame(count($rows), 5);
+    $this->assertSame(count(iterator_to_array($parser)), 5);
     $this->assertSame(['Header A', 'Header B', 'Header C'], $parser->getHeader());
   }
 
-  public function testAlternateSeparator() {
+  public function  testAlternateSeparator() {
     // This implicitly tests lines without a newline.
-    $rows = CsvParser::createFromString("a*b*c")
-      ->setDelimiter('*')
-      ->parse();
-    $this->assertSame(['a', 'b', 'c'], $rows[0]);
+    $parser = CsvParser::createFromString("a*b*c")
+      ->setDelimiter('*');
+
+    $this->assertSame(['a', 'b', 'c'], iterator_to_array($parser)[0]);
   }
 
   /**
@@ -103,7 +102,7 @@ class CsvParserTest extends FeedsUnitTestCase {
   /**
    * @expectedException \InvalidArgumentException
    */
-  public function testInvalidResourcePath() {
+  public function __constructtestInvalidResourcePath() {
     new CsvParser('beep boop');
   }
 

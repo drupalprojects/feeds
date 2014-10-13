@@ -12,7 +12,7 @@ namespace Drupal\feeds\Component;
  *
  * http://tools.ietf.org/html/rfc4180
  */
-class CsvParser {
+class CsvParser implements \Iterator {
 
   /**
    * The column delimeter.
@@ -36,13 +36,6 @@ class CsvParser {
   protected $startByte = 0;
 
   /**
-   * The limit of the number of lines to parse. 0 means there is not limit.
-   *
-   * @var int
-   */
-  protected $lineLimit = 0;
-
-  /**
    * The file handle to the CSV file.
    *
    * @var resource
@@ -50,16 +43,37 @@ class CsvParser {
   protected $handle;
 
   /**
+   * The current line.
+   *
+   * @var array|bool
+   */
+  protected $currentLine;
+
+  /**
+   * The number of lines read.
+   *
+   * @var int
+   */
+  protected $linesRead = 0;
+
+  /**
+   * The byte position in the file.
+   *
+   * @var int
+   */
+  protected $filePosition;
+
+  /**
    * Constructs a CsvParser object.
    *
-   * @param resource $stream
+   * @param resource $handle
    *   An open file handle.
    */
-  public function __construct($stream) {
-    if (!is_resource($stream)) {
-      throw new \InvalidArgumentException('Stream must be a resource.');
+  public function __construct($handle) {
+    if (!is_resource($handle)) {
+      throw new \RuntimeException('handle must be a resource.');
     }
-    $this->handle = $stream;
+    $this->handle = $handle;
   }
 
   /**
@@ -77,10 +91,10 @@ class CsvParser {
     }
 
     $previous = ini_set('auto_detect_line_endings', '1');
-    $stream = fopen($filepath, 'r');
+    $handle = fopen($filepath, 'r');
     ini_set('auto_detect_line_endings', $previous);
 
-    return new static($stream);
+    return new static($handle);
   }
 
   /**
@@ -94,12 +108,12 @@ class CsvParser {
    */
   public static function createFromString($string) {
     $previous = ini_set('auto_detect_line_endings', '1');
-    $stream = fopen('php://temp', 'r+');
+    $handle = fopen('php://temp', 'rw');
     ini_set('auto_detect_line_endings', $previous);
 
-    fwrite($stream, $string);
-    fseek($stream, 0);
-    return new static($stream);
+    fwrite($handle, $string);
+    fseek($handle, 0);
+    return new static($handle);
   }
 
   /**
@@ -144,7 +158,7 @@ class CsvParser {
    *   A list of the header names.
    */
   public function getHeader() {
-    $prev = $this->lastLinePos();
+    $prev = ftell($this->handle);
 
     fseek($this->handle, 0);
     $header = $this->parseLine($this->readLine());
@@ -154,31 +168,15 @@ class CsvParser {
   }
 
   /**
-   * Defines the number of lines to parse in one operation.
+   * Gets the byte number where the parser left off.
    *
-   * By default, all lines of a file are being parsed.
-   *
-   * @param int $lines
-   *   The number of lines to parse in one operation.
-   *
-   * @return $this
-   */
-  public function setLineLimit($lines) {
-    $this->lineLimit = (int) $lines;
-    return $this;
-  }
-
-  /**
-   * Gets the byte number where the parser left off after last parse() call.
+   * This position can be used to set the start byte for the next iteration.
    *
    * @return int
-   *   0 if all lines or no line has been parsed, the byte position of where a
-   *   timeout or the line limit has been reached, otherwise. This position can
-   *   be used to set the start byte for the next iteration after parse() has
-   *   reached the line limit set with setLineLimit().
+   *   The byte position of where parsing ended.
    */
   public function lastLinePos() {
-    return ftell($this->handle);
+    return $this->filePosition;
   }
 
   /**
@@ -197,38 +195,78 @@ class CsvParser {
   }
 
   /**
-   * Parses CSV files into a two dimensional array.
-   *
-   * @return array
-   *   Two dimensional array that contains the data in the CSV file.
+   * Implements \Iterator::current().
    */
-  public function parse() {
-    if ($this->hasHeader) {
-      fseek($this->handle, 0);
+  public function current() {
+    return $this->currentLine;
+  }
+
+  /**
+   * Implements \Iterator::key().
+   */
+  public function key() {
+    return $this->linesRead - 1;
+  }
+
+  /**
+   * Implements \Iterator::next().
+   */
+  public function next() {
+    // Record the file position before reading the next line since we
+    // preemptively read lines to avoid returning empty rows.
+    $this->filePosition = ftell($this->handle);
+
+    do {
+      $line = $this->readLine();
+
+      // End of file.
+      if ($line === FALSE) {
+        $this->currentLine = FALSE;
+        return;
+      }
+
+    // Skip empty lines that aren't wrapped in an enclosure.
+    } while (!strlen(rtrim($line, "\r\n")));
+
+    $this->currentLine = $this->parseLine($line);
+    $this->linesRead++;
+  }
+
+  /**
+   * Implements \Iterator::rewind().
+   */
+  public function rewind() {
+    fseek($this->handle, 0);
+
+    if ($this->hasHeader && !$this->startByte) {
       $this->parseLine($this->readLine());
     }
-
-    if ($this->startByte > $this->lastLinePos()) {
+    elseif ($this->startByte) {
       fseek($this->handle, $this->startByte);
     }
 
-    $lines_read = 0;
-    $rows = [];
-    while ($line = $this->readLine()) {
-      // Skip empty new lines.
-      if (!strlen(rtrim($line, "\r\n"))) {
-        continue;
-      }
+    $this->linesRead = 0;
+    // Preemptively advance to the next line.
+    $this->next();
+  }
 
-      $rows[] = $this->parseLine($line);
-      $lines_read++;
+  /**
+   * Implements \Iterator::valid().
+   */
+  public function valid() {
+    return (bool) $this->currentLine;
+  }
 
-      if ($lines_read === $this->lineLimit) {
-        break;
-      }
-    }
-
-    return $rows;
+  /**
+   * Returns a new line from the CSV file.
+   *
+   * @return string|bool
+   *   Returns the next line in the file, or false if the end has been reached.
+   *
+   * @todo Add encoding conversion.
+   */
+  protected function readLine() {
+    return fgets($this->handle);
   }
 
   /**
@@ -257,6 +295,7 @@ class CsvParser {
       // Found an escaped double quote.
       if ($byte === '"' && $next_byte === '"') {
         $field .= '"';
+        // Skip the next quote.
         $index++;
         continue;
       }
@@ -276,7 +315,8 @@ class CsvParser {
 
       // End of this line.
       if (!$in_quotes && $next_byte === '') {
-        // Don't save the last newline, but don't remove all newlines.
+        // Don't save the last newline, but don't use trim to remove all
+        // newlines.
         if ($byte === "\n") {
           // Check for windows line ending.
           $field = substr($field, -1) === "\r" ? substr($field, 0, -1) : $field;
@@ -304,18 +344,6 @@ class CsvParser {
     }
 
     return $fields;
-  }
-
-  /**
-   * Returns a new line from the CSV file.
-   *
-   * @return string|bool
-   *   Returns the next line in the file, or false if the end has been reached.
-   *
-   * @todo Add encoding conversion.
-   */
-  protected function readLine() {
-    return fgets($this->handle);
   }
 
 }

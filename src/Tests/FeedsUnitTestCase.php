@@ -84,6 +84,9 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     if (!defined('WATCHDOG_ERROR')) {
       define('WATCHDOG_ERROR', 3);
     }
+    if (!defined('WATCHDOG_WARNING')) {
+      define('WATCHDOG_WARNING', 4);
+    }
     if (!defined('WATCHDOG_NOTICE')) {
       define('WATCHDOG_NOTICE', 5);
     }

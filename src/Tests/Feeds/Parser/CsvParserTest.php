@@ -55,11 +55,13 @@ class CsvParserTest extends FeedsUnitTestCase {
     $fetcher_result = new FetcherResult($file);
 
     $result = $this->parser->parse($this->feed, $fetcher_result);
+
     $this->assertSame(count($result), 3);
     $this->assertSame($result[0]->get('Header A'), '"1"');
 
     // Parse again. Tests batching.
     $result = $this->parser->parse($this->feed, $fetcher_result);
+
     $this->assertSame(count($result), 2);
     $this->assertSame($result[0]->get('Header B'), "new\r\nline 2");
   }

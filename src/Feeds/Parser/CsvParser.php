@@ -45,16 +45,19 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
 
     // Load and configure parser.
     $parser = CsvFileParser::createFromFilePath($fetcher_result->getFilePath())
-      ->setDelimiter($feed_config['delimiter'] == 'TAB' ? "\t" : $feed_config['delimiter'])
+      ->setDelimiter($feed_config['delimiter'] === 'TAB' ? "\t" : $feed_config['delimiter'])
       ->setHasHeader(!$feed_config['no_headers'])
-      ->setLineLimit($this->configuration['line_limit'])
       ->setStartByte((int) $state->pointer);
+
+    // Wrap parser in a limit iterator.
+    $parser = new \LimitIterator($parser, 0, $this->configuration['line_limit']);
 
     $header = !$feed_config['no_headers'] ? $parser->getHeader() : array();
     $result = new ParserResult();
 
-    foreach ($parser->parse() as $row) {
+    foreach ($parser as $row) {
       $item = new DynamicItem();
+
       foreach ($row as $delta => $cell) {
         $key = isset($header[$delta]) ? $header[$delta] : $delta;
         $item->set($key, $cell);
