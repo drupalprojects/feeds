@@ -12,6 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\feeds\Entity\Feed;
 use Drupal\feeds\FeedInterface;
+use Drupal\file\Entity\File;
 
 /**
  * Implements hook_help().
@@ -81,6 +82,72 @@ function feeds_theme() {
 }
 
 /**
+ * Implements hook_file_download().
+ *
+ * @todo This doesn't handle duplicate sources.
+ */
+function feeds_file_download($uri) {
+  $fids = \Drupal::entityQuery('feeds_feed')
+    ->condition('source', $uri)
+    ->range(0, 1)
+    ->execute();
+
+  if (!$fids) {
+    // File is not associated with a feed.
+    return;
+  }
+
+  // Get the file record based on the URI. If not in the database just return.
+  $files = \Drupal::entityManager()
+    ->getStorage('file')
+    ->loadByProperties(['uri' => $uri]);
+
+  foreach (File::loadMultiple($files) as $item) {
+    // Since some database servers sometimes use a case-insensitive comparison
+    // by default, double check that the filename is an exact match.
+    if ($file->getFileUri() === $uri) {
+      $file = $item;
+      break;
+    }
+  }
+
+  if (!isset($file)) {
+    return;
+  }
+
+  // Check if this file belongs to Feeds.
+  if (!isset(\Drupal::service('file.usage')->listUsage($file)['feeds'])) {
+    return;
+  }
+
+  $feed = Feed::load(reset($fids));
+  if (!$feed || !$feed->access('import')) {
+    // User does not have permission to import this feed.
+    return -1;
+  }
+
+  // Return file headers.
+  return file_get_content_headers($file);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Remove our field from the Field UI overview form.
+ */
+function feeds_form_field_ui_field_overview_form_alter(array &$form, FormStateInterface $form_state) {
+  // if (in_array('feeds_item', $form['#fields'])) {
+
+  //   unset($form['#fields'][array_search('feeds_item', $form['#fields'])]);
+  //   unset($form['fields']['feeds_item']);
+
+  //   $rows_order = $form['fields']['#regions']['content']['rows_order'];
+  //   $key = array_search('feeds_item', $rows_order);
+  //   unset($form['fields']['#regions']['content']['rows_order'][$key]);
+  // }
+}
+
+/**
  * Prepares variables for feed templates.
  *
  * Default template: feeds_feed.html.twig.
@@ -106,14 +173,14 @@ function template_preprocess_feeds_feed(&$variables) {
   $variables['author_name'] = drupal_render($variables['elements']['uid'], TRUE);
   unset($variables['elements']['uid']);
 
-  $variables['url'] = $feed->url('canonical', array(
+  $variables['url'] = $feed->url('canonical', [
     'language' => $feed->language(),
-  ));
+  ]);
   $variables['label'] = $variables['elements']['title'];
   unset($variables['elements']['title']);
 
   // Helpful $content variable for templates.
-  $variables += array('content' => array());
+  $variables += array('content' => []);
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
@@ -124,70 +191,4 @@ function template_preprocess_feeds_feed(&$variables) {
   // Add article ARIA role.
   $variables['attributes']['role'] = 'article';
   $variables['item_count'] = $feed->getItemCount();
-}
-
-
-/**
- * Implements hook_file_download().
- *
- * @todo This doesn't handle duplicate sources.
- */
-function feeds_file_download($uri) {
-  $fids = \Drupal::entityQuery('feeds_feed')
-    ->condition('source', $uri)
-    ->range(0, 1)
-    ->execute();
-
-  if (!$fids) {
-    // File is not associated with a feed.
-    return;
-  }
-
-  // Get the file record based on the URI. If not in the database just return.
-  $files = file_load_multiple(array(), array('uri' => $uri));
-  foreach ($files as $item) {
-    // Since some database servers sometimes use a case-insensitive comparison
-    // by default, double check that the filename is an exact match.
-    if ($file->getFileUri() === $uri) {
-      $file = $item;
-      break;
-    }
-  }
-  if (!isset($file)) {
-    return;
-  }
-
-  // Check if this file belongs to Feeds.
-  $usage_list = file_usage()->listUsage($file);
-  if (!isset($usage_list['feeds'])) {
-    return;
-  }
-
-  $fid = reset($fids);
-
-  $feed = \Drupal::entityManager()->getStorage('feeds_feed')->load($fid);
-  if (!$feed || !$feed->access('import')) {
-    // User does not have permission to import this feed.
-    return -1;
-  }
-
-  // Return file headers.
-  return file_get_content_headers($file);
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Remove our field from the Field UI overview form.
- */
-function feeds_form_field_ui_field_overview_form_alter(array &$form, FormStateInterface $form_state) {
-  // if (in_array('feeds_item', $form['#fields'])) {
-
-  //   unset($form['#fields'][array_search('feeds_item', $form['#fields'])]);
-  //   unset($form['fields']['feeds_item']);
-
-  //   $rows_order = $form['fields']['#regions']['content']['rows_order'];
-  //   $key = array_search('feeds_item', $rows_order);
-  //   unset($form['fields']['#regions']['content']['rows_order'][$key]);
-  // }
 }
