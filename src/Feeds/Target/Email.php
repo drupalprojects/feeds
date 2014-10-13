@@ -16,7 +16,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a email field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "email",
  *   field_types = {"email"}
  * )

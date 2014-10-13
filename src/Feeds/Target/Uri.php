@@ -13,7 +13,7 @@ use Drupal\feeds\FieldTargetDefinition;
 /**
  * Defines a string field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "uri",
  *   field_types = {"uri"}
  * )

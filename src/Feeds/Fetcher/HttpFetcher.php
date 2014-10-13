@@ -35,7 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines an HTTP fetcher.
  *
- * @Plugin(
+ * @FeedsFetcher(
  *   id = "http",
  *   title = @Translation("Download"),
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")

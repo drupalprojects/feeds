@@ -20,7 +20,7 @@ use Drupal\feeds\StateInterface;
 /**
  * Defines a SitemapXML feed parser.
  *
- * @Plugin(
+ * @FeedsParser(
  *   id = "sitemap",
  *   title = @Translation("Sitemap XML"),
  *   description = @Translation("Parse Sitemap XML format feeds.")

@@ -15,7 +15,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a string field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "string",
  *   field_types = {
  *     "string",

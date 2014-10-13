@@ -14,7 +14,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a feeds_item field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "feeds_item",
  *   field_types = {"feeds_item"}
  * )

@@ -10,7 +10,7 @@ namespace Drupal\feeds\Feeds\Target;
 /**
  * Defines an integer field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "integer",
  *   field_types = {
  *     "integer",

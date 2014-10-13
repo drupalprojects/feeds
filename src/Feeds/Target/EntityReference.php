@@ -18,7 +18,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines an entity reference mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "entity_reference",
  *   field_types = {"entity_reference"}
  * )

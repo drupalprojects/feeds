@@ -14,7 +14,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a path field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "path",
  *   field_types = {"path"}
  * )

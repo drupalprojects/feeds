@@ -40,7 +40,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Creates entities from feed items.
  *
- * @Plugin(
+ * @FeedsProcessor(
  *   id = "entity",
  *   title = @Translation("Entity processor"),
  *   description = @Translation("Creates entities from feed items."),

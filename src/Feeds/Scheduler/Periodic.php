@@ -16,7 +16,7 @@ use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 /**
  * Defines a Feeds scheduler plugin with optional periodic scheduling.
  *
- * @Plugin(
+ * @FeedsScheduler(
  *   id = "periodic",
  *   title = @Translation("Periodic"),
  *   description = @Translation("Schedules recurring imports.")

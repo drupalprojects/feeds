@@ -20,7 +20,7 @@ use Drupal\feeds\StateInterface;
 /**
  * Defines an OPML feed parser.
  *
- * @Plugin(
+ * @FeedsParser(
  *   id = "opml",
  *   title = @Translation("OPML"),
  *   description = @Translation("Parse OPML files.")

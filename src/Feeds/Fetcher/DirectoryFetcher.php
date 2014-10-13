@@ -19,7 +19,7 @@ use Drupal\feeds\StateInterface;
 /**
  * Defines a directory fetcher.
  *
- * @Plugin(
+ * @FeedsFetcher(
  *   id = "directory",
  *   title = @Translation("Directory"),
  *   description = @Translation("Uses a directory, or file, on the server.")

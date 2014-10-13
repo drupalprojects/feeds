@@ -12,7 +12,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a number field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "number",
  *   field_types = {
  *     "decimal",

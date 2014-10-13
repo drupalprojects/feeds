@@ -13,7 +13,7 @@ use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Plugin\Type\Source\SourceInterface;
 
 /**
- * @Plugin(
+ * @FeedsSource(
  *   id = "basic_field",
  *   field_types = {
  *     "integer_field",

@@ -13,7 +13,7 @@ use Drupal\feeds\FieldTargetDefinition;
 /**
  * Defines a file field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "image",
  *   field_types = {"image"}
  * )

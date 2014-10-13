@@ -16,7 +16,7 @@ use Drupal\feeds\FieldTargetDefinition;
 /**
  * Defines a file field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "file",
  *   field_types = {"file"}
  * )

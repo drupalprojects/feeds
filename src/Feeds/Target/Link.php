@@ -15,7 +15,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a link field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "link",
  *   field_types = {"link"}
  * )

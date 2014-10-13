@@ -13,7 +13,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a dateime field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "datetime",
  *   field_types = {"datetime"}
  * )

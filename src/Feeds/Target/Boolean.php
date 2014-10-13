@@ -12,7 +12,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 /**
  * Defines a boolean field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "boolean",
  *   field_types = {
  *     "boolean",

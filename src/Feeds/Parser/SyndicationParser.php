@@ -21,7 +21,7 @@ use Zend\Feed\Reader\Reader;
 /**
  * Defines an RSS and Atom feed parser.
  *
- * @Plugin(
+ * @FeedsParser(
  *   id = "syndication",
  *   title = @Translation("RSS/Atom"),
  *   description = @Translation("Default parser for RSS, Atom and RDF feeds.")

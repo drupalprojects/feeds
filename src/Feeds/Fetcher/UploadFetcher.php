@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines a file upload fetcher.
  *
- * @Plugin(
+ * @FeedsFetcher(
  *   id = "upload",
  *   title = @Translation("Upload"),
  *   description = @Translation("Upload content from a local file.")

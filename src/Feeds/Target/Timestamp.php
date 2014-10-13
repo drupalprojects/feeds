@@ -10,7 +10,7 @@ namespace Drupal\feeds\Feeds\Target;
 /**
  * Defines a timestamp field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "integer",
  *   field_types = {
  *     "created",

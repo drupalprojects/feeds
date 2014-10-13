@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines a taxonomy term field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "taxonomy",
  *   field_types = {"taxonomy_term_reference"}
  * )

@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines a text field mapper.
  *
- * @Plugin(
+ * @FeedsTarget(
  *   id = "text",
  *   field_types = {
  *     "text",
