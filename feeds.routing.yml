@@ -55,10 +55,19 @@ feeds.delete:
     _entity_access: 'feeds_feed.delete'
     feeds_feed: \d+
 
+feeds.item_list:
+  path: '/feed/{feeds_feed}/list'
+  defaults:
+    _content: 'Drupal\feeds\Controller\ItemListController:listItems'
+    _title: 'Feed items'
+  requirements:
+    _entity_access: 'feeds_feed.view'
+    feeds_feed: \d+
+
 feeds.multiple_delete_confirm:
   path: '/admin/content/feed/delete'
   defaults:
-    _form: '\Drupal\feeds\Form\DeleteMultiple'
+    _form: 'Drupal\feeds\Form\DeleteMultiple'
   requirements:
     _permission: 'administer feeds'
 

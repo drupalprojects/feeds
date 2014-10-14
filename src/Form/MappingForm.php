@@ -275,6 +275,14 @@ class MappingForm extends FormBase {
       $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
     }
 
+    $mappings = $this->importer->getMappings();
+    foreach ($form_state->getValue('mappings') as $delta => $mapping) {
+      $mappings[$delta]['map'] = $mapping['map'];
+      $mappings[$delta]['unique'] = array_filter($mapping['unique']);
+    }
+    $this->importer->setMappings($mappings);
+    // $this->importer->setMappings($form_state->getValue('mappings'));
+
     // Remove any mappings.
     foreach (array_keys(array_filter($form_state->getValue('remove_mappings', []))) as $delta) {
       $this->importer->removeMapping($delta);

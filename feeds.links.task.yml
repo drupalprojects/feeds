@@ -14,6 +14,12 @@ feeds.delete:
   title: Delete
   weight: 10
 
+feeds.item_list:
+  route_name: feeds.item_list
+  base_route: feeds.view
+  title: Items
+  weight: 20
+
 feeds.importer_edit:
   route_name: feeds.importer_edit
   title: Edit
