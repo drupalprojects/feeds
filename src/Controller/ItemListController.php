@@ -11,6 +11,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Processor\EntityProcessor;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -23,22 +24,6 @@ class ItemListController extends ControllerBase {
    */
   public function listItems(FeedInterface $feeds_feed, Request $request) {
     $processor = $feeds_feed->getImporter()->getProcessor();
-
-    $limit = 50;
-    $page = (int) $request->query->get('page');
-
-    $total = \Drupal::entityQuery($processor->entityType())
-    ->condition('feeds_item.target_id', $feeds_feed->id())
-    ->count()
-    ->execute();
-
-    pager_default_initialize($total, $limit);
-
-    $entity_ids = \Drupal::entityQuery($processor->entityType())
-    ->condition('feeds_item.target_id', $feeds_feed->id())
-    ->range($page * $limit, $limit)
-    ->sort('feeds_item.imported', 'DESC')
-    ->execute();
 
     $header = [
       'title' => $this->t('Label'),
@@ -57,29 +42,45 @@ class ItemListController extends ControllerBase {
     $build['table'] = [
       '#type' => 'table',
       '#header' => $header,
-      '#rows' => array(),
-      '#empty' => $this->t('There is no items yet.'),
+      '#rows' => [],
+      '#empty' => $this->t('There are no items yet.'),
     ];
+
+    // @todo Allow processors to create their own entity listings.
+    if (!$processor instanceof EntityProcessor) {
+      return $build;
+    }
+
+    $entity_ids = \Drupal::entityQuery($processor->entityType())
+    ->condition('feeds_item.target_id', $feeds_feed->id())
+    ->pager(50)
+    ->sort('feeds_item.imported', 'DESC')
+    ->execute();
 
     $storage = $this->entityManager()->getStorage($processor->entityType());
     foreach ($storage->loadMultiple($entity_ids) as $entity) {
       $ago = \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $entity->get('feeds_item')->imported);
+      $row = [];
 
-      $build['table']['#rows'][] = [
-        [
-          'data' => $entity->link(Unicode::truncate($entity->label(), 50, TRUE, TRUE)),
-          'title' => String::checkPlain($entity->label()),
-        ],
-        $this->t('@time ago', ['@time' => $ago]),
-        [
-          'data' => Unicode::truncate(String::checkPlain($entity->get('feeds_item')->guid), 30, FALSE, TRUE),
-          'title' => String::checkPlain($entity->get('feeds_item')->guid),
-        ],
-        [
-          'data' => Unicode::truncate(String::checkPlain($entity->get('feeds_item')->url), 30, FALSE, TRUE),
-          'title' => String::checkPlain($entity->get('feeds_item')->url),
-        ],
+      // Entity link.
+      $row[] = [
+        'data' => $entity->link(Unicode::truncate($entity->label(), 50, TRUE, TRUE)),
+        'title' => String::checkPlain($entity->label()),
       ];
+      // Imported ago.
+      $row[] = $this->t('@time ago', ['@time' => $ago]);
+      // Item GUID.
+      $row[] = [
+        'data' => Unicode::truncate(String::checkPlain($entity->get('feeds_item')->guid), 30, FALSE, TRUE),
+        'title' => String::checkPlain($entity->get('feeds_item')->guid),
+      ];
+      // Item URL.
+      $row[] = [
+        'data' => Unicode::truncate(String::checkPlain($entity->get('feeds_item')->url), 30, FALSE, TRUE),
+        'title' => String::checkPlain($entity->get('feeds_item')->url),
+      ];
+
+      $build['table']['#rows'][] = $row;
     }
 
     $build['pager'] = ['#theme' => 'pager'];
