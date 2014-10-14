@@ -35,6 +35,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $result = new ParserResult();
     Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
+    Reader::registerExtension('GeoRSS');
 
     $raw = $fetcher_result->getRaw();
     if (!strlen(trim($raw))) {
@@ -69,15 +70,21 @@ class SyndicationParser extends PluginBase implements ParserInterface {
       }
 
       if ($enclosure = $entry->getEnclosure()) {
-        $item->set('enclosures', array(urldecode($enclosure->url)));
+        $item->set('enclosures', [rawurldecode($enclosure->url)]);
       }
 
       if ($author = $entry->getAuthor()) {
+        $author += ['name' => '', 'email' => ''];
         $item->set('author_name', $author['name'])
              ->set('author_email', $author['email']);
       }
       if ($date = $entry->getDateModified()) {
         $item->set('timestamp', $date->getTimestamp());
+      }
+
+      if ($point = $entry->getGeoPoint()) {
+        $item->set('georss_lat', $point['lat'])
+             ->set('georss_lon', $point['lon']);
       }
 
       $result->addItem($item);
@@ -172,9 +179,13 @@ class SyndicationParser extends PluginBase implements ParserInterface {
           ),
         ),
       ),
-      'geolocations' => array(
-        'label' => $this->t('Geo Locations'),
-        'description' => $this->t('An array of geographic locations with a name and a position.'),
+      'georss_lat' => array(
+        'label' => $this->t('Item lattitude'),
+        'description' => $this->t('The feed item lattitutde.'),
+      ),
+      'georss_lon' => array(
+        'label' => $this->t('Item longitude'),
+        'description' => $this->t('The feed item longitude.'),
       ),
       'enclosures' => array(
         'label' => $this->t('Enclosures'),

@@ -37,6 +37,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
     'feed.reader.threadentry' => 'Zend\Feed\Reader\Extension\Thread\Entry',
     'feed.reader.podcastentry' => 'Zend\Feed\Reader\Extension\Podcast\Entry',
     'feed.reader.podcastfeed' => 'Zend\Feed\Reader\Extension\Podcast\Feed',
+    'feed.reader.georssentry' => 'Drupal\feeds\Zend\Extension\Georss\Entry',
   ];
 
   public function setUp() {
@@ -98,7 +99,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
 
   public function testGetMappingSources() {
     // Not really much to test here.
-    $this->assertSame(count($this->parser->getMappingSources()), 14);
+    $this->assertSame(count($this->parser->getMappingSources()), 15);
   }
 
 }

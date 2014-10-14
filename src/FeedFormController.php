@@ -176,4 +176,18 @@ class FeedFormController extends ContentEntityForm {
     }
   }
 
+  /**
+   * Form submission handler for the 'import' action.
+   *
+   * @param $form
+   *   An associative array containing the structure of the form.
+   * @param $form_state
+   *   The current state of the form.
+   */
+  public function import(array $form, FormStateInterface $form_state) {
+    $feed = $this->entity;
+    $feed->startBatchImport();
+    return $feed;
+  }
+
 }

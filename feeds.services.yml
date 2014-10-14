@@ -30,3 +30,5 @@ services:
     class: Drupal\feeds\EventSubscriber\LazySubscriber
     tags:
       - { name: event_subscriber }
+  feed.reader.georssentry:
+    class: Drupal\feeds\Zend\Extension\Georss\Entry
