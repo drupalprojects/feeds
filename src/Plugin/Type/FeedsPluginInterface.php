@@ -7,12 +7,13 @@
 
 namespace Drupal\feeds\Plugin\Type;
 
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
  * Interface that all Feeds plugins must implement.
  */
-interface FeedsPluginInterface extends PluginInspectionInterface {
+interface FeedsPluginInterface extends PluginInspectionInterface, ConfigurablePluginInterface {
 
   /**
    * Returns the type of plugin.

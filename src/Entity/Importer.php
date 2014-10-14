@@ -7,25 +7,17 @@
 
 namespace Drupal\feeds\Entity;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Plugin\DefaultSinglePluginBag;
-use Drupal\feeds\Event\ClearEvent;
-use Drupal\feeds\Event\EventDispatcherTrait;
-use Drupal\feeds\Event\ExpireEvent;
-use Drupal\feeds\Event\FeedsEvents;
-use Drupal\feeds\Event\FetchEvent;
-use Drupal\feeds\Event\ParseEvent;
-use Drupal\feeds\Event\ProcessEvent;
+use Drupal\Core\Entity\EntityWithPluginBagsInterface;
+use Drupal\feeds\Feeds\FeedsPluginBag;
 use Drupal\feeds\ImporterInterface;
-use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
- * Defines the feeds importer entity.
+ * Defines the Feeds importer entity.
  *
  * @ConfigEntityType(
  *   id = "feeds_importer",
@@ -56,8 +48,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   admin_permission = "administer feeds"
  * )
  */
-class Importer extends ConfigEntityBundleBase implements ImporterInterface {
-  use EventDispatcherTrait;
+class Importer extends ConfigEntityBundleBase implements ImporterInterface, EntityWithPluginBagsInterface {
 
   /**
    * The importer ID.
@@ -90,33 +81,53 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * The types of plugins we support.
    *
-   * @var array
-   *
    * @todo Make this dynamic?
+   *
+   * @var array
    */
-  protected $pluginTypes = [
-    'fetcher',
-    'parser',
-    'processor',
-  ];
+  protected $pluginTypes = ['fetcher', 'parser', 'processor'];
 
   /**
-   * Plugin ids and configuration.
+   * The fetcher plugin id.
+   *
+   * @var string
    */
-  protected $plugins = [
-    'fetcher' => [
-      'id' => 'http',
-      'configuration' => [],
-    ],
-    'parser' => [
-      'id' => 'syndication',
-      'configuration' => [],
-    ],
-    'processor' => [
-      'id' => 'entity:node',
-      'configuration' => [],
-    ],
-  ];
+  protected $fetcher = 'http';
+
+  /**
+   * The parser plugin id.
+   *
+   * @var string
+   */
+  protected $parser = 'syndication';
+
+  /**
+   * The processor plugin id.
+   *
+   * @var string
+   */
+  protected $processor = 'entity:node';
+
+  /**
+   * The fetcher plugin configuration.
+   *
+   * @var array
+   */
+  protected $fetcher_configuration = [];
+
+  /**
+   * The parser plugin configuration.
+   *
+   * @var array
+   */
+  protected $parser_configuration = [];
+
+  /**
+   * The processor plugin configuration.
+   *
+   * @var array
+   */
+  protected $processor_configuration = [];
 
   /**
    * The list of source to target mappings.
@@ -144,54 +155,29 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    *
    * These are lazily instantiated on-demand.
    *
-   * @var \Drupal\Core\Plugin\DefaultSinglePluginBag[]
+   * @var \Drupal\Component\Plugin\PluginBag[]
    */
-  protected $pluginBags = [];
+  protected $pluginBags;
 
+  /**
+   * The instantiated target plugins.
+   *
+   * @var \Drupal\feeds\Plugin\Type\Target\TargetInterface[]
+   */
   protected $targetPlugins = [];
 
+  /**
+   * The instantiated source plugins.
+   *
+   * @var \Drupal\feeds\Plugin\Type\Target\SourceInterface[]
+   */
   protected $sourcePlugins = [];
-
-  /**
-   * Constructs a new Importer object.
-   */
-  public function __construct(array $values, $entity_type) {
-
-    // Move plugin configuration separately from values.
-    foreach ($this->getPluginTypes() as $type) {
-      if (isset($values[$type])) {
-        $this->plugins[$type] = $values[$type];
-        unset($values[$type]);
-      }
-    }
-
-    parent::__construct($values, $entity_type);
-
-    // Prepare plugin bags. This has to be done after all configuration is done.
-    foreach ($this->getPluginTypes() as $type) {
-      $this->initPluginBag($type);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setLabel($label) {
-    $this->label = $label;
-  }
 
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
     return $this->description;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setDescription($description) {
-    $this->description = $description;
   }
 
   /**
@@ -266,10 +252,6 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
     return $this->mappings;
   }
 
-  public function getMappingsBag() {
-    return $this->mappingsBag;
-  }
-
   /**
    * {@inheritdoc}
    */
@@ -289,21 +271,6 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMapping($delta) {
-    return $this->mappings[$delta];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setMapping($delta, $mapping) {
-    $this->mappings[$delta]['map'] = $mapping['map'];
-    if (!empty($mapping['unique'])) {
-      $this->mappings[$delta]['unique'] = array_filter($mapping['unique']);
-    }
-    return $this;
-  }
-
   public function removeMapping($delta) {
     unset($this->mappings[$delta]);
     unset($this->targetPlugins[$delta]);
@@ -320,16 +287,9 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getPluginTypes() {
-    return $this->pluginTypes;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getPlugins() {
     $plugins = [];
-    foreach ($this->getPluginTypes() as $type) {
+    foreach ($this->pluginTypes as $type) {
       $plugins[$type] = $this->getPlugin($type);
     }
 
@@ -358,10 +318,17 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the configured plugin for this importer given the plugin type.
+   *
+   * @param string $plugin_type
+   *   The plugin type to return.
+   *
+   * @return \Drupal\feeds\Plugin\PluginInterface
+   *   The plugin specified.
    */
-  public function getPlugin($plugin_type) {
-    return $this->pluginBags[$plugin_type]->get($this->plugins[$plugin_type]['id']);
+  protected function getPlugin($plugin_type) {
+    $bags = $this->getPluginBags();
+    return $bags[$plugin_type . '_configuration']->get($this->$plugin_type);
   }
 
   /**
@@ -413,6 +380,9 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
     return $this->sourcePlugins[$source];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getPluginOptionsList($plugin_type) {
     $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
 
@@ -425,31 +395,30 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   }
 
   /**
-   * Initializes a plugin bag for a plugin type.
-   *
-   * @param string $plugin_type
-   *   The plugin type to initialize.
+   * {@inheritdoc}
    */
-  protected function initPluginBag($plugin_type) {
-    $id = $this->plugins[$plugin_type]['id'];
-
-    $configuration = ['importer' => $this];
-    if (isset($this->plugins[$plugin_type]['configuration'])) {
-      $configuration += $this->plugins[$plugin_type]['configuration'];
+  public function getPluginBags() {
+    if (!isset($this->pluginBags)) {
+      foreach ($this->pluginTypes as $type) {
+        $this->pluginBags[$type . '_configuration'] = new FeedsPluginBag(
+          \Drupal::service("plugin.manager.feeds.$type"),
+          $this->get($type),
+          $this->get($type . '_configuration'),
+          $this
+        );
+      }
     }
 
-    $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
-
-    $this->pluginBags[$plugin_type] = new DefaultSinglePluginBag($manager, $id, $configuration);
+    return $this->pluginBags;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setPlugin($plugin_type, $plugin_id) {
-    $this->plugins[$plugin_type]['id'] = $plugin_id;
-    $this->pluginBags[$plugin_type]->addInstanceID($plugin_id);
-    return $this;
+    $bags = $this->getPluginBags();
+    $this->$plugin_type = $plugin_id;
+    $bags[$plugin_type . '_configuration']->addInstanceID($plugin_id);
   }
 
   /**
@@ -469,20 +438,8 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
-    parent::preSave($storage_controller);
-
     foreach ($this->getPlugins() as $type => $plugin) {
       $plugin->onImporterSave($update);
-    }
-
-    foreach ($this->getPlugins() as $type => $plugin) {
-      // If this plugin has any configuration, ensure that it is set.
-      if ($plugin instanceof ConfigurablePluginInterface) {
-        $this->plugins[$type]['configuration'] = $plugin->getConfiguration();
-      }
-      else {
-        unset($this->plugins[$type]['configuration']);
-      }
     }
 
     foreach ($this->targetPlugins as $delta => $target_plugin) {
@@ -495,6 +452,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
     }
 
     $this->mappings = array_values($this->mappings);
+    parent::preSave($storage_controller, $update);
   }
 
   /**
@@ -513,7 +471,6 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    */
   public function toArray() {
     $properties = parent::toArray();
-    $properties += $this->plugins;
     $properties['mappings'] = $this->mappings;
     return $properties;
   }

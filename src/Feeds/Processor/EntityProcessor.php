@@ -490,14 +490,14 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#title' => $this->t('Authorize'),
       '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
       '#default_value' => $this->configuration['authorize'],
-      '#parents' => array('processor', 'configuration', 'authorize'),
+      '#parents' => ['processor_configuration', 'authorize'],
     );
     $form['advanced']['skip_hash_check'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Force update'),
       '#description' => $this->t('Forces the update of items even if the feed did not change.'),
       '#default_value' => $this->configuration['skip_hash_check'],
-      '#parents' => array('processor', 'configuration', 'skip_hash_check'),
+      '#parents' => array('processor_configuration', 'skip_hash_check'),
     );
 
     return $form;
@@ -507,9 +507,9 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state->getValue(['processor', 'configuration']);
+    $values =& $form_state->getValue(['processor_configuration']);
 
-    if ($owner = user_load_by_name($values['owner_id'])) {
+    if (isset($values['owner_id']) && $owner = user_load_by_name($values['owner_id'])) {
       $values['owner_id'] = $owner->id();
     }
     else {
@@ -693,8 +693,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
-    $form['values']['#tree'] = TRUE;
-
     if ($bundle_key = $this->bundleKey()) {
       $form['values'][$bundle_key] = array(
         '#type' => 'select',
@@ -765,7 +763,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * configuration.
    */
   protected function map(FeedInterface $feed, EntityInterface $entity, ItemInterface $item) {
-    $parser = $this->importer->getParser();
     $mappings = $this->importer->getMappings();
 
     // Mappers add to existing fields rather than replacing them. Hence we need

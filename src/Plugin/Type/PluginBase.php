@@ -54,7 +54,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     $this->importer = $configuration['importer'];
     unset($configuration['importer']);
-    $this->configuration = $configuration;
+    $this->setConfiguration($configuration);
     $this->pluginId = $plugin_id;
     $this->pluginDefinition = $plugin_definition;
   }
@@ -64,6 +64,41 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    */
   public function pluginType() {
     return $this->pluginDefinition['plugin_type'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration($key = NULL) {
+    if ($key === NULL) {
+      return $this->configuration;
+    }
+
+    if (isset($this->configuration[$key])) {
+      return $this->configuration[$key];
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setConfiguration(array $configuration) {
+    $defaults = $this->defaultConfiguration();
+    $this->configuration = array_intersect_key($configuration, $defaults) + $defaults;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    return array();
   }
 
   /**

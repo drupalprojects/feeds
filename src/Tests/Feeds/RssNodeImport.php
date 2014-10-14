@@ -85,12 +85,10 @@ class RssNodeImport extends WebTestBase {
           'settings' => ['autocreate' => TRUE],
         ],
       ],
-      'processor' => [
-        'id' => 'entity:node',
-        'configuration' => [
-          'values' => [
-            'type' => 'article',
-          ],
+      'processor' => 'entity:node',
+      'processor_configuration' => [
+        'values' => [
+          'type' => 'article',
         ],
       ],
     ]);

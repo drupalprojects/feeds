@@ -24,28 +24,12 @@ interface ImporterInterface extends ConfigEntityInterface {
   const SCHEDULE_NEVER = -1;
 
   /**
-   * Sets the label of the importer.
-   *
-   * @param string $label
-   *   The label of the importer.
-   */
-  public function setLabel($label);
-
-  /**
    * Returns the description of the importer.
    *
    * @return string
    *   The description of the importer.
    */
   public function getDescription();
-
-  /**
-   * Sets the description of the importer.
-   *
-   * @param string $description
-   *   The description of the importer.
-   */
-  public function setDescription($description);
 
   /**
    * Returns the import period.
@@ -62,22 +46,6 @@ interface ImporterInterface extends ConfigEntityInterface {
    *   The import period in seconds.
    */
   public function setImportPeriod($import_period);
-
-  /**
-   * Returns the mappings for this importer.
-   *
-   * @return array
-   *   The list of mappings.
-   */
-  public function getMappings();
-
-  /**
-   * Returns the list of supported plugin types.
-   *
-   * @return array
-   *   The list of plugin types.
-   */
-  public function getPluginTypes();
 
   /**
    * Returns the configured plugins for this importer.
@@ -112,27 +80,50 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function getProcessor();
 
   /**
-   * Returns the configured plugin for this importer given the plugin type.
-   *
-   * @param string $plugin_type
-   *   The plugin type to return.
-   *
-   * @return \Drupal\feeds\Plugin\PluginInterface
-   *   The plugin specified.
-   */
-  public function getPlugin($plugin_type);
-
-  /**
    * Sets a plugin.
    *
    * @param string $plugin_type
    *   The type of plugin being set.
    * @param string $plugin_id
    *   A id of the plugin being set.
-   *
-   * @return self
-   *   Returns the importer.
    */
   public function setPlugin($plugin_type, $plugin_id);
+
+  /**
+   * Returns the mappings for this importer.
+   *
+   * @return array
+   *   The list of mappings.
+   */
+  public function getMappings();
+
+  /**
+   * Sets the mappings for the importer.
+   *
+   * @param array $mappings
+   *   A list of mappings.
+   */
+  public function setMappings(array $mappings);
+
+  /**
+   * Adds a mapping to the importer.
+   *
+   * @param array $mapping
+   *   A single mapping.
+   */
+  public function addMapping(array $mapping);
+
+  /**
+   * Removes a mapping from the importer.
+   *
+   * @param int $delta
+   *   The mapping delta to remove.
+   */
+  public function removeMapping($delta);
+
+  /**
+   * Removes all mappings.
+   */
+  public function removeMappings();
 
 }

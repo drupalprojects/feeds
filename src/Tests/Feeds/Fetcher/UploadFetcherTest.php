@@ -111,20 +111,20 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $form['fetcher_configuration']['directory']['#parents'] = ['fetcher_configuration', 'directory'];
 
     // Validate.
-    $form_state->setValue(['fetcher', 'configuration'], $this->fetcher->defaultConfiguration());
-    $form_state->setValue(['fetcher', 'configuration', 'directory'], 'vfs://feeds/uploads');
+    $form_state->setValue(['fetcher_configuration'], $this->fetcher->defaultConfiguration());
+    $form_state->setValue(['fetcher_configuration', 'directory'], 'vfs://feeds/uploads');
     $this->fetcher->validateConfigurationForm($form, $form_state);
     $this->assertSame(0, count($form_state->clearErrors()));
 
     // Validate
-    $form_state->setValue(['fetcher', 'configuration', 'directory'], 'badscheme://duh');
+    $form_state->setValue(['fetcher_configuration', 'directory'], 'badscheme://duh');
     $this->fetcher->validateConfigurationForm($form, $form_state);
     $this->assertSame($form_state->getError($form['fetcher_configuration']['directory']), 'Please enter a valid scheme into the directory location.');
 
     $form_state->clearErrors();
 
     // // Validate.
-    $form_state->setValue(['fetcher', 'configuration', 'directory'], 'vfs://noroot');
+    $form_state->setValue(['fetcher_configuration', 'directory'], 'vfs://noroot');
     $this->fetcher->validateConfigurationForm($form, $form_state);
     $this->assertSame($form_state->getError($form['fetcher_configuration']['directory']), 'The chosen directory does not exist and attempts to create it failed.');
   }

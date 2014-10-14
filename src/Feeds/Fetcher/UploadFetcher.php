@@ -215,7 +215,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
 
-    $values =& $form_state->getValue(array('fetcher', 'configuration'));
+    $values =& $form_state->getValue(array('fetcher_configuration'));
 
     $values['directory'] = trim($values['directory']);
     $values['allowed_extensions'] = trim($values['allowed_extensions']);

@@ -54,9 +54,9 @@ class ImporterFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
+    $form['#tree'] = TRUE;
     $values = $form_state->getValues();
 
-    $form['#tree'] = TRUE;
     $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
     if ($this->operation == 'edit') {
@@ -66,8 +66,8 @@ class ImporterFormController extends EntityForm {
     $form['basics'] = array(
       '#title' => $this->t('Basic settings'),
       '#type' => 'details',
-      '#tree' => FALSE,
       '#open' => $this->entity->isNew(),
+      '#tree' => FALSE,
     );
 
     $form['basics']['label'] = array(
@@ -111,6 +111,7 @@ class ImporterFormController extends EntityForm {
       '#type' => 'details',
       '#group' => 'plugin_settings',
       '#title' => $this->t('Settings'),
+      '#tree' => FALSE,
     );
     $times = [900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200];
     $period = array_map(function($time) {
@@ -131,43 +132,43 @@ class ImporterFormController extends EntityForm {
       '#options' => $period,
       '#description' => $this->t('Choose how often a feed should be imported.'),
       '#default_value' => $this->entity->getImportPeriod(),
-      '#tree' => FALSE,
     );
 
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
     if (!empty($values)) {
-      if ($values['processor']['id'] !== $this->entity->getProcessor()->getPluginId()) {
+      if ($values['processor'] !== $this->entity->getProcessor()->getPluginId()) {
         $this->entity->removeMappings();
       }
-      foreach ($this->entity->getPluginTypes() as $type) {
-        $this->entity->setPlugin($type, $values[$type]['id']);
+      foreach (array_keys($this->entity->getPlugins()) as $type) {
+        $this->entity->setPlugin($type, $values[$type]);
       }
     }
 
     foreach ($this->entity->getPlugins() as $type => $plugin) {
       $options = $this->entity->getPluginOptionsList($type);
 
-      $form[$type] = array(
+      $form[$type . '_wrapper'] = array(
         '#type' => 'container',
         '#attributes' => array('class' => array('feeds-plugin-inline')),
       );
 
       if (count($options) === 1) {
-        $form[$type]['id'] = array(
+        $form[$type . '_wrapper']['id'] = array(
           '#type' => 'value',
           '#value' => $plugin->getPluginId(),
           '#plugin_type' => $type,
+          '#parents' => [$type],
         );
       }
       else {
-        $form[$type]['id'] = array(
+        $form[$type . '_wrapper']['id'] = array(
           '#type' => 'select',
           '#title' => $this->t('@type', array('@type' => ucfirst($type))),
           '#options' => $options,
           '#default_value' => $plugin->getPluginId(),
           '#ajax' => array(
-            'callback' => '::ajaxCallback',
+            'callback' => get_class($this) . '::ajaxCallback',
             'wrapper' => 'feeds-ajax-form-wrapper',
             'progress' => 'none',
           ),
@@ -175,22 +176,23 @@ class ImporterFormController extends EntityForm {
             'library' => array('feeds/feeds'),
           ),
           '#plugin_type' => $type,
+          '#parents' => [$type],
         );
       }
 
       // Give lockable plugins a chance to lock themselves.
       // @see \Drupal\feeds\Feeds\Processor\EntityProcessor::isLocked()
       if ($plugin instanceof LockableInterface) {
-        $form[$type]['id']['#disabled'] = $plugin->isLocked();
+        $form[$type . '_wrapper']['id']['#disabled'] = $plugin->isLocked();
       }
 
       // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
-        $form[$type]['advanced'] = $plugin->buildAdvancedForm([], $form_state);
+        $form[$type . '_wrapper']['advanced'] = $plugin->buildAdvancedForm([], $form_state);
       }
 
-      $form[$type]['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
-      $form[$type]['advanced']['#suffix'] = '</div>';
+      $form[$type . '_wrapper']['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
+      $form[$type . '_wrapper']['advanced']['#suffix'] = '</div>';
 
       if ($plugin instanceof PluginFormInterface) {
         if ($plugin_form = $plugin->buildConfigurationForm([], $form_state)) {
@@ -198,11 +200,7 @@ class ImporterFormController extends EntityForm {
             '#type' => 'details',
             '#group' => 'plugin_settings',
             '#title' => $this->t('@type settings', array('@type' => ucfirst($type))),
-            '#parents' => array($type, 'configuration'),
           );
-          // $form[$type . '_configuration']['#prefix'] = '<span id="feeds-' . $type . '-details">';
-          // $form[$type . '_configuration']['#suffix'] = '</span>';
-
           $form[$type . '_configuration'] += $plugin_form;
         }
       }
@@ -237,13 +235,13 @@ class ImporterFormController extends EntityForm {
     $values =& $form_state->getValues();
 
     // Moved advanced settings to regular settings.
-    foreach ($this->entity->getPluginTypes() as $type) {
-      if (isset($values[$type]['advanced'])) {
-        if (!isset($values[$type]['configuration'])) {
-          $values[$type]['configuration'] = [];
+    foreach (array_keys($this->entity->getPlugins()) as $type) {
+      if (isset($values[$type . '_wrapper']['advanced'])) {
+        if (!isset($values[$type . '_configuration'])) {
+          $values[$type . '_configuration'] = [];
         }
-        $values[$type]['configuration'] += $values[$type]['advanced'];
-        unset($values[$type]['advanced']);
+        $values[$type . '_configuration'] += $values[$type . '_wrapper']['advanced'];
+        unset($values[$type . '_wrapper']['advanced']);
       }
     }
 
@@ -260,6 +258,7 @@ class ImporterFormController extends EntityForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
+
     foreach ($this->getConfigurablePlugins() as $plugin) {
       $plugin->submitConfigurationForm($form, $form_state);
     }
@@ -277,8 +276,9 @@ class ImporterFormController extends EntityForm {
   /**
    * Sends an ajax response.
    */
-  public function ajaxCallback(array $form, FormStateInterface $form_state) {
+  public static function ajaxCallback(array $form, FormStateInterface $form_state) {
     $type = $form_state->getTriggeringElement()['#plugin_type'];
+
     $response = new AjaxResponse();
 
     if (isset($form[$type . '_configuration']['#id'])) {
@@ -286,7 +286,7 @@ class ImporterFormController extends EntityForm {
       $response->addCommand(new SetHashCommand($hash));
     }
     $response->addCommand(new ReplaceCommand('#feeds-ajax-form-wrapper', drupal_render($form['plugin_settings'])));
-    $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', drupal_render($form[$type]['advanced'])));
+    $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', drupal_render($form[$type . '_wrapper']['advanced'])));
 
     return $response;
   }

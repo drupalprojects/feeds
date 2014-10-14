@@ -14,3 +14,21 @@ feeds.importer.*:
     import_period:
       type: integer
       label: 'The import period'
+    fetcher:
+      type: string
+      label: 'Fetcher id'
+    fetcher_configuration:
+      type: mapping
+      label: 'Fetcher configuration'
+    parser:
+      type: string
+      label: 'Parser id'
+    parser_configuration:
+      type: mapping
+      label: 'Parser configuration'
+    processor:
+      type: string
+      label: 'Processor id'
+    processor_configuration:
+      type: mapping
+      label: 'Processor configuration'

@@ -49,13 +49,13 @@ class MappingForm extends FormBase {
     $this->targets = $targets = $importer->getMappingTargets();
 
     // Denormalize targets.
-    $this->sourceOptions = array();
+    $this->sourceOptions = [];
     foreach ($importer->getMappingSources() as $key => $info) {
       $this->sourceOptions[$key] = $info['label'];
     }
     $this->sourceOptions = $this->sortOptions($this->sourceOptions);
 
-    $target_options = array();
+    $target_options = [];
     foreach ($targets as $key => $target) {
       $target_options[$key] = $target->getLabel();
     }
@@ -102,7 +102,7 @@ class MappingForm extends FormBase {
       '#parents' => array('add_target'),
       '#default_value' => NULL,
       '#ajax' => array(
-        'callback' => '::ajaxCallback',
+        'callback' => get_class($this) . '::ajaxCallback',
         'wrapper' => 'feeds-mapping-form-ajax-wrapper',
         'effect' => 'none',
         'progress' => 'none',
@@ -145,7 +145,7 @@ class MappingForm extends FormBase {
     );
     $row['targets'] = array(
       '#theme' => 'item_list',
-      '#items' => array(),
+      '#items' => [],
     );
 
     foreach ($mapping['map'] as $column => $source) {
@@ -158,7 +158,7 @@ class MappingForm extends FormBase {
         '#options' => $this->sourceOptions,
         '#default_value' => $source,
         '#empty_option' => $this->t('- Select a source -'),
-        '#attributes' => array('class' => array('feeds-table-select-list')),
+        '#attributes' => ['class' => ['feeds-table-select-list']],
       );
 
       $label = String::checkPlain($this->targets[$mapping['target']]->getLabel());
@@ -181,12 +181,12 @@ class MappingForm extends FormBase {
 
       if ($plugin instanceof ConfigurableTargetInterface) {
         if ($delta == $ajax_delta) {
-          $row['settings'] += $plugin->buildConfigurationForm(array(), $form_state);
+          $row['settings'] += $plugin->buildConfigurationForm([], $form_state);
           $row['settings']['submit'] = array(
             '#type' => 'submit',
             '#value' => $this->t('Save'),
             '#ajax' => array(
-              'callback' => array($this, 'settingsAjaxCallback'),
+              'callback' => get_class($this) . '::settingsAjaxCallback',
               'wrapper' => 'edit-mappings-' . $delta . '-settings',
               'effect' => 'fade',
               'progress' => 'none',
@@ -194,30 +194,30 @@ class MappingForm extends FormBase {
             '#name' => 'target-save-' . $delta,
             '#delta' => $delta,
             '#saved' => TRUE,
-            '#parents' => array('config_button', $delta),
-            '#attributes' => array('class' => array('feeds-ajax-save-button')),
+            '#parents' => ['config_button', $delta],
+            '#attributes' => ['class' => ['feeds-ajax-save-button']],
           );
         }
         else {
           $row['settings']['summary'] = array(
             '#type' => 'item',
             '#markup' => $plugin->getSummary(),
-            '#parents' => array('config_summary', $delta),
-            '#attributes' => array('class' => array('field-plugin-summary')),
+            '#parents' => ['config_summary', $delta],
+            '#attributes' => ['class' => ['field-plugin-summary']],
           );
           $row['configure']['button'] = array(
             '#type' => 'image_button',
             '#op' => 'configure',
             '#ajax' => array(
-              'callback' => '::settingsAjaxCallback',
+              'callback' => get_class($this) . '::settingsAjaxCallback',
               'wrapper' => 'edit-mappings-' . $delta . '-settings',
               'effect' => 'fade',
               'progress' => 'none',
             ),
             '#name' => 'target-settings-' . $delta,
             '#delta' => $delta,
-            '#parents' => array('config_button', $delta),
-            '#attributes' => array('class' => array('feeds-ajax-configure-button')),
+            '#parents' => ['config_button', $delta],
+            '#attributes' => ['class' => ['feeds-ajax-configure-button']],
             '#src' => 'core/misc/configure-dark.png',
           );
         }
@@ -254,7 +254,7 @@ class MappingForm extends FormBase {
       '#title_display' => 'invisible',
       '#parents' => array('remove_mappings', $delta),
       '#ajax' => array(
-        'callback' => array($this, 'ajaxCallback'),
+        'callback' => get_class($this) . '::ajaxCallback',
         'wrapper' => 'feeds-mapping-form-ajax-wrapper',
         'effect' => 'none',
         'progress' => 'none',
@@ -266,12 +266,7 @@ class MappingForm extends FormBase {
   }
 
   /**
-   * Processes the form state, populating the mapping array.
-   *
-   * @param array $form
-   *   The form.
-   * @param FormStateInterface $form_state
-   *   The form state array to process.
+   * Processes the form state, populating the mappings on the importer.
    */
   protected function processFormState(array $form, FormStateInterface $form_state) {
     // Process any plugin configuration.
@@ -280,26 +275,18 @@ class MappingForm extends FormBase {
       $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
     }
 
-    if ($form_state->getValue('mappings')) {
-      foreach ($form_state->getValue('mappings') as $delta => $mapping) {
-        $this->importer->setMapping($delta, $mapping);
-      }
-    }
-
     // Remove any mappings.
-    if ($form_state->getValue('remove_mappings')) {
-      foreach (array_keys(array_filter($form_state->getValue('remove_mappings'))) as $delta) {
-        $this->importer->removeMapping($delta);
-      }
+    foreach (array_keys(array_filter($form_state->getValue('remove_mappings', []))) as $delta) {
+      $this->importer->removeMapping($delta);
     }
 
     // Add any targets.
     if ($new_target = $form_state->getValue('add_target')) {
       $map = array_fill_keys($this->targets[$new_target]->getProperties(), '');
-      $this->importer->addMapping(array(
-        'target' => $form_state->getValue('add_target'),
+      $this->importer->addMapping([
+        'target' => $new_target,
         'map' => $map,
-      ));
+      ]);
     }
 
     // Allow the #default_value of 'add_target' to be reset.
@@ -337,7 +324,7 @@ class MappingForm extends FormBase {
    *   The sorted options.
    */
   protected function sortOptions(array $options) {
-    $result = array();
+    $result = [];
     foreach ($options as $k => $v) {
       if (is_array($v) && !empty($v['label'])) {
         $result[$k] = $v['label'];
