@@ -217,17 +217,19 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
       '#description' => $this->t('Attempt to use a <a href="http://en.wikipedia.org/wiki/PubSubHubbub">PubSubHubbub</a> subscription if available.'),
       '#default_value' => $this->configuration['use_pubsubhubbub'],
     );
-    $form['designated_hub'] = array(
+    $form['designated_hub'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Designated hub'),
       '#description' => $this->t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
       '#default_value' => $this->configuration['designated_hub'],
-      '#states' => array(
-        'visible' => array(
-          'input[name="fetcher[configuration][use_pubsubhubbub]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          'input[name="fetcher_configuration[use_pubsubhubbub]"]' => [
+            'checked' => TRUE,
+          ],
+        ],
+      ],
+    ];
     // Per importer override of global http request timeout setting.
     $form['request_timeout'] = array(
       '#type' => 'number',

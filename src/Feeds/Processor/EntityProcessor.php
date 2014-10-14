@@ -485,20 +485,27 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#collapsible' => TRUE,
       '#weight' => 10,
     );
-    $form['advanced']['authorize'] = array(
+    $form['advanced']['authorize'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Authorize'),
       '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
       '#default_value' => $this->configuration['authorize'],
       '#parents' => ['processor_configuration', 'authorize'],
-    );
-    $form['advanced']['skip_hash_check'] = array(
+    ];
+    $form['advanced']['skip_hash_check'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Force update'),
       '#description' => $this->t('Forces the update of items even if the feed did not change.'),
       '#default_value' => $this->configuration['skip_hash_check'],
-      '#parents' => array('processor_configuration', 'skip_hash_check'),
-    );
+      '#parents' => ['processor_configuration', 'skip_hash_check'],
+      '#states' => [
+        'visible' => [
+          'input[name="processor_configuration[update_existing]"]' => [
+            'value' => static::UPDATE_EXISTING,
+          ],
+        ],
+      ],
+    ];
 
     return $form;
   }
