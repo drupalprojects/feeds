@@ -65,19 +65,19 @@ class ItemListController extends ControllerBase {
       // Entity link.
       $row[] = [
         'data' => $entity->link(Unicode::truncate($entity->label(), 50, TRUE, TRUE)),
-        'title' => String::checkPlain($entity->label()),
+        'title' => $entity->label(),
       ];
       // Imported ago.
       $row[] = $this->t('@time ago', ['@time' => $ago]);
       // Item GUID.
       $row[] = [
-        'data' => Unicode::truncate(String::checkPlain($entity->get('feeds_item')->guid), 30, FALSE, TRUE),
-        'title' => String::checkPlain($entity->get('feeds_item')->guid),
+        'data' => String::checkPlain(Unicode::truncate($entity->get('feeds_item')->guid, 30, FALSE, TRUE)),
+        'title' => $entity->get('feeds_item')->guid,
       ];
       // Item URL.
       $row[] = [
-        'data' => Unicode::truncate(String::checkPlain($entity->get('feeds_item')->url), 30, FALSE, TRUE),
-        'title' => String::checkPlain($entity->get('feeds_item')->url),
+        'data' => String::checkPlain(Unicode::truncate($entity->get('feeds_item')->url, 30, FALSE, TRUE)),
+        'title' => $entity->get('feeds_item')->url,
       ];
 
       $build['table']['#rows'][] = $row;

@@ -167,13 +167,12 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     $state = $feed->getState(StateInterface::PROCESS);
+    // Build a new entity.
+    if (!$existing_entity_id) {
+      $entity = $this->newEntity($feed);
+    }
 
     try {
-      // Build a new entity.
-      if (!$existing_entity_id) {
-        $entity = $this->newEntity($feed);
-      }
-
       // Set field values.
       $this->map($feed, $entity, $item);
       $this->entityValidate($entity);
