@@ -28,7 +28,6 @@ use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
-use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -122,7 +121,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     $this->pluginDefinition = $plugin_definition;
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->skipExisting = $this->configuration['update_existing'] == ProcessorInterface::SKIP_EXISTING;
+    $this->skipExisting = $this->configuration['update_existing'] == static::SKIP_EXISTING;
   }
 
   /**
@@ -432,11 +431,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function defaultConfiguration() {
     $defaults = array(
-      'update_existing' => ProcessorInterface::SKIP_EXISTING,
+      'update_existing' => static::SKIP_EXISTING,
       'skip_hash_check' => FALSE,
       'values' => [$this->bundleKey() => NULL],
       'authorize' => TRUE,
-      'expire' => SchedulerInterface::EXPIRE_NEVER,
+      'expire' => static::EXPIRE_NEVER,
       'owner_id' => 0,
     );
 
@@ -454,13 +453,13 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       '#title' => $this->t('Update existing @entities', $tokens),
       '#description' => $this->t('Existing @entities will be determined using mappings that are <strong>unique</strong>.', $tokens),
       '#options' => array(
-        ProcessorInterface::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
-        ProcessorInterface::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
-        ProcessorInterface::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
+        static::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
+        static::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
+        static::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
       ),
       '#default_value' => $this->configuration['update_existing'],
     );
-    $times = array(SchedulerInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000);
+    $times = array(static::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000);
     $period = array_map(array($this, 'formatExpire'), array_combine($times, $times));
     $form['expire'] = array(
       '#type' => 'select',
@@ -627,7 +626,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     if ($time === NULL) {
       $time = $this->expiryTime();
     }
-    if ($time == SchedulerInterface::EXPIRE_NEVER) {
+    if ($time == static::EXPIRE_NEVER) {
       return;
     }
 
@@ -751,7 +750,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   A string in the format, "After (time)" or "Never."
    */
   public function formatExpire($timestamp) {
-    if ($timestamp == SchedulerInterface::EXPIRE_NEVER) {
+    if ($timestamp == static::EXPIRE_NEVER) {
       return $this->t('Never');
     }
     return $this->t('after !time', array('!time' => \Drupal::service('date.formatter')->formatInterval($timestamp)));

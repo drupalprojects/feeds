@@ -9,8 +9,8 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Config\Entity\ConfigEntityStorageInterface;
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
@@ -34,18 +34,20 @@ class ImporterFormController extends EntityForm {
   /**
    * Constructs an ImporterFormController object.
    *
-   * @param \Drupal\Core\Entity\EntityStorageInterface $importer_storage
+   * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $importer_storage
    *   The importer storage controller.
    */
-  public function __construct(EntityManagerInterface $entity_manager) {
-    $this->importerStorage = $entity_manager->getStorage('feeds_importer');
+  public function __construct(ConfigEntityStorageInterface $importer_storage) {
+    $this->importerStorage = $importer_storage;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity.manager'));
+    return new static(
+      $container->get('entity.manager')->getStorage('feeds_importer')
+    );
   }
 
   /**
@@ -85,7 +87,7 @@ class ImporterFormController extends EntityForm {
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#description' => $this->t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
       '#machine_name' => array(
-        'exists' => 'node_type_load',
+        'exists' => 'Drupal\feeds\Entity\Importer::load',
         'source' => array('basics', 'label'),
       ),
       '#required' => TRUE,
@@ -94,7 +96,7 @@ class ImporterFormController extends EntityForm {
       '#type' => 'textfield',
       '#title' => $this->t('Description'),
       '#description' => $this->t('A description of this importer.'),
-      '#default_value' => $this->entity->description,
+      '#default_value' => $this->entity->getDescription(),
     );
 
     $form['plugin_settings'] = array(
@@ -105,10 +107,37 @@ class ImporterFormController extends EntityForm {
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
+    $form['importer_settings'] = array(
+      '#type' => 'details',
+      '#group' => 'plugin_settings',
+      '#title' => $this->t('Settings'),
+    );
+    $times = [900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200];
+    $period = array_map(function($time) {
+      return \Drupal::service('date.formatter')->formatInterval($time);
+    }, array_combine($times, $times));
+
+    foreach ($period as &$p) {
+      $p = $this->t('Every !p', array('!p' => $p));
+    }
+    $period = array(
+      ImporterInterface::SCHEDULE_NEVER => $this->t('Off'),
+      0 => $this->t('As often as possible'),
+    ) + $period;
+
+    $form['importer_settings']['import_period'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Import period'),
+      '#options' => $period,
+      '#description' => $this->t('Choose how often a feed should be imported.'),
+      '#default_value' => $this->entity->getImportPeriod(),
+      '#tree' => FALSE,
+    );
+
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
     if (!empty($values)) {
-      if ($values['processor']['id'] != $this->entity->getProcessor()->getPluginId()) {
+      if ($values['processor']['id'] !== $this->entity->getProcessor()->getPluginId()) {
         $this->entity->removeMappings();
       }
       foreach ($this->entity->getPluginTypes() as $type) {
@@ -140,7 +169,6 @@ class ImporterFormController extends EntityForm {
           '#ajax' => array(
             'callback' => '::ajaxCallback',
             'wrapper' => 'feeds-ajax-form-wrapper',
-            // 'effect' => 'none',
             'progress' => 'none',
           ),
           '#attached' => array(
@@ -158,14 +186,14 @@ class ImporterFormController extends EntityForm {
 
       // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
-        $form[$type]['advanced'] = $plugin->buildAdvancedForm(array(), $form_state);
+        $form[$type]['advanced'] = $plugin->buildAdvancedForm([], $form_state);
       }
 
       $form[$type]['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
       $form[$type]['advanced']['#suffix'] = '</div>';
 
       if ($plugin instanceof PluginFormInterface) {
-        if ($plugin_form = $plugin->buildConfigurationForm(array(), $form_state)) {
+        if ($plugin_form = $plugin->buildConfigurationForm([], $form_state)) {
           $form[$type . '_configuration'] = array(
             '#type' => 'details',
             '#group' => 'plugin_settings',
@@ -184,19 +212,6 @@ class ImporterFormController extends EntityForm {
   }
 
   /**
-   * Determines if the importer already exists.
-   *
-   * @param string $id
-   *   The importer ID.
-   *
-   * @return bool
-   *   True if the importer exists, false otherwise.
-   */
-  public function exists($id) {
-    return (bool) $this->importerStorage->load($id);
-  }
-
-  /**
    * Returns the configurable plugins for this importer.
    *
    * @return array
@@ -205,8 +220,7 @@ class ImporterFormController extends EntityForm {
    * @todo Consider moving this to Importer.
    */
   protected function getConfigurablePlugins() {
-    $plugins = array();
-
+    $plugins = [];
     foreach ($this->entity->getPlugins() as $type => $plugin) {
       if ($plugin instanceof PluginFormInterface || $plugin instanceof AdvancedFormPluginInterface) {
         $plugins[$type] = $plugin;
@@ -226,7 +240,7 @@ class ImporterFormController extends EntityForm {
     foreach ($this->entity->getPluginTypes() as $type) {
       if (isset($values[$type]['advanced'])) {
         if (!isset($values[$type]['configuration'])) {
-          $values[$type]['configuration'] = array();
+          $values[$type]['configuration'] = [];
         }
         $values[$type]['configuration'] += $values[$type]['advanced'];
         unset($values[$type]['advanced']);

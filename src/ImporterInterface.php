@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Entity\ImporterInterface.
+ * Contains \Drupal\feeds\ImporterInterface.
  */
 
 namespace Drupal\feeds;
@@ -17,6 +17,51 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  * plugins.
  */
 interface ImporterInterface extends ConfigEntityInterface {
+
+  /**
+   * Indicates that a feed should never be scheduled.
+   */
+  const SCHEDULE_NEVER = -1;
+
+  /**
+   * Sets the label of the importer.
+   *
+   * @param string $label
+   *   The label of the importer.
+   */
+  public function setLabel($label);
+
+  /**
+   * Returns the description of the importer.
+   *
+   * @return string
+   *   The description of the importer.
+   */
+  public function getDescription();
+
+  /**
+   * Sets the description of the importer.
+   *
+   * @param string $description
+   *   The description of the importer.
+   */
+  public function setDescription($description);
+
+  /**
+   * Returns the import period.
+   *
+   * @return int
+   *   The import period in seconds.
+   */
+  public function getImportPeriod();
+
+  /**
+   * Sets the import period.
+   *
+   * @param int $import_period
+   *   The import period in seconds.
+   */
+  public function setImportPeriod($import_period);
 
   /**
    * Returns the mappings for this importer.

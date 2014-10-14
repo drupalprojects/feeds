@@ -39,6 +39,13 @@ interface ProcessorInterface extends FeedsPluginInterface {
   const UPDATE_EXISTING = 2;
 
   /**
+   * Feed items should never be expired.
+   *
+   * @var int
+   */
+  const EXPIRE_NEVER = -1;
+
+  /**
    * Processes the results from a parser.
    *
    * @param \Drupal\feeds\FeedInterface $feed

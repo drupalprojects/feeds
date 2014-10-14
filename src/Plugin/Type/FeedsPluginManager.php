@@ -42,7 +42,6 @@ class FeedsPluginManager extends DefaultPluginManager {
    */
   public function __construct($type, \Traversable $namespaces, CacheBackendInterface $cache_backend, LanguageManager $language_manager, ModuleHandlerInterface $module_handler) {
     $type_annotations = array(
-      'scheduler' => 'Drupal\feeds\Annotation\FeedsScheduler',
       'fetcher' => 'Drupal\feeds\Annotation\FeedsFetcher',
       'parser' => 'Drupal\feeds\Annotation\FeedsParser',
       'processor' => 'Drupal\feeds\Annotation\FeedsProcessor',
@@ -50,7 +49,6 @@ class FeedsPluginManager extends DefaultPluginManager {
       'target' => 'Drupal\feeds\Annotation\FeedsTarget',
     );
     $plugin_interfaces = array(
-      'scheduler' => 'Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface',
       'fetcher' => 'Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface',
       'parser' => 'Drupal\feeds\Plugin\Type\Parser\ParserInterface',
       'processor' => 'Drupal\feeds\Plugin\Type\Processor\ProcessorInterface',

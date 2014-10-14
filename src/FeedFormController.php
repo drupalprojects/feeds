@@ -168,29 +168,12 @@ class FeedFormController extends ContentEntityForm {
       return;
     }
 
-    // Schedule jobs for this feed.
-    $feed->schedule();
-
     if ($feed->access('view')) {
       $form_state->setRedirect('feeds.view', ['feeds_feed' => $feed->id()]);
     }
     else {
       $form_state->setRedirect('<front>');
     }
-  }
-
-  /**
-   * Form submission handler for the 'import' action.
-   *
-   * @param $form
-   *   An associative array containing the structure of the form.
-   * @param $form_state
-   *   The current state of the form.
-   */
-  public function import(array $form, FormStateInterface $form_state) {
-    $feed = $this->entity;
-    $feed->startBatchImport();
-    return $feed;
   }
 
 }

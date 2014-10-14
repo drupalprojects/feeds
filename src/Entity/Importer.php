@@ -64,21 +64,28 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    *
    * @var string
    */
-  public $id;
+  protected $id;
 
   /**
    * The label of the importer.
    *
    * @var string
    */
-  public $label;
+  protected $label;
 
   /**
    * Description of the importer.
    *
    * @var string
    */
-  public $description;
+  protected $description;
+
+  /**
+   * The import period.
+   *
+   * @var int
+   */
+  protected $import_period = 3600;
 
   /**
    * The types of plugins we support.
@@ -87,41 +94,36 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    *
    * @todo Make this dynamic?
    */
-  protected $pluginTypes = array(
-    'scheduler',
+  protected $pluginTypes = [
     'fetcher',
     'parser',
     'processor',
-  );
+  ];
 
   /**
    * Plugin ids and configuration.
    */
-  protected $plugins = array(
-    'scheduler' => array(
-      'id' => 'periodic',
-      'configuration' => array(),
-    ),
-    'fetcher' => array(
+  protected $plugins = [
+    'fetcher' => [
       'id' => 'http',
-      'configuration' => array(),
-    ),
-    'parser' => array(
+      'configuration' => [],
+    ],
+    'parser' => [
       'id' => 'syndication',
-      'configuration' => array(),
-    ),
-    'processor' => array(
+      'configuration' => [],
+    ],
+    'processor' => [
       'id' => 'entity:node',
-      'configuration' => array(),
-    ),
-  );
+      'configuration' => [],
+    ],
+  ];
 
   /**
    * The list of source to target mappings.
    *
    * @var array
    */
-  protected $mappings = array();
+  protected $mappings = [];
 
   /**
    * The list of sources.
@@ -144,11 +146,11 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    *
    * @var \Drupal\Core\Plugin\DefaultSinglePluginBag[]
    */
-  protected $pluginBags = array();
+  protected $pluginBags = [];
 
-  protected $targetPlugins = array();
+  protected $targetPlugins = [];
 
-  protected $sourcePlugins = array();
+  protected $sourcePlugins = [];
 
   /**
    * Constructs a new Importer object.
@@ -174,6 +176,27 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   /**
    * {@inheritdoc}
    */
+  public function setLabel($label) {
+    $this->label = $label;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return $this->description;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($description) {
+    $this->description = $description;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isLocked() {
     foreach ($this->getPlugins() as $plugin) {
       if ($plugin instanceof LockableInterface && $plugin->isLocked()) {
@@ -188,7 +211,14 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getImportPeriod() {
-    return (int) $this->getPlugin('scheduler')->getImportPeriod();
+    return $this->import_period;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setImportPeriod($import_period) {
+    $this->import_period = (int) $import_period;
   }
 
   /**
@@ -284,7 +314,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function removeMappings() {
-    $this->mappings = array();
+    $this->mappings = [];
   }
 
   /**
@@ -298,7 +328,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function getPlugins() {
-    $plugins = array();
+    $plugins = [];
     foreach ($this->getPluginTypes() as $type) {
       $plugins[$type] = $this->getPlugin($type);
     }
@@ -372,7 +402,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
 
       // The source is a plugin.
       if (isset($sources[$source]['id'])) {
-        $configuration = array('importer' => $this);
+        $configuration = ['importer' => $this];
         $this->sourcePlugins[$source] = \Drupal::service('plugin.manager.feeds.source')->createInstance($sources[$source]['id'], $configuration);
       }
       else {
@@ -386,7 +416,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   public function getPluginOptionsList($plugin_type) {
     $manager = \Drupal::service("plugin.manager.feeds.$plugin_type");
 
-    $options = array();
+    $options = [];
     foreach ($manager->getDefinitions() as $id => $definition) {
       $options[$id] = String::checkPlain($definition['title']);
     }
@@ -403,7 +433,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
   protected function initPluginBag($plugin_type) {
     $id = $this->plugins[$plugin_type]['id'];
 
-    $configuration = array('importer' => $this);
+    $configuration = ['importer' => $this];
     if (isset($this->plugins[$plugin_type]['configuration'])) {
       $configuration += $this->plugins[$plugin_type]['configuration'];
     }
@@ -426,13 +456,13 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface {
    * {@inheritdoc}
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'admin/structure/feeds/manage/' . $this->id(),
-      'options' => array(
+      'options' => [
         'entity_type' => $this->entityType,
         'entity' => $this,
-      ),
-    );
+      ],
+    ];
   }
 
   /**

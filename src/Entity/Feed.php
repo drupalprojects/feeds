@@ -16,9 +16,9 @@ use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\EventDispatcherTrait;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
+use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
-use Drupal\feeds\Plugin\Type\Scheduler\SchedulerInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
@@ -266,36 +266,11 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->set('imported', $time);
 
     $interval = $this->getImporter()->getImportPeriod();
-    if ($interval === SchedulerInterface::SCHEDULE_NEVER) {
-      $this->set('next', SchedulerInterface::SCHEDULE_NEVER);
-    }
-    else {
+    if ($interval !== ImporterInterface::SCHEDULE_NEVER) {
       $this->set('next', $interval + $time);
     }
 
     return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function schedule() {
-    $this->scheduleImport();
-    $this->scheduleExpire();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function scheduleImport() {
-    $this->getImporter()->getPlugin('scheduler')->scheduleImport($this);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function scheduleExpire() {
-    $this->getImporter()->getPlugin('scheduler')->scheduleExpire($this);
   }
 
   /**
@@ -455,8 +430,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
     // If this is a new node, 'next' and 'imported' will be zero which will
     // queue it for the next run.
-    if ($this->getImporter()->getImportPeriod() === SchedulerInterface::SCHEDULE_NEVER) {
-      $this->set('next', SchedulerInterface::SCHEDULE_NEVER);
+    if ($this->getImporter()->getImportPeriod() === ImporterInterface::SCHEDULE_NEVER) {
+      $this->set('next', ImporterInterface::SCHEDULE_NEVER);
     }
   }
 

@@ -23,7 +23,7 @@ class ImporterListController extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $entity->label();
     $row['id'] = $entity->id();
-    $row['description'] = $entity->description;
+    $row['description'] = $entity->getDescription();
     $row['operations']['data'] = $this->buildOperations($entity);
     return $row;
   }

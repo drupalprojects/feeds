@@ -11,3 +11,6 @@ feeds.importer.*:
     description:
       type: text
       label: 'Description'
+    import_period:
+      type: integer
+      label: 'The import period'

@@ -56,7 +56,7 @@ class FeedController extends ControllerBase {
       }
       $build['#rows'][] = array(
         $this->l($importer->label(), new Url('feeds.add', ['feeds_importer' => $importer->id()])),
-        String::checkPlain($importer->description),
+        String::checkPlain($importer->getDescription()),
       );
     }
 
