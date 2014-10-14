@@ -379,7 +379,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function lock() {
-    if (!\Drupal::service('feeds.lock.persistent')->acquire("feeds_feed_{$this->id()}", 3600 * 12)) {
+    if (!\Drupal::service('lock.persistent')->acquire("feeds_feed_{$this->id()}", 3600 * 12)) {
       $args = ['@id' => $this->bundle(), '@fid' => $this->id()];
       throw new LockException(String::format('Cannot acquire lock for feed @id / @fid.', $args));
     }
@@ -390,7 +390,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function unlock() {
-    \Drupal::service('feeds.lock.persistent')->release("feeds_feed_{$this->id()}");
+    \Drupal::service('lock.persistent')->release("feeds_feed_{$this->id()}");
     return $this;
   }
 
@@ -398,7 +398,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function isLocked() {
-    return !\Drupal::service('feeds.lock.persistent')->lockMayBeAvailable("feeds_feed_{$this->id()}");
+    return !\Drupal::service('lock.persistent')->lockMayBeAvailable("feeds_feed_{$this->id()}");
   }
 
   /**

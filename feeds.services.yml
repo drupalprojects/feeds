@@ -30,6 +30,3 @@ services:
     class: Drupal\feeds\EventSubscriber\LazySubscriber
     tags:
       - { name: event_subscriber }
-  feeds.lock.persistent:
-    class: Drupal\feeds\Lock\PersistentDatabaseLockBackend
-    arguments: ['@database']
