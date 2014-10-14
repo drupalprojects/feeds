@@ -114,9 +114,7 @@ class FeedsItem extends EntityReferenceItem {
   public function preSave() {
     $this->url = trim($this->url);
     $this->guid = trim($this->guid);
-
-    // Force the imported time.
-    $this->imported = REQUEST_TIME;
+    $this->imported = (int) $this->imported;
   }
 
 }

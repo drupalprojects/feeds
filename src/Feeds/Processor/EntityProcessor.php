@@ -184,6 +184,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       // Set the values that we absolutely need.
       $entity->get('feeds_item')->target_id = $feed->id();
       $entity->get('feeds_item')->hash = $hash;
+      $entity->get('feeds_item')->imported = REQUEST_TIME;
 
       // And... Save! We made it.
       $this->storageController->save($entity);
