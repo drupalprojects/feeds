@@ -37,6 +37,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $container->set('file.usage', $this->getMock('Drupal\file\FileUsage\FileUsageInterface'));
     $container->set('entity.manager', $entity_manager);
     $container->set('uuid', $this->getMock('Drupal\Component\Uuid\UuidInterface'));
+    $container->set('stream_wrapper_manager', $this->getMockStreamWrapperManager());
     $this->fetcher = UploadFetcher::create($container, $configuration, 'test_plugin', ['plugin_type' => 'fetcher']);
 
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());

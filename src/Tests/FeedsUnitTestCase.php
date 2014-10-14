@@ -38,6 +38,31 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     return $feed;
   }
 
+  /**
+   * Returns a mock stream wrapper manager.
+   *
+   * @return \Drupal\Core\StreamWrapper\StreamWrapperManager
+   *   A mocked stream wrapper manager.
+   */
+  protected function getMockStreamWrapperManager() {
+    $mock = $this->getMock('Drupal\Core\StreamWrapper\StreamWrapperManager', [], [], '', FALSE);
+
+    $wrappers = [
+      'vfs' => 'VFS',
+      'public' => 'Public',
+    ];
+
+    $mock->expects($this->any())
+      ->method('getDescriptions')
+      ->will($this->returnValue($wrappers));
+
+    $mock->expects($this->any())
+      ->method('getWrappers')
+      ->will($this->returnValue($wrappers));
+
+    return $mock;
+  }
+
   protected function getMethod($class, $name) {
     $class = new \ReflectionClass($class);
     $method = $class->getMethod($name);
@@ -81,10 +106,6 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
    * Defines stub constants.
    */
   protected function defineConstants() {
-    if (!defined('STREAM_WRAPPERS_WRITE_VISIBLE')) {
-      define('STREAM_WRAPPERS_WRITE_VISIBLE', 1);
-    }
-
     if (!defined('DATETIME_STORAGE_TIMEZONE')) {
       define('DATETIME_STORAGE_TIMEZONE', 'UTC');
     }
@@ -134,18 +155,13 @@ namespace {
       return $dir;
     }
   }
-  if (!function_exists('file_get_stream_wrappers')) {
-    function file_get_stream_wrappers() {
-      return [
-        'vfs' => ['description' => 'VFS'],
-        'public' => ['description' => 'Public'],
-      ];
-    }
-  }
   if (!function_exists('file_uri_scheme')) {
     function file_uri_scheme($uri) {
-      $position = strpos($uri, '://');
-      return $position ? substr($uri, 0, $position) : FALSE;
+      if (preg_match('/^([\w\-]+):\/\/|^(data):/', $uri, $matches)) {
+        // The scheme will always be the last element in the matches array.
+        return array_pop($matches);
+      }
+      return FALSE;
     }
   }
 

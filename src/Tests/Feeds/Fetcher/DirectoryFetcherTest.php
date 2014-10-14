@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Tests\Feeds\Fetcher;
 
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\DirectoryFetcher;
 use Drupal\feeds\State;
@@ -24,7 +25,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     parent::setUp();
 
     $importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $this->fetcher = new DirectoryFetcher(['importer' => $importer], 'directory', []);
+    $container = new ContainerBuilder();
+    $container->set('stream_wrapper_manager', $this->getMockStreamWrapperManager());
+    $this->fetcher = DirectoryFetcher::create($container, ['importer' => $importer], 'directory', []);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
   }
 

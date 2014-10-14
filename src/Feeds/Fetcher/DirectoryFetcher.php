@@ -9,12 +9,16 @@ namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\StateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a directory fetcher.
@@ -25,7 +29,43 @@ use Drupal\feeds\StateInterface;
  *   description = @Translation("Uses a directory, or file, on the server.")
  * )
  */
-class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterface, FeedPluginFormInterface {
+class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterface, FeedPluginFormInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * The stream wrapper manager.
+   *
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManager
+   */
+  protected $streamWrapperManager;
+
+  /**
+   * Constructs a DirectoryFetcher object.
+   *
+   * @param array $configuration
+   *   The plugin configuration.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param array $plugin_definition
+   *   The plugin definition.
+   * @param \Drupal\Core\StreamWrapper\StreamWrapperManager $stream_wrapper_manager
+   *   The stream wrapper manager.
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, StreamWrapperManager $stream_wrapper_manager) {
+    $this->streamWrapperManager = $stream_wrapper_manager;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('stream_wrapper_manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -156,7 +196,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    *   The available schemes.
    */
   protected function getSchemes() {
-    return array_keys(file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE));
+    return array_keys($this->streamWrapperManager->getWrappers(StreamWrapperInterface::WRITE_VISIBLE));
   }
 
   /**
@@ -167,8 +207,8 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    */
   protected function getSchemeOptions() {
     $options = array();
-    foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-      $options[$scheme] = String::checkPlain($scheme . ': ' . $info['description']);
+    foreach ($this->streamWrapperManager->getDescriptions(StreamWrapperInterface::WRITE_VISIBLE) as $scheme => $description) {
+      $options[$scheme] = String::checkPlain($scheme . ': ' . $description);
     }
     return $options;
   }

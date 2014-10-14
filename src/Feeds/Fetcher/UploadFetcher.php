@@ -12,6 +12,8 @@ use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
@@ -53,6 +55,13 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   protected $uuid;
 
   /**
+   * The stream wrapper manager.
+   *
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManager
+   */
+  protected $streamWrapperManager;
+
+  /**
    * Constructs an UploadFetcher object.
    *
    * @param array $configuration
@@ -65,12 +74,17 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    *   The file usage backend.
    * @param \Drupal\Core\Entity\EntityStorageInterface $file_storage
    *   The file storage controller.
+   * @param \Drupal\Component\Uuid\UuidInterface $uuid
+   *   The UUID generator.
+   * @param \Drupal\Core\StreamWrapper\StreamWrapperManager $stream_wrapper_manager
+   *   The stream wrapper manager.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageInterface $file_storage, UuidInterface $uuid) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileUsageInterface $file_usage, EntityStorageInterface $file_storage, UuidInterface $uuid, StreamWrapperManager $stream_wrapper_manager) {
     $this->fileUsage = $file_usage;
     $this->fileStorage = $file_storage;
     $this->uuid = $uuid;
+    $this->streamWrapperManager = $stream_wrapper_manager;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
@@ -83,7 +97,8 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
       $plugin_definition,
       $container->get('file.usage'),
       $container->get('entity.manager')->getStorage('file'),
-      $container->get('uuid')
+      $container->get('uuid'),
+      $container->get('stream_wrapper_manager')
     );
   }
 
@@ -257,7 +272,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    *   The available schemes.
    */
   protected function getSchemes() {
-    return array_keys(file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE));
+    return array_keys($this->streamWrapperManager->getWrappers(StreamWrapperInterface::WRITE_VISIBLE));
   }
 
 }
