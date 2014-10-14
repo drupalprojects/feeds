@@ -182,5 +182,4 @@ function template_preprocess_feeds_feed(&$variables) {
 
   // Add article ARIA role.
   $variables['attributes']['role'] = 'article';
-  $variables['item_count'] = $feed->getItemCount();
 }

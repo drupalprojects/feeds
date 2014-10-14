@@ -363,16 +363,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getItemCount() {
-    return $this->getImporter()->getProcessor()->getItemCount($this);
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * @todo Perform some validation.
-   */
-  public function existing() {
-    return $this;
+    return (int) $this->get('item_count')->value;
   }
 
   /**
@@ -415,7 +406,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   public function setConfigurationFor(FeedsPluginInterface $client, array $configuration) {
     $type = $client->pluginType();
     $this->get('config')->$type = array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
-    return $this;
   }
 
   /**
@@ -433,6 +423,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
     if ($this->getImporter()->getImportPeriod() === ImporterInterface::SCHEDULE_NEVER) {
       $this->set('next', ImporterInterface::SCHEDULE_NEVER);
     }
+
+    // Update the item count.
+    $this->set('item_count', $this->getImporter()->getProcessor()->getItemCount($this));
   }
 
   /**
@@ -593,16 +586,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setLabel(t('Config'))
       ->setDescription(t('The config of the feed.'));
 
-    // $fields['item_count'] = BaseFieldDefinition::create('integer')
-    //   ->setLabel(t('Items imported'))
-    //   ->setDescription(t('The number of items imported.'))
-    //   ->setComputed(TRUE)
-    //   ->setCustomStorage(TRUE)
-    //   ->setDisplayOptions('view', array(
-    //     'label' => 'inline',
-    //     'type' => 'number_integer',
-    //     'weight' => 0,
-    //   ));
+    $fields['item_count'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Items imported'))
+      ->setDescription(t('The number of items imported.'))
+      ->setDefaultValue(0)
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'type' => 'number_integer',
+        'weight' => 0,
+      ]);
 
     $fields['fetcher_result'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Fetcher result'))

@@ -178,7 +178,8 @@ class FeedImportHandler extends FeedHandlerBase {
       $this->startBatchFetch($feed);
     }
     else {
-      $feed->cleanUp()->save();
+      $feed->cleanUp();
+      $feed->save();
       $feed->unlock();
     }
   }
