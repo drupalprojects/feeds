@@ -143,7 +143,7 @@ class DirectoryFetcher extends ConfigurablePluginBase implements FetcherInterfac
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state->getValue(array('fetcher_configuration',));
+    $values =& $form_state->getValues();
     $values['allowed_schemes'] = array_filter($values['allowed_schemes']);
     // Convert allowed_extensions to an array for storage.
     $values['allowed_extensions'] = array_unique(explode(' ', preg_replace('/\s+/', ' ', trim($values['allowed_extensions']))));

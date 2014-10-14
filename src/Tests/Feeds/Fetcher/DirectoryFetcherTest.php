@@ -67,13 +67,15 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   }
 
   public function testConfigurationForm() {
-    $form_state = new FormState();
-    $form_state->setValue(['fetcher_configuration'], ['allowed_schemes' => ['public'], 'allowed_extensions' => ' txt  pdf']);
+    $form_state = (new FormState())->setValues([
+      'allowed_schemes' => ['public'],
+      'allowed_extensions' => ' txt  pdf',
+    ]);
+
     $form = $this->fetcher->buildConfigurationForm([], $form_state);
     $this->fetcher->validateConfigurationForm($form, $form_state);
 
-    $allowed_extension = $form_state->getValue(['fetcher_configuration', 'allowed_extensions']);
-    $this->assertSame(['txt', 'pdf'], $allowed_extension);
+    $this->assertSame(['txt', 'pdf'], $form_state->getValue(['allowed_extensions']));
   }
 
   public function testFeedForm() {

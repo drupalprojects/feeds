@@ -214,8 +214,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-
-    $values =& $form_state->getValue(array('fetcher_configuration'));
+    $values =& $form_state->getValues();
 
     $values['directory'] = trim($values['directory']);
     $values['allowed_extensions'] = trim($values['allowed_extensions']);
@@ -223,7 +222,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     // Validate the URI scheme of the upload directory.
     $scheme = file_uri_scheme($values['directory']);
     if (!$scheme || !in_array($scheme, $this->getSchemes())) {
-      $form_state->setError($form['fetcher_configuration']['directory'], $this->t('Please enter a valid scheme into the directory location.'));
+      $form_state->setError($form['directory'], $this->t('Please enter a valid scheme into the directory location.'));
       // Return here so that attempts to create the directory below don't throw
       // warnings.
       return;
@@ -231,7 +230,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
 
     // Ensure that the upload directory exists.
     if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      $form_state->setError($form['fetcher_configuration']['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
+      $form_state->setError($form['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
     }
   }
 

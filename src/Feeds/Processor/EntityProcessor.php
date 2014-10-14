@@ -507,7 +507,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state->getValue(['processor_configuration']);
+    $values =& $form_state->getValues();
 
     if (isset($values['owner_id']) && $owner = user_load_by_name($values['owner_id'])) {
       $values['owner_id'] = $owner->id();
