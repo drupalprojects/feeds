@@ -15,7 +15,7 @@ use Drupal\views\ResultRow;
  *
  * @ingroup views_field_handlers
  *
- * @PluginID("feeds_feed_importer")
+ * @ViewsField("feeds_feed_importer")
  */
 class Importer extends Feed {
 

@@ -8,10 +8,10 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityManager;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\user\TempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,14 +20,14 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 /**
  * Provides a feed deletion confirmation form.
  */
-class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterface {
+class DeleteMultiple extends ConfirmFormBase {
 
   /**
    * The array of feeds to delete.
    *
    * @var array
    */
-  protected $feeds = array();
+  protected $feeds = [];
 
   /**
    * The tempstore factory.
@@ -44,16 +44,26 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
   protected $storage;
 
   /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $user;
+
+  /**
    * Constructs a DeleteMultiple form object.
    *
    * @param \Drupal\user\TempStoreFactory $temp_store_factory
    *   The tempstore factory.
-   * @param \Drupal\Core\Entity\EntityManager $manager
-   *   The entity manager.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   The feed storage.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The current user.
    */
-  public function __construct(TempStoreFactory $temp_store_factory, EntityManager $manager) {
+  public function __construct(TempStoreFactory $temp_store_factory, EntityStorageInterface $storage, AccountInterface $user) {
     $this->tempStoreFactory = $temp_store_factory;
-    $this->storage = $manager->getStorage('feeds_feed');
+    $this->storage = $storage;
+    $this->user = $user;
   }
 
   /**
@@ -62,7 +72,8 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('user.tempstore'),
-      $container->get('entity.manager')
+      $container->get('entity.manager')->getStorage('feeds_feed'),
+      $container->get('current_user')
     );
   }
 
@@ -77,37 +88,36 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return format_plural(count($this->feeds), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
+    return $this->formatPlural(count($this->feeds), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('feeds.add_page');
+    return new Url('feeds.admin');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return t('Delete');
+    return $this->t('Delete');
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $this->feeds = $this->tempStoreFactory->get('feeds_feed_multiple_delete_confirm')->get($GLOBALS['user']->id());
+    $this->feeds = $this->tempStoreFactory->get('feeds_feed_multiple_delete_confirm')->get($this->user->id());
     if (empty($this->feeds)) {
-      // @todo Set the correct route once views can override paths.
-      return new RedirectResponse(url('admin/content/feed', array('absolute' => TRUE)));
+      return new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString());
     }
 
     $form['feeds'] = array(
       '#theme' => 'item_list',
-      '#items' => array_map(function ($node) {
-        return String::checkPlain($node->label());
+      '#items' => array_map(function ($feed) {
+        return String::checkPlain($feed->label());
       }, $this->feeds),
     );
     return parent::buildForm($form, $form_state);
@@ -119,13 +129,13 @@ class DeleteMultiple extends ConfirmFormBase implements ContainerInjectionInterf
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getValue('confirm') && !empty($this->feeds)) {
       $this->storage->delete($this->feeds);
-      $this->tempStoreFactory->get('feeds_multiple_delete_confirm')->delete($GLOBALS['user']->id());
+      $this->tempStoreFactory->get('feeds_multiple_delete_confirm')->delete($this->user->id());
       $count = count($this->feeds);
       $this->logger('feeds')->notice('Deleted @count feeds.', array('@count' => $count));
-      drupal_set_message(format_plural($count, 'Deleted 1 feed.', 'Deleted @count posts.', array('@count' => $count)));
+      drupal_set_message($this->formatPlural($count, 'Deleted 1 feed.', 'Deleted @count posts.'));
     }
-    // @todo Set the correct route once views can override paths.
-    // $form_state['redirect'] = 'admin/content/feed';
+
+    $form_state->setRedirectUrl($this->getCancelUrl());
   }
 
 }

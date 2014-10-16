@@ -248,7 +248,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * Returns available schemes.
    *
-   * @return array
+   * @return string[]
    *   The available schemes.
    */
   protected function getSchemes() {

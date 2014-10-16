@@ -32,3 +32,7 @@ feeds.importer.*:
     processor_configuration:
       type: mapping
       label: 'Processor configuration'
+
+action.configuration.feeds_feed_delete_action:
+  type: action_configuration_default
+  label: 'Delete feeds configuration'

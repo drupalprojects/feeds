@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "feeds_feed_delete_action",
  *   label = @Translation("Delete selected feeds"),
  *   type = "feeds_feed",
- *   confirm_form_path = "admin/content/feed/delete"
+ *   confirm_form_path = "feeds.multiple_delete_confirm"
  * )
  */
 class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
@@ -47,9 +47,9 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
    *   The current user.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, TempStore $temp_store, AccountInterface $user) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->tempStore = $temp_store;
     $this->user = $user;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
@@ -78,7 +78,7 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function execute($object = NULL) {
-    $this->executeMultiple(array($object));
+    $this->executeMultiple([$object]);
   }
 
 }

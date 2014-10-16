@@ -20,7 +20,7 @@ use Drupal\views\ViewExecutable;
  *
  * @ingroup views_field_handlers
  *
- * @PluginID("feeds_feed")
+ * @ViewsField("feeds_feed")
  */
 class Feed extends FieldPluginBase {
 

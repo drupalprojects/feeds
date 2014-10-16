@@ -120,8 +120,10 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
     ]);
 
     try {
+      $tmp_file = drupal_tempnam('temporary://', 'feeds_download_cache_');
+      touch($tmp_file);
       $response = $this->client->get($url, [
-        'save_to' => drupal_tempnam('temporary://', 'feeds_download_cache_'),
+        'save_to' => fopen($tmp_file, 'w+'),
       ]);
     }
     catch (BadResponseException $e) {

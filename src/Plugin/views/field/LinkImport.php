@@ -14,7 +14,7 @@ use Drupal\views\ResultRow;
  *
  * @ingroup views_field_handlers
  *
- * @PluginID("feeds_feed_link_import")
+ * @ViewsField("feeds_feed_link_import")
  */
 class LinkImport extends Link {
 

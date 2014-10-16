@@ -1,8 +1,9 @@
 id: feeds_feed_delete_action
 label: 'Delete selected feeds'
-uuid: 8962d6cc-7866-4be8-ad37-5518409f2728
-status: '1'
+status: true
 langcode: en
 type: feeds_feed
 plugin: feeds_feed_delete_action
-configuration: {  }
+dependencies:
+  module:
+    - feeds

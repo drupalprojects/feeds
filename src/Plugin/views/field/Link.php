@@ -16,7 +16,7 @@ use Drupal\views\ResultRow;
  *
  * @ingroup views_field_handlers
  *
- * @PluginID("feeds_feed_link")
+ * @ViewsField("feeds_feed_link")
  */
 class Link extends FieldPluginBase {
 
