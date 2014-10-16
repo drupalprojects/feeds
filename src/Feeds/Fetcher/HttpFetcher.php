@@ -10,7 +10,6 @@ namespace Drupal\feeds\Feeds\Fetcher;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
@@ -21,7 +20,6 @@ use Drupal\feeds\StateInterface;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines an HTTP fetcher.
@@ -30,10 +28,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "http",
  *   title = @Translation("Download"),
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler."),
- *   configuration_form = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm"
+ *   configuration_form = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm",
+ *   arguments = {"@http_client", "@config.factory", "@cache.default"}
  * )
  */
-class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInterface, ContainerFactoryPluginInterface {
+class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInterface {
 
   /**
    * The Guzzle client.
@@ -82,22 +81,6 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
   /**
    * {@inheritdoc}
    *
-   * @todo Merge the two queues.
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('http_client'),
-      $container->get('config.factory'),
-      $container->get('cache.default')
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   *
    * @todo Make parsers be able to handle streams. Maybe exclusively.
    * @todo Clean download cache directory.
    */
@@ -129,12 +112,12 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    *   A Guzzle response.
    */
   protected function get($url, $cache = TRUE) {
-    $url = strtr($url, ['feed://' => 'http://', 'webcal://' => 'http://']);
-
-    // Add our handy dandy cache plugin. It's magic.
-    // if ($cache) {
-    //   $this->client->addSubscriber(new CachePlugin(\Drupal::cache()));
-    // }
+    $url = strtr($url, [
+      'feed://' => 'http://',
+      'webcal://' => 'http://',
+      'feeds://' => 'https://',
+      'webcals://' => 'https://',
+    ]);
 
     try {
       $response = $this->client->get($url, [
@@ -143,11 +126,11 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
-      $args = array('%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase());
+      $args = ['%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()];
       throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
     catch (RequestException $e) {
-      $args = array('%url' => $url, '%error' => $e->getMessage());
+      $args = ['%url' => $url, '%error' => $e->getMessage()];
       throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
 
@@ -178,7 +161,11 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    */
   public function clear(FeedInterface $feed) {
     $this->cache->delete('feeds_http_download:' . md5($feed->getSource()));
-    file_unmanaged_delete($this->prepareDirectory($feed->getSource()));
+
+    $cache_file = $this->prepareDirectory($feed->getSource());
+    if (file_exists($cache_file)) {
+      file_unmanaged_delete($cache_file);
+    }
   }
 
   /**
@@ -218,7 +205,7 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    * {@inheritdoc}
    */
   public function sourceDefaults() {
-    return array('source' => '', 'thing' => '');
+    return ['source' => ''];
   }
 
   /**

@@ -246,6 +246,9 @@ class ImporterFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function validate(array $form, FormStateInterface $form_state) {
+    if ($form_state->getErrors()) {
+      return;
+    }
     $values =& $form_state->getValues();
 
     // Moved advanced settings to regular settings.

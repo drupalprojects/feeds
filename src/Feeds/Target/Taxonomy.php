@@ -7,55 +7,50 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a taxonomy term field mapper.
  *
  * @FeedsTarget(
  *   id = "taxonomy",
- *   field_types = {"taxonomy_term_reference"}
+ *   field_types = {"taxonomy_term_reference"},
+ *   arguments = {"@entity.manager", "@entity.query"}
  * )
  */
-class Taxonomy extends EntityReference implements ContainerFactoryPluginInterface {
+class Taxonomy extends EntityReference {
 
   /**
-   * The taxonomy term storage controller.
+   * The term storage controller.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\taxonomy\TermStorageInterface
    */
   protected $termStorage;
 
   /**
-   * Constructs a Taxonomy object.
+   * Constructs an Taxonomy object.
    *
-   * @param array $settings
-   *   The plugin settings.
+   * @param array $configuration
+   *   The plugin configuration.
    * @param string $plugin_id
    *   The plugin id.
-   * @param \Drupal\Core\Entity\EntityStorageInterface $term_storage
-   *   The taxonomy term storage controller.
+   * @param array $plugin_definition
+   *   The plugin definition.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Drupal\Core\Entity\Query\QueryFactory $query_factory
+   *   The entity query factory.
    */
-  public function __construct(array $settings, $plugin_id, array $plugin_definition, EntityStorageInterface $term_storage) {
-    parent::__construct($settings, $plugin_id, $plugin_definition);
-    $this->termStorage = $term_storage;
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityManagerInterface $entity_manager, QueryFactory $query_factory) {
+    $this->termStorage = $entity_manager->getStorage('taxonomy_term');
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $query_factory);
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity.manager')->getStorage('taxonomy_term')
-    );
-  }
-
   protected function getBundle() {
     return $this->settings['allowed_values'][0]['vocabulary'];
   }
@@ -103,11 +98,11 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
 
-    $form['autocreate'] = array(
+    $form['autocreate'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Autocreate term'),
       '#default_value' => $this->configuration['autocreate'],
-    );
+    ];
 
     return $form;
   }
@@ -118,7 +113,6 @@ class Taxonomy extends EntityReference implements ContainerFactoryPluginInterfac
   public function getSummary() {
     $summary = parent::getSummary();
     $create = $this->configuration['autocreate'] ? $this->t('Yes') : $this->t('No');
-
     return $summary . '<br>' . $this->t('Autocreate terms: %create', ['%create' => $create]);
   }
 

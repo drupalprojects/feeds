@@ -11,13 +11,10 @@ use Doctrine\Common\Inflector\Inflector;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\Field\FieldItemInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\feeds\Entity\Importer;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
@@ -32,7 +29,6 @@ use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\user\EntityOwnerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines an entity processor.
@@ -43,17 +39,32 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "entity",
  *   title = @Translation("Entity processor"),
  *   description = @Translation("Creates entities from feed items."),
- *   deriver = "\Drupal\feeds\Plugin\Derivative\EntityProcessor"
+ *   deriver = "\Drupal\feeds\Plugin\Derivative\EntityProcessor",
+ *   arguments = {"@entity.manager", "@entity.query"}
  * )
  */
-class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterface, ClearableInterface, LockableInterface, AdvancedFormPluginInterface, ContainerFactoryPluginInterface {
+class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterface, ClearableInterface, LockableInterface, AdvancedFormPluginInterface {
+
+  /**
+   * The entity manager.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface
+   */
+  protected $entityManager;
 
   /**
    * The entity storage controller for the entity type being processed.
    *
-   * @var
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $storageController;
+
+  /**
+   * The entity info for the selected entity type.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeInterface
+   */
+  protected $entityType;
 
   /**
    * The entity query factory object.
@@ -63,41 +74,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected $queryFactory;
 
   /**
-   * The entity info for the selected entity type.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeInterface
-   */
-  protected $entityInfo;
-
-  /**
-   * Whether or not we should continue processing existing items.
-   *
-   * @var bool
-   */
-  protected $skipExisting;
-
-  /**
-   * A cache of the existing entity ids, keyed by item delta.
-   *
-   * @var array
-   */
-  protected $existingEntityIds = array();
-
-  /**
-   * A cache of the existing entities, keyed by entity id.
-   *
-   * @var array
-   */
-  protected $existingEntities;
-
-  /**
    * Flag indicating that this processor is locked.
    *
    * @var bool
    */
   protected $isLocked;
-
-  protected $uniqueQueries = array();
 
   /**
    * Constructs an EntityProcessor object.
@@ -108,38 +89,18 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The plugin id.
    * @param array $plugin_definition
    *   The plugin definition.
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_info
-   *   The entity info.
-   * @param $storage_controller
-   *   The storage controller for this processor.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Drupal\Core\Entity\Query\QueryFactory $query_factory
+   *   The entity query factory.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeInterface $entity_info, EntityStorageInterface $storage_controller, QueryFactory $query_factory) {
-    // $entityInfo has to be assinged before $this->loadHandlers() is called.
-    $this->entityInfo = $entity_info;
-    $this->storageController = $storage_controller;
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityManagerInterface $entity_manager, QueryFactory $query_factory) {
+    $this->entityManager = $entity_manager;
+    $this->entityType = $entity_manager->getDefinition($plugin_definition['entity type']);
+    $this->storageController = $entity_manager->getStorage($plugin_definition['entity type']);
     $this->queryFactory = $query_factory;
-    $this->pluginDefinition = $plugin_definition;
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->skipExisting = $this->configuration['update_existing'] == static::SKIP_EXISTING;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $entity_manager = $container->get('entity.manager');
-    $entity_info = $entity_manager->getDefinition($plugin_definition['entity type']);
-    $storage_controller = $entity_manager->getStorage($plugin_definition['entity type']);
-
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $entity_info,
-      $storage_controller,
-      $container->get('entity.query')
-    );
   }
 
   /**
@@ -147,8 +108,10 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function process(FeedInterface $feed, ItemInterface $item) {
     $existing_entity_id = $this->existingEntityId($feed, $item);
+    $skip_existing = $this->configuration['update_existing'] == static::SKIP_EXISTING;
+
     // Bulk load existing entities to save on db queries.
-    if ($this->skipExisting && $existing_entity_id) {
+    if ($skip_existing && $existing_entity_id) {
       return;
     }
 
@@ -285,7 +248,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The bundle type this processor operates on, or null if it is undefined.
    */
   public function bundleKey() {
-    return $this->entityInfo->getKey('bundle');
+    return $this->entityType->getKey('bundle');
   }
 
   /**
@@ -314,7 +277,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The bundle label.
    */
   protected function bundleLabel() {
-    if ($label = $this->entityInfo->getBundleLabel()) {
+    if ($label = $this->entityType->getBundleLabel()) {
       return $label;
     }
     return $this->t('Bundle');
@@ -327,8 +290,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   A keyed array of bundle => label.
    */
   protected function bundleOptions() {
-    $options = array();
-    foreach (entity_get_bundles($this->entityType()) as $bundle => $info) {
+    $options = [];
+    foreach ($this->entityManager->getBundleInfo($this->entityType()) as $bundle => $info) {
       if (!empty($info['label'])) {
         $options[$bundle] = $info['label'];
       }
@@ -347,7 +310,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    *   The label of the entity.
    */
   protected function entityLabel() {
-    return $this->entityInfo->getLabel();
+    return $this->entityType->getLabel();
   }
 
   /**
@@ -382,11 +345,11 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected function entityValidate(EntityInterface $entity) {
     $violations = $entity->validate();
     if (count($violations)) {
-      $args = array(
+      $args = [
         '@entity' => Unicode::strtolower($this->entityLabel()),
         '%label' => $entity->label(),
-        '@url' => $this->url('feeds.importer_mapping', array('feeds_importer' => $this->importer->id())),
-      );
+        '@url' => $this->url('feeds.importer_mapping', ['feeds_importer' => $this->importer->id()]),
+      ];
       throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
     }
   }
@@ -401,18 +364,18 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
       // could be invalid.
       if (!($account = $entity->uid->entity)) {
         $message = 'User %uid is not a valid user.';
-        throw new EntityAccessException(String::format($message, array('%uid' => $entity->uid->value)));
+        throw new EntityAccessException(String::format($message, ['%uid' => $entity->uid->value]));
       }
 
       $op = $entity->isNew() ? 'create' : 'update';
 
       if (!$entity->access($op, $account)) {
-        $args = array(
+        $args = [
           '%name' => $account->getUsername(),
           '%op' => $op,
           '@bundle' => Unicode::strtolower($this->bundleLabel()),
           '%bundle' => $entity->bundle(),
-        );
+        ];
         throw new EntityAccessException(String::format('User %name is not authorized to %op @bundle %bundle.', $args));
       }
     }
@@ -430,14 +393,14 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    $defaults = array(
+    $defaults = [
       'update_existing' => static::SKIP_EXISTING,
       'skip_hash_check' => FALSE,
       'values' => [$this->bundleKey() => NULL],
       'authorize' => TRUE,
       'expire' => static::EXPIRE_NEVER,
       'owner_id' => 0,
-    );
+    ];
 
     return $defaults;
   }
@@ -446,45 +409,45 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $tokens = array('@entity' => Unicode::strtolower($this->entityLabel()), '@entities' => Unicode::strtolower($this->entityLabelPlural()));
+    $tokens = ['@entity' => Unicode::strtolower($this->entityLabel()), '@entities' => Unicode::strtolower($this->entityLabelPlural())];
 
-    $form['update_existing'] = array(
+    $form['update_existing'] = [
       '#type' => 'radios',
       '#title' => $this->t('Update existing @entities', $tokens),
       '#description' => $this->t('Existing @entities will be determined using mappings that are <strong>unique</strong>.', $tokens),
-      '#options' => array(
+      '#options' => [
         static::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
         static::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
         static::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
-      ),
+      ],
       '#default_value' => $this->configuration['update_existing'],
-    );
-    $times = array(static::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000);
-    $period = array_map(array($this, 'formatExpire'), array_combine($times, $times));
-    $form['expire'] = array(
+    ];
+    $times = [static::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000];
+    $period = array_map([$this, 'formatExpire'], array_combine($times, $times));
+    $form['expire'] = [
       '#type' => 'select',
       '#title' => $this->t('Expire @entities', $tokens),
       '#options' => $period,
       '#description' => $this->t('Select after how much time @entities should be deleted.', $tokens),
       '#default_value' => $this->configuration['expire'],
-    );
-    if ($this->entityInfo->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
+    ];
+    if ($this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
       $owner = user_load($this->configuration['owner_id']);
-      $form['owner_id'] = array(
+      $form['owner_id'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Owner'),
-        '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', array('%anonymous' => \Drupal::config('user.settings')->get('anonymous'))),
+        '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', ['%anonymous' => \Drupal::config('user.settings')->get('anonymous')]),
         '#autocomplete_route_name' => 'user.autocomplete',
         '#default_value' => String::checkPlain($owner->getUsername()),
-      );
+      ];
     }
-    $form['advanced'] = array(
+    $form['advanced'] = [
       '#title' => $this->t('Advanced settings'),
       '#type' => 'details',
       '#collapsed' => TRUE,
       '#collapsible' => TRUE,
       '#weight' => 10,
-    );
+    ];
     $form['advanced']['authorize'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Authorize'),
@@ -614,7 +577,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function getMappingTargets() {
-    return array();
+    return [];
   }
 
   /**
@@ -701,14 +664,14 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
     if ($bundle_key = $this->bundleKey()) {
-      $form['values'][$bundle_key] = array(
+      $form['values'][$bundle_key] = [
         '#type' => 'select',
         '#options' => $this->bundleOptions(),
         '#title' => $this->bundleLabel(),
         '#required' => TRUE,
         '#default_value' => $this->bundle() ?: key($this->bundleOptions()),
         '#disabled' => $this->isLocked(),
-      );
+      ];
     }
 
     return $form;
@@ -758,7 +721,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     if ($timestamp == static::EXPIRE_NEVER) {
       return $this->t('Never');
     }
-    return $this->t('after !time', array('!time' => \Drupal::service('date.formatter')->formatInterval($timestamp)));
+    return $this->t('after !time', ['!time' => \Drupal::service('date.formatter')->formatInterval($timestamp)]);
   }
 
   /**
@@ -780,14 +743,14 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Gather all of the values for this item.
-    $source_values = array();
+    $source_values = [];
     foreach ($mappings as $mapping) {
       $target = $mapping['target'];
 
       foreach ($mapping['map'] as $column => $source) {
 
         if (!isset($source_values[$target][$column])) {
-          $source_values[$target][$column] = array();
+          $source_values[$target][$column] = [];
         }
 
         $value = $item->get($source);
@@ -801,7 +764,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     }
 
     // Rearrange values into Drupal's field structure.
-    $field_values = array();
+    $field_values = [];
     foreach ($source_values as $field => $field_value) {
       $field_values[$field] = [];
       foreach ($field_value as $column => $values) {
@@ -827,7 +790,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * @todo Sort this out so that we aren't calling db_delete() here.
    */
   public function onFeedDeleteMultiple(array $feeds) {
-    $fids = array();
+    $fids = [];
     foreach ($feeds as $feed) {
       $fids[] = $feed->id();
     }

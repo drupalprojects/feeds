@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests\Feeds\Fetcher;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\HttpFetcher;
 use Drupal\feeds\State;
@@ -35,7 +34,6 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     parent::setUp();
 
     $importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $container = new ContainerBuilder();
     $this->client = new Client();
     $this->config = $this->getMock('Drupal\Core\Config\ConfigFactoryInterface');
     $config = $this->getMock('Drupal\Core\Config\Config', [], [], '', FALSE);
@@ -49,11 +47,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
       ->will($this->returnValue($config));
     $this->cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
 
-    $container->set('http_client', $this->client);
-    $container->set('config.factory', $this->config);
-    $container->set('cache.default', $this->cache);
-
-    $this->fetcher = HttpFetcher::create($container, ['importer' => $importer], 'http', []);
+    $this->fetcher = new HttpFetcher(['importer' => $importer], 'http', [], $this->client, $this->config, $this->cache);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
   }
 
@@ -108,7 +102,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     $form = $this->fetcher->buildFeedForm([], $form_state, $feed);
     $this->fetcher->validateFeedForm($form, $form_state, $feed);
 
-    $this->assertSame(count($this->fetcher->sourceDefaults()), 2);
+    $this->assertSame(count($this->fetcher->sourceDefaults()), 1);
   }
 
   public function testOnFeedDeleteMultiple() {

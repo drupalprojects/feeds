@@ -15,7 +15,8 @@ use Drupal\feeds\FieldTargetDefinition;
  *
  * @FeedsTarget(
  *   id = "image",
- *   field_types = {"image"}
+ *   field_types = {"image"},
+ *   arguments = {"@entity.manager", "@entity.query", "@http_client"}
  * )
  */
 class Image extends File {

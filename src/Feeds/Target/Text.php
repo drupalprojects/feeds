@@ -10,11 +10,9 @@ namespace Drupal\feeds\Feeds\Target;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a text field mapper.
@@ -25,10 +23,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     "text",
  *     "text_long",
  *     "text_with_summary"
- *   }
+ *   },
+ *   arguments = {"@current_user"}
  * )
  */
-class Text extends String implements ConfigurableTargetInterface, ContainerFactoryPluginInterface {
+class Text extends String implements ConfigurableTargetInterface {
 
   /**
    * The current user.
@@ -36,6 +35,23 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    * @var \Drupal\Core\Session\AccountInterface
    */
   protected $user;
+
+  /**
+   * Constructs a Text object.
+   *
+   * @param array $configuration
+   *   The plugin configuration.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param array $plugin_definition
+   *   The plugin definition.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The current user.
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, AccountInterface $user) {
+    $this->user = $user;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
 
   /**
    * {@inheritdoc}
@@ -51,39 +67,11 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
   }
 
   /**
-   * Constructs a Text object.
-   *
-   * @param array $settings
-   *   The plugin settings.
-   * @param string $plugin_id
-   *   The plugin id.
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The current user.
-   */
-  public function __construct(array $settings, $plugin_id, array $plugin_definition, AccountInterface $user) {
-    parent::__construct($settings, $plugin_id, $plugin_definition);
-    $this->user = $user;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $settings, $plugin_id, $plugin_definition) {
-    return new static(
-      $settings,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('current_user')
-    );
-  }
-
-  /**
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
     // At todo. Maybe break these up into separate classes.
     parent::prepareValue($delta, $values);
-
     $values['format'] = $this->configuration['format'];
   }
 
@@ -91,23 +79,23 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array('format' => 'plain_text');
+    return ['format' => 'plain_text'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $options = array();
+    $options = [];
     foreach (filter_formats($this->user) as $id => $format) {
       $options[$id] = $format->label();
     }
-    $form['format'] = array(
+    $form['format'] = [
       '#type' => 'select',
       '#title' => $this->t('Filter format'),
       '#options' => $options,
       '#default_value' => $this->configuration['format'],
-    );
+    ];
 
     return $form;
   }
@@ -118,10 +106,11 @@ class Text extends String implements ConfigurableTargetInterface, ContainerFacto
   public function getSummary() {
     $formats = \Drupal::entityManager()
       ->getStorage('filter_format')
-      ->loadByProperties(array('status' => '1', 'format' => $this->configuration['format']));
+      ->loadByProperties(['status' => '1', 'format' => $this->configuration['format']]);
+
     if ($formats) {
       $format = reset($formats);
-      return $this->t('Format: %format', array('%format' => $format->label()));
+      return $this->t('Format: %format', ['%format' => $format->label()]);
     }
   }
 

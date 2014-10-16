@@ -30,10 +30,9 @@ class DateTime extends FieldTargetBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $settings, $plugin_id, array $plugin_definition) {
-    parent::__construct($settings, $plugin_id, $plugin_definition);
-    $datetime_type = $this->settings['datetime_type'];
-    $this->storageFormat = $datetime_type == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->storageFormat = $this->settings['datetime_type'] === 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
   }
 
   /**

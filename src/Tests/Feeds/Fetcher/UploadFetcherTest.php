@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Tests\Feeds\Fetcher;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\UploadFetcher;
 use Drupal\feeds\Tests\FeedsUnitTestCase;
@@ -31,14 +30,15 @@ class UploadFetcherTest extends FeedsUnitTestCase {
       ->with('file')
       ->will($this->returnValue($this->fileStorage));
 
-    $configuration = ['importer' => $this->getMock('Drupal\feeds\ImporterInterface')];
-
-    $container = new ContainerBuilder();
-    $container->set('file.usage', $this->getMock('Drupal\file\FileUsage\FileUsageInterface'));
-    $container->set('entity.manager', $entity_manager);
-    $container->set('uuid', $this->getMock('Drupal\Component\Uuid\UuidInterface'));
-    $container->set('stream_wrapper_manager', $this->getMockStreamWrapperManager());
-    $this->fetcher = UploadFetcher::create($container, $configuration, 'test_plugin', ['plugin_type' => 'fetcher']);
+    $this->fetcher = new UploadFetcher(
+      ['importer' => $this->getMock('Drupal\feeds\ImporterInterface')],
+      'test_plugin',
+      ['plugin_type' => 'fetcher'],
+      $this->getMock('Drupal\file\FileUsage\FileUsageInterface'),
+      $entity_manager,
+      $this->getMock('Drupal\Component\Uuid\UuidInterface'),
+      $this->getMockStreamWrapperManager()
+    );
 
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
   }
@@ -116,13 +116,6 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $form_state->setValue(['directory'], 'vfs://feeds/uploads');
     $this->fetcher->validateConfigurationForm($form, $form_state);
     $this->assertSame(0, count($form_state->clearErrors()));
-
-    // Validate
-    $form_state->setValue(['directory'], 'badscheme://duh');
-    $this->fetcher->validateConfigurationForm($form, $form_state);
-    $this->assertSame($form_state->getError($form['directory']), 'Please enter a valid scheme into the directory location.');
-
-    $form_state->clearErrors();
 
     // // Validate.
     $form_state->setValue(['directory'], 'vfs://noroot');

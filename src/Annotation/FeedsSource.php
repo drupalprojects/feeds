@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds\Annotation;
 
-use Drupal\Component\Annotation\Plugin;
-
 /**
  * Defines a Plugin annotation object for Feeds source plugins.
  *
@@ -23,32 +21,7 @@ use Drupal\Component\Annotation\Plugin;
  *
  * @Annotation
  */
-class FeedsSource extends Plugin {
-
-  /**
-   * The plugin ID.
-   *
-   * @var string
-   */
-  public $id;
-
-  /**
-   * The title of the plugin.
-   *
-   * @var \Drupal\Core\Annotation\Translation
-   *
-   * @ingroup plugin_translatable
-   */
-  public $title;
-
-  /**
-   * The description of the plugin.
-   *
-   * @var \Drupal\Core\Annotation\Translation
-   *
-   * @ingroup plugin_translatable
-   */
-  public $description;
+class FeedsSource extends FeedsBase {
 
   /**
    * The field types a source plugin applies to.

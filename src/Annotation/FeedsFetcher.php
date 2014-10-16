@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds\Annotation;
 
-use Drupal\Component\Annotation\Plugin;
-
 /**
  * Defines a Plugin annotation object for Feeds fetcher plugins.
  *
@@ -23,40 +21,6 @@ use Drupal\Component\Annotation\Plugin;
  *
  * @Annotation
  */
-class FeedsFetcher extends Plugin {
-
-  /**
-   * The plugin ID.
-   *
-   * @var string
-   */
-  public $id;
-
-  /**
-   * The title of the plugin.
-   *
-   * @var \Drupal\Core\Annotation\Translation
-   *
-   * @ingroup plugin_translatable
-   */
-  public $title;
-
-  /**
-   * The description of the plugin.
-   *
-   * @var \Drupal\Core\Annotation\Translation
-   *
-   * @ingroup plugin_translatable
-   */
-  public $description;
-
-  /**
-   * An optional form class that is separate from the plugin.
-   *
-   * It must implement \Drupal\feeds\Plugin\Type\ExternalPluginFormInterface.
-   *
-   * @var string
-   */
-  public $configuration_form;
+class FeedsFetcher extends FeedsBase {
 
 }
