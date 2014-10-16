@@ -7,29 +7,20 @@
 
 namespace Drupal\feeds\Feeds\Fetcher;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Queue\QueueInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
-use Drupal\feeds\Exception\NotModifiedException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Guzzle\CachePlugin;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
-use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
-use Drupal\feeds\PuSH\SubscriptionInterface;
-use Drupal\feeds\RawFetcherResult;
+use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\HttpFetcherResult;
 use Drupal\feeds\StateInterface;
-use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Stream\Stream;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -38,10 +29,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FeedsFetcher(
  *   id = "http",
  *   title = @Translation("Download"),
- *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler.")
+ *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler."),
+ *   configuration_form = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm"
  * )
  */
-class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, ClearableInterface, FeedPluginFormInterface, ContainerFactoryPluginInterface {
+class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInterface, ContainerFactoryPluginInterface {
 
   /**
    * The Guzzle client.
@@ -196,50 +188,9 @@ class HttpFetcher extends ConfigurablePluginBase implements FetcherInterface, Cl
     return array(
       'auto_detect_feeds' => TRUE,
       'use_pubsubhubbub' => FALSE,
-      'designated_hub' => '',
+      'fallback_hub' => '',
       'request_timeout' => 30,
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['auto_detect_feeds'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Auto detect feeds'),
-      '#description' => $this->t('If the supplied URL does not point to a feed but an HTML document, attempt to extract a feed URL from the document.'),
-      '#default_value' => $this->configuration['auto_detect_feeds'],
-    );
-    $form['use_pubsubhubbub'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use PubSubHubbub'),
-      '#description' => $this->t('Attempt to use a <a href="http://en.wikipedia.org/wiki/PubSubHubbub">PubSubHubbub</a> subscription if available.'),
-      '#default_value' => $this->configuration['use_pubsubhubbub'],
-    );
-    $form['designated_hub'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Designated hub'),
-      '#description' => $this->t('Enter the URL of a designated PubSubHubbub hub (e. g. superfeedr.com). If given, this hub will be used instead of the hub specified in the actual feed.'),
-      '#default_value' => $this->configuration['designated_hub'],
-      '#states' => [
-        'visible' => [
-          'input[name="fetcher_configuration[use_pubsubhubbub]"]' => [
-            'checked' => TRUE,
-          ],
-        ],
-      ],
-    ];
-    // Per importer override of global http request timeout setting.
-    $form['request_timeout'] = array(
-      '#type' => 'number',
-      '#title' => $this->t('Request timeout'),
-      '#description' => $this->t('Timeout in seconds to wait for an HTTP request to finish.'),
-      '#default_value' => $this->configuration['request_timeout'],
-      '#min' => 0,
-    );
-
-    return $form;
   }
 
   /**

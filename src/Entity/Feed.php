@@ -256,7 +256,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->getImporter()->getProcessor()->finishImport($this);
 
     foreach ($this->states as $state) {
-      $state->displayMessages();
+      is_object($state) ? $state->displayMessages() : NULL;
     }
 
     $this->clearStates();
@@ -577,6 +577,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ))
       ->setDisplayOptions('view', array(
         'label' => 'inline',
+        'type' => 'feeds_uri_link',
         'weight' => -3,
       ))
       ->setDisplayConfigurable('view', TRUE)

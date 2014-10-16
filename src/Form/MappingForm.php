@@ -278,7 +278,9 @@ class MappingForm extends FormBase {
     $mappings = $this->importer->getMappings();
     foreach ($form_state->getValue('mappings') as $delta => $mapping) {
       $mappings[$delta]['map'] = $mapping['map'];
-      $mappings[$delta]['unique'] = array_filter($mapping['unique']);
+      if (isset($mapping['unique'])) {
+        $mappings[$delta]['unique'] = array_filter($mapping['unique']);
+      }
     }
     $this->importer->setMappings($mappings);
     // $this->importer->setMappings($form_state->getValue('mappings'));

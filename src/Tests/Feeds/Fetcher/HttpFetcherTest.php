@@ -101,12 +101,6 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'));
   }
 
-  public function testConfigurationForm() {
-    $form_state = new FormState();
-    $form = $this->fetcher->buildConfigurationForm([], $form_state);
-    $this->assertSame(count($form), 4);
-  }
-
   public function testFeedForm() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
 

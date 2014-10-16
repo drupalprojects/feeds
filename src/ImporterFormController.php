@@ -197,15 +197,21 @@ class ImporterFormController extends EntityForm {
       $form[$type . '_wrapper']['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
       $form[$type . '_wrapper']['advanced']['#suffix'] = '</div>';
 
+      $form_builder = FALSE;
       if ($plugin instanceof PluginFormInterface) {
-        if ($plugin_form = $plugin->buildConfigurationForm([], $plugin_values)) {
-          $form[$type . '_configuration'] = array(
-            '#type' => 'details',
-            '#group' => 'plugin_settings',
-            '#title' => $this->t('@type settings', array('@type' => ucfirst($type))),
-          );
-          $form[$type . '_configuration'] += $plugin_form;
-        }
+        $form_builder = $plugin;
+      }
+      elseif ($config_form = $plugin->getConfigurationForm()) {
+        $form_builder = $config_form;
+      }
+      if ($form_builder) {
+        $plugin_form = $form_builder->buildConfigurationForm([], $plugin_values);
+        $form[$type . '_configuration'] = array(
+          '#type' => 'details',
+          '#group' => 'plugin_settings',
+          '#title' => $this->t('@type settings', array('@type' => ucfirst($type))),
+        );
+        $form[$type . '_configuration'] += $plugin_form;
       }
     }
 
@@ -227,6 +233,9 @@ class ImporterFormController extends EntityForm {
     foreach ($this->entity->getPlugins() as $type => $plugin) {
       if ($plugin instanceof PluginFormInterface || $plugin instanceof AdvancedFormPluginInterface) {
         $plugins[$type] = $plugin;
+      }
+      elseif ($form = $plugin->getConfigurationForm()) {
+        $plugins[$type] = $form;
       }
     }
 
@@ -264,13 +273,13 @@ class ImporterFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
-
     foreach ($this->getConfigurablePlugins() as $type => $plugin) {
       $plugin_values = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
       $plugin->submitConfigurationForm($form[$type . '_configuration'], $plugin_values);
       $form_state->setValue([$type . '_configuration'], $plugin_values->getValues());
     }
+
+    parent::submitForm($form, $form_state);
   }
 
   /**

@@ -18,12 +18,19 @@ use Drupal\Core\Render\Element\Url;
 class Uri extends Url {
 
   /**
-   * Form element validation handler for #type 'url'.
-   *
-   * Note that #maxlength and #required is validated by _form_validate() already.
+   * {@inheritdoc}
+   */
+  public function getInfo() {
+    $info = parent::getInfo();
+    $info['#allowed_schemes'] = [];
+    return $info;
+  }
+
+  /**
+   * Form element validation handler for #type 'feeds_uri'.
    */
   public static function validateUrl(&$element, FormStateInterface $form_state, &$complete_form) {
-    $value = trim($element['#value']);
+    $value = file_stream_wrapper_uri_normalize(trim($element['#value']));
     $form_state->setValueForElement($element, $value);
 
     if (!$value) {
@@ -35,6 +42,15 @@ class Uri extends Url {
 
     if (!$valid) {
       $form_state->setError($element, t('The URI %url is not valid.', array('%url' => $value)));
+      return;
+    }
+
+    if ($element['#allowed_schemes'] && !in_array(file_uri_scheme($value), $element['#allowed_schemes'], TRUE)) {
+      $args = [
+        '%scheme' => file_uri_scheme($value),
+        '@schemes' => implode(', ', $element['#allowed_schemes']),
+      ];
+      $form_state->setError($element, t("The scheme %scheme is invalid. Available schemes: @schemes.", $args));
     }
   }
 

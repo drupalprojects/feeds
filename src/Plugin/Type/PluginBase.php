@@ -94,6 +94,17 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
     return [];
   }
 
+  public function getConfigurationForm() {
+    $definition = $this->getPluginDefinition();
+
+    if (empty($definition['configuration_form'])) {
+      return;
+    }
+
+    $class = $definition['configuration_form'];
+    return $class::create(\Drupal::getContainer(), $this);
+  }
+
   /**
    * {@inheritdoc}
    */

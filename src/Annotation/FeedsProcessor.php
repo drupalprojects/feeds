@@ -50,4 +50,13 @@ class FeedsProcessor extends Plugin {
    */
   public $description;
 
+  /**
+   * An optional form class that is separate from the plugin.
+   *
+   * It must implement \Drupal\feeds\Plugin\Type\ExternalPluginFormInterface.
+   *
+   * @var string
+   */
+  public $configuration_form;
+
 }

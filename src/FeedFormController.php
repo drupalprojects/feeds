@@ -119,6 +119,9 @@ class FeedFormController extends ContentEntityForm {
    * @todo Don't call buildEntity() here.
    */
   public function validate(array $form, FormStateInterface $form_state) {
+    if ($form_state->getErrors()) {
+      return;
+    }
     $feed = $this->buildEntity($form, $form_state);
 
     foreach ($this->configurablePlugins as $plugin) {

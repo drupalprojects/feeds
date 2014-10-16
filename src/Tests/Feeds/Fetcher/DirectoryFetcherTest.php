@@ -20,6 +20,8 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class DirectoryFetcherTest extends FeedsUnitTestCase {
 
   protected $fetcher;
+  protected $state;
+  protected $feed;
 
   public function setUp() {
     parent::setUp();
@@ -27,84 +29,95 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $importer = $this->getMock('Drupal\feeds\ImporterInterface');
     $container = new ContainerBuilder();
     $container->set('stream_wrapper_manager', $this->getMockStreamWrapperManager());
-    $this->fetcher = DirectoryFetcher::create($container, ['importer' => $importer], 'directory', []);
+    $this->fetcher = new DirectoryFetcher(['importer' => $importer], 'directory', []);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
+
+    $this->state = new State();
+
+    $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
+    $this->feed->expects($this->any())
+      ->method('getSource')
+      ->will($this->returnValue('vfs://feeds'));
+    $this->feed->expects($this->any())
+      ->method('getState')
+      ->will($this->returnValue($this->state));
+
+    // Prepare filesystem.
+    touch('vfs://feeds/test_file_1.txt');
+    touch('vfs://feeds/test_file_2.txt');
+    touch('vfs://feeds/test_file_3.txt');
+    touch('vfs://feeds/test_file_3.mp3');
+    chmod('vfs://feeds/test_file_3.txt', 0333);
+    mkdir('vfs://feeds/subdir');
+    touch('vfs://feeds/subdir/test_file_4.txt');
+    touch('vfs://feeds/subdir/test_file_4.mp3');
   }
 
   public function testFetchFile() {
-    touch('vfs://feeds/test_file');
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
       ->method('getSource')
-      ->will($this->returnValue('vfs://feeds/test_file'));
+      ->will($this->returnValue('vfs://feeds/test_file_1.txt'));
     $result = $this->fetcher->fetch($feed);
-    $this->assertSame('vfs://feeds/test_file', $result->getFilePath());
+    $this->assertSame('vfs://feeds/test_file_1.txt', $result->getFilePath());
   }
 
   /**
    * @expectedException \RuntimeException
    */
   public function testFetchDir() {
-    touch('vfs://feeds/test_file_1');
-    touch('vfs://feeds/test_file_2');
+    $result = $this->fetcher->fetch($this->feed);
+    $this->assertSame($this->state->total, 2);
+    $this->assertSame('vfs://feeds/test_file_1.txt', $result->getFilePath());
+    $this->assertSame('vfs://feeds/test_file_2.txt', $this->fetcher->fetch($this->feed)->getFilePath());
 
-    $state = new State();
+    chmod('vfs://feeds', 0333);
+    $result = $this->fetcher->fetch($this->feed);
+  }
+
+  public function testRecursiveFetchDir() {
+    $this->fetcher->setConfiguration(['recursive_scan' => TRUE]);
+
+    $result = $this->fetcher->fetch($this->feed);
+    $this->assertSame($this->state->total, 3);
+    $this->assertSame('vfs://feeds/test_file_1.txt', $result->getFilePath());
+    $this->assertSame('vfs://feeds/test_file_2.txt', $this->fetcher->fetch($this->feed)->getFilePath());
+    $this->assertSame('vfs://feeds/subdir/test_file_4.txt', $this->fetcher->fetch($this->feed)->getFilePath());
+  }
+
+  /**
+   * @expectedException \Drupal\feeds\Exception\EmptyFeedException
+   */
+  public function testEmptyDirectory() {
+    mkdir('vfs://feeds/emptydir');
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
       ->method('getSource')
-      ->will($this->returnValue('vfs://feeds'));
+      ->will($this->returnValue('vfs://feeds/emptydir'));
     $feed->expects($this->any())
       ->method('getState')
-      ->will($this->returnValue($state));
-
+      ->will($this->returnValue($this->state));
     $result = $this->fetcher->fetch($feed);
-    $this->assertSame($state->total, 2);
-    $this->assertSame('vfs://feeds/test_file_1', $result->getFilePath());
-
-    // Fetch again.
-    $result = $this->fetcher->fetch($feed);
-    $this->assertSame('vfs://feeds/test_file_2', $result->getFilePath());
-
-    // Throws an exception.
-    $this->fetcher->fetch($feed);
-  }
-
-  public function testConfigurationForm() {
-    $form_state = (new FormState())->setValues([
-      'allowed_schemes' => ['public'],
-      'allowed_extensions' => ' txt  pdf',
-    ]);
-
-    $form = $this->fetcher->buildConfigurationForm([], $form_state);
-    $this->fetcher->validateConfigurationForm($form, $form_state);
-
-    $this->assertSame(['txt', 'pdf'], $form_state->getValue(['allowed_extensions']));
   }
 
   public function testFeedForm() {
-    $feed = $this->getMock('Drupal\feeds\FeedInterface');
-    $feed->expects($this->any())
+    $this->fetcher->setConfiguration(['allowed_schemes' => ['vfs']]);
+    $this->feed->expects($this->any())
       ->method('getConfigurationFor')
       ->with($this->fetcher)
       ->will($this->returnValue($this->fetcher->sourceDefaults()));
 
     $form_state = new FormState();
-    $form = $this->fetcher->buildFeedForm([], $form_state, $feed);
+    $form = $this->fetcher->buildFeedForm([], $form_state, $this->feed);
     $form['source']['#parents'] = ['source'];
 
     // Valid.
     $form_state->setValue(['source', 0, 'value'], 'vfs://feeds');
-    $this->fetcher->validateFeedForm($form, $form_state, $feed);
-
-    // Invalid.
-    $form_state->setValue(['source', 0, 'value'], 'badscheme://feeds');
-    $this->fetcher->validateFeedForm($form, $form_state, $feed);
-    $this->assertSame(count($form_state->getErrors()), 1);
-    $form_state->clearErrors();
+    $this->fetcher->validateFeedForm($form, $form_state, $this->feed);
 
     // Does not exist.
     $form_state->setValue(['source', 0, 'value'], 'vfs://doesnotexist');
-    $this->fetcher->validateFeedForm($form, $form_state, $feed);
+    $this->fetcher->validateFeedForm($form, $form_state, $this->feed);
     $this->assertSame(count($form_state->getErrors()), 1);
   }
 

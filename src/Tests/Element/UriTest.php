@@ -24,18 +24,29 @@ class UriTest extends FeedsUnitTestCase {
     $complete_form = [];
     $form_state = new FormState();
 
+    $element_object = new Uri([], '', []);
+
     $element = ['#value' => ' public://test', '#parents' => ['element']];
+    $element += $element_object->getInfo();
     Uri::validateUrl($element, $form_state, $complete_form);
     $this->assertSame($form_state->getValue('element'), 'public://test');
 
     $element = ['#value' => '', '#parents' => ['element']];
+    $element += $element_object->getInfo();
     Uri::validateUrl($element, $form_state, $complete_form);
     $this->assertSame($form_state->getValue('element'), '');
 
     $element = ['#value' => '@@', '#parents' => ['element']];
+    $element += $element_object->getInfo();
     Uri::validateUrl($element, $form_state, $complete_form);
     $this->assertSame($form_state->getValue('element'), '@@');
     $this->assertSame($form_state->getError($element), 'The URI <em class="placeholder">@@</em> is not valid.');
+    $form_state->clearErrors();
+
+    $element = ['#value' => 'badscheme://foo', '#parents' => ['element'], '#allowed_schemes' => ['public']];
+    $element += $element_object->getInfo();
+    Uri::validateUrl($element, $form_state, $complete_form);
+    $this->assertSame($form_state->getError($element), 'The scheme <em class="placeholder">badscheme</em> is invalid. Available schemes: public.');
   }
 
 }
