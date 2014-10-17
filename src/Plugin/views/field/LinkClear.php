@@ -28,11 +28,10 @@ class LinkClear extends Link {
     }
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = 'feed/' . $feed->id() . '/clear';
+    $this->options['alter']['path'] = $feed->getSystemPath('clear-form');
     $this->options['alter']['query'] = drupal_get_destination();
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('delete items');
-    return $text;
+    return !empty($this->options['text']) ? $this->options['text'] : t('Delete items');
   }
 
 }

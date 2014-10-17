@@ -20,23 +20,30 @@ use Drupal\views\ResultRow;
  */
 class Link extends FieldPluginBase {
 
+  /**
+   * {@inheritdoc}
+   */
+  public function usesGroupBy() {
+    return FALSE;
+  }
+
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
+    $options['text'] = ['default' => ''];
     return $options;
   }
 
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
-      '#title' => t('Text to display'),
+      '#title' => $this->t('Text to display'),
       '#default_value' => $this->options['text'],
-    );
+    ];
     parent::buildOptionsForm($form, $form_state);
 
     // The path is set by renderLink function so don't allow to set it.
-    $form['alter']['path'] = array('#access' => FALSE);
-    $form['alter']['external'] = array('#access' => FALSE);
+    $form['alter']['path'] = ['#access' => FALSE];
+    $form['alter']['external'] = ['#access' => FALSE];
   }
 
   /**
@@ -55,12 +62,14 @@ class Link extends FieldPluginBase {
     }
   }
 
+  /**
+   * Prepares the link to the feed.
+   */
   protected function renderLink($feed, ResultRow $values) {
     if ($feed->access('view')) {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = 'feed/' . $feed->id();
-      $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
-      return $text;
+      $this->options['alter']['path'] = $feed->getSystemPath('canonical');
+      return !empty($this->options['text']) ? $this->options['text'] : $this->t('View');
     }
   }
 

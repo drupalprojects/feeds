@@ -64,7 +64,7 @@ class ItemListController extends ControllerBase {
 
       // Entity link.
       $row[] = [
-        'data' => $entity->link(Unicode::truncate($entity->label(), 50, TRUE, TRUE)),
+        'data' => $entity->link(Unicode::truncate($entity->label(), 75, TRUE, TRUE)),
         'title' => $entity->label(),
       ];
       // Imported ago.

@@ -32,16 +32,13 @@ class Feed extends FieldPluginBase {
 
     // Don't add the additional fields to groupby
     if (!empty($this->options['link_to_feed'])) {
-      $this->additional_fields['fid'] = array('table' => 'feeds_feed', 'field' => 'fid');
-      if (\Drupal::moduleHandler()->moduleExists('translation')) {
-        $this->additional_fields['langcode'] = array('table' => 'feeds_feed', 'field' => 'langcode');
-      }
+      $this->additional_fields['fid'] = ['table' => 'feeds_feed', 'field' => 'fid'];
     }
   }
 
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['link_to_feed'] = array('default' => isset($this->definition['link_to_feed default']) ? $this->definition['link_to_feed default'] : FALSE, 'bool' => TRUE);
+    $options['link_to_feed'] = ['default' => isset($this->definition['link_to_feed default']) ? $this->definition['link_to_feed default'] : FALSE];
     return $options;
   }
 
@@ -49,12 +46,12 @@ class Feed extends FieldPluginBase {
    * Provides link to feed option.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    $form['link_to_feed'] = array(
+    $form['link_to_feed'] = [
       '#title' => t('Link this field to the feed'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_feed']),
-    );
+    ];
 
     parent::buildOptionsForm($form, $form_state);
   }

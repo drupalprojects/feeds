@@ -71,7 +71,7 @@ class CsvParser implements \Iterator {
    */
   public function __construct($handle) {
     if (!is_resource($handle)) {
-      throw new \RuntimeException('handle must be a resource.');
+      throw new \InvalidArgumentException('handle must be a resource.');
     }
     $this->handle = $handle;
   }
@@ -297,24 +297,21 @@ class CsvParser implements \Iterator {
         $field .= '"';
         // Skip the next quote.
         $index++;
-        continue;
       }
 
       // Beginning or ending a quoted field.
-      if ($byte === '"' && $next_byte !== '"') {
+      elseif ($byte === '"' && $next_byte !== '"') {
         $in_quotes = !$in_quotes;
-        continue;
       }
 
       // Ending a field.
-      if (!$in_quotes && $byte === $this->delimiter) {
+      elseif (!$in_quotes && $byte === $this->delimiter) {
         $fields[] = $field;
         $field = '';
-        continue;
       }
 
       // End of this line.
-      if (!$in_quotes && $next_byte === '') {
+      elseif (!$in_quotes && $next_byte === '') {
         // Don't save the last newline, but don't use trim to remove all
         // newlines.
         if ($byte === "\n") {
@@ -331,10 +328,10 @@ class CsvParser implements \Iterator {
 
         $fields[] = $field;
         $field = '';
-        continue;
       }
-
-      $field .= $byte;
+      else {
+        $field .= $byte;
+      }
     }
 
     // If we're still in quotes after the line is read continue reading on the

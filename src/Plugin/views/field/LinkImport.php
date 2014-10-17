@@ -28,11 +28,10 @@ class LinkImport extends Link {
     }
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = 'feed/' . $feed->id() . '/import';
+    $this->options['alter']['path'] = $feed->getSystemPath('import-form');
     $this->options['alter']['query'] = drupal_get_destination();
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('import');
-    return $text;
+    return !empty($this->options['text']) ? $this->options['text'] : t('Import');
   }
 
 }

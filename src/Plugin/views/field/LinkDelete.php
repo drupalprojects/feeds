@@ -28,11 +28,10 @@ class LinkDelete extends Link {
     }
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = 'feed/' . $feed->id() . '/delete';
+    $this->options['alter']['path'] = $feed->getSystemPath('delete-from');
     $this->options['alter']['query'] = drupal_get_destination();
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('delete');
-    return $text;
+    return !empty($this->options['text']) ? $this->options['text'] : t('Delete');
   }
 
 }
