@@ -28,8 +28,6 @@ function feeds_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_cron().
  */
 function feeds_cron() {
-  $queue = \Drupal::queue('feeds_feed_import');
-
   $ids = \Drupal::entityQuery('feeds_feed')
     ->condition('queued', 0)
     ->condition('next', REQUEST_TIME, '<=')
@@ -42,6 +40,8 @@ function feeds_cron() {
     if ($feed->isLocked()) {
       continue;
     }
+    $queue = \Drupal::queue('feeds_feed_import:' . $feed->bundle());
+
     if ($queue->createItem($feed)) {
       // Add timestamp to avoid queueing item more than once.
       $feed->setQueuedTime(REQUEST_TIME);

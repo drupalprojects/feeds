@@ -18,7 +18,8 @@ use Drupal\feeds\StateInterface;
  * @QueueWorker(
  *   id = "feeds_feed_import",
  *   title = @Translation("Feed refresh"),
- *   cron = {"time" = 60}
+ *   cron = {"time" = 60},
+ *   deriver = "Drupal\feeds\Plugin\Derivative\FeedQueueWorker"
  * )
  */
 class FeedRefresh extends FeedQueueWorkerBase {
@@ -50,7 +51,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
     }
 
     $feed->saveStates();
-    $this->queueFactory->get('feeds_feed_parse')->createItem([$feed, $fetch_event->getFetcherResult()]);
+    $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem([$feed, $fetch_event->getFetcherResult()]);
   }
 
 }

@@ -17,7 +17,8 @@ use Drupal\feeds\StateInterface;
  * @QueueWorker(
  *   id = "feeds_feed_parse",
  *   title = @Translation("Feed parse"),
- *   cron = {"time" = 60}
+ *   cron = {"time" = 60},
+ *   deriver = "Drupal\feeds\Plugin\Derivative\FeedQueueWorker"
  * )
  */
 class FeedParse extends FeedQueueWorkerBase {
@@ -27,7 +28,6 @@ class FeedParse extends FeedQueueWorkerBase {
    */
   public function processItem($data) {
     list($feed, $fetcher_result) = $data;
-
     try {
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'parse'));
       $parse_event = $this->dispatchEvent(FeedsEvents::PARSE, new ParseEvent($feed, $fetcher_result));
@@ -38,7 +38,7 @@ class FeedParse extends FeedQueueWorkerBase {
     }
 
     $feed->saveStates();
-    $queue = $this->queueFactory->get('feeds_feed_process');
+    $queue = $this->queueFactory->get('feeds_feed_process:' . $feed->bundle());
 
     foreach ($parse_event->getParserResult() as $item) {
       $queue->createItem([$feed, $item]);

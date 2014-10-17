@@ -458,12 +458,35 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
   /**
    * {@inheritdoc}
    */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    // Clear the queue worker plugin cache so that our derivaties will be found.
+    if (!$update) {
+      \Drupal::service('plugin.manager.queue_worker')->clearCachedDefinitions();
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    $prefixes = ['feeds_feed_import', 'feeds_feed_parse', 'feeds_feed_process'];
+
     foreach ($entities as $entity) {
       foreach ($entity->getPlugins() as $plugin) {
         $plugin->onImporterDelete();
       }
+
+      // Delete any existing queues related to this importer.
+      foreach ($prefixes as $prefix) {
+        if ($queue = \Drupal::queue($prefix . ':' . $entity->id())) {
+          $queue->deleteQueue();
+        }
+      }
     }
+
+    // Clear the queue worker plugin cache to remove this derivative.
+    \Drupal::service('plugin.manager.queue_worker')->clearCachedDefinitions();
   }
 
   /**

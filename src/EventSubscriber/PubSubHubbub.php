@@ -72,21 +72,35 @@ class PubSubHubbub implements EventSubscriberInterface {
       return;
     }
 
+    if (!$hub = $this->findHub($event->getFetcherResult())) {
+      $hub = $fetcher->getConfiguration('fallback_hub');
+    }
+
+    if (!$hub) {
+      if ($subscription) {
+        // The hub is gone and there's no fallback.
+        $subscription->delete();
+      }
+      return;
+    }
+
     // Subscription does not exist yet.
     if (!$subscription) {
       $this->storage->create([
         'fid' => $feed->id(),
         'topic' => $feed->getSource(),
-        'hub' => $this->findHub($event->getFetcherResult()),
+        'hub' => $hub,
+        'state' => 'subscribing',
       ])->save();
     }
-    elseif ($feed->getSource() !== $subscription->getTopic()) {
+    elseif ($feed->getSource() !== $subscription->getTopic() || $subscription->getHub() !== $hub) {
       $subscription->delete();
 
       $this->storage->create([
         'fid' => $feed->id(),
         'topic' => $feed->getSource(),
-        'hub' => $this->findHub($event->getFetcherResult()),
+        'hub' => $hub,
+        'state' => 'subscribing',
       ])->save();
     }
   }
@@ -99,8 +113,6 @@ class PubSubHubbub implements EventSubscriberInterface {
    *
    * @return string|null
    *   The hub URL or null if one wasn't found.
-   *
-   * @todo Log/retry when downloading fails.
    */
   protected function findHub(FetcherResultInterface $fetcher_result) {
     if ($fetcher_result instanceof HttpFetcherResultInterface) {

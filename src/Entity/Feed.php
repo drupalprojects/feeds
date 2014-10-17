@@ -66,7 +66,8 @@ use Drupal\user\UserInterface;
  *     "delete-form" = "feeds.delete",
  *     "edit-form" = "feeds.edit",
  *     "admin-form" = "feeds.importer_edit",
- *     "import-form" = "feeds.import"
+ *     "import-form" = "feeds.import",
+ *     "clear-form" = "feeds.clear"
  *   }
  * )
  */

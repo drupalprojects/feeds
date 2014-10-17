@@ -26,66 +26,92 @@ use Drupal\feeds\SubscriptionInterface;
  *   },
  *   base_table = "feeds_subscription",
  *   entity_keys = {
- *     "id" = "fid",
- *     "label" = "label"
+ *     "id" = "fid"
  *   },
  * )
  */
 class Subscription extends ContentEntityBase implements SubscriptionInterface {
 
-  protected $topicChanged = FALSE;
-
-  // public function getFeedId() {
-  //   return $this->get('fid')->value;
-  // }
-
+  /**
+   * {@inheritdoc}
+   */
   public function getSecret() {
     return $this->get('secret')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getTopic() {
     return $this->get('topic')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setTopic($topic) {
-    $topic = trim($topic);
-    $this->topicChanged = $topic !== $this->getTopic();
-
-    $this->set('topic', $topic);
+    $this->set('topic', trim($topic));
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getHub() {
     return $this->get('hub')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setHub($hub) {
-    $this->set('hub', $hub);
+    $this->set('hub', trim($hub));
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getState() {
     return $this->get('state')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setState($state) {
     $this->set('state', $state);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getLease() {
     return (int) $this->get('lease')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setLease($lease) {
     $this->set('lease', (int) $lease);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getExpire() {
     return (int) $this->get('expires')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function setExpire($expiration_time) {
     $this->set('expires', (int) $expiration_time);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function checkSignature($sha1, $data) {
     return $sha1 === hash_hmac('sha1', $data, $this->getSecret());
   }
@@ -114,7 +140,7 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
         break;
 
       default:
-        $this->queue('feeds_push_subscribe')->createItem($this->getFeedId());
+        \Drupal::queue('feeds_push_subscribe')->createItem($this->getFeedId());
         break;
     }
   }
@@ -126,7 +152,6 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
     $queue = \Drupal::queue('feeds_push_unsubscribe');
 
     foreach ($subscriptions as $subscription) {
-
       switch ($subscription->getState()) {
         case 'subscribing':
         case 'subscribed':
@@ -136,28 +161,17 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
     }
   }
 
-  protected function queue($name, $reliable = FALSE) {
-    return \Drupal::queue($name, $reliable);
-  }
-
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = array();
+    $fields = [];
 
     $fields['fid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Feed ID'))
       ->setDescription(t('The feed ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
-
-    $fields['label'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Label'))
-      ->setDescription(t('The label of the subscription.'))
-      ->setRequired(TRUE)
-      ->setDefaultValue('')
-      ->setSetting('max_length', 255);
 
     $fields['topic'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Topic'))
@@ -169,15 +183,6 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       ->setLabel(t('Hub'))
       ->setDescription(t('The fully-qualified URL of the PuSH hub.'))
       ->setDefaultValue('');
-
-    $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Created'))
-      ->setDescription(t('The time that the subscription was created.'));
-
-    $fields['imported'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Last import'))
-      ->setDescription(t('The time that the feed was imported.'))
-      ->setDefaultValue(0);
 
     $fields['lease'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Lease time'))

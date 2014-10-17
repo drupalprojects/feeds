@@ -18,7 +18,8 @@ use Drupal\feeds\StateInterface;
  * @QueueWorker(
  *   id = "feeds_feed_process",
  *   title = @Translation("Feed process"),
- *   cron = {"time" = 60}
+ *   cron = {"time" = 60},
+ *   deriver = "Drupal\feeds\Plugin\Derivative\FeedQueueWorker"
  * )
  */
 class FeedProcess extends FeedQueueWorkerBase {
@@ -28,7 +29,6 @@ class FeedProcess extends FeedQueueWorkerBase {
    */
   public function processItem($data) {
     list($feed, $item) = $data;
-
     if ($item instanceof FetcherResultInterface) {
       $this->finish($feed, $item);
       return;
@@ -50,10 +50,10 @@ class FeedProcess extends FeedQueueWorkerBase {
    */
   protected function finish(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     if ($feed->progressParsing() !== StateInterface::BATCH_COMPLETE) {
-      $this->queueFactory->get('feeds_feed_import')->createItem($feed);
+      $this->queueFactory->get('feeds_feed_import:' . $feed->bundle())->createItem($feed);
     }
     elseif ($feed->progressFetching() !== StateInterface::BATCH_COMPLETE) {
-      $this->queueFactory->get('feeds_feed_parse')->createItem($feed, $fetcher_result);
+      $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem($feed, $fetcher_result);
     }
     else {
       $feed->cleanUp();

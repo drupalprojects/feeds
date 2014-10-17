@@ -32,7 +32,6 @@ class SubscriptionController {
    *   Thrown if the subscription was not found.
    */
   public function subscribe(SubscriptionInterface $feeds_subscription, Request $request) {
-
     // Verify the request has the proper attributes.
     if ($request->query->get('hub.challenge') === NULL) {
       throw new NotFoundHttpException();
@@ -49,8 +48,13 @@ class SubscriptionController {
       $feeds_subscription->setExpire($lease_time + REQUEST_TIME);
     }
 
-    $feeds_subscription->setState($request->query->get('hub.mode') . 'd');
-    $feeds_subscription->save();
+    if ($request->query->get('hub.mode') === 'unsubscribe') {
+      // Subscription is already deleted.
+    }
+    elseif ($request->query->get('hub.mode') === 'subscribe') {
+      $feeds_subscription->setState('subscribed');
+      $feeds_subscription->save();
+    }
 
     return new Response($request->query->get('hub.challenge'), 200);
   }

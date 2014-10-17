@@ -22,7 +22,7 @@ class ImporterStorageController extends ConfigEntityStorage {
    */
   public function loadEnabled() {
     // Status has to be a string.
-    return $this->loadByProperties(array('status' => TRUE));
+    return $this->loadByProperties(['status' => TRUE]);
   }
 
 }

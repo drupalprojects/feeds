@@ -27,9 +27,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInterface {
   use UrlGeneratorTrait;
 
+  /**
+   * The Guzzle client.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
   protected $client;
 
   /**
+   * The logger factory.
+   *
    * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
   protected $loggerFactory;
@@ -41,13 +48,17 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
    *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
+   * @param array $plugin_definition
    *   The plugin implementation definition.
+   * @param \GuzzleHttp\ClientInterface $client
+   *   The Guzzle client.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   The logger factory.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, LoggerChannelFactoryInterface $logger_factory) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->client = $client;
     $this->loggerFactory = $logger_factory;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
@@ -69,10 +80,6 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
   public function processItem($subscription) {
     if (!$subscription instanceof SubscriptionInterface) {
       return;
-    }
-
-    if (!$subscription->getHub() && $hub = $this->findHub($subscription)) {
-      $subscription->setHub($hub);
     }
 
     if (!$subscription->getHub()) {
@@ -104,32 +111,6 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
     if ($response->getStatusCode() != 202) {
       $subscription->delete();
     }
-  }
-
-  /**
-   * Finds a hub from a subscription.
-   *
-   * @param SubscriptionInterface $subscription
-   *   The subscription.
-   *
-   * @return string|null
-   *   The hub URL or null if one wasn't found.
-   *
-   * @todo Log/retry when downloading fails.
-   */
-  protected function findHub(SubscriptionInterface $subscription) {
-    try {
-      $response = $this->client->get($subscription->getTopic());
-    }
-    catch (RequestException $e) {
-      return NULL;
-    }
-
-    if ($hub = HttpHelpers::findLinkHeader($response->getHeaders(), 'hub')) {
-      return $hub;
-    }
-
-    return HttpHelpers::findHubFromXml((string) $response->getBody());
   }
 
 }

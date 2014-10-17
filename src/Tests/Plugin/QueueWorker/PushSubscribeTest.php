@@ -50,28 +50,21 @@ class PushSubscribeTest extends FeedsUnitTestCase {
     $this->plugin->processItem(NULL);
 
     $stream = Stream::factory(fopen('php://memory', 'r+'));
-    $headers =  [
-      'Link' => [
-        '<http://blog.superfeedr.com/my-resource>; rel="self"',
-        '<http://pubsubhubbub.superfeedr.com>; rel="hub"',
-      ],
-    ];
-
-    $this->mock->addResponse(new Response(200, $headers, $stream));
     $this->mock->addResponse(new Response(200, [], $stream));
+    $this->mock->addResponse(new Response(400, [], $stream));
 
     $subscription = $this->getMock('Drupal\feeds\SubscriptionInterface');
+
+    // Test item without hub.
+    $this->plugin->processItem($subscription);
+
     $subscription->expects($this->any())
       ->method('getHub')
-      ->will($this->returnCallback(function () {
-        return $this->hub;
-      }));
-    $subscription->expects($this->any())
-      ->method('setHub')
-      ->will($this->returnCallback(function ($hub) {
-        $this->hub = $hub;
-      }));
+      ->will($this->returnValue('http://example.com'));
 
+    $this->plugin->processItem($subscription);
+
+    // Test 404.
     $this->plugin->processItem($subscription);
   }
 
