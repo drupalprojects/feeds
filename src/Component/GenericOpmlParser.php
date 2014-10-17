@@ -70,7 +70,7 @@ class GenericOpmlParser {
       $return['head']['#expansionState'] = array_filter(explode(',', $return['head']['#expansionState']));
     }
 
-    $return['outlines'] = array();
+    $return['outlines'] = [];
     if ($content = $this->xpath->evaluate('/opml/body', $this->xpath->document)->item(0)) {
       $return['outlines'] = $this->getOutlines($content);
     }
@@ -88,10 +88,10 @@ class GenericOpmlParser {
    *   The nested outline array.
    */
   protected function getOutlines(\DOMElement $context) {
-    $outlines = array();
+    $outlines = [];
 
     foreach ($this->xpath->query('outline', $context) as $element) {
-      $outline = array();
+      $outline = [];
       if ($element->hasAttributes()) {
         foreach ($element->attributes as $attribute) {
           if ($this->normalizeCase) {

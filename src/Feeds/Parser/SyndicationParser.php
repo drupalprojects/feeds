@@ -120,7 +120,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         'suggestions' => array(
           'targets' => array('subject', 'title', 'label', 'name'),
           'types' => array(
-            'field_item:text' => array(),
+            'field_item:text' => [],
           ),
         ),
       ),
@@ -131,7 +131,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         'suggestions' => array(
           'targets' => array('body'),
           'types' => array(
-            'field_item:text_with_summary' => array(),
+            'field_item:text_with_summary' => [],
           ),
         ),
       ),
@@ -175,7 +175,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         'suggestions' => array(
           'targets' => array('field_tags'),
           'types' => array(
-            'field_item:taxonomy_term_reference' => array(),
+            'field_item:taxonomy_term_reference' => [],
           ),
         ),
       ),
@@ -192,7 +192,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         'description' => $this->t('A list of enclosures attached to the feed item.'),
         'suggestions' => array(
           'types' => array(
-            'field_item:file' => array(),
+            'field_item:file' => [],
           ),
         ),
       ),

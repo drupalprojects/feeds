@@ -42,7 +42,6 @@ class FeedListBuilder extends EntityListBuilder {
    */
   public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatter $date_formatter) {
     parent::__construct($entity_type, $storage);
-
     $this->dateFormatter = $date_formatter;
   }
 

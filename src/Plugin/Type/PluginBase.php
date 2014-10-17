@@ -109,14 +109,14 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    return array();
+    return [];
   }
 
   /**
    * {@inheritodc}
    */
   public function sourceDefaults() {
-    return array();
+    return [];
   }
 
   /**
@@ -168,7 +168,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    * @return string
    *   An HTML string containing a link to the given route and parameters.
    */
-  protected function l($text, $route_name, array $parameters = array(), array $options = array()) {
+  protected function l($text, $route_name, array $parameters = [], array $options = []) {
     return $this->linkGenerator()->generate($text, $route_name, $parameters, $options);
   }
 
@@ -181,7 +181,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    * @return string
    *   The generated URL for the given route.
    */
-  protected function url($route_name, $route_parameters = array(), $options = array()) {
+  protected function url($route_name, $route_parameters = [], $options = []) {
     return $this->urlGenerator()->generateFromRoute($route_name, $route_parameters, $options);
   }
 

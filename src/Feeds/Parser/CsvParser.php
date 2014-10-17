@@ -52,7 +52,7 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     // Wrap parser in a limit iterator.
     $parser = new \LimitIterator($parser, 0, $this->configuration['line_limit']);
 
-    $header = !$feed_config['no_headers'] ? $parser->getHeader() : array();
+    $header = !$feed_config['no_headers'] ? $parser->getHeader() : [];
     $result = new ParserResult();
 
     foreach ($parser as $row) {

@@ -2,19 +2,19 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\FeedAccessControllerTest.
+ * Contains \Drupal\feeds\Tests\FeedAccessControlHandlerTest.
  */
 
 namespace Drupal\feeds\Tests;
 
 use Drupal\Core\Language\Language;
-use Drupal\feeds\FeedAccessController;
+use Drupal\feeds\FeedAccessControlHandler;
 
 /**
- * @covers \Drupal\feeds\FeedAccessController
+ * @covers \Drupal\feeds\FeedAccessControlHandler
  * @group Feeds
  */
-class FeedAccessControllerTest extends FeedsUnitTestCase {
+class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
 
   protected $entityType;
   protected $controller;
@@ -26,11 +26,11 @@ class FeedAccessControllerTest extends FeedsUnitTestCase {
     $this->entityType->expects($this->once())
       ->method('id')
       ->will($this->returnValue('feeds_feed'));
-    $this->controller = new FeedAccessController($this->entityType);
+    $this->controller = new FeedAccessControlHandler($this->entityType);
     $this->moduleHandler = $this->getMock('\Drupal\Core\Extension\ModuleHandlerInterface');
     $this->moduleHandler->expects($this->any())
       ->method('invokeAll')
-      ->will($this->returnValue(array()));
+      ->will($this->returnValue([]));
     $this->controller->setModuleHandler($this->moduleHandler);
   }
 

@@ -21,7 +21,7 @@ class FieldTarget implements DerivativeInterface {
    *
    * @var array
    */
-  protected $derivatives = array();
+  protected $derivatives = [];
 
   /**
    * {@inheritdoc}

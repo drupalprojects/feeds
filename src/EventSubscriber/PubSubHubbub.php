@@ -50,7 +50,7 @@ class PubSubHubbub implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events = array();
+    $events = [];
     $events[FeedsEvents::FETCH][] = ['onPostFetch', FeedsEvents::AFTER];
     $events[FeedsEvents::FEEDS_DELETE][] = 'onDeleteMultipleFeeds';
     return $events;

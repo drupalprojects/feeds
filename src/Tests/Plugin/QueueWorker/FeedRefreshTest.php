@@ -32,7 +32,7 @@ class FeedRefreshTest extends FeedsUnitTestCase {
     $queue_factory = $this->getMock('Drupal\Core\Queue\QueueFactory', [], [], '', FALSE);
     $queue_factory->expects($this->any())
       ->method('get')
-      ->with('feeds_feed_parse')
+      ->with('feeds_feed_parse:')
       ->will($this->returnValue($this->getMock('Drupal\Core\Queue\QueueInterface')));
 
     $container->set('queue', $queue_factory);

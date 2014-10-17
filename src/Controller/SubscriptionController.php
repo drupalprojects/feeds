@@ -79,7 +79,7 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
-    $result = array();
+    $result = [];
     parse_str($sig, $result);
     if (empty($result['sha1'])) {
       throw new NotFoundHttpException();

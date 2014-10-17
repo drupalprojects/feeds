@@ -33,12 +33,12 @@ function feeds_tests_menu() {
 function feeds_tests_theme() {
   return array(
     'feeds_tests_flickr' => array(
-      'variables' => array('image_urls' => array()),
+      'variables' => array('image_urls' => []),
       'path' => drupal_get_path('module', 'feeds_tests') . '/feeds',
       'template' => 'feeds-tests-flickr',
     ),
     'feeds_tests_files' => array(
-      'variables' => array('files' => array()),
+      'variables' => array('files' => []),
       'path' => drupal_get_path('module', 'feeds_tests') . '/feeds',
       'template' => 'feeds-tests-files',
     ),

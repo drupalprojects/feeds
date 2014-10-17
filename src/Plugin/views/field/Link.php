@@ -66,11 +66,14 @@ class Link extends FieldPluginBase {
    * Prepares the link to the feed.
    */
   protected function renderLink($feed, ResultRow $values) {
-    if ($feed->access('view')) {
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = $feed->getSystemPath('canonical');
-      return !empty($this->options['text']) ? $this->options['text'] : $this->t('View');
+    if (!$feed->access('view')) {
+      return;
     }
+
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = $feed->getSystemPath('canonical');
+    $this->options['alter']['path'] = 'asdfasf';
+    return !empty($this->options['text']) ? $this->options['text'] : $this->t('View');
   }
 
 }

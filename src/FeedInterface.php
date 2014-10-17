@@ -72,9 +72,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *
    * @param int $timestamp
    *   The feed creation timestamp.
-   *
-   * @return \Drupal\feeds\FeedInterface
-   *   The called feed entity.
    */
   public function setCreatedTime($timestamp);
 
@@ -99,8 +96,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *
    * @param int $queued
    *   The timestamp of the last refresh.
-   *
-   * @return $this
    */
   public function setQueuedTime($queued);
 
@@ -170,8 +165,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
 
   /**
    * Cleans up after an import.
-   *
-   * @return $this
    */
   public function cleanUp();
 
@@ -265,8 +258,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * @param array $config
    *   The configuration for the plugin.
    *
-   * @return $this
-   *
    * @todo Refactor this. This can cause conflicts if different plugin types
    *   use the same id.
    */
@@ -287,15 +278,11 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *
    * @param bool $active
    *   True to set this feed to active, false to set it to inactive.
-   *
-   * @return $this
    */
   public function setActive($active);
 
   /**
    * Locks a feed.
-   *
-   * @return $this
    *
    * @throws \Drupal\feeds\Exception\LockException
    *   Thrown if the lock is unavailable.
@@ -304,8 +291,6 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
 
   /**
    * Unlocks a feed.
-   *
-   * @return $this
    */
   public function unlock();
 

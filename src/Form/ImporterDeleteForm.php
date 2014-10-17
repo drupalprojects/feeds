@@ -20,7 +20,7 @@ class ImporterDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to delete the importer %importer?', array('%importer' => $this->entity->label()));
+    return $this->t('Are you sure you want to delete the importer %importer?', ['%importer' => $this->entity->label()]);
   }
 
   /**
@@ -42,8 +42,8 @@ class ImporterDeleteForm extends EntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
-    $args = array('%importer' => $this->entity->label());
 
+    $args = ['%importer' => $this->entity->label()];
     $this->logger('feeds')->notice('Deleted importer: %importer.', $args);
     drupal_set_message($this->t('%importer has been deleted.', $args));
 

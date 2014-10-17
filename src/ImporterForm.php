@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of \Drupal\feeds\ImporterFormController.
+ * Definition of \Drupal\feeds\ImporterForm.
  */
 
 namespace Drupal\feeds;
@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Form controller for the importer edit forms.
  */
-class ImporterFormController extends EntityForm {
+class ImporterForm extends EntityForm {
 
   /**
    * The importer storage controller.
@@ -33,7 +33,7 @@ class ImporterFormController extends EntityForm {
   protected $importerStorage;
 
   /**
-   * Constructs an ImporterFormController object.
+   * Constructs an ImporterForm object.
    *
    * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $importer_storage
    *   The importer storage controller.

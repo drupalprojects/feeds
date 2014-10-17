@@ -33,17 +33,15 @@ use Drupal\user\UserInterface;
  *   bundle_label = @Translation("Importer"),
  *   module = "feeds",
  *   handlers = {
- *     "storage" = "Drupal\feeds\FeedStorageController",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "access" = "Drupal\feeds\FeedAccessController",
+ *     "storage" = "Drupal\feeds\FeedStorage",
+ *     "view_builder" = "Drupal\feeds\FeedViewBuilder",
+ *     "access" = "Drupal\feeds\FeedAccessControlHandler",
  *     "form" = {
- *       "create" = "Drupal\feeds\FeedFormController",
- *       "update" = "Drupal\feeds\FeedFormController",
+ *       "default" = "Drupal\feeds\FeedForm",
  *       "delete" = "Drupal\feeds\Form\FeedDeleteForm",
  *       "import" = "Drupal\feeds\Form\FeedImportForm",
  *       "clear" = "Drupal\feeds\Form\FeedClearForm",
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
- *       "default" = "Drupal\feeds\FeedFormController"
  *     },
  *     "list_builder" = "Drupal\feeds\FeedListBuilder",
  *     "feed_import" = "Drupal\feeds\FeedImportHandler",
@@ -121,7 +119,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function setCreatedTime($timestamp) {
     $this->set('created', (int) $timestamp);
-    return $this;
   }
 
   /**
@@ -150,7 +147,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function setQueuedTime($queued) {
     $this->set('queued', $queued);
-    return $this;
   }
 
   /**
@@ -202,7 +198,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function setActive($active) {
     $this->set('status', $active ? self::ACTIVE : self::INACTIVE);
-    return $this;
   }
 
   /**
@@ -270,8 +265,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
     if ($interval !== ImporterInterface::SCHEDULE_NEVER) {
       $this->set('next', $interval + $time);
     }
-
-    return $this;
   }
 
   /**
@@ -289,7 +282,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function setState($stage, $state) {
     $this->states[$stage] = $state;
-    return $this;
   }
 
   /**
@@ -298,7 +290,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
   public function clearStates() {
     $this->states = [];
     \Drupal::keyValue('feeds_feed.' . $this->id())->deleteAll();
-    return $this;
   }
 
   /**
@@ -306,7 +297,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function saveStates() {
     \Drupal::keyValue('feeds_feed.' . $this->id())->setMultiple($this->states);
-    return $this;
   }
 
   /**
@@ -375,7 +365,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
       $args = ['@id' => $this->bundle(), '@fid' => $this->id()];
       throw new LockException(String::format('Cannot acquire lock for feed @id / @fid.', $args));
     }
-    return $this;
   }
 
   /**
@@ -383,7 +372,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function unlock() {
     \Drupal::service('lock.persistent')->release("feeds_feed_{$this->id()}");
-    return $this;
   }
 
   /**
@@ -437,7 +425,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $ids = array_keys($feeds);
 
     // Group feeds by imporer.
-    $grouped = array();
+    $grouped = [];
     foreach ($feeds as $fid => $feed) {
       $grouped[$feed->bundle()][$fid] = $feed;
     }
@@ -458,7 +446,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = array();
+    $fields = [];
 
     $fields['fid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Feed ID'))
@@ -483,15 +471,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setRequired(TRUE)
       ->setDefaultValue('')
       ->setSetting('max_length', 255)
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'string',
         'weight' => -5,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => -5,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
@@ -501,21 +489,21 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
       ->setDefaultValueCallback('Drupal\feeds\Entity\Feed::getCurrentUserId')
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'author',
         'weight' => 0,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
         'weight' => 5,
-        'settings' => array(
+        'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
           'autocomplete_type' => 'tags',
           'placeholder' => '',
-        ),
-      ))
+        ],
+      ])
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
@@ -526,15 +514,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Authored on'))
       ->setDescription(t('The time that the feed was created.'))
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'timestamp',
         'weight' => 0,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'datetime_timestamp',
         'weight' => 10,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
@@ -545,22 +533,22 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setLabel(t('Last import'))
       ->setDescription(t('The time that the feed was imported.'))
       ->setDefaultValue(0)
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'timestamp_ago',
         'weight' => 1,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['next'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Next import'))
       ->setDescription(t('The time that the feed will import next.'))
       ->setDefaultValue(0)
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'timestamp',
         'weight' => 1,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['queued'] = BaseFieldDefinition::create('timestamp')
@@ -572,15 +560,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setLabel(t('Source'))
       ->setDescription(t('The source of the feed.'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'uri',
         'weight' => -3,
-      ))
-      ->setDisplayOptions('view', array(
+      ])
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'feeds_uri_link',
         'weight' => -3,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -605,7 +593,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $fields['state'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('State'))
       ->setDescription(t('The source of the feed.'))
-      ->setSettings(array('default_value' => array()));
+      ->setSettings(['default_value' => []]);
 
     return $fields;
   }
@@ -619,7 +607,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    *   An array of default values.
    */
   public static function getCurrentUserId() {
-    return array(\Drupal::currentUser()->id());
+    return [\Drupal::currentUser()->id()];
   }
 
 }

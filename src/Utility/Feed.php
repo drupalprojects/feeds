@@ -89,7 +89,7 @@ class Feed {
     $feed_set->addLinks($dom->getElementsByTagName('link'), $url);
 
     // Load the first feed type found.
-    foreach (array('atom', 'rss', 'rdf') as $feed_type) {
+    foreach (['atom', 'rss', 'rdf'] as $feed_type) {
       if (isset($feed_set->$feed_type)) {
         return $feed_set->$feed_type;
       }

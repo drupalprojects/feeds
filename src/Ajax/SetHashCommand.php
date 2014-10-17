@@ -35,10 +35,10 @@ class SetHashCommand implements CommandInterface {
    * {@inheritdoc}
    */
   public function render() {
-    return array(
+    return [
       'command' => 'feedsHash',
       'hash' => $this->hash,
-    );
+    ];
   }
 
 }

@@ -39,7 +39,7 @@ class FeedsPermissions {
    * @return array
    */
   public function importerPermissions() {
-    $perms = array();
+    $perms = [];
     // Generate feeds permissions for all feeds types.
     foreach (Importer::loadMultiple() as $type) {
       $perms += $this->buildPermissions($type);

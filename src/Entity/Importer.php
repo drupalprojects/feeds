@@ -24,12 +24,11 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   label = @Translation("Feed importer"),
  *   module = "feeds",
  *   handlers = {
- *     "storage" = "Drupal\feeds\ImporterStorageController",
- *     "access" = "Drupal\feeds\ImporterAccessController",
- *     "list_builder" = "Drupal\feeds\ImporterListController",
+ *     "access" = "Drupal\feeds\ImporterAccessControlHandler",
+ *     "list_builder" = "Drupal\feeds\ImporterListBuilder",
  *     "form" = {
- *       "create" = "Drupal\feeds\ImporterFormController",
- *       "edit" = "Drupal\feeds\ImporterFormController",
+ *       "create" = "Drupal\feeds\ImporterForm",
+ *       "edit" = "Drupal\feeds\ImporterForm",
  *       "delete" = "Drupal\feeds\Form\ImporterDeleteForm"
  *     }
  *   },

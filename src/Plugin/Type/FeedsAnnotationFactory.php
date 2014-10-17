@@ -16,7 +16,7 @@ class FeedsAnnotationFactory extends ContainerFactory {
   /**
    * {@inheritdoc}
    */
-  public function createInstance($plugin_id, array $configuration = array()) {
+  public function createInstance($plugin_id, array $configuration = []) {
     $definition = $this->discovery->getDefinition($plugin_id);
 
     if (empty($definition['arguments'])) {

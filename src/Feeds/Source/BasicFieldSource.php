@@ -57,7 +57,7 @@ class BasicFieldSource extends PluginBase implements SourceInterface {
    */
   public function getSourceElement(FeedInterface $feed, array $item, $element_key) {
     list(, $field) = explode(':', $element_key);
-    $return = array();
+    $return = [];
 
     if ($field_list = $feed->get($field)) {
       foreach ($field_list as $field) {

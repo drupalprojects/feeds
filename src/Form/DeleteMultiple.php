@@ -8,11 +8,11 @@
 namespace Drupal\feeds\Form;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\feeds\FeedStorageInterface;
 use Drupal\user\TempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -39,7 +39,7 @@ class DeleteMultiple extends ConfirmFormBase {
   /**
    * The feed storage.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\feeds\FeedStorageInterface
    */
   protected $storage;
 
@@ -55,12 +55,12 @@ class DeleteMultiple extends ConfirmFormBase {
    *
    * @param \Drupal\user\TempStoreFactory $temp_store_factory
    *   The tempstore factory.
-   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   * @param \Drupal\feeds\FeedStorageInterface $storage
    *   The feed storage.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The current user.
    */
-  public function __construct(TempStoreFactory $temp_store_factory, EntityStorageInterface $storage, AccountInterface $user) {
+  public function __construct(TempStoreFactory $temp_store_factory, FeedStorageInterface $storage, AccountInterface $user) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->storage = $storage;
     $this->user = $user;
@@ -129,7 +129,7 @@ class DeleteMultiple extends ConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getValue('confirm') && !empty($this->feeds)) {
       $this->storage->delete($this->feeds);
-      $this->tempStoreFactory->get('feeds_multiple_delete_confirm')->delete($this->user->id());
+      $this->tempStoreFactory->get('feeds_feed_multiple_delete_confirm')->delete($this->user->id());
       $count = count($this->feeds);
       $this->logger('feeds')->notice('Deleted @count feeds.', array('@count' => $count));
       drupal_set_message($this->formatPlural($count, 'Deleted 1 feed.', 'Deleted @count posts.'));

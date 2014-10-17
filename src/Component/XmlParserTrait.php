@@ -89,11 +89,11 @@ trait XmlParserTrait {
    */
   protected function stopXmlErrorHandling() {
     foreach (libxml_get_errors() as $error) {
-      $this->_errors[$error->level][] = array(
+      $this->_errors[$error->level][] = [
         'message' => trim($error->message),
         'line' => $error->line,
         'code' => $error->code,
-      );
+      ];
     }
     libxml_clear_errors();
     libxml_use_internal_errors($this->_useError);

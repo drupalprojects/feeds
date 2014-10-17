@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ImporterAccessController.
+ * Contains \Drupal\feeds\ImporterAccessControlHandler.
  */
 
 namespace Drupal\feeds;
@@ -19,7 +19,7 @@ use Drupal\Core\Session\AccountInterface;
  *
  * @todo Provide more granular permissions.
  */
-class ImporterAccessController extends EntityAccessControlHandler {
+class ImporterAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}

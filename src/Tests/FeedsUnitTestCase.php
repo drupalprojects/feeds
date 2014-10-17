@@ -82,10 +82,10 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     return call_user_func_array($closure, $args);
   }
 
-  protected function getMockAccount(array $perms = array()) {
+  protected function getMockAccount(array $perms = []) {
     $account = $this->getMock('\Drupal\Core\Session\AccountInterface');
     if ($perms) {
-      $map = array();
+      $map = [];
       foreach ($perms as $perm => $has) {
         $map[] = array($perm, $has);
       }
@@ -138,7 +138,7 @@ namespace {
   use Drupal\Component\Utility\String;
 
   if (!function_exists('t')) {
-    function t($string, array $args = array()) {
+    function t($string, array $args = []) {
       return String::format($string, $args);
     }
   }

@@ -30,7 +30,7 @@ class FeedController extends ControllerBase {
     // Show add form if there is only one importer.
     $importers = $this->entityManager()
       ->getStorage('feeds_importer')
-      ->loadEnabled();
+      ->loadByProperties(['status' => TRUE]);
     // There is an access checker on this route that determines if the user can
     // create at least one importer. If there is only one enabled importer, this
     // must be it.
@@ -41,23 +41,23 @@ class FeedController extends ControllerBase {
 
     // @todo Don't show link for non-admins.
     $url = $this->url('feeds.importer_list');
-    $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', array('@importers' => $url));
+    $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', ['@importers' => $url]);
 
-    $build = array(
+    $build = [
       '#theme' => 'table',
-      '#header' => array($this->t('Import'), $this->t('Description')),
-      '#rows' => array(),
+      '#header' => [$this->t('Import'), $this->t('Description')],
+      '#rows' => [],
       '#empty' => $empty,
-    );
+    ];
 
     foreach ($importers as $importer) {
       if (!($importer->access('create'))) {
         continue;
       }
-      $build['#rows'][] = array(
+      $build['#rows'][] = [
         $this->l($importer->label(), new Url('feeds.add', ['feeds_importer' => $importer->id()])),
         String::checkPlain($importer->getDescription()),
-      );
+      ];
     }
 
     return $build;
@@ -70,12 +70,12 @@ class FeedController extends ControllerBase {
    *   A form array as expected by drupal_render().
    */
   public function createForm(ImporterInterface $feeds_importer) {
-    $feed = $this->entityManager()->getStorage('feeds_feed')->create(array(
+    $feed = $this->entityManager()->getStorage('feeds_feed')->create([
       'uid' => $this->currentUser()->id(),
       'importer' => $feeds_importer->id(),
       // 'status' => 1,
       'created' => REQUEST_TIME,
-    ));
+    ]);
     return $this->entityFormBuilder()->getForm($feed);
   }
 

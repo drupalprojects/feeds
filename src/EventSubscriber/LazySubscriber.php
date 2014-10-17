@@ -48,7 +48,7 @@ class LazySubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events = array();
+    $events = [];
     $events[FeedsEvents::INIT_IMPORT][] = 'onInitImport';
     $events[FeedsEvents::INIT_CLEAR][] = 'onInitClear';
     $events[FeedsEvents::INIT_EXPIRE][] = 'onInitExpire';

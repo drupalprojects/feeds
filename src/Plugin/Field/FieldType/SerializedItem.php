@@ -27,7 +27,7 @@ class SerializedItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties = array();
+    $properties = [];
     $properties['value'] = DataDefinition::create('string')
       ->setLabel(t('Serialized value'));
 
@@ -43,7 +43,7 @@ class SerializedItem extends FieldItemBase {
     if (is_string($values)) {
       $values = unserialize($values);
       if (!is_array($values)) {
-        $values = array();
+        $values = [];
       }
     }
 
@@ -68,7 +68,7 @@ class SerializedItem extends FieldItemBase {
     if (isset($this->values[$property_name])) {
       return $this->values[$property_name];
     }
-    return array();
+    return [];
   }
 
   public function getValue() {

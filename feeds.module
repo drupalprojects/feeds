@@ -64,21 +64,21 @@ function feeds_cron() {
  * Implements hook_theme().
  */
 function feeds_theme() {
-  return array(
-    'feeds_feed_status' => array(
-      'variables' => array(
+  return [
+    'feeds_feed_status' => [
+      'variables' => [
         'progress_importing' => NULL,
         'progress_clearing' => NULL,
         'imported' => NULL,
         'count' => NULL,
-      ),
+      ],
       'file' => 'feeds.theme.inc',
-    ),
-    'feeds_feed' => array(
+    ],
+    'feeds_feed' => [
       'render element' => 'elements',
       'template' => 'feeds_feed',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -172,7 +172,7 @@ function template_preprocess_feeds_feed(&$variables) {
   unset($variables['elements']['title']);
 
   // Helpful $content variable for templates.
-  $variables += array('content' => []);
+  $variables += ['content' => []];
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }

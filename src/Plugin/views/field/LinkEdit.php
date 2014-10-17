@@ -28,7 +28,7 @@ class LinkEdit extends Link {
     }
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = $feed->getSystemPath('edit-from');
+    $this->options['alter']['path'] = $feed->getSystemPath('edit-form');
     $this->options['alter']['query'] = drupal_get_destination();
 
     return !empty($this->options['text']) ? $this->options['text'] : t('Edit');

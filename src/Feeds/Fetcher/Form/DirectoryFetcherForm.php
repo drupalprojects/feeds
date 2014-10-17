@@ -90,7 +90,7 @@ class DirectoryFetcherForm extends ExternalPluginFormBase {
    *   The available scheme array keyed scheme => description.
    */
   protected function getSchemeOptions() {
-    $options = array();
+    $options = [];
     foreach ($this->streamWrapperManager->getDescriptions(StreamWrapperInterface::WRITE_VISIBLE) as $scheme => $description) {
       $options[$scheme] = String::checkPlain($scheme . ': ' . $description);
     }

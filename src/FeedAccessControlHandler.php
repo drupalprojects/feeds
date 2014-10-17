@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\FeedAccessController.
+ * Contains \Drupal\feeds\FeedAccessControlHandler.
  */
 
 namespace Drupal\feeds;
@@ -18,7 +18,7 @@ use Drupal\feeds\StateInterface;
  *
  * @see \Drupal\feeds\Entity\Feed
  */
-class FeedAccessController extends EntityAccessControlHandler {
+class FeedAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}

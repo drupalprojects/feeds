@@ -25,10 +25,10 @@ class EventDispatcherTraitTest extends FeedsUnitTestCase {
     $container->set('event_dispatcher', $dispatcher);
     \Drupal::setContainer($container);
     $method = $this->getMethod(get_class($mock), 'getEventDispatcher');
-    $this->assertSame($dispatcher, $method->invokeArgs($mock, array()));
+    $this->assertSame($dispatcher, $method->invokeArgs($mock, []));
 
     $mock->setEventDispatcher($dispatcher);
-    $this->assertSame($dispatcher, $method->invokeArgs($mock, array()));
+    $this->assertSame($dispatcher, $method->invokeArgs($mock, []));
 
     $event = new Event();
     $dispatcher->expects($this->once())

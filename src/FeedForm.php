@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\feeds\FeedFormController.
+ * Definition of Drupal\feeds\FeedForm.
  */
 
 namespace Drupal\feeds;
@@ -17,14 +17,14 @@ use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 /**
  * Form controller for the feed edit forms.
  */
-class FeedFormController extends ContentEntityForm {
+class FeedForm extends ContentEntityForm {
 
   /**
    * Plugins that provide configuration forms.
    *
    * @var array
    */
-  protected $configurablePlugins = array();
+  protected $configurablePlugins = [];
 
   /**
    * {@inheritdoc}
@@ -34,7 +34,7 @@ class FeedFormController extends ContentEntityForm {
 
     $importer = $feed->getImporter();
 
-    $args = array('@importer' => $importer->label(), '@title' => $feed->label());
+    $args = ['@importer' => $importer->label(), '@title' => $feed->label()];
     if ($this->operation == 'update') {
       $form['#title'] = $this->t('<em>Edit @importer</em> @title', $args);
     }
@@ -42,11 +42,11 @@ class FeedFormController extends ContentEntityForm {
       $form['#title'] = $this->t('<em>Add @importer</em>', $args);
     }
 
-    $form['advanced'] = array(
+    $form['advanced'] = [
       '#type' => 'vertical_tabs',
-      '#attributes' => array('class' => array('entity-meta')),
+      '#attributes' => ['class' => ['entity-meta']],
       '#weight' => 99,
-    );
+    ];
     $form = parent::form($form, $form_state);
 
     foreach ($importer->getPlugins() as $plugin) {
@@ -57,16 +57,16 @@ class FeedFormController extends ContentEntityForm {
       }
     }
 
-    $form['author'] = array(
+    $form['author'] = [
       '#type' => 'details',
       '#title' => t('Authoring information'),
       '#group' => 'advanced',
-      '#attributes' => array(
-        'class' => array('feeds-feed-form-author'),
-      ),
+      '#attributes' => [
+        'class' => ['feeds-feed-form-author'],
+      ],
       '#weight' => 90,
       '#optional' => TRUE,
-    );
+    ];
     if (isset($form['uid'])) {
       $form['uid']['#group'] = 'author';
     }
@@ -75,19 +75,19 @@ class FeedFormController extends ContentEntityForm {
     }
 
     // Feed options for administrators.
-    $form['options'] = array(
+    $form['options'] = [
       '#type' => 'details',
       '#access' => $this->currentUser()->hasPermission('administer feeds'),
       '#title' => $this->t('Import options'),
       '#collapsed' => TRUE,
       '#group' => 'advanced',
-    );
+    ];
 
-    $form['options']['status'] = array(
+    $form['options']['status'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Active'),
       '#default_value' => $feed->isActive(),
-    );
+    ];
 
     return $form;
   }
