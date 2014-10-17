@@ -21,16 +21,36 @@ use Drupal\feeds\SubscriptionInterface;
  *   id = "feeds_subscription",
  *   label = @Translation("Subscription"),
  *   module = "feeds",
- *   handlers = {
- *     "storage" = "Drupal\Core\Entity\Sql\SqlContentEntityStorage"
- *   },
  *   base_table = "feeds_subscription",
- *   entity_keys = {
- *     "id" = "fid"
- *   },
+ *   entity_keys = {"id" = "fid"}
  * )
  */
 class Subscription extends ContentEntityBase implements SubscriptionInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function subscribe() {
+    $this->validateState();
+    $this->set('state', 'subscribing');
+    $this->save();
+    \Drupal::queue('feeds_push_subscribe')->createItem($this->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function unsubscribe() {
+    $this->validateState();
+    switch ($this->getState()) {
+      case 'subscribed':
+      case 'subscribing':
+        $this->set('state', 'unsubscribing');
+        \Drupal::queue('feeds_push_unsubscribe')->createItem($this);
+        break;
+    }
+    $this->delete();
+  }
 
   /**
    * {@inheritdoc}
@@ -49,22 +69,8 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
   /**
    * {@inheritdoc}
    */
-  public function setTopic($topic) {
-    $this->set('topic', trim($topic));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getHub() {
     return $this->get('hub')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setHub($hub) {
-    $this->set('hub', trim($hub));
   }
 
   /**
@@ -92,7 +98,9 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
    * {@inheritdoc}
    */
   public function setLease($lease) {
-    $this->set('lease', (int) $lease);
+    $lease = (int) trim($lease);
+    $this->set('lease', $lease);
+    $this->set('expires', $lease + REQUEST_TIME);
   }
 
   /**
@@ -105,15 +113,20 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
   /**
    * {@inheritdoc}
    */
-  public function setExpire($expiration_time) {
-    $this->set('expires', (int) $expiration_time);
+  public function checkSignature($sha1, $data) {
+    return $sha1 === hash_hmac('sha1', $data, $this->getSecret());
   }
 
   /**
-   * {@inheritdoc}
+   * Validates the state of the subscription.
+   *
+   * @throws \LogicException
+   *   Thrown if the state of the subscription is invalid.
    */
-  public function checkSignature($sha1, $data) {
-    return $sha1 === hash_hmac('sha1', $data, $this->getSecret());
+  protected function validateState() {
+    if ($this->validate()) {
+      throw new \LogicException('The subscription is invalid.');
+    }
   }
 
   /**
@@ -128,42 +141,6 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
   /**
    * {@inheritdoc}
    */
-  public function postSave(EntityStorageInterface $storage_controller, $update = TRUE) {
-    if (!$this->getHub()) {
-      return;
-    }
-
-    switch ($this->getState()) {
-      // Don't do anything if we are in the process of subscribing.
-      case 'subscribing':
-      case 'subscribed':
-        break;
-
-      default:
-        \Drupal::queue('feeds_push_subscribe')->createItem($this->getFeedId());
-        break;
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function postDelete(EntityStorageInterface $storage_controller, array $subscriptions) {
-    $queue = \Drupal::queue('feeds_push_unsubscribe');
-
-    foreach ($subscriptions as $subscription) {
-      switch ($subscription->getState()) {
-        case 'subscribing':
-        case 'subscribed':
-          $queue->createItem($subscription);
-          break;
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = [];
 
@@ -171,6 +148,7 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       ->setLabel(t('Feed ID'))
       ->setDescription(t('The feed ID.'))
       ->setReadOnly(TRUE)
+      ->setRequired(TRUE)
       ->setSetting('unsigned', TRUE);
 
     $fields['topic'] = BaseFieldDefinition::create('uri')
@@ -182,6 +160,8 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
     $fields['hub'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Hub'))
       ->setDescription(t('The fully-qualified URL of the PuSH hub.'))
+      ->setReadOnly(TRUE)
+      ->setRequired(TRUE)
       ->setDefaultValue('');
 
     $fields['lease'] = BaseFieldDefinition::create('integer')
@@ -196,12 +176,14 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       ->setLabel(t('Secret'))
       ->setDescription(t('The secret used to verify a request.'))
       ->setReadOnly(TRUE)
+      ->setRequired(TRUE)
       ->setSetting('max_length', 43);
 
     $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State'))
       ->setDescription(t('The state of the subscription.'))
       ->setSetting('max_length', 64)
+      ->setRequired(TRUE)
       ->setDefaultValue('unsubscribed');
 
     return $fields;

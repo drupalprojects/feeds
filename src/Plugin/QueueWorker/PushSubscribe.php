@@ -82,35 +82,71 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
       return;
     }
 
-    if (!$subscription->getHub()) {
-      return;
-    }
+    switch ($subscription->getState()) {
+      case 'subscribing':
+        $mode = 'subscribe';
+        break;
 
-    $subscription->setState('subscribing');
-    $subscription->save();
+      case 'unsubscribing':
+        $mode = 'unsubscribe';
+        // The subscription has been deleted, store it for a bit to handle the
+        // response.
+        \Drupal::keyValueExpirable('feeds_push_unsubscribe')>setWithExpire($subscription, $this, 3600);
+        break;
+
+      default:
+        throw new \LogicException('A subscription was found in an invalid state.');
+    }
 
     $callback = $this->url('feeds.subscribe', ['feeds_feed' => $subscription->id()], ['absolute' => TRUE]);
 
     $post_body = [
       'hub.callback' => $callback,
-      'hub.mode' => 'subscribe',
+      'hub.mode' => $mode,
       'hub.topic' => $subscription->getTopic(),
       'hub.secret' => $subscription->getSecret(),
     ];
 
-    try {
-      $response = $this->client->post($subscription->getHub(), ['body' => $post_body]);
-    }
-    catch (RequestException $e) {
-      $this->loggerFactory->get('feeds')->warning('%error', ['%error' => $e->getMessage()]);
-      return;
-    }
+    $response = $this->retry($subscription, $post_body);
 
-    // Response failed. Deleting the subscription will make it re-subscribe on
-    // the next fetch.
-    if ($response->getStatusCode() != 202) {
-      $subscription->delete();
+    // Response failed.
+    if (!$response || $response->getStatusCode() != 202) {
+      switch ($subscription->getState()) {
+        case 'subscribing':
+          // Deleting the subscription will make it re-subscribe on the next
+          // import.
+          $subscription->delete();
+          break;
+
+        case 'unsubscribing':
+          // Unsubscribe failed. The hub should give up eventually.
+          break;
+      }
     }
+  }
+
+  /**
+   * Retries a POST request.
+   *
+   * @param \Drupal\feeds\SubscriptionInterface $subscription
+   *   The subscription.
+   * @param array $body
+   *   The POST body.
+   *
+   * @return \GuzzleHttp\Message\Response
+   *   The Guzzle response.
+   */
+  protected function retry(SubscriptionInterface $subscription, array $body, $max_tries = 3) {
+    $tries = 0;
+    do {
+      $tries++;
+      try {
+        return $this->client->post($subscription->getHub(), ['body' => $body]);
+      }
+      catch (RequestException $e) {
+        $this->loggerFactory->get('feeds')->warning('Subscription error: %error', ['%error' => $e->getMessage()]);
+      }
+    } while ($tries <= $max_tries);
   }
 
 }

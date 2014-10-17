@@ -67,7 +67,7 @@ class PubSubHubbub implements EventSubscriberInterface {
 
     if (!$fetcher->getConfiguration('use_pubsubhubbub')) {
       if ($subscription) {
-        $subscription->delete();
+        $subscription->unsubscribe();
       }
       return;
     }
@@ -79,7 +79,7 @@ class PubSubHubbub implements EventSubscriberInterface {
     if (!$hub) {
       if ($subscription) {
         // The hub is gone and there's no fallback.
-        $subscription->delete();
+        $subscription->unsubscribe();
       }
       return;
     }
@@ -90,18 +90,16 @@ class PubSubHubbub implements EventSubscriberInterface {
         'fid' => $feed->id(),
         'topic' => $feed->getSource(),
         'hub' => $hub,
-        'state' => 'subscribing',
-      ])->save();
+      ])->subscribe();
     }
     elseif ($feed->getSource() !== $subscription->getTopic() || $subscription->getHub() !== $hub) {
-      $subscription->delete();
+      $subscription->unsubscribe();
 
       $this->storage->create([
         'fid' => $feed->id(),
         'topic' => $feed->getSource(),
         'hub' => $hub,
-        'state' => 'subscribing',
-      ])->save();
+      ])->subscribe();
     }
   }
 
@@ -129,7 +127,10 @@ class PubSubHubbub implements EventSubscriberInterface {
    */
   public function onDeleteMultipleFeeds(DeleteFeedsEvent $event) {
     $subscriptions = $this->storage->loadMultiple(array_keys($event->getFeeds()));
-    $this->storage->delete($subscriptions);
+
+    foreach ($subscriptions as $subscription) {
+      $subscription->unsubscribe();
+    }
   }
 
 }

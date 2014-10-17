@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds\Controller;
 
+use Drupal\feeds\Entity\Subscription;
 use Drupal\feeds\SubscriptionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,8 +21,8 @@ class SubscriptionController {
   /**
    * Handles subscribe/unsubscribe requests.
    *
-   * @param \Drupal\feeds\SubscriptionInterface $feeds_subscription
-   *   The subscription entity.
+   * @param int feeds_subscription_id
+   *   The subscription entity id.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -29,32 +30,85 @@ class SubscriptionController {
    *   The response object.
    *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-   *   Thrown if the subscription was not found.
+   *   Thrown if the subscription was not found, or if the request is invalid.
    */
-  public function subscribe(SubscriptionInterface $feeds_subscription, Request $request) {
-    // Verify the request has the proper attributes.
+  public function subscribe($feeds_subscription_id, Request $request) {
+    $feeds_subscription_id = (int) $feeds_subscription_id;
+
+    // This is an invalid request.
     if ($request->query->get('hub.challenge') === NULL) {
       throw new NotFoundHttpException();
     }
-    elseif ($request->query->get('hub.topic') !== $feeds_subscription->getTopic()) {
+
+    // A subscribe request.
+    if ($request->query->get('hub.mode') === 'subscribe') {
+      return $this->handleSubscribe($subscription, $request);
+    }
+
+    // An unsubscribe request.
+    if ($request->query->get('hub.mode') === 'unsubscribe') {
+      return $this->handleUnsubscribe($subscription, $request);
+    }
+
+    // Whatever.
+    throw new NotFoundHttpException();
+  }
+
+  /**
+   * Handles a subscribe request.
+   *
+   * @param int feeds_subscription_id
+   *   The subscription entity id.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response challenge.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   Thrown if anything seems amiss.
+   */
+  protected function handleSubscribe($subscription_id, Request $request) {
+    if (!$subscription = Subscription::load($subscription_id)) {
       throw new NotFoundHttpException();
     }
-    elseif (!in_array($request->query->get('hub.mode'), ['subscribe', 'unsubscribe'])) {
+
+    if ($request->query->get('hub.topic') !== $subscription->getTopic()) {
       throw new NotFoundHttpException();
     }
 
     if ($lease_time = $request->query->get('hub.lease_seconds')) {
-      $feeds_subscription->setLease($lease_time);
-      $feeds_subscription->setExpire($lease_time + REQUEST_TIME);
+      $subscription->setLease($lease_time);
     }
 
-    if ($request->query->get('hub.mode') === 'unsubscribe') {
-      // Subscription is already deleted.
+    $subscription->setState('subscribed');
+    $subscription->save();
+
+    return new Response($request->query->get('hub.challenge'), 200);
+  }
+
+  /**
+   * Handles an unsubscribe request.
+   *
+   * @param int feeds_subscription_id
+   *   The subscription entity id.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response challenge.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   Thrown if anything seems amiss.
+   */
+  protected function handleUnsubscribe($subscription_id, Request $request) {
+    // The subscription id already deleted, but waiting in the keyvalue store.
+    $subscription = \Drupal::keyValueExpirable('feeds_push_unsubscribe')->get($subscription_id);
+    if (!$subscription) {
+      throw new NotFoundHttpException();
     }
-    elseif ($request->query->get('hub.mode') === 'subscribe') {
-      $feeds_subscription->setState('subscribed');
-      $feeds_subscription->save();
-    }
+
+    \Drupal::keyValueExpirable('feeds_push_unsubscribe')->delete($subscription_id);
 
     return new Response($request->query->get('hub.challenge'), 200);
   }
@@ -71,8 +125,7 @@ class SubscriptionController {
    *   The response object.
    *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-   *   Thrown if the subscription was not found or the request parameters were
-   *   invalid.
+   *   Thrown if anything seems amiss.
    */
   public function receive(SubscriptionInterface $feeds_subscription, Request $request) {
     if (!$sig = $request->headers->get('X-Hub-Signature')) {

@@ -45,7 +45,7 @@ class PushSubscribeTest extends FeedsUnitTestCase {
     $this->plugin->setUrlGenerator($this->getMock('Drupal\Core\Routing\UrlGeneratorInterface'));
   }
 
-  public function testHeaderLink() {
+  public function testGoodSubscribe() {
     // Check invalid argument passes.
     $this->plugin->processItem(NULL);
 
@@ -55,12 +55,12 @@ class PushSubscribeTest extends FeedsUnitTestCase {
 
     $subscription = $this->getMock('Drupal\feeds\SubscriptionInterface');
 
-    // Test item without hub.
-    $this->plugin->processItem($subscription);
-
     $subscription->expects($this->any())
       ->method('getHub')
       ->will($this->returnValue('http://example.com'));
+    $subscription->expects($this->any())
+      ->method('getState')
+      ->will($this->returnValue('subscribing'));
 
     $this->plugin->processItem($subscription);
 

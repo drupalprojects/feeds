@@ -11,15 +11,15 @@ use Drupal\Core\Entity\ContentEntityInterface;
 
 interface SubscriptionInterface extends ContentEntityInterface {
 
+  public function subscribe();
+
+  public function unsubscribe();
+
   public function getTopic();
 
   public function getSecret();
 
-  public function setTopic($topic);
-
   public function getHub();
-
-  public function setHub($hub);
 
   public function getState();
 
@@ -28,8 +28,6 @@ interface SubscriptionInterface extends ContentEntityInterface {
   public function getLease();
 
   public function setLease($lease);
-
-  public function setExpire($expiration_time);
 
   public function getExpire();
 

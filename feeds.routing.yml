@@ -111,12 +111,12 @@ feeds.receive:
     _method: 'POST'
 
 feeds.subscribe:
-  path: '/feed/{feeds_subscription}/push_callback'
+  path: '/feed/{feeds_subscription_id}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:subscribe'
   requirements:
     _access: 'TRUE'
-    feeds_subscription: \d+
+    feeds_subscription_id: \d+
     _method: 'GET'
 
 # Admin UI routes.
