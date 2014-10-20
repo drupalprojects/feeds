@@ -5,7 +5,7 @@
  * Contains Drupal\feeds\Tests\Element\UriTest.
  */
 
-namespace Drupal\feeds\Tests\Element;
+namespace Drupal\feeds\Tests\Element {
 
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Element\Uri;
@@ -47,6 +47,18 @@ class UriTest extends FeedsUnitTestCase {
     $element += $element_object->getInfo();
     Uri::validateUrl($element, $form_state, $complete_form);
     $this->assertSame($form_state->getError($element), 'The scheme <em class="placeholder">badscheme</em> is invalid. Available schemes: public.');
+  }
+
+}
+}
+
+namespace {
+  use Drupal\Component\Utility\String;
+
+  if (!function_exists('t')) {
+    function t($string, array $args = []) {
+      return String::format($string, $args);
+    }
   }
 
 }

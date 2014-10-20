@@ -137,12 +137,6 @@ namespace {
   use Drupal\Core\Session\AccountInterface;
   use Drupal\Component\Utility\String;
 
-  if (!function_exists('t')) {
-    function t($string, array $args = []) {
-      return String::format($string, $args);
-    }
-  }
-
   if (!function_exists('drupal_set_message')) {
     function drupal_set_message() {}
   }
@@ -156,15 +150,6 @@ namespace {
   if (!function_exists('file_stream_wrapper_uri_normalize')) {
     function file_stream_wrapper_uri_normalize($dir) {
       return $dir;
-    }
-  }
-  if (!function_exists('file_uri_scheme')) {
-    function file_uri_scheme($uri) {
-      if (preg_match('/^([\w\-]+):\/\/|^(data):/', $uri, $matches)) {
-        // The scheme will always be the last element in the matches array.
-        return array_pop($matches);
-      }
-      return FALSE;
     }
   }
 
@@ -201,6 +186,40 @@ namespace {
 
   if (!function_exists('batch_set')) {
     function batch_set() {}
+  }
+
+
+  if (!function_exists('_format_date_callback')) {
+    function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
+      // We cache translations to avoid redundant and rather costly calls to t().
+      static $cache, $langcode;
+
+      if (!isset($matches)) {
+        $langcode = $new_langcode;
+        return;
+      }
+
+      $code = $matches[1];
+      $string = $matches[2];
+
+      if (!isset($cache[$langcode][$code][$string])) {
+        $options = array(
+          'langcode' => $langcode,
+        );
+
+        if ($code == 'F') {
+          $options['context'] = 'Long month name';
+        }
+
+        if ($code == '') {
+          $cache[$langcode][$code][$string] = $string;
+        }
+        else {
+          $cache[$langcode][$code][$string] = t($string, array(), $options);
+        }
+      }
+      return $cache[$langcode][$code][$string];
+    }
   }
 
   class FeedsFilterStub {

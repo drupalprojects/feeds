@@ -45,13 +45,28 @@ class Uri extends Url {
       return;
     }
 
-    if ($element['#allowed_schemes'] && !in_array(file_uri_scheme($value), $element['#allowed_schemes'], TRUE)) {
+    if ($element['#allowed_schemes'] && !in_array(static::getScheme($value), $element['#allowed_schemes'], TRUE)) {
       $args = [
-        '%scheme' => file_uri_scheme($value),
+        '%scheme' => static::getScheme($value),
         '@schemes' => implode(', ', $element['#allowed_schemes']),
       ];
       $form_state->setError($element, t("The scheme %scheme is invalid. Available schemes: @schemes.", $args));
     }
+  }
+
+/**
+ * Returns the scheme of a URI (e.g. a stream).
+ *
+ * @param string $uri
+ *   A stream, referenced as "scheme://target".
+ *
+ * @return string
+ *   A string containing the name of the scheme, or FALSE if none. For example,
+ *   the URI "public://example.txt" would return "public".
+ */
+  protected static function getScheme($uri) {
+    $position = strpos($uri, '://');
+    return $position ? substr($uri, 0, $position) : FALSE;
   }
 
 }

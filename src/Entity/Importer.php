@@ -10,8 +10,8 @@ namespace Drupal\feeds\Entity;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityWithPluginBagsInterface;
-use Drupal\feeds\Feeds\FeedsPluginBag;
+use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\feeds\Feeds\FeedsSingleLazyPluginCollection;
 use Drupal\feeds\ImporterInterface;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
@@ -47,7 +47,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   admin_permission = "administer feeds"
  * )
  */
-class Importer extends ConfigEntityBundleBase implements ImporterInterface, EntityWithPluginBagsInterface {
+class Importer extends ConfigEntityBundleBase implements ImporterInterface, EntityWithPluginCollectionInterface {
 
   /**
    * The importer ID.
@@ -150,13 +150,13 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
   protected $targets;
 
   /**
-   * The plugin bags that store feeds plugins keyed by plugin type.
+   * The plugin collections that store feeds plugins keyed by plugin type.
    *
    * These are lazily instantiated on-demand.
    *
-   * @var \Drupal\Component\Plugin\PluginBag[]
+   * @var \Drupal\Component\Plugin\LazyPluginCollection[]
    */
-  protected $pluginBags;
+  protected $pluginCollection;
 
   /**
    * The instantiated target plugins.
@@ -326,7 +326,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
    *   The plugin specified.
    */
   protected function getPlugin($plugin_type) {
-    $bags = $this->getPluginBags();
+    $bags = $this->getPluginCollections();
     return $bags[$plugin_type . '_configuration']->get($this->$plugin_type);
   }
 
@@ -396,10 +396,10 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
   /**
    * {@inheritdoc}
    */
-  public function getPluginBags() {
-    if (!isset($this->pluginBags)) {
+  public function getPluginCollections() {
+    if (!isset($this->pluginCollection)) {
       foreach ($this->pluginTypes as $type) {
-        $this->pluginBags[$type . '_configuration'] = new FeedsPluginBag(
+        $this->pluginCollection[$type . '_configuration'] = new FeedsSingleLazyPluginCollection(
           \Drupal::service("plugin.manager.feeds.$type"),
           $this->get($type),
           $this->get($type . '_configuration'),
@@ -408,14 +408,14 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
       }
     }
 
-    return $this->pluginBags;
+    return $this->pluginCollection;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setPlugin($plugin_type, $plugin_id) {
-    $bags = $this->getPluginBags();
+    $bags = $this->getPluginCollections();
     $this->$plugin_type = $plugin_id;
     $bags[$plugin_type . '_configuration']->addInstanceID($plugin_id);
   }

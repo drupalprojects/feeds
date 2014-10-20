@@ -2,22 +2,22 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Feeds\FeedsPluginBag.
+ * Contains \Drupal\feeds\Feeds\FeedsSingleLazyPluginCollection.
  */
 
 namespace Drupal\feeds\Feeds;
 
-use Drupal\Core\Plugin\DefaultSinglePluginBag;
+use Drupal\Core\Plugin\DefaultSingleLazyPluginCollection;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\feeds\ImporterInterface;
 
 /**
  * Provides a container for lazily loading Feeds plugins.
  */
-class FeedsPluginBag extends DefaultSinglePluginBag {
+class FeedsSingleLazyPluginCollection extends DefaultSingleLazyPluginCollection {
 
   /**
-   * Constructs a FeedsPluginBag.
+   * Constructs a FeedsSingleLazyPluginCollection.
    *
    * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
    *   The manager to be used for instantiating plugins.

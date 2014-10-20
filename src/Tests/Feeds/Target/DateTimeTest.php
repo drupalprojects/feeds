@@ -20,8 +20,6 @@ class DateTimeTest extends FeedsUnitTestCase {
   protected $targetDefinition;
 
   public function setUp() {
-    require_once DRUPAL_ROOT . '/core/includes/common.inc';
-
     parent::setUp();
 
     $container = new ContainerBuilder();
