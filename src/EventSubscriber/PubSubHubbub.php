@@ -8,7 +8,6 @@
 namespace Drupal\feeds\EventSubscriber;
 
 use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Queue\QueueFactory;
 use Drupal\feeds\Entity\Subscription;
 use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
@@ -22,13 +21,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class PubSubHubbub implements EventSubscriberInterface {
 
   /**
-   * The queue service.
-   *
-   * @var \Drupal\Core\Queue\QueueFactory
-   */
-  protected $queueFactory;
-
-  /**
    * The subscription storage controller.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
@@ -38,11 +30,10 @@ class PubSubHubbub implements EventSubscriberInterface {
   /**
    * Constructs a PubSubHubbub object.
    *
-   * @param \Drupal\Core\Queue\QueueFactory $queue_factory
-   *   The queue service.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
    */
-  public function __construct(QueueFactory $queue_factory, EntityManagerInterface $entity_manager) {
-    $this->queueFactory = $queue_factory;
+  public function __construct(EntityManagerInterface $entity_manager) {
     $this->storage = $entity_manager->getStorage('feeds_subscription');
   }
 
@@ -93,6 +84,7 @@ class PubSubHubbub implements EventSubscriberInterface {
       ])->subscribe();
     }
     elseif ($feed->getSource() !== $subscription->getTopic() || $subscription->getHub() !== $hub) {
+      // Unsubscribe from the old feed.
       $subscription->unsubscribe();
 
       $this->storage->create([

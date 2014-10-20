@@ -23,7 +23,7 @@ services:
     class: Drupal\feeds\Controller\SubscriptionController
   feeds.pubsubhubbub:
     class: Drupal\feeds\EventSubscriber\PubSubHubbub
-    arguments: ['@queue', '@entity.manager']
+    arguments: ['@entity.manager']
     tags:
       - { name: event_subscriber }
   feeds.import_subscriber:

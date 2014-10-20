@@ -34,7 +34,7 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
     $this->validateState();
     $this->set('state', 'subscribing');
     $this->save();
-    \Drupal::queue('feeds_push_subscribe')->createItem($this->id());
+    \Drupal::queue('feeds_push_subscribe')->createItem($this);
   }
 
   /**
@@ -46,7 +46,7 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       case 'subscribed':
       case 'subscribing':
         $this->set('state', 'unsubscribing');
-        \Drupal::queue('feeds_push_unsubscribe')->createItem($this);
+        \Drupal::queue('feeds_push_subscribe')->createItem($this);
         break;
     }
     $this->delete();

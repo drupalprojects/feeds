@@ -21,7 +21,7 @@ class SubscriptionController {
   /**
    * Handles subscribe/unsubscribe requests.
    *
-   * @param int feeds_subscription_id
+   * @param int $feeds_subscription_id
    *   The subscription entity id.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
@@ -33,8 +33,6 @@ class SubscriptionController {
    *   Thrown if the subscription was not found, or if the request is invalid.
    */
   public function subscribe($feeds_subscription_id, Request $request) {
-    $feeds_subscription_id = (int) $feeds_subscription_id;
-
     // This is an invalid request.
     if ($request->query->get('hub.challenge') === NULL) {
       throw new NotFoundHttpException();
@@ -42,12 +40,12 @@ class SubscriptionController {
 
     // A subscribe request.
     if ($request->query->get('hub.mode') === 'subscribe') {
-      return $this->handleSubscribe($subscription, $request);
+      return $this->handleSubscribe((int) $feeds_subscription_id, $request);
     }
 
     // An unsubscribe request.
     if ($request->query->get('hub.mode') === 'unsubscribe') {
-      return $this->handleUnsubscribe($subscription, $request);
+      return $this->handleUnsubscribe((int) $feeds_subscription_id, $request);
     }
 
     // Whatever.
@@ -57,7 +55,7 @@ class SubscriptionController {
   /**
    * Handles a subscribe request.
    *
-   * @param int feeds_subscription_id
+   * @param int $subscription_id
    *   The subscription entity id.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
@@ -77,6 +75,10 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
+    if ($subscription->getState() !== 'subscribing' && $subscription->getState() !== 'subscribed') {
+      throw new NotFoundHttpException();
+    }
+
     if ($lease_time = $request->query->get('hub.lease_seconds')) {
       $subscription->setLease($lease_time);
     }
@@ -90,7 +92,7 @@ class SubscriptionController {
   /**
    * Handles an unsubscribe request.
    *
-   * @param int feeds_subscription_id
+   * @param int $subscription_id
    *   The subscription entity id.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.

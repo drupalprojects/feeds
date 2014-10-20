@@ -91,7 +91,7 @@ class PushSubscribe extends QueueWorkerBase implements ContainerFactoryPluginInt
         $mode = 'unsubscribe';
         // The subscription has been deleted, store it for a bit to handle the
         // response.
-        \Drupal::keyValueExpirable('feeds_push_unsubscribe')>setWithExpire($subscription, $this, 3600);
+        \Drupal::keyValueExpirable('feeds_push_unsubscribe')->setWithExpire($subscription->id(), $subscription, 3600);
         break;
 
       default:
