@@ -160,9 +160,9 @@ function template_preprocess_feeds_feed(&$variables) {
 
   $variables['page'] = $variables['view_mode'] === 'full';
 
-  $variables['date'] = drupal_render($variables['elements']['created'], TRUE);
+  $variables['date'] = drupal_render($variables['elements']['created']);
   unset($variables['elements']['created']);
-  $variables['author_name'] = drupal_render($variables['elements']['uid'], TRUE);
+  $variables['author_name'] = drupal_render($variables['elements']['uid']);
   unset($variables['elements']['uid']);
 
   $variables['url'] = $feed->url('canonical', [
