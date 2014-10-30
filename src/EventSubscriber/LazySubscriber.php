@@ -15,6 +15,7 @@ use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
+use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -70,7 +71,7 @@ class LazySubscriber implements EventSubscriberInterface {
       case 'fetch':
         $dispatcher->addListener(FeedsEvents::FETCH, function(FetchEvent $event) {
           $feed = $event->getFeed();
-          $result = $feed->getImporter()->getFetcher()->fetch($feed);
+          $result = $feed->getImporter()->getFetcher()->fetch($feed, $feed->getState(StateInterface::FETCH));
           $event->setFetcherResult($result);
         });
         break;
@@ -82,7 +83,7 @@ class LazySubscriber implements EventSubscriberInterface {
           $result = $feed
             ->getImporter()
             ->getParser()
-            ->parse($feed, $event->getFetcherResult());
+            ->parse($feed, $event->getFetcherResult(), $feed->getState(StateInterface::PARSE));
           $event->setParserResult($result);
         });
         break;
@@ -93,7 +94,7 @@ class LazySubscriber implements EventSubscriberInterface {
           $feed
             ->getImporter()
             ->getProcessor()
-            ->process($feed, $event->getParserResult());
+            ->process($feed, $event->getParserResult(), $feed->getState(StateInterface::PROCESS));
         });
         break;
     }
@@ -114,7 +115,8 @@ class LazySubscriber implements EventSubscriberInterface {
       }
 
       $dispatcher->addListener(FeedsEvents::CLEAR, function(ClearEvent $event) use ($plugin) {
-        $plugin->clear($event->getFeed());
+        $feed = $event->getFeed();
+        $plugin->clear($feed, $feed->getState(StateInterface::CLEAR));
       });
     }
   }

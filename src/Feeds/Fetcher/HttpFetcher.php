@@ -84,12 +84,12 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    * @todo Make parsers be able to handle streams. Maybe exclusively.
    * @todo Clean download cache directory.
    */
-  public function fetch(FeedInterface $feed) {
+  public function fetch(FeedInterface $feed, StateInterface $state) {
     $response = $this->get($feed->getSource());
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == 304) {
-      $feed->getState(StateInterface::FETCH)->setMessage($this->t('The feed has not been updated.'));
+      $state->setMessage($this->t('The feed has not been updated.'));
       throw new EmptyFeedException();
     }
 
@@ -161,13 +161,8 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
   /**
    * {@inheritdoc}
    */
-  public function clear(FeedInterface $feed) {
-    $this->cache->delete('feeds_http_download:' . md5($feed->getSource()));
-
-    $cache_file = $this->prepareDirectory($feed->getSource());
-    if (file_exists($cache_file)) {
-      file_unmanaged_delete($cache_file);
-    }
+  public function clear(FeedInterface $feed, StateInterface $state) {
+    $this->onFeedDeleteMultiple([$feed]);
   }
 
   /**
@@ -218,7 +213,12 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
   public function onFeedDeleteMultiple(array $feeds) {
     // Remove caches and files for this feeds.
     foreach ($feeds as $feed) {
-      $this->clear($feed);
+      $this->cache->delete('feeds_http_download:' . md5($feed->getSource()));
+
+      $cache_file = $this->prepareDirectory($feed->getSource());
+      if (file_exists($cache_file)) {
+        file_unmanaged_delete($cache_file);
+      }
     }
   }
 

@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * Interface for plugins that store information related to a feed.
@@ -36,7 +37,9 @@ interface ClearableInterface {
    *   to this feed. The preferred way of determining whether an item pertains
    *   to a certain feed is by using $feed->id(). It is the plugins's
    *   responsibility to store the id of an imported item during importing.
+   * @param \Drupal\feeds\StateInterface $state
+   *   The state object.
    */
-  public function clear(FeedInterface $feed);
+  public function clear(FeedInterface $feed, StateInterface $state);
 
 }

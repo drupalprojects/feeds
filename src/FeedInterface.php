@@ -166,7 +166,12 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   /**
    * Cleans up after an import.
    */
-  public function cleanUp();
+  public function cleanUpAfterImport();
+
+  /**
+   * Cleans up after feed items have been delted.
+   */
+  public function cleanUpAfterClear();
 
   /**
    * Reports the progress of the fetching stage.
@@ -301,6 +306,5 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *   Returns true if the feed is locked, and false if not.
    */
   public function isLocked();
-
 
 }

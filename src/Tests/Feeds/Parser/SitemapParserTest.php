@@ -36,10 +36,6 @@ class SitemapParserTest extends FeedsUnitTestCase {
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
     $this->feed->expects($this->any())
-      ->method('getState')
-      ->with(StateInterface::PARSE)
-      ->will($this->returnValue($this->state));
-    $this->feed->expects($this->any())
       ->method('getImporter')
       ->will($this->returnValue($this->importer));
   }
@@ -48,7 +44,7 @@ class SitemapParserTest extends FeedsUnitTestCase {
     $file = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tests/resources/sitemap-example.xml';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
-    $result = $this->parser->parse($this->feed, $fetcher_result);
+    $result = $this->parser->parse($this->feed, $fetcher_result, $this->state);
     $this->assertSame(count($result), 5);
     $this->assertSame($result[0]->get('url'), 'http://www.example.com/');
     $this->assertSame($result[3]->get('priority'), '0.3');
@@ -59,7 +55,7 @@ class SitemapParserTest extends FeedsUnitTestCase {
    */
   public function testInvalidFeed() {
     $fetcher_result = new RawFetcherResult('beep boop');
-    $result = $this->parser->parse($this->feed, $fetcher_result);
+    $result = $this->parser->parse($this->feed, $fetcher_result, $this->state);
   }
 
   /**
@@ -67,7 +63,7 @@ class SitemapParserTest extends FeedsUnitTestCase {
    */
   public function testEmptyFeed() {
     $result = new RawFetcherResult('');
-    $this->parser->parse($this->feed, $result);
+    $this->parser->parse($this->feed, $result, $this->state);
   }
 
   public function testGetMappingSources() {

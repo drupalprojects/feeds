@@ -32,7 +32,7 @@ class SitemapParser extends PluginBase implements ParserInterface {
   /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result, StateInterface $state) {
     // Set time zone to GMT for parsing dates with strtotime().
     $tz = date_default_timezone_get();
     date_default_timezone_set('GMT');

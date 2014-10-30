@@ -18,6 +18,7 @@ use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 use Drupal\feeds\Result\FetcherResult;
+use Drupal\feeds\StateInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
 
 /**
@@ -94,7 +95,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
   /**
    * {@inheritdoc}
    */
-  public function fetch(FeedInterface $feed) {
+  public function fetch(FeedInterface $feed, StateInterface $state) {
     if (is_file($feed->getSource())) {
       return new FetcherResult($feed->getSource());
     }

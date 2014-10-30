@@ -29,6 +29,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   protected $dispatcher;
   protected $explodingDispatcher;
   protected $feed;
+  protected $state;
   protected $importer;
   protected $fetcher;
   protected $parser;
@@ -45,7 +46,11 @@ class LazySubscriberTest extends FeedsUnitTestCase {
       ->method('addListener')
       ->will($this->throwException(new \Exception));
 
+    $this->state = $this->getMock('Drupal\feeds\StateInterface');
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
+    $this->feed->expects($this->any())
+      ->method('getState')
+      ->will($this->returnValue($this->state));
     $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
 
     $this->fetcher = $this->getMock('Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface');
@@ -70,11 +75,11 @@ class LazySubscriberTest extends FeedsUnitTestCase {
 
     $this->fetcher->expects($this->once())
       ->method('fetch')
-      ->with($this->feed)
+      ->with($this->feed, $this->state)
       ->will($this->returnValue($fetcher_result));
     $this->parser->expects($this->once())
       ->method('parse')
-      ->with($this->feed, $fetcher_result)
+      ->with($this->feed, $fetcher_result, $this->state)
       ->will($this->returnValue($parser_result));
     $this->processor->expects($this->once())
       ->method('process');
@@ -108,7 +113,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
     }
 
     // Call again.
-    $subscriber->onInitImport(new InitEvent($this->feed), FeedsEvents::INIT_IMPORT, $this->explodingDispatcher);
+    $subscriber->onInitImport(new InitEvent($this->feed, 'fetch'), FeedsEvents::INIT_IMPORT, $this->explodingDispatcher);
   }
 
   public function testOnInitClear() {

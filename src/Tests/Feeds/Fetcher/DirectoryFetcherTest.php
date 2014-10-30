@@ -38,9 +38,6 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $this->feed->expects($this->any())
       ->method('getSource')
       ->will($this->returnValue('vfs://feeds'));
-    $this->feed->expects($this->any())
-      ->method('getState')
-      ->will($this->returnValue($this->state));
 
     // Prepare filesystem.
     touch('vfs://feeds/test_file_1.txt');
@@ -58,7 +55,7 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $feed->expects($this->any())
       ->method('getSource')
       ->will($this->returnValue('vfs://feeds/test_file_1.txt'));
-    $result = $this->fetcher->fetch($feed);
+    $result = $this->fetcher->fetch($feed, $this->state);
     $this->assertSame('vfs://feeds/test_file_1.txt', $result->getFilePath());
   }
 
@@ -66,23 +63,23 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
    * @expectedException \RuntimeException
    */
   public function testFetchDir() {
-    $result = $this->fetcher->fetch($this->feed);
+    $result = $this->fetcher->fetch($this->feed, $this->state);
     $this->assertSame($this->state->total, 2);
     $this->assertSame('vfs://feeds/test_file_1.txt', $result->getFilePath());
-    $this->assertSame('vfs://feeds/test_file_2.txt', $this->fetcher->fetch($this->feed)->getFilePath());
+    $this->assertSame('vfs://feeds/test_file_2.txt', $this->fetcher->fetch($this->feed, $this->state)->getFilePath());
 
     chmod('vfs://feeds', 0333);
-    $result = $this->fetcher->fetch($this->feed);
+    $result = $this->fetcher->fetch($this->feed, $this->state);
   }
 
   public function testRecursiveFetchDir() {
     $this->fetcher->setConfiguration(['recursive_scan' => TRUE]);
 
-    $result = $this->fetcher->fetch($this->feed);
+    $result = $this->fetcher->fetch($this->feed, $this->state);
     $this->assertSame($this->state->total, 3);
     $this->assertSame('vfs://feeds/test_file_1.txt', $result->getFilePath());
-    $this->assertSame('vfs://feeds/test_file_2.txt', $this->fetcher->fetch($this->feed)->getFilePath());
-    $this->assertSame('vfs://feeds/subdir/test_file_4.txt', $this->fetcher->fetch($this->feed)->getFilePath());
+    $this->assertSame('vfs://feeds/test_file_2.txt', $this->fetcher->fetch($this->feed, $this->state)->getFilePath());
+    $this->assertSame('vfs://feeds/subdir/test_file_4.txt', $this->fetcher->fetch($this->feed, $this->state)->getFilePath());
   }
 
   /**
@@ -94,10 +91,7 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $feed->expects($this->any())
       ->method('getSource')
       ->will($this->returnValue('vfs://feeds/emptydir'));
-    $feed->expects($this->any())
-      ->method('getState')
-      ->will($this->returnValue($this->state));
-    $result = $this->fetcher->fetch($feed);
+    $result = $this->fetcher->fetch($feed, $this->state);
   }
 
   public function testFeedForm() {

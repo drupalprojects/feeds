@@ -10,6 +10,7 @@ namespace Drupal\feeds\Plugin\Type\Parser;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
+use Drupal\feeds\StateInterface;
 
 /**
  * The interface Feeds parser must implement.
@@ -23,13 +24,15 @@ interface ParserInterface extends FeedsPluginInterface {
    *   The feed we are parsing for.
    * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
    *   The result returned by the fetcher.
+   * @param \Drupal\feeds\StateInterface $state
+   *   The state object.
    *
    * @return \Drupal\feeds\Result\ParserResultInterface
    *   The parser result object.
    *
    * @todo This needs more documentation.
    */
-  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result);
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result, StateInterface $state);
 
   /**
    * Declare the possible mapping sources that this parser produces.

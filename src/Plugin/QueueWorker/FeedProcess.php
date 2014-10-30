@@ -56,7 +56,7 @@ class FeedProcess extends FeedQueueWorkerBase {
       $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem($feed, $fetcher_result);
     }
     else {
-      $feed->cleanUp();
+      $feed->cleanUpAfterImport();
       $feed->save();
       $feed->unlock();
     }

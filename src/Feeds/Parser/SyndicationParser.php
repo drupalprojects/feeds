@@ -32,7 +32,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
   /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result, StateInterface $state) {
     $result = new ParserResult();
     Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
     Reader::registerExtension('GeoRSS');

@@ -19,6 +19,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
 
   protected $fileStorage;
   protected $fetcher;
+  protected $state;
 
   public function setUp() {
     parent::setUp();
@@ -41,6 +42,8 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     );
 
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
+
+    $this->state = $this->getMock('Drupal\feeds\StateInterface');
   }
 
   public function testFetch() {
@@ -50,7 +53,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $feed->expects($this->any())
       ->method('getSource')
       ->will($this->returnValue('vfs://feeds/test_file'));
-    $this->fetcher->fetch($feed);
+    $this->fetcher->fetch($feed, $this->state);
   }
 
   /**
@@ -61,7 +64,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $feed->expects($this->any())
       ->method('getSource')
       ->will($this->returnValue('vfs://feeds/test_file'));
-    $this->fetcher->fetch($feed);
+    $this->fetcher->fetch($feed, $this->state);
   }
 
   public function testBuildFeedForm() {

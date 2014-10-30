@@ -52,15 +52,20 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *   The feed being imported.
    * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
    *   The item to process.
+   * @param \Drupal\feeds\StateInterface $state
+   *   The state object.
    */
-  public function process(FeedInterface $feed, ItemInterface $item);
+  public function process(FeedInterface $feed, ItemInterface $item, StateInterface $state);
 
   /**
    * Called after an import is completed.
    *
    * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed.
+   * @param \Drupal\feeds\StateInterface $state
+   *   The state object.
    */
-  public function finishImport(FeedInterface $feed);
+  public function postProcess(FeedInterface $feed, StateInterface $state);
 
   /**
    * Deletes feed items older than REQUEST_TIME - $time.
@@ -93,6 +98,22 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *   The number of items imported by this feed.
    */
   public function getItemCount(FeedInterface $feed);
+
+  /**
+   * Returns the label for feed items created.
+   *
+   * @return string
+   *   The item label.
+   */
+  public function getItemLabel();
+
+  /**
+   * Returns the plural label for feed items created.
+   *
+   * @return string
+   *   The plural item label.
+   */
+  public function getItemLabelPlural();
 
   /**
    * Returns the age of items that should be removed.

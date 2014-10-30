@@ -31,7 +31,7 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
   /**
    * {@inheritdoc}
    */
-  public function fetch(FeedInterface $feed) {
+  public function fetch(FeedInterface $feed, StateInterface $state) {
     $path = $feed->getSource();
     // Just return a file fetcher result if this is a file.
     if (is_file($path)) {
@@ -43,7 +43,6 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
     }
 
     // Batch if this is a directory.
-    $state = $feed->getState(StateInterface::FETCH);
     if (!isset($state->files)) {
       $state->files = $this->listFiles($path);
       $state->total = count($state->files);

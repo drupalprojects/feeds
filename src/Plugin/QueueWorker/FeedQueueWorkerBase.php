@@ -62,7 +62,7 @@ abstract class FeedQueueWorkerBase extends QueueWorkerBase implements ContainerF
    * Handles an import exception.
    */
   protected function handleException(FeedInterface $feed, \Exception $exception) {
-    $feed->cleanUp();
+    $feed->cleanUpAfterImport();
     $feed->save();
     $feed->unlock();
 

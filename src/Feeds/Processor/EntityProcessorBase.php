@@ -32,7 +32,7 @@ use Drupal\user\EntityOwnerInterface;
  *
  * Creates entities from feed items.
  */
-abstract class EntityProcessorBase extends ConfigurablePluginBase implements EntityProcessorInterface {
+abstract class EntityProcessorBase extends ProcessorBase implements EntityProcessorInterface {
 
   /**
    * The entity manager.
@@ -95,7 +95,7 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
   /**
    * {@inheritdoc}
    */
-  public function process(FeedInterface $feed, ItemInterface $item) {
+  public function process(FeedInterface $feed, ItemInterface $item, StateInterface $state) {
     $existing_entity_id = $this->existingEntityId($feed, $item);
     $skip_existing = $this->configuration['update_existing'] == static::SKIP_EXISTING;
 
@@ -118,7 +118,6 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
       return;
     }
 
-    $state = $feed->getState(StateInterface::PROCESS);
     // Build a new entity.
     if (!$existing_entity_id) {
       $entity = $this->newEntity($feed);
@@ -153,9 +152,7 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
   /**
    * {@inheritdoc}
    */
-  public function clear(FeedInterface $feed) {
-    $state = $feed->getState(StateInterface::CLEAR);
-
+  public function clear(FeedInterface $feed, StateInterface $state) {
     // Build base select statement.
     $query = $this->queryFactory->get($this->entityType())
       ->condition('feeds_item.target_id', $feed->id());
@@ -173,46 +170,6 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
       $this->entityDeleteMultiple($entity_ids);
       $state->deleted += count($entity_ids);
       $state->progress($state->total, $state->deleted);
-    }
-
-    // Report results when done.
-    if ($feed->progressClearing() === StateInterface::BATCH_COMPLETE) {
-      $tokens = [
-        '@item' => $this->itemLabel(),
-        '@items' => $this->itemLabelPlural(),
-        '%title' => $feed->label(),
-      ];
-
-      if ($state->deleted) {
-        $state->setMessage($this->formatPlural($state->deleted, 'Deleted @count @item from %title.', 'Deleted @count @items from %title.', $tokens));
-      }
-      else {
-        $state->setMessage($this->t('There are no @items to delete.', $tokens));
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function finishImport(FeedInterface $feed) {
-    $state = $feed->getState(StateInterface::PROCESS);
-    $tokens = [
-      '@item' => $this->itemLabel(),
-      '@items' => $this->itemLabelPlural(),
-    ];
-
-    if ($state->created) {
-      $state->setMessage($this->formatPlural($state->created, 'Created @count @item.', 'Created @count @items.', $tokens));
-    }
-    if ($state->updated) {
-      $state->setMessage($this->formatPlural($state->updated, 'Updated @count @item.', 'Updated @count @items.', $tokens));
-    }
-    if ($state->failed) {
-      $state->setMessage($this->formatPlural($state->failed, 'Failed importing @count @item.', 'Failed importing @count @items.', $tokens));
-    }
-    if (!$state->created && !$state->updated && !$state->failed) {
-      $state->setMessage($this->t('There are no new @items.', $tokens));
     }
   }
 
@@ -311,7 +268,7 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
    * @return string
    *   The item label.
    */
-  protected function itemLabel() {
+  public function getItemLabel() {
     if (!$this->entityType->getKey('bundle')) {
       return $this->entityTypeLabel();
     }
@@ -325,8 +282,8 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
    * @return string
    *   The plural item label.
    */
-  protected function itemLabelPlural() {
-    return Inflector::pluralize($this->itemLabel());
+  public function getItemLabelPlural() {
+    return Inflector::pluralize($this->getItemLabel());
   }
 
   /**
@@ -364,27 +321,35 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
    * {@inheritdoc}
    */
   protected function entitySaveAccess(EntityInterface $entity) {
-    if ($this->configuration['authorize'] && !empty($entity->uid->value)) {
-
-      // If the uid was mapped directly, rather than by email or username, it
-      // could be invalid.
-      if (!($account = $entity->uid->entity)) {
-        $message = 'User %uid is not a valid user.';
-        throw new EntityAccessException(String::format($message, ['%uid' => $entity->uid->value]));
-      }
-
-      $op = $entity->isNew() ? 'create' : 'update';
-
-      if (!$entity->access($op, $account)) {
-        $args = [
-          '%name' => $account->getUsername(),
-          '%op' => $op,
-          '@bundle' => Unicode::strtolower($this->bundleLabel()),
-          '%bundle' => $entity->bundle(),
-        ];
-        throw new EntityAccessException(String::format('User %name is not authorized to %op @bundle %bundle.', $args));
-      }
+    // No need to authorize.
+    if (!$this->configuration['authorize']) {
+      return;
     }
+
+    // If the uid was mapped directly, rather than by email or username, it
+    // could be invalid.
+    if (!$account = $entity->getOwner()) {
+      throw new EntityAccessException($this->t('Invalid user mapped to %label.', ['%label' => $entity->label()]));
+    }
+
+    // We don't check access for anonymous users.
+    if ($account->isAnonymous()) {
+      return;
+    }
+
+    $op = $entity->isNew() ? 'create' : 'update';
+
+    // Access granted.
+    if ($entity->access($op, $account)) {
+      return;
+    }
+
+    $args = [
+      '%name' => $account->getUsername(),
+      '@op' => $op,
+      '@bundle' => $this->getItemLabelPlural(),
+    ];
+    throw new EntityAccessException($this->t('User %name is not authorized to @op @bundle.', $args));
   }
 
   /**
@@ -403,7 +368,7 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
       'update_existing' => static::SKIP_EXISTING,
       'skip_hash_check' => FALSE,
       'values' => [$this->entityType->getKey('bundle') => NULL],
-      'authorize' => TRUE,
+      'authorize' => $this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface'),
       'expire' => static::EXPIRE_NEVER,
       'owner_id' => 0,
     ];
@@ -415,7 +380,10 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $tokens = ['@entity' => Unicode::strtolower($this->entityTypeLabel()), '@entities' => Unicode::strtolower($this->entityTypeLabelPlural())];
+    $tokens = [
+      '@entity' => Unicode::strtolower($this->entityTypeLabel()),
+      '@entities' => Unicode::strtolower($this->entityTypeLabelPlural()),
+    ];
 
     $form['update_existing'] = [
       '#type' => 'radios',
@@ -454,13 +422,15 @@ abstract class EntityProcessorBase extends ConfigurablePluginBase implements Ent
       '#collapsible' => TRUE,
       '#weight' => 10,
     ];
-    $form['advanced']['authorize'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Authorize'),
-      '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
-      '#default_value' => $this->configuration['authorize'],
-      '#parents' => ['processor_configuration', 'authorize'],
-    ];
+    if ($this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
+      $form['advanced']['authorize'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Authorize'),
+        '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
+        '#default_value' => $this->configuration['authorize'],
+        '#parents' => ['processor_configuration', 'authorize'],
+      ];
+    }
     $form['advanced']['skip_hash_check'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Force update'),

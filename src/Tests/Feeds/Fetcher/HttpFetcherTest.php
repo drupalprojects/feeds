@@ -29,6 +29,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   protected $client;
   protected $config;
   protected $cache;
+  protected $state;
 
   public function setUp() {
     parent::setUp();
@@ -49,6 +50,8 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
     $this->fetcher = new HttpFetcher(['importer' => $importer], 'http', [], $this->client, $this->config, $this->cache);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
+
+    $this->state = $this->getMock('Drupal\feeds\StateInterface');
   }
 
   public function testFetch() {
@@ -58,7 +61,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     file_put_contents('vfs://feeds/test_data', 'test data');
     $stream = Stream::factory(fopen('vfs://feeds/test_data', 'r+'));
     $this->client->getEmitter()->attach(new Mock([new Response(200, [], $stream)]));
-    $result = $this->fetcher->fetch($feed);
+    $result = $this->fetcher->fetch($feed, $this->state);
     $this->assertSame('test data', $result->getRaw());
   }
 
@@ -69,14 +72,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     $state = new State();
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
 
-    $feed->expects($this->any())
-      ->method('getState')
-      ->with(StateInterface::FETCH)
-      ->will($this->returnValue($state));
-
     $this->client->getEmitter()->attach(new Mock([new Response(304)]));
 
-    $this->fetcher->fetch($feed);
+    $this->fetcher->fetch($feed, $this->state);
   }
 
   /**
@@ -84,7 +82,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    */
   public function testFetch404() {
     $this->client->getEmitter()->attach(new Mock([new Response(404)]));
-    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'));
+    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), $this->state);
   }
 
   /**
@@ -92,7 +90,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    */
   public function testFetchError() {
     $this->client->getEmitter()->attach(new Mock([new RequestException('', new Request(200, 'http://google.com'))]));
-    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'));
+    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), $this->state);
   }
 
   public function testFeedForm() {
@@ -112,7 +110,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
       ->will($this->returnValue('http://example.com'));
     $feeds = [$feed, $feed, $feed];
 
-    $this->fetcher->onFeedDeleteMultiple($feeds);
+    $this->fetcher->onFeedDeleteMultiple($feeds, $this->state);
   }
 
 }

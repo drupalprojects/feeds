@@ -35,9 +35,8 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result, StateInterface $state) {
     $feed_config = $feed->getConfigurationFor($this);
-    $state = $feed->getState(StateInterface::PARSE);
 
     if (!filesize($fetcher_result->getFilePath())) {
       throw new EmptyFeedException();

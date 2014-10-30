@@ -31,7 +31,7 @@ class OpmlParser extends PluginBase implements ParserInterface {
   /**
    * {@inheritdoc}
    */
-  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
+  public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result, StateInterface $state) {
     $raw = $fetcher_result->getRaw();
     if (!strlen(trim($raw))) {
       throw new EmptyFeedException();

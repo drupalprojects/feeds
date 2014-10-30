@@ -248,8 +248,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * Cleans up after an import.
    */
-  public function cleanUp() {
-    $this->getImporter()->getProcessor()->finishImport($this);
+  public function cleanUpAfterImport() {
+    $this->getImporter()->getProcessor()->postProcess($this, $this->getState(StateInterface::PROCESS));
 
     foreach ($this->states as $state) {
       is_object($state) ? $state->displayMessages() : NULL;
@@ -265,6 +265,19 @@ class Feed extends ContentEntityBase implements FeedInterface {
     if ($interval !== ImporterInterface::SCHEDULE_NEVER) {
       $this->set('next', $interval + $time);
     }
+  }
+
+  /**
+   * Cleans up after an import.
+   */
+  public function cleanUpAfterClear() {
+    $this->getImporter()->getProcessor()->postClear($this, $this->getState(StateInterface::CLEAR));
+
+    foreach ($this->states as $state) {
+      is_object($state) ? $state->displayMessages() : NULL;
+    }
+
+    $this->clearStates();
   }
 
   /**

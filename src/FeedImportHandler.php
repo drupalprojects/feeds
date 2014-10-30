@@ -178,7 +178,7 @@ class FeedImportHandler extends FeedHandlerBase {
       $this->startBatchFetch($feed);
     }
     else {
-      $feed->cleanUp();
+      $feed->cleanUpAfterImport();
       $feed->save();
       $feed->unlock();
     }
@@ -217,7 +217,7 @@ class FeedImportHandler extends FeedHandlerBase {
       // Do nothing. Will throw later.
     }
 
-    $feed->cleanUp();
+    $feed->cleanUpAfterImport();
     $feed->save();
     $feed->unlock();
 
@@ -287,7 +287,7 @@ class FeedImportHandler extends FeedHandlerBase {
    *   Thrown if $exception is not an instance of EmptyFeedException.
    */
   protected function handleException(FeedInterface $feed, \Exception $exception) {
-    $feed->cleanUp();
+    $feed->cleanUpAfterImport();
     $feed->save();
     $feed->unlock();
 
