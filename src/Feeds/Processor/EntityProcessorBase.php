@@ -32,7 +32,7 @@ use Drupal\user\EntityOwnerInterface;
  *
  * Creates entities from feed items.
  */
-class EntityProcessorBase extends ConfigurablePluginBase implements EntityProcessorInterface {
+abstract class EntityProcessorBase extends ConfigurablePluginBase implements EntityProcessorInterface {
 
   /**
    * The entity manager.
@@ -131,7 +131,6 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
 
       // This will throw an exception on failure.
       $this->entitySaveAccess($entity);
-
       // Set the values that we absolutely need.
       $entity->get('feeds_item')->target_id = $feed->id();
       $entity->get('feeds_item')->hash = $hash;
@@ -179,16 +178,16 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
     // Report results when done.
     if ($feed->progressClearing() === StateInterface::BATCH_COMPLETE) {
       $tokens = [
-        '@entity' => Unicode::strtolower($this->entityLabel()),
-        '@entities' => Unicode::strtolower($this->entityLabelPlural()),
+        '@item' => $this->itemLabel(),
+        '@items' => $this->itemLabelPlural(),
         '%title' => $feed->label(),
       ];
 
       if ($state->deleted) {
-        $state->setMessage($this->formatPlural($state->deleted, 'Deleted @count @entity from %title.', 'Deleted @count @entities from %title.', $tokens));
+        $state->setMessage($this->formatPlural($state->deleted, 'Deleted @count @item from %title.', 'Deleted @count @items from %title.', $tokens));
       }
       else {
-        $state->setMessage($this->t('There are no @entities to delete.', $tokens));
+        $state->setMessage($this->t('There are no @items to delete.', $tokens));
       }
     }
   }
@@ -197,29 +196,23 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
    * {@inheritdoc}
    */
   public function finishImport(FeedInterface $feed) {
-    $this->setMessages($feed->getState(StateInterface::PROCESS));
-  }
-
-  /**
-   * Sets the messages.
-   */
-  protected function setMessages(StateInterface $state) {
+    $state = $feed->getState(StateInterface::PROCESS);
     $tokens = [
-      '@entity' => Unicode::strtolower($this->entityLabel()),
-      '@entities' => Unicode::strtolower($this->entityLabelPlural()),
+      '@item' => $this->itemLabel(),
+      '@items' => $this->itemLabelPlural(),
     ];
 
     if ($state->created) {
-      $state->setMessage($this->formatPlural($state->created, 'Created @count @entity.', 'Created @count @entities.', $tokens));
+      $state->setMessage($this->formatPlural($state->created, 'Created @count @item.', 'Created @count @items.', $tokens));
     }
     if ($state->updated) {
-      $state->setMessage($this->formatPlural($state->updated, 'Updated @count @entity.', 'Updated @count @entities.', $tokens));
+      $state->setMessage($this->formatPlural($state->updated, 'Updated @count @item.', 'Updated @count @items.', $tokens));
     }
     if ($state->failed) {
-      $state->setMessage($this->formatPlural($state->failed, 'Failed @count @entity.', 'Failed @count @entities.', $tokens));
+      $state->setMessage($this->formatPlural($state->failed, 'Failed importing @count @item.', 'Failed importing @count @items.', $tokens));
     }
     if (!$state->created && !$state->updated && !$state->failed) {
-      $state->setMessage($this->t('There are no new @entities.', $tokens));
+      $state->setMessage($this->t('There are no new @items.', $tokens));
     }
   }
 
@@ -251,7 +244,7 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
    * @todo We should be more careful about missing bundles.
    */
   public function bundle() {
-    if (!$bundle_key = $this->bundleKey()) {
+    if (!$bundle_key = $this->entityType->getKey('bundle')) {
       return $this->entityType();
     }
     if (isset($this->configuration['values'][$bundle_key])) {
@@ -293,25 +286,47 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
   }
 
   /**
-   * Returns the label of the entity being processed.
+   * Returns the label of the entity type being processed.
    *
    * @return string
-   *   The label of the entity.
+   *   The label of the entity type.
    */
-  protected function entityLabel() {
+  protected function entityTypeLabel() {
     return $this->entityType->getLabel();
   }
 
   /**
-   * Returns the plural label of the entity being processed.
-   *
-   * This will return the singular label if the plural label does not exist.
+   * Returns the plural label of the entity type being processed.
    *
    * @return string
-   *   The plural label of the entity.
+   *   The plural label of the entity type.
    */
-  protected function entityLabelPlural() {
-    return Inflector::pluralize($this->entityLabel());
+  protected function entityTypeLabelPlural() {
+    return Inflector::pluralize($this->entityTypeLabel());
+  }
+
+  /**
+   * Returns the label for items being created, updated, or deleted.
+   *
+   * @return string
+   *   The item label.
+   */
+  protected function itemLabel() {
+    if (!$this->entityType->getKey('bundle')) {
+      return $this->entityTypeLabel();
+    }
+    $storage = $this->entityManager->getStorage($this->entityType->getBundleEntityType());
+    return $storage->load($this->configuration['values'][$this->entityType->getKey('bundle')])->label();
+  }
+
+  /**
+   * Returns the plural label for items being created, updated, or deleted.
+   *
+   * @return string
+   *   The plural item label.
+   */
+  protected function itemLabelPlural() {
+    return Inflector::pluralize($this->itemLabel());
   }
 
   /**
@@ -333,14 +348,16 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
    */
   protected function entityValidate(EntityInterface $entity) {
     $violations = $entity->validate();
-    if (count($violations)) {
-      $args = [
-        '@entity' => Unicode::strtolower($this->entityLabel()),
-        '%label' => $entity->label(),
-        '@url' => $this->url('feeds.importer_mapping', ['feeds_importer' => $this->importer->id()]),
-      ];
-      throw new ValidationException(String::format('The @entity %label failed to validate. Please check your <a href="@url">mappings</a>.', $args));
+    if (!count($violations)) {
+      return;
     }
+    $args = [
+      '@entity' => Unicode::strtolower($this->entityTypeLabel()),
+      '%label' => $entity->label(),
+      '%error' => $violations[0]->getMessage(),
+      '@url' => $this->url('feeds.importer_mapping', ['feeds_importer' => $this->importer->id()]),
+    ];
+    throw new ValidationException(String::format('The @entity %label failed to validate with the error: %error Please check your <a href="@url">mappings</a>.', $args));
   }
 
   /**
@@ -385,7 +402,7 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
     $defaults = [
       'update_existing' => static::SKIP_EXISTING,
       'skip_hash_check' => FALSE,
-      'values' => [$this->bundleKey() => NULL],
+      'values' => [$this->entityType->getKey('bundle') => NULL],
       'authorize' => TRUE,
       'expire' => static::EXPIRE_NEVER,
       'owner_id' => 0,
@@ -398,7 +415,7 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $tokens = ['@entity' => Unicode::strtolower($this->entityLabel()), '@entities' => Unicode::strtolower($this->entityLabelPlural())];
+    $tokens = ['@entity' => Unicode::strtolower($this->entityTypeLabel()), '@entities' => Unicode::strtolower($this->entityTypeLabelPlural())];
 
     $form['update_existing'] = [
       '#type' => 'radios',
@@ -645,7 +662,7 @@ class EntityProcessorBase extends ConfigurablePluginBase implements EntityProces
    * {@inheritdoc}
    */
   public function buildAdvancedForm(array $form, FormStateInterface $form_state) {
-    if ($bundle_key = $this->bundleKey()) {
+    if ($bundle_key = $this->entityType->getKey('bundle')) {
       $form['values'][$bundle_key] = [
         '#type' => 'select',
         '#options' => $this->bundleOptions(),

@@ -7,9 +7,7 @@
 
 namespace Drupal\feeds\Exception;
 
-use RuntimeException;
-
 /**
  * Thrown if validation of a feed item fails.
  */
-class ValidationException extends RuntimeException {}
+class ValidationException extends \RuntimeException {}

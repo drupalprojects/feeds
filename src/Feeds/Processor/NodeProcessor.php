@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Feeds\Processor;
 
+use Doctrine\Common\Inflector\Inflector;
+
 /**
  * Defines a node processor.
  *
@@ -21,5 +23,19 @@ namespace Drupal\feeds\Feeds\Processor;
  * )
  */
 class NodeProcessor extends EntityProcessorBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function entityLabel() {
+    return $this->t('Node');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function entityLabelPlural() {
+    return $this->t('Nodes');
+  }
 
 }
