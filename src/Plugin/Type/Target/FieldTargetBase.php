@@ -13,9 +13,9 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Feeds\Processor\EntityProcessor;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
 
 /**
  * Helper class for field mappers.
@@ -42,7 +42,7 @@ abstract class FieldTargetBase extends TargetBase {
   public static function targets(array &$targets, ImporterInterface $importer, array $definition) {
     $processor = $importer->getProcessor();
 
-    if (!$processor instanceof EntityProcessor) {
+    if (!$processor instanceof EntityProcessorInterface) {
       return $targets;
     }
 

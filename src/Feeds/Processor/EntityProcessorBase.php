@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Feeds\Processor\EntityProcessor.
+ * Contains \Drupal\feeds\Feeds\Processor\EntityProcessorBase.
  */
 
 namespace Drupal\feeds\Feeds\Processor;
@@ -20,30 +20,19 @@ use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\ItemInterface;
-use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
-use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\Type\LockableInterface;
-use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
+use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
 use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\user\EntityOwnerInterface;
 
 /**
- * Defines an entity processor.
+ * Defines a base entity processor.
  *
  * Creates entities from feed items.
- *
- * @FeedsProcessor(
- *   id = "entity",
- *   title = @Translation("Entity processor"),
- *   description = @Translation("Creates entities from feed items."),
- *   deriver = "\Drupal\feeds\Plugin\Derivative\EntityProcessor",
- *   arguments = {"@entity.manager", "@entity.query"}
- * )
  */
-class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterface, ClearableInterface, LockableInterface, AdvancedFormPluginInterface {
+class EntityProcessorBase extends ConfigurablePluginBase implements EntityProcessorInterface {
 
   /**
    * The entity manager.
@@ -81,7 +70,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
   protected $isLocked;
 
   /**
-   * Constructs an EntityProcessor object.
+   * Constructs an EntityProcessorBase object.
    *
    * @param array $configuration
    *   The plugin configuration.
@@ -96,8 +85,8 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityManagerInterface $entity_manager, QueryFactory $query_factory) {
     $this->entityManager = $entity_manager;
-    $this->entityType = $entity_manager->getDefinition($plugin_definition['entity type']);
-    $this->storageController = $entity_manager->getStorage($plugin_definition['entity type']);
+    $this->entityType = $entity_manager->getDefinition($plugin_definition['entity_type']);
+    $this->storageController = $entity_manager->getStorage($plugin_definition['entity_type']);
     $this->queryFactory = $query_factory;
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -238,7 +227,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
    * {@inheritdoc}
    */
   public function entityType() {
-    return $this->pluginDefinition['entity type'];
+    return $this->pluginDefinition['entity_type'];
   }
 
   /**
@@ -540,7 +529,7 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
         continue;
       }
       $processor = $importer->getProcessor();
-      if (!$processor instanceof EntityProcessor) {
+      if (!$processor instanceof EntityProcessorInterface) {
         continue;
       }
 
@@ -571,13 +560,6 @@ class EntityProcessor extends ConfigurablePluginBase implements ProcessorInterfa
     if ($storage = FieldStorageConfig::loadByName($this->entityType(), 'feeds_item')) {
       $storage->delete();
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getMappingTargets() {
-    return [];
   }
 
   /**

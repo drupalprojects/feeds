@@ -11,7 +11,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Feeds\Processor\EntityProcessor;
+use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -47,7 +47,7 @@ class ItemListController extends ControllerBase {
     ];
 
     // @todo Allow processors to create their own entity listings.
-    if (!$processor instanceof EntityProcessor) {
+    if (!$processor instanceof EntityProcessorInterface) {
       return $build;
     }
 

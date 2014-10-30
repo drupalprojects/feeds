@@ -230,7 +230,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
    */
   public function getMappingTargets() {
     if ($this->targets === NULL) {
-      $this->targets = $this->getProcessor()->getMappingTargets();
+      $this->targets = [];
       $definitions = \Drupal::service('plugin.manager.feeds.target')->getDefinitions();
 
       foreach ($definitions as $definition) {

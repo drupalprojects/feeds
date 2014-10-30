@@ -104,16 +104,4 @@ interface ProcessorInterface extends FeedsPluginInterface {
    */
   public function expiryTime();
 
-  /**
-   * Declares the possible mapping targets that this processor exposes.
-   *
-   * @return array
-   *   An array of mapping targets keyed by the target id:
-   *   - target id: This is the id of the target.
-   *     - name: The name of the target as displayed on the UI.
-   *     - description: A helpful description of the target.
-   *     - optional_unique: Set to true if this target supports unique values.
-   */
-  public function getMappingTargets();
-
 }
