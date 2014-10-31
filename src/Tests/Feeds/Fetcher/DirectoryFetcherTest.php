@@ -106,11 +106,11 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $form['source']['#parents'] = ['source'];
 
     // Valid.
-    $form_state->setValue(['source', 0, 'value'], 'vfs://feeds');
+    $form_state->setValue('source', 'vfs://feeds');
     $this->fetcher->validateFeedForm($form, $form_state, $this->feed);
 
     // Does not exist.
-    $form_state->setValue(['source', 0, 'value'], 'vfs://doesnotexist');
+    $form_state->setValue('source', 'vfs://doesnotexist');
     $this->fetcher->validateFeedForm($form, $form_state, $this->feed);
     $this->assertSame(count($form_state->getErrors()), 1);
   }

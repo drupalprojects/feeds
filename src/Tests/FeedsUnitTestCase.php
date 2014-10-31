@@ -168,14 +168,10 @@ namespace {
     }
   }
 
-  if (!function_exists('file_unmanaged_move')) {
-    function file_unmanaged_move($old, $new) {
-      rename($old, $new);
+  if (!function_exists('drupal_basename')) {
+    function drupal_basename($uri, $suffix = NULL) {
+      return basename($uri, $suffix);
     }
-  }
-
-  if (!function_exists('file_unmanaged_delete')) {
-    function file_unmanaged_delete() {}
   }
 
   if (!function_exists('drupal_get_user_timezone')) {

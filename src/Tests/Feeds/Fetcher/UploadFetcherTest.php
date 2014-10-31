@@ -77,7 +77,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $form_state = new FormState();
     $form = $this->fetcher->buildFeedForm([], $form_state, $feed);
 
-    $form_state->setValue(['fetcher', 'upload'], [10]);
+    $form_state->setValue('source', [10]);
     $this->fileStorage->expects($this->exactly(2))
       ->method('load')
       ->will($this->returnValue($this->getMock('Drupal\file\FileInterface')));

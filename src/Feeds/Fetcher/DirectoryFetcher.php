@@ -33,9 +33,16 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
    */
   public function fetch(FeedInterface $feed, StateInterface $state) {
     $path = $feed->getSource();
-    // Just return a file fetcher result if this is a file.
+    // Just return a file fetcher result if this is a file. Make sure to
+    // re-validate the file extension in case the importer settings have
+    // changed.
     if (is_file($path)) {
-      return new FetcherResult($path);
+      if ($this->validateFilePath($path)) {
+        return new FetcherResult($path);
+      }
+      else {
+        throw new \RuntimeException($this->t('%source has an invalid file extension.', ['%source' => $path]));
+      }
     }
 
     if (!is_dir($path) || !is_readable($path)) {
@@ -54,6 +61,26 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
     }
 
     throw new EmptyFeedException();
+  }
+
+  /**
+   * Validates a single file path.
+   *
+   * @param string $filepath
+   *   The file path.
+   *
+   * @return bool
+   *   Returns true if the file is valid, and false if not.
+   */
+  protected function validateFilePath($filepath) {
+    $filename = drupal_basename($filepath);
+    // Don't allow hidden files.
+    if (substr($filename, 0, 1) === '.') {
+      return FALSE;
+    }
+    // Validate file extension.
+    $extension = substr($filename, strrpos($filename, '.') + 1);
+    return in_array($extension, $this->configuration['allowed_extensions'], TRUE);
   }
 
   /**
@@ -100,8 +127,13 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
    * {@inheritdoc}
    */
   public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
-    $form['source']['widget'][0]['value']['#type'] = 'feeds_uri';
-    $form['source']['widget'][0]['value']['#allowed_schemes'] = $this->configuration['allowed_schemes'];
+    $form['source'] = [
+      '#title' => $this->t('Server file or directory path'),
+      '#type' => 'feeds_uri',
+      '#default_value' => $feed->getSource(),
+      '#allowed_schemes' => $this->configuration['allowed_schemes'],
+      '#description' => $this->t('The allowed schemes are: %schemes', ['%schemes' => implode(', ', $this->configuration['allowed_schemes'])]),
+    ];
     return $form;
   }
 
@@ -109,12 +141,26 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
    * {@inheritdoc}
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    $source = $form_state->getValue(['source', 0, 'value']);
+    $source = $form_state->getValue('source');
 
-    // Check wether the given path exists.
     if (!is_readable($source) || (!is_dir($source) && !is_file($source))) {
       $form_state->setError($form['source'], $this->t('%source is not a readable directory or file.', ['%source' => $source]));
+      return;
     }
+    if (is_dir($source)) {
+      return;
+    }
+    // Validate a single file.
+    if (!$this->validateFilePath($source)) {
+      $form_state->setError($form['source'], $this->t('%source has an invalid file extension.', ['%source' => $source]));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
+    $feed->setSource($form_state->getValue('source'));
   }
 
   /**

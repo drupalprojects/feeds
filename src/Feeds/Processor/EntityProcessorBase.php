@@ -322,7 +322,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    */
   protected function entitySaveAccess(EntityInterface $entity) {
     // No need to authorize.
-    if (!$this->configuration['authorize']) {
+    if (!$this->configuration['authorize'] || !$entity instanceof EntityOwnerInterface) {
       return;
     }
 

@@ -116,12 +116,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
     $feed_config = $feed->getConfigurationFor($this);
-
-    $form['source']['widget'][0]['value']['#type'] = 'value';
-    $form['source']['widget'][0]['value']['#value'] = 'http://example.com';
-
-    $form['fetcher']['#tree'] = TRUE;
-    $form['fetcher']['upload'] = [
+    $form['source'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('File'),
       '#description' => $this->t('Select a file from your local system.'),
@@ -143,7 +138,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
    */
   public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
     // We need to store this for later so that we have the feed id.
-    $new_fid = reset($form_state->getValue(['fetcher', 'upload']));
+    $new_fid = reset($form_state->getValue('source'));
     $feed_config = $feed->getConfigurationFor($this);
 
     // Generate a UUID that maps to this feed for file usage. We can't depend

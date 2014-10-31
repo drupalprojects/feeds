@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of \Drupal\feeds\ImporterForm.
+ * Contains \Drupal\feeds\ImporterForm.
  */
 
 namespace Drupal\feeds;

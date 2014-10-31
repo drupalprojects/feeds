@@ -38,7 +38,7 @@ class Uri extends Url {
     }
 
     $parsed = parse_url($value);
-    $valid = $parsed && isset($parsed['scheme']) && isset($parsed['host']);
+    $valid = $parsed && !empty($parsed['scheme']) && !empty($parsed['host']);
 
     if (!$valid) {
       $form_state->setError($element, t('The URI %url is not valid.', ['%url' => $value]));

@@ -38,6 +38,7 @@ use Drupal\user\UserInterface;
  *     "access" = "Drupal\feeds\FeedAccessControlHandler",
  *     "form" = {
  *       "default" = "Drupal\feeds\FeedForm",
+ *       "update" = "Drupal\feeds\FeedForm",
  *       "delete" = "Drupal\feeds\Form\FeedDeleteForm",
  *       "import" = "Drupal\feeds\Form\FeedImportForm",
  *       "clear" = "Drupal\feeds\Form\FeedClearForm",
@@ -573,17 +574,12 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setLabel(t('Source'))
       ->setDescription(t('The source of the feed.'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', [
-        'type' => 'uri',
-        'weight' => -3,
-      ])
       ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'feeds_uri_link',
         'weight' => -3,
       ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['config'] = BaseFieldDefinition::create('feeds_serialized')
       ->setLabel(t('Config'))

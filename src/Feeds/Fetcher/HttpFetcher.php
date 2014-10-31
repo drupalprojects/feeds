@@ -13,13 +13,16 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
+use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\HttpFetcherResult;
 use Drupal\feeds\StateInterface;
+use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Stream\Utils;
 
 /**
  * Defines an HTTP fetcher.
@@ -32,7 +35,7 @@ use GuzzleHttp\Exception\RequestException;
  *   arguments = {"@http_client", "@config.factory", "@cache.default"}
  * )
  */
-class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInterface {
+class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFormInterface, FetcherInterface {
 
   /**
    * The Guzzle client.
@@ -80,12 +83,11 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Make parsers be able to handle streams. Maybe exclusively.
-   * @todo Clean download cache directory.
    */
   public function fetch(FeedInterface $feed, StateInterface $state) {
     $response = $this->get($feed->getSource());
+
+    $feed->setSource($response->getEffectiveUrl());
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == 304) {
@@ -93,11 +95,12 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
       throw new EmptyFeedException();
     }
 
-    $tempname = $response->getBody()->getMetadata('uri');
-    $response->getBody()->close();
-
+    // Copy the temp stream to a real file.
     $download_file = $this->prepareDirectory($feed->getSource());
-    file_unmanaged_move($tempname, $download_file, FILE_EXISTS_REPLACE);
+    $dest_stream = Utils::create(fopen($download_file, 'w+'));
+    Utils::copyToStream($response->getBody(), $dest_stream);
+    $response->getBody()->close();
+    $dest_stream->close();
 
     return new HttpFetcherResult($download_file, $response->getHeaders());
   }
@@ -110,6 +113,9 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    *
    * @return \Guzzle\Http\Message\Response
    *   A Guzzle response.
+   *
+   * @throws \RuntimeException
+   *   Thrown if the GET request failed.
    */
   protected function get($url, $cache = TRUE) {
     $url = strtr($url, [
@@ -120,11 +126,7 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
     ]);
 
     try {
-      $tmp_file = drupal_tempnam('temporary://', 'feeds_download_cache_');
-      touch($tmp_file);
-      $response = $this->client->get($url, [
-        'save_to' => fopen($tmp_file, 'w+'),
-      ]);
+      $response = $this->client->get($url);
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
@@ -181,6 +183,11 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    * {@inheritdoc}
    */
   public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
+    $form['source'] = [
+      '#title' => $this->t('Feed URL'),
+      '#type' => 'url',
+      '#default_value' => $feed->getSource(),
+    ];
     return $form;
   }
 
@@ -188,14 +195,23 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
    * {@inheritdoc}
    */
   public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    // $values =& $form_state->getValue('fetcher');
+    if (!$this->configuration['auto_detect_feeds']) {
+      return;
+    }
 
-    // if ($this->configuration['auto_detect_feeds']) {
-    //   $response = $this->get($values['source'], FALSE);
-    //   if ($url = Feed::getCommonSyndication($values['source'], $response->getBody(TRUE))) {
-    //     $values['source'] = $url;
-    //   }
-    // }
+    $source = $form_state->getValue('source');
+    if (!$url = Feed::getCommonSyndication($source, (string) $this->get($source)->getBody())) {
+      $form_state->setError($form['source'], $this->t('Invalid feed URL.'));
+    }
+
+    $form_state->setValue('source', $url);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
+    $feed->setSource($form_state->getValue('source'));
   }
 
   /**
@@ -207,8 +223,6 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Call sourceDelete() when changing plugins.
    */
   public function onFeedDeleteMultiple(array $feeds) {
     // Remove caches and files for this feeds.
@@ -216,8 +230,9 @@ class HttpFetcher extends PluginBase implements FetcherInterface, ClearableInter
       $this->cache->delete('feeds_http_download:' . md5($feed->getSource()));
 
       $cache_file = $this->prepareDirectory($feed->getSource());
-      if (file_exists($cache_file)) {
-        file_unmanaged_delete($cache_file);
+      // Don't use file_unmanaged_delete() to avoid useless log messages.
+      if (is_file($cache_file)) {
+        return drupal_unlink($cache_file);
       }
     }
   }

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of Drupal\feeds\FeedStorage.
+ * Contains \Drupal\feeds\FeedStorage.
  */
 
 namespace Drupal\feeds;
