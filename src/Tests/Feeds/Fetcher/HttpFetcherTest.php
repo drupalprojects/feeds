@@ -27,7 +27,6 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
   protected $fetcher;
   protected $client;
-  protected $config;
   protected $cache;
   protected $state;
 
@@ -36,19 +35,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
     $importer = $this->getMock('Drupal\feeds\ImporterInterface');
     $this->client = new Client();
-    $this->config = $this->getMock('Drupal\Core\Config\ConfigFactoryInterface');
-    $config = $this->getMock('Drupal\Core\Config\Config', [], [], '', FALSE);
-    $config->expects($this->any())
-      ->method('get')
-      ->with('path.private')
-      ->will($this->returnValue('vfs://feeds/private'));
-    $this->config->expects($this->any())
-      ->method('get')
-      ->with('system.file')
-      ->will($this->returnValue($config));
     $this->cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
 
-    $this->fetcher = new HttpFetcher(['importer' => $importer], 'http', [], $this->client, $this->config, $this->cache);
+    $this->fetcher = new HttpFetcher(['importer' => $importer], 'http', [], $this->client, $this->cache);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
 
     $this->state = $this->getMock('Drupal\feeds\StateInterface');
@@ -107,7 +96,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
   public function testOnFeedDeleteMultiple() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
-    $feed->expects($this->exactly(6))
+    $feed->expects($this->exactly(3))
       ->method('getSource')
       ->will($this->returnValue('http://example.com'));
     $feeds = [$feed, $feed, $feed];

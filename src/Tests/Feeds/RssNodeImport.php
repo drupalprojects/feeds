@@ -123,16 +123,21 @@ class RssNodeImport extends WebTestBase {
 
       $terms = [];
       foreach ($node->field_tags as $value) {
-        debug($value->target_id);
         // $terms[] = Term::load([$value['target_id']])->label();
       }
     }
 
+    // Test cache.
+    $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
+    $this->assertText('The feed has not been updated.');
+
     // Import again.
+    \Drupal::cache('feeds_download')->deleteAll();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $this->assertText('There are no new');
 
     // Test force-import.
+    \Drupal::cache('feeds_download')->deleteAll();
     $configuration = $this->importer->getProcessor()->getConfiguration();
     $configuration['skip_hash_check'] = TRUE;
     $configuration['update_existing'] = TRUE;
@@ -167,9 +172,11 @@ class RssNodeImport extends WebTestBase {
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
 
     $this->cronRun();
+    \Drupal::cache('feeds_download')->deleteAll();
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
 
     // Check that items import normally.
+    \Drupal::cache('feeds_download')->deleteAll();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 12);
   }

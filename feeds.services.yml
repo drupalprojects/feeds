@@ -32,3 +32,10 @@ services:
       - { name: event_subscriber }
   feed.reader.georssentry:
     class: Drupal\feeds\Zend\Extension\Georss\Entry
+  cache.feeds_download:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory_method: get
+    factory_service: cache_factory
+    arguments: [feeds_download]

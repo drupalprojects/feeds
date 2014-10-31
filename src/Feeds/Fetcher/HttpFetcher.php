@@ -8,7 +8,6 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
@@ -32,7 +31,7 @@ use GuzzleHttp\Stream\Utils;
  *   title = @Translation("Download"),
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler."),
  *   configuration_form = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm",
- *   arguments = {"@http_client", "@config.factory", "@cache.default"}
+ *   arguments = {"@http_client", "@cache.feeds_download"}
  * )
  */
 class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFormInterface, FetcherInterface {
@@ -43,13 +42,6 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    * @var \GuzzleHttp\ClientInterface
    */
   protected $client;
-
-  /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $config;
 
   /**
    * The cache backend.
@@ -69,24 +61,20 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    *   The plugin definition.
    * @param \GuzzleHttp\ClientInterface $client
    *   The Guzzle client.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
-   *   The configuration factory.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   The cache backend.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, ConfigFactoryInterface $config, CacheBackendInterface $cache) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, CacheBackendInterface $cache) {
     $this->client = $client;
-    $this->config = $config;
     $this->cache = $cache;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed, StateInterface $state) {
-    $response = $this->get($feed->getSource());
-
+    $response = $this->get($feed->getSource(), $this->getCacheKey($feed));
     $feed->setSource($response->getEffectiveUrl());
 
     // 304, nothing to see here.
@@ -96,7 +84,7 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
     }
 
     // Copy the temp stream to a real file.
-    $download_file = $this->prepareDirectory($feed->getSource());
+    $download_file = drupal_tempnam('temporary://', 'feeds_http_fetcher');
     $dest_stream = Utils::create(fopen($download_file, 'w+'));
     Utils::copyToStream($response->getBody(), $dest_stream);
     $response->getBody()->close();
@@ -110,6 +98,8 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    *
    * @param string $url
    *   The URL to GET.
+   * @param string $cache_key
+   *   (optional) The cache key to find cached headers. Defaults to false.
    *
    * @return \Guzzle\Http\Message\Response
    *   A Guzzle response.
@@ -117,7 +107,7 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    * @throws \RuntimeException
    *   Thrown if the GET request failed.
    */
-  protected function get($url, $cache = TRUE) {
+  protected function get($url, $cache_key = FALSE) {
     $url = strtr($url, [
       'feed://' => 'http://',
       'webcal://' => 'http://',
@@ -125,12 +115,26 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       'webcals://' => 'https://',
     ]);
 
+    // Add cached headers if requested.
+    $headers = [];
+    if ($cache_key && ($cache = $this->cache->get($cache_key))) {
+      if (isset($cache->data['etag'])) {
+        $headers['If-None-Match'] = $cache->data['etag'];
+      }
+      if (isset($cache->data['last-modified'])) {
+        $headers['If-Modified-Since'] = $cache->data['last-modified'];
+      }
+    }
+
     try {
-      $response = $this->client->get($url);
+      $response = $this->client->get($url, ['headers' => $headers]);
     }
     catch (BadResponseException $e) {
       $response = $e->getResponse();
-      $args = ['%url' => $url, '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()];
+      $args = [
+        '%url' => $url,
+        '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase(),
+      ];
       throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
     catch (RequestException $e) {
@@ -138,26 +142,24 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
     }
 
+    if ($cache_key) {
+      $this->cache->set($cache_key, array_change_key_case($response->getHeaders()));
+    }
+
     return $response;
   }
 
   /**
-   * Prepares a destination for file download.
+   * Returns the download cache key for a given feed.
    *
-   * @param string $url
-   *   The URL to find a spot for.
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to find the cache key for.
    *
    * @return string
-   *   The filepath of the destination.
+   *   The cache key for the feed.
    */
-  protected function prepareDirectory($url) {
-    $download_dir = 'public://feeds_download_cache';
-    if ($path = $this->config->get('system.file')->get('path.private')) {
-      $download_dir = $path . '/feeds_download_cache';
-    }
-
-    file_prepare_directory($download_dir, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
-    return $download_dir . '/' . md5($url);
+  protected function getCacheKey(FeedInterface $feed) {
+    return $feed->id() . ':' . md5($feed->getSource());
   }
 
   /**
@@ -171,12 +173,12 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array(
+    return [
       'auto_detect_feeds' => TRUE,
       'use_pubsubhubbub' => FALSE,
       'fallback_hub' => '',
       'request_timeout' => 30,
-    );
+    ];
   }
 
   /**
@@ -199,12 +201,13 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       return;
     }
 
-    $source = $form_state->getValue('source');
-    if (!$url = Feed::getCommonSyndication($source, (string) $this->get($source)->getBody())) {
+    $response = $this->get($form_state->getValue('source'));
+    if ($url = Feed::getCommonSyndication($response->getEffectiveUrl(), (string) $response->getBody())) {
+      $form_state->setValue('source', $url);
+    }
+    else {
       $form_state->setError($form['source'], $this->t('Invalid feed URL.'));
     }
-
-    $form_state->setValue('source', $url);
   }
 
   /**
@@ -217,23 +220,9 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
   /**
    * {@inheritdoc}
    */
-  public function sourceDefaults() {
-    return ['source' => ''];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function onFeedDeleteMultiple(array $feeds) {
-    // Remove caches and files for this feeds.
     foreach ($feeds as $feed) {
-      $this->cache->delete('feeds_http_download:' . md5($feed->getSource()));
-
-      $cache_file = $this->prepareDirectory($feed->getSource());
-      // Don't use file_unmanaged_delete() to avoid useless log messages.
-      if (is_file($cache_file)) {
-        return drupal_unlink($cache_file);
-      }
+      $this->cache->delete($this->getCacheKey($feed));
     }
   }
 
