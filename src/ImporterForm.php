@@ -187,11 +187,11 @@ class ImporterForm extends EntityForm {
         $form[$type . '_wrapper']['id']['#disabled'] = $plugin->isLocked();
       }
 
-      $plugin_values = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
+      $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
 
       // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
-        $form[$type . '_wrapper']['advanced'] = $plugin->buildAdvancedForm([], $plugin_values);
+        $form[$type . '_wrapper']['advanced'] = $plugin->buildAdvancedForm([], $plugin_state);
       }
 
       $form[$type . '_wrapper']['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
@@ -205,7 +205,7 @@ class ImporterForm extends EntityForm {
         $form_builder = $config_form;
       }
       if ($form_builder) {
-        $plugin_form = $form_builder->buildConfigurationForm([], $plugin_values);
+        $plugin_form = $form_builder->buildConfigurationForm([], $plugin_state);
         $form[$type . '_configuration'] = array(
           '#type' => 'details',
           '#group' => 'plugin_settings',
@@ -215,7 +215,7 @@ class ImporterForm extends EntityForm {
       }
     }
 
-    $form_state->setValue([$type . '_configuration'], $plugin_values->getValues());
+    $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
 
     return parent::form($form, $form_state);
   }
@@ -263,9 +263,19 @@ class ImporterForm extends EntityForm {
     }
 
     foreach ($this->getConfigurablePlugins() as $type => $plugin) {
-      $plugin_values = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
-      $plugin->validateConfigurationForm($form[$type . '_configuration'], $plugin_values);
-      $form_state->setValue([$type . '_configuration'], $plugin_values->getValues());
+      $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
+      $plugin->validateConfigurationForm($form[$type . '_configuration'], $plugin_state);
+      $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
+      foreach ($plugin_state->getErrors() as $name => $error) {
+        // Remove duplicate error messages.
+        foreach ($_SESSION['messages']['error'] as $delta => $message) {
+          if ($message['message'] === $error) {
+            unset($_SESSION['messages']['error'][$delta]);
+            break;
+          }
+        }
+        $form_state->setErrorByName($name, $error);
+      }
     }
 
     // Build the importer object from the submitted values.
@@ -277,9 +287,9 @@ class ImporterForm extends EntityForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     foreach ($this->getConfigurablePlugins() as $type => $plugin) {
-      $plugin_values = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
-      $plugin->submitConfigurationForm($form[$type . '_configuration'], $plugin_values);
-      $form_state->setValue([$type . '_configuration'], $plugin_values->getValues());
+      $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
+      $plugin->submitConfigurationForm($form[$type . '_configuration'], $plugin_state);
+      $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
     }
 
     parent::submitForm($form, $form_state);

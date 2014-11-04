@@ -72,8 +72,7 @@ class FeedImportHandler extends FeedHandlerBase {
       $this->fetcherResult = $this->doFetch($feed);
     }
     catch (\Exception $exception) {
-      $this->handleException($feed, $exception);
-      return;
+      return $this->handleException($feed, $exception);
     }
 
     $this->setBatchParse($feed);
@@ -111,8 +110,7 @@ class FeedImportHandler extends FeedHandlerBase {
       $parser_result = $this->doParse($feed, $this->fetcherResult);
     }
     catch (\Exception $exception) {
-      $this->handleException($feed, $exception);
-      return;
+      return $this->handleException($feed, $exception);
     }
 
     $this->startBatchProcess($feed, $parser_result);
@@ -157,8 +155,7 @@ class FeedImportHandler extends FeedHandlerBase {
       $this->doProcess($feed, $item);
     }
     catch (\Exception $exception) {
-      $this->handleException($feed, $exception);
-      return;
+      return $this->handleException($feed, $exception);
     }
 
     $feed->saveStates();
@@ -291,9 +288,15 @@ class FeedImportHandler extends FeedHandlerBase {
     $feed->save();
     $feed->unlock();
 
-    if (!$exception instanceof EmptyFeedException) {
-      throw $exception;
+    if ($exception instanceof EmptyFeedException) {
+      return;
     }
+    if ($exception instanceof \RuntimeException) {
+      drupal_set_message($exception->getMessage(), 'error');
+      return;
+    }
+
+    throw $exception;
   }
 
 }

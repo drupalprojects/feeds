@@ -19,7 +19,6 @@ use Drupal\feeds\Result\HttpFetcherResult;
 use Drupal\feeds\StateInterface;
 use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Stream\Utils;
 
@@ -129,17 +128,9 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
     try {
       $response = $this->client->get($url, ['headers' => $headers]);
     }
-    catch (BadResponseException $e) {
-      $response = $e->getResponse();
-      $args = [
-        '%url' => $url,
-        '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase(),
-      ];
-      throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
-    }
     catch (RequestException $e) {
-      $args = ['%url' => $url, '%error' => $e->getMessage()];
-      throw new \RuntimeException($this->t('The feed %url seems to be broken because of error "%error".', $args));
+      $args = ['%site' => $url, '%error' => $e->getMessage()];
+      throw new \RuntimeException($this->t('The feed from %site seems to be broken because of error "%error".', $args));
     }
 
     if ($cache_key) {
@@ -201,7 +192,13 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       return;
     }
 
-    $response = $this->get($form_state->getValue('source'));
+    try {
+      $response = $this->get($form_state->getValue('source'));
+    }
+    catch (\RuntimeException $e) {
+      $form_state->setError($form['source'], $e->getMessage());
+      return;
+    }
     if ($url = Feed::getCommonSyndication($response->getEffectiveUrl(), (string) $response->getBody())) {
       $form_state->setValue('source', $url);
     }

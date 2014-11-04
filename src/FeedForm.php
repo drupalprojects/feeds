@@ -125,6 +125,17 @@ class FeedForm extends ContentEntityForm {
         $plugin->validateFeedForm($form['plugin'][$type], $plugin_state, $feed);
 
         $form_state->setValue(['plugin', $type], $plugin_state->getValues());
+
+        foreach ($plugin_state->getErrors() as $name => $error) {
+          // Remove duplicate error messages.
+          foreach ($_SESSION['messages']['error'] as $delta => $message) {
+            if ($message['message'] === $error) {
+              unset($_SESSION['messages']['error'][$delta]);
+              break;
+            }
+          }
+          $form_state->setErrorByName($name, $error);
+        }
       }
     }
 
