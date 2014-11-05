@@ -151,7 +151,6 @@ class FeedImportHandler extends FeedHandlerBase {
    */
   public function batchProcess(FeedInterface $feed, ItemInterface $item) {
     try {
-      $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed));
       $this->doProcess($feed, $item);
     }
     catch (\Exception $exception) {

@@ -10,6 +10,8 @@ namespace Drupal\feeds\Tests\Feeds;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\feeds\Entity\Feed;
+use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
@@ -91,6 +93,7 @@ class RssNodeImport extends WebTestBase {
           'type' => 'article',
         ],
       ],
+      'import_period' => ImporterInterface::SCHEDULE_NEVER,
     ]);
     $this->importer->save();
   }
@@ -140,7 +143,7 @@ class RssNodeImport extends WebTestBase {
     \Drupal::cache('feeds_download')->deleteAll();
     $configuration = $this->importer->getProcessor()->getConfiguration();
     $configuration['skip_hash_check'] = TRUE;
-    $configuration['update_existing'] = TRUE;
+    $configuration['update_existing'] = ProcessorInterface::UPDATE_EXISTING;
     $this->importer->getProcessor()->setConfiguration($configuration);
     $this->importer->save();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
@@ -155,6 +158,7 @@ class RssNodeImport extends WebTestBase {
   }
 
   public function testCron() {
+    $this->importer->setImportPeriod(3600);
     $mappings = $this->importer->getMappings();
     unset($mappings[2]['unique']);
     $this->importer->setMappings($mappings)->save();
