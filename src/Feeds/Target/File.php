@@ -8,6 +8,8 @@
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\TargetValidationException;
