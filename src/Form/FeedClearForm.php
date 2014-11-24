@@ -19,7 +19,7 @@ class FeedClearForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Delete all items from feed %feed?', array('%feed' => $this->entity->label()));
+    return $this->t('Delete all items from feed %feed?', ['%feed' => $this->entity->label()]);
   }
 
   /**

@@ -51,25 +51,25 @@ class DirectoryFetcherForm extends ExternalPluginFormBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['allowed_extensions'] = array(
+    $form['allowed_extensions'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Allowed file extensions'),
       '#description' => $this->t('Allowed file extensions for upload.'),
       '#default_value' => implode(' ', $this->plugin->getConfiguration('allowed_extensions')),
-    );
-    $form['allowed_schemes'] = array(
+    ];
+    $form['allowed_schemes'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed schemes'),
       '#default_value' => $this->plugin->getConfiguration('allowed_schemes'),
       '#options' => $this->getSchemeOptions(),
       '#description' => $this->t('Select the schemes you want to allow for direct upload.'),
-    );
-    $form['recursive_scan'] = array(
+    ];
+    $form['recursive_scan'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Search recursively'),
       '#default_value' => $this->plugin->getConfiguration('recursive_scan'),
       '#description' => $this->t('Search through sub-directories.'),
-    );
+    ];
     return $form;
   }
 

@@ -84,10 +84,10 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    * {@inheritdoc}
    */
   public function sourceDefaults() {
-    return array(
+    return [
       'delimiter' => $this->configuration['delimiter'],
       'no_headers' => $this->configuration['no_headers'],
-    );
+    ];
   }
 
   /**
@@ -98,25 +98,25 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
     $form['parser']['#tree'] = TRUE;
     $form['parser']['#weight'] = -10;
 
-    $form['parser']['delimiter'] = array(
+    $form['parser']['delimiter'] = [
       '#type' => 'select',
       '#title' => $this->t('Delimiter'),
       '#description' => $this->t('The character that delimits fields in the CSV file.'),
-      '#options'  => array(
+      '#options'  => [
         ',' => ',',
         ';' => ';',
         'TAB' => 'TAB',
         '|' => '|',
         '+' => '+',
-      ),
+      ],
       '#default_value' => $feed_config['delimiter'],
-    );
-    $form['parser']['no_headers'] = array(
+    ];
+    $form['parser']['no_headers'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('No Headers'),
       '#description' => $this->t("Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named '0', '1', '2' etc."),
       '#default_value' => $feed_config['no_headers'],
-    );
+    ];
     return $form;
   }
 
@@ -124,36 +124,36 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array(
+    return [
       'delimiter' => ',',
       'no_headers' => 0,
       'line_limit' => 100,
-    );
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['delimiter'] = array(
+    $form['delimiter'] = [
       '#type' => 'select',
       '#title' => $this->t('Default delimiter'),
       '#description' => $this->t('Default field delimiter.'),
-      '#options' => array(
+      '#options' => [
         ',' => ',',
         ';' => ';',
         'TAB' => 'TAB',
         '|' => '|',
         '+' => '+',
-      ),
+      ],
       '#default_value' => $this->configuration['delimiter'],
-    );
-    $form['no_headers'] = array(
+    ];
+    $form['no_headers'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('No headers'),
-      '#description' => $this->t('Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named \'0\', \'1\', \'2\' etc.'),
+      '#description' => $this->t("Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named '0', '1', '2' etc."),
       '#default_value' => $this->configuration['no_headers'],
-    );
+    ];
 
     return $form;
   }

@@ -73,27 +73,27 @@ class SitemapParser extends PluginBase implements ParserInterface {
    * {@inheritdoc}
    */
   public function getMappingSources() {
-    return array(
-      'url' => array(
+    return [
+      'url' => [
         'label' => $this->t('Item URL (link)'),
         'description' => $this->t('URL of the feed item.'),
-        'suggestions' => array(
-          'targets' => array('url'),
-        ),
-      ),
-      'lastmod' => array(
+        'suggestions' => [
+          'targets' => ['url'],
+        ],
+      ],
+      'lastmod' => [
         'label' => $this->t('Last modification date'),
         'description' => $this->t('Last modified date as UNIX time GMT of the feed item.'),
-      ),
-      'changefreq' => array(
+      ],
+      'changefreq' => [
         'label' => $this->t('Change frequency'),
         'description' => $this->t('How frequently the page is likely to change.'),
-      ),
-      'priority' => array(
+      ],
+      'priority' => [
         'label' => $this->t('Priority'),
         'description' => $this->t('The priority of this URL relative to other URLs on the site.'),
-      ),
-    );
+      ],
+    ];
   }
 
 }

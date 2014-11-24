@@ -9,21 +9,21 @@
  * Implements hook_menu().
  */
 function feeds_tests_menu() {
-  $items['testing/feeds/flickr.xml'] = array(
+  $items['testing/feeds/flickr.xml'] = [
     'page callback' => 'feeds_tests_flickr',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_CALLBACK,
-  );
-  $items['testing/feeds/files.csv'] = array(
+  ];
+  $items['testing/feeds/files.csv'] = [
     'page callback' => 'feeds_tests_files',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_CALLBACK,
-  );
-  $items['testing/feeds/files-remote.csv'] = array(
+  ];
+  $items['testing/feeds/files-remote.csv'] = [
     'page callback' => 'feeds_tests_files_remote',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_CALLBACK,
-  );
+  ];
   return $items;
 }
 
@@ -31,37 +31,37 @@ function feeds_tests_menu() {
  * Implements hook_theme().
  */
 function feeds_tests_theme() {
-  return array(
-    'feeds_tests_flickr' => array(
-      'variables' => array('image_urls' => []),
+  return [
+    'feeds_tests_flickr' => [
+      'variables' => ['image_urls' => []],
       'path' => drupal_get_path('module', 'feeds_tests') . '/feeds',
       'template' => 'feeds-tests-flickr',
-    ),
-    'feeds_tests_files' => array(
-      'variables' => array('files' => []),
+    ],
+    'feeds_tests_files' => [
+      'variables' => ['files' => []],
       'path' => drupal_get_path('module', 'feeds_tests') . '/feeds',
       'template' => 'feeds-tests-files',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Outputs flickr test feed.
  */
 function feeds_tests_flickr() {
-  $images = array(
+  $images = [
     0 => "tubing.jpeg",
     1 => "foosball.jpeg",
     2 => "attersee.jpeg",
     3 => "hstreet.jpeg",
     4 => "la fayette.jpeg",
-  );
+  ];
   $path = drupal_get_path('module', 'feeds_tests') . '/feeds/assets';
   foreach ($images as &$image) {
     $image = file_create_url("$path/$image");
   }
   drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
-  print theme('feeds_tests_flickr', array('image_urls' => $images));
+  print theme('feeds_tests_flickr', ['image_urls' => $images]);
   die();
 }
 
@@ -69,18 +69,18 @@ function feeds_tests_flickr() {
  * Outputs a CSV file pointing to files.
  */
 function feeds_tests_files() {
-  $images = array(
+  $images = [
     0 => "tubing.jpeg",
     1 => "foosball.jpeg",
     2 => "attersee.jpeg",
     3 => "hstreet.jpeg",
     4 => "la fayette.jpeg",
-  );
+  ];
   foreach ($images as &$image) {
     $image = "public://images/$image";
   }
   drupal_add_http_header('Content-Type', 'text/plain; charset=utf-8');
-  print theme('feeds_tests_files', array('files' => $images));
+  print theme('feeds_tests_files', ['files' => $images]);
   die();
 }
 
@@ -88,18 +88,18 @@ function feeds_tests_files() {
  * Outputs a CSV file pointing to files to download.
  */
 function feeds_tests_files_remote() {
-  $images = array(
+  $images = [
     0 => 'tubing.jpeg',
     1 => 'foosball.jpeg',
     2 => 'attersee.jpeg',
     3 => 'hstreet.jpeg',
     4 => 'la fayette.jpeg',
-  );
+  ];
   $path = drupal_get_path('module', 'feeds_tests') . '/feeds/assets';
   foreach ($images as &$image) {
     $image = file_create_url("$path/$image");
   }
   drupal_add_http_header('Content-Type', 'text/plain; charset=utf-8');
-  print theme('feeds_tests_files', array('files' => $images));
+  print theme('feeds_tests_files', ['files' => $images]);
   die();
 }

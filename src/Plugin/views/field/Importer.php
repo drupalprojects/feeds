@@ -21,7 +21,7 @@ class Importer extends Feed {
 
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['machine_name'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['machine_name'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -32,12 +32,12 @@ class Importer extends Feed {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $form['machine_name'] = array(
+    $form['machine_name'] = [
       '#title' => t('Output machine name'),
       '#description' => t('Display field as the importer machine name.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['machine_name']),
-    );
+    ];
   }
 
   /**

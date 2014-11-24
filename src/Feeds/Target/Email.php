@@ -49,19 +49,19 @@ class Email extends FieldTargetBase implements ConfigurableTargetInterface {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array('defuse' => FALSE);
+    return ['defuse' => FALSE];
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['defuse'] = array(
+    $form['defuse'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Defuse e-mail addresses'),
       '#default_value' => $this->configuration['defuse'],
       '#description' => $this->t('This appends _test to all imported e-mail addresses to ensure they cannot be used as recipients.'),
-    );
+    ];
 
     return $form;
   }

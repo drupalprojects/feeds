@@ -124,7 +124,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
 
     $this->importer->expects($this->once())
       ->method('getPlugins')
-      ->will($this->returnValue(array($clearable, $this->dispatcher, $clearable)));
+      ->will($this->returnValue([$clearable, $this->dispatcher, $clearable]));
 
     $subscriber = new LazySubscriber();
 

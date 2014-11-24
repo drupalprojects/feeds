@@ -97,106 +97,88 @@ class SyndicationParser extends PluginBase implements ParserInterface {
    * {@inheritdoc}
    */
   public function getMappingSources() {
-    return array(
-      'feed_title' => array(
+    return [
+      'feed_title' => [
         'label' => $this->t('Feed title'),
         'description' => $this->t('Title of the feed.'),
-      ),
-      'feed_description' => array(
+      ],
+      'feed_description' => [
         'label' => $this->t('Feed description'),
         'description' => $this->t('Description of the feed.'),
-      ),
-      'feed_image_uri' => array(
+      ],
+      'feed_image_uri' => [
         'label' => $this->t('Feed image'),
         'description' => $this->t('The URL of the feed image.'),
-      ),
-      'feed_url' => array(
+      ],
+      'feed_url' => [
         'label' => $this->t('Feed URL (link)'),
         'description' => $this->t('URL of the feed.'),
-      ),
-      'title' => array(
+      ],
+      'title' => [
         'label' => $this->t('Title'),
         'description' => $this->t('Title of the feed item.'),
-        'suggestions' => array(
-          'targets' => array('subject', 'title', 'label', 'name'),
-          'types' => array(
-            'field_item:text' => [],
-          ),
-        ),
-      ),
-      'description' => array(
+        'suggestions' => [
+          'targets' => ['subject', 'title', 'label', 'name'],
+          'types' => ['field_item:text' => []],
+        ],
+      ],
+      'description' => [
         'label' => $this->t('Description'),
         'description' => $this->t('Description of the feed item.'),
-        'suggested' => array('body'),
-        'suggestions' => array(
-          'targets' => array('body'),
-          'types' => array(
-            'field_item:text_with_summary' => [],
-          ),
-        ),
-      ),
-      'author_name' => array(
+        'suggested' => ['body'],
+        'suggestions' => [
+          'targets' => ['body'],
+          'types' => ['field_item:text_with_summary' => []],
+        ],
+      ],
+      'author_name' => [
         'label' => $this->t('Author name'),
         'description' => $this->t("Name of the feed item's author."),
-        'suggestions' => array(
-          'types' => array(
-            'entity_reference_field' => array('target_type' => 'user'),
-          ),
-        ),
-      ),
-      'author_email' => array(
+        'suggestions' => [
+          'types' => ['entity_reference_field' => ['target_type' => 'user']],
+        ],
+      ],
+      'author_email' => [
         'label' => $this->t('Author email'),
         'description' => $this->t("Name of the feed item's email address."),
-      ),
-      'timestamp' => array(
+      ],
+      'timestamp' => [
         'label' => $this->t('Published date'),
         'description' => $this->t('Published date as UNIX time GMT of the feed item.'),
-        'suggestions' => array(
-          'targets' => array('created'),
-        ),
-      ),
-      'url' => array(
+        'suggestions' => ['targets' => ['created']],
+      ],
+      'url' => [
         'label' => $this->t('Item URL (link)'),
         'description' => $this->t('URL of the feed item.'),
-        'suggestions' => array(
-          'targets' => array('url'),
-        ),
-      ),
-      'guid' => array(
+        'suggestions' => ['targets' => ['url']],
+      ],
+      'guid' => [
         'label' => $this->t('Item GUID'),
         'description' => $this->t('Global Unique Identifier of the feed item.'),
-        'suggestions' => array(
-          'targets' => array('guid'),
-        ),
-      ),
-      'tags' => array(
+        'suggestions' => ['targets' => ['guid']],
+      ],
+      'tags' => [
         'label' => $this->t('Categories'),
         'description' => $this->t('An array of categories that have been assigned to the feed item.'),
-        'suggestions' => array(
-          'targets' => array('field_tags'),
-          'types' => array(
-            'field_item:taxonomy_term_reference' => [],
-          ),
-        ),
-      ),
-      'georss_lat' => array(
+        'suggestions' => [
+          'targets' => ['field_tags'],
+          'types' => ['field_item:taxonomy_term_reference' => []],
+        ],
+      ],
+      'georss_lat' => [
         'label' => $this->t('Item lattitude'),
         'description' => $this->t('The feed item lattitutde.'),
-      ),
-      'georss_lon' => array(
+      ],
+      'georss_lon' => [
         'label' => $this->t('Item longitude'),
         'description' => $this->t('The feed item longitude.'),
-      ),
-      'enclosures' => array(
+      ],
+      'enclosures' => [
         'label' => $this->t('Enclosures'),
         'description' => $this->t('A list of enclosures attached to the feed item.'),
-        'suggestions' => array(
-          'types' => array(
-            'field_item:file' => [],
-          ),
-        ),
-      ),
-    );
+        'suggestions' => ['types' => ['field_item:file' => []]],
+      ],
+    ];
   }
 
 }

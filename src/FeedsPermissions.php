@@ -25,12 +25,12 @@ class FeedsPermissions {
    * @return array
    */
   public function contentPermissions() {
-    return array(
-      'access feed overview' => array(
+    return [
+      'access feed overview' => [
         'title' => $this->t('Access the Feed overview page'),
-        'description' => $this->t('Get an overview of <a href="!url">all feeds</a>.', array('!url' => $this->url('feeds.admin'))),
-      ),
-    );
+        'description' => $this->t('Get an overview of <a href="!url">all feeds</a>.', ['!url' => $this->url('feeds.admin')]),
+      ],
+    ];
   }
 
   /**
@@ -58,33 +58,33 @@ class FeedsPermissions {
    *   An array of permission names and descriptions.
    */
   protected function buildPermissions(Importer $importer) {
-    $args = array('%name' => $importer->label());
+    $args = ['%name' => $importer->label()];
     $id = $importer->id();
 
-    return array(
-      "view $id feeds" => array(
+    return [
+      "view $id feeds" => [
         'title' => $this->t('%name: View feeds', $args),
-      ),
-      "create $id feeds" => array(
+      ],
+      "create $id feeds" => [
         'title' => $this->t('%name: Create new feeds', $args),
-      ),
-      "update $id feeds" => array(
+      ],
+      "update $id feeds" => [
         'title' => $this->t('%name: Update existing feeds', $args),
-      ),
-      "delete $id feeds" => array(
+      ],
+      "delete $id feeds" => [
         'title' => $this->t('%name: Delete feeds', $args),
-      ),
-      "import $id feeds" => array(
+      ],
+      "import $id feeds" => [
         'title' => $this->t('%name: Import feeds', $args),
-      ),
-      "clear $id feeds" => array(
+      ],
+      "clear $id feeds" => [
         'title' => $this->t('%name: Delete feed items', $args),
-      ),
-      "unlock $id feeds" => array(
+      ],
+      "unlock $id feeds" => [
         'title' => $this->t('%name: Unlock feeds', $args),
         'description' => $this->t('If a feed importation breaks for some reason, users with this permission can unlock it.'),
-      ),
-    );
+      ],
+    ];
   }
 
 }

@@ -161,7 +161,8 @@ class RssNodeImport extends WebTestBase {
     $this->importer->setImportPeriod(3600);
     $mappings = $this->importer->getMappings();
     unset($mappings[2]['unique']);
-    $this->importer->setMappings($mappings)->save();
+    $this->importer->setMappings($mappings);
+    $this->importer->save();
 
     $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
 

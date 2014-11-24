@@ -61,79 +61,82 @@ class ImporterForm extends EntityForm {
     $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
 
     if ($this->operation == 'edit') {
-      $form['#title'] = $this->t('Edit %label', array('%label' => $this->entity->label()));
+      $form['#title'] = $this->t('Edit %label', ['%label' => $this->entity->label()]);
     }
 
-    $form['basics'] = array(
+    $form['basics'] = [
       '#title' => $this->t('Basic settings'),
       '#type' => 'details',
       '#open' => $this->entity->isNew(),
       '#tree' => FALSE,
-    );
+    ];
 
-    $form['basics']['label'] = array(
+    $form['basics']['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
       '#default_value' => $this->entity->label(),
       '#maxlength' => '255',
       '#description' => $this->t('A unique label for this importer. This label will be displayed in the interface.'),
       '#required' => TRUE,
-    );
+    ];
 
-    $form['basics']['id'] = array(
+    $form['basics']['id'] = [
       '#type' => 'machine_name',
       '#title' => $this->t('Machine name'),
       '#default_value' => $this->entity->id(),
       '#disabled' => !$this->entity->isNew(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#description' => $this->t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
-      '#machine_name' => array(
+      '#machine_name' => [
         'exists' => 'Drupal\feeds\Entity\Importer::load',
-        'source' => array('basics', 'label'),
-      ),
+        'source' => ['basics', 'label'],
+      ],
       '#required' => TRUE,
-    );
-    $form['basics']['description'] = array(
+    ];
+    $form['basics']['description'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Description'),
       '#description' => $this->t('A description of this importer.'),
       '#default_value' => $this->entity->getDescription(),
-    );
+    ];
 
-    $form['plugin_settings'] = array(
+    $form['plugin_settings'] = [
       '#type' => 'vertical_tabs',
       '#weight' => 99,
-    );
+    ];
 
     $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
-    $form['importer_settings'] = array(
+    $form['importer_settings'] = [
       '#type' => 'details',
       '#group' => 'plugin_settings',
       '#title' => $this->t('Settings'),
       '#tree' => FALSE,
-    );
+    ];
+
     $times = [900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200];
+
     $period = array_map(function($time) {
       return \Drupal::service('date.formatter')->formatInterval($time);
     }, array_combine($times, $times));
 
     foreach ($period as &$p) {
-      $p = $this->t('Every !p', array('!p' => $p));
+      $p = $this->t('Every !p', ['!p' => $p]);
     }
-    $period = array(
+
+    $period = [
       ImporterInterface::SCHEDULE_NEVER => $this->t('Off'),
       0 => $this->t('As often as possible'),
-    ) + $period;
+    ] + $period;
 
-    $form['importer_settings']['import_period'] = array(
+    $form['importer_settings']['import_period'] = [
       '#type' => 'select',
       '#title' => $this->t('Import period'),
       '#options' => $period,
       '#description' => $this->t('Choose how often a feed should be imported.'),
       '#default_value' => $this->entity->getImportPeriod(),
-    );
+    ];
 
     // If this is an ajax requst, updating the plugins on the importer will give
     // us the updated form.
@@ -149,36 +152,36 @@ class ImporterForm extends EntityForm {
     foreach ($this->entity->getPlugins() as $type => $plugin) {
       $options = $this->entity->getPluginOptionsList($type);
 
-      $form[$type . '_wrapper'] = array(
+      $form[$type . '_wrapper'] = [
         '#type' => 'container',
-        '#attributes' => array('class' => array('feeds-plugin-inline')),
-      );
+        '#attributes' => ['class' => ['feeds-plugin-inline']],
+      ];
 
       if (count($options) === 1) {
-        $form[$type . '_wrapper']['id'] = array(
+        $form[$type . '_wrapper']['id'] = [
           '#type' => 'value',
           '#value' => $plugin->getPluginId(),
           '#plugin_type' => $type,
           '#parents' => [$type],
-        );
+        ];
       }
       else {
-        $form[$type . '_wrapper']['id'] = array(
+        $form[$type . '_wrapper']['id'] = [
           '#type' => 'select',
-          '#title' => $this->t('@type', array('@type' => ucfirst($type))),
+          '#title' => $this->t('@type', ['@type' => ucfirst($type)]),
           '#options' => $options,
           '#default_value' => $plugin->getPluginId(),
-          '#ajax' => array(
+          '#ajax' => [
             'callback' => get_class($this) . '::ajaxCallback',
             'wrapper' => 'feeds-ajax-form-wrapper',
             'progress' => 'none',
-          ),
-          '#attached' => array(
-            'library' => array('feeds/feeds'),
-          ),
+          ],
+          '#attached' => [
+            'library' => ['feeds/feeds'],
+          ],
           '#plugin_type' => $type,
           '#parents' => [$type],
-        );
+        ];
       }
 
       // Give lockable plugins a chance to lock themselves.
@@ -206,11 +209,11 @@ class ImporterForm extends EntityForm {
       }
       if ($form_builder) {
         $plugin_form = $form_builder->buildConfigurationForm([], $plugin_state);
-        $form[$type . '_configuration'] = array(
+        $form[$type . '_configuration'] = [
           '#type' => 'details',
           '#group' => 'plugin_settings',
-          '#title' => $this->t('@type settings', array('@type' => ucfirst($type))),
-        );
+          '#title' => $this->t('@type settings', ['@type' => ucfirst($type)]),
+        ];
         $form[$type . '_configuration'] += $plugin_form;
       }
     }

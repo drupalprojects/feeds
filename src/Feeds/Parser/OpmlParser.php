@@ -92,7 +92,7 @@ class OpmlParser extends PluginBase implements ParserInterface {
 
       // Get sub elements.
       if ($outline['outlines']) {
-        $sub_categories = array_merge($categories, array($outline['#text']));
+        $sub_categories = array_merge($categories, [$outline['#text']]);
         $items = array_merge($items, $this->getItems($outline['outlines'], $sub_categories));
       }
     }
@@ -104,43 +104,43 @@ class OpmlParser extends PluginBase implements ParserInterface {
    * {@inheritdoc}
    */
   public function getMappingSources() {
-    return array(
-      'feed_title' => array(
+    return [
+      'feed_title' => [
         'label' => $this->t('Feed: Title of the OPML file'),
         'description' => $this->t('Title of the feed.'),
-      ),
-      'title' => array(
+      ],
+      'title' => [
         'label' => $this->t('Title'),
         'description' => $this->t('Title of the feed.'),
-        'suggestions' => array(
-          'targets' => array('subject', 'title', 'label', 'name'),
-          'types' => array(
+        'suggestions' => [
+          'targets' => ['subject', 'title', 'label', 'name'],
+          'types' => [
             'field_item:text' => [],
-          ),
-        ),
-      ),
-      'xmlurl' => array(
+          ],
+        ],
+      ],
+      'xmlurl' => [
         'label' => $this->t('URL'),
         'description' => $this->t('URL of the feed.'),
-        'suggestions' => array(
-          'targets' => array('url'),
-        ),
-      ),
-      'categories' => array(
+        'suggestions' => [
+          'targets' => ['url'],
+        ],
+      ],
+      'categories' => [
         'label' => $this->t('Categories'),
         'description' => $this->t('The categories of the feed.'),
-        'suggestions' => array(
-          'targets' => array('field_tags'),
-          'types' => array(
+        'suggestions' => [
+          'targets' => ['field_tags'],
+          'types' => [
             'field_item:taxonomy_term_reference' => [],
-          ),
-        ),
-      ),
-      'htmlurl' => array(
+          ],
+        ],
+      ],
+      'htmlurl' => [
         'label' => $this->t('Site URL'),
         'description' => $this->t('The URL of the site that provides the feed.'),
-      ),
-    );
+      ],
+    ];
   }
 
 }

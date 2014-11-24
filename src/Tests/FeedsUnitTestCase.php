@@ -87,7 +87,7 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     if ($perms) {
       $map = [];
       foreach ($perms as $perm => $has) {
-        $map[] = array($perm, $has);
+        $map[] = [$perm, $has];
       }
       $account->expects($this->any())
               ->method('hasPermission')
@@ -143,7 +143,7 @@ namespace {
 
   if (!function_exists('filter_formats')) {
     function filter_formats(AccountInterface $account) {
-      return array('test_format' => new FeedsFilterStub('Test format'));
+      return ['test_format' => new FeedsFilterStub('Test format')];
     }
   }
 
@@ -199,9 +199,9 @@ namespace {
       $string = $matches[2];
 
       if (!isset($cache[$langcode][$code][$string])) {
-        $options = array(
+        $options = [
           'langcode' => $langcode,
-        );
+        ];
 
         if ($code == 'F') {
           $options['context'] = 'Long month name';
@@ -211,7 +211,7 @@ namespace {
           $cache[$langcode][$code][$string] = $string;
         }
         else {
-          $cache[$langcode][$code][$string] = t($string, array(), $options);
+          $cache[$langcode][$code][$string] = t($string, [], $options);
         }
       }
       return $cache[$langcode][$code][$string];

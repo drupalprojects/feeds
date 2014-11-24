@@ -17,7 +17,7 @@ class EventBaseTest extends FeedsUnitTestCase {
 
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
-    $event = $this->getMockForAbstractClass('Drupal\feeds\Event\EventBase', array($feed));
+    $event = $this->getMockForAbstractClass('Drupal\feeds\Event\EventBase', [$feed]);
     $this->assertSame($feed, $event->getFeed());
   }
 

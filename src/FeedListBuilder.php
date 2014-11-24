@@ -60,23 +60,23 @@ class FeedListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header = array(
+    $header = [
       'title' => $this->t('Title'),
-      'importer' => array(
+      'importer' => [
         'data' => $this->t('Importer'),
-        'class' => array(RESPONSIVE_PRIORITY_MEDIUM),
-      ),
-      'author' => array(
+        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+      ],
+      'author' => [
         'data' => $this->t('Author'),
-        'class' => array(RESPONSIVE_PRIORITY_LOW),
-      ),
+        'class' => [RESPONSIVE_PRIORITY_LOW],
+      ],
       'status' => $this->t('Status'),
 
-      'imported' => array(
+      'imported' => [
         'data' => $this->t('Imported'),
-        'class' => array(RESPONSIVE_PRIORITY_LOW),
-      ),
-    );
+        'class' => [RESPONSIVE_PRIORITY_LOW],
+      ],
+    ];
     return $header + parent::buildHeader();
   }
 
@@ -88,16 +88,16 @@ class FeedListBuilder extends EntityListBuilder {
     $options = $uri->getOptions();
     $uri->setOptions($options);
 
-    $row['title']['data'] = array(
+    $row['title']['data'] = [
       '#type' => 'link',
       '#title' => $entity->label(),
-    ) + $uri->toRenderArray();
+    ] + $uri->toRenderArray();
 
     $row['importer'] = String::checkPlain($entity->getImporter()->label());
-    $row['author']['data'] = array(
+    $row['author']['data'] = [
       '#theme' => 'username',
       '#account' => $entity->getOwner(),
-    );
+    ];
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('not active');
 
     $row['imported'] = $this->dateFormatter->format($entity->getImportedTime(), 'short');
@@ -113,10 +113,10 @@ class FeedListBuilder extends EntityListBuilder {
     $operations = parent::getDefaultOperations($entity);
 
     if ($entity->access('import') && $entity->hasLinkTemplate('import-form')) {
-      $operations['import'] = array(
+      $operations['import'] = [
         'title' => $this->t('Import'),
         'weight' => 1,
-      ) + $entity->urlInfo('import-form')->toArray();
+      ] + $entity->urlInfo('import-form')->toArray();
     }
 
     $destination = drupal_get_destination();

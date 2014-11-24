@@ -32,9 +32,7 @@ class FeedsItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public static function defaultStorageSettings() {
-    return array(
-      'target_type' => 'feeds_feed',
-    ) + parent::defaultStorageSettings();
+    return ['target_type' => 'feeds_feed'] + parent::defaultStorageSettings();
   }
 
 
@@ -63,49 +61,49 @@ class FeedsItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
-    return array(
-      'columns' => array(
-        'target_id' => array(
+    return [
+      'columns' => [
+        'target_id' => [
           'description' => 'The ID of the target feed.',
           'type' => 'int',
           'not null' => TRUE,
           'unsigned' => TRUE,
-        ),
-        'imported' => array(
+        ],
+        'imported' => [
           'type' => 'int',
           'not null' => TRUE,
           'unsigned' => TRUE,
           'description' => 'Import date of the feed item, as a Unix timestamp.',
-        ),
-        'url' => array(
+        ],
+        'url' => [
           'type' => 'text',
           'description' => 'Link to the feed item.',
-        ),
-        'guid' => array(
+        ],
+        'guid' => [
           'type' => 'text',
           'description' => 'Unique identifier for the feed item.',
-        ),
-        'hash' => array(
+        ],
+        'hash' => [
           'type' => 'varchar',
           // The length of an MD5 hash.
           'length' => 32,
           'not null' => TRUE,
           'description' => 'The hash of the feed item.',
-        ),
-      ),
-      'indexes' => array(
-        'target_id' => array('target_id'),
-        'lookup_url' => array('target_id', array('url', 128)),
-        'lookup_guid' => array('target_id', array('guid', 128)),
-        'imported' => array('imported'),
-      ),
-      'foreign keys' => array(
-        'target_id' => array(
+        ],
+      ],
+      'indexes' => [
+        'target_id' => ['target_id'],
+        'lookup_url' => ['target_id', ['url', 128]],
+        'lookup_guid' => ['target_id', ['guid', 128]],
+        'imported' => ['imported'],
+      ],
+      'foreign keys' => [
+        'target_id' => [
           'table' => 'feeds_feed',
-          'columns' => array('target_id' => 'fid'),
-        ),
-      ),
-    );
+          'columns' => ['target_id' => 'fid'],
+        ],
+      ],
+    ];
   }
 
   /**

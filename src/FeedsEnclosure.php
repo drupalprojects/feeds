@@ -70,10 +70,10 @@ class FeedsEnclosure {
     $response = \Drupal::httpClient()->get($this->uri)->send();
 
     if ($response->getStatusCode() != 200) {
-      $args = array(
+      $args = [
         '%url' => $this->uri,
         '@code' => $response->getStatusCode(),
-      );
+      ];
       throw new \RuntimeException(String::format('Download of %url failed with code @code.', $args));
     }
 
@@ -115,12 +115,12 @@ class FeedsEnclosure {
     file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
     // Copy or save file depending on whether it is remote or local.
     if (drupal_realpath($this->uri)) {
-      $file = entity_create('file', array(
+      $file = entity_create('file', [
         'uid' => 0,
         'uri' => $this->uri,
         'filemime' => $this->mimeType,
         'filename' => basename($this->uri),
-      ));
+      ]);
       if (drupal_dirname($file->getFileUri()) != $destination) {
         $file = file_copy($file, $destination, $replace);
       }
@@ -128,7 +128,7 @@ class FeedsEnclosure {
         // If file is not to be copied, check whether file already exists,
         // as file_save() won't do that for us (compare file_copy() and
         // file_save())
-        $existing_files = file_load_multiple([], array('uri' => $file->getFileUri()));
+        $existing_files = file_load_multiple([], ['uri' => $file->getFileUri()]);
         if ($existing_files) {
           return reset($existing_files);
         }
@@ -155,7 +155,7 @@ class FeedsEnclosure {
 
     // We couldn't make sense of this enclosure, throw an exception.
     if (!$file) {
-      throw new \RuntimeException(String::format('Invalid enclosure %enclosure', array('%enclosure' => $this->uri)));
+      throw new \RuntimeException(String::format('Invalid enclosure %enclosure', ['%enclosure' => $this->uri]));
     }
 
     return $file;

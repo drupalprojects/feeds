@@ -114,12 +114,12 @@ class DeleteMultiple extends ConfirmFormBase {
       return new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString());
     }
 
-    $form['feeds'] = array(
+    $form['feeds'] = [
       '#theme' => 'item_list',
       '#items' => array_map(function ($feed) {
         return String::checkPlain($feed->label());
       }, $this->feeds),
-    );
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -131,7 +131,7 @@ class DeleteMultiple extends ConfirmFormBase {
       $this->storage->delete($this->feeds);
       $this->tempStoreFactory->get('feeds_feed_multiple_delete_confirm')->delete($this->user->id());
       $count = count($this->feeds);
-      $this->logger('feeds')->notice('Deleted @count feeds.', array('@count' => $count));
+      $this->logger('feeds')->notice('Deleted @count feeds.', ['@count' => $count]);
       drupal_set_message($this->formatPlural($count, 'Deleted 1 feed.', 'Deleted @count posts.'));
     }
 

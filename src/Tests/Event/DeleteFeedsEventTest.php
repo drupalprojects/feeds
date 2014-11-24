@@ -17,7 +17,7 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class DeleteFeedsEventTest extends FeedsUnitTestCase {
 
   public function test() {
-    $feeds = array($this->getMock('Drupal\feeds\FeedInterface'));
+    $feeds = [$this->getMock('Drupal\feeds\FeedInterface')];
     $event = new DeleteFeedsEvent($feeds);
 
     $this->assertSame($feeds, $event->getFeeds());
