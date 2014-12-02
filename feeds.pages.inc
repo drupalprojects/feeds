@@ -347,33 +347,33 @@ function theme_feeds_upload($variables) {
   $element = $variables['element'];
   drupal_add_css(drupal_get_path('module', 'feeds') . '/feeds.css');
   _form_set_class($element, array('form-file'));
-  $description = '';
+  $summary = '';
   if (!empty($element['#file_info'])) {
     $file = $element['#file_info'];
     $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
-    $description .= '<div class="file-info">';
-    $description .= '<div class="file-name">';
+    $summary .= '<div class="feeds-file-info">';
+    $summary .= '<div class="feeds-file-name">';
     if ($wrapper) {
-      $description .= l($file->filename, $wrapper->getExternalUrl());
+      $summary .= l(check_plain($file->filename), $wrapper->getExternalUrl());
     }
     else {
-      $description .= t('URI scheme %scheme not available.', array('%scheme' =>  file_uri_scheme($uri)));
+      $summary .= t('URI scheme %scheme not available.', array('%scheme' =>  file_uri_scheme($uri)));
     }
-    $description .= '</div>';
-    $description .= '<div class="file-size">';
-    $description .= format_size($file->filesize);
-    $description .= '</div>';
-    $description .= '<div class="file-mime">';
-    $description .= check_plain($file->filemime);
-    $description .= '</div>';
-    $description .= '</div>';
+    $summary .= '</div>';
+    $summary .= '<div class="file-size">';
+    $summary .= format_size($file->filesize);
+    $summary .= '</div>';
+    $summary .= '<div class="feeds-file-mime">';
+    $summary .= check_plain($file->filemime);
+    $summary .= '</div>';
+    $summary .= '</div>';
   }
-  $description .= '<div class="file-upload">';
-  $description .= '<input type="file" name="' . $element['#name'] . '"' . ($element['#attributes'] ? ' ' . drupal_attributes($element['#attributes']) : '') . ' id="' . $element['#id'] . '" size="' . $element['#size'] . "\" />\n";
-  $description .= '</div>';
-  $element['#description'] = $description;
+  // Prepend the summary to the form field.
+  $element['#children'] = '<div class="feeds-file">' . $summary . '<div class="feeds-file-upload">' . $element['#children'];
+  // Render file upload field using theme_form_element().
+  $output = theme('form_element', $element);
+  // Close "feeds-file" and "feeds-file-upload" divs.
+  $output .= '</div></div>';
 
-  // For some reason not unsetting #title leads to printing the title twice.
-  unset($element['#title']);
-  return theme('form_element', $element);
+  return $output;
 }
