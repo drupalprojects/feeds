@@ -10,7 +10,7 @@ feeds.add_page:
   path: '/feed/add'
   defaults:
     _title: 'Add feed'
-    _content: 'Drupal\feeds\Controller\FeedController::addPage'
+    _controller: 'Drupal\feeds\Controller\FeedController::addPage'
   options:
     _access_mode: 'ANY'
     _admin_route: TRUE
@@ -21,7 +21,7 @@ feeds.add_page:
 feeds.add:
   path: '/feed/add/{feeds_importer}'
   defaults:
-    _content: 'Drupal\feeds\Controller\FeedController::createForm'
+    _controller: 'Drupal\feeds\Controller\FeedController::createForm'
   options:
     _admin_route: TRUE
   requirements:
@@ -58,7 +58,7 @@ feeds.delete:
 feeds.item_list:
   path: '/feed/{feeds_feed}/list'
   defaults:
-    _content: 'Drupal\feeds\Controller\ItemListController:listItems'
+    _controller: 'Drupal\feeds\Controller\ItemListController:listItems'
     _title: 'Feed items'
   requirements:
     _entity_access: 'feeds_feed.view'
