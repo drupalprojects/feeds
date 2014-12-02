@@ -380,9 +380,10 @@ function feeds_importer_load($id) {
   try {
     return feeds_importer($id)->existing();
   }
-  catch (FeedsNotExistingException $e) {
-    return FALSE;
-  }
+  catch (FeedsNotExistingException $e) {}
+  catch (InvalidArgumentException $e) {}
+
+  return FALSE;
 }
 
 /**
