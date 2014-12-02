@@ -102,7 +102,7 @@ class MappingForm extends FormBase {
       '#parents' => ['add_target'],
       '#default_value' => NULL,
       '#ajax' => [
-        'callback' => get_class($this) . '::ajaxCallback',
+        'callback' => '::ajaxCallback',
         'wrapper' => 'feeds-mapping-form-ajax-wrapper',
         'effect' => 'none',
         'progress' => 'none',
@@ -168,20 +168,15 @@ class MappingForm extends FormBase {
 
     if ($plugin = $this->importer->getTargetPlugin($delta)) {
 
-      $row['settings'] = [
-        '#type' => 'container',
-        '#id' => 'edit-mappings-' . $delta . '-settings',
-      ];
-
       if ($plugin instanceof ConfigurableTargetInterface) {
         if ($delta == $ajax_delta) {
-          $row['settings'] += $plugin->buildConfigurationForm([], $form_state);
+          $row['settings'] = $plugin->buildConfigurationForm([], $form_state);
           $row['settings']['submit'] = [
             '#type' => 'submit',
             '#value' => $this->t('Save'),
             '#ajax' => [
-              'callback' => get_class($this) . '::settingsAjaxCallback',
-              'wrapper' => 'edit-mappings-' . $delta . '-settings',
+              'callback' => '::ajaxCallback',
+              'wrapper' => 'feeds-mapping-form-ajax-wrapper',
               'effect' => 'fade',
               'progress' => 'none',
             ],
@@ -191,9 +186,11 @@ class MappingForm extends FormBase {
             '#parents' => ['config_button', $delta],
             '#attributes' => ['class' => ['feeds-ajax-save-button']],
           ];
+          $row['configure']['#markup'] = '';
+          $row['#attributes']['class'][] = 'feeds-mapping-settings-editing';
         }
         else {
-          $row['settings']['summary'] = [
+          $row['settings'] = [
             '#type' => 'item',
             '#markup' => $plugin->getSummary(),
             '#parents' => ['config_summary', $delta],
@@ -203,8 +200,8 @@ class MappingForm extends FormBase {
             '#type' => 'image_button',
             '#op' => 'configure',
             '#ajax' => [
-              'callback' => get_class($this) . '::settingsAjaxCallback',
-              'wrapper' => 'edit-mappings-' . $delta . '-settings',
+              'callback' => '::ajaxCallback',
+              'wrapper' => 'feeds-mapping-form-ajax-wrapper',
               'effect' => 'fade',
               'progress' => 'none',
             ],
@@ -217,6 +214,7 @@ class MappingForm extends FormBase {
         }
       }
       else {
+        $row['settings']['#markup'] = '';
         $row['configure']['#markup'] = '';
       }
     }
@@ -248,7 +246,7 @@ class MappingForm extends FormBase {
       '#title_display' => 'invisible',
       '#parents' => ['remove_mappings', $delta],
       '#ajax' => [
-        'callback' => get_class($this) . '::ajaxCallback',
+        'callback' => '::ajaxCallback',
         'wrapper' => 'feeds-mapping-form-ajax-wrapper',
         'effect' => 'none',
         'progress' => 'none',
@@ -349,14 +347,6 @@ class MappingForm extends FormBase {
    */
   public static function ajaxCallback(array $form, FormStateInterface $form_state) {
     return $form;
-  }
-
-  /**
-   * Callback for target settings forms.
-   */
-  public static function settingsAjaxCallback(array $form, FormStateInterface $form_state) {
-    $delta = $form_state->getTriggeringElement()['#delta'];
-    return $form['mappings'][$delta]['settings'];
   }
 
 }

@@ -16,9 +16,13 @@ table td {
   padding-bottom: 0;
 }
 
-#feeds-mapping-form .item-list ul li {
+.feeds-mapping-form .item-list ul li {
   margin-bottom: 13px;
   list-style: none;
   list-style-type: none;
   margin-left: 0;
+}
+
+.feeds-mapping-form .feeds-mapping-settings-editing {
+  background: #d5e9f2;
 }
