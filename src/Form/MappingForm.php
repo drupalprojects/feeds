@@ -64,8 +64,17 @@ class MappingForm extends FormBase {
     if ($form_state->getValues()) {
       $this->processFormState($form, $form_state);
 
-      if ($form_state->getTriggeringElement()['#name'] === 'add_target' || !empty($form_state->getTriggeringElement()['#remove'])) {
-        drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
+      $triggering_element = $form_state->getTriggeringElement() + ['#op' => ''];
+
+      switch ($triggering_element['#op']) {
+        case 'cancel':
+        case 'configure':
+          // These don't need a configuration message.
+          break;
+
+        default:
+          drupal_set_message($this->t('Your changes will not be saved until you click the <em>Save</em> button at the bottom of the page.'), 'warning');
+          break;
       }
     }
 
@@ -131,7 +140,8 @@ class MappingForm extends FormBase {
    */
   protected function buildRow($form, $form_state, $mapping, $delta) {
     $ajax_delta = -1;
-    if (isset($form_state->getTriggeringElement()['#delta']) && empty($form_state->getTriggeringElement()['#saved'])) {
+    $triggering_element = (array) $form_state->getTriggeringElement() + ['#op' => ''];
+    if ($triggering_element['#op'] === 'configure') {
       $ajax_delta = $form_state->getTriggeringElement()['#delta'];
     }
 
@@ -166,25 +176,37 @@ class MappingForm extends FormBase {
       $row['targets']['#items'][] = $label;
     }
 
+    $default_button = [
+      '#ajax' => [
+        'callback' => '::ajaxCallback',
+        'wrapper' => 'feeds-mapping-form-ajax-wrapper',
+        'effect' => 'fade',
+        'progress' => 'none',
+      ],
+      '#delta' => $delta,
+    ];
+
     if ($plugin = $this->importer->getTargetPlugin($delta)) {
 
       if ($plugin instanceof ConfigurableTargetInterface) {
         if ($delta == $ajax_delta) {
           $row['settings'] = $plugin->buildConfigurationForm([], $form_state);
-          $row['settings']['submit'] = [
-            '#type' => 'submit',
-            '#value' => $this->t('Save'),
-            '#ajax' => [
-              'callback' => '::ajaxCallback',
-              'wrapper' => 'feeds-mapping-form-ajax-wrapper',
-              'effect' => 'fade',
-              'progress' => 'none',
+          $row['settings']['actions'] = [
+            '#type' => 'actions',
+            'save_settings' => $default_button + [
+              '#type' => 'submit',
+              '#button_type' => 'primary',
+              '#value' => $this->t('Update'),
+              '#op' => 'update',
+              '#name' => 'target-save-' . $delta,
             ],
-            '#name' => 'target-save-' . $delta,
-            '#delta' => $delta,
-            '#saved' => TRUE,
-            '#parents' => ['config_button', $delta],
-            '#attributes' => ['class' => ['feeds-ajax-save-button']],
+            'cancel_settings' => $default_button + [
+              '#type' => 'submit',
+              '#value' => $this->t('Cancel'),
+              '#op' => 'cancel',
+              '#name' => 'target-cancel-' . $delta,
+              '#limit_validation_errors' => [[]],
+            ],
           ];
           $row['configure']['#markup'] = '';
           $row['#attributes']['class'][] = 'feeds-mapping-settings-editing';
@@ -194,21 +216,11 @@ class MappingForm extends FormBase {
             '#type' => 'item',
             '#markup' => $plugin->getSummary(),
             '#parents' => ['config_summary', $delta],
-            '#attributes' => ['class' => ['field-plugin-summary']],
           ];
-          $row['configure']['button'] = [
+          $row['configure'] = $default_button + [
             '#type' => 'image_button',
             '#op' => 'configure',
-            '#ajax' => [
-              'callback' => '::ajaxCallback',
-              'wrapper' => 'feeds-mapping-form-ajax-wrapper',
-              'effect' => 'fade',
-              'progress' => 'none',
-            ],
             '#name' => 'target-settings-' . $delta,
-            '#delta' => $delta,
-            '#parents' => ['config_button', $delta],
-            '#attributes' => ['class' => ['feeds-ajax-configure-button']],
             '#src' => 'core/misc/icons/787878/cog.svg',
           ];
         }
@@ -239,20 +251,19 @@ class MappingForm extends FormBase {
       }
     }
 
-    $row['remove'] = [
-      '#title' => $this->t('Remove'),
-      '#type' => 'checkbox',
-      '#default_value' => FALSE,
-      '#title_display' => 'invisible',
-      '#parents' => ['remove_mappings', $delta],
-      '#ajax' => [
-        'callback' => '::ajaxCallback',
-        'wrapper' => 'feeds-mapping-form-ajax-wrapper',
-        'effect' => 'none',
-        'progress' => 'none',
-      ],
-      '#remove' => TRUE,
-    ];
+    if ($delta != $ajax_delta) {
+      $row['remove'] = $default_button + [
+        '#title' => $this->t('Remove'),
+        '#type' => 'checkbox',
+        '#default_value' => FALSE,
+        '#title_display' => 'invisible',
+        '#parents' => ['remove_mappings', $delta],
+        '#remove' => TRUE,
+      ];
+    }
+    else {
+      $row['remove']['#markup'] = '';
+    }
 
     return $row;
   }
@@ -262,9 +273,9 @@ class MappingForm extends FormBase {
    */
   protected function processFormState(array $form, FormStateInterface $form_state) {
     // Process any plugin configuration.
-    if (isset($form_state->getTriggeringElement()['#delta']) && !empty($form_state->getTriggeringElement()['#saved'])) {
-      $delta = $form_state->getTriggeringElement()['#delta'];
-      $this->importer->getTargetPlugin($delta)->submitConfigurationForm($form, $form_state);
+    $triggering_element = $form_state->getTriggeringElement() + ['#op' => ''];
+    if ($triggering_element['#op'] === 'update') {
+      $this->importer->getTargetPlugin($triggering_element['#delta'])->submitConfigurationForm($form, $form_state);
     }
 
     $mappings = $this->importer->getMappings();
@@ -312,7 +323,6 @@ class MappingForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->processFormState($form, $form_state);
     $this->importer->save();
-
   }
 
   /**
@@ -347,6 +357,13 @@ class MappingForm extends FormBase {
    */
   public static function ajaxCallback(array $form, FormStateInterface $form_state) {
     return $form;
+  }
+
+  /**
+   * Page title callback.
+   */
+  public function mappingTitle(ImporterInterface $feeds_importer) {
+    return $this->t('Mappings @label', array('@label' => $feeds_importer->label()));
   }
 
 }

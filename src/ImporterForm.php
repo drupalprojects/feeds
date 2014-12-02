@@ -105,7 +105,7 @@ class ImporterForm extends EntityForm {
       '#weight' => 99,
     ];
 
-    $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="theme-settings-bottom">';
+    $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="feeds-importer-secondary-settings">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
     $form['importer_settings'] = [

@@ -148,6 +148,7 @@ feeds.importer_mapping:
   path: '/admin/structure/feeds/manage/{feeds_importer}/mapping'
   defaults:
     _form: '\Drupal\feeds\Form\MappingForm'
+    _title_callback: '\Drupal\feeds\Form\MappingForm::mappingTitle'
   requirements:
     _entity_access: 'feeds_importer.mapping'
 
