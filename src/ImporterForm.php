@@ -172,13 +172,11 @@ class ImporterForm extends EntityForm {
           '#options' => $options,
           '#default_value' => $plugin->getPluginId(),
           '#ajax' => [
-            'callback' => get_class($this) . '::ajaxCallback',
+            'callback' => '::ajaxCallback',
             'wrapper' => 'feeds-ajax-form-wrapper',
             'progress' => 'none',
           ],
-          '#attached' => [
-            'library' => ['feeds/feeds'],
-          ],
+          '#attached' => ['library' => ['feeds/feeds']],
           '#plugin_type' => $type,
           '#parents' => [$type],
         ];
@@ -310,7 +308,7 @@ class ImporterForm extends EntityForm {
   /**
    * Sends an ajax response.
    */
-  public static function ajaxCallback(array $form, FormStateInterface $form_state) {
+  public function ajaxCallback(array $form, FormStateInterface $form_state) {
     $type = $form_state->getTriggeringElement()['#plugin_type'];
 
     $response = new AjaxResponse();

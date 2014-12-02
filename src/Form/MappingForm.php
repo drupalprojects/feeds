@@ -212,7 +212,7 @@ class MappingForm extends FormBase {
             '#delta' => $delta,
             '#parents' => ['config_button', $delta],
             '#attributes' => ['class' => ['feeds-ajax-configure-button']],
-            '#src' => 'core/misc/configure-dark.png',
+            '#src' => 'core/misc/icons/787878/cog.svg',
           ];
         }
       }

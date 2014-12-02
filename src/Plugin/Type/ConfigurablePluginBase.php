@@ -27,7 +27,7 @@ abstract class ConfigurablePluginBase extends PluginBase implements PluginFormIn
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Submission is optional.
+    $this->setConfiguration($form_state->getValues());
   }
 
 }

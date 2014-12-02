@@ -3,4 +3,5 @@ feeds:
   js:
     feeds.js: {}
   dependencies:
+    - core/drupal.form
     - core/drupal.ajax
