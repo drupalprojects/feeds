@@ -32,8 +32,6 @@ class FeedRefresh extends FeedQueueWorkerBase {
       return;
     }
 
-    debug('feeds_feed_import: ' . $feed->id());
-
     try {
       $feed->lock();
     }

@@ -187,6 +187,9 @@ class RssNodeImport extends WebTestBase {
     // Clear the download cache so that the http fetcher doesn't trick us.
     \Drupal::cache('feeds_download')->deleteAll();
     $this->cronRun();
+
+    debug(db_query("SELECT * FROM {queue}")->fetchAll());
+
     $feed = $this->reloadFeed($feed->id());
 
     $this->assertEqual($feed->getItemCount(), 6);
