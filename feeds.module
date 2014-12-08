@@ -36,6 +36,8 @@ function feeds_cron() {
     ->sort('imported')
     ->execute();
 
+  debug($ids);
+
   foreach (Feed::loadMultiple($ids) as $feed) {
     if ($feed->isLocked()) {
       continue;
