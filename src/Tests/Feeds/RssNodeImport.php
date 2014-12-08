@@ -158,6 +158,9 @@ class RssNodeImport extends WebTestBase {
   }
 
   public function testCron() {
+    // Run cron once before, so any other bookkeeping can get done.
+    $this->cronRun();
+
     $this->importer->setImportPeriod(3600);
     $mappings = $this->importer->getMappings();
     unset($mappings[2]['unique']);
