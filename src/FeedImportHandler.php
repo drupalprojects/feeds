@@ -13,6 +13,7 @@ use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\Exception\EmptyFeedException;
+use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
@@ -36,7 +37,13 @@ class FeedImportHandler extends FeedHandlerBase {
    * {@inheritodc}
    */
   public function startBatchImport(FeedInterface $feed) {
-    $feed->lock();
+    try {
+      $feed->lock();
+    }
+    catch (LockException $e) {
+      drupal_set_message(t('The feed became locked before the import could begin.'), 'warning');
+      return;
+    }
     $feed->clearStates();
     $this->startBatchFetch($feed);
   }
