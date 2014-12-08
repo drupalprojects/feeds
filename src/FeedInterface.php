@@ -84,6 +84,14 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function getImportedTime();
 
   /**
+   * Returns the next time the feed will be imported.
+   *
+   * @return int
+   *   The next time the feed will be imported as a UNIX timestamp.
+   */
+  public function getNextImportTime();
+
+  /**
    * Returns the time when this feed was queued for refresh, 0 if not queued.
    *
    * @return int
@@ -149,7 +157,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    *   services don't have to wait for us to process. Can we spawn a background
    *   process?
    */
-  public function importRaw($raw);
+  public function pushImport($raw);
 
   /**
    * Removes all expired items from a feed.
@@ -166,7 +174,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   /**
    * Cleans up after an import.
    */
-  public function cleanUpAfterImport();
+  public function finishImport();
 
   /**
    * Cleans up after feed items have been delted.
@@ -279,7 +287,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function isActive();
 
   /**
-   * Sets the active status of a feed..
+   * Sets the active status of a feed.
    *
    * @param bool $active
    *   True to set this feed to active, false to set it to inactive.

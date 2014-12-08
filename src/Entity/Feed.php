@@ -13,7 +13,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\feeds\Event\DeleteFeedsEvent;
-use Drupal\feeds\Event\EventDispatcherTrait;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\ImporterInterface;
@@ -71,7 +70,6 @@ use Drupal\user\UserInterface;
  * )
  */
 class Feed extends ContentEntityBase implements FeedInterface {
-  use EventDispatcherTrait;
 
   /**
    * An array of import stage states keyed by state.
@@ -112,7 +110,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getCreatedTime() {
-    return $this->get('created')->value;
+    return (int) $this->get('created')->value;
   }
 
   /**
@@ -126,28 +124,35 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function getChangedTime() {
-    return $this->get('changed')->value;
+    return (int) $this->get('changed')->value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getImportedTime() {
-    return $this->get('imported')->value;
+    return (int) $this->get('imported')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNextImportTime() {
+    return (int) $this->get('next')->value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getQueuedTime() {
-    return $this->get('queued')->value;
+    return (int) $this->get('queued')->value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setQueuedTime($queued) {
-    $this->set('queued', $queued);
+    $this->set('queued', (int) $queued);
   }
 
   /**
@@ -198,7 +203,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function setActive($active) {
-    $this->set('status', $active ? self::ACTIVE : self::INACTIVE);
+    $this->set('status', $active ? static::ACTIVE : static::INACTIVE);
   }
 
   /**
@@ -222,7 +227,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function importRaw($raw) {
+  public function pushImport($raw) {
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_import')
       ->pushImport($this, $raw);
@@ -247,10 +252,12 @@ class Feed extends ContentEntityBase implements FeedInterface {
   }
 
   /**
-   * Cleans up after an import.
+   * {@inheritdoc}
    */
-  public function cleanUpAfterImport() {
-    $this->getImporter()->getProcessor()->postProcess($this, $this->getState(StateInterface::PROCESS));
+  public function finishImport() {
+    $this->getImporter()
+      ->getProcessor()
+      ->postProcess($this, $this->getState(StateInterface::PROCESS));
 
     foreach ($this->states as $state) {
       is_object($state) ? $state->displayMessages() : NULL;
@@ -266,13 +273,19 @@ class Feed extends ContentEntityBase implements FeedInterface {
     if ($interval !== ImporterInterface::SCHEDULE_NEVER) {
       $this->set('next', $interval + $time);
     }
+
+    $this->save();
+    $this->unlock();
   }
 
   /**
    * Cleans up after an import.
    */
   public function cleanUpAfterClear() {
-    $this->getImporter()->getProcessor()->postClear($this, $this->getState(StateInterface::CLEAR));
+    $this
+      ->getImporter()
+      ->getProcessor()
+      ->postClear($this, $this->getState(StateInterface::CLEAR));
 
     foreach ($this->states as $state) {
       is_object($state) ? $state->displayMessages() : NULL;
@@ -415,20 +428,20 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
-    // Before saving the feed, set changed time.
-    $this->set('changed', REQUEST_TIME);
-    foreach ($this->getImporter()->getPlugins() as $plugin) {
+    $importer = $this->getImporter();
+
+    foreach ($importer->getPlugins() as $plugin) {
       $plugin->onFeedSave($this, $update);
     }
 
     // If this is a new node, 'next' and 'imported' will be zero which will
     // queue it for the next run.
-    if ($this->getImporter()->getImportPeriod() === ImporterInterface::SCHEDULE_NEVER) {
+    if ($importer->getImportPeriod() === ImporterInterface::SCHEDULE_NEVER) {
       $this->set('next', ImporterInterface::SCHEDULE_NEVER);
     }
 
     // Update the item count.
-    $this->set('item_count', $this->getImporter()->getProcessor()->getItemCount($this));
+    $this->set('item_count', $importer->getProcessor()->getItemCount($this));
   }
 
   /**
@@ -594,15 +607,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
         'type' => 'number_integer',
         'weight' => 0,
       ]);
-
-    $fields['fetcher_result'] = BaseFieldDefinition::create('feeds_serialized')
-      ->setLabel(t('Fetcher result'))
-      ->setDescription(t('The source of the feed.'));
-
-    $fields['state'] = BaseFieldDefinition::create('feeds_serialized')
-      ->setLabel(t('State'))
-      ->setDescription(t('The source of the feed.'))
-      ->setSettings(['default_value' => []]);
 
     return $fields;
   }

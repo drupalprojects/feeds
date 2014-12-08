@@ -174,9 +174,7 @@ class FeedImportHandler extends FeedHandlerBase {
       $this->startBatchFetch($feed);
     }
     else {
-      $feed->cleanUpAfterImport();
-      $feed->save();
-      $feed->unlock();
+      $feed->finishImport();
     }
   }
 
@@ -188,9 +186,6 @@ class FeedImportHandler extends FeedHandlerBase {
    * @param string $payload
    *   The feed contents.
    *
-   * @return float
-   *   The progress made.
-   *
    * @todo Move this to a queue.
    */
   public function pushImport(FeedInterface $feed, $payload) {
@@ -199,9 +194,7 @@ class FeedImportHandler extends FeedHandlerBase {
 
     try {
       do {
-        $fetcher_result = $this->doFetch($feed);
-        $parser_result =$this->doParse($feed, $fetcher_result);
-        foreach ($parser_result as $item) {
+        foreach ($this->doParse($feed, $fetcher_result) as $item) {
           $this->doProcess($feed, $item);
         }
       } while ($feed->progressImporting() !== StateInterface::BATCH_COMPLETE);
@@ -213,15 +206,11 @@ class FeedImportHandler extends FeedHandlerBase {
       // Do nothing. Will throw later.
     }
 
-    $feed->cleanUpAfterImport();
-    $feed->save();
-    $feed->unlock();
+    $feed->finishImport();
 
     if (isset($exception)) {
       throw $exception;
     }
-
-    return StateInterface::BATCH_COMPLETE;
   }
 
   /**
@@ -253,6 +242,7 @@ class FeedImportHandler extends FeedHandlerBase {
    */
   protected function doParse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'parse'));
+
     $parse_event = $this->dispatchEvent(FeedsEvents::PARSE, new ParseEvent($feed, $fetcher_result));
     $feed->setState(StateInterface::PROCESS, NULL);
     return $parse_event->getParserResult();
@@ -283,9 +273,7 @@ class FeedImportHandler extends FeedHandlerBase {
    *   Thrown if $exception is not an instance of EmptyFeedException.
    */
   protected function handleException(FeedInterface $feed, \Exception $exception) {
-    $feed->cleanUpAfterImport();
-    $feed->save();
-    $feed->unlock();
+    $feed->finishImport();
 
     if ($exception instanceof EmptyFeedException) {
       return;

@@ -173,17 +173,50 @@ class RssNodeImport extends WebTestBase {
     ]);
     $feed->save();
 
-    $this->cronRun();
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+    // Verify initial values.
+    $feed = $this->reloadFeed($feed->id());
 
-    $this->cronRun();
+    $this->assertEqual($feed->getImportedTime(), 0);
+    $this->assertEqual($feed->getNextImportTime(), 0);
+    $this->assertEqual($feed->getItemCount(), 0);
+
+    // Cron should import some nodes.
+    // Clear the download cache so that the http fetcher doesn't trick us.
     \Drupal::cache('feeds_download')->deleteAll();
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+    $this->cronRun();
+    $feed = $this->reloadFeed($feed->id());
+
+    $this->assertEqual($feed->getItemCount(), 6);
+    $imported = $feed->getImportedTime();
+    $this->assertTrue($imported > 0);
+    $this->assertEqual($feed->getNextImportTime(), $imported + 3600);
+
+    // Nothing should change on this cron run.
+    \Drupal::cache('feeds_download')->deleteAll();
+    $this->cronRun();
+    $feed = $this->reloadFeed($feed->id());
+
+    $this->assertEqual($feed->getItemCount(), 6);
+    $this->assertEqual($feed->getImportedTime(), $imported);
+    $this->assertEqual($feed->getNextImportTime(), $imported + 3600);
 
     // Check that items import normally.
     \Drupal::cache('feeds_download')->deleteAll();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 12);
+    $feed = $this->reloadFeed($feed->id());
+
+    $this->assertEqual($feed->getItemCount(), 12);
+    $this->assertTrue($feed->getImportedTime() > $imported);
+    $this->assertEqual($feed->getNextImportTime(), $feed->getImportedTime() + 3600);
+  }
+
+  protected function reloadFeed($fid) {
+    $this->container
+      ->get('entity.manager')
+      ->getStorage('feeds_feed')
+      ->resetCache();
+
+    return Feed::load($fid);
   }
 
 }
