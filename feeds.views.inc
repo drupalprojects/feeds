@@ -66,7 +66,7 @@ function feeds_views_data() {
     ],
   ];
 
-  $data['feeds_feed']['feed_type'] = [
+  $data['feeds_feed']['type'] = [
     'title' => t('Feed type'),
     'help' => t('The feed type.'),
     'field' => [

@@ -3,6 +3,7 @@ status: true
 dependencies:
   module:
     - feeds
+    - system
     - user
 id: feeds_feed
 label: Feeds
@@ -92,17 +93,14 @@ display:
           field: title
           id: title
           exclude: false
-        feed_type:
-          id: feed_type
+        type:
+          id: type
           table: feeds_feed
-          field: feed_type
+          field: type
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - feeds
-          label: Feed type
+          label: Type
           exclude: false
           alter:
             alter_text: false
@@ -146,7 +144,6 @@ display:
           link_to_feed: 0
           machine_name: 0
           plugin_id: feeds_feed_type
-          provider: feeds
         name:
           id: name
           table: users_field_data

@@ -5,25 +5,25 @@ feeds.add_action:
     - feeds.admin
 
 feeds.import_action:
-  route_name: feeds.import
+  route_name: entity.feeds_feed.import
   title: Import
   appears_on:
-    - feeds.view
+    - entity.feeds_feed.canonical
 
 feeds.clear_action:
-  route_name: feeds.clear
+  route_name: entity.feeds_feed.clear
   title: Delete items
   appears_on:
-    - feeds.view
+    - entity.feeds_feed.canonical
 
 feeds.unlock_action:
-  route_name: feeds.unlock
+  route_name: entity.feeds_feed.unlock
   title: Unlock
   appears_on:
-    - feeds.view
+    - entity.feeds_feed.canonical
 
-feeds.feed_type_add:
-  route_name: feeds.feed_type_add
+feeds.type_add:
+  route_name: feeds.type_add
   title: Add feed type
   appears_on:
-    - feeds.feed_type_list
+    - feeds.overview_types

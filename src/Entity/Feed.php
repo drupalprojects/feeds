@@ -58,14 +58,14 @@ use Drupal\user\UserInterface;
  *   },
  *   permission_granularity = "bundle",
  *   bundle_entity_type = "feeds_feed_type",
- *   field_ui_base_route = "feeds.feed_type_edit",
+ *   field_ui_base_route = "entity.feeds_feed_type.edit_form",
  *   links = {
- *     "canonical" = "feeds.view",
- *     "delete-form" = "feeds.delete",
- *     "edit-form" = "feeds.edit",
- *     "admin-form" = "feeds.feed_type_edit",
- *     "import-form" = "feeds.import",
- *     "clear-form" = "feeds.clear"
+ *     "canonical" = "entity.feeds_feed.canonical",
+ *     "delete-form" = "entity.feeds_feed.delete_form",
+ *     "edit-form" = "entity.feeds_feed.edit_form",
+ *     "admin-form" = "entity.feeds_feed_type.edit_form",
+ *     "import-form" = "entity.feeds_feed.import",
+ *     "clear-form" = "entity.feeds_feed.clear"
  *   }
  * )
  */

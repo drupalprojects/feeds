@@ -192,7 +192,7 @@ class FeedForm extends ContentEntityForm {
     }
 
     if ($feed->access('view')) {
-      $form_state->setRedirect('feeds.view', ['feeds_feed' => $feed->id()]);
+      $form_state->setRedirect('entity.feeds_feed.canonical', ['feeds_feed' => $feed->id()]);
     }
     else {
       $form_state->setRedirect('<front>');

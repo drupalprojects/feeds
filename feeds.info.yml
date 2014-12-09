@@ -4,4 +4,4 @@ package: Feeds
 type: module
 core: 8.x
 version: 8.0-dev
-configure: feeds.feed_type_list
+configure: feeds.overview_types

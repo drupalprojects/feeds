@@ -40,7 +40,7 @@ class FeedController extends ControllerBase {
     }
 
     // @todo Don't show link for non-admins.
-    $url = $this->url('feeds.feed_type_list');
+    $url = $this->url('feeds.overview_types');
     $empty = $this->t('There are no feed types, go to <a href="@types">Feed types</a> to create one or enable an existing one.', ['@types' => $url]);
 
     $build = [

@@ -19,7 +19,7 @@ use Drupal\file\Entity\File;
  */
 function feeds_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    case 'feeds.feed_type_list':
+    case 'feeds.overview_types':
       return '<p>' . t('Create one or more feed types for pulling content into Drupal.') . '</p>';
   }
 }

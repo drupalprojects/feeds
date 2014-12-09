@@ -312,7 +312,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       '@entity' => Unicode::strtolower($this->entityTypeLabel()),
       '%label' => $entity->label(),
       '%error' => $violations[0]->getMessage(),
-      '@url' => $this->url('feeds.feed_type_mapping', ['feeds_feed_type' => $this->feedType->id()]),
+      '@url' => $this->url('entity.feeds_feed_type.mapping', ['feeds_feed_type' => $this->feedType->id()]),
     ];
     throw new ValidationException(String::format('The @entity %label failed to validate with the error: %error Please check your <a href="@url">mappings</a>.', $args));
   }

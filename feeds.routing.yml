@@ -27,7 +27,7 @@ feeds.add:
   requirements:
     _entity_create_access: 'feeds_feed:{feeds_feed_type}'
 
-feeds.view:
+entity.feeds_feed.canonical:
   path: '/feed/{feeds_feed}'
   defaults:
     _entity_view: 'feeds_feed'
@@ -35,7 +35,7 @@ feeds.view:
     _entity_access: 'feeds_feed.view'
     feeds_feed: \d+
 
-feeds.edit:
+entity.feeds_feed.edit_form:
   path: '/feed/{feeds_feed}/edit'
   defaults:
     _entity_form: 'feeds_feed.update'
@@ -45,7 +45,7 @@ feeds.edit:
     _entity_access: 'feeds_feed.update'
     feeds_feed: \d+
 
-feeds.delete:
+entity.feeds_feed.delete_form:
   path: '/feed/{feeds_feed}/delete'
   defaults:
     _entity_form: 'feeds_feed.delete'
@@ -71,7 +71,7 @@ feeds.multiple_delete_confirm:
   requirements:
     _permission: 'administer feeds'
 
-feeds.import:
+entity.feeds_feed.import:
   path: '/feed/{feeds_feed}/import'
   defaults:
     _entity_form: 'feeds_feed.import'
@@ -81,7 +81,7 @@ feeds.import:
     _entity_access: 'feeds_feed.import'
     feeds_feed: \d+
 
-feeds.clear:
+entity.feeds_feed.clear:
   path: '/feed/{feeds_feed}/delete-items'
   defaults:
     _entity_form: 'feeds_feed.clear'
@@ -91,7 +91,7 @@ feeds.clear:
     _entity_access: 'feeds_feed.clear'
     feeds_feed: \d+
 
-feeds.unlock:
+entity.feeds_feed.unlock:
   path: '/feed/{feeds_feed}/unlock'
   defaults:
     _entity_form: 'feeds_feed.unlock'
@@ -101,7 +101,7 @@ feeds.unlock:
     _entity_access: 'feeds_feed.unlock'
     feeds_feed: \d+
 
-feeds.receive:
+entity.feeds_feed.receive:
   path: '/feed/{feeds_subscription}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:receive'
@@ -110,7 +110,7 @@ feeds.receive:
     feeds_subscription: \d+
     _method: 'POST'
 
-feeds.subscribe:
+entity.feeds_feed.subscribe:
   path: '/feed/{feeds_subscription_id}/push_callback'
   defaults:
     _controller: 'feeds.subscription.controller:subscribe'
@@ -121,7 +121,7 @@ feeds.subscribe:
 
 # Admin UI routes.
 
-feeds.feed_type_list:
+feeds.overview_types:
   path: '/admin/structure/feeds'
   defaults:
     _title: 'Feed types'
@@ -129,7 +129,7 @@ feeds.feed_type_list:
   requirements:
     _permission: 'administer feeds'
 
-feeds.feed_type_add:
+feeds.type_add:
   path: '/admin/structure/feeds/add'
   defaults:
     _title: 'Add feed feed type'
@@ -137,14 +137,14 @@ feeds.feed_type_add:
   requirements:
     _permission: 'administer feeds'
 
-feeds.feed_type_edit:
+entity.feeds_feed_type.edit_form:
   path: '/admin/structure/feeds/manage/{feeds_feed_type}'
   defaults:
     _entity_form: 'feeds_feed_type.edit'
   requirements:
     _entity_access: 'feeds_feed_type.edit'
 
-feeds.feed_type_mapping:
+entity.feeds_feed_type.mapping:
   path: '/admin/structure/feeds/manage/{feeds_feed_type}/mapping'
   defaults:
     _form: '\Drupal\feeds\Form\MappingForm'
@@ -152,7 +152,7 @@ feeds.feed_type_mapping:
   requirements:
     _entity_access: 'feeds_feed_type.mapping'
 
-feeds.feed_type_delete:
+entity.feeds_feed_type.delete_form:
   path: '/admin/structure/feeds/manage/{feeds_feed_type}/delete'
   defaults:
     _entity_form: 'feeds_feed_type.delete'
