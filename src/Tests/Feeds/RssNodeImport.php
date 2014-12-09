@@ -186,6 +186,7 @@ class RssNodeImport extends WebTestBase {
     // Cron should import some nodes.
     // Clear the download cache so that the http fetcher doesn't trick us.
     \Drupal::cache('feeds_download')->deleteAll();
+    $this->cronRun(); // Run cron twice for testbot.
     $this->cronRun();
 
     $feed = $this->reloadFeed($feed->id());
