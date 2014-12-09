@@ -10,7 +10,6 @@ namespace Drupal\feeds\Plugin\QueueWorker;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\InitEvent;
-use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\StateInterface;
 
@@ -32,14 +31,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
       return;
     }
 
-    try {
-      $feed->lock();
-    }
-    catch (LockException $e) {
-      // We don't really know when a queue item will execute, so it could be
-      // locked which is ok.
-      return;
-    }
+    $feed->lock();
     $feed->clearStates();
     try {
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'fetch'));

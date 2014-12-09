@@ -459,9 +459,11 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
-    // Clear the queue worker plugin cache so that our derivaties will be found.
+
     if (!$update) {
+      // Clear the queue worker plugin cache so that our derivaties will be found.
       \Drupal::service('plugin.manager.queue_worker')->clearCachedDefinitions();
+      \Drupal::queue('feeds_feed_import:' . $this->id())->createQueue();
     }
   }
 
