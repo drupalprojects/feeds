@@ -66,11 +66,11 @@ function feeds_views_data() {
     ],
   ];
 
-  $data['feeds_feed']['importer'] = [
-    'title' => t('Importer'),
-    'help' => t('The feed importer.'),
+  $data['feeds_feed']['feed_type'] = [
+    'title' => t('Feed type'),
+    'help' => t('The feed type.'),
     'field' => [
-      'id' => 'feeds_feed_importer',
+      'id' => 'feeds_feed_type',
      ],
     'sort' => [
       'id' => 'standard',

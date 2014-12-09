@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Feeds\Source;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Plugin\Type\Source\SourceInterface;
 
@@ -38,8 +38,8 @@ class BasicFieldSource extends PluginBase implements SourceInterface {
   /**
    * {@inheritdoc}
    */
-  public static function sources(array &$sources, ImporterInterface $importer, array $definition) {
-    // $field_definitions = \Drupal::entityManager()->getFieldDefinitions('feeds_feed', $importer->id());
+  public static function sources(array &$sources, FeedTypeInterface $feed_type, array $definition) {
+    // $field_definitions = \Drupal::entityManager()->getFieldDefinitions('feeds_feed', $feed_type->id());
     // foreach ($field_definitions as $field => $field_definition) {
     //   if (in_array($field_definition['type'], $definition['field_types'])) {
     //     $field_definition['label'] = t('Feed: @label', array('@label' => $field_definition['label']));

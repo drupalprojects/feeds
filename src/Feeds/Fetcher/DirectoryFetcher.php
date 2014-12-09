@@ -34,7 +34,7 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface, FeedPlugi
   public function fetch(FeedInterface $feed, StateInterface $state) {
     $path = $feed->getSource();
     // Just return a file fetcher result if this is a file. Make sure to
-    // re-validate the file extension in case the importer settings have
+    // re-validate the file extension in case the feed type settings have
     // changed.
     if (is_file($path)) {
       if ($this->validateFilePath($path)) {

@@ -1,8 +1,8 @@
-feeds.importer_list:
-  title: 'Feed importers'
+feeds.feed_type_list:
+  title: 'Feed types'
   parent: system.admin_structure
-  description: 'Configure one or more Feeds importers to aggregate RSS and Atom feeds, import CSV files or more.'
-  route_name: feeds.importer_list
+  description: 'Configure one or more feed types to aggregate RSS and Atom feeds, import CSV files or more.'
+  route_name: feeds.feed_type_list
 feeds.add_page:
   title: 'Add feed'
   route_name: feeds.add_page

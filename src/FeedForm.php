@@ -26,14 +26,14 @@ class FeedForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $feed = $this->entity;
 
-    $importer = $feed->getImporter();
+    $feed_type = $feed->getType();
 
-    $args = ['@importer' => $importer->label(), '@title' => $feed->label()];
+    $args = ['@type' => $feed_type->label(), '@title' => $feed->label()];
     if ($this->operation === 'update') {
-      $form['#title'] = $this->t('<em>Edit @importer</em> @title', $args);
+      $form['#title'] = $this->t('<em>Edit @type</em> @title', $args);
     }
     elseif ($this->operation === 'create') {
-      $form['#title'] = $this->t('<em>Add @importer</em>', $args);
+      $form['#title'] = $this->t('<em>Add @type</em>', $args);
     }
 
     $form['advanced'] = [
@@ -44,7 +44,7 @@ class FeedForm extends ContentEntityForm {
     $form = parent::form($form, $form_state);
 
     $form['plugin']['#tree'] = TRUE;
-    foreach ($importer->getPlugins() as $type => $plugin) {
+    foreach ($feed_type->getPlugins() as $type => $plugin) {
       if ($plugin instanceof FeedPluginFormInterface) {
         $plugin_state = (new FormState())->setValues($form_state->getValue(['plugin', $type], []));
         $form['plugin'][$type] = $plugin->buildFeedForm([], $plugin_state, $feed);
@@ -119,7 +119,7 @@ class FeedForm extends ContentEntityForm {
     }
     $feed = $this->buildEntity($form, $form_state);
 
-    foreach ($feed->getImporter()->getPlugins() as $type => $plugin) {
+    foreach ($feed->getType()->getPlugins() as $type => $plugin) {
       if ($plugin instanceof FeedPluginFormInterface) {
         $plugin_state = (new FormState())->setValues($form_state->getValue(['plugin', $type], []));
         $plugin->validateFeedForm($form['plugin'][$type], $plugin_state, $feed);
@@ -150,7 +150,7 @@ class FeedForm extends ContentEntityForm {
     parent::submitForm($form, $form_state);
     $feed = $this->entity;
 
-    foreach ($feed->getImporter()->getPlugins() as $type => $plugin) {
+    foreach ($feed->getType()->getPlugins() as $type => $plugin) {
       if ($plugin instanceof FeedPluginFormInterface) {
         $plugin_state = (new FormState())->setValues($form_state->getValue(['plugin', $type], []));
         $plugin->submitFeedForm($form['plugin'][$type], $plugin_state, $feed);
@@ -168,18 +168,18 @@ class FeedForm extends ContentEntityForm {
     $insert = $feed->isNew();
     $feed->save();
 
-    $context = ['@importer' => $feed->bundle(), '%title' => $feed->label()];
+    $context = ['@type' => $feed->bundle(), '%title' => $feed->label()];
     $t_args = [
-      '@importer' => $feed->getImporter()->label(),
+      '@type' => $feed->getType()->label(),
       '%title' => $feed->label(),
     ];
 
     if ($insert) {
-      $this->logger('feeds')->notice('@importer: added %title.', $context);
+      $this->logger('feeds')->notice('@type: added %title.', $context);
       drupal_set_message($this->t('%title has been created.', $t_args));
     }
     else {
-      $this->logger('feeds')->notice('@importer: updated %title.', $context);
+      $this->logger('feeds')->notice('@type: updated %title.', $context);
       drupal_set_message($this->t('%title has been updated.', $t_args));
     }
 

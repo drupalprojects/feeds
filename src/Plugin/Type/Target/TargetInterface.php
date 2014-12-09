@@ -9,7 +9,7 @@ namespace Drupal\feeds\Plugin\Type\Target;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 
 /**
  * Interface for Feed targets.
@@ -24,7 +24,7 @@ interface TargetInterface {
    *
    * @todo Finish documenting this.
    */
-  public static function targets(array &$targets, ImporterInterface $importer, array $definition);
+  public static function targets(array &$targets, FeedTypeInterface $feed_type, array $definition);
 
   /**
    * Sets the values on an object.

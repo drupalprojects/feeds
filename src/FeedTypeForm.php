@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ImporterForm.
+ * Contains \Drupal\feeds\FeedTypeForm.
  */
 
 namespace Drupal\feeds;
@@ -21,25 +21,25 @@ use Drupal\feeds\Plugin\Type\LockableInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form controller for the importer edit forms.
+ * Form controller for the feed type edit forms.
  */
-class ImporterForm extends EntityForm {
+class FeedTypeForm extends EntityForm {
 
   /**
-   * The importer storage controller.
+   * The feed type storage controller.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $importerStorage;
+  protected $feed_typeStorage;
 
   /**
-   * Constructs an ImporterForm object.
+   * Constructs an FeedTypeForm object.
    *
-   * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $importer_storage
-   *   The importer storage controller.
+   * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $feed_type_storage
+   *   The feed type storage controller.
    */
-  public function __construct(ConfigEntityStorageInterface $importer_storage) {
-    $this->importerStorage = $importer_storage;
+  public function __construct(ConfigEntityStorageInterface $feed_type_storage) {
+    $this->feedTypeStorage = $feed_type_storage;
   }
 
   /**
@@ -47,7 +47,7 @@ class ImporterForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager')->getStorage('feeds_importer')
+      $container->get('entity.manager')->getStorage('feeds_feed_type')
     );
   }
 
@@ -76,7 +76,7 @@ class ImporterForm extends EntityForm {
       '#title' => $this->t('Name'),
       '#default_value' => $this->entity->label(),
       '#maxlength' => '255',
-      '#description' => $this->t('A unique label for this importer. This label will be displayed in the interface.'),
+      '#description' => $this->t('A unique label for this feed type. This label will be displayed in the interface.'),
       '#required' => TRUE,
     ];
 
@@ -86,9 +86,9 @@ class ImporterForm extends EntityForm {
       '#default_value' => $this->entity->id(),
       '#disabled' => !$this->entity->isNew(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
-      '#description' => $this->t('A unique name for this importer. It must only contain lowercase letters, numbers and underscores.'),
+      '#description' => $this->t('A unique name for this feed type. It must only contain lowercase letters, numbers and underscores.'),
       '#machine_name' => [
-        'exists' => 'Drupal\feeds\Entity\Importer::load',
+        'exists' => 'Drupal\feeds\Entity\FeedType::load',
         'source' => ['basics', 'label'],
       ],
       '#required' => TRUE,
@@ -96,7 +96,7 @@ class ImporterForm extends EntityForm {
     $form['basics']['description'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Description'),
-      '#description' => $this->t('A description of this importer.'),
+      '#description' => $this->t('A description of this feed type.'),
       '#default_value' => $this->entity->getDescription(),
     ];
 
@@ -105,10 +105,10 @@ class ImporterForm extends EntityForm {
       '#weight' => 99,
     ];
 
-    $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="feeds-importer-secondary-settings">';
+    $form['plugin_settings']['#prefix'] = '<div id="feeds-ajax-form-wrapper" class="feeds-feed-type-secondary-settings">';
     $form['plugin_settings']['#suffix'] = '</div>';
 
-    $form['importer_settings'] = [
+    $form['feed_type_settings'] = [
       '#type' => 'details',
       '#group' => 'plugin_settings',
       '#title' => $this->t('Settings'),
@@ -126,11 +126,11 @@ class ImporterForm extends EntityForm {
     }
 
     $period = [
-      ImporterInterface::SCHEDULE_NEVER => $this->t('Off'),
+      FeedTypeInterface::SCHEDULE_NEVER => $this->t('Off'),
       0 => $this->t('As often as possible'),
     ] + $period;
 
-    $form['importer_settings']['import_period'] = [
+    $form['feed_type_settings']['import_period'] = [
       '#type' => 'select',
       '#title' => $this->t('Import period'),
       '#options' => $period,
@@ -138,7 +138,7 @@ class ImporterForm extends EntityForm {
       '#default_value' => $this->entity->getImportPeriod(),
     ];
 
-    // If this is an ajax requst, updating the plugins on the importer will give
+    // If this is an ajax requst, updating the plugins on the feed type will give
     // us the updated form.
     if (!empty($values)) {
       if ($values['processor'] !== $this->entity->getProcessor()->getPluginId()) {
@@ -222,12 +222,12 @@ class ImporterForm extends EntityForm {
   }
 
   /**
-   * Returns the configurable plugins for this importer.
+   * Returns the configurable plugins for this feed type.
    *
    * @return array
    *   A plugin array keyed by plugin type.
    *
-   * @todo Consider moving this to Importer.
+   * @todo Consider moving this to FeedType.
    */
   protected function getConfigurablePlugins() {
     $plugins = [];
@@ -279,7 +279,7 @@ class ImporterForm extends EntityForm {
       }
     }
 
-    // Build the importer object from the submitted values.
+    // Build the feed type object from the submitted values.
     parent::validate($form, $form_state);
   }
 
@@ -301,7 +301,7 @@ class ImporterForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $this->entity->save();
-    $form_state->setRedirect('feeds.importer_edit', ['feeds_importer' => $this->entity->id()]);
+    $form_state->setRedirect('feeds.feed_type_edit', ['feeds_feed_type' => $this->entity->id()]);
     drupal_set_message($this->t('Your changes have been saved.'));
   }
 

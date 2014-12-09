@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Tests\ImporterAccessControlHandlerTest.
+ * Contains \Drupal\feeds\Tests\FeedTypeAccessControlHandlerTest.
  */
 
 namespace Drupal\feeds\Tests;
 
 /**
- * @covers \Drupal\feeds\ImporterAccessControlHandler
+ * @covers \Drupal\feeds\FeedTypeAccessControlHandler
  * @group Feeds
  */
-class ImporterAccessControlHandlerTest extends FeedsUnitTestCase {
+class FeedTypeAccessControlHandlerTest extends FeedsUnitTestCase {
 
   public function setUp() {
     parent::setUp();
@@ -22,11 +22,11 @@ class ImporterAccessControlHandlerTest extends FeedsUnitTestCase {
       ->method('hasPermission')
       ->with('administer feeds')
       ->will($this->returnValue(TRUE));
-    $this->controller = $this->getMock('Drupal\feeds\ImporterAccessControlHandler', NULL, [], '', FALSE);
+    $this->controller = $this->getMock('Drupal\feeds\FeedTypeAccessControlHandler', NULL, [], '', FALSE);
   }
 
   public function testCheckAccessTrue() {
-    $method = $this->getMethod('Drupal\feeds\ImporterAccessControlHandler', 'checkAccess');
+    $method = $this->getMethod('Drupal\feeds\FeedTypeAccessControlHandler', 'checkAccess');
     $result = $method->invokeArgs($this->controller, [$this->entity, '', '', $this->account]);
     $this->assertTrue($result->isAllowed());
   }

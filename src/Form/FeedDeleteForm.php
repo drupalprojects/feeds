@@ -45,8 +45,8 @@ class FeedDeleteForm extends ContentEntityConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
 
-    $args = ['@importer' => $this->entity->getImporter()->label(), '%title' => $this->entity->label()];
-    $this->logger('feeds')->notice('@importer: deleted %title.', $args);
+    $args = ['@type' => $this->entity->getType()->label(), '%title' => $this->entity->label()];
+    $this->logger('feeds')->notice('@type: deleted %title.', $args);
     drupal_set_message($this->t('%title has been deleted.', $args));
 
     $form_state->setRedirect('feeds.admin');

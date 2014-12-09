@@ -9,7 +9,7 @@ namespace Drupal\feeds;
 
 use Drupal\Core\Routing\UrlGeneratorTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\feeds\Entity\Importer;
+use Drupal\feeds\Entity\FeedType;
 
 /**
  * Defines a class containing permission callbacks.
@@ -38,10 +38,10 @@ class FeedsPermissions {
    *
    * @return array
    */
-  public function importerPermissions() {
+  public function feedTypePermissions() {
     $perms = [];
     // Generate feeds permissions for all feeds types.
-    foreach (Importer::loadMultiple() as $type) {
+    foreach (FeedType::loadMultiple() as $type) {
       $perms += $this->buildPermissions($type);
     }
 
@@ -51,15 +51,15 @@ class FeedsPermissions {
   /**
    * Builds a standard list of feeds permissions for a given type.
    *
-   * @param \Drupal\feeds\Entity\Importer $importer
-   *   The importer object.
+   * @param \Drupal\feeds\Entity\FeedType $feed_type
+   *   The feed type object.
    *
    * @return array
    *   An array of permission names and descriptions.
    */
-  protected function buildPermissions(Importer $importer) {
-    $args = ['%name' => $importer->label()];
-    $id = $importer->id();
+  protected function buildPermissions(FeedType $feed_type) {
+    $args = ['%name' => $feed_type->label()];
+    $id = $feed_type->id();
 
     return [
       "view $id feeds" => [

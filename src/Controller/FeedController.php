@@ -11,7 +11,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 
 /**
  * Returns responses for feed routes.
@@ -27,21 +27,21 @@ class FeedController extends ControllerBase {
    * @todo When node page gets converted, look at the implementation.
    */
   public function addPage() {
-    // Show add form if there is only one importer.
-    $importers = $this->entityManager()
-      ->getStorage('feeds_importer')
+    // Show add form if there is only one feed type.
+    $feed_types = $this->entityManager()
+      ->getStorage('feeds_feed_type')
       ->loadByProperties(['status' => TRUE]);
     // There is an access checker on this route that determines if the user can
-    // create at least one importer. If there is only one enabled importer, this
+    // create at least one feed type. If there is only one enabled type, this
     // must be it.
-    if ($importers && count($importers) == 1) {
-      $importer = reset($importers);
-      return $this->createForm($importer);
+    if ($feed_types && count($feed_types) == 1) {
+      $feed_type = reset($feed_types);
+      return $this->createForm($feed_type);
     }
 
     // @todo Don't show link for non-admins.
-    $url = $this->url('feeds.importer_list');
-    $empty = $this->t('There are no importers, go to <a href="@importers">Feed importers</a> to create one or enable an existing one.', ['@importers' => $url]);
+    $url = $this->url('feeds.feed_type_list');
+    $empty = $this->t('There are no feed types, go to <a href="@types">Feed types</a> to create one or enable an existing one.', ['@types' => $url]);
 
     $build = [
       '#theme' => 'table',
@@ -50,13 +50,13 @@ class FeedController extends ControllerBase {
       '#empty' => $empty,
     ];
 
-    foreach ($importers as $importer) {
-      if (!($importer->access('create'))) {
+    foreach ($feed_types as $feed_type) {
+      if (!($feed_type->access('create'))) {
         continue;
       }
       $build['#rows'][] = [
-        $this->l($importer->label(), new Url('feeds.add', ['feeds_importer' => $importer->id()])),
-        String::checkPlain($importer->getDescription()),
+        $this->l($feed_type->label(), new Url('feeds.add', ['feeds_feed_type' => $feed_type->id()])),
+        String::checkPlain($feed_type->getDescription()),
       ];
     }
 
@@ -69,10 +69,10 @@ class FeedController extends ControllerBase {
    * @return array
    *   A form array as expected by drupal_render().
    */
-  public function createForm(ImporterInterface $feeds_importer) {
+  public function createForm(FeedTypeInterface $feeds_feed_type) {
     $feed = $this->entityManager()->getStorage('feeds_feed')->create([
       'uid' => $this->currentUser()->id(),
-      'importer' => $feeds_importer->id(),
+      'type' => $feeds_feed_type->id(),
       // 'status' => 1,
       'created' => REQUEST_TIME,
     ]);

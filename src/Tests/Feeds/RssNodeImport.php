@@ -10,7 +10,7 @@ namespace Drupal\feeds\Tests\Feeds;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\feeds\Entity\Feed;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -61,7 +61,7 @@ class RssNodeImport extends WebTestBase {
     $web_user = $this->drupalCreateUser(['administer feeds', 'bypass node access']);
     $this->drupalLogin($web_user);
 
-    $this->importer = entity_create('feeds_importer', [
+    $this->type = entity_create('feeds_feed_type', [
       'id' => Unicode::strtolower($this->randomMachineName()),
       'mappings' => [
         [
@@ -93,9 +93,9 @@ class RssNodeImport extends WebTestBase {
           'type' => 'article',
         ],
       ],
-      'import_period' => ImporterInterface::SCHEDULE_NEVER,
+      'import_period' => FeedTypeInterface::SCHEDULE_NEVER,
     ]);
-    $this->importer->save();
+    $this->type->save();
   }
 
   public function testHttpImport() {
@@ -104,7 +104,7 @@ class RssNodeImport extends WebTestBase {
     $feed = entity_create('feeds_feed', [
       'title' => $this->randomString(),
       'source' => file_create_url($filepath),
-      'importer' => $this->importer->id(),
+      'type' => $this->type->id(),
     ]);
     $feed->save();
     $this->drupalGet('feed/' . $feed->id());
@@ -141,11 +141,11 @@ class RssNodeImport extends WebTestBase {
 
     // Test force-import.
     \Drupal::cache('feeds_download')->deleteAll();
-    $configuration = $this->importer->getProcessor()->getConfiguration();
+    $configuration = $this->type->getProcessor()->getConfiguration();
     $configuration['skip_hash_check'] = TRUE;
     $configuration['update_existing'] = ProcessorInterface::UPDATE_EXISTING;
-    $this->importer->getProcessor()->setConfiguration($configuration);
-    $this->importer->save();
+    $this->type->getProcessor()->setConfiguration($configuration);
+    $this->type->save();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
     $this->assertText('Updated 6');
@@ -161,18 +161,18 @@ class RssNodeImport extends WebTestBase {
     // Run cron once before, so any other bookkeeping can get done.
     $this->cronRun();
 
-    $this->importer->setImportPeriod(3600);
-    $mappings = $this->importer->getMappings();
+    $this->type->setImportPeriod(3600);
+    $mappings = $this->type->getMappings();
     unset($mappings[2]['unique']);
-    $this->importer->setMappings($mappings);
-    $this->importer->save();
+    $this->type->setMappings($mappings);
+    $this->type->save();
 
     $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
 
     $feed = Feed::create([
       'title' => $this->randomString(),
       'source' => file_create_url($filepath),
-      'importer' => $this->importer->id(),
+      'type' => $this->type->id(),
     ]);
     $feed->save();
 

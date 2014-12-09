@@ -19,13 +19,13 @@ feeds.add_page:
     _feeds_feed_add_access: 'feeds_feed'
 
 feeds.add:
-  path: '/feed/add/{feeds_importer}'
+  path: '/feed/add/{feeds_feed_type}'
   defaults:
     _controller: 'Drupal\feeds\Controller\FeedController::createForm'
   options:
     _admin_route: TRUE
   requirements:
-    _entity_create_access: 'feeds_feed:{feeds_importer}'
+    _entity_create_access: 'feeds_feed:{feeds_feed_type}'
 
 feeds.view:
   path: '/feed/{feeds_feed}'
@@ -121,41 +121,41 @@ feeds.subscribe:
 
 # Admin UI routes.
 
-feeds.importer_list:
+feeds.feed_type_list:
   path: '/admin/structure/feeds'
   defaults:
-    _title: 'Feed importers'
-    _entity_list: 'feeds_importer'
+    _title: 'Feed types'
+    _entity_list: 'feeds_feed_type'
   requirements:
     _permission: 'administer feeds'
 
-feeds.importer_add:
+feeds.feed_type_add:
   path: '/admin/structure/feeds/add'
   defaults:
-    _title: 'Add feed importer'
-    _entity_form: 'feeds_importer.create'
+    _title: 'Add feed feed type'
+    _entity_form: 'feeds_feed_type.create'
   requirements:
     _permission: 'administer feeds'
 
-feeds.importer_edit:
-  path: '/admin/structure/feeds/manage/{feeds_importer}'
+feeds.feed_type_edit:
+  path: '/admin/structure/feeds/manage/{feeds_feed_type}'
   defaults:
-    _entity_form: 'feeds_importer.edit'
+    _entity_form: 'feeds_feed_type.edit'
   requirements:
-    _entity_access: 'feeds_importer.edit'
+    _entity_access: 'feeds_feed_type.edit'
 
-feeds.importer_mapping:
-  path: '/admin/structure/feeds/manage/{feeds_importer}/mapping'
+feeds.feed_type_mapping:
+  path: '/admin/structure/feeds/manage/{feeds_feed_type}/mapping'
   defaults:
     _form: '\Drupal\feeds\Form\MappingForm'
     _title_callback: '\Drupal\feeds\Form\MappingForm::mappingTitle'
   requirements:
-    _entity_access: 'feeds_importer.mapping'
+    _entity_access: 'feeds_feed_type.mapping'
 
-feeds.importer_delete:
-  path: '/admin/structure/feeds/manage/{feeds_importer}/delete'
+feeds.feed_type_delete:
+  path: '/admin/structure/feeds/manage/{feeds_feed_type}/delete'
   defaults:
-    _entity_form: 'feeds_importer.delete'
+    _entity_form: 'feeds_feed_type.delete'
   requirements:
-    _entity_access: 'feeds_importer.delete'
+    _entity_access: 'feeds_feed_type.delete'
 

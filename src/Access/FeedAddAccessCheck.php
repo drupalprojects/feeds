@@ -40,11 +40,11 @@ class FeedAddAccessCheck implements AccessInterface {
    * {@inheritdoc}
    */
   public function access(AccountInterface $account) {
-    // @todo Perhaps read config directly rather than load all importers.
+    // @todo Perhaps read config directly rather than load all feed types.
     $access_control_handler = $this->entityManager->getAccessControlHandler('feeds_feed');
 
-    foreach ($this->entityManager->getStorage('feeds_importer')->loadByProperties(['status' => TRUE]) as $importer) {
-      $access = $access_control_handler->createAccess($importer->id(), $account, [], TRUE);
+    foreach ($this->entityManager->getStorage('feeds_feed_type')->loadByProperties(['status' => TRUE]) as $feed_type) {
+      $access = $access_control_handler->createAccess($feed_type->id(), $account, [], TRUE);
       if ($access->isAllowed()) {
         return $access;
       }

@@ -20,15 +20,15 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class SitemapParserTest extends FeedsUnitTestCase {
 
   protected $parser;
-  protected $importer;
+  protected $feedType;
   protected $feed;
   protected $state;
 
   public function setUp() {
     parent::setUp();
 
-    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $configuration = ['importer' => $this->importer];
+    $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
+    $configuration = ['feed_type' => $this->feedType];
     $this->parser = new SitemapParser($configuration, 'sitemap', []);
     $this->parser->setStringTranslation($this->getStringTranslationStub());
 
@@ -36,8 +36,8 @@ class SitemapParserTest extends FeedsUnitTestCase {
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
     $this->feed->expects($this->any())
-      ->method('getImporter')
-      ->will($this->returnValue($this->importer));
+      ->method('getType')
+      ->will($this->returnValue($this->feedType));
   }
 
   public function testFetch() {

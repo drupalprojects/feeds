@@ -19,7 +19,7 @@ class BooleanTest extends FeedsUnitTestCase {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Boolean', 'prepareTarget')->getClosure();
 
     $configuration = [
-      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
       'target_definition' =>  $method($this->getMockFieldDefinition()),
     ];
 

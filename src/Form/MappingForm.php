@@ -12,7 +12,7 @@ namespace Drupal\feeds\Form;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
@@ -21,14 +21,14 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 class MappingForm extends FormBase {
 
   /**
-   * The feeds importer.
+   * The feed type.
    *
-   * @var \Drupal\feeds\ImporterInterface
+   * @var \Drupal\feeds\FeedTypeInterface
    */
-  protected $importer;
+  protected $feedType;
 
   /**
-   * The mappings for this importer.
+   * The mappings for this feed type.
    *
    * @var array
    */
@@ -44,13 +44,13 @@ class MappingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ImporterInterface $feeds_importer = NULL) {
-    $importer = $this->importer = $feeds_importer;
-    $this->targets = $targets = $importer->getMappingTargets();
+  public function buildForm(array $form, FormStateInterface $form_state, FeedTypeInterface $feeds_feed_type = NULL) {
+    $feed_type = $this->feedType = $feeds_feed_type;
+    $this->targets = $targets = $feed_type->getMappingTargets();
 
     // Denormalize targets.
     $this->sourceOptions = [];
-    foreach ($importer->getMappingSources() as $key => $info) {
+    foreach ($feed_type->getMappingSources() as $key => $info) {
       $this->sourceOptions[$key] = $info['label'];
     }
     $this->sourceOptions = $this->sortOptions($this->sourceOptions);
@@ -96,7 +96,7 @@ class MappingForm extends FormBase {
       '#sticky' => TRUE,
     ];
 
-    foreach ($importer->getMappings() as $delta => $mapping) {
+    foreach ($feed_type->getMappings() as $delta => $mapping) {
       $table[$delta] = $this->buildRow($form, $form_state, $mapping, $delta);
     }
 
@@ -186,7 +186,7 @@ class MappingForm extends FormBase {
       '#delta' => $delta,
     ];
 
-    if ($plugin = $this->importer->getTargetPlugin($delta)) {
+    if ($plugin = $this->feedType->getTargetPlugin($delta)) {
 
       if ($plugin instanceof ConfigurableTargetInterface) {
         if ($delta == $ajax_delta) {
@@ -235,7 +235,7 @@ class MappingForm extends FormBase {
       $row['configure']['#markup'] = '';
     }
 
-    $mappings = $this->importer->getMappings();
+    $mappings = $this->feedType->getMappings();
 
     foreach ($mapping['map'] as $column => $source) {
       if ($this->targets[$mapping['target']]->isUnique($column)) {
@@ -269,33 +269,33 @@ class MappingForm extends FormBase {
   }
 
   /**
-   * Processes the form state, populating the mappings on the importer.
+   * Processes the form state, populating the mappings on the feed type.
    */
   protected function processFormState(array $form, FormStateInterface $form_state) {
     // Process any plugin configuration.
     $triggering_element = $form_state->getTriggeringElement() + ['#op' => ''];
     if ($triggering_element['#op'] === 'update') {
-      $this->importer->getTargetPlugin($triggering_element['#delta'])->submitConfigurationForm($form, $form_state);
+      $this->feedType->getTargetPlugin($triggering_element['#delta'])->submitConfigurationForm($form, $form_state);
     }
 
-    $mappings = $this->importer->getMappings();
+    $mappings = $this->feedType->getMappings();
     foreach (array_filter((array) $form_state->getValue('mappings', [])) as $delta => $mapping) {
       $mappings[$delta]['map'] = $mapping['map'];
       if (isset($mapping['unique'])) {
         $mappings[$delta]['unique'] = array_filter($mapping['unique']);
       }
     }
-    $this->importer->setMappings($mappings);
+    $this->feedType->setMappings($mappings);
 
     // Remove any mappings.
     foreach (array_keys(array_filter($form_state->getValue('remove_mappings', []))) as $delta) {
-      $this->importer->removeMapping($delta);
+      $this->feedType->removeMapping($delta);
     }
 
     // Add any targets.
     if ($new_target = $form_state->getValue('add_target')) {
       $map = array_fill_keys($this->targets[$new_target]->getProperties(), '');
-      $this->importer->addMapping([
+      $this->feedType->addMapping([
         'target' => $new_target,
         'map' => $map,
       ]);
@@ -312,7 +312,7 @@ class MappingForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     if (isset($form_state->getTriggeringElement()['#delta'])) {
       $delta = $form_state->getTriggeringElement()['#delta'];
-      $this->importer->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
+      $this->feedType->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
       $form_state->setRebuild();
     }
   }
@@ -322,7 +322,7 @@ class MappingForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->processFormState($form, $form_state);
-    $this->importer->save();
+    $this->feedType->save();
   }
 
   /**
@@ -362,8 +362,8 @@ class MappingForm extends FormBase {
   /**
    * Page title callback.
    */
-  public function mappingTitle(ImporterInterface $feeds_importer) {
-    return $this->t('Mappings @label', array('@label' => $feeds_importer->label()));
+  public function mappingTitle(FeedTypeInterface $feeds_feed_type) {
+    return $this->t('Mappings @label', array('@label' => $feeds_feed_type->label()));
   }
 
 }

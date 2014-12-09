@@ -19,8 +19,8 @@ use Drupal\file\Entity\File;
  */
 function feeds_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    case 'feeds.importer_list':
-      return '<p>' . t('Create one or more Feed importers for pulling content into Drupal.') . '</p>';
+    case 'feeds.feed_type_list':
+      return '<p>' . t('Create one or more feed types for pulling content into Drupal.') . '</p>';
   }
 }
 

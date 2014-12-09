@@ -71,7 +71,7 @@ class LazySubscriber implements EventSubscriberInterface {
       case 'fetch':
         $dispatcher->addListener(FeedsEvents::FETCH, function(FetchEvent $event) {
           $feed = $event->getFeed();
-          $result = $feed->getImporter()->getFetcher()->fetch($feed, $feed->getState(StateInterface::FETCH));
+          $result = $feed->getType()->getFetcher()->fetch($feed, $feed->getState(StateInterface::FETCH));
           $event->setFetcherResult($result);
         });
         break;
@@ -81,7 +81,7 @@ class LazySubscriber implements EventSubscriberInterface {
           $feed = $event->getFeed();
 
           $result = $feed
-            ->getImporter()
+            ->getType()
             ->getParser()
             ->parse($feed, $event->getFetcherResult(), $feed->getState(StateInterface::PARSE));
           $event->setParserResult($result);
@@ -92,7 +92,7 @@ class LazySubscriber implements EventSubscriberInterface {
         $dispatcher->addListener(FeedsEvents::PROCESS, function(ProcessEvent $event) {
           $feed = $event->getFeed();
           $feed
-            ->getImporter()
+            ->getType()
             ->getProcessor()
             ->process($feed, $event->getParserResult(), $feed->getState(StateInterface::PROCESS));
         });
@@ -109,7 +109,7 @@ class LazySubscriber implements EventSubscriberInterface {
     }
     $this->clearInited = TRUE;
 
-    foreach ($event->getFeed()->getImporter()->getPlugins() as $plugin) {
+    foreach ($event->getFeed()->getType()->getPlugins() as $plugin) {
       if (!$plugin instanceof ClearableInterface) {
         continue;
       }
@@ -132,7 +132,7 @@ class LazySubscriber implements EventSubscriberInterface {
 
     $dispatcher->addListener(FeedsEvents::EXPIRE, function(ExpireEvent $event) {
       $feed = $event->getFeed();
-      $feed->getImporter()->getProcessor()->expire($feed);
+      $feed->getType()->getProcessor()->expire($feed);
     });
   }
 

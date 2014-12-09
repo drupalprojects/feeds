@@ -22,22 +22,22 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     vfsStream::setup('feeds');
   }
 
-  protected function getMockImporter() {
-    $importer = $this->getMock('\Drupal\feeds\ImporterInterface');
-    $importer->id = 'test_importer';
-    $importer->description = 'This is a test importer';
-    $importer->label = 'Test importer';
-    $importer->expects($this->any())
+  protected function getMockFeedType() {
+    $feed_type = $this->getMock('\Drupal\feeds\FeedTypeInterface');
+    $feed_type->id = 'test_feed_type';
+    $feed_type->description = 'This is a test feed type';
+    $feed_type->label = 'Test feed type';
+    $feed_type->expects($this->any())
              ->method('label')
-             ->will($this->returnValue($importer->label));
-    return $importer;
+             ->will($this->returnValue($feed_type->label));
+    return $feed_type;
   }
 
   protected function getMockFeed() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
-      ->method('getImporter')
-      ->will($this->returnValue($this->getMockImporter()));
+      ->method('getType')
+      ->will($this->returnValue($this->getMockFeedType()));
     return $feed;
   }
 

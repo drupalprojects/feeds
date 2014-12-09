@@ -52,7 +52,7 @@ class PubSubHubbub implements EventSubscriberInterface {
    */
   public function onPostFetch(FetchEvent $event) {
     $feed = $event->getFeed();
-    $fetcher = $feed->getImporter()->getFetcher();
+    $fetcher = $feed->getType()->getFetcher();
 
     $subscription = $this->storage->load($feed->id());
 

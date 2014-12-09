@@ -23,7 +23,7 @@ class ItemListController extends ControllerBase {
    * Lists the feed items belonging to a feed.
    */
   public function listItems(FeedInterface $feeds_feed, Request $request) {
-    $processor = $feeds_feed->getImporter()->getProcessor();
+    $processor = $feeds_feed->getType()->getProcessor();
 
     $header = [
       'title' => $this->t('Label'),

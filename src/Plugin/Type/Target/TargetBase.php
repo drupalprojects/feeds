@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\Type\Target;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 use Drupal\feeds\Plugin\Type\Target\TargetInterface;
 
@@ -38,12 +38,12 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     // Do not call parent, we handle everything ourselves.
-    $this->importer = $configuration['importer'];
+    $this->feedType = $configuration['feed_type'];
     $this->pluginId = $plugin_id;
     $this->pluginDefinition = $plugin_definition;
     $this->targetDefinition = $configuration['target_definition'];
 
-    unset($configuration['importer']);
+    unset($configuration['feed_type']);
     unset($configuration['target_definition']);
 
     // Calling setConfiguration() ensures the configuration is clean and

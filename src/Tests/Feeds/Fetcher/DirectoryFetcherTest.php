@@ -26,10 +26,10 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    $importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $feed_type = $this->getMock('Drupal\feeds\FeedTypeInterface');
     $container = new ContainerBuilder();
     $container->set('stream_wrapper_manager', $this->getMockStreamWrapperManager());
-    $this->fetcher = new DirectoryFetcher(['importer' => $importer], 'directory', []);
+    $this->fetcher = new DirectoryFetcher(['feed_type' => $feed_type], 'directory', []);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
 
     $this->state = new State();

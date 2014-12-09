@@ -49,15 +49,12 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function setSource($source);
 
   /**
-   * Returns the Importer object that this feed is expected to be used with.
+   * Returns the Feed type object that this feed is expected to be used with.
    *
-   * @return \Drupal\feeds\ImporterInterface
-   *   The importer object.
-   *
-   * @throws \RuntimeException
-   *   Thrown if the importer does not exist.
+   * @return \Drupal\feeds\FeedTypeInterface
+   *   The feed type object.
    */
-  public function getImporter();
+  public function getType();
 
   /**
    * Returns the feed creation timestamp.
@@ -124,11 +121,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function startCronImport();
 
   /**
-   * Start deleting all imported items of a feed.
-   *
-   * This method starts a clear job. Depending on the configuration of the
-   * importer, a Batch API job or a background job with Job Scheduler will be
-   * created.
+   * Start deleting all imported items of a feed via the batch API.
    *
    * @throws \Exception
    *   If processing in background is enabled, the first batch chunk of the

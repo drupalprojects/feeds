@@ -33,11 +33,11 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    $importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $feed_type = $this->getMock('Drupal\feeds\FeedTypeInterface');
     $this->client = new Client();
     $this->cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
 
-    $this->fetcher = new HttpFetcher(['importer' => $importer], 'http', [], $this->client, $this->cache);
+    $this->fetcher = new HttpFetcher(['feed_type' => $feed_type], 'http', [], $this->client, $this->cache);
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
 
     $this->state = $this->getMock('Drupal\feeds\StateInterface');

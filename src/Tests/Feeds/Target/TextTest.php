@@ -24,7 +24,7 @@ class TextTest extends FeedsUnitTestCase {
 
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Text', 'prepareTarget')->getClosure();
     $configuration = [
-      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
       'target_definition' => $method($this->getMockFieldDefinition()),
     ];
     $this->target = new Text($configuration, 'text', [], $this->getMock('Drupal\Core\Session\AccountInterface'));

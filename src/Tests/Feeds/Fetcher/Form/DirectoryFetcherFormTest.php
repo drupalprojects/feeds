@@ -28,7 +28,7 @@ class DirectoryFetcherFormTest extends FeedsUnitTestCase {
     $container = new ContainerBuilder();
     $container->set('stream_wrapper_manager', $this->getMockStreamWrapperManager());
 
-    $form_object = DirectoryFetcherForm::create($container, new DirectoryFetcher(['importer' => ''], '', []));
+    $form_object = DirectoryFetcherForm::create($container, new DirectoryFetcher(['feed_type' => ''], '', []));
     $form_object->setStringTranslation($this->getStringTranslationStub());
     $form = $form_object->buildConfigurationForm([], $form_state);
     $form_object->validateConfigurationForm($form, $form_state);

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Entity\Importer.
+ * Contains \Drupal\feeds\Entity\FeedType.
  */
 
 namespace Drupal\feeds\Entity;
@@ -12,27 +12,27 @@ use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\feeds\Feeds\FeedsSingleLazyPluginCollection;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
- * Defines the Feeds importer entity.
+ * Defines the Feeds feed type entity.
  *
  * @ConfigEntityType(
- *   id = "feeds_importer",
- *   label = @Translation("Feed importer"),
+ *   id = "feeds_feed_type",
+ *   label = @Translation("Feed type"),
  *   module = "feeds",
  *   handlers = {
- *     "access" = "Drupal\feeds\ImporterAccessControlHandler",
- *     "list_builder" = "Drupal\feeds\ImporterListBuilder",
+ *     "access" = "Drupal\feeds\FeedTypeAccessControlHandler",
+ *     "list_builder" = "Drupal\feeds\FeedTypeListBuilder",
  *     "form" = {
- *       "create" = "Drupal\feeds\ImporterForm",
- *       "edit" = "Drupal\feeds\ImporterForm",
- *       "delete" = "Drupal\feeds\Form\ImporterDeleteForm"
+ *       "create" = "Drupal\feeds\FeedTypeForm",
+ *       "edit" = "Drupal\feeds\FeedTypeForm",
+ *       "delete" = "Drupal\feeds\Form\FeedTypeDeleteForm"
  *     }
  *   },
- *   config_prefix = "importer",
+ *   config_prefix = "feed_type",
  *   bundle_of = "feeds_feed",
  *   entity_keys = {
  *     "id" = "id",
@@ -41,30 +41,30 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *     "status" = "status"
  *   },
  *   links = {
- *     "edit-form" = "feeds.importer_edit",
- *     "delete-form" = "feeds.importer_delete"
+ *     "edit-form" = "feeds.feed_type_edit",
+ *     "delete-form" = "feeds.feed_type_delete"
  *   },
  *   admin_permission = "administer feeds"
  * )
  */
-class Importer extends ConfigEntityBundleBase implements ImporterInterface, EntityWithPluginCollectionInterface {
+class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, EntityWithPluginCollectionInterface {
 
   /**
-   * The importer ID.
+   * The feed type ID.
    *
    * @var string
    */
   protected $id;
 
   /**
-   * The label of the importer.
+   * The label of the feed type.
    *
    * @var string
    */
   protected $label;
 
   /**
-   * Description of the importer.
+   * Description of the feed type.
    *
    * @var string
    */
@@ -317,7 +317,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
   }
 
   /**
-   * Returns the configured plugin for this importer given the plugin type.
+   * Returns the configured plugin for this type given the plugin type.
    *
    * @param string $plugin_type
    *   The plugin type to return.
@@ -347,7 +347,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
     $id = $targets[$target]->getPluginId();
 
     $configuration = [];
-    $configuration['importer'] = $this;
+    $configuration['feed_type'] = $this;
     $configuration['target_definition'] = $targets[$target];
     if (isset($this->mappings[$delta]['settings'])) {
       $configuration += $this->mappings[$delta]['settings'];
@@ -368,7 +368,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
 
       // The source is a plugin.
       if (isset($sources[$source]['id'])) {
-        $configuration = ['importer' => $this];
+        $configuration = ['feed_type' => $this];
         $this->sourcePlugins[$source] = \Drupal::service('plugin.manager.feeds.source')->createInstance($sources[$source]['id'], $configuration);
       }
       else {
@@ -438,7 +438,7 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
    */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     foreach ($this->getPlugins() as $type => $plugin) {
-      $plugin->onImporterSave($update);
+      $plugin->onFeedTypeSave($update);
     }
 
     foreach ($this->targetPlugins as $delta => $target_plugin) {
@@ -475,10 +475,10 @@ class Importer extends ConfigEntityBundleBase implements ImporterInterface, Enti
 
     foreach ($entities as $entity) {
       foreach ($entity->getPlugins() as $plugin) {
-        $plugin->onImporterDelete();
+        $plugin->onFeedTypeDelete();
       }
 
-      // Delete any existing queues related to this importer.
+      // Delete any existing queues related to this type.
       foreach ($prefixes as $prefix) {
         if ($queue = \Drupal::queue($prefix . ':' . $entity->id())) {
           $queue->deleteQueue();

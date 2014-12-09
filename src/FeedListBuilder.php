@@ -62,8 +62,8 @@ class FeedListBuilder extends EntityListBuilder {
   public function buildHeader() {
     $header = [
       'title' => $this->t('Title'),
-      'importer' => [
-        'data' => $this->t('Importer'),
+      'type' => [
+        'data' => $this->t('Type'),
         'class' => [RESPONSIVE_PRIORITY_MEDIUM],
       ],
       'author' => [
@@ -93,7 +93,7 @@ class FeedListBuilder extends EntityListBuilder {
       '#title' => $entity->label(),
     ] + $uri->toRenderArray();
 
-    $row['importer'] = String::checkPlain($entity->getImporter()->label());
+    $row['type'] = String::checkPlain($entity->getType()->label());
     $row['author']['data'] = [
       '#theme' => 'username',
       '#account' => $entity->getOwner(),

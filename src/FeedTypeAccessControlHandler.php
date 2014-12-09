@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ImporterAccessControlHandler.
+ * Contains \Drupal\feeds\FeedTypeAccessControlHandler.
  */
 
 namespace Drupal\feeds;
@@ -13,13 +13,13 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines an access controller for the feeds_importer entity.
+ * Defines an access controller for the feeds_feed_type entity.
  *
- * @see \Drupal\feeds\Entity\Importer
+ * @see \Drupal\feeds\Entity\FeedType
  *
  * @todo Provide more granular permissions.
  */
-class ImporterAccessControlHandler extends EntityAccessControlHandler {
+class FeedTypeAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}

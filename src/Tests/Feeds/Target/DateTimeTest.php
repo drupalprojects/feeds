@@ -16,7 +16,7 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
  */
 class DateTimeTest extends FeedsUnitTestCase {
 
-  protected $importer;
+  protected $feedType;
   protected $targetDefinition;
 
   public function setUp() {
@@ -35,7 +35,7 @@ class DateTimeTest extends FeedsUnitTestCase {
 
     \Drupal::setContainer($container);
 
-    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\DateTime', 'prepareTarget')->getClosure();
     $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'time']));
   }
@@ -45,7 +45,7 @@ class DateTimeTest extends FeedsUnitTestCase {
     $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'date']));
 
     $configuration = [
-      'importer' => $this->importer,
+      'feed_type' => $this->feedType,
       'target_definition' => $this->targetDefinition,
     ];
     $target = new DateTime($configuration, 'datetime', []);
@@ -58,7 +58,7 @@ class DateTimeTest extends FeedsUnitTestCase {
 
   public function testWithErrors() {
     $configuration = [
-      'importer' => $this->importer,
+      'feed_type' => $this->feedType,
       'target_definition' => $this->targetDefinition,
     ];
     $target = new DateTime($configuration, 'datetime', []);
@@ -71,7 +71,7 @@ class DateTimeTest extends FeedsUnitTestCase {
 
   public function testYearValue() {
     $configuration = [
-      'importer' => $this->importer,
+      'feed_type' => $this->feedType,
       'target_definition' => $this->targetDefinition,
     ];
     $target = new DateTime($configuration, 'datetime', []);

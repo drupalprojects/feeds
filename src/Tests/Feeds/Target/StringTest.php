@@ -22,7 +22,7 @@ class StringTest extends FeedsUnitTestCase {
       ->method('getType')
       ->will($this->returnValue('string'));
     $configuration = [
-      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
       'target_definition' =>  $method($field_definition),
     ];
     $target = new String($configuration, 'link', []);

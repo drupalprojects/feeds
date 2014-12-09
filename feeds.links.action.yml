@@ -22,8 +22,8 @@ feeds.unlock_action:
   appears_on:
     - feeds.view
 
-feeds.importer_add:
-  route_name: feeds.importer_add
-  title: Add importer
+feeds.feed_type_add:
+  route_name: feeds.feed_type_add
+  title: Add feed type
   appears_on:
-    - feeds.importer_list
+    - feeds.feed_type_list

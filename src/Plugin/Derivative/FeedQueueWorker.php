@@ -13,7 +13,7 @@ use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides separate queue works for importers.
+ * Provides separate queue works for feed types.
  *
  * @see \Drupal\feeds\Plugin\QueueWorker\FeedRefresh
  */
@@ -42,7 +42,7 @@ class FeedQueueWorker extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
-    return new static($container->get('entity.manager')->getStorage('feeds_importer'));
+    return new static($container->get('entity.manager')->getStorage('feeds_feed_type'));
   }
 
   /**
@@ -50,8 +50,8 @@ class FeedQueueWorker extends DeriverBase implements ContainerDeriverInterface {
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     $derivatives = [];
-    foreach ($this->storage->loadMultiple() as $importer) {
-      $derivatives[$importer->id()] = $base_plugin_definition;
+    foreach ($this->storage->loadMultiple() as $feed_type) {
+      $derivatives[$feed_type->id()] = $base_plugin_definition;
     }
 
     return $derivatives;

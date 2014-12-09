@@ -8,7 +8,7 @@
 namespace Drupal\feeds\Plugin\Type\Source;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
 /**
@@ -21,12 +21,12 @@ interface SourceInterface extends FeedsPluginInterface {
    *
    * @param array $sources
    *   The list of sources to modify.
-   * @param \Drupal\feeds\ImporterInterface $importer
-   *   The importer being added to.
+   * @param \Drupal\feeds\FeedTypeInterface $feed_type
+   *   The feed type being added to.
    * @param array $definition
    *   The plugin definition.
    */
-  public static function sources(array &$sources, ImporterInterface $importer, array $definition);
+  public static function sources(array &$sources, FeedTypeInterface $feed_type, array $definition);
 
   /**
    * Returns the value for a source.

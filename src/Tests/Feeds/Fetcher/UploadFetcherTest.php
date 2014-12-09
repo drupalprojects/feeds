@@ -32,7 +32,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
       ->will($this->returnValue($this->fileStorage));
 
     $this->fetcher = new UploadFetcher(
-      ['importer' => $this->getMock('Drupal\feeds\ImporterInterface')],
+      ['feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface')],
       'test_plugin',
       ['plugin_type' => 'fetcher'],
       $this->getMock('Drupal\file\FileUsage\FileUsageInterface'),

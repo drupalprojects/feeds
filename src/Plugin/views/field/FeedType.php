@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Plugin\views\field\Importer.
+ * Contains \Drupal\feeds\Plugin\views\field\FeedType.
  */
 
 namespace Drupal\feeds\Plugin\views\field;
@@ -11,13 +11,13 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ResultRow;
 
 /**
- * Field handler to translate a feed importer into its readable form.
+ * Field handler to translate a feed feed type into its readable form.
  *
  * @ingroup views_field_handlers
  *
- * @ViewsField("feeds_feed_importer")
+ * @ViewsField("feeds_feed_type")
  */
-class Importer extends Feed {
+class FeedType extends Feed {
 
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -27,14 +27,14 @@ class Importer extends Feed {
   }
 
   /**
-   * Provides the machine_name option for to feed importer display.
+   * Provides the machine_name option for to feed feed type display.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
     $form['machine_name'] = [
       '#title' => t('Output machine name'),
-      '#description' => t('Display field as the importer machine name.'),
+      '#description' => t('Display field as the feed type machine name.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['machine_name']),
     ];
@@ -45,7 +45,7 @@ class Importer extends Feed {
     */
   function render_name($data, $values) {
     if ($this->options['machine_name'] != 1 && $data !== NULL && $data !== '') {
-      $type = entity_load('feeds_importer', $data);
+      $type = entity_load('feeds_feed_type', $data);
       return $type ? t($this->sanitizeValue($type->label())) : '';
     }
     return $this->sanitizeValue($data);

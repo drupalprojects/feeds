@@ -20,22 +20,22 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class OpmlParserTest extends FeedsUnitTestCase {
 
   protected $parser;
-  protected $importer;
+  protected $feedType;
   protected $feed;
   protected $state;
 
   public function setUp() {
     parent::setUp();
 
-    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $configuration = ['importer' => $this->importer];
+    $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
+    $configuration = ['feed_type' => $this->feedType];
     $this->parser = new OpmlParser($configuration, 'sitemap', []);
     $this->parser->setStringTranslation($this->getStringTranslationStub());
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
     $this->feed->expects($this->any())
-      ->method('getImporter')
-      ->will($this->returnValue($this->importer));
+      ->method('getType')
+      ->will($this->returnValue($this->feedType));
 
     $this->state = $this->getMock('Drupal\feeds\StateInterface');
   }

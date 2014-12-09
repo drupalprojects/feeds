@@ -18,13 +18,13 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class FileTest extends FeedsUnitTestCase {
 
   protected $container;
-  protected $importer;
+  protected $feedType;
   protected $targetDefinition;
 
   public function setUp() {
     parent::setUp();
 
-    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
 
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\File', 'prepareTarget')->getClosure();
     $this->targetDefinition = $method($this->getMockFieldDefinition());
@@ -32,7 +32,7 @@ class FileTest extends FeedsUnitTestCase {
 
   public function test() {
     // $configuration = [
-    //   'importer' => $this->importer,
+    //   'feed_type' => $this->feedType,
     //   'target_definition' => $this->targetDefinition,
     // ];
 

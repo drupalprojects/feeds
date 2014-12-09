@@ -92,17 +92,17 @@ display:
           field: title
           id: title
           exclude: false
-        importer:
-          id: importer
+        feed_type:
+          id: feed_type
           table: feeds_feed
-          field: importer
+          field: feed_type
           relationship: none
           group_type: group
           admin_label: ''
           dependencies:
             module:
               - feeds
-          label: Importer
+          label: Feed type
           exclude: false
           alter:
             alter_text: false
@@ -145,7 +145,7 @@ display:
           hide_alter_empty: true
           link_to_feed: 0
           machine_name: 0
-          plugin_id: feeds_feed_importer
+          plugin_id: feeds_feed_type
           provider: feeds
         name:
           id: name
@@ -597,7 +597,7 @@ display:
             delete_feed: delete_feed
             feeds_feed_bulk_form: '0'
             title: '0'
-            importer: '0'
+            feed_type: '0'
             name: '0'
             status: '0'
             imported: '0'

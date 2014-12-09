@@ -15,7 +15,7 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\feeds\Entity\Importer;
+use Drupal\feeds\Entity\FeedType;
 use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
@@ -312,7 +312,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       '@entity' => Unicode::strtolower($this->entityTypeLabel()),
       '%label' => $entity->label(),
       '%error' => $violations[0]->getMessage(),
-      '@url' => $this->url('feeds.importer_mapping', ['feeds_importer' => $this->importer->id()]),
+      '@url' => $this->url('feeds.feed_type_mapping', ['feeds_feed_type' => $this->feedType->id()]),
     ];
     throw new ValidationException(String::format('The @entity %label failed to validate with the error: %error Please check your <a href="@url">mappings</a>.', $args));
   }
@@ -466,14 +466,14 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
   /**
    * {@inheritdoc}
    */
-  public function onImporterSave($update = TRUE) {
+  public function onFeedTypeSave($update = TRUE) {
     $this->prepareFeedsItemField();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onImporterDelete() {
+  public function onFeedTypeDelete() {
     $this->removeFeedItemField();
   }
 
@@ -511,11 +511,11 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     $storage_in_use = FALSE;
     $instance_in_use = FALSE;
 
-    foreach (Importer::loadMultiple() as $importer) {
-      if ($importer->id() === $this->importer->id()) {
+    foreach (FeedType::loadMultiple() as $feed_type) {
+      if ($feed_type->id() === $this->feedType->id()) {
         continue;
       }
-      $processor = $importer->getProcessor();
+      $processor = $feed_type->getProcessor();
       if (!$processor instanceof EntityProcessorInterface) {
         continue;
       }
@@ -613,13 +613,13 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    *   The integer of the entity, or false if not found.
    */
   protected function existingEntityId(FeedInterface $feed, ItemInterface $item) {
-    foreach ($this->importer->getMappings() as $delta => $mapping) {
+    foreach ($this->feedType->getMappings() as $delta => $mapping) {
       if (empty($mapping['unique'])) {
         continue;
       }
 
       foreach ($mapping['unique'] as $key => $true) {
-        $plugin = $this->importer->getTargetPlugin($delta);
+        $plugin = $this->feedType->getTargetPlugin($delta);
         $entity_id = $plugin->getUniqueValue($feed, $mapping['target'], $key, $item->get($mapping['map'][$key]));
         if ($entity_id) {
           return $entity_id;
@@ -653,7 +653,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     if ($this->isLocked === NULL) {
       // Look for feeds.
       $this->isLocked = (bool) $this->queryFactory->get('feeds_feed')
-        ->condition('importer', $this->importer->id())
+        ->condition('type', $this->feedType->id())
         ->range(0, 1)
         ->execute();
     }
@@ -674,7 +674,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    *   An MD5 hash.
    */
   protected function hash(ItemInterface $item) {
-    return hash('md5', serialize($item) . serialize($this->importer->getMappings()));
+    return hash('md5', serialize($item) . serialize($this->feedType->getMappings()));
   }
 
   /**
@@ -702,7 +702,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * configuration.
    */
   protected function map(FeedInterface $feed, EntityInterface $entity, ItemInterface $item) {
-    $mappings = $this->importer->getMappings();
+    $mappings = $this->feedType->getMappings();
 
     // Mappers add to existing fields rather than replacing them. Hence we need
     // to clear target elements of each item before mapping in case we are
@@ -746,7 +746,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
 
     // Set target values.
     foreach ($mappings as $delta => $mapping) {
-      $plugin = $this->importer->getTargetPlugin($delta);
+      $plugin = $this->feedType->getTargetPlugin($delta);
       $plugin->setTarget($feed, $entity, $mapping['target'], $field_values[$mapping['target']]);
     }
 

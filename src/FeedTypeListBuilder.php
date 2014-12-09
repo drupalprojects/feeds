@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ImporterListBuilder.
+ * Contains \Drupal\feeds\FeedTypeListBuilder.
  */
 
 namespace Drupal\feeds;
@@ -11,11 +11,11 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 
 /**
- * Provides a listing of Importers.
+ * Provides a listing of feed types.
  *
  * @todo Would making this sortable help in specifying the importance of a feed?
  */
-class ImporterListBuilder extends EntityListBuilder {
+class FeedTypeListBuilder extends EntityListBuilder {
 
   /**
    * {@inheritdoc}

@@ -23,9 +23,9 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * The impoter this plugin is working for.
    *
-   * @var \Drupal\feeds\Entity\Importer
+   * @var \Drupal\feeds\Entity\FeedType
    */
-  protected $importer;
+  protected $feedType;
 
   /**
    * The url generator.
@@ -52,8 +52,8 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    *   The plugin implementation definition.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
-    $this->importer = $configuration['importer'];
-    unset($configuration['importer']);
+    $this->feedType = $configuration['feed_type'];
+    unset($configuration['feed_type']);
     $this->setConfiguration($configuration);
     $this->pluginId = $plugin_id;
     $this->pluginDefinition = $plugin_definition;
@@ -148,14 +148,14 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   public function onFeedDeleteMultiple(array $feeds) {}
 
   /**
-   * The importer is being saved.
+   * The feed type is being saved.
    */
-  public function onImporterSave($update = TRUE) {}
+  public function onFeedTypeSave($update = TRUE) {}
 
   /**
-   * The importer is being deleted.
+   * The feed type is being deleted.
    */
-  public function onImporterDelete() {}
+  public function onFeedTypeDelete() {}
 
   /**
    * Renders a link to a route given a route name and its parameters.

@@ -1,6 +1,6 @@
-feeds.importer.*:
+feeds.feed_type.*:
   type: config_entity
-  label: 'Feed importer'
+  label: 'Feed type'
   mapping:
     label:
       type: label

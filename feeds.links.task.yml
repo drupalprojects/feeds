@@ -20,15 +20,15 @@ feeds.item_list:
   title: Items
   weight: 20
 
-feeds.importer_edit:
-  route_name: feeds.importer_edit
+feeds.feed_type_edit:
+  route_name: feeds.feed_type_edit
   title: Edit
-  base_route: feeds.importer_edit
+  base_route: feeds.feed_type_edit
 
-feeds.importer_mapping:
-  route_name: feeds.importer_mapping
+feeds.feed_type_mapping:
+  route_name: feeds.feed_type_mapping
   title: Mapping
-  base_route: feeds.importer_edit
+  base_route: feeds.feed_type_edit
   weight: 0
 
 feeds.admin:

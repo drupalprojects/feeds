@@ -15,7 +15,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
@@ -29,7 +29,7 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "feeds_feed",
  *   label = @Translation("Feed"),
- *   bundle_label = @Translation("Importer"),
+ *   bundle_label = @Translation("Feed type"),
  *   module = "feeds",
  *   handlers = {
  *     "storage" = "Drupal\feeds\FeedStorage",
@@ -52,18 +52,18 @@ use Drupal\user\UserInterface;
  *   fieldable = TRUE,
  *   entity_keys = {
  *     "id" = "fid",
- *     "bundle" = "importer",
+ *     "bundle" = "type",
  *     "label" = "title",
  *     "uuid" = "uuid"
  *   },
  *   permission_granularity = "bundle",
- *   bundle_entity_type = "feeds_importer",
- *   field_ui_base_route = "feeds.importer_edit",
+ *   bundle_entity_type = "feeds_feed_type",
+ *   field_ui_base_route = "feeds.feed_type_edit",
  *   links = {
  *     "canonical" = "feeds.view",
  *     "delete-form" = "feeds.delete",
  *     "edit-form" = "feeds.edit",
- *     "admin-form" = "feeds.importer_edit",
+ *     "admin-form" = "feeds.feed_type_edit",
  *     "import-form" = "feeds.import",
  *     "clear-form" = "feeds.clear"
  *   }
@@ -158,8 +158,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function getImporter() {
-    return $this->get('importer')->entity;
+  public function getType() {
+    return $this->get('type')->entity;
   }
 
   /**
@@ -255,7 +255,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function finishImport() {
-    $this->getImporter()
+    $this->getType()
       ->getProcessor()
       ->postProcess($this, $this->getState(StateInterface::PROCESS));
 
@@ -269,8 +269,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $time = time();
     $this->set('imported', $time);
 
-    $interval = $this->getImporter()->getImportPeriod();
-    if ($interval !== ImporterInterface::SCHEDULE_NEVER) {
+    $interval = $this->getType()->getImportPeriod();
+    if ($interval !== FeedTypeInterface::SCHEDULE_NEVER) {
       $this->set('next', $interval + $time);
     }
 
@@ -283,7 +283,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function cleanUpAfterClear() {
     $this
-      ->getImporter()
+      ->getType()
       ->getProcessor()
       ->postClear($this, $this->getState(StateInterface::CLEAR));
 
@@ -428,20 +428,20 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
-    $importer = $this->getImporter();
+    $feed_type = $this->getType();
 
-    foreach ($importer->getPlugins() as $plugin) {
+    foreach ($feed_type->getPlugins() as $plugin) {
       $plugin->onFeedSave($this, $update);
     }
 
     // If this is a new node, 'next' and 'imported' will be zero which will
     // queue it for the next run.
-    if ($importer->getImportPeriod() === ImporterInterface::SCHEDULE_NEVER) {
-      $this->set('next', ImporterInterface::SCHEDULE_NEVER);
+    if ($feed_type->getImportPeriod() === FeedTypeInterface::SCHEDULE_NEVER) {
+      $this->set('next', FeedTypeInterface::SCHEDULE_NEVER);
     }
 
     // Update the item count.
-    $this->set('item_count', $importer->getProcessor()->getItemCount($this));
+    $this->set('item_count', $feed_type->getProcessor()->getItemCount($this));
   }
 
   /**
@@ -459,9 +459,9 @@ class Feed extends ContentEntityBase implements FeedInterface {
 
     // Alert plugins that we are deleting.
     foreach ($grouped as $group) {
-      // Grab the first feed to get its importer.
+      // Grab the first feed to get its type.
       $feed = reset($group);
-      foreach ($feed->getImporter()->getPlugins() as $plugin) {
+      foreach ($feed->getType()->getPlugins() as $plugin) {
         $plugin->onFeedDeleteMultiple($group);
       }
     }
@@ -486,10 +486,10 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ->setDescription(t('The feed UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['importer'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Importer'))
-      ->setDescription(t('The feed importer.'))
-      ->setSetting('target_type', 'feeds_importer')
+    $fields['type'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Feed type'))
+      ->setDescription(t('The feed type.'))
+      ->setSetting('target_type', 'feeds_feed_type')
       ->setReadOnly(TRUE);
 
     $fields['title'] = BaseFieldDefinition::create('string')

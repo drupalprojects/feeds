@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\ImporterInterface.
+ * Contains \Drupal\feeds\FeedTypeInterface.
  */
 
 namespace Drupal\feeds;
@@ -10,13 +10,13 @@ namespace Drupal\feeds;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
- * Provides an interface defining a feeds importer entity.
+ * Provides an interface defining a feeds feed type entity.
  *
- * An importer is a wrapper around a set of configured plugins that are used to
- * perform an import. The importer manages the configuration on behalf of the
+ * A feed type is a wrapper around a set of configured plugins that are used to
+ * perform an import. The feed type manages the configuration on behalf of the
  * plugins.
  */
-interface ImporterInterface extends ConfigEntityInterface {
+interface FeedTypeInterface extends ConfigEntityInterface {
 
   /**
    * Indicates that a feed should never be scheduled.
@@ -24,10 +24,10 @@ interface ImporterInterface extends ConfigEntityInterface {
   const SCHEDULE_NEVER = -1;
 
   /**
-   * Returns the description of the importer.
+   * Returns the description of the feed type.
    *
    * @return string
-   *   The description of the importer.
+   *   The description of the feed type.
    */
   public function getDescription();
 
@@ -48,7 +48,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function setImportPeriod($import_period);
 
   /**
-   * Returns the configured plugins for this importer.
+   * Returns the configured plugins for this feed type.
    *
    * @return \Drupal\feeds\Plugin\Type\PluginBase[]
    *   An array of plugins keyed by plugin type.
@@ -56,26 +56,26 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function getPlugins();
 
   /**
-   * Returns the configured fetcher for this importer.
+   * Returns the configured fetcher for this feed type.
    *
    * @return \Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface
-   *   The fetcher associated with this Importer.
+   *   The fetcher associated with this feed type.
    */
   public function getFetcher();
 
   /**
-   * Returns the configured parser for this importer.
+   * Returns the configured parser for this feed type.
    *
    * @return \Drupal\feeds\Plugin\Type\Parser\ParserInterface
-   *   The parser associated with this Importer.
+   *   The parser associated with this feed type.
    */
   public function getParser();
 
   /**
-   * Returns the configured processor for this importer.
+   * Returns the configured processor for this feed type.
    *
    * @return \Drupal\feeds\Plugin\Type\Processor\ProcessorInterface
-   *   The processor associated with this Importer.
+   *   The processor associated with this feed type.
    */
   public function getProcessor();
 
@@ -90,7 +90,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function setPlugin($plugin_type, $plugin_id);
 
   /**
-   * Returns the mappings for this importer.
+   * Returns the mappings for this feed type.
    *
    * @return array
    *   The list of mappings.
@@ -98,7 +98,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function getMappings();
 
   /**
-   * Sets the mappings for the importer.
+   * Sets the mappings for the feed type.
    *
    * @param array $mappings
    *   A list of mappings.
@@ -106,7 +106,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function setMappings(array $mappings);
 
   /**
-   * Adds a mapping to the importer.
+   * Adds a mapping to the feed type.
    *
    * @param array $mapping
    *   A single mapping.
@@ -114,7 +114,7 @@ interface ImporterInterface extends ConfigEntityInterface {
   public function addMapping(array $mapping);
 
   /**
-   * Removes a mapping from the importer.
+   * Removes a mapping from the feed type.
    *
    * @param int $delta
    *   The mapping delta to remove.

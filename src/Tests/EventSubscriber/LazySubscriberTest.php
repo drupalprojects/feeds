@@ -30,7 +30,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   protected $explodingDispatcher;
   protected $feed;
   protected $state;
-  protected $importer;
+  protected $feedType;
   protected $fetcher;
   protected $parser;
   protected $processor;
@@ -51,7 +51,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
     $this->feed->expects($this->any())
       ->method('getState')
       ->will($this->returnValue($this->state));
-    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
+    $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
 
     $this->fetcher = $this->getMock('Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface');
     $this->parser = $this->getMock('Drupal\feeds\Plugin\Type\Parser\ParserInterface');
@@ -59,8 +59,8 @@ class LazySubscriberTest extends FeedsUnitTestCase {
 
     $this->feed
       ->expects($this->any())
-      ->method('getImporter')
-      ->will($this->returnValue($this->importer));
+      ->method('getType')
+      ->will($this->returnValue($this->feedType));
   }
 
   public function testGetSubscribedEvents() {
@@ -84,13 +84,13 @@ class LazySubscriberTest extends FeedsUnitTestCase {
     $this->processor->expects($this->once())
       ->method('process');
 
-    $this->importer->expects($this->once())
+    $this->feedType->expects($this->once())
       ->method('getFetcher')
       ->will($this->returnValue($this->fetcher));
-    $this->importer->expects($this->once())
+    $this->feedType->expects($this->once())
       ->method('getParser')
       ->will($this->returnValue($this->parser));
-    $this->importer->expects($this->once())
+    $this->feedType->expects($this->once())
       ->method('getProcessor')
       ->will($this->returnValue($this->processor));
 
@@ -122,7 +122,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
       ->method('clear')
       ->with($this->feed);
 
-    $this->importer->expects($this->once())
+    $this->feedType->expects($this->once())
       ->method('getPlugins')
       ->will($this->returnValue([$clearable, $this->dispatcher, $clearable]));
 
@@ -136,7 +136,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   }
 
   public function testOnInitExpire() {
-    $this->importer->expects($this->once())
+    $this->feedType->expects($this->once())
       ->method('getProcessor')
       ->will($this->returnValue($this->processor));
     $this->processor->expects($this->once())

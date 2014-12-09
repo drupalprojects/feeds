@@ -22,7 +22,7 @@ use Drupal\feeds\Tests\FeedsUnitTestCase;
 class SyndicationParserTest extends FeedsUnitTestCase {
 
   protected $parser;
-  protected $importer;
+  protected $feedType;
   protected $feed;
   protected $state;
 
@@ -54,8 +54,8 @@ class SyndicationParserTest extends FeedsUnitTestCase {
     $container->set('feed.bridge.reader', $manager);
     \Drupal::setContainer($container);
 
-    $this->importer = $this->getMock('Drupal\feeds\ImporterInterface');
-    $configuration = ['importer' => $this->importer];
+    $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
+    $configuration = ['feed_type' => $this->feedType];
     $this->parser = new SyndicationParser($configuration, 'syndication', []);
     $this->parser->setStringTranslation($this->getStringTranslationStub());
 
@@ -63,8 +63,8 @@ class SyndicationParserTest extends FeedsUnitTestCase {
 
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
     $this->feed->expects($this->any())
-      ->method('getImporter')
-      ->will($this->returnValue($this->importer));
+      ->method('getType')
+      ->will($this->returnValue($this->feedType));
   }
 
   public function testFetch() {

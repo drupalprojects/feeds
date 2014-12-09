@@ -14,7 +14,7 @@ use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FieldTargetDefinition;
-use Drupal\feeds\ImporterInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
 
 /**
@@ -39,8 +39,8 @@ abstract class FieldTargetBase extends TargetBase {
   /**
    * {@inheritdoc}
    */
-  public static function targets(array &$targets, ImporterInterface $importer, array $definition) {
-    $processor = $importer->getProcessor();
+  public static function targets(array &$targets, FeedTypeInterface $feed_type, array $definition) {
+    $processor = $feed_type->getProcessor();
 
     if (!$processor instanceof EntityProcessorInterface) {
       return $targets;
@@ -132,7 +132,7 @@ abstract class FieldTargetBase extends TargetBase {
   protected function getUniqueQuery(FeedInterface $feed) {
     if (!isset(static::$uniqueQueries[$feed->id()])) {
 
-      static::$uniqueQueries[$feed->id()] = \Drupal::entityQuery($this->importer->getProcessor()->entityType())
+      static::$uniqueQueries[$feed->id()] = \Drupal::entityQuery($this->feedType->getProcessor()->entityType())
         ->condition('feeds_item.target_id', $feed->id())
         ->range(0, 1);
     }
@@ -141,7 +141,7 @@ abstract class FieldTargetBase extends TargetBase {
   }
 
   public function getUniqueValue($feed, $target, $key, $value) {
-    $base_fields = \Drupal::entityManager()->getBaseFieldDefinitions($this->importer->getProcessor()->entityType());
+    $base_fields = \Drupal::entityManager()->getBaseFieldDefinitions($this->feedType->getProcessor()->entityType());
 
     if (isset($base_fields[$target])) {
       $field = $target;

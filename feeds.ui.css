@@ -1,18 +1,18 @@
 /* Feeds admin overview form. */
-table.feeds-admin-importers thead th {
+table.feeds-admin-feed-type thead th {
   border: none;
 }
 
-table.feeds-admin-importers td.disabled {
+table.feeds-admin-feed-type td.disabled {
   color: #aaa;
 }
 
-table.feeds-admin-importers tr.disabled.odd,
-table.feeds-admin-importers tr.disabled.even {
+table.feeds-admin-feed-type tr.disabled.odd,
+table.feeds-admin-feed-type tr.disabled.even {
   border-color: #eee;
 }
 
-table.feeds-admin-importers tr.disabled.odd {
+table.feeds-admin-feed-type tr.disabled.odd {
   background-color: #f5f5f5;
 }
 

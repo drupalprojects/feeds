@@ -44,7 +44,7 @@ class HttpFetcherForm extends ExternalPluginFormBase {
         ],
       ],
     ];
-    // Per importer override of global http request timeout setting.
+    // Per feed type override of global http request timeout setting.
     $form['request_timeout'] = [
       '#type' => 'number',
       '#title' => $this->t('Request timeout'),

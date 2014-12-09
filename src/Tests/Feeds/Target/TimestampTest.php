@@ -21,7 +21,7 @@ class TimestampTest extends FeedsUnitTestCase {
     $target_definition = $method($this->getMockFieldDefinition());
 
     $configuration = [
-      'importer' => $this->getMock('Drupal\feeds\ImporterInterface'),
+      'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
       'target_definition' => $target_definition,
     ];
     $target = new Timestamp($configuration, 'timestamp', []);
