@@ -36,17 +36,13 @@ function feeds_cron() {
     ->sort('imported')
     ->execute();
 
-  debug($ids);
-
   foreach (Feed::loadMultiple($ids) as $feed) {
     if ($feed->isLocked()) {
-      debug('locked: ' . $feed->id());
       continue;
     }
     $queue = \Drupal::queue('feeds_feed_import:' . $feed->bundle());
 
     if ($queue->createItem($feed)) {
-      debug('queing:' . $feed->id());
       // Add timestamp to avoid queueing item more than once.
       $feed->setQueuedTime(REQUEST_TIME);
       $feed->save();
