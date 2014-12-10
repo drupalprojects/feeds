@@ -705,7 +705,7 @@ function feeds_update_7211(&$sandbox) {
 
   // Load a single importer.
   $importer = array_pop($sandbox['importers']);
-  $importer = feeds_importer_load($importer);
+  $importer = feeds_importer($importer);
   $mappings = $importer->processor->getMappings();
 
   foreach ($mappings as $key => $mapping) {
