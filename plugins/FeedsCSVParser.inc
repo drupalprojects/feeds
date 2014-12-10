@@ -28,7 +28,8 @@ class FeedsCSVParser extends FeedsParser {
       // Get first line and use it for column names, convert them to lower case.
       $header = $this->parseHeader($parser, $iterator);
       if (!$header) {
-        return FeedsParserResult();
+        drupal_set_message(t('The CSV file is empty.'), 'warning', FALSE);
+        return new FeedsParserResult();
       }
       $parser->setColumnNames($header);
     }
