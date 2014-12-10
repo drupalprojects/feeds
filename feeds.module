@@ -720,6 +720,18 @@ function feeds_field_extra_fields() {
   return $extras;
 }
 
+/**
+ * Implements hook_features_pipe_COMPONENT_alter() for component "feeds_importer".
+ *
+ * Automatically adds dependencies when a Feed importer is selected in Features.
+ */
+function feeds_features_pipe_feeds_importer_alter(&$pipe, $data, &$export) {
+  foreach ($data as $importer_id) {
+    if ($importer = feeds_importer_load($importer_id)) {
+      $export['dependencies'] = array_merge($export['dependencies'], $importer->dependencies());
+    }
+  }
+}
 
 /**
  * Implements hook_system_info_alter().

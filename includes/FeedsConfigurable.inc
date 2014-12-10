@@ -214,6 +214,16 @@ abstract class FeedsConfigurable {
     drupal_set_message(t('Your changes have been saved.'));
     feeds_cache_clear(FALSE);
   }
+
+  /**
+   * Returns an array of required modules.
+   *
+   * @return array
+   *   The modules that this configurable requires.
+   */
+  public function dependencies() {
+    return array();
+  }
 }
 
 /**

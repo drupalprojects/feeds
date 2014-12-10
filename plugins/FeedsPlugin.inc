@@ -209,6 +209,21 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
     }
     return $result;
   }
+
+  /**
+   * Implements FeedsConfigurable::dependencies().
+   */
+  public function dependencies() {
+    $dependencies = parent::dependencies();
+
+    // Find out which module provides this plugin.
+    $plugin_info = $this->pluginDefinition();
+    if (isset($plugin_info['module'])) {
+      $dependencies[$plugin_info['module']] = $plugin_info['module'];
+    }
+
+    return $dependencies;
+  }
 }
 
 /**

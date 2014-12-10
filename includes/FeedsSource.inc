@@ -799,4 +799,12 @@ class FeedsSource extends FeedsConfigurable {
     lock_release("feeds_source_{$this->id}_{$this->feed_nid}");
   }
 
+  /**
+   * Implements FeedsConfigurable::dependencies().
+   */
+  public function dependencies() {
+    $dependencies = parent::dependencies();
+    return array_merge($dependencies, $this->importer()->dependencies());
+  }
+
 }
