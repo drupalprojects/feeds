@@ -397,7 +397,7 @@ function my_module_form_callback($mapping, $target, $form, $form_state) {
  *   The unique values to be checked.
  *
  * @return int
- *   The existing entity id, or 0 if not found.
+ *   The existing entity id, or NULL if no existing entity is found.
  *
  * @see hook_feeds_processor_targets_alter()
  * @see FeedsProcessor::existingEntityId()
