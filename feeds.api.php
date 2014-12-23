@@ -257,8 +257,10 @@ function my_source_get_source(FeedsSource $source, FeedsParserResult $result, $k
 }
 
 /**
- * Alter mapping targets for entities. Use this hook to add additional target
- * options to the mapping form of Node processors.
+ * Alters mapping targets for processors.
+ *
+ * This hook allows additional target options to be added to the processors
+ * mapping form.
  *
  * If the key in $targets[] does not correspond to the actual key on the node
  * object ($node->key), real_target MUST be specified. See mappers/link.inc
