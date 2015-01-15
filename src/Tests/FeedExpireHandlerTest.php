@@ -27,36 +27,36 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
   }
 
-  public function testExpire() {
-    $this->feed
-      ->expects($this->exactly(2))
-      ->method('progressExpiring')
-      ->will($this->onConsecutiveCalls(0.5, 1.0));
-    $this->feed
-      ->expects($this->once())
-      ->method('clearStates');
+  // public function testExpire() {
+  //   $this->feed
+  //     ->expects($this->exactly(2))
+  //     ->method('progressExpiring')
+  //     ->will($this->onConsecutiveCalls(0.5, 1.0));
+  //   $this->feed
+  //     ->expects($this->once())
+  //     ->method('clearStates');
 
-    $handler = new FeedExpireHandler($this->dispatcher);
-    $result = $handler->expire($this->feed);
-    $this->assertSame($result, 0.5);
-    $result = $handler->expire($this->feed);
-    $this->assertSame($result, 1.0);
-  }
+  //   $handler = new FeedExpireHandler($this->dispatcher);
+  //   $result = $handler->expire($this->feed);
+  //   $this->assertSame($result, 0.5);
+  //   $result = $handler->expire($this->feed);
+  //   $this->assertSame($result, 1.0);
+  // }
 
   /**
    * @expectedException \Exception
    */
-  public function testException() {
-    $this->dispatcher->addListener(FeedsEvents::EXPIRE, function($event) {
-      throw new \Exception();
-    });
+  // public function testException() {
+  //   $this->dispatcher->addListener(FeedsEvents::EXPIRE, function($event) {
+  //     throw new \Exception();
+  //   });
 
-    $this->feed
-      ->expects($this->once())
-      ->method('clearStates');
+  //   $this->feed
+  //     ->expects($this->once())
+  //     ->method('clearStates');
 
-    $handler = new FeedExpireHandler($this->dispatcher);
-    $handler->expire($this->feed);
-  }
+  //   $handler = new FeedExpireHandler($this->dispatcher);
+  //   $handler->expire($this->feed);
+  // }
 
 }

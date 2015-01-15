@@ -50,8 +50,6 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
   }
 
   public function testBatchFetch() {
-    $this->feed->expects($this->once())
-      ->method('saveStates');
     $this->handler->batchFetch($this->feed);
   }
 

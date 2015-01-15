@@ -58,7 +58,7 @@ class FeedClearHandler extends FeedHandlerBase {
     }
 
     if ($context['finished'] === StateInterface::BATCH_COMPLETE) {
-      $feed->cleanUpAfterClear();
+      $feed->finishClear();
       $feed->save();
       $feed->unlock();
     }

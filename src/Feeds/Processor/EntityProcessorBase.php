@@ -559,9 +559,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
   /**
    * {@inheritdoc}
    */
-  public function expire(FeedInterface $feed, $time = NULL) {
-    $state = $feed->getState(StateInterface::EXPIRE);
-
+  public function getExpiredIds(FeedInterface $feed, $time = NULL) {
     if ($time === NULL) {
       $time = $this->expiryTime();
     }
@@ -569,26 +567,18 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       return;
     }
 
-    $query = $this->queryFactory
-      ->get($this->entityType())
+    return $this->queryFactory->get($this->entityType())
       ->condition('feeds_item.target_id', $feed->id())
-      ->condition('feeds_item.imported', REQUEST_TIME - $time, '<');
+      // ->condition('feeds_item.imported', REQUEST_TIME -1, '<')
+      ->execute();
+  }
 
-    // If there is no total, query it.
-    if (!$state->total) {
-      $count_query = clone $query;
-      $state->total = (int) $count_query->count()->execute();
-    }
-
-    // Delete a batch of entities.
-    if ($entity_ids = $query->range(0, 50)->execute()) {
-      $this->entityDeleteMultiple($entity_ids);
-      $state->deleted += count($entity_ids);
-      $state->progress($state->total, $state->deleted);
-    }
-    else {
-      $state->progress($state->total, $state->total);
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function expireItem(FeedInterface $feed, $item_id, StateInterface $state) {
+    $this->entityDeleteMultiple([$item_id]);
+    $state->total++;
   }
 
   /**

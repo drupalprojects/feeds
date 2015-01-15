@@ -49,7 +49,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function setSource($source);
 
   /**
-   * Returns the Feed type object that this feed is expected to be used with.
+   * Returns the feed type object that this feed is expected to be used with.
    *
    * @return \Drupal\feeds\FeedTypeInterface
    *   The feed type object.
@@ -136,15 +136,10 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * it.
    *
    * @param string $raw
-   *   (optional) A raw string to import. Defaults to null.
+   *   (optional) A raw string to import.
    *
-   * @throws \Drupal\feeds\Exception\InterfaceNotImplementedException
-   *   Thrown if the fetcher does not support real-time updates.
    * @throws \Exception
    *   Re-throws any exception that bubbles up.
-   *
-   * @todo We should document all possible exceptions, or at least the ones that
-   *   can bubble up.
    *
    * @todo We need to create a job for this that will run immediately so that
    *   services don't have to wait for us to process. Can we spawn a background
@@ -153,16 +148,12 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function pushImport($raw);
 
   /**
-   * Removes all expired items from a feed.
-   *
-   * @return float
-   *   StateInterface::BATCH_COMPLETE if the expiring process finished. A
-   *   decimal between 0.0 and 0.9 periodic if it is still in progress.
+   * Removes all expired items from a feed via batch api.
    *
    * @throws \Exception
    *   Re-throws any exception that bubbles up.
    */
-  public function expire();
+  public function startBatchExpire();
 
   /**
    * Cleans up after an import.
@@ -172,7 +163,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   /**
    * Cleans up after feed items have been delted.
    */
-  public function cleanUpAfterClear();
+  public function finishClear();
 
   /**
    * Reports the progress of the fetching stage.

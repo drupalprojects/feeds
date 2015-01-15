@@ -145,8 +145,13 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
-    $feeds_feed->pushImport($raw);
-    return new Response('', 200);
+    try {
+      $feeds_feed->pushImport($raw);
+      return new Response('', 200);
+    }
+    catch (\Exception $e) {
+      return new Response('', 500);
+    }
   }
 
 }

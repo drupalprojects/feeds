@@ -140,12 +140,12 @@ class LazySubscriberTest extends FeedsUnitTestCase {
       ->method('getProcessor')
       ->will($this->returnValue($this->processor));
     $this->processor->expects($this->once())
-      ->method('expire')
+      ->method('expireItem')
       ->with($this->feed);
 
     $subscriber = new LazySubscriber();
     $subscriber->onInitExpire(new InitEvent($this->feed), FeedsEvents::INIT_IMPORT, $this->dispatcher);
-    $this->dispatcher->dispatch(FeedsEvents::EXPIRE, new ExpireEvent($this->feed));
+    $this->dispatcher->dispatch(FeedsEvents::EXPIRE, new ExpireEvent($this->feed, 1234));
 
     // Call again.
     $subscriber->onInitExpire(new InitEvent($this->feed), FeedsEvents::INIT_IMPORT, $this->explodingDispatcher);

@@ -142,7 +142,7 @@ class File extends EntityReference {
   protected function getContent($url) {
     $response = $this->client->get($url);
 
-    if ($response->getStatusCode() !== '200') {
+    if ($response->getStatusCode() >= 400) {
       $args = [
         '%url' => $url,
         '@code' => $response->getStatusCode(),

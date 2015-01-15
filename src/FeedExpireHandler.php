@@ -20,30 +20,67 @@ class FeedExpireHandler extends FeedHandlerBase {
   /**
    * {@inheritodc}
    */
-  public function expire(FeedInterface $feed) {
-    $feed->lock();
+  public function startBatchExpire(FeedInterface $feed) {
+    try {
+      $feed->lock();
+    }
+    catch (LockException $e) {
+      drupal_set_message(t('The feed became locked before the expiring could begin.'), 'warning');
+      return;
+    }
+    $feed->clearStates();
+
+    $ids = $feed->getType()->getProcessor()->getExpiredIds($feed);
+
+    if (!$ids) {
+      $feed->unlock();
+      return;
+    }
+
+    $batch = [
+      'title' => $this->t('Expiring: %title', ['%title' => $feed->label()]),
+      'init_message' => $this->t('Expiring: %title', ['%title' => $feed->label()]),
+      'progress_message' => $this->t('Expiring: %title', ['%title' => $feed->label()]),
+      'error_message' => $this->t('An error occored while expiring %title.', ['%title' => $feed->label()]),
+    ];
+
+    foreach ($ids as $id) {
+      $batch['operations'][] = [[$this, 'expireItem'], [$feed, $id]];
+    }
+    $batch['operations'][] = [[$this, 'postExpire'], [$feed]];
+
+    batch_set($batch);
+  }
+
+
+  /**
+   * {@inheritodc}
+   */
+  public function expireItem(FeedInterface $feed, $item_id) {
     try {
       $this->dispatchEvent(FeedsEvents::INIT_EXPIRE, new InitEvent($feed));
-      $this->dispatchEvent(FeedsEvents::EXPIRE, new ExpireEvent($feed));
+      $this->dispatchEvent(FeedsEvents::EXPIRE, new ExpireEvent($feed, $item_id));
     }
-    catch (\Exception $exception) {
-      // Will throw after the lock is released.
-    }
-    $feed->unlock();
-
-    $result = $feed->progressExpiring();
-
-    if ($result === StateInterface::BATCH_COMPLETE || isset($exception)) {
+    catch (\RuntimeException $e) {
+      drupal_set_message($exception->getMessage(), 'error');
       $feed->clearStates();
+      $feed->unlock();
     }
+    catch (\Exception $e) {
+      $feed->clearStates();
+      $feed->unlock();
+      throw $e;
+    }
+  }
 
+  public function postExpire(FeedInterface $feed) {
+    $state = $feed->getState(StateInterface::EXPIRE);
+    if ($state->total) {
+      drupal_set_message(t('Expired @count items.', ['@count' => $state->total]));
+    }
+    $feed->clearStates();
     $feed->save();
-
-    if (isset($exception)) {
-      throw $exception;
-    }
-
-    return $result;
+    $feed->unlock();
   }
 
 }

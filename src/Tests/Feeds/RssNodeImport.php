@@ -43,9 +43,7 @@ class RssNodeImport extends WebTestBase {
       'entity_type' => 'node',
       'type' => 'taxonomy_term_reference',
       'settings' => [
-        'allowed_values' => [
-          ['vocabulary' => 'tags', 'parent' => 0],
-        ],
+        'allowed_values' => [['vocabulary' => 'tags', 'parent' => 0]],
       ],
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ])->save();
@@ -88,11 +86,7 @@ class RssNodeImport extends WebTestBase {
         ],
       ],
       'processor' => 'entity:node',
-      'processor_configuration' => [
-        'values' => [
-          'type' => 'article',
-        ],
-      ],
+      'processor_configuration' => ['values' => ['type' => 'article']],
       'import_period' => FeedTypeInterface::SCHEDULE_NEVER,
     ]);
     $this->type->save();

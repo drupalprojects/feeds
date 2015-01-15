@@ -132,7 +132,13 @@ class LazySubscriber implements EventSubscriberInterface {
 
     $dispatcher->addListener(FeedsEvents::EXPIRE, function(ExpireEvent $event) {
       $feed = $event->getFeed();
-      $feed->getType()->getProcessor()->expire($feed);
+      $state = $feed->getState(StateInterface::EXPIRE);
+
+      $feed->getType()
+        ->getProcessor()
+        ->expireItem($feed, $event->getItemId(), $state);
+
+      $feed->saveStates();
     });
   }
 

@@ -245,10 +245,10 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function expire() {
+  public function startBatchExpire() {
     return $this->entityManager()
       ->getHandler('feeds_feed', 'feed_expire')
-      ->expire($this);
+      ->startBatchExpire($this);
   }
 
   /**
@@ -281,7 +281,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * Cleans up after an import.
    */
-  public function cleanUpAfterClear() {
+  public function finishClear() {
     $this
       ->getType()
       ->getProcessor()

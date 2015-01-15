@@ -163,7 +163,6 @@ class FeedImportHandler extends FeedHandlerBase {
     catch (\Exception $exception) {
       return $this->handleException($feed, $exception);
     }
-
     $feed->saveStates();
   }
 
@@ -182,6 +181,7 @@ class FeedImportHandler extends FeedHandlerBase {
     }
     else {
       $feed->finishImport();
+      $feed->startBatchExpire();
     }
   }
 
