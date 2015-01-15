@@ -2,6 +2,9 @@ feeds:
   version: VERSION
   js:
     feeds.js: {}
+  css:
+    layout:
+      feeds.css: {}
   dependencies:
     - core/drupal.form
     - core/drupal.ajax

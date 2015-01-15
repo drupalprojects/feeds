@@ -222,10 +222,10 @@ function feeds_views_data() {
 /**
  * Implements hook_field_views_data().
  *
- * @see field_views_field_default_views_data()
+ * @see views_field_default_views_data()
  */
 function feeds_field_views_data(FieldStorageConfig $field) {
-  $data = field_views_field_default_views_data($field);
+  $data = views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     // Add the relationship only on the target_id field.
     $data[$table_name][$field->getName() . '_target_id']['relationship'] = [

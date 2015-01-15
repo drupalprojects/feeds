@@ -81,7 +81,7 @@ class MappingForm extends FormBase {
     $form['#tree'] = TRUE;
     $form['#prefix'] = '<div id="feeds-mapping-form-ajax-wrapper">';
     $form['#suffix'] = '</div>';
-    $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
+    $form['#attached']['library'][] = 'feeds/feeds';
 
     $table = [
       '#type' => 'table',

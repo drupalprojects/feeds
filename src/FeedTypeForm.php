@@ -58,7 +58,7 @@ class FeedTypeForm extends EntityForm {
     $form['#tree'] = TRUE;
     $values = $form_state->getValues();
 
-    $form['#attached']['css'][] = drupal_get_path('module', 'feeds') . '/feeds.css';
+    $form['#attached']['library'][] = 'feeds/feeds';
 
     if ($this->operation == 'edit') {
       $form['#title'] = $this->t('Edit %label', ['%label' => $this->entity->label()]);
@@ -176,7 +176,6 @@ class FeedTypeForm extends EntityForm {
             'wrapper' => 'feeds-ajax-form-wrapper',
             'progress' => 'none',
           ],
-          '#attached' => ['library' => ['feeds/feeds']],
           '#plugin_type' => $type,
           '#parents' => [$type],
         ];

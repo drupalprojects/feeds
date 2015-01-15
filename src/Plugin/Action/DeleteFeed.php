@@ -81,4 +81,11 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
     $this->executeMultiple([$object]);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    return TRUE;
+  }
+
 }
