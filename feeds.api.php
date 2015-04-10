@@ -136,16 +136,16 @@ function hook_feeds_before_update(FeedsSource $source, $item, $entity_id) {
  * Invoked before a feed item is saved.
  *
  * @param FeedsSource $source
- *  FeedsSource object that describes the source that is being imported.
+ *   FeedsSource object that describes the source that is being imported.
  * @param $entity
  *   The entity object.
  * @param array $item
  *   The parser result for this entity.
  * @param int|null $entity_id
- *  The id of the current item which is going to be updated. If this is a new
- *  item, then NULL is passed.
+ *   The id of the current item which is going to be updated. If this is a new
+ *   item, then NULL is passed.
  */
-function hook_feeds_presave(FeedsSource $source, $entity, $item) {
+function hook_feeds_presave(FeedsSource $source, $entity, $item, $entity_id) {
   if ($entity->feeds_item->entity_type == 'node') {
     // Skip saving this entity.
     $entity->feeds_item->skip = TRUE;
