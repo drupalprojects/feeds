@@ -294,10 +294,25 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->assertFeedItemCount(10);
 
     // Enable unpublish missing nodes and import updated feed file.
-    $this->setSettings('syndication_standalone', 'FeedsNodeProcessor', array('update_non_existent' => 'unpublish'));
+    $this->setSettings('syndication_standalone', 'FeedsNodeProcessor', array('update_non_existent' => FEEDS_UNPUBLISH_NON_EXISTENT, 'update_existing' => FEEDS_REPLACE_EXISTING));
     $missing_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed_missing.rss2';
     $this->importURL('syndication_standalone', $missing_url);
     $this->assertText('Unpublished 1 node');
+    $this->assertFeedItemCount(10);
+
+    // Import again to ensure the message that one node is unpublished doesn't
+    // reappear (since the node was already unpublished during the previous
+    // import).
+    $this->drupalPost('import/syndication_standalone', array(), 'Import');
+    $this->assertText('There are no new nodes');
+    $this->assertFeedItemCount(10);
+
+    // Re-import the original feed to ensure the unpublished node is updated,
+    // even though the item is the same since the last time it was available in
+    // the feed. Fact is that the node was not available in the previous import
+    // and that should be seen as a change.
+    $this->importURL('syndication_standalone', $feed_url);
+    $this->assertText('Updated 1 node');
     $this->assertFeedItemCount(10);
 
     // Now delete all items.

@@ -375,6 +375,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
     $select->condition('fi.id', $this->id);
     $select->condition('fi.feed_nid', $source->feed_nid);
+    // No need to remove item again if same method of removal was already used.
+    $select->condition('fi.hash', $this->config['update_non_existent'], '<>');
     $entities = $select->execute();
     // If not found on process, existing entities will be deleted.
     foreach ($entities as $entity) {
