@@ -173,10 +173,8 @@ function feeds_views_data() {
       'type' => 'LEFT',
       'extra' => array(
         array(
-          'table' => 'feeds_item',
           'field' => 'entity_type',
           'value' => $entity_type,
-          'operator' => '=',
         ),
       ),
     );
