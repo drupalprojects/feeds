@@ -319,3 +319,17 @@ function feeds_views_data() {
 
   return $data;
 }
+
+/**
+ * Implements hook_views_plugins().
+ */
+function feeds_views_plugins() {
+  return array(
+    'argument validator' => array(
+      'feed_nid' => array(
+        'title' => t('Feed node id'),
+        'handler' => 'feeds_views_plugin_argument_validate_feed_nid',
+      ),
+    ),
+  );
+}
