@@ -243,7 +243,10 @@ class FeedsHTTPFetcher extends FeedsFetcher {
     }
     elseif ($this->config['auto_detect_feeds']) {
       feeds_include_library('http_request.inc', 'http_request');
-      if ($url = http_request_get_common_syndication($values['source'])) {
+      $url = http_request_get_common_syndication($values['source'], array(
+        'accept_invalid_cert' => $this->config['accept_invalid_cert'],
+      ));
+      if ($url) {
         $values['source'] = $url;
       }
     }

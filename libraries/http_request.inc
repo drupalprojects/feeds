@@ -38,7 +38,7 @@ class HRCurlException extends Exception {}
  *   The discovered feed, or FALSE if the URL is not reachable or there was an
  *   error.
  */
-function http_request_get_common_syndication($url, $settings = NULL) {
+function http_request_get_common_syndication($url, $settings = array()) {
 
   $accept_invalid_cert = isset($settings['accept_invalid_cert']) ? $settings['accept_invalid_cert'] : FALSE;
   $download = http_request_get($url, NULL, NULL, $accept_invalid_cert);
