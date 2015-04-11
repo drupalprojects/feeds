@@ -41,8 +41,8 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *     "status" = "status"
  *   },
  *   links = {
- *     "edit-form" = "entity.feeds_feed_type.edit_form",
- *     "delete-form" = "entity.feeds_feed_type.delete_form"
+ *     "edit-form" = "/admin/structure/feeds/manage/{feeds_feed_type}",
+ *     "delete-form" = "/admin/structure/feeds/manage/{feeds_feed_type}/delete"
  *   },
  *   admin_permission = "administer feeds"
  * )

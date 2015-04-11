@@ -60,12 +60,12 @@ use Drupal\user\UserInterface;
  *   bundle_entity_type = "feeds_feed_type",
  *   field_ui_base_route = "entity.feeds_feed_type.edit_form",
  *   links = {
- *     "canonical" = "entity.feeds_feed.canonical",
- *     "delete-form" = "entity.feeds_feed.delete_form",
- *     "edit-form" = "entity.feeds_feed.edit_form",
- *     "admin-form" = "entity.feeds_feed_type.edit_form",
- *     "import-form" = "entity.feeds_feed.import_form",
- *     "clear-form" = "entity.feeds_feed.clear_form"
+ *     "canonical" = "/feed/{feeds_feed}",
+ *     "delete-form" = "/feed/{feeds_feed}/delete",
+ *     "edit-form" = "/feed/{feeds_feed}/edit",
+ *     "admin-form" = "/admin/structure/feeds/manage/{feeds_feed_type}",
+ *     "import-form" = "/feed/{feeds_feed}/import",
+ *     "clear-form" = "/feed/{feeds_feed}/delete-items"
  *   }
  * )
  */
