@@ -6,6 +6,5 @@ core = 7.x
 test_dependencies[] = date
 test_dependencies[] = entity
 test_dependencies[] = feeds_xpathparser
-test_dependencies[] = libraries
 test_dependencies[] = link
 hidden = TRUE

@@ -14,15 +14,7 @@ class FeedsSyndicationParserTestCase extends FeedsWebTestCase {
       'name' => 'Syndication parsers',
       'description' => 'Regression tests for syndication parsers Common syndication and SimplePie. Tests parsers against a set of feeds in the context of Feeds module. <strong>Requires SimplePie parser to be configured correctly.</strong>',
       'group' => 'Feeds',
-      'dependencies' => array('libraries'),
     );
-  }
-
-  /**
-   * Set up test.
-   */
-  public function setUp() {
-    parent::setUp(array('libraries'));
   }
 
   /**
