@@ -83,7 +83,7 @@ class ItemListController extends ControllerBase {
       $build['table']['#rows'][] = $row;
     }
 
-    $build['pager'] = ['#theme' => 'pager'];
+    $build['pager'] = ['#type' => 'pager'];
     $build['#title'] = $this->t('%title items', ['%title' => $feeds_feed->label()]);
 
     return $build;
