@@ -222,7 +222,7 @@ class FeedsCSVParser extends FeedsParser {
         $sources[] = check_plain($mapping['source']);
       }
     }
-    $sep = ',';
+    $sep = $this->config['delimiter'];
     $columns = array();
     foreach (array_merge($uniques, $sources) as $col) {
       if (strpos($col, $sep) !== FALSE) {
