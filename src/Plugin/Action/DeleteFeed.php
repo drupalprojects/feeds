@@ -10,7 +10,7 @@ namespace Drupal\feeds\Plugin\Action;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\user\TempStore;
+use Drupal\user\PrivateTempStore;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -28,7 +28,7 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
   /**
    * The tempstore object.
    *
-   * @var \Drupal\user\TempStore
+   * @var \Drupal\user\PrivateTempStore
    */
   protected $tempStore;
 
@@ -41,12 +41,12 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
    *   The plugin ID for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\user\TempStore $temp_store
+   * @param \Drupal\user\PrivateTempStore $temp_store
    *   The tempstore factory.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The current user.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, TempStore $temp_store, AccountInterface $user) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, PrivateTempStore $temp_store, AccountInterface $user) {
     $this->tempStore = $temp_store;
     $this->user = $user;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -56,7 +56,7 @@ class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $temp_store = $container->get('user.tempstore')->get('feeds_feed_multiple_delete_confirm');
+    $temp_store = $container->get('user.private_tempstore')->get('feeds_feed_multiple_delete_confirm');
 
     return new static(
       $configuration,
