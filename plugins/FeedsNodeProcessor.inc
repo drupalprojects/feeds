@@ -164,6 +164,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       'mappings' => array(),
       'author' => 0,
       'authorize' => 0,
+      'skip_hash_check' => FALSE,
     );
   }
 
@@ -224,6 +225,12 @@ class FeedsNodeProcessor extends FeedsProcessor {
         FEEDS_UPDATE_EXISTING => 'Update existing nodes (slower than replacing them)',
       ),
       '#default_value' => $this->config['update_existing'],
+    );
+    $form['skip_hash_check'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Skip hash check'),
+      '#description' => t('Force update of items even if item source data did not change.'),
+      '#default_value' => $this->config['skip_hash_check'],
     );
     return $form;
   }
@@ -440,10 +447,18 @@ class FeedsNodeProcessor extends FeedsProcessor {
   }
 
   /**
-   * Retrieve MD5 hash of $nid from DB.
-   * @return Empty string if no item is found, hash otherwise.
+   * Retrieves the MD5 hash of $entity_id from the database.
+   *
+   * When "skip hash check" is set to TRUE, returns dummy md5.
+   *
+   * @return string
+   *   Empty string if no item is found, hash otherwise.
    */
   protected function getHash($nid) {
+    if ($this->config['skip_hash_check']) {
+      return '00000000000000000000000000000000';
+    }
+
     $hash = db_result(db_query("SELECT hash FROM {feeds_node_item} WHERE nid = %d", $nid));
     if ($hash) {
       // Return with the hash.
