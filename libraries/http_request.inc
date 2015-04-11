@@ -213,7 +213,12 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
       // considered by CURLINFO_HEADER_SIZE (possibly cURL bug).
       // This data is only added when to HTTP header when working with a proxy.
       // Example string added: <HTTP/1.0 200 Connection established\r\n\r\n>
-      if ($proxy_server && _drupal_http_use_proxy($uri['host'])) {
+      // This was fixed in libcurl version 7.30.0 (0x71e00) (April 12, 2013),
+      // so this workaround only removes the proxy-added headers if we are using
+      // an older version of libcurl.
+      $curl_ver = curl_version();
+
+      if ($proxy_server && $curl_ver['version_number'] < 0x71e00 && _drupal_http_use_proxy($uri['host'])) {
         $http_header_break = "\r\n\r\n";
         $response = explode($http_header_break, $data);
         if (count($response) > 2) {
