@@ -71,7 +71,7 @@ feeds.multiple_delete_confirm:
   requirements:
     _permission: 'administer feeds'
 
-entity.feeds_feed.import:
+entity.feeds_feed.import_form:
   path: '/feed/{feeds_feed}/import'
   defaults:
     _entity_form: 'feeds_feed.import'
@@ -81,7 +81,7 @@ entity.feeds_feed.import:
     _entity_access: 'feeds_feed.import'
     feeds_feed: \d+
 
-entity.feeds_feed.clear:
+entity.feeds_feed.clear_form:
   path: '/feed/{feeds_feed}/delete-items'
   defaults:
     _entity_form: 'feeds_feed.clear'

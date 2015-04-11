@@ -64,8 +64,8 @@ use Drupal\user\UserInterface;
  *     "delete-form" = "entity.feeds_feed.delete_form",
  *     "edit-form" = "entity.feeds_feed.edit_form",
  *     "admin-form" = "entity.feeds_feed_type.edit_form",
- *     "import-form" = "entity.feeds_feed.import",
- *     "clear-form" = "entity.feeds_feed.clear"
+ *     "import-form" = "entity.feeds_feed.import_form",
+ *     "clear-form" = "entity.feeds_feed.clear_form"
  *   }
  * )
  */

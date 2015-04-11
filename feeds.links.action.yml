@@ -5,13 +5,13 @@ feeds.add_action:
     - feeds.admin
 
 feeds.import_action:
-  route_name: entity.feeds_feed.import
+  route_name: entity.feeds_feed.import_form
   title: Import
   appears_on:
     - entity.feeds_feed.canonical
 
 feeds.clear_action:
-  route_name: entity.feeds_feed.clear
+  route_name: entity.feeds_feed.clear_form
   title: Delete items
   appears_on:
     - entity.feeds_feed.canonical
