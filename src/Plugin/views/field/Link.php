@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 
@@ -20,6 +21,8 @@ use Drupal\views\ResultRow;
  */
 class Link extends FieldPluginBase {
 
+  use RedirectDestinationTrait;
+
   /**
    * {@inheritdoc}
    */
@@ -27,12 +30,18 @@ class Link extends FieldPluginBase {
     return FALSE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['text'] = ['default' => ''];
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['text'] = [
       '#type' => 'textfield',
@@ -64,16 +73,22 @@ class Link extends FieldPluginBase {
 
   /**
    * Prepares the link to the feed.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $feed
+   *   The feed entity this field belongs to.
+   * @param ResultRow $values
+   *   The values retrieved from the view's result set.
+   *
+   * @return string
+   *   Returns a string for the link text.
    */
   protected function renderLink($feed, ResultRow $values) {
-    if (!$feed->access('view')) {
-      return;
+    if ($feed->access('view')) {
+      $this->options['alter']['make_link'] = TRUE;
+      $this->options['alter']['url'] = $feed->urlInfo();
+      $text = !empty($this->options['text']) ? $this->options['text'] : $this->t('View');
+      return $text;
     }
-
-    $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = $feed->getSystemPath('canonical');
-    $this->options['alter']['path'] = 'asdfasf';
-    return !empty($this->options['text']) ? $this->options['text'] : $this->t('View');
   }
 
 }
