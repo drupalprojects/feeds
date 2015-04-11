@@ -12,9 +12,6 @@
  */
 function number_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
   $numeric_types = array(
-    'list_integer',
-    'list_float',
-    'list_boolean',
     'number_integer',
     'number_decimal',
     'number_float',

@@ -12,7 +12,6 @@
  */
 function text_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
   $text_types = array(
-    'list_text',
     'text',
     'text_long',
     'text_with_summary',
