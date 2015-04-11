@@ -100,8 +100,8 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
     // Handle password protected feeds.
     $url_parts = parse_url($url);
     if (!empty($url_parts['user'])) {
-      $password = $url_parts['pass'];
-      $username = $url_parts['user'];
+      $password = urldecode($url_parts['pass']);
+      $username = urldecode($url_parts['user']);
     }
   }
 
