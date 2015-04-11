@@ -35,6 +35,7 @@ use Drupal\user\UserInterface;
  *     "storage" = "Drupal\feeds\FeedStorage",
  *     "view_builder" = "Drupal\feeds\FeedViewBuilder",
  *     "access" = "Drupal\feeds\FeedAccessControlHandler",
+ *     "views_data" = "Drupal\feeds\FeedViewsData",
  *     "form" = {
  *       "default" = "Drupal\feeds\FeedForm",
  *       "update" = "Drupal\feeds\FeedForm",
