@@ -26,6 +26,7 @@ use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\Entity\User;
 
 /**
  * Defines a base entity processor.
@@ -406,14 +407,13 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       '#default_value' => $this->configuration['expire'],
     ];
     if ($this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
-      $owner = user_load($this->configuration['owner_id']);
-      $form['owner_id'] = [
-        '#type' => 'textfield',
+      $form['owner_id'] = array(
+        '#type' => 'entity_autocomplete',
         '#title' => $this->t('Owner'),
         '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', ['%anonymous' => \Drupal::config('user.settings')->get('anonymous')]),
-        '#autocomplete_route_name' => 'user.autocomplete',
-        '#default_value' => String::checkPlain($owner->getUsername()),
-      ];
+        '#target_type' => 'user',
+        '#default_value' => User::load($this->configuration['owner_id']),
+      );
     }
     $form['advanced'] = [
       '#title' => $this->t('Advanced settings'),
@@ -454,13 +454,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $values =& $form_state->getValues();
-
-    if (isset($values['owner_id']) && $owner = user_load_by_name($values['owner_id'])) {
-      $values['owner_id'] = $owner->id();
-    }
-    else {
-      $values['owner_id'] = 0;
-    }
+    $values['owner_id'] = (int) $values['owner_id'];
   }
 
   /**
