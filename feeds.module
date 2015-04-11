@@ -1255,6 +1255,12 @@ function feeds_entity_property_info_alter(&$info) {
       'description' => t('Nid of the Feed Node that imported this entity.'),
       'getter callback' => 'feeds_get_feed_nid_entity_callback',
     );
+    $info[$entity_type]['properties']['feed_node'] = array(
+      'label' => 'Feed node',
+      'type' => 'node',
+      'description' => t('Feed Node that imported this entity.'),
+      'getter callback' => 'feeds_get_feed_nid_entity_callback',
+    );
   }
 }
 
@@ -1264,10 +1270,17 @@ function feeds_entity_property_info_alter(&$info) {
 function feeds_get_feed_nid_entity_callback($entity, array $options, $name, $entity_type) {
   list($entity_id, , ) = entity_extract_ids($entity_type, $entity);
 
-  $feed_nid = feeds_get_feed_nid($entity_id, $entity_type);
-
-  if ($feed_nid === FALSE) {
-    return NULL;
+  $feed_nid = NULL;
+  if ($entity_id) {
+    $feed_nid = feeds_get_feed_nid($entity_id, $entity_type);
+    if ($feed_nid === FALSE) {
+      return NULL;
+    }
+  }
+  // If the entity has no ID (yet) try read the feed nid from the object
+  // directly.
+  elseif (isset($entity->feeds_item->feed_nid)) {
+    $feed_nid = $entity->feeds_item->feed_nid;
   }
   return $feed_nid;
 }
