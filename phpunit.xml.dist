@@ -8,16 +8,22 @@
     <ini name="memory_limit" value="-1"/>
   </php>
   <testsuites>
-    <testsuite name="Drupal Unit Test Suite">
-      <directory>./src/Tests</directory>
+    <testsuite name="Feeds Unit Test Suite">
+      <directory>./tests</directory>
     </testsuite>
   </testsuites>
+  <listeners>
+    <listener class="\Drupal\Tests\Standards\DrupalStandardsListener">
+    </listener>
+  </listeners>
   <!-- Filter for coverage reports. -->
   <filter>
     <whitelist>
       <directory>./src</directory>
+      <!-- By definition test classes have no tests. -->
       <exclude>
-        <directory>./src/Tests</directory>
+        <directory suffix="Test.php">./</directory>
+        <directory suffix="TestBase.php">./</directory>
       </exclude>
     </whitelist>
   </filter>
