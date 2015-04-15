@@ -41,9 +41,9 @@ class RssNodeImport extends WebTestBase {
     FieldStorageConfig::create([
       'field_name' => 'field_tags',
       'entity_type' => 'node',
-      'type' => 'taxonomy_term_reference',
+      'type' => 'entity_reference',
       'settings' => [
-        'allowed_values' => [['vocabulary' => 'tags', 'parent' => 0]],
+        'target_type' => 'taxonomy_term',
       ],
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ])->save();
