@@ -610,7 +610,7 @@ class FeedsDateTime extends DateTime {
     $time = str_replace("GMT+", "+", $time);
 
     // Some PHP 5.2 version's DateTime class chokes on invalid dates.
-    if (!strtotime($time)) {
+    if (!date_create($time)) {
       $time = 'now';
     }
 
