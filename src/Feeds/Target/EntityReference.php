@@ -102,8 +102,16 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     return $this->settings['target_type'];
   }
 
-  protected function getBundle() {
-    return $this->settings['target_bundle'];
+  protected function getBundles() {
+    return $this->settings['handler_settings']['target_bundles'];
+  }
+
+  protected function getBundleKey() {
+    return $this->entityManager->getDefinition($this->getEntityType())->getKey('bundle');
+  }
+
+  protected function getLabelKey() {
+    return $this->entityManager->getDefinition($this->getEntityType())->getKey('label');
   }
 
   /**
@@ -130,12 +138,8 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   protected function findEntity($value, $field) {
     $query = $this->queryFactory->get($this->getEntityType());
 
-    if ($bundle = $this->getBundle()) {
-      $bundle_key = $this->entityManager
-        ->getStorage($this->getEntityType())
-        ->getEntityType()
-        ->getKey('bundle');
-      $query->condition($bundle_key, $bundle);
+    if ($bundles = $this->getBundles()) {
+      $query->condition($this->getBundleKey(), $bundles);
     }
 
     $ids = array_filter($query->condition($field, $value)->range(0, 1)->execute());
@@ -143,14 +147,37 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       return reset($ids);
     }
 
+    if ($this->configuration['autocreate'] && $this->configuration['reference_by'] === $this->getLabelKey()) {
+      return $this->createEntity($value);
+    }
+
     return FALSE;
+  }
+
+  protected function createEntity($value) {
+    if (!strlen(trim($value))) {
+      return FALSE;
+    }
+
+    $bundles = $this->getBundles();
+
+    $entity = $this->entityManager->getStorage($this->getEntityType())->create([
+      $this->getLabelKey() => $value,
+      $this->getBundleKey() => reset($bundles),
+    ]);
+    $entity->save();
+
+    return $entity->id();
   }
 
   /**
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return ['reference_by' => NULL];
+    return [
+      'reference_by' => $this->getLabelKey(),
+      'autocreate' => FALSE,
+    ];
   }
 
   /**
@@ -159,11 +186,32 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = $this->getPotentialFields();
 
+    // Hack to find out the target delta.
+    foreach ($form_state->getValues() as $key => $value) {
+      if (strpos($key, 'target-settings-') === 0) {
+        list(, , $delta) = explode('-', $key);
+        break;
+      }
+    }
+
     $form['reference_by'] = [
       '#type' => 'select',
       '#title' => $this->t('Reference by'),
       '#options' => $options,
       '#default_value' => $this->configuration['reference_by'],
+    ];
+
+    $form['autocreate'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Autocreate entity'),
+      '#default_value' => $this->configuration['autocreate'],
+      '#states' => [
+        'visible' => [
+          ':input[name="mappings[' . $delta . '][settings][reference_by]"]' => [
+            'value' => $this->getLabelKey(),
+          ],
+        ],
+      ],
     ];
 
     return $form;
@@ -174,11 +222,22 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    */
   public function getSummary() {
     $options = $this->getPotentialFields();
+
+    $summary = [];
+
     if ($this->configuration['reference_by'] && isset($options[$this->configuration['reference_by']])) {
-      $options = $this->getPotentialFields();
-      return $this->t('Reference by: %message', ['%message' => $options[$this->configuration['reference_by']]]);
+      $summary[] = $this->t('Reference by: %message', ['%message' => $options[$this->configuration['reference_by']]]);
     }
-    return $this->t('Please select a field to reference by.');
+    else {
+      $summary[] = $this->t('Please select a field to reference by.');
+    }
+
+    if ($this->configuration['reference_by'] === $this->getLabelKey()) {
+      $create = $this->configuration['autocreate'] ? $this->t('Yes') : $this->t('No');
+      $summary[] = $this->t('Autocreate terms: %create', ['%create' => $create]);
+    }
+
+    return implode('<br>', $summary);
   }
 
 }

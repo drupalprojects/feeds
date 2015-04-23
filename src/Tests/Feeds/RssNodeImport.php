@@ -54,6 +54,13 @@ class RssNodeImport extends WebTestBase {
       'field_name' => 'field_tags',
       'entity_type' => 'node',
       'bundle' => 'article',
+      'settings' => [
+        'handler_settings' => [
+          'target_bundles' => [
+            'tags' => 'tags',
+          ],
+        ],
+      ],
     ])->save();
 
     $web_user = $this->drupalCreateUser(['administer feeds', 'bypass node access']);

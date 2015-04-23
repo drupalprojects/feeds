@@ -27,6 +27,10 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
   }
 
+  public function test() {
+    $this->assertTrue(TRUE);
+  }
+
   // public function testExpire() {
   //   $this->feed
   //     ->expects($this->exactly(2))
