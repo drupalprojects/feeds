@@ -187,9 +187,8 @@ class RssNodeImport extends WebTestBase {
     // Cron should import some nodes.
     // Clear the download cache so that the http fetcher doesn't trick us.
     \Drupal::cache('feeds_download')->deleteAll();
-    $this->cronRun(); // Run cron twice for testbot.
+    sleep(1);
     $this->cronRun();
-
     $feed = $this->reloadFeed($feed->id());
 
     $this->assertEqual($feed->getItemCount(), 6);
@@ -199,6 +198,7 @@ class RssNodeImport extends WebTestBase {
 
     // Nothing should change on this cron run.
     \Drupal::cache('feeds_download')->deleteAll();
+    sleep(1);
     $this->cronRun();
     $feed = $this->reloadFeed($feed->id());
 
@@ -208,6 +208,7 @@ class RssNodeImport extends WebTestBase {
 
     // Check that items import normally.
     \Drupal::cache('feeds_download')->deleteAll();
+    sleep(1);
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $feed = $this->reloadFeed($feed->id());
 
