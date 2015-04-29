@@ -66,6 +66,13 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * {@inheritdoc}
    */
   protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
+    // Only reference content entities. Configuration entities will need custom
+    // targets.
+    $type = $field_definition->getSetting('target_type');
+    if (!\Drupal::entityManager()->getDefinition($type)->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface')) {
+      return;
+    }
+
     return FieldTargetDefinition::createFromFieldDefinition($field_definition)
       ->addProperty('target_id');
   }

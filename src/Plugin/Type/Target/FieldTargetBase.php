@@ -53,9 +53,10 @@ abstract class FieldTargetBase extends TargetBase {
         continue;
       }
       if (in_array($field_definition->getType(), $definition['field_types'])) {
-        $target = static::prepareTarget($field_definition);
-        $target->setPluginId($definition['id']);
-        $targets[$id] = $target;
+        if ($target = static::prepareTarget($field_definition)) {
+          $target->setPluginId($definition['id']);
+          $targets[$id] = $target;
+        }
       }
     }
   }
