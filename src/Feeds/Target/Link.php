@@ -27,7 +27,7 @@ class Link extends FieldTargetBase {
    */
   protected static function prepareTarget(FieldDefinitionInterface $field_definition) {
     return FieldTargetDefinition::createFromFieldDefinition($field_definition)
-      ->addProperty('url')
+      ->addProperty('uri')
       ->addProperty('title');
   }
 
@@ -35,10 +35,10 @@ class Link extends FieldTargetBase {
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $values['url'] = trim($values['url']);
+    $values['uri'] = trim($values['uri']);
 
-    if (!UrlHelper::isValid($values['url'], TRUE)) {
-      $values['url'] = '';
+    if (!UrlHelper::isValid($values['uri'], TRUE)) {
+      $values['uri'] = '';
     }
   }
 

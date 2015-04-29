@@ -26,13 +26,13 @@ class LinkTest extends FeedsUnitTestCase {
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
-    $values = ['url' => 'string'];
+    $values = ['uri' => 'string'];
     $method(0, $values);
-    $this->assertSame($values['url'], '');
+    $this->assertSame($values['uri'], '');
 
-    $values = ['url' => 'http://example.com'];
+    $values = ['uri' => 'http://example.com'];
     $method(0, $values);
-    $this->assertSame($values['url'], 'http://example.com');
+    $this->assertSame($values['uri'], 'http://example.com');
   }
 
   // public function testPrepareTarget() {
