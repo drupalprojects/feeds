@@ -30,7 +30,7 @@ class FeedTypeForm extends EntityForm {
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $feed_typeStorage;
+  protected $feedTypeStorage;
 
   /**
    * Constructs an FeedTypeForm object.
