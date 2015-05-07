@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Result;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * The default fetcher result object.
@@ -55,11 +55,11 @@ class FetcherResult implements FetcherResultInterface {
    */
   protected function checkFile() {
     if (!file_exists($this->filePath)) {
-      throw new \RuntimeException(String::format('File %filepath does not exist.', ['%filepath' => $this->filePath]));
+      throw new \RuntimeException(SafeMarkup::format('File %filepath does not exist.', ['%filepath' => $this->filePath]));
     }
 
     if (!is_readable($this->filePath)) {
-      throw new \RuntimeException(String::format('File %filepath is not readable.', ['%filepath' => $this->filePath]));
+      throw new \RuntimeException(SafeMarkup::format('File %filepath is not readable.', ['%filepath' => $this->filePath]));
     }
   }
 
@@ -107,7 +107,7 @@ class FetcherResult implements FetcherResultInterface {
     }
 
     if (!is_writable($this->filePath)) {
-      throw new \RuntimeException(String::format('File %filepath is not writable.', ['%filepath' => $this->filePath]));
+      throw new \RuntimeException(SafeMarkup::format('File %filepath is not writable.', ['%filepath' => $this->filePath]));
     }
 
     $contents = file_get_contents($this->filePath);

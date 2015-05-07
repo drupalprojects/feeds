@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Controller;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\feeds\FeedInterface;
@@ -71,12 +71,12 @@ class ItemListController extends ControllerBase {
       $row[] = $this->t('@time ago', ['@time' => $ago]);
       // Item GUID.
       $row[] = [
-        'data' => String::checkPlain(Unicode::truncate($entity->get('feeds_item')->guid, 30, FALSE, TRUE)),
+        'data' => SafeMarkup::checkPlain(Unicode::truncate($entity->get('feeds_item')->guid, 30, FALSE, TRUE)),
         'title' => $entity->get('feeds_item')->guid,
       ];
       // Item URL.
       $row[] = [
-        'data' => String::checkPlain(Unicode::truncate($entity->get('feeds_item')->url, 30, FALSE, TRUE)),
+        'data' => SafeMarkup::checkPlain(Unicode::truncate($entity->get('feeds_item')->url, 30, FALSE, TRUE)),
         'title' => $entity->get('feeds_item')->url,
       ];
 

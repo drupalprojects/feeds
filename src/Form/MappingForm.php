@@ -9,7 +9,7 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedTypeInterface;
@@ -165,7 +165,7 @@ class MappingForm extends FormBase {
         '#attributes' => ['class' => ['feeds-table-select-list']],
       ];
 
-      $label = String::checkPlain($this->targets[$mapping['target']]->getLabel());
+      $label = SafeMarkup::checkPlain($this->targets[$mapping['target']]->getLabel());
 
       if (count($mapping['map']) > 1) {
         $label .= ': ' . $this->targets[$mapping['target']]->getPropertyLabel($column);

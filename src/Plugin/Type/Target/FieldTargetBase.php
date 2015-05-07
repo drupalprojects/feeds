@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Plugin\Type\Target;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\feeds\Exception\EmptyFeedException;

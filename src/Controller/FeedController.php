@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Controller;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\feeds\FeedInterface;
@@ -56,7 +56,7 @@ class FeedController extends ControllerBase {
       }
       $build['#rows'][] = [
         $this->l($feed_type->label(), new Url('feeds.add', ['feeds_feed_type' => $feed_type->id()])),
-        String::checkPlain($feed_type->getDescription()),
+        SafeMarkup::checkPlain($feed_type->getDescription()),
       ];
     }
 

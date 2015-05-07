@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Form;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -117,7 +117,7 @@ class DeleteMultiple extends ConfirmFormBase {
     $form['feeds'] = [
       '#theme' => 'item_list',
       '#items' => array_map(function ($feed) {
-        return String::checkPlain($feed->label());
+        return SafeMarkup::checkPlain($feed->label());
       }, $this->feeds),
     ];
     return parent::buildForm($form, $form_state);

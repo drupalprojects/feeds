@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Feeds\Fetcher\Form;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
@@ -92,7 +92,7 @@ class DirectoryFetcherForm extends ExternalPluginFormBase {
   protected function getSchemeOptions() {
     $options = [];
     foreach ($this->streamWrapperManager->getDescriptions(StreamWrapperInterface::WRITE_VISIBLE) as $scheme => $description) {
-      $options[$scheme] = String::checkPlain($scheme . ': ' . $description);
+      $options[$scheme] = SafeMarkup::checkPlain($scheme . ': ' . $description);
     }
     return $options;
   }

@@ -135,7 +135,6 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
 
 namespace {
   use Drupal\Core\Session\AccountInterface;
-  use Drupal\Component\Utility\String;
 
   if (!function_exists('drupal_set_message')) {
     function drupal_set_message() {}

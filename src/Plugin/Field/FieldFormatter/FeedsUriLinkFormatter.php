@@ -7,7 +7,7 @@
 
 namespace Drupal\feeds\Plugin\Field\FieldFormatter;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\UriLinkFormatter;
 use Drupal\Core\Url;
@@ -46,7 +46,7 @@ class FeedsUriLinkFormatter extends UriLinkFormatter {
       }
       else {
         $elements[$delta] = [
-          '#markup' => String::checkPlain($item->value),
+          '#markup' => SafeMarkup::checkPlain($item->value),
         ];
       }
     }

@@ -10,7 +10,7 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Enclosure element, can be part of the result array.
@@ -74,7 +74,7 @@ class FeedsEnclosure {
         '%url' => $this->uri,
         '@code' => $response->getStatusCode(),
       ];
-      throw new \RuntimeException(String::format('Download of %url failed with code @code.', $args));
+      throw new \RuntimeException(SafeMarkup::format('Download of %url failed with code @code.', $args));
     }
 
     return $response->getBody(TRUE);
@@ -149,13 +149,13 @@ class FeedsEnclosure {
         $file = file_save_data($this->getContent(), $destination . $filename, $replace);
       }
       catch (\Exception $e) {
-        watchdog_exception('Feeds', $e, nl2br(String::checkPlain($e)));
+        watchdog_exception('Feeds', $e, nl2br(SafeMarkup::checkPlain($e)));
       }
     }
 
     // We couldn't make sense of this enclosure, throw an exception.
     if (!$file) {
-      throw new \RuntimeException(String::format('Invalid enclosure %enclosure', ['%enclosure' => $this->uri]));
+      throw new \RuntimeException(SafeMarkup::format('Invalid enclosure %enclosure', ['%enclosure' => $this->uri]));
     }
 
     return $file;

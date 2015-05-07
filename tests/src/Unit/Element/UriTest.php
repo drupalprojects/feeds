@@ -53,11 +53,11 @@ class UriTest extends FeedsUnitTestCase {
 }
 
 namespace {
-  use Drupal\Component\Utility\String;
+  use Drupal\Component\Utility\SafeMarkup;
 
   if (!function_exists('t')) {
     function t($string, array $args = []) {
-      return String::format($string, $args);
+      return SafeMarkup::format($string, $args);
     }
   }
 
