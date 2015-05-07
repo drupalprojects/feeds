@@ -116,7 +116,8 @@ class FeedListBuilder extends EntityListBuilder {
       $operations['import'] = [
         'title' => $this->t('Import'),
         'weight' => 1,
-      ] + $entity->urlInfo('import-form')->toArray();
+        'url' => $entity->urlInfo('import-form'),
+      ];
     }
 
     $destination = drupal_get_destination();
