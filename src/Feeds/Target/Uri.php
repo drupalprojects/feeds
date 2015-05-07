@@ -18,7 +18,7 @@ use Drupal\feeds\FieldTargetDefinition;
  *   field_types = {"uri"}
  * )
  */
-class Uri extends String {
+class Uri extends StringTarget {
 
   /**
    * {@inheritdoc}

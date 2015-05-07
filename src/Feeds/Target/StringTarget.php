@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\feeds\Feeds\Target\String.
+ * Contains \Drupal\feeds\Feeds\Target\StringTarget.
  */
 
 namespace Drupal\feeds\Feeds\Target;
@@ -24,7 +24,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  *   }
  * )
  */
-class String extends FieldTargetBase {
+class StringTarget extends FieldTargetBase {
 
   /**
    * {@inheritdoc}

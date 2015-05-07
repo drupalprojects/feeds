@@ -27,7 +27,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   arguments = {"@current_user"}
  * )
  */
-class Text extends String implements ConfigurableTargetInterface {
+class Text extends StringTarget implements ConfigurableTargetInterface {
 
   /**
    * The current user.

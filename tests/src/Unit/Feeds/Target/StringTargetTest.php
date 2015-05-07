@@ -2,21 +2,21 @@
 
 /**
  * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Target\StringTest.
+ * Contains \Drupal\Tests\feeds\Unit\Feeds\Target\StringTargetTest.
  */
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
-use Drupal\feeds\Feeds\Target\String;
+use Drupal\feeds\Feeds\Target\StringTarget;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * @covers \Drupal\feeds\Feeds\Target\String
+ * @covers \Drupal\feeds\Feeds\Target\StringTarget
  */
-class StringTest extends FeedsUnitTestCase {
+class StringTargetTest extends FeedsUnitTestCase {
 
   public function testPrepareValue() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\String', 'prepareTarget')->getClosure();
+    $method = $this->getMethod('Drupal\feeds\Feeds\Target\StringTarget', 'prepareTarget')->getClosure();
     $field_definition = $this->getMockFieldDefinition(['max_length' => 5]);
     $field_definition->expects($this->any())
       ->method('getType')
@@ -25,7 +25,7 @@ class StringTest extends FeedsUnitTestCase {
       'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
       'target_definition' =>  $method($field_definition),
     ];
-    $target = new String($configuration, 'link', []);
+    $target = new StringTarget($configuration, 'link', []);
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
 
