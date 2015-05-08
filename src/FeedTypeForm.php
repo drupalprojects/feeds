@@ -7,6 +7,7 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
@@ -290,19 +291,30 @@ class FeedTypeForm extends EntityForm {
    * Sends an ajax response.
    */
   public function ajaxCallback(array $form, FormStateInterface $form_state) {
+    $renderer = \Drupal::service('renderer');
     $type = $form_state->getTriggeringElement()['#plugin_type'];
 
     $response = new AjaxResponse();
 
+    // Set URL hash so that the correct settings tab is open.
     if (isset($form[$type . '_configuration']['#id'])) {
       $hash = ltrim($form[$type . '_configuration']['#id'], '#');
       $response->addCommand(new SetHashCommand($hash));
     }
-    $response->addCommand(new ReplaceCommand('#feeds-ajax-form-wrapper', drupal_render($form['plugin_settings'])));
-    $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', drupal_render($form[$type . '_wrapper']['advanced'])));
 
+    // Update the forms.
+    $plugin_settings = $renderer->renderRoot($form['plugin_settings']);
+    $advanced_settings = $renderer->renderRoot($form[$type . '_wrapper']['advanced']);
+    $response->addCommand(new ReplaceCommand('#feeds-ajax-form-wrapper', $plugin_settings));
+    $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', $advanced_settings));
+
+    // Add attachments.
+    $attachments = NestedArray::mergeDeep($form['plugin_settings']['#attached'], $form[$type . '_wrapper']['advanced']['#attached']);
+    $response->setAttachments($attachments);
+
+    // Display status messages.
     $status_messages = array('#type' => 'status_messages');
-    $output = \Drupal::service('renderer')->renderRoot($status_messages);
+    $output = $renderer->renderRoot($status_messages);
     if (!empty($output)) {
       $response->addCommand(new HtmlCommand('.region-messages', $output));
     }
