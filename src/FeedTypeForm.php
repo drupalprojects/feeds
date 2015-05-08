@@ -187,7 +187,7 @@ class FeedTypeForm extends EntityForm {
         $form[$type . '_wrapper']['id']['#disabled'] = $plugin->isLocked();
       }
 
-      $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
+      $plugin_state = $this->createSubFormState($type . '_configuration', $form_state);
 
       // This is the small form that appears under the select box.
       if ($plugin instanceof AdvancedFormPluginInterface) {
@@ -215,7 +215,7 @@ class FeedTypeForm extends EntityForm {
       }
     }
 
-    $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
+    $form_state->setValue($type . '_configuration', $plugin_state->getValues());
 
     return parent::form($form, $form_state);
   }
@@ -263,9 +263,9 @@ class FeedTypeForm extends EntityForm {
     }
 
     foreach ($this->getConfigurablePlugins() as $type => $plugin) {
-      $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
+      $plugin_state = $this->createSubFormState($type . '_configuration', $form_state);
       $plugin->validateConfigurationForm($form[$type . '_configuration'], $plugin_state);
-      $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
+      $form_state->setValue($type . '_configuration', $plugin_state->getValues());
 
       $this->moveFormStateErrors($plugin_state, $form_state);
     }
@@ -279,9 +279,9 @@ class FeedTypeForm extends EntityForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     foreach ($this->getConfigurablePlugins() as $type => $plugin) {
-      $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
+      $plugin_state = $this->createSubFormState($type . '_configuration', $form_state);
       $plugin->submitConfigurationForm($form[$type . '_configuration'], $plugin_state);
-      $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
+      $form_state->setValue($type . '_configuration', $plugin_state->getValues());
     }
 
     parent::submitForm($form, $form_state);
@@ -315,17 +315,29 @@ class FeedTypeForm extends EntityForm {
   }
 
   /**
+   * Creates a FormStateInterface object for a plugin.
+   *
+   * @param string|array $key
+   *   The form state key.
+   * @param FormStateInterface $form_state
+   *   The form state to copy values from.
+   *
+   * @return FormStateInterface
+   *   A new form state object.
+   *
+   * @see FormStateInterface::getValue()
+   */
+  protected function createSubFormState($key, FormStateInterface $form_state) {
+    // There might turn out to be other things that need to be copied and passed
+    // into plugins. This works for now.
+    return (new FormState())->setValues($form_state->getValue($key, []));
+  }
+
+  /**
    * Moves form state errors from one form state to another.
    */
   protected function moveFormStateErrors(FormStateInterface $from, FormStateInterface $to) {
     foreach ($from->getErrors() as $name => $error) {
-      // Remove duplicate error messages.
-      foreach ($_SESSION['messages']['error'] as $delta => $message) {
-        if ($message['message'] === $error) {
-          unset($_SESSION['messages']['error'][$delta]);
-          break;
-        }
-      }
       $to->setErrorByName($name, $error);
     }
   }
