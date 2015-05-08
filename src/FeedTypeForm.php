@@ -8,6 +8,7 @@
 namespace Drupal\feeds;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Config\Entity\ConfigEntityStorageInterface;
 use Drupal\Core\Entity\EntityForm;
@@ -299,6 +300,12 @@ class FeedTypeForm extends EntityForm {
     }
     $response->addCommand(new ReplaceCommand('#feeds-ajax-form-wrapper', drupal_render($form['plugin_settings'])));
     $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', drupal_render($form[$type . '_wrapper']['advanced'])));
+
+    $status_messages = array('#type' => 'status_messages');
+    $output = \Drupal::service('renderer')->renderRoot($status_messages);
+    if (!empty($output)) {
+      $response->addCommand(new HtmlCommand('.region-messages', $output));
+    }
 
     return $response;
   }
