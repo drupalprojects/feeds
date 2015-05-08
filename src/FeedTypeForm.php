@@ -138,17 +138,6 @@ class FeedTypeForm extends EntityForm {
       '#default_value' => $this->entity->getImportPeriod(),
     ];
 
-    // If this is an ajax requst, updating the plugins on the feed type will give
-    // us the updated form.
-    if (!empty($values)) {
-      if ($values['processor'] !== $this->entity->getProcessor()->getPluginId()) {
-        $this->entity->removeMappings();
-      }
-      foreach (array_keys($this->entity->getPlugins()) as $type) {
-        $this->entity->setPlugin($type, $values[$type]);
-      }
-    }
-
     foreach ($this->entity->getPlugins() as $type => $plugin) {
       $options = $this->entity->getPluginOptionsList($type);
 

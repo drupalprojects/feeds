@@ -80,16 +80,6 @@ interface FeedTypeInterface extends ConfigEntityInterface {
   public function getProcessor();
 
   /**
-   * Sets a plugin.
-   *
-   * @param string $plugin_type
-   *   The type of plugin being set.
-   * @param string $plugin_id
-   *   A id of the plugin being set.
-   */
-  public function setPlugin($plugin_type, $plugin_id);
-
-  /**
    * Returns the mappings for this feed type.
    *
    * @return array

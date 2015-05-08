@@ -175,6 +175,17 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
   /**
    * {@inheritdoc}
    */
+  public function set($property_name, $value) {
+    // Remove mappings when processor changes.
+    if ($property_name === 'processor' && $this->processor !== $value) {
+      $this->removeMappings();
+    }
+    return parent::set($property_name, $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDescription() {
     return $this->description;
   }
@@ -398,6 +409,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
    */
   public function getPluginCollections() {
     if (!isset($this->pluginCollection)) {
+      $this->pluginCollection = [];
       foreach ($this->pluginTypes as $type) {
         $this->pluginCollection[$type . '_configuration'] = new FeedsSingleLazyPluginCollection(
           \Drupal::service("plugin.manager.feeds.$type"),
@@ -409,15 +421,6 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
     }
 
     return $this->pluginCollection;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setPlugin($plugin_type, $plugin_id) {
-    $bags = $this->getPluginCollections();
-    $this->$plugin_type = $plugin_id;
-    $bags[$plugin_type . '_configuration']->addInstanceID($plugin_id);
   }
 
   /**
