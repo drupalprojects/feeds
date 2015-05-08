@@ -52,7 +52,7 @@ abstract class ExternalPluginFormBase implements ExternalPluginFormInterface {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Submission is optional.
+    $this->plugin->setConfiguration($form_state->getValues());
   }
 
 }

@@ -266,16 +266,8 @@ class FeedTypeForm extends EntityForm {
       $plugin_state = (new FormState())->setValues($form_state->getValue([$type . '_configuration'], []));
       $plugin->validateConfigurationForm($form[$type . '_configuration'], $plugin_state);
       $form_state->setValue([$type . '_configuration'], $plugin_state->getValues());
-      foreach ($plugin_state->getErrors() as $name => $error) {
-        // Remove duplicate error messages.
-        foreach ($_SESSION['messages']['error'] as $delta => $message) {
-          if ($message['message'] === $error) {
-            unset($_SESSION['messages']['error'][$delta]);
-            break;
-          }
-        }
-        $form_state->setErrorByName($name, $error);
-      }
+
+      $this->moveFormStateErrors($plugin_state, $form_state);
     }
 
     // Build the feed type object from the submitted values.
@@ -320,6 +312,22 @@ class FeedTypeForm extends EntityForm {
     $response->addCommand(new ReplaceCommand('#feeds-plugin-' . $type . '-advanced', drupal_render($form[$type . '_wrapper']['advanced'])));
 
     return $response;
+  }
+
+  /**
+   * Moves form state errors from one form state to another.
+   */
+  protected function moveFormStateErrors(FormStateInterface $from, FormStateInterface $to) {
+    foreach ($from->getErrors() as $name => $error) {
+      // Remove duplicate error messages.
+      foreach ($_SESSION['messages']['error'] as $delta => $message) {
+        if ($message['message'] === $error) {
+          unset($_SESSION['messages']['error'][$delta]);
+          break;
+        }
+      }
+      $to->setErrorByName($name, $error);
+    }
   }
 
 }
