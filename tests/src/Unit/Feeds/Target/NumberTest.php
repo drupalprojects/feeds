@@ -11,7 +11,10 @@ use Drupal\feeds\Feeds\Target\Number;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\Number.
+ *
  * @covers \Drupal\feeds\Feeds\Target\Number
+ * @group Feeds
  */
 class NumberTest extends FeedsUnitTestCase {
 

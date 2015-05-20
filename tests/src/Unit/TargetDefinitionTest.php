@@ -11,6 +11,8 @@ use Drupal\feeds\TargetDefinition;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\TargetDefinition.
+ *
  * @covers \Drupal\feeds\TargetDefinition
  * @group Feeds
  */

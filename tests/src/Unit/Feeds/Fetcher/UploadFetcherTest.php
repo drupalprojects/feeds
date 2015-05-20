@@ -12,6 +12,8 @@ use Drupal\feeds\Feeds\Fetcher\UploadFetcher;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Fetcher\UploadFetcher.
+ *
  * @covers \Drupal\feeds\Feeds\Fetcher\UploadFetcher
  * @group Feeds
  */

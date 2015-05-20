@@ -10,6 +10,8 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Item;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Item\BaseItem.
+ *
  * @covers \Drupal\feeds\Feeds\Item\BaseItem
  * @group Feeds
  */

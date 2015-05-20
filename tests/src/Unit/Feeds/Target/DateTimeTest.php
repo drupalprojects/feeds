@@ -12,7 +12,10 @@ use Drupal\feeds\Feeds\Target\DateTime;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\DateTime.
+ *
  * @covers \Drupal\feeds\Feeds\Target\DateTime
+ * @group Feeds
  */
 class DateTimeTest extends FeedsUnitTestCase {
 

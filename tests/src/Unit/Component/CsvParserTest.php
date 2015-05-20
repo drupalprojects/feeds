@@ -11,6 +11,8 @@ use Drupal\feeds\Component\CsvParser;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Component\CsvParser.
+ *
  * @covers \Drupal\feeds\Component\CsvParser
  * @group Feeds
  */

@@ -11,7 +11,10 @@ use Drupal\feeds\Feeds\Target\Email;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\Email.
+ *
  * @covers \Drupal\feeds\Feeds\Target\Email
+ * @group Feeds
  */
 class EmailTest extends FeedsUnitTestCase {
 

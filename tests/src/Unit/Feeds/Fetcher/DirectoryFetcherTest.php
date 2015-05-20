@@ -14,6 +14,8 @@ use Drupal\feeds\State;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Fetcher\DirectoryFetcher.
+ *
  * @covers \Drupal\feeds\Feeds\Fetcher\DirectoryFetcher
  * @group Feeds
  */

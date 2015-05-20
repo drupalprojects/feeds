@@ -12,6 +12,8 @@ use Drupal\feeds\Element\Uri;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Element\Uri.
+ *
  * @covers \Drupal\feeds\Element\Uri
  * @group Feeds
  */

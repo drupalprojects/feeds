@@ -13,7 +13,10 @@ use Drupal\feeds\Feeds\Target\File;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\File.
+ *
  * @covers \Drupal\feeds\Feeds\Target\File
+ * @group Feeds
  */
 class FileTest extends FeedsUnitTestCase {
 

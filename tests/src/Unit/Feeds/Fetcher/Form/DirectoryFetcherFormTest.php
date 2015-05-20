@@ -14,6 +14,8 @@ use Drupal\feeds\Feeds\Fetcher\Form\DirectoryFetcherForm;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Fetcher\Form\DirectoryFetcherForm.
+ *
  * @covers \Drupal\feeds\Feeds\Fetcher\Form\DirectoryFetcherForm
  * @group Feeds
  */

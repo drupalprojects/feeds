@@ -11,6 +11,8 @@ use Drupal\feeds\Event\FetchEvent;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Event\FetchEvent.
+ *
  * @covers \Drupal\feeds\Event\FetchEvent
  * @group Feeds
  */

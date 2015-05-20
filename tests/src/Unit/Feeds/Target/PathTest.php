@@ -11,7 +11,10 @@ use Drupal\feeds\Feeds\Target\Path;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\Path.
+ *
  * @covers \Drupal\feeds\Feeds\Target\Path
+ * @group Feeds
  */
 class PathTest extends FeedsUnitTestCase {
 

@@ -12,6 +12,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
+ * Tests \Symfony\Component\EventDispatcher\EventDispatcher.
+ *
  * @covers \Drupal\feeds\Event\EventDispatcherTrait
  * @group Feeds
  */

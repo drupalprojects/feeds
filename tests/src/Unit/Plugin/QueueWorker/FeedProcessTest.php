@@ -18,6 +18,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
+ * Tests \Drupal\feeds\Plugin\QueueWorker\FeedProcess.
+ *
  * @covers \Drupal\feeds\Plugin\QueueWorker\FeedProcess
  * @group Feeds
  */

@@ -12,7 +12,10 @@ use Drupal\feeds\Feeds\Target\Timestamp;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\Timestamp.
+ *
  * @covers \Drupal\feeds\Feeds\Target\Timestamp
+ * @group Feeds
  */
 class TimestampTest extends FeedsUnitTestCase {
 

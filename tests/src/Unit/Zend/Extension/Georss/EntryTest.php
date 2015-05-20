@@ -11,6 +11,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\Zend\Extension\Georss\Entry;
 
 /**
+ * Tests \Drupal\feeds\Zend\Extension\Georss\Entry.
+ *
  * @covers \Drupal\feeds\Zend\Extension\Georss\Entry
  * @group Feeds
  */

@@ -8,6 +8,8 @@
 namespace Drupal\Tests\feeds\Unit;
 
 /**
+ * Tests \Drupal\feeds\FeedTypeAccessControlHandler.
+ *
  * @covers \Drupal\feeds\FeedTypeAccessControlHandler
  * @group Feeds
  */

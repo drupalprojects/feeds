@@ -16,6 +16,8 @@ use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Subscriber\Mock;
 
 /**
+ * Tests \Drupal\feeds\Plugin\QueueWorker\PushSubscribe.
+ *
  * @covers \Drupal\feeds\Plugin\QueueWorker\PushSubscribe
  * @group Feeds
  */

@@ -11,7 +11,10 @@ use Drupal\feeds\Feeds\Target\Uri;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\Uri.
+ *
  * @covers \Drupal\feeds\Feeds\Target\Uri
+ * @group Feeds
  */
 class UriTest extends FeedsUnitTestCase {
 

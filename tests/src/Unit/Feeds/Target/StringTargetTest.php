@@ -11,7 +11,10 @@ use Drupal\feeds\Feeds\Target\StringTarget;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Feeds\Target\StringTarget.
+ *
  * @covers \Drupal\feeds\Feeds\Target\StringTarget
+ * @group Feeds
  */
 class StringTargetTest extends FeedsUnitTestCase {
 

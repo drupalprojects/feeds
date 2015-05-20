@@ -17,6 +17,8 @@ use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
+ * Tests \Drupal\feeds\FeedImportHandler.
+ *
  * @covers \Drupal\feeds\FeedImportHandler
  * @group Feeds
  */

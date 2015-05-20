@@ -10,6 +10,8 @@ namespace Drupal\Tests\feeds\Unit\Event;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Event\EventBase.
+ *
  * @covers \Drupal\feeds\Event\EventBase
  * @group Feeds
  */

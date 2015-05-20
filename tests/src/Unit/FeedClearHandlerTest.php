@@ -14,6 +14,8 @@ use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
+ * Tests \Drupal\feeds\FeedClearHandler.
+ *
  * @covers \Drupal\feeds\FeedClearHandler
  * @group Feeds
  */

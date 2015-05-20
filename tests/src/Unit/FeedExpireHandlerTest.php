@@ -12,6 +12,8 @@ use Drupal\feeds\FeedExpireHandler;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
+ * Tests \Drupal\feeds\FeedExpireHandler.
+ *
  * @covers \Drupal\feeds\FeedExpireHandler
  * @group Feeds
  */

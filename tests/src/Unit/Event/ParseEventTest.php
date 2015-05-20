@@ -11,6 +11,8 @@ use Drupal\feeds\Event\ParseEvent;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Event\ParseEvent.
+ *
  * @covers \Drupal\feeds\Event\ParseEvent
  * @group Feeds
  */

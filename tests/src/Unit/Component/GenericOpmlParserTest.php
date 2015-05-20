@@ -11,6 +11,8 @@ use Drupal\feeds\Component\GenericOpmlParser;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Component\GenericOpmlParser.
+ *
  * @covers \Drupal\feeds\Component\GenericOpmlParser
  * @group Feeds
  */

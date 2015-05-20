@@ -14,6 +14,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
+ * Tests \Drupal\feeds\Plugin\QueueWorker\FeedQueueWorkerBase.
+ *
  * @covers \Drupal\feeds\Plugin\QueueWorker\FeedQueueWorkerBase
  * @group Feeds
  */

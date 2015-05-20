@@ -11,6 +11,8 @@ use Drupal\feeds\Event\ProcessEvent;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
+ * Tests \Drupal\feeds\Event\ProcessEvent.
+ *
  * @covers \Drupal\feeds\Event\ProcessEvent
  * @group Feeds
  */
