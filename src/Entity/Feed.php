@@ -9,14 +9,15 @@ namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
-use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\State;
@@ -71,6 +72,8 @@ use Drupal\user\UserInterface;
  * )
  */
 class Feed extends ContentEntityBase implements FeedInterface {
+
+  use EntityChangedTrait;
 
   /**
    * An array of import stage states keyed by state.
