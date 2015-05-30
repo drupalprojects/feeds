@@ -20,6 +20,47 @@ class FeedsResult {}
 abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInterface {
 
   /**
+   * The plugin definition.
+   *
+   * @var array
+   */
+  protected $pluginDefinition;
+
+  /**
+   * Constructs a FeedsPlugin object.
+   *
+   * @param string $id
+   *   The plugin id.
+   * @param array $plugin_definition
+   *   The plugin definition.
+   */
+  protected function __construct($id, array $plugin_definition) {
+    $this->pluginDefinition = $plugin_definition;
+    parent::__construct($id);
+  }
+
+  /**
+   * Instantiates a FeedsPlugin object.
+   *
+   * Don't use directly, use feeds_plugin() instead.
+   *
+   * @see feeds_plugin()
+   */
+  public static function instance($class, $id, array $plugin_definition = array()) {
+    if (!strlen($id)) {
+      throw new InvalidArgumentException(t('Empty configuration identifier.'));
+    }
+
+    static $instances = array();
+
+    if (!isset($instances[$class][$id])) {
+      $instances[$class][$id] = new $class($id, $plugin_definition);
+    }
+
+    return $instances[$class][$id];
+  }
+
+  /**
    * Returns the type of plugin.
    *
    * @return string
@@ -36,9 +77,7 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    * @see ctools_get_plugins()
    */
   public function pluginDefinition() {
-    $importer = feeds_importer($this->id);
-    $plugin_key = $importer->config[$this->pluginType()]['plugin_key'];
-    return ctools_get_plugins('feeds', 'plugins', $plugin_key);
+    return $this->pluginDefinition;
   }
 
   /**

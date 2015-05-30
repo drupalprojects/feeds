@@ -1011,22 +1011,21 @@ function feeds_source($importer_id, $feed_nid = 0) {
 /**
  * Gets an instance of a class for a given plugin and id.
  *
- * @param $plugin
+ * @param string $plugin
  *   A string that is the key of the plugin to load.
- * @param $id
+ * @param string $id
  *   A string that is the id of the object.
  *
- * @return
+ * @return FeedsPlugin
  *   A FeedsPlugin object.
- *
- * @throws Exception
- *   If plugin can't be instantiated.
  */
 function feeds_plugin($plugin, $id) {
   ctools_include('plugins');
+
   if ($class = ctools_plugin_load_class('feeds', 'plugins', $plugin, 'handler')) {
-    return FeedsConfigurable::instance($class, $id);
+    return FeedsPlugin::instance($class, $id, ctools_get_plugins('feeds', 'plugins', $plugin));
   }
+
   $args = array('%plugin' => $plugin, '@id' => $id);
   if (user_access('administer feeds')) {
     $args['@link'] = url('admin/structure/feeds/' . $id);
@@ -1035,8 +1034,10 @@ function feeds_plugin($plugin, $id) {
   else {
     drupal_set_message(t('Missing Feeds plugin %plugin. Please contact your site administrator.', $args), 'warning', FALSE);
   }
+
   $class = ctools_plugin_load_class('feeds', 'plugins', 'FeedsMissingPlugin', 'handler');
-  return FeedsConfigurable::instance($class, $id);
+
+  return FeedsPlugin::instance($class, $id);
 }
 
 /**
