@@ -315,7 +315,8 @@ function feeds_ui_edit_page(FeedsImporter $importer, $active = 'help', $plugin_k
       break;
 
     case 'mapping':
-      $active_container['title'] = t('Mapping for !processor', array('!processor' => $plugins[$config['processor']['plugin_key']]['name']));
+      $processor_name = isset($plugins[$config['processor']['plugin_key']]['name']) ? $plugins[$config['processor']['plugin_key']]['name'] : $plugins['FeedsMissingPlugin']['name'];
+      $active_container['title'] = t('Mapping for @processor', array('@processor' => $processor_name));
       $active_container['body'] = drupal_get_form('feeds_ui_mapping_form', $importer);
       break;
   }
@@ -349,7 +350,7 @@ function feeds_ui_edit_page(FeedsImporter $importer, $active = 'help', $plugin_k
   $config_info[] = $info;
 
   // Fetcher.
-  $fetcher = $plugins[$config['fetcher']['plugin_key']];
+  $fetcher = isset($plugins[$config['fetcher']['plugin_key']]) ? $plugins[$config['fetcher']['plugin_key']] : $plugins['FeedsMissingPlugin'];
   $actions = array();
   if ($importer->fetcher->hasConfigForm()) {
     $actions = array(l(t('Settings'), $path . '/settings/' . $config['fetcher']['plugin_key']));
@@ -366,7 +367,7 @@ function feeds_ui_edit_page(FeedsImporter $importer, $active = 'help', $plugin_k
   $config_info[] = $info;
 
   // Parser.
-  $parser = $plugins[$config['parser']['plugin_key']];
+  $parser = isset($plugins[$config['parser']['plugin_key']]) ? $plugins[$config['parser']['plugin_key']] : $plugins['FeedsMissingPlugin'];
   $actions = array();
   if ($importer->parser->hasConfigForm()) {
     $actions = array(l(t('Settings'), $path . '/settings/' . $config['parser']['plugin_key']));
@@ -383,7 +384,7 @@ function feeds_ui_edit_page(FeedsImporter $importer, $active = 'help', $plugin_k
   $config_info[] = $info;
 
   // Processor.
-  $processor = $plugins[$config['processor']['plugin_key']];
+  $processor = isset($plugins[$config['processor']['plugin_key']]) ? $plugins[$config['processor']['plugin_key']] : $plugins['FeedsMissingPlugin'];
   $actions = array();
   if ($importer->processor->hasConfigForm()) {
     $actions[] = l(t('Settings'), $path . '/settings/' . $config['processor']['plugin_key']);
