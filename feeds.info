@@ -14,7 +14,6 @@ files[] = libraries/PuSHSubscriber.inc
 
 ; Plugins
 files[] = plugins/FeedsCSVParser.inc
-files[] = plugins/FeedsEntityProcessor.inc
 files[] = plugins/FeedsFetcher.inc
 files[] = plugins/FeedsFileFetcher.inc
 files[] = plugins/FeedsHTTPFetcher.inc
@@ -48,7 +47,6 @@ files[] = tests/feeds_mapper_format_config.test
 files[] = tests/feeds_fetcher_http.test
 files[] = tests/feeds_parser_sitemap.test
 files[] = tests/feeds_parser_syndication.test
-files[] = tests/feeds_processor_entity.test
 files[] = tests/feeds_processor_node.test
 files[] = tests/feeds_processor_term.test
 files[] = tests/feeds_processor_user.test
