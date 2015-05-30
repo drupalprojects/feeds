@@ -104,6 +104,12 @@ function taxonomy_feeds_set_target($source, $entity, $target, array $terms, $map
     }
   }
 
+  // Some kind of configuration issue. Perhaps the vocabulary was deleted.
+  // Nothing we can do about it.
+  if (empty($cache['allowed_vocabularies'][$target])) {
+    return;
+  }
+
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'taxonomy_term')
     ->entityCondition('bundle', $cache['allowed_vocabularies'][$target])
