@@ -29,14 +29,16 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   /**
    * Constructs a FeedsPlugin object.
    *
+   * A copy of FeedsConfigurable::__construct() that doesn't call
+   * configDefaults() so that we avoid circular dependencies.
+   *
    * @param string $id
-   *   The plugin id.
-   * @param array $plugin_definition
-   *   The plugin definition.
+   *   The importer id.
    */
-  protected function __construct($id, array $plugin_definition) {
-    $this->pluginDefinition = $plugin_definition;
-    parent::__construct($id);
+  protected function __construct($id) {
+    $this->id = $id;
+    $this->export_type = FEEDS_EXPORT_NONE;
+    $this->disabled = FALSE;
   }
 
   /**
@@ -54,7 +56,13 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
     static $instances = array();
 
     if (!isset($instances[$class][$id])) {
-      $instances[$class][$id] = new $class($id, $plugin_definition);
+      $instance = new $class($id);
+
+      // The ordering here is important. The plugin definition should be usable
+      // in getConfig().
+      $instance->setPluginDefinition($plugin_definition);
+      $instance->setConfig($instance->configDefaults());
+      $instances[$class][$id] = $instance;
     }
 
     return $instances[$class][$id];
@@ -78,6 +86,18 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
    */
   public function pluginDefinition() {
     return $this->pluginDefinition;
+  }
+
+  /**
+   * Sets the plugin definition.
+   *
+   * This is protected since we're only using it in FeedsPlugin::instance().
+   *
+   * @param array $plugin_definition
+   *   The plugin definition.
+   */
+  protected function setPluginDefinition(array $plugin_definition) {
+    $this->pluginDefinition = $plugin_definition;
   }
 
   /**
