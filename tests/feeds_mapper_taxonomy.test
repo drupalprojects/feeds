@@ -236,11 +236,13 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_ID,
     );
 
-    taxonomy_feeds_set_target(NULL, $entity, $target, $terms, $mapping);
+    $source = FeedsSource::instance('tmp', 0);
+
+    taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping);
     $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
 
     // Test a second mapping with a bogus term id.
-    taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
+    taxonomy_feeds_set_target($source, $entity, $target, array(1234), $mapping);
     $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
   }
 
@@ -284,14 +286,16 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
       'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_GUID,
     );
 
-    taxonomy_feeds_set_target(NULL, $entity, $target, $guids, $mapping);
+    $source = FeedsSource::instance('tmp', 0);
+
+    taxonomy_feeds_set_target($source, $entity, $target, $guids, $mapping);
     $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
     foreach ($entity->field_tags[LANGUAGE_NONE] as $delta => $values) {
       $this->assertEqual($tids[$delta], $values['tid'], 'Correct term id foud.');
     }
 
     // Test a second mapping with a bogus term id.
-    taxonomy_feeds_set_target(NULL, $entity, $target, array(1234), $mapping);
+    taxonomy_feeds_set_target($source, $entity, $target, array(1234), $mapping);
     $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 10);
     foreach ($entity->field_tags[LANGUAGE_NONE] as $delta => $values) {
       $this->assertEqual($tids[$delta], $values['tid'], 'Correct term id foud.');

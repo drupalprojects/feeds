@@ -7,11 +7,11 @@
  */
 
 /**
- * Implements hook_feeds_processor_targets_alter().
- *
- * @see FeedsNodeProcessor::getMappingTargets()
+ * Implements hook_feeds_processor_targets().
  */
-function file_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
+function file_feeds_processor_targets($entity_type, $bundle_name) {
+  $targets = array();
+
   foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
 
@@ -47,16 +47,14 @@ function file_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_nam
       }
     }
   }
+
+  return $targets;
 }
 
 /**
- * Callback for mapping. Here is where the actual mapping happens.
- *
- * When the callback is invoked, $target contains the name of the field the
- * user has decided to map to and $value contains the value of the feed item
- * element the user has picked as a source.
+ * Callback for mapping file fields.
  */
-function file_feeds_set_target($source, $entity, $target, array $values) {
+function file_feeds_set_target(FeedsSource $source, $entity, $target, array $values) {
   // Add default of uri for backwards compatibility.
   list($field_name, $sub_field) = explode(':', $target . ':uri');
   $info = field_info_field($field_name);

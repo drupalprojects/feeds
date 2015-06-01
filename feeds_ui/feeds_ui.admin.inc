@@ -634,12 +634,10 @@ function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targe
   }
 
   if ($form_state['mapping_settings_edit'] === $i) {
-    // Build the form.
-    if (isset($target['form_callback'])) {
-      $settings_form = call_user_func($target['form_callback'], $mapping, $target, $form, $form_state);
-    }
-    else {
-      $settings_form = array();
+    $settings_form = array();
+
+    foreach ($target['form_callbacks'] as $callback) {
+      $settings_form += $callback($mapping, $target, $form, $form_state);
     }
 
     // Merge in the optional unique form.
@@ -664,12 +662,14 @@ function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targe
   }
   else {
     // Build the summary.
-    if (isset($target['summary_callback'])) {
-      $summary = call_user_func($target['summary_callback'], $mapping, $target, $form, $form_state);
+    $summary = array();
+
+    foreach ($target['summary_callbacks'] as $callback) {
+      $summary[] = $callback($mapping, $target, $form, $form_state);
     }
-    else {
-      $summary = '';
-    }
+
+    // Filter out empty summary values.
+    $summary = implode('<br />', array_filter($summary));
 
     // Append the optional unique summary.
     if ($optional_unique_summary = feeds_ui_mapping_settings_optional_unique_summary($mapping, $target, $form, $form_state)) {

@@ -285,8 +285,8 @@ function hook_feeds_processor_targets_alter(&$targets, $entity_type, $bundle) {
 
       // Specify both summary_callback and form_callback to add a per mapping
       // configuration form.
-      'summary_callback' => 'my_module_summary_callback',
-      'form_callback' => 'my_module_form_callback',
+      'summary_callbacks' => array('my_module_summary_callback'),
+      'form_callbacks' => array('my_module_form_callback'),
     );
     $targets['my_node_field2'] = array(
       'name' => t('My Second custom node field'),
@@ -334,23 +334,23 @@ function my_module_set_target($source, $entity, $target, array $values, $mapping
  * Example of the summary_callback specified in
  * hook_feeds_processor_targets_alter().
  *
- * @param $mapping
+ * @param array $mapping
  *   Associative array of the mapping settings.
- * @param $target
+ * @param string $target
  *   Array of target settings, as defined by the processor or
  *   hook_feeds_processor_targets_alter().
- * @param $form
+ * @param array $form
  *   The whole mapping form.
- * @param $form_state
+ * @param array $form_state
  *   The form state of the mapping form.
  *
- * @return
+ * @return string
  *   Returns, as a string that may contain HTML, the summary to display while
  *   the full form isn't visible.
  *   If the return value is empty, no summary and no option to view the form
  *   will be displayed.
  */
-function my_module_summary_callback($mapping, $target, $form, $form_state) {
+function my_module_summary_callback(array $mapping, $target, array $form, array $form_state) {
   if (empty($mapping['my_setting'])) {
     return t('My setting <strong>not</strong> active');
   }
@@ -365,13 +365,13 @@ function my_module_summary_callback($mapping, $target, $form, $form_state) {
  *
  * The arguments are the same that my_module_summary_callback() gets.
  *
- * @return
+ * @return array
  *   The per mapping configuration form. Once the form is saved, $mapping will
  *   be populated with the form values.
  *
  * @see my_module_summary_callback()
  */
-function my_module_form_callback($mapping, $target, $form, $form_state) {
+function my_module_form_callback(array $mapping, $target, array $form, array $form_state) {
   return array(
     'my_setting' => array(
       '#type' => 'checkbox',
