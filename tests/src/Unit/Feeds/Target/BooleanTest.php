@@ -11,10 +11,8 @@ use Drupal\feeds\Feeds\Target\Boolean;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Target\Boolean.
- *
- * @covers \Drupal\feeds\Feeds\Target\Boolean
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Target\Boolean
+ * @group feeds
  */
 class BooleanTest extends FeedsUnitTestCase {
 

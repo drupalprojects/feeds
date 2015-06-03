@@ -11,10 +11,8 @@ use Drupal\feeds\Result\FetcherResult;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Result\FetcherResult.
- *
- * @covers \Drupal\feeds\Result\FetcherResult
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Result\FetcherResult
+ * @group feeds
  */
 class FetcherResultTest extends FeedsUnitTestCase {
 

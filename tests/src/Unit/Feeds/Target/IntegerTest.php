@@ -11,10 +11,8 @@ use Drupal\feeds\Feeds\Target\Integer;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Target\Integer.
- *
- * @covers \Drupal\feeds\Feeds\Target\Integer
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Target\Integer
+ * @group feeds
  */
 class IntegerTest extends FeedsUnitTestCase {
 

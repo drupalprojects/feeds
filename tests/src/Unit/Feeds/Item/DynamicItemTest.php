@@ -11,10 +11,8 @@ use Drupal\feeds\Feeds\Item\DynamicItem;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Item\DynamicItem.
- *
- * @covers \Drupal\feeds\Feeds\Item\DynamicItem
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Item\DynamicItem
+ * @group feeds
  */
 class DynamicItemTest extends FeedsUnitTestCase {
 

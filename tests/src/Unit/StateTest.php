@@ -11,10 +11,8 @@ use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
 
 /**
- * Tests \Drupal\Core\State\State.
- *
- * @covers \Drupal\feeds\State
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\State
+ * @group feeds
  */
 class StateTest extends FeedsUnitTestCase {
 

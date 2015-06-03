@@ -10,10 +10,8 @@ namespace Drupal\Tests\feeds\Unit\Component;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Component\XmlParserTrait.
- *
- * @covers \Drupal\feeds\Component\XmlParserTrait
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Component\XmlParserTrait
+ * @group feeds
  */
 class XmlParserTraitTest extends FeedsUnitTestCase {
 

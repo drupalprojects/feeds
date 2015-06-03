@@ -20,10 +20,8 @@ use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Subscriber\Mock;
 
 /**
- * Tests \Drupal\feeds\Feeds\Fetcher\HttpFetcher.
- *
- * @covers \Drupal\feeds\Feeds\Fetcher\HttpFetcher
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Fetcher\HttpFetcher
+ * @group feeds
  */
 class HttpFetcherTest extends FeedsUnitTestCase {
 

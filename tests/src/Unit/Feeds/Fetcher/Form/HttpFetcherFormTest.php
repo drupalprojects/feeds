@@ -12,10 +12,8 @@ use Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm.
- *
- * @covers \Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm
+ * @group feeds
  */
 class HttpFetcherFormTest extends FeedsUnitTestCase {
 

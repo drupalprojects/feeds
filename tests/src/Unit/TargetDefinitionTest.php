@@ -11,10 +11,8 @@ use Drupal\feeds\TargetDefinition;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\TargetDefinition.
- *
- * @covers \Drupal\feeds\TargetDefinition
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\TargetDefinition
+ * @group feeds
  */
 class TargetDefinitionTest extends FeedsUnitTestCase {
 

@@ -12,7 +12,7 @@ use Drupal\simpletest\WebTestBase;
 /**
  * Tests module installation and uninstallation.
  *
- * @group Feeds
+ * @group feeds
  */
 class ModuleInstallUninstallWebTest extends WebTestBase {
 

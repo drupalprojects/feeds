@@ -21,10 +21,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Tests \Drupal\feeds\EventSubscriber\LazySubscriber.
- *
- * @covers \Drupal\feeds\EventSubscriber\LazySubscriber
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\EventSubscriber\LazySubscriber
+ * @group feeds
  */
 class LazySubscriberTest extends FeedsUnitTestCase {
 

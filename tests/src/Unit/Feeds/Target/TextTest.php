@@ -13,10 +13,8 @@ use Drupal\feeds\Feeds\Target\Text;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Target\Text.
- *
- * @covers \Drupal\feeds\Feeds\Target\Text
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Target\Text
+ * @group feeds
  */
 class TextTest extends FeedsUnitTestCase {
 

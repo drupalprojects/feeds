@@ -8,10 +8,8 @@
 namespace Drupal\Tests\feeds\Unit;
 
 /**
- * Tests \Drupal\feeds\FeedTypeAccessControlHandler.
- *
- * @covers \Drupal\feeds\FeedTypeAccessControlHandler
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\FeedTypeAccessControlHandler
+ * @group feeds
  */
 class FeedTypeAccessControlHandlerTest extends FeedsUnitTestCase {
 

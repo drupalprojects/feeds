@@ -11,10 +11,8 @@ use Drupal\Core\Language\Language;
 use Drupal\feeds\FeedAccessControlHandler;
 
 /**
- * Tests \Drupal\feeds\FeedAccessControlHandler.
- *
- * @covers \Drupal\feeds\FeedAccessControlHandler
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\FeedAccessControlHandler
+ * @group feeds
  */
 class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
 

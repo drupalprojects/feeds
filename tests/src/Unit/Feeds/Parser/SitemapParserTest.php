@@ -14,10 +14,8 @@ use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Parser\SitemapParser.
- *
- * @covers \Drupal\feeds\Feeds\Parser\SitemapParser
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Parser\SitemapParser
+ * @group feeds
  */
 class SitemapParserTest extends FeedsUnitTestCase {
 

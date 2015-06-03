@@ -11,10 +11,8 @@ use Drupal\feeds\Feeds\Target\Link;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Target\Link.
- *
- * @covers \Drupal\feeds\Feeds\Target\Link
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Target\Link
+ * @group feeds
  */
 class LinkTest extends FeedsUnitTestCase {
 

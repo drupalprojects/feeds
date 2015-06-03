@@ -14,10 +14,8 @@ use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Parser\OpmlParser.
- *
- * @covers \Drupal\feeds\Feeds\Parser\OpmlParser
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Parser\OpmlParser
+ * @group feeds
  */
 class OpmlParserTest extends FeedsUnitTestCase {
 

@@ -15,10 +15,8 @@ use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Parser\CsvParser.
- *
- * @covers \Drupal\feeds\Feeds\Parser\CsvParser
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Parser\CsvParser
+ * @group feeds
  */
 class CsvParserTest extends FeedsUnitTestCase {
 

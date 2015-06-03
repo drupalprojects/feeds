@@ -16,10 +16,8 @@ use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * Tests \Drupal\feeds\Feeds\Parser\SyndicationParser.
- *
- * @covers \Drupal\feeds\Feeds\Parser\SyndicationParser
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Feeds\Parser\SyndicationParser
+ * @group feeds
  */
 class SyndicationParserTest extends FeedsUnitTestCase {
 

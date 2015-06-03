@@ -16,10 +16,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Tests \Drupal\feeds\Plugin\QueueWorker\FeedRefresh.
- *
- * @covers \Drupal\feeds\Plugin\QueueWorker\FeedRefresh
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\Plugin\QueueWorker\FeedRefresh
+ * @group feeds
  */
 class FeedRefreshTest extends FeedsUnitTestCase {
 

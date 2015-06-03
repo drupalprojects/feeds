@@ -10,10 +10,8 @@ namespace Drupal\Tests\feeds\Unit;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 
 /**
- * Tests \Drupal\feeds\FeedHandlerBase.
- *
- * @covers \Drupal\feeds\FeedHandlerBase
- * @group Feeds
+ * @coversDefaultClass \Drupal\feeds\FeedHandlerBase
+ * @group feeds
  */
 class FeedHandlerBaseTest extends FeedsUnitTestCase {
 

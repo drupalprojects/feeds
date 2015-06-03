@@ -21,7 +21,7 @@ use Drupal\taxonomy\Entity\Vocabulary;
 /**
  * Integration test that imports nodes from an RSS feed.
  *
- * @group Feeds
+ * @group feeds
  */
 class RssNodeImport extends WebTestBase {
 
