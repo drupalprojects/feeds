@@ -483,237 +483,13 @@ display:
           timezone: ''
           plugin_id: date
           provider: views
-        import_feed:
-          id: import_feed
+        operations:
+          id: operations
           table: feeds_feed
-          field: import_feed
+          field: operations
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - feeds
-              - feeds
-          label: Import
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          text: ''
-          plugin_id: feeds_feed_link_import
-          provider: feeds
-        clear_feed:
-          id: clear_feed
-          table: feeds_feed
-          field: clear_feed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          dependencies:
-            module:
-              - feeds
-              - feeds
-          label: Clear
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          text: ''
-          plugin_id: feeds_feed_link_clear
-          provider: feeds
-        edit_feed:
-          id: edit_feed
-          table: feeds_feed
-          field: edit_feed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          dependencies:
-            module:
-              - feeds
-              - feeds
-          label: Edit
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          text: ''
-          plugin_id: feeds_feed_link_edit
-          provider: feeds
-        delete_feed:
-          id: delete_feed
-          table: feeds_feed
-          field: delete_feed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          dependencies:
-            module:
-              - feeds
-              - feeds
-          label: Delete
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          text: ''
-          plugin_id: feeds_feed_link_delete
-          provider: feeds
-        dropbutton:
-          id: dropbutton
-          table: views
-          field: dropbutton
-          relationship: none
-          group_type: group
-          admin_label: ''
-          dependencies:
-            module:
-              - views
-              - views
           label: Operations
           exclude: false
           alter:
@@ -733,7 +509,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -755,20 +531,9 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          fields:
-            import_feed: import_feed
-            clear_feed: clear_feed
-            edit_feed: edit_feed
-            delete_feed: delete_feed
-            feeds_feed_bulk_form: '0'
-            title: '0'
-            feed_type: '0'
-            name: '0'
-            status: '0'
-            imported: '0'
           destination: true
-          plugin_id: dropbutton
-          provider: views
+          entity_type: feeds_feed
+          plugin_id: entity_operations
       filters:
         title:
           id: title
@@ -898,6 +663,9 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
+        - 'url.query_args.pagers:0'
+        - 'url.query_args:order'
+        - 'url.query_args:sort'
       cacheable: false
   page_1:
     display_plugin: page
@@ -919,4 +687,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
+        - 'url.query_args.pagers:0'
+        - 'url.query_args:order'
+        - 'url.query_args:sort'
       cacheable: false

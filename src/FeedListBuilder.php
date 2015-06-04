@@ -14,6 +14,7 @@ use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Routing\RedirectDestinationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -31,6 +32,13 @@ class FeedListBuilder extends EntityListBuilder {
   protected $dateFormatter;
 
   /**
+   * The redirect destination service.
+   *
+   * @var \Drupal\Core\Routing\RedirectDestinationInterface
+   */
+  protected $redirectDestination;
+
+  /**
    * Constructs a new FeedListBuilder object.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -39,10 +47,14 @@ class FeedListBuilder extends EntityListBuilder {
    *   The entity storage class.
    * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
    *   The date formatter service.
+   * @param \Drupal\Core\Routing\RedirectDestinationInterface $redirect_destination
+   *   The redirect destination service.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatter $date_formatter) {
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatter $date_formatter, RedirectDestinationInterface $redirect_destination) {
     parent::__construct($entity_type, $storage);
+
     $this->dateFormatter = $date_formatter;
+    $this->redirectDestination = $redirect_destination;
   }
 
   /**
@@ -52,7 +64,8 @@ class FeedListBuilder extends EntityListBuilder {
     return new static(
       $entity_type,
       $container->get('entity.manager')->getStorage($entity_type->id()),
-      $container->get('date.formatter')
+      $container->get('date.formatter'),
+      $container->get('redirect.destination')
     );
   }
 
@@ -91,7 +104,8 @@ class FeedListBuilder extends EntityListBuilder {
     $row['title']['data'] = [
       '#type' => 'link',
       '#title' => $entity->label(),
-    ] + $uri->toRenderArray();
+      '#url' => $uri,
+    ];
 
     $row['type'] = SafeMarkup::checkPlain($entity->getType()->label());
     $row['author']['data'] = [
@@ -103,6 +117,7 @@ class FeedListBuilder extends EntityListBuilder {
     $row['imported'] = $this->dateFormatter->format($entity->getImportedTime(), 'short');
 
     $row['operations']['data'] = $this->buildOperations($entity);
+
     return $row + parent::buildRow($entity);
   }
 
@@ -112,18 +127,30 @@ class FeedListBuilder extends EntityListBuilder {
   protected function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
 
+    $operations['edit']['weight'] = 0;
+
     if ($entity->access('import') && $entity->hasLinkTemplate('import-form')) {
       $operations['import'] = [
         'title' => $this->t('Import'),
-        'weight' => 1,
+        'weight' => 2,
         'url' => $entity->urlInfo('import-form'),
       ];
     }
 
-    $destination = drupal_get_destination();
+    if ($entity->access('clear') && $entity->hasLinkTemplate('clear-form')) {
+      $operations['clear'] = [
+        'title' => $this->t('Delete items'),
+        'weight' => 3,
+        'url' => $entity->urlInfo('clear-form'),
+      ];
+    }
+
+    $destination = $this->redirectDestination->getAsArray();
+
     foreach ($operations as $key => $operation) {
       $operations[$key]['query'] = $destination;
     }
+
     return $operations;
   }
 

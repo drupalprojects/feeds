@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
@@ -32,13 +33,22 @@ class Feed extends FieldPluginBase {
 
     // Don't add the additional fields to groupby
     if (!empty($this->options['link_to_feed'])) {
-      $this->additional_fields['fid'] = ['table' => 'feeds_feed', 'field' => 'fid'];
+      $this->additional_fields['fid'] = [
+        'table' => 'feeds_feed',
+        'field' => 'fid',
+      ];
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['link_to_feed'] = ['default' => isset($this->definition['link_to_feed default']) ? $this->definition['link_to_feed default'] : FALSE];
+    $options['link_to_feed'] = [
+      'default' => !empty($this->definition['link_to_feed default']),
+    ];
+
     return $options;
   }
 
@@ -47,8 +57,8 @@ class Feed extends FieldPluginBase {
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['link_to_feed'] = [
-      '#title' => t('Link this field to the feed'),
-      '#description' => t("Enable to override this field's links."),
+      '#title' => $this->t('Link this field to the original feed'),
+      '#description' => $this->t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_feed']),
     ];
@@ -57,30 +67,30 @@ class Feed extends FieldPluginBase {
   }
 
   /**
-   * Render whatever the data is as a link to the feed.
+   * Prepares link to the feed.
    *
-   * Data should be made XSS safe prior to calling this function.
+   * @param string $data
+   *   The XSS safe string for the link text.
+   * @param \Drupal\views\ResultRow $values
+   *   The values retrieved from a single row of a view's query result.
+   *
+   * @return string
+   *   Returns a string for the link text.
    */
   protected function renderLink($data, ResultRow $values) {
-    if (!empty($this->options['link_to_feed']) && !empty($this->additional_fields['fid'])) {
-      if ($data !== NULL && $data !== '') {
-        $this->options['alter']['make_link'] = TRUE;
-        $this->options['alter']['path'] = 'feed/' . $this->getValue($values, 'fid');
-        if (isset($this->aliases['langcode'])) {
-          $languages = language_list();
-          $langcode = $this->getValue($values, 'langcode');
-          if (isset($languages[$langcode])) {
-            $this->options['alter']['language'] = $languages[$langcode];
-          }
-          else {
-            unset($this->options['alter']['language']);
-          }
-        }
-      }
-      else {
-        $this->options['alter']['make_link'] = FALSE;
-      }
+    $this->options['alter']['make_link'] = FALSE;
+
+    if (empty($this->options['link_to_feed']) || empty($this->additional_fields['fid'])) {
+      return $data;
     }
+
+    if ($data === NULL || $data === '') {
+      return $data;
+    }
+
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['url'] = Url::fromRoute('entity.feeds_feed.canonical', ['feeds_feed' => $this->getValue($values, 'fid')]);
+
     return $data;
   }
 
@@ -88,8 +98,7 @@ class Feed extends FieldPluginBase {
    * {@inheritdoc}
    */
   public function render(ResultRow $values) {
-    $value = $this->getValue($values);
-    return $this->renderLink($this->sanitizeValue($value), $values);
+    return $this->renderLink($this->sanitizeValue($this->getValue($values)), $values);
   }
 
 }
