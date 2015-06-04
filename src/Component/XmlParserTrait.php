@@ -24,21 +24,21 @@ trait XmlParserTrait {
    *
    * @var bool
    */
-  private $_useError;
+  private static $_useError;
 
   /**
    * The previous value of the entity loader.
    *
    * @var bool
    */
-  private $_entityLoader;
+  private static $_entityLoader;
 
   /**
    * The errors reported during parsing.
    *
    * @var array
    */
-  private $_errors = [];
+  private static $_errors = [];
 
   /**
    * Returns a new DOMDocument.
@@ -56,8 +56,8 @@ trait XmlParserTrait {
    * @throws \RuntimeException
    *   Thrown if the document fails to load.
    */
-  protected function getDomDocument($source, $options = 0) {
-    $this->startXmlErrorHandling();
+  protected static function getDomDocument($source, $options = 0) {
+    static::startXmlErrorHandling();
 
     $document = new \DOMDocument('1.0', 'utf-8');
     $document->strictErrorChecking = FALSE;
@@ -70,7 +70,7 @@ trait XmlParserTrait {
     $options = $options | defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0;
 
     $document->loadXML($source, $options);
-    $this->stopXmlErrorHandling();
+    static::stopXmlErrorHandling();
 
     return $document;
   }
@@ -78,26 +78,26 @@ trait XmlParserTrait {
   /**
    * Starts custom error handling.
    */
-  protected function startXmlErrorHandling() {
-    $this->_useError = libxml_use_internal_errors(TRUE);
-    $this->_entityLoader = libxml_disable_entity_loader(TRUE);
+  protected static function startXmlErrorHandling() {
+    static::$_useError = libxml_use_internal_errors(TRUE);
+    static::$_entityLoader = libxml_disable_entity_loader(TRUE);
     libxml_clear_errors();
   }
 
   /**
    * Stops custom error handling.
    */
-  protected function stopXmlErrorHandling() {
+  protected static function stopXmlErrorHandling() {
     foreach (libxml_get_errors() as $error) {
-      $this->_errors[$error->level][] = [
+      static::$_errors[$error->level][] = [
         'message' => trim($error->message),
         'line' => $error->line,
         'code' => $error->code,
       ];
     }
     libxml_clear_errors();
-    libxml_use_internal_errors($this->_useError);
-    libxml_disable_entity_loader($this->_entityLoader);
+    libxml_use_internal_errors(static::$_useError);
+    libxml_disable_entity_loader(static::$_entityLoader);
   }
 
   /**
@@ -108,8 +108,8 @@ trait XmlParserTrait {
    *
    * @see libxml_get_errors()
    */
-  protected function getXmlErrors() {
-    return $this->_errors;
+  protected static function getXmlErrors() {
+    return static::$_errors;
   }
 
   /**
@@ -121,7 +121,7 @@ trait XmlParserTrait {
    * @return string
    *   The XML string with the default namespaces removed.
    */
-  protected function removeDefaultNamespaces($xml) {
+  protected static function removeDefaultNamespaces($xml) {
     return preg_replace('/(<' . static::$_elementRegex . '[^>]*)\s+xmlns\s*=\s*("|\').*?(\2)([^>]*>)/u', '$1$4', $xml);
   }
 

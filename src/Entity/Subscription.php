@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -34,7 +35,6 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
     $this->validateState();
     $this->set('state', 'subscribing');
     $this->save();
-    \Drupal::queue('feeds_push_subscribe')->createItem($this);
   }
 
   /**
@@ -42,13 +42,14 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
    */
   public function unsubscribe() {
     $this->validateState();
+
     switch ($this->getState()) {
       case 'subscribed':
       case 'subscribing':
         $this->set('state', 'unsubscribing');
-        \Drupal::queue('feeds_push_subscribe')->createItem($this);
         break;
     }
+
     $this->delete();
   }
 
@@ -124,7 +125,11 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
    *   Thrown if the state of the subscription is invalid.
    */
   protected function validateState() {
-    if ($this->validate()) {
+    if (!$this->getSecret()) {
+      $this->set('secret', substr(Crypt::randomBytesBase64(55), 0, 43));
+    }
+
+    if ($this->validate()->has(0)) {
       throw new \LogicException('The subscription is invalid.');
     }
   }

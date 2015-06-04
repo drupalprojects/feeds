@@ -7,6 +7,8 @@
 
 namespace Drupal\feeds\Controller;
 
+use Drupal\Component\Utility\SafeMarkup;
+use Drupal\feeds\Entity\Feed;
 use Drupal\feeds\Entity\Subscription;
 use Drupal\feeds\SubscriptionInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,17 +36,21 @@ class SubscriptionController {
    */
   public function subscribe($feeds_subscription_id, Request $request) {
     // This is an invalid request.
-    if ($request->query->get('hub.challenge') === NULL) {
+    if ($request->query->get('hub_challenge') === NULL) {
+      throw new NotFoundHttpException();
+    }
+
+    if ($request->query->get('hub_topic') === NULL) {
       throw new NotFoundHttpException();
     }
 
     // A subscribe request.
-    if ($request->query->get('hub.mode') === 'subscribe') {
+    if ($request->query->get('hub_mode') === 'subscribe') {
       return $this->handleSubscribe((int) $feeds_subscription_id, $request);
     }
 
     // An unsubscribe request.
-    if ($request->query->get('hub.mode') === 'unsubscribe') {
+    if ($request->query->get('hub_mode') === 'unsubscribe') {
       return $this->handleUnsubscribe((int) $feeds_subscription_id, $request);
     }
 
@@ -71,7 +77,7 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
-    if ($request->query->get('hub.topic') !== $subscription->getTopic()) {
+    if ($request->query->get('hub_topic') !== $subscription->getTopic()) {
       throw new NotFoundHttpException();
     }
 
@@ -79,14 +85,14 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
-    if ($lease_time = $request->query->get('hub.lease_seconds')) {
+    if ($lease_time = $request->query->get('hub_lease_seconds')) {
       $subscription->setLease($lease_time);
     }
 
     $subscription->setState('subscribed');
     $subscription->save();
 
-    return new Response($request->query->get('hub.challenge'), 200);
+    return new Response(SafeMarkup::checkPlain($request->query->get('hub_challenge')), 200);
   }
 
   /**
@@ -105,14 +111,16 @@ class SubscriptionController {
    */
   protected function handleUnsubscribe($subscription_id, Request $request) {
     // The subscription id already deleted, but waiting in the keyvalue store.
-    $subscription = \Drupal::keyValueExpirable('feeds_push_unsubscribe')->get($subscription_id);
+    $id = sha1($request->query->get('hub_topic')) . ':' . $subscription_id;
+    $subscription = \Drupal::keyValueExpirable('feeds_push_unsubscribe')->get($id);
+
     if (!$subscription) {
       throw new NotFoundHttpException();
     }
 
-    \Drupal::keyValueExpirable('feeds_push_unsubscribe')->delete($subscription_id);
+    \Drupal::keyValueExpirable('feeds_push_unsubscribe')->delete($id);
 
-    return new Response($request->query->get('hub.challenge'), 200);
+    return new Response(SafeMarkup::checkPlain($request->query->get('hub_challenge')), 200);
   }
 
   /**
@@ -134,19 +142,23 @@ class SubscriptionController {
       throw new NotFoundHttpException();
     }
 
+    // X-Hub-Signature is in the format sha1=signature.
     $result = [];
     parse_str($sig, $result);
     if (empty($result['sha1'])) {
       throw new NotFoundHttpException();
     }
+
     $raw = file_get_contents('php://input');
 
     if (!$feeds_subscription->checkSignature($result['sha1'], $raw)) {
       throw new NotFoundHttpException();
     }
 
+    $feed = Feed::load($feeds_subscription->id());
+
     try {
-      $feeds_feed->pushImport($raw);
+      $feed->pushImport($raw);
       return new Response('', 200);
     }
     catch (\Exception $e) {

@@ -1,21 +1,47 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\feeds\Component\HttpHelpers.
+ */
+
 namespace Drupal\feeds\Component;
 
+use Drupal\feeds\Component\XmlParserTrait;
+
+/**
+ * Various helpers for dealing with HTTP data.
+ *
+ * @todo Move this some place else and split it up.
+ */
 class HttpHelpers {
 
-  public static function findLinkHeader(array $headers, $rel) {
+  use XmlParserTrait;
+
+  /**
+   * Finds a relation type in a header array.
+   *
+   * @param array $headers
+   *   The header array.
+   * @param string $relation
+   *   The type of relation to find.
+   *
+   * @return string|false The link, or false.
+   */
+  public static function findLinkHeader(array $headers, $relation) {
     $headers = array_change_key_case($headers);
 
     if (!isset($headers['link'])) {
-      return;
+      return FALSE;
     }
 
     foreach ((array) $headers['link'] as $link) {
-      if ($link = static::parseLink($link, $rel)) {
+      if ($link = static::parseLinkRelation($link, $relation)) {
         return $link;
       }
     }
+
+    return FALSE;
   }
 
   /**
@@ -23,26 +49,64 @@ class HttpHelpers {
    *
    * @param string $link_header
    *   The full link header string.
-   * @param string $rel
+   * @param string $relation
    *   The relationship to find.
    *
    * @return string
    *   The link, or an empty string if one wasn't found.
    */
-  public static function parseLink($link_header, $rel) {
-    if (preg_match('/^<(.*?)>;.*?rel=(\'|")' . $rel . '\2/i', trim($link_header), $matches)) {
-      return trim($matches[1]);
+  public static function parseLinkRelation($link_header, $relation) {
+    if (!preg_match_all('/<([^>]*)>\s*;.*?rel\s*=(.+?)(?:;|$)/is', trim($link_header), $matches)) {
+      return '';
+    }
+
+    foreach ($matches[2] as $delta => $match) {
+      $match = trim($match);
+
+      // Strip quotes if present.
+      $len = strlen($match);
+      if ($match[0] === '"' && $match[$len - 1] === '"') {
+        $match = substr($match, 1, $len - 2);
+      }
+
+      // Normalize whitespace.
+      preg_replace('/\s+/s', ' ', trim($match));
+
+      if (in_array($relation, explode(' ', $match), TRUE)) {
+        return $matches[1][$delta];
+      }
     }
 
     return '';
   }
 
-  public static function findHubFromXml($xml) {
-    Reader::setExtensionManager(\Drupal::service('feed.bridge.reader'));
-    $channel = Reader::importString($xml);
+  /**
+   * Finds a link relation in XML.
+   *
+   * @param string $xml
+   *   The XML.
+   * @param string $relation
+   *   The relation to find.
+   *
+   * @return string|false The relation, or false.
+   */
+  public static function findRelationFromXml($xml, $relation) {
+    // Check if $xml has length.
+    if (!isset($xml[0])) {
+      return FALSE;
+    }
 
-    $hubs = $channel->getHubs();
-    return $hubs ? reset($hubs) : NULL;
+    $document = static::getDomDocument($xml);
+
+    $xpath = new \DOMXPath($document);
+
+    $list = $xpath->query('//*[local-name() = "link" and @rel = "' . $relation . '"]/@href');
+
+    if ($list->length === 0) {
+      return FALSE;
+    }
+
+    return $list->item(0)->value;
   }
 
 }

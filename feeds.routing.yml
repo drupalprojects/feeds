@@ -116,7 +116,7 @@ entity.feeds_feed.subscribe:
     _controller: 'feeds.subscription.controller:subscribe'
   requirements:
     _access: 'TRUE'
-    feeds_subscription_id: \d+
+    $feeds_subscription_id: \d+
     _method: 'GET'
 
 # Admin UI routes.
