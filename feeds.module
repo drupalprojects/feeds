@@ -35,6 +35,7 @@ function feeds_hook_info() {
     'feeds_after_save',
     'feeds_after_import',
     'feeds_after_clear',
+    'feeds_processor_targets',
     'feeds_processor_targets_alter',
     'feeds_parser_sources_alter',
   );
@@ -781,6 +782,36 @@ function feeds_system_info_alter(array &$info, $file, $type) {
   }
   else {
     $info['explanation'] = t('Feeds is currently using this module for one or more importers.');
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function feeds_module_implements_alter(array &$implementations, $hook) {
+  if ($hook === 'feeds_processor_targets_alter') {
+    // We need two implementations of this hook, so we add one that gets
+    // called first, and move the normal one to last.
+    $implementations = array('_feeds' => FALSE) + $implementations;
+
+    // Move normal implementation to last.
+    $group = $implementations['feeds'];
+    unset($implementations['feeds']);
+    $implementations['feeds'] = $group;
+  }
+}
+
+/**
+ * Implements hook_feeds_processor_targets_alter().
+ *
+ * @see feeds_feeds_processor_targets()
+ * @see feeds_feeds_processor_targets_alter()
+ */
+function _feeds_feeds_processor_targets_alter(array &$targets, $entity_type, $bundle) {
+  // If hook_feeds_processor_targets() hasn't been called, for instance, by
+  // older processors, invoke it ourself.
+  if (!drupal_static('feeds_feeds_processor_targets', FALSE)) {
+    $targets += module_invoke_all('feeds_processor_targets', $entity_type, $bundle);
   }
 }
 
