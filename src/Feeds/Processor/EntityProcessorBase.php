@@ -407,13 +407,13 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       '#default_value' => $this->configuration['expire'],
     ];
     if ($this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
-      $form['owner_id'] = array(
+      $form['owner_id'] = [
         '#type' => 'entity_autocomplete',
         '#title' => $this->t('Owner'),
         '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', ['%anonymous' => \Drupal::config('user.settings')->get('anonymous')]),
         '#target_type' => 'user',
         '#default_value' => User::load($this->configuration['owner_id']),
-      );
+      ];
     }
     $form['advanced'] = [
       '#title' => $this->t('Advanced settings'),

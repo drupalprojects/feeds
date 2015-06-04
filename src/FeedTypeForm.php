@@ -313,7 +313,7 @@ class FeedTypeForm extends EntityForm {
     $response->setAttachments($attachments);
 
     // Display status messages.
-    $status_messages = array('#type' => 'status_messages');
+    $status_messages = ['#type' => 'status_messages'];
     $output = $renderer->renderRoot($status_messages);
     if (!empty($output)) {
       $response->addCommand(new HtmlCommand('.region-messages', $output));

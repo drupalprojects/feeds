@@ -363,7 +363,7 @@ class MappingForm extends FormBase {
    * Page title callback.
    */
   public function mappingTitle(FeedTypeInterface $feeds_feed_type) {
-    return $this->t('Mappings @label', array('@label' => $feeds_feed_type->label()));
+    return $this->t('Mappings @label', ['@label' => $feeds_feed_type->label()]);
   }
 
 }

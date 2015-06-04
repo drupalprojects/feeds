@@ -19,7 +19,7 @@ class ModuleInstallUninstallWebTest extends WebTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = array('feeds');
+  public static $modules = ['feeds'];
 
   /**
    * Test installation and uninstallation.
@@ -32,7 +32,7 @@ class ModuleInstallUninstallWebTest extends WebTestBase {
 
     // @todo Test default configuration.
 
-    $module_installer->uninstall(array('feeds'));
+    $module_installer->uninstall(['feeds']);
     $this->assertFalse($module_handler->moduleExists('feeds'));
   }
 }
