@@ -762,6 +762,17 @@ function feeds_system_info_alter(array &$info, $file, $type) {
 
   // Check if any importers are using any plugins from the current module.
   foreach (feeds_importer_load_all(TRUE) as $importer) {
+
+    // Skip importers that are defined in code and are provided by the current
+    // module. This ensures that modules that define both an importer and a
+    // plugin can still be disabled.
+    if ($importer->export_type == EXPORT_IN_CODE) {
+      $configs = ctools_export_load_object('feeds_importer', 'names', array($importer->id));
+      if (isset($configs[$importer->id]) && $configs[$importer->id]->export_module === $file->name) {
+        continue;
+      }
+    }
+
     $configuration = $importer->getConfig();
 
     foreach (array('fetcher', 'parser', 'processor') as $plugin_type) {
@@ -778,10 +789,10 @@ function feeds_system_info_alter(array &$info, $file, $type) {
   }
 
   if (module_exists('feeds_ui') && user_access('administer feeds')) {
-    $info['explanation'] = t('Feeds is currently using this module for one or more <a href="@link">importers</a>.', array('@link' => url('admin/structure/feeds')));
+    $info['explanation'] = t('Feeds is currently using this module for one or more <a href="@link">importers</a>', array('@link' => url('admin/structure/feeds')));
   }
   else {
-    $info['explanation'] = t('Feeds is currently using this module for one or more importers.');
+    $info['explanation'] = t('Feeds is currently using this module for one or more importers');
   }
 }
 
