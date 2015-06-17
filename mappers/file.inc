@@ -111,13 +111,14 @@ function file_feeds_set_target(FeedsSource $source, $entity, $target, array $val
       case 'uri':
         if ($v) {
           try {
+            $v->setAllowedExtensions($instance_info['settings']['file_extensions']);
             $file = $v->getFile($destination);
             $field[LANGUAGE_NONE][$delta] += (array) $file;
             // @todo: Figure out how to properly populate this field.
             $field[LANGUAGE_NONE][$delta]['display'] = 1;
           }
           catch (Exception $e) {
-            watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
+            watchdog('feeds', check_plain($e->getMessage()));
           }
         }
         break;
