@@ -286,7 +286,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
  * Decides if it's possible to use cURL or not.
  *
  * @return bool
- *   TRUE if cURL is available, FALSE otherwise.
+ *   TRUE if cURL may be used, FALSE otherwise.
  */
 function http_request_use_curl() {
   // Allow site administrators to choose to not use cURL.
@@ -294,9 +294,19 @@ function http_request_use_curl() {
     return FALSE;
   }
 
-  // Check availability of cURL on the system.
-  $basedir = ini_get("open_basedir");
-  return function_exists('curl_init') && !ini_get('safe_mode') && empty($basedir);
+  // Check that the PHP cURL extension has been enabled.
+  if (!extension_loaded('curl')) {
+    return FALSE;
+  }
+
+  // cURL below PHP 5.6.0 must not have open_basedir or safe_mode enabled.
+  if (version_compare(PHP_VERSION, '5.6.0', '<')) {
+    return !ini_get('safe_mode') && !ini_get('open_basedir');
+  }
+
+  // cURL in PHP 5.6.0 and above re-enables CURLOPT_FOLLOWLOCATION with
+  // open_basedir so there is no need to check for this.
+  return TRUE;
 }
 
 /**
