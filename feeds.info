@@ -51,6 +51,7 @@ files[] = tests/feeds_parser_syndication.test
 files[] = tests/feeds_processor_node.test
 files[] = tests/feeds_processor_term.test
 files[] = tests/feeds_processor_user.test
+files[] = tests/feeds_push.test
 files[] = tests/feeds_scheduler.test
 files[] = tests/feeds_mapper_link.test
 files[] = tests/feeds_mapper_summary.test
