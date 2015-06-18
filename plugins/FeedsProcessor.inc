@@ -314,6 +314,16 @@ abstract class FeedsProcessor extends FeedsPlugin {
         ),
       );
     }
+    if ($state->blocked) {
+      $messages[] = array(
+        'message' => format_plural(
+          $state->blocked,
+          'Blocked @number @entity.',
+          'Blocked @number @entities.',
+          array('@number' => $state->blocked) + $tokens
+        ),
+      );
+    }
     if ($state->deleted) {
       $messages[] = array(
        'message' => format_plural(
