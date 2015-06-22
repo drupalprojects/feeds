@@ -2,17 +2,14 @@
 
 /**
  * @file
- * Feeds - basic API functions and hook implementations.
+ * Feeds hook implementations.
  */
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\feeds\Entity\Feed;
-use Drupal\feeds\FeedInterface;
-use Drupal\file\Entity\File;
 
 /**
  * Implements hook_help().

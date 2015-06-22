@@ -7,8 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Processor;
 
-use Doctrine\Common\Inflector\Inflector;
-
 /**
  * Defines a node processor.
  *

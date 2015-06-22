@@ -222,7 +222,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
    */
   public function getMappingSources() {
     if ($this->sources === NULL) {
-      $this->sources = (array) $this->getParser()->getMappingSources();
+      $this->sources = $this->getParser()->getMappingSources();
       $definitions = \Drupal::service('plugin.manager.feeds.source')->getDefinitions();
 
       foreach ($definitions as $definition) {

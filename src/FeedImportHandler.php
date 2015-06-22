@@ -233,6 +233,7 @@ class FeedImportHandler extends FeedHandlerBase {
     $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'fetch'));
     $fetch_event = $this->dispatchEvent(FeedsEvents::FETCH, new FetchEvent($feed));
     $feed->setState(StateInterface::PARSE, NULL);
+
     return $fetch_event->getFetcherResult();
   }
 
@@ -252,6 +253,7 @@ class FeedImportHandler extends FeedHandlerBase {
 
     $parse_event = $this->dispatchEvent(FeedsEvents::PARSE, new ParseEvent($feed, $fetcher_result));
     $feed->setState(StateInterface::PROCESS, NULL);
+
     return $parse_event->getParserResult();
   }
 
