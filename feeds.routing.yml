@@ -106,18 +106,18 @@ entity.feeds_feed.receive:
   defaults:
     _controller: 'Drupal\feeds\Controller\SubscriptionController::receive'
   requirements:
-    _access: 'TRUE'
+    _access: TRUE
     feeds_subscription: \d+
-    _method: 'POST'
+  methods: [POST]
 
 entity.feeds_feed.subscribe:
   path: '/feed/{feeds_subscription_id}/push_callback'
   defaults:
     _controller: 'Drupal\feeds\Controller\SubscriptionController::subscribe'
   requirements:
-    _access: 'TRUE'
+    _access: TRUE
     feeds_subscription_id: \d+
-    _method: 'GET'
+  methods: [GET]
 
 # Admin UI routes.
 
