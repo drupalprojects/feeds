@@ -1111,10 +1111,11 @@ function feeds_include_library($file, $library) {
 
     $library_dir = variable_get('feeds_library_dir', FALSE);
     $feeds_library_path = DRUPAL_ROOT . '/' . drupal_get_path('module', 'feeds') . "/libraries/$file";
+    $libraries_path = module_exists('libraries') ? libraries_get_path($library) : FALSE;
 
     // Try first whether libraries module is present and load the file from
     // there. If this fails, require the library from the local path.
-    if (module_exists('libraries') && $path = libraries_get_path($library) && is_file("$path/$file")) {
+    if ($libraries_path && is_file("$libraries_path/$file")) {
       require "$path/$file";
       $included[$key] = TRUE;
     }
@@ -1148,18 +1149,16 @@ function feeds_include_library($file, $library) {
  *   libraries module.
  */
 function feeds_library_exists($file, $library) {
-  if (module_exists('libraries') && $path = libraries_get_path($library) && is_file("$path/$file")) {
+  $path = module_exists('libraries') ? libraries_get_path($library) : FALSE;
+  if ($path && is_file($path . '/' . $file)) {
     return TRUE;
   }
-
   elseif (is_file(DRUPAL_ROOT . "/sites/all/libraries/$library/$file")) {
     return TRUE;
   }
-
   elseif (is_file(DRUPAL_ROOT . '/' . drupal_get_path('module', 'feeds') . "/libraries/$file")) {
     return TRUE;
   }
-
   elseif ($library_dir = variable_get('feeds_library_dir', FALSE)) {
     if (is_file("$library_dir/$library/$file")) {
       return TRUE;
