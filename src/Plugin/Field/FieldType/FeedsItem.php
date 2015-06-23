@@ -85,10 +85,11 @@ class FeedsItem extends EntityReferenceItem {
         ],
         'hash' => [
           'type' => 'varchar',
-          // The length of an MD5 hash.
+          // The length of an md5 hash.
           'length' => 32,
           'not null' => TRUE,
           'description' => 'The hash of the feed item.',
+          'is_ascii' => TRUE,
         ],
       ],
       'indexes' => [

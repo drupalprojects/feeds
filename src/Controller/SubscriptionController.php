@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Returns responses for PuSH module routes.
  */
-class SubscriptionController implements ContainerInjectionInterface {
+class SubscriptionController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
    * The key value expirable factory.
