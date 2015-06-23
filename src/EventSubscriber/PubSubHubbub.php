@@ -160,7 +160,7 @@ class PubSubHubbub implements EventSubscriberInterface {
         $mode = 'unsubscribe';
         // The subscription has been deleted, store it for a bit to handle the
         // response.
-        $id = substr(hash('sha512', $subscription->getTopic()), 0, 64) . ':' . $subscription->id();
+        $id = $subscription->getToken() . ':' . $subscription->id();
         \Drupal::keyValueExpirable('feeds_push_unsubscribe')->setWithExpire($id, $subscription, 3600);
         break;
 
@@ -168,7 +168,11 @@ class PubSubHubbub implements EventSubscriberInterface {
         throw new \LogicException('A subscription was found in an invalid state.');
     }
 
-    $callback = \Drupal::url('entity.feeds_feed.subscribe', ['feeds_subscription_id' => $subscription->id()], ['absolute' => TRUE]);
+    $args = [
+      'feeds_subscription_id' => $subscription->id(),
+      'feeds_push_token' => $subscription->getToken(),
+    ];
+    $callback = \Drupal::url('entity.feeds_feed.subscribe', $args, ['absolute' => TRUE]);
 
     $post_body = [
       'hub.callback' => $callback,

@@ -32,7 +32,6 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
    * {@inheritdoc}
    */
   public function subscribe() {
-    $this->validateState();
     $this->set('state', 'subscribing');
     $this->save();
   }
@@ -56,6 +55,13 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
   /**
    * {@inheritdoc}
    */
+  public function getHub() {
+    return $this->get('hub')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSecret() {
     return $this->get('secret')->value;
   }
@@ -70,8 +76,8 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getHub() {
-    return $this->get('hub')->value;
+  public function getToken() {
+    return $this->get('token')->value;
   }
 
   /**
@@ -125,11 +131,10 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
    *   Thrown if the state of the subscription is invalid.
    */
   protected function validateState() {
-    if (!$this->getSecret()) {
-      $this->set('secret', substr(Crypt::randomBytesBase64(55), 0, 43));
-    }
+    $this->ensureSecret();
+    $this->ensureToken();
 
-    if ($this->validate()->has(0)) {
+    if ($this->validate()->count()) {
       throw new \LogicException('The subscription is invalid.');
     }
   }
@@ -138,8 +143,28 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
+    parent::preSave($storage_controller, $update);
+
+    $this->ensureSecret();
+    $this->ensureToken();
+    $this->validateState();
+  }
+
+  /**
+   * Ensures that this subscription has a valid secret.
+   */
+  protected function ensureSecret() {
     if (!$this->getSecret()) {
-      $this->set('secret', substr(Crypt::randomBytesBase64(55), 0, 43));
+      $this->set('secret', substr(Crypt::randomBytesBase64(32), 0, 32));
+    }
+  }
+
+  /**
+   * Ensures that this subscription has a valid token.
+   */
+  protected function ensureToken() {
+    if (!$this->getToken()) {
+      $this->set('token', substr(Crypt::randomBytesBase64(20), 0, 20));
     }
   }
 
@@ -153,7 +178,6 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       ->setLabel(t('Feed ID'))
       ->setDescription(t('The feed ID.'))
       ->setReadOnly(TRUE)
-      ->setRequired(TRUE)
       ->setSetting('unsigned', TRUE);
 
     $fields['topic'] = BaseFieldDefinition::create('uri')
@@ -166,8 +190,7 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       ->setLabel(t('Hub'))
       ->setDescription(t('The fully-qualified URL of the PuSH hub.'))
       ->setReadOnly(TRUE)
-      ->setRequired(TRUE)
-      ->setDefaultValue('');
+      ->setRequired(TRUE);
 
     $fields['lease'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Lease time'))
@@ -182,13 +205,23 @@ class Subscription extends ContentEntityBase implements SubscriptionInterface {
       ->setDescription(t('The secret used to verify a request.'))
       ->setReadOnly(TRUE)
       ->setRequired(TRUE)
-      ->setSetting('max_length', 43);
+      ->setSetting('is_ascii', TRUE)
+      ->setSetting('max_length', 32);
+
+    $fields['token'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Token'))
+      ->setDescription(t('The token used as part of the URL.'))
+      ->setReadOnly(TRUE)
+      ->setRequired(TRUE)
+      ->setSetting('is_ascii', TRUE)
+      ->setSetting('max_length', 20);
 
     $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State'))
       ->setDescription(t('The state of the subscription.'))
-      ->setSetting('max_length', 64)
       ->setRequired(TRUE)
+      ->setSetting('is_ascii', TRUE)
+      ->setSetting('max_length', 32)
       ->setDefaultValue('unsubscribed');
 
     return $fields;

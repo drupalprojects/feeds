@@ -15,11 +15,15 @@ interface SubscriptionInterface extends ContentEntityInterface {
 
   public function unsubscribe();
 
-  public function getTopic();
+  public function getExpire();
+
+  public function getHub();
 
   public function getSecret();
 
-  public function getHub();
+  public function getTopic();
+
+  public function getToken();
 
   public function getState();
 
@@ -28,8 +32,6 @@ interface SubscriptionInterface extends ContentEntityInterface {
   public function getLease();
 
   public function setLease($lease);
-
-  public function getExpire();
 
   public function checkSignature($sha1, $data);
 

@@ -56,6 +56,8 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    *
    * @param int $feeds_subscription_id
    *   The subscription entity id.
+   * @param string $feeds_push_token
+   *   The subscription token.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -65,7 +67,7 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown if the subscription was not found, or if the request is invalid.
    */
-  public function subscribe($feeds_subscription_id, Request $request) {
+  public function subscribe($feeds_subscription_id, $feeds_push_token, Request $request) {
     // This is an invalid request.
     if ($request->query->get('hub_challenge') === NULL || $request->query->get('hub_topic') === NULL) {
       throw new NotFoundHttpException();
@@ -73,12 +75,12 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
 
     // A subscribe request.
     if ($request->query->get('hub_mode') === 'subscribe') {
-      return $this->handleSubscribe((int) $feeds_subscription_id, $request);
+      return $this->handleSubscribe((int) $feeds_subscription_id, $feeds_push_token, $request);
     }
 
     // An unsubscribe request.
     if ($request->query->get('hub_mode') === 'unsubscribe') {
-      return $this->handleUnsubscribe((int) $feeds_subscription_id, $request);
+      return $this->handleUnsubscribe((int) $feeds_subscription_id, $feeds_push_token, $request);
     }
 
     // Whatever.
@@ -90,6 +92,8 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    *
    * @param int $subscription_id
    *   The subscription entity id.
+   * @param string $token
+   *   The subscription token.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -99,12 +103,12 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown if anything seems amiss.
    */
-  protected function handleSubscribe($subscription_id, Request $request) {
+  protected function handleSubscribe($subscription_id, $token, Request $request) {
     if (!$subscription = $this->entityManager()->getStorage('feeds_subscription')->load($subscription_id)) {
       throw new NotFoundHttpException();
     }
 
-    if ($request->query->get('hub_topic') !== $subscription->getTopic()) {
+    if ($subscription->getToken() !== $token || $subscription->getTopic() !== $request->query->get('hub_topic')) {
       throw new NotFoundHttpException();
     }
 
@@ -127,6 +131,8 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    *
    * @param int $subscription_id
    *   The subscription entity id.
+   * @param string $token
+   *   The subscription token.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -136,9 +142,9 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown if anything seems amiss.
    */
-  protected function handleUnsubscribe($subscription_id, Request $request) {
+  protected function handleUnsubscribe($subscription_id, $token, Request $request) {
     // The subscription id already deleted, but waiting in the keyvalue store.
-    $id = substr(hash('sha512', $request->query->get('hub_topic')), 0, 64) . ':' . $subscription_id;
+    $id = $token . ':' . $subscription_id;
 
     $subscription = $this->keyValueExpireFactory->get('feeds_push_unsubscribe')->get($id);
 
@@ -156,6 +162,8 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    *
    * @param \Drupal\feeds\SubscriptionInterface $feeds_subscription
    *   The subscription entity.
+   * @param string $feeds_push_token
+   *   The subscription token.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
@@ -165,7 +173,11 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown if anything seems amiss.
    */
-  public function receive(SubscriptionInterface $feeds_subscription, Request $request) {
+  public function receive(SubscriptionInterface $feeds_subscription, $feeds_push_token, Request $request) {
+    if ($feeds_subscription->getToken() !== $feeds_push_token) {
+      throw new NotFoundHttpException();
+    }
+
     // X-Hub-Signature is in the format sha1=signature.
     parse_str($request->headers->get('X-Hub-Signature'), $result);
 
