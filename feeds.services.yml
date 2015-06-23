@@ -19,8 +19,6 @@ services:
     arguments: ['@entity.manager']
     tags:
       - { name: access_check, applies_to: _feeds_feed_add_access }
-  feeds.subscription.controller:
-    class: Drupal\feeds\Controller\SubscriptionController
   feeds.pubsubhubbub:
     class: Drupal\feeds\EventSubscriber\PubSubHubbub
     arguments: ['@entity.manager']

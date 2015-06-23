@@ -104,7 +104,7 @@ entity.feeds_feed.unlock:
 entity.feeds_feed.receive:
   path: '/feed/{feeds_subscription}/push_callback'
   defaults:
-    _controller: 'feeds.subscription.controller:receive'
+    _controller: 'Drupal\feeds\Controller\SubscriptionController::receive'
   requirements:
     _access: 'TRUE'
     feeds_subscription: \d+
@@ -113,10 +113,10 @@ entity.feeds_feed.receive:
 entity.feeds_feed.subscribe:
   path: '/feed/{feeds_subscription_id}/push_callback'
   defaults:
-    _controller: 'feeds.subscription.controller:subscribe'
+    _controller: 'Drupal\feeds\Controller\SubscriptionController::subscribe'
   requirements:
     _access: 'TRUE'
-    $feeds_subscription_id: \d+
+    feeds_subscription_id: \d+
     _method: 'GET'
 
 # Admin UI routes.

@@ -8,9 +8,12 @@
 namespace Drupal\feeds\Controller;
 
 use Drupal\Component\Utility\SafeMarkup;
-use Drupal\feeds\Entity\Feed;
-use Drupal\feeds\Entity\Subscription;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface;
 use Drupal\feeds\SubscriptionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -18,7 +21,35 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Returns responses for PuSH module routes.
  */
-class SubscriptionController {
+class SubscriptionController implements ContainerInjectionInterface {
+
+  /**
+   * The key value expirable factory.
+   *
+   * @var \Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface
+   */
+  protected $keyValueExpireFactory;
+
+  /**
+   * Constructs a SubscriptionController object.
+   *
+   * @param \Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface $key_value_expire_factory
+   *   The key value expirable factory.
+   */
+  public function __construct(KeyValueExpirableFactoryInterface $key_value_expire_factory, EntityManagerInterface $entity_manager) {
+    $this->keyValueExpireFactory = $key_value_expire_factory;
+    $this->entityManager = $entity_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('keyvalue.expirable'),
+      $container->get('entity.manager')
+    );
+  }
 
   /**
    * Handles subscribe/unsubscribe requests.
@@ -36,11 +67,7 @@ class SubscriptionController {
    */
   public function subscribe($feeds_subscription_id, Request $request) {
     // This is an invalid request.
-    if ($request->query->get('hub_challenge') === NULL) {
-      throw new NotFoundHttpException();
-    }
-
-    if ($request->query->get('hub_topic') === NULL) {
+    if ($request->query->get('hub_challenge') === NULL || $request->query->get('hub_topic') === NULL) {
       throw new NotFoundHttpException();
     }
 
@@ -73,7 +100,7 @@ class SubscriptionController {
    *   Thrown if anything seems amiss.
    */
   protected function handleSubscribe($subscription_id, Request $request) {
-    if (!$subscription = Subscription::load($subscription_id)) {
+    if (!$subscription = $this->entityManager()->getStorage('feeds_subscription')->load($subscription_id)) {
       throw new NotFoundHttpException();
     }
 
@@ -111,14 +138,15 @@ class SubscriptionController {
    */
   protected function handleUnsubscribe($subscription_id, Request $request) {
     // The subscription id already deleted, but waiting in the keyvalue store.
-    $id = sha1($request->query->get('hub_topic')) . ':' . $subscription_id;
-    $subscription = \Drupal::keyValueExpirable('feeds_push_unsubscribe')->get($id);
+    $id = substr(hash('sha512', $request->query->get('hub_topic')), 0, 64) . ':' . $subscription_id;
+
+    $subscription = $this->keyValueExpireFactory->get('feeds_push_unsubscribe')->get($id);
 
     if (!$subscription) {
       throw new NotFoundHttpException();
     }
 
-    \Drupal::keyValueExpirable('feeds_push_unsubscribe')->delete($id);
+    $this->keyValueExpireFactory->get('feeds_push_unsubscribe')->delete($id);
 
     return new Response(SafeMarkup::checkPlain($request->query->get('hub_challenge')), 200);
   }
@@ -138,32 +166,23 @@ class SubscriptionController {
    *   Thrown if anything seems amiss.
    */
   public function receive(SubscriptionInterface $feeds_subscription, Request $request) {
-    if (!$sig = $request->headers->get('X-Hub-Signature')) {
-      throw new NotFoundHttpException();
-    }
-
     // X-Hub-Signature is in the format sha1=signature.
-    $result = [];
-    parse_str($sig, $result);
-    if (empty($result['sha1'])) {
+    parse_str($request->headers->get('X-Hub-Signature'), $result);
+
+    if (empty($result['sha1']) || !$feeds_subscription->checkSignature($result['sha1'], $request->getContent())) {
       throw new NotFoundHttpException();
     }
 
-    $raw = file_get_contents('php://input');
-
-    if (!$feeds_subscription->checkSignature($result['sha1'], $raw)) {
-      throw new NotFoundHttpException();
-    }
-
-    $feed = Feed::load($feeds_subscription->id());
+    $feed = $this->entityManager()->getStorage('feeds_feed')->load($feeds_subscription->id());
 
     try {
-      $feed->pushImport($raw);
-      return new Response('', 200);
+      $feed->pushImport($request->getContent());
     }
     catch (\Exception $e) {
       return new Response('', 500);
     }
+
+    return new Response('', 200);
   }
 
 }

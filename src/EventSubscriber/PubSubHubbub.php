@@ -160,7 +160,7 @@ class PubSubHubbub implements EventSubscriberInterface {
         $mode = 'unsubscribe';
         // The subscription has been deleted, store it for a bit to handle the
         // response.
-        $id = sha1($subscription->getTopic()) . ':' . $subscription->id();
+        $id = substr(hash('sha512', $subscription->getTopic()), 0, 64) . ':' . $subscription->id();
         \Drupal::keyValueExpirable('feeds_push_unsubscribe')->setWithExpire($id, $subscription, 3600);
         break;
 
