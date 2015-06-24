@@ -29,7 +29,7 @@ function field_feeds_presave(FeedsSource $source, $entity, $item, $entity_id) {
     $field_name = $instance['field_name'];
 
     // Skip fields that Feeds isn't mapping to, and empty fields.
-    if (!isset($feeds_fields[$field_name]) || empty($entity->$field_name)) {
+    if (!isset($feeds_fields[$field_name]) || empty($entity->$field_name) || !is_array($entity->$field_name)) {
       continue;
     }
 
