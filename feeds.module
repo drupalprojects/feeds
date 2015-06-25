@@ -1116,7 +1116,7 @@ function feeds_include_library($file, $library) {
     // Try first whether libraries module is present and load the file from
     // there. If this fails, require the library from the local path.
     if ($libraries_path && is_file("$libraries_path/$file")) {
-      require "$path/$file";
+      require "$libraries_path/$file";
       $included[$key] = TRUE;
     }
     elseif (is_file(DRUPAL_ROOT . '/sites/all/libraries/' . $key)) {
