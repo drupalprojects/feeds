@@ -315,7 +315,7 @@ class FeedsEnclosure extends FeedsElement {
    */
   public function setAllowedExtensions($extensions) {
     // Normalize whitespace so that empty extensions are not allowed.
-    $this->allowedExtensions = trim(preg_replace('/\s+/', ' ', $extensions));
+    $this->allowedExtensions = drupal_strtolower(trim(preg_replace('/\s+/', ' ', $extensions)));
   }
 
   /**
@@ -371,7 +371,11 @@ class FeedsEnclosure extends FeedsElement {
       return $this->safeFilename;
     }
 
-    $filename = rawurldecode(drupal_basename($this->getValue()));
+    // Strip any query string or fragment from file name.
+    list($filename) = explode('?', $this->getValue());
+    list($filename) = explode('#', $filename);
+
+    $filename = rawurldecode(drupal_basename($filename));
 
     if (module_exists('transliteration')) {
       require_once drupal_get_path('module', 'transliteration') . '/transliteration.inc';
@@ -385,7 +389,7 @@ class FeedsEnclosure extends FeedsElement {
       $extension = FALSE;
     }
     else {
-      $extension = substr($filename, strrpos($filename, '.') + 1);
+      $extension = drupal_strtolower(substr($filename, strrpos($filename, '.') + 1));
     }
 
     if (!$extension || !in_array($extension, explode(' ', $this->allowedExtensions), TRUE)) {

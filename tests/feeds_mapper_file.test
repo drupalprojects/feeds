@@ -267,6 +267,14 @@ class FeedsMapperFileTestCase extends FeedsMapperTestCase {
       $message = t('The file @file has an invalid extension.', array('@file' => $filename));
       $this->assertTrue(db_query("SELECT 1 FROM {watchdog} WHERE message = :message", array(':message' => $message))->fetchField());
     }
+
+    // Test that query string and fragments are removed.
+    $enclosure = new FeedsEnclosure('http://example.com/image.jpg?thing=stuff', 'text/plain');
+    $this->assertEqual($enclosure->getLocalValue(), 'image.jpg');
+    $enclosure = new FeedsEnclosure('http://example.com/image.jpg#stuff', 'text/plain');
+    $this->assertEqual($enclosure->getLocalValue(), 'image.jpg');
+    $enclosure = new FeedsEnclosure('http://example.com/image.JPG?thing=stuff#stuff', 'text/plain');
+    $this->assertEqual($enclosure->getLocalValue(), 'image.JPG');
   }
 
   /**
