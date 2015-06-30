@@ -435,7 +435,7 @@ class FeedsEnclosure extends FeedsElement {
         $file           = new stdClass();
         $file->uid      = 0;
         $file->uri      = $this->getSanitizedUri();
-        $file->filemime = $this->mime_type;
+        $file->filemime = $this->getMIMEType();
         $file->filename = $this->getSafeFilename();
 
         if (drupal_dirname($file->uri) !== $destination) {
