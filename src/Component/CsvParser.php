@@ -71,7 +71,7 @@ class CsvParser implements \Iterator {
    */
   public function __construct($handle) {
     if (!is_resource($handle)) {
-      throw new \InvalidArgumentException('handle must be a resource.');
+      throw new \InvalidArgumentException('$handle must be a resource.');
     }
     $this->handle = $handle;
   }
@@ -86,12 +86,14 @@ class CsvParser implements \Iterator {
    *   A new CsvParser object.
    */
   public static function createFromFilePath($filepath) {
-    if (!file_exists($filepath) || !is_readable($filepath)) {
-      throw new \InvalidArgumentException('Filepath must exist and be readable.');
+    if (!is_file($filepath) || !is_readable($filepath)) {
+      throw new \InvalidArgumentException('$filepath must exist and be readable.');
     }
 
     $previous = ini_set('auto_detect_line_endings', '1');
-    $handle = fopen($filepath, 'r');
+
+    $handle = fopen($filepath, 'rb');
+
     ini_set('auto_detect_line_endings', $previous);
 
     return new static($handle);
@@ -108,11 +110,14 @@ class CsvParser implements \Iterator {
    */
   public static function createFromString($string) {
     $previous = ini_set('auto_detect_line_endings', '1');
-    $handle = fopen('php://temp', 'rw');
+
+    $handle = fopen('php://temp', 'w+b');
+
     ini_set('auto_detect_line_endings', $previous);
 
     fwrite($handle, $string);
     fseek($handle, 0);
+
     return new static($handle);
   }
 
@@ -160,7 +165,7 @@ class CsvParser implements \Iterator {
   public function getHeader() {
     $prev = ftell($this->handle);
 
-    fseek($this->handle, 0);
+    rewind($this->handle);
     $header = $this->parseLine($this->readLine());
     fseek($this->handle, $prev);
 
@@ -236,7 +241,7 @@ class CsvParser implements \Iterator {
    * Implements \Iterator::rewind().
    */
   public function rewind() {
-    fseek($this->handle, 0);
+    rewind($this->handle);
 
     if ($this->hasHeader && !$this->startByte) {
       $this->parseLine($this->readLine());
@@ -288,20 +293,22 @@ class CsvParser implements \Iterator {
     $line_length = strlen($line);
 
     // Traverse the line byte-by-byte.
-    for ($index = 0; $index < $line_length; $index++) {
+    for ($index = 0; $index < $line_length; ++$index) {
       $byte = $line[$index];
       $next_byte = isset($line[$index + 1]) ? $line[$index + 1] : '';
 
+      // Beginning a quoted field.
+      if ($byte === '"' && $field === '' && !$in_quotes) {
+        $in_quotes = TRUE;
+      }
+      elseif ($byte === '"' && $next_byte !== '"' && $in_quotes) {
+        $in_quotes = FALSE;
+      }
       // Found an escaped double quote.
-      if ($byte === '"' && $next_byte === '"') {
+      elseif ($byte === '"' && $next_byte === '"' && $in_quotes) {
         $field .= '"';
         // Skip the next quote.
-        $index++;
-      }
-
-      // Beginning or ending a quoted field.
-      elseif ($byte === '"' && $next_byte !== '"') {
-        $in_quotes = !$in_quotes;
+        ++$index;
       }
 
       // Ending a field.
@@ -312,21 +319,7 @@ class CsvParser implements \Iterator {
 
       // End of this line.
       elseif (!$in_quotes && $next_byte === '') {
-        // Don't save the last newline, but don't use trim to remove all
-        // newlines.
-        if ($byte === "\n") {
-          // Check for windows line ending.
-          $field = substr($field, -1) === "\r" ? substr($field, 0, -1) : $field;
-        }
-        elseif ($byte === "\r") {
-          // Mac line endings.
-        }
-        else {
-          // Line ended without a trailing newline.
-          $field .= $byte;
-        }
-
-        $fields[] = $field;
+        $fields[] = $this->trimNewline($byte, $field);
         $field = '';
       }
       else {
@@ -334,13 +327,42 @@ class CsvParser implements \Iterator {
       }
     }
 
-    // If we're still in quotes after the line is read continue reading on the
+    // If we're still in quotes after the line is read, continue reading on the
     // next line. Check that we're not at the end of a malformed file.
     if ($in_quotes && $line = $this->readLine()) {
       $fields = $this->parseLine($line, $in_quotes, $field, $fields);
     }
 
     return $fields;
+  }
+
+  /**
+   * Removes the trailing line ending.
+   *
+   * This does not call trim() since we only want to remove the last line
+   * ending, not all line endings.
+   *
+   * @param string $last_character
+   *   The last character.
+   * @param string $field
+   *   The current field.
+   *
+   * @return string
+   *   The field with the line ending removed.
+   */
+  protected function trimNewline($last_character, $field) {
+    // Windows line ending.
+    if ($last_character === "\n" && substr($field, -1) === "\r") {
+      return substr($field, 0, -1);
+    }
+
+    // Unix or Mac line ending.
+    if ($last_character === "\n" || $last_character === "\r") {
+      return $field;
+    }
+
+    // Line ended without a trailing newline.
+    return $field . $last_character;
   }
 
 }

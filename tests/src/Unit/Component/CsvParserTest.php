@@ -20,7 +20,7 @@ class CsvParserTest extends FeedsUnitTestCase {
    * @dataProvider provider
    */
   public function testAlternateLineEnding(array $expected, $ending) {
-    $text = file_get_contents(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tests/resources/csv-example.xml');
+    $text = file_get_contents(dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/example.csv');
     $text = str_replace("\r\n", $ending, $text);
 
     $parser = new \LimitIterator(CsvParser::createFromString($text), 0, 4);
@@ -41,8 +41,8 @@ class CsvParserTest extends FeedsUnitTestCase {
     $second = array_slice($expected, 4);
 
     // // Test that rewinding works as expected.
-    $this->assertSame(count(iterator_to_array($parser)), 2);
-    $this->assertSame(count(iterator_to_array($parser)), 2);
+    $this->assertSame(2, count(iterator_to_array($parser)));
+    $this->assertSame(2, count(iterator_to_array($parser)));
     foreach ($parser as $delta => $row) {
       $this->assertSame($second[$delta], $row);
     }
@@ -76,9 +76,8 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   public function testHasHeader() {
-    $file = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/tests/resources/csv-example.xml';
-    $parser = CsvParser::createFromFilePath($file)
-      ->setHasHeader();
+    $file = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/example.csv';
+    $parser = CsvParser::createFromFilePath($file)->setHasHeader();
 
     $this->assertSame(count(iterator_to_array($parser)), 5);
     $this->assertSame(['Header A', 'Header B', 'Header C'], $parser->getHeader());
@@ -102,8 +101,48 @@ class CsvParserTest extends FeedsUnitTestCase {
   /**
    * @expectedException \InvalidArgumentException
    */
-  public function __constructtestInvalidResourcePath() {
+  public function testInvalidResourcePath() {
     new CsvParser('beep boop');
+  }
+
+  /**
+   * @dataProvider csvFileProvider
+   */
+  public function testCsvParsing($file, $expected) {
+    $parser = CsvParser::createFromFilePath($file);
+    $parser->setHasHeader();
+
+    $header = $parser->getHeader();
+
+    $output = [];
+    $test = [];
+    foreach (iterator_to_array($parser) as $row) {
+      $new_row = [];
+      foreach ($row as $key => $value) {
+        if (isset($header[$key])) {
+          $new_row[$header[$key]] = $value;
+        }
+      }
+      $output[] = $new_row;
+    }
+
+    $this->assertSame($expected, $output);
+  }
+
+  public function csvFileProvider() {
+    $path = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csvs';
+    $return = [];
+
+    foreach (glob($path . '/*.csv') as $file) {
+      $json_file = $path . '/json/' . str_replace('.csv', '.json', basename($file));
+
+      $return[] = [
+        $file,
+        json_decode(file_get_contents($json_file), TRUE),
+      ];
+    }
+
+    return $return;
   }
 
 }
