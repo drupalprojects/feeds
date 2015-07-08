@@ -236,7 +236,7 @@ class FeedTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getErrors()) {
       return;
     }
@@ -262,7 +262,7 @@ class FeedTypeForm extends EntityForm {
     }
 
     // Build the feed type object from the submitted values.
-    parent::validate($form, $form_state);
+    parent::validateForm($form, $form_state);
   }
 
   /**
