@@ -5,6 +5,10 @@
  * Contains FeedsProcessor and related classes.
  */
 
+// Insert mode for new items.
+define('FEEDS_SKIP_NEW', 0);
+define('FEEDS_INSERT_NEW', 1);
+
 // Update mode for existing items.
 define('FEEDS_SKIP_EXISTING', 0);
 define('FEEDS_REPLACE_EXISTING', 1);
@@ -183,6 +187,9 @@ abstract class FeedsProcessor extends FeedsPlugin {
       $this->initEntitiesToBeRemoved($source, $state);
     }
 
+    $skip_new = $this->config['insert_new'] == FEEDS_SKIP_NEW;
+    $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
+
     while ($item = $parser_result->shiftItem()) {
 
       // Check if this item already exists.
@@ -191,24 +198,22 @@ abstract class FeedsProcessor extends FeedsPlugin {
       if ($entity_id) {
         unset($state->removeList[$entity_id]);
       }
-      $skip_existing = $this->config['update_existing'] == FEEDS_SKIP_EXISTING;
 
       module_invoke_all('feeds_before_update', $source, $item, $entity_id);
 
-      // If it exists, and we are not updating, pass onto the next item.
-      if ($entity_id && $skip_existing) {
+      // If it exists, and we are not updating, or if it does not exist, and we
+      // are not inserting, pass onto the next item.
+      if (($entity_id && $skip_existing) || (!$entity_id && $skip_new)) {
         continue;
       }
 
       try {
-
         $hash = $this->hash($item);
-        $changed = ($hash !== $this->getHash($entity_id));
-        $force_update = $this->config['skip_hash_check'];
+        $changed = $hash !== $this->getHash($entity_id);
 
         // Do not proceed if the item exists, has not changed, and we're not
         // forcing the update.
-        if ($entity_id && !$changed && !$force_update) {
+        if ($entity_id && !$changed && !$this->config['skip_hash_check']) {
           continue;
         }
 
@@ -770,6 +775,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     }
     return array(
       'mappings' => array(),
+      'insert_new' => FEEDS_INSERT_NEW,
       'update_existing' => FEEDS_SKIP_EXISTING,
       'update_non_existent' => FEEDS_SKIP_NON_EXISTENT,
       'input_format' => NULL,
@@ -802,6 +808,17 @@ abstract class FeedsProcessor extends FeedsPlugin {
     }
 
     $tokens = array('@entities' => strtolower($info['label plural']));
+
+    $form['insert_new'] = array(
+      '#type' => 'radios',
+      '#title' => t('Insert new @entities', $tokens),
+      '#description' => t('New @entities will be determined using mappings that are a "unique target".', $tokens),
+      '#options' => array(
+        FEEDS_INSERT_NEW => t('Insert new @entities', $tokens),
+        FEEDS_SKIP_NEW => t('Do not insert new @entities', $tokens),
+      ),
+      '#default_value' => $this->config['insert_new'],
+    );
 
     $form['update_existing'] = array(
       '#type' => 'radios',
