@@ -362,8 +362,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
   }
 
   /**
-   * Initialize the array of entities to remove with all existing entities
-   * previously imported from the source.
+   * Initializes the list of entities to remove.
+   *
+   * This populates $state->removeList with all existing entities previously
+   * imported from the source.
    *
    * @param FeedsSource $source
    *   Source information about this import.
@@ -372,33 +374,27 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function initEntitiesToBeRemoved(FeedsSource $source, FeedsState $state) {
     $state->removeList = array();
+
     // We fill it only if needed.
-    if (!isset($this->config['update_non_existent']) || $this->config['update_non_existent'] == FEEDS_SKIP_NON_EXISTENT) {
+    if ($this->config['update_non_existent'] == FEEDS_SKIP_NON_EXISTENT) {
       return;
     }
-    // Build base select statement.
-    $info = $this->entityInfo();
-    $id_key = db_escape_field($info['entity keys']['id']);
-    $select = db_select($info['base table'], 'e');
-    $select->addField('e', $info['entity keys']['id'], 'entity_id');
-    $select->join(
-      'feeds_item',
-      'fi',
-      'e.' . $id_key . ' = fi.entity_id AND fi.entity_type = :entity_type', array(
-        ':entity_type' => $this->entityType(),
-    ));
 
-    $select->condition('fi.id', $this->id);
-    $select->condition('fi.feed_nid', $source->feed_nid);
-    // No need to remove item again if same method of removal was already used.
-    $select->condition('fi.hash', $this->config['update_non_existent'], '<>');
-    $entities = $select->execute();
-    // If not found on process, existing entities will be deleted.
-    foreach ($entities as $entity) {
-      // Obviously, items which are still included in the source feed will be
-      // removed from this array when processed.
-      $state->removeList[$entity->entity_id] = $entity->entity_id;
+    // Get the full list of entities for this source.
+    $entity_ids = db_select('feeds_item')
+      ->fields('feeds_item', array('entity_id'))
+      ->condition('entity_type', $this->entityType())
+      ->condition('id', $this->id)
+      ->condition('feed_nid', $source->feed_nid)
+      ->condition('hash', $this->config['update_non_existent'], '<>')
+      ->execute()
+      ->fetchCol();
+
+    if (!$entity_ids) {
+      return;
     }
+
+    $state->removeList = array_combine($entity_ids, $entity_ids);
   }
 
   /**
@@ -411,12 +407,11 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function clean(FeedsState $state) {
     // We clean only if needed.
-    if (!isset($this->config['update_non_existent']) || $this->config['update_non_existent'] == FEEDS_SKIP_NON_EXISTENT) {
+    if ($this->config['update_non_existent'] == FEEDS_SKIP_NON_EXISTENT) {
       return;
     }
 
-    $total = count($state->removeList);
-    if ($total) {
+    if ($total = count($state->removeList)) {
       $this->entityDeleteMultiple($state->removeList);
       $state->deleted += $total;
     }
@@ -437,35 +432,25 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $state = $source->state(FEEDS_PROCESS_CLEAR);
 
     // Build base select statement.
-    $info = $this->entityInfo();
-    $select = db_select($info['base table'], 'e');
-    $select->addField('e', $info['entity keys']['id'], 'entity_id');
-    $select->join(
-      'feeds_item',
-      'fi',
-      "e.{$info['entity keys']['id']} = fi.entity_id AND fi.entity_type = '{$this->entityType()}'");
-    $select->condition('fi.id', $this->id);
-    $select->condition('fi.feed_nid', $source->feed_nid);
+    $select = db_select('feeds_item')
+      ->fields('feeds_item', array('entity_id'))
+      ->condition('entity_type', $this->entityType())
+      ->condition('id', $this->id)
+      ->condition('feed_nid', $source->feed_nid);
 
     // If there is no total, query it.
     if (!$state->total) {
-      $state->total = $select->countQuery()
-        ->execute()
-        ->fetchField();
+      $state->total = $select->countQuery()->execute()->fetchField();
     }
 
     // Delete a batch of entities.
-    $entities = $select->range(0, $this->getLimit())->execute();
-    $entity_ids = array();
-    foreach ($entities as $entity) {
-      $entity_ids[$entity->entity_id] = $entity->entity_id;
-    }
+    $entity_ids = $select->range(0, $this->getLimit())->execute()->fetchCol();
     $this->entityDeleteMultiple($entity_ids);
 
-    // Report progress, take into account that we may not have deleted as
-    // many items as we have counted at first.
-    if (count($entity_ids)) {
-      $state->deleted += count($entity_ids);
+    // Report progress, take into account that we may not have deleted as many
+    // items as we have counted at first.
+    if ($deleted_count = count($entity_ids)) {
+      $state->deleted += $deleted_count;
       $state->progress($state->total, $state->deleted);
     }
     else {
@@ -474,6 +459,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
     // Report results when done.
     if ($source->progressClearing() == FEEDS_BATCH_COMPLETE) {
+      $info = $this->entityInfo();
+
       if ($state->deleted) {
         $message = format_plural(
           $state->deleted,
@@ -577,16 +564,12 @@ abstract class FeedsProcessor extends FeedsPlugin {
   protected function expiryQuery(FeedsSource $source, $time) {
     // Build base select statement.
     $info = $this->entityInfo();
-    $id_key = db_escape_field($info['entity keys']['id']);
+    $id_key = $info['entity keys']['id'];
 
     $select = db_select($info['base table'], 'e');
-    $select->addField('e', $info['entity keys']['id'], 'entity_id');
-    $select->join(
-      'feeds_item',
-      'fi',
-      "e.$id_key = fi.entity_id AND fi.entity_type = :entity_type", array(
-        ':entity_type' => $this->entityType(),
-    ));
+    $select->addField('e', $id_key);
+    $select->join('feeds_item', 'fi', "e.$id_key = fi.entity_id");
+    $select->condition('fi.entity_type', $this->entityType());
     $select->condition('fi.id', $this->id);
     $select->condition('fi.feed_nid', $source->feed_nid);
 
