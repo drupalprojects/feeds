@@ -108,7 +108,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * Starts importing a feed via the batch API.
    *
    * @throws \Exception
-   *   Thrown if an un-recoverable error has occured.
+   *   Thrown if an un-recoverable error has occurred.
    */
   public function startBatchImport();
 
@@ -116,7 +116,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * Starts importing a feed via cron.
    *
    * @throws \Exception
-   *   Thrown if an un-recoverable error has occured.
+   *   Thrown if an un-recoverable error has occurred.
    */
   public function startCronImport();
 
