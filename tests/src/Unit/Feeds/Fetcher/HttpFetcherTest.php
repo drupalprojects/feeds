@@ -8,16 +8,17 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Fetcher;
 
 use Drupal\Core\Form\FormState;
+use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\Feeds\Fetcher\HttpFetcher;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Stream;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Fetcher\HttpFetcher
@@ -25,16 +26,18 @@ use GuzzleHttp\Subscriber\Mock;
  */
 class HttpFetcherTest extends FeedsUnitTestCase {
 
-  protected $fetcher;
-  protected $client;
   protected $cache;
+  protected $client;
+  protected $fetcher;
+  protected $mockHandler;
   protected $state;
 
   public function setUp() {
     parent::setUp();
 
     $feed_type = $this->getMock('Drupal\feeds\FeedTypeInterface');
-    $this->client = new Client();
+    $this->mockHandler = new MockHandler();
+    $this->client = new Client(['handler' => HandlerStack::create($this->mockHandler)]);
     $this->cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
 
     $this->fetcher = new HttpFetcher(['feed_type' => $feed_type], 'http', [], $this->client, $this->cache);
@@ -48,8 +51,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     file_put_contents('vfs://feeds/test_data', 'test data');
-    $stream = Stream::factory(fopen('vfs://feeds/test_data', 'r+'));
-    $this->client->getEmitter()->attach(new Mock([new Response(200, [], $stream)]));
+    $this->mockHandler->append(new Response(200, [], new Stream(fopen('vfs://feeds/test_data', 'r+'))));
     $result = $this->fetcher->fetch($feed, $this->state);
     $this->assertSame('test data', $result->getRaw());
   }
@@ -61,7 +63,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     $state = new State();
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
 
-    $this->client->getEmitter()->attach(new Mock([new Response(304)]));
+    $this->mockHandler->append(new Response(304));
 
     $this->fetcher->fetch($feed, $this->state);
   }
@@ -70,7 +72,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    * @expectedException \RuntimeException
    */
   public function testFetch404() {
-    $this->client->getEmitter()->attach(new Mock([new Response(404)]));
+    $this->mockHandler->append(new Response(404));
     $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), $this->state);
   }
 
@@ -78,7 +80,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    * @expectedException \RuntimeException
    */
   public function testFetchError() {
-    $this->client->getEmitter()->attach(new Mock([new RequestException('', new Request(200, 'http://google.com'))]));
+    $this->mockHandler->append(new RequestException('', new Request(200, 'http://google.com')));
     $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), $this->state);
   }
 

@@ -20,7 +20,6 @@ use Drupal\feeds\StateInterface;
 use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Stream\Utils;
 
 /**
  * Defines an HTTP fetcher.
@@ -74,7 +73,8 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    */
   public function fetch(FeedInterface $feed, StateInterface $state) {
     $response = $this->get($feed->getSource(), $this->getCacheKey($feed));
-    $feed->setSource($response->getEffectiveUrl());
+    // @todo Handle redirects.
+    // $feed->setSource($response->getEffectiveUrl());
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == 304) {
@@ -84,10 +84,11 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
 
     // Copy the temp stream to a real file.
     $download_file = drupal_tempnam('temporary://', 'feeds_http_fetcher');
-    $dest_stream = Utils::create(fopen($download_file, 'w+'));
-    Utils::copyToStream($response->getBody(), $dest_stream);
-    $response->getBody()->close();
-    $dest_stream->close();
+    $dest_stream = fopen($download_file, 'w+b');
+    $source_stream = $response->getBody()->detach();
+    stream_copy_to_stream($source_stream, $dest_stream);
+    fclose($source_stream);
+    fclose($dest_stream);
 
     return new HttpFetcherResult($download_file, $response->getHeaders());
   }
