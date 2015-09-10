@@ -19,6 +19,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
+use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Fetcher\HttpFetcher
@@ -26,46 +27,48 @@ use GuzzleHttp\Psr7\Stream;
  */
 class HttpFetcherTest extends FeedsUnitTestCase {
 
-  protected $cache;
-  protected $client;
   protected $fetcher;
   protected $mockHandler;
-  protected $state;
 
   public function setUp() {
     parent::setUp();
 
     $feed_type = $this->getMock('Drupal\feeds\FeedTypeInterface');
     $this->mockHandler = new MockHandler();
-    $this->client = new Client(['handler' => HandlerStack::create($this->mockHandler)]);
-    $this->cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
+    $client = new Client(['handler' => HandlerStack::create($this->mockHandler)]);
+    $cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
 
-    $this->fetcher = new HttpFetcher(['feed_type' => $feed_type], 'http', [], $this->client, $this->cache);
+    $file_system = $this->prophesize('Drupal\Core\File\FileSystemInterface');
+    $file_system->tempnam(Argument::type('string'), Argument::type('string'))->will(function ($args) {
+      return tempnam($args[0], $args[1]);
+    });
+    $file_system->realpath(Argument::type('string'))->will(function ($args) {
+      return realpath($args[0]);
+    });
+
+    $this->fetcher = new HttpFetcher(['feed_type' => $feed_type], 'http', [], $client, $cache, $file_system->reveal());
     $this->fetcher->setStringTranslation($this->getStringTranslationStub());
-
-    $this->state = $this->getMock('Drupal\feeds\StateInterface');
   }
 
   public function testFetch() {
-    mkdir('vfs://feeds/private');
+    $this->mockHandler->append(function ($request, $options) {
+      file_put_contents($options['sink'], 'test data');
 
-    $feed = $this->getMock('Drupal\feeds\FeedInterface');
-    file_put_contents('vfs://feeds/test_data', 'test data');
-    $this->mockHandler->append(new Response(200, [], new Stream(fopen('vfs://feeds/test_data', 'r+'))));
-    $result = $this->fetcher->fetch($feed, $this->state);
+      return new Response(200);
+    });
+    $result = $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), new State());
     $this->assertSame('test data', $result->getRaw());
+
+    // Clean up test file.
+    unlink($result->getFilePath());
   }
 
   /**
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testFetch304() {
-    $state = new State();
-    $feed = $this->getMock('Drupal\feeds\FeedInterface');
-
     $this->mockHandler->append(new Response(304));
-
-    $this->fetcher->fetch($feed, $this->state);
+    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), new State());
   }
 
   /**
@@ -73,7 +76,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    */
   public function testFetch404() {
     $this->mockHandler->append(new Response(404));
-    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), $this->state);
+    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), new State());
   }
 
   /**
@@ -81,14 +84,12 @@ class HttpFetcherTest extends FeedsUnitTestCase {
    */
   public function testFetchError() {
     $this->mockHandler->append(new RequestException('', new Request(200, 'http://google.com')));
-    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), $this->state);
+    $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), new State());
   }
 
   public function testFeedForm() {
-    $feed = $this->getMock('Drupal\feeds\FeedInterface');
-
     $form_state = new FormState();
-    $form = $this->fetcher->buildFeedForm([], $form_state, $feed);
+    $form = $this->fetcher->buildFeedForm([], $form_state, $this->getMock('Drupal\feeds\FeedInterface'));
 
     // @todo Validate now calls download, fix this test.
     // $this->fetcher->validateFeedForm($form, $form_state, $feed);
@@ -103,7 +104,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
       ->will($this->returnValue('http://example.com'));
     $feeds = [$feed, $feed, $feed];
 
-    $this->fetcher->onFeedDeleteMultiple($feeds, $this->state);
+    $this->fetcher->onFeedDeleteMultiple($feeds, new State());
   }
 
 }

@@ -8,6 +8,7 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
@@ -20,6 +21,8 @@ use Drupal\feeds\StateInterface;
 use Drupal\feeds\Utility\Feed;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\RequestOptions;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Defines an HTTP fetcher.
@@ -29,7 +32,7 @@ use GuzzleHttp\Exception\RequestException;
  *   title = @Translation("Download"),
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler."),
  *   configuration_form = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm",
- *   arguments = {"@http_client", "@cache.feeds_download"}
+ *   arguments = {"@http_client", "@cache.feeds_download", "@file_system"}
  * )
  */
 class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFormInterface, FetcherInterface {
@@ -49,6 +52,13 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
   protected $cache;
 
   /**
+   * Drupal file system helper.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
    * Constructs an UploadFetcher object.
    *
    * @param array $configuration
@@ -61,10 +71,13 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    *   The Guzzle client.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   The cache backend.
+   * @param \Drupal\Core\File\FileSystemInterface $file_system
+   *   The Drupal file system helper.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, CacheBackendInterface $cache) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ClientInterface $client, CacheBackendInterface $cache, FileSystemInterface $file_system) {
     $this->client = $client;
     $this->cache = $cache;
+    $this->fileSystem = $file_system;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -72,25 +85,20 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    * {@inheritdoc}
    */
   public function fetch(FeedInterface $feed, StateInterface $state) {
-    $response = $this->get($feed->getSource(), $this->getCacheKey($feed));
+    $sink = $this->fileSystem->tempnam('temporary://', 'feeds_http_fetcher');
+    $sink = $this->fileSystem->realpath($sink);
+
+    $response = $this->get($feed->getSource(), $sink, $this->getCacheKey($feed));
     // @todo Handle redirects.
     // $feed->setSource($response->getEffectiveUrl());
 
     // 304, nothing to see here.
-    if ($response->getStatusCode() == 304) {
+    if ($response->getStatusCode() == Response::HTTP_NOT_MODIFIED) {
       $state->setMessage($this->t('The feed has not been updated.'));
       throw new EmptyFeedException();
     }
 
-    // Copy the temp stream to a real file.
-    $download_file = drupal_tempnam('temporary://', 'feeds_http_fetcher');
-    $dest_stream = fopen($download_file, 'w+b');
-    $source_stream = $response->getBody()->detach();
-    stream_copy_to_stream($source_stream, $dest_stream);
-    fclose($source_stream);
-    fclose($dest_stream);
-
-    return new HttpFetcherResult($download_file, $response->getHeaders());
+    return new HttpFetcherResult($sink, $response->getHeaders());
   }
 
   /**
@@ -107,7 +115,7 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    * @throws \RuntimeException
    *   Thrown if the GET request failed.
    */
-  protected function get($url, $cache_key = FALSE) {
+  protected function get($url, $sink, $cache_key = FALSE) {
     $url = strtr($url, [
       'feed://' => 'http://',
       'webcal://' => 'http://',
@@ -115,19 +123,20 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       'webcals://' => 'https://',
     ]);
 
+    $options = [RequestOptions::SINK => $sink];
+
     // Add cached headers if requested.
-    $headers = [];
     if ($cache_key && ($cache = $this->cache->get($cache_key))) {
       if (isset($cache->data['etag'])) {
-        $headers['If-None-Match'] = $cache->data['etag'];
+        $options[RequestOptions::HEADERS]['If-None-Match'] = $cache->data['etag'];
       }
       if (isset($cache->data['last-modified'])) {
-        $headers['If-Modified-Since'] = $cache->data['last-modified'];
+        $options[RequestOptions::HEADERS]['If-Modified-Since'] = $cache->data['last-modified'];
       }
     }
 
     try {
-      $response = $this->client->get($url, ['headers' => $headers]);
+      $response = $this->client->get($url, $options);
     }
     catch (RequestException $e) {
       $args = ['%site' => $url, '%error' => $e->getMessage()];
@@ -151,7 +160,7 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    *   The cache key for the feed.
    */
   protected function getCacheKey(FeedInterface $feed) {
-    return $feed->id() . ':' . md5($feed->getSource());
+    return $feed->id() . ':' . hash('sha256', $feed->getSource());
   }
 
   /**
@@ -200,7 +209,8 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       $form_state->setError($form['source'], $e->getMessage());
       return;
     }
-    if ($url = Feed::getCommonSyndication($response->getEffectiveUrl(), (string) $response->getBody())) {
+
+    if ($url = Feed::getCommonSyndication($form_state->getValue('source'), (string) $response->getBody())) {
       $form_state->setValue('source', $url);
     }
     else {
