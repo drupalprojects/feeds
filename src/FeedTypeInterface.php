@@ -116,4 +116,12 @@ interface FeedTypeInterface extends ConfigEntityInterface {
    */
   public function removeMappings();
 
+  /**
+   * Returns whether the feed type is considered locked.
+   *
+   * @return bool
+   *   True if locked, false if not.
+   */
+  public function isLocked();
+
 }
