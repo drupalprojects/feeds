@@ -30,7 +30,7 @@ class RssNodeImport extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = ['taxonomy', 'node', 'feeds'];
+  public static $modules = ['block', 'taxonomy', 'node', 'feeds'];
 
   protected function setUp() {
     parent::setUp();
@@ -97,6 +97,10 @@ class RssNodeImport extends WebTestBase {
       'import_period' => FeedTypeInterface::SCHEDULE_NEVER,
     ]);
     $this->type->save();
+
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('system_messages_block');
   }
 
   public function testHttpImport() {
