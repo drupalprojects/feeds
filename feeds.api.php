@@ -311,6 +311,16 @@ function hook_feeds_processor_targets($entity_type, $bundle) {
       // to prepare values on the entity or mapping array.
       'preprocess_callbacks' => array('my_module_preprocess_callback'),
     );
+    $targets['deprecated_target'] = array(
+      'name' => t('A target that cannot be chosen in the UI.'),
+
+      // Set deprecated to TRUE to hide the target from the UI. This can be
+      // useful if you want to rename targets for consistency, but don't want to
+      // break importers that are using the old target name.
+      // If an importer uses this target it will show up as "DEPRECATED" in the
+      // UI.
+      'deprecated' => TRUE,
+    );
   }
 
   return $targets;
