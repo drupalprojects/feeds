@@ -123,7 +123,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     // // Validate.
     $form_state->setValue(['directory'], 'vfs://noroot');
     $this->fetcher->validateConfigurationForm($form, $form_state);
-    $this->assertSame($form_state->getError($form['directory']), 'The chosen directory does not exist and attempts to create it failed.');
+    $this->assertSame('The chosen directory does not exist and attempts to create it failed.', (string) $form_state->getError($form['directory']));
   }
 
 }

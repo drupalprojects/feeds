@@ -37,8 +37,8 @@ class TextTest extends FeedsUnitTestCase {
 
     $values = ['value' => 'longstring'];
     $method(0, $values);
-    $this->assertSame($values['value'], 'longstring');
-    $this->assertSame($values['format'], 'plain_text');
+    $this->assertSame('longstring', $values['value']);
+    $this->assertSame('plain_text', $values['format']);
   }
 
   public function testBuildConfigurationForm() {
@@ -63,8 +63,8 @@ class TextTest extends FeedsUnitTestCase {
     $container->set('entity.manager', $manager);
     \Drupal::setContainer($container);
 
-    $this->assertSame($this->target->getSummary(), 'Format: <em class="placeholder">Test filter</em>');
-    $this->assertEquals($this->target->getSummary(), '');
+    $this->assertSame('Format: <em class="placeholder">Test filter</em>', (string) $this->target->getSummary());
+    $this->assertEquals('', (string) $this->target->getSummary());
   }
 
 }
