@@ -55,6 +55,23 @@ function feeds_views_data() {
       'click sortable' => FALSE,
     ),
   );
+  $data['feeds_source']['imported'] = array(
+    'title' => t('Imported date'),
+    'help' => t('The date the source was imported last.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+  );
   $data['feeds_source']['table']['join'] = array(
     'node' => array(
       'left_field' => 'nid',
