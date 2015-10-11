@@ -210,6 +210,24 @@ function feeds_views_data() {
       'help' => t('Logs events during importing, clearing, expiry.'),
     ),
   );
+  $data['feeds_log']['flid'] = array(
+    'title' => t('Log id'),
+    'help' => t('The id of the log message.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+      'numeric' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
   $data['feeds_log']['id'] = array(
     'title' => t('Importer id'),
     'help' => t('The id of an importer.'),
