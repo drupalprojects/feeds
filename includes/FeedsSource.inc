@@ -6,7 +6,7 @@
  */
 
 /**
- * Distinguish exceptions occuring when handling locks.
+ * Distinguish exceptions occurring when handling locks.
  */
 class FeedsLockException extends Exception {}
 

@@ -1108,7 +1108,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
   }
 
   /**
-   * Creates a log entry for when an exception occured during import.
+   * Creates a log entry for when an exception occurred during import.
    *
    * @param Exception $e
    *   The exception that was throwned during processing the item.

@@ -49,7 +49,7 @@ function http_request_get_common_syndication($url, $settings = array()) {
     return FALSE;
   }
 
-  // Drop the data into a seperate variable so all manipulations of the html
+  // Drop the data into a separate variable so all manipulations of the html
   // will not effect the actual object that exists in the static cache.
   // @see http_request_get.
   $downloaded_string = $download->data;

@@ -227,7 +227,7 @@ function hook_feeds_after_clear(FeedsSource $source) {
 function hook_feeds_parser_sources_alter(&$sources, $content_type) {
   $sources['my_source'] = array(
     'name' => t('Images in description element'),
-    'description' => t('Images occuring in the description element of a feed item.'),
+    'description' => t('Images occurring in the description element of a feed item.'),
     'callback' => 'my_source_get_source',
   );
 }
