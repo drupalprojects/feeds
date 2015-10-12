@@ -39,25 +39,28 @@ class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
     $feed->expects($this->any())
-         ->method('bundle')
-         ->will($this->returnValue('feed_bundle'));
+      ->method('bundle')
+      ->will($this->returnValue('feed_bundle'));
+    $feed->expects($this->any())
+      ->method('language')
+      ->will($this->returnValue(new Language()));
 
     $account = $this->getMock('\Drupal\Core\Session\AccountInterface');
 
-    $this->assertFalse($this->controller->access($feed, 'beep', Language::LANGCODE_DEFAULT, $account));
-    $this->assertFalse($this->controller->access($feed, 'unlock', Language::LANGCODE_DEFAULT, $account));
+    $this->assertFalse($this->controller->access($feed, 'beep', $account));
+    $this->assertFalse($this->controller->access($feed, 'unlock', $account));
 
     $this->controller->resetCache();
 
-    $this->assertFalse($this->controller->access($feed, 'unlock', Language::LANGCODE_DEFAULT, $account));
+    $this->assertFalse($this->controller->access($feed, 'unlock', $account));
 
     $account->expects($this->any())
       ->method('hasPermission')
       ->with($this->equalTo('administer feeds'))
       ->will($this->returnValue(TRUE));
 
-    $this->assertTrue($this->controller->access($feed, 'clear', Language::LANGCODE_DEFAULT, $account));
-    $this->assertTrue($this->controller->access($feed, 'view', Language::LANGCODE_DEFAULT, $account));
+    $this->assertTrue($this->controller->access($feed, 'clear', $account));
+    $this->assertTrue($this->controller->access($feed, 'view', $account));
 
     $account = $this->getMock('\Drupal\Core\Session\AccountInterface');
 
@@ -68,7 +71,7 @@ class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
            $this->equalTo('delete feed_bundle feeds')
        ))
       ->will($this->onConsecutiveCalls(FALSE, TRUE));
-    $this->assertTrue($this->controller->access($feed, 'delete', Language::LANGCODE_DEFAULT, $account));
+    $this->assertTrue($this->controller->access($feed, 'delete', $account));
   }
 
   public function testCheckCreateAccess() {

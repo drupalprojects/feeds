@@ -23,7 +23,7 @@ class FeedAccessControlHandler extends EntityAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $feed, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $feed, $operation, AccountInterface $account) {
     $has_perm = $account->hasPermission('administer feeds') || $account->hasPermission("$operation {$feed->bundle()} feeds");
 
     switch ($operation) {

@@ -92,7 +92,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function label($langcode = NULL) {
+  public function label() {
     return $this->get('title')->value;
   }
 
