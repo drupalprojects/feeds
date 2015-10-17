@@ -246,7 +246,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
   /**
    * Returns the label of the entity type being processed.
    *
-   * @return string
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The label of the entity type.
    */
   protected function entityTypeLabel() {
@@ -260,7 +260,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    *   The plural label of the entity type.
    */
   protected function entityTypeLabelPlural() {
-    return Inflector::pluralize($this->entityTypeLabel());
+    return Inflector::pluralize((string) $this->entityTypeLabel());
   }
 
   /**
