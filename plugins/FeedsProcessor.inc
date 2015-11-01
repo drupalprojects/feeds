@@ -1052,12 +1052,13 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * Include mappings as a change in mappings may have an affect on the item
    * produced.
    *
-   * @return Always returns a hash, even with empty, NULL, FALSE:
-   *  Empty arrays return 40cd750bba9870f18aada2478b24840a
-   *  Empty/NULL/FALSE strings return d41d8cd98f00b204e9800998ecf8427e
+   * @return string
+   *   A hash is always returned, even when the item is empty, NULL or FALSE.
    */
   protected function hash($item) {
-    return hash('md5', serialize($item) . serialize($this->config['mappings']));
+    $sources = feeds_importer($this->id)->parser->getMappingSourceList();
+    $mapped_item = array_intersect_key($item, array_flip($sources));
+    return hash('md5', serialize($mapped_item) . serialize($this->config['mappings']));
   }
 
   /**

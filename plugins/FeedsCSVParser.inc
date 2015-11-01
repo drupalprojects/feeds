@@ -102,6 +102,13 @@ class FeedsCSVParser extends FeedsParser {
   }
 
   /**
+   * Override parent::getMappingSourceList() to use only lower keys.
+   */
+  public function getMappingSourceList() {
+    return array_map('drupal_strtolower', parent::getMappingSourceList());
+  }
+
+  /**
    * Define defaults.
    */
   public function sourceDefaults() {

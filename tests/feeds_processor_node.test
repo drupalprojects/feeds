@@ -668,4 +668,37 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
     $this->assertEqual(10, db_query("SELECT COUNT(*) FROM {node}")->fetchField());
   }
 
+  /**
+   * Tests if target item is not updated when only non-mapped data on the source changed.
+   */
+  public function testIrrelevantUpdate() {
+    // Include FeedsProcessor.inc so processor related constants are available.
+    module_load_include('inc', 'feeds', 'plugins/FeedsProcessor');
+
+    // Attach to standalone importer and configure.
+    $this->setSettings('syndication', NULL, array('content_type' => ''));
+    $this->setPlugin('syndication', 'FeedsFileFetcher');
+    $this->setPlugin('syndication', 'FeedsCSVParser');
+    $this->removeMappings('syndication', $this->getCurrentMappings('syndication'));
+    $this->addMappings('syndication', array(
+      0 => array(
+        'source' => 'name',
+        'target' => 'title',
+        'unique' => TRUE,
+      ),
+    ));
+
+    // Import file.
+    $this->importFile('syndication', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->assertText('Created 5 nodes');
+
+    // Ensure that no nodes are updated when only non-mapped columns changed.
+    $this->setSettings('syndication', 'FeedsNodeProcessor', array(
+      'skip_hash_check' => FALSE,
+      'update_existing' => FEEDS_UPDATE_EXISTING,
+    ));
+    $this->importFile('syndication', $this->absolutePath() . '/tests/feeds/users_updated.csv');
+    $this->assertText('There are no new nodes.');
+  }
+
 }
