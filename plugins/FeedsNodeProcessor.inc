@@ -36,11 +36,10 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Creates a new node in memory and returns it.
    */
   protected function newEntity(FeedsSource $source) {
-    $node = new stdClass();
+    $node = parent::newEntity($source);
     $node->type = $this->bundle();
     $node->changed = REQUEST_TIME;
     $node->created = REQUEST_TIME;
-    $node->language = LANGUAGE_NONE;
     $node->is_new = TRUE;
     node_object_prepare($node);
     // Populate properties that are set by node_object_prepare().
@@ -127,6 +126,8 @@ class FeedsNodeProcessor extends FeedsProcessor {
    * Validates a node.
    */
   protected function entityValidate($entity) {
+    parent::entityValidate($entity);
+
     if (!isset($entity->uid) || !is_numeric($entity->uid)) {
        $entity->uid = $this->config['author'];
     }

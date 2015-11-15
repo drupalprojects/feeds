@@ -86,13 +86,22 @@ abstract class FeedsProcessor extends FeedsPlugin {
   /**
    * Create a new entity.
    *
-   * @param $source
+   * @param FeedsSource $source
    *   The feeds source that spawns this entity.
    *
-   * @return
+   * @return object
    *   A new entity object.
    */
-  protected abstract function newEntity(FeedsSource $source);
+  protected function newEntity(FeedsSource $source) {
+    $entity = new stdClass();
+
+    $info = $this->entityInfo();
+    if (!empty($info['entity keys']['language'])) {
+      $entity->{$info['entity keys']['language']} = $this->entityLanguage();
+    }
+
+    return $entity;
+  }
 
   /**
    * Load an existing entity.
@@ -109,28 +118,46 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *   existing ids first.
    */
   protected function entityLoad(FeedsSource $source, $entity_id) {
-    if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
-      $entities = entity_load($this->entityType(), array($entity_id));
-      return reset($entities);
-    }
-
     $info = $this->entityInfo();
 
-    $args = array(':entity_id' => $entity_id);
+    if ($this->config['update_existing'] == FEEDS_UPDATE_EXISTING) {
+      $entities = entity_load($this->entityType(), array($entity_id));
+      $entity = reset($entities);
+    }
+    else {
+      $args = array(':entity_id' => $entity_id);
+      $table = db_escape_table($info['base table']);
+      $key = db_escape_field($info['entity keys']['id']);
+      $entity = db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
+    }
 
-    $table = db_escape_table($info['base table']);
-    $key = db_escape_field($info['entity keys']['id']);
+    if ($entity && !empty($info['entity keys']['language'])) {
+      $entity->{$info['entity keys']['language']} = $this->entityLanguage();
+    }
 
-    return db_query("SELECT * FROM {" . $table . "} WHERE $key = :entity_id", $args)->fetchObject();
+    return $entity;
   }
 
   /**
-   * Validate an entity.
+   * Validates an entity.
    *
    * @throws FeedsValidationException $e
-   *   If validation fails.
+   *   Thrown if validation fails.
    */
-  protected function entityValidate($entity) {}
+  protected function entityValidate($entity) {
+    $info = $this->entityInfo();
+    if (empty($info['entity keys']['language'])) {
+      return;
+    }
+
+    // Ensure that a valid language is always set.
+    $key = $info['entity keys']['language'];
+    $languages = language_list('enabled');
+
+    if (empty($entity->$key) || !isset($languages[1][$entity->$key])) {
+      $entity->$key = $this->entityLanguage();
+    }
+  }
 
   /**
    * Access check for saving an enity.
@@ -167,6 +194,28 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function entityInfo() {
     return entity_get_info($this->entityType());
+  }
+
+  /**
+   * Returns the current language for entities.
+   *
+   * This checks if the configuration value is valid.
+   *
+   * @return string
+   *   The current language code.
+   */
+  protected function entityLanguage() {
+    if (!module_exists('locale')) {
+      // language_list() may return languages even if the locale module is
+      // disabled. See https://www.drupal.org/node/173227 why.
+      // When the locale module is disabled, there are no selectable languages
+      // in the UI, so the content should be imported in LANGUAGE_NONE.
+      return LANGUAGE_NONE;
+    }
+
+    $languages = language_list('enabled');
+
+    return isset($languages[1][$this->config['language']]) ? $this->config['language'] : LANGUAGE_NONE;
   }
 
   /**
@@ -764,6 +813,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       'input_format' => NULL,
       'skip_hash_check' => FALSE,
       'bundle' => $bundle,
+      'language' => LANGUAGE_NONE,
     );
   }
 
@@ -787,6 +837,16 @@ abstract class FeedsProcessor extends FeedsPlugin {
       $form['bundle'] = array(
         '#type' => 'value',
         '#value' => $this->entityType(),
+      );
+    }
+
+    if (module_exists('locale') && !empty($info['entity keys']['language'])) {
+      $form['language'] = array(
+        '#type' => 'select',
+        '#options' => array(LANGUAGE_NONE => t('Language neutral')) + locale_language_list('name'),
+        '#title' => t('Language'),
+        '#required' => TRUE,
+        '#default_value' => $this->config['language'],
       );
     }
 

@@ -31,9 +31,10 @@ class FeedsTermProcessor extends FeedsProcessor {
    */
   protected function newEntity(FeedsSource $source) {
     $vocabulary = $this->vocabulary();
-    $term = new stdClass();
+    $term = parent::newEntity($source);
     $term->vid = $vocabulary->vid;
     $term->vocabulary_machine_name = $vocabulary->machine_name;
+
     return $term;
   }
 
@@ -41,6 +42,8 @@ class FeedsTermProcessor extends FeedsProcessor {
    * Validates a term.
    */
   protected function entityValidate($term) {
+    parent::entityValidate($term);
+
     if (drupal_strlen($term->name) == 0) {
       throw new FeedsValidationException(t('Term name missing.'));
     }
