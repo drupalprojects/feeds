@@ -28,7 +28,7 @@ class FeedsPermissions {
     return [
       'access feed overview' => [
         'title' => $this->t('Access the Feed overview page'),
-        'description' => $this->t('Get an overview of <a href="@url">all feeds</a>.', ['@url' => $this->url('feeds.admin')]),
+        'description' => $this->t('Get an overview of <a href=":url">all feeds</a>.', [':url' => $this->url('feeds.admin')]),
       ],
     ];
   }
