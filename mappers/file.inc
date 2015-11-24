@@ -79,9 +79,14 @@ function file_feeds_set_target(FeedsSource $source, $entity, $target, array $val
       }
     }
 
-    $entity_type = $source->importer->processor->entityType();
-    $bundle = $source->importer->processor->bundle();
-
+    if ($entity instanceof Entity) {
+      $entity_type = $entity->entityType();
+      $bundle = $entity->bundle();
+    }
+    else {
+      $entity_type = $source->importer->processor->entityType();
+      $bundle = $source->importer->processor->bundle();
+    }
     $instance_info = field_info_instance($entity_type, $field_name, $bundle);
 
     // Determine file destination.
