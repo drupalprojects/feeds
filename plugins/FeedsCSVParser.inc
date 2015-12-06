@@ -20,7 +20,7 @@ class FeedsCSVParser extends FeedsParser {
     // Load and configure parser.
     feeds_include_library('ParserCSV.inc', 'ParserCSV');
     $parser = new ParserCSV();
-    $delimiter = $source_config['delimiter'] == 'TAB' ? "\t" : $source_config['delimiter'];
+    $delimiter = $this->getDelimiterChar($source_config);
     $parser->setDelimiter($delimiter);
 
     $iterator = new ParserCSVIterator($fetcher_result->getFilePath());
@@ -163,13 +163,7 @@ class FeedsCSVParser extends FeedsParser {
       '#type' => 'select',
       '#title' => t('Delimiter'),
       '#description' => t('The character that delimits fields in the CSV file.'),
-      '#options'  => array(
-        ',' => ',',
-        ';' => ';',
-        'TAB' => 'TAB',
-        '|' => '|',
-        '+' => '+',
-      ),
+      '#options' => $this->getAllDelimiterTypes(),
       '#default_value' => isset($source_config['delimiter']) ? $source_config['delimiter'] : ',',
     );
     $form['no_headers'] = array(
@@ -200,13 +194,7 @@ class FeedsCSVParser extends FeedsParser {
       '#type' => 'select',
       '#title' => t('Default delimiter'),
       '#description' => t('Default field delimiter.'),
-      '#options' => array(
-        ',' => ',',
-        ';' => ';',
-        'TAB' => 'TAB',
-        '|' => '|',
-        '+' => '+',
-      ),
+      '#options' => $this->getAllDelimiterTypes(),
       '#default_value' => $this->config['delimiter'],
     );
     $form['no_headers'] = array(
@@ -221,6 +209,7 @@ class FeedsCSVParser extends FeedsParser {
   public function getTemplate() {
     $mappings = feeds_importer($this->id)->processor->config['mappings'];
     $sources = $uniques = array();
+
     foreach ($mappings as $mapping) {
       if (in_array($mapping['source'], $uniques) || in_array($mapping['source'], $sources)) {
         // Skip columns we've already seen.
@@ -234,18 +223,109 @@ class FeedsCSVParser extends FeedsParser {
         $sources[] = $mapping['source'];
       }
     }
-    $sep = $this->config['delimiter'];
+
+    $sep = $this->getDelimiterChar($this->config);
     $columns = array();
+
     foreach (array_merge($uniques, $sources) as $col) {
       if (strpos($col, $sep) !== FALSE) {
         $col = '"' . str_replace('"', '""', $col) . '"';
       }
+
       $columns[] = $col;
     }
-    drupal_add_http_header('Cache-Control', 'max-age=60, must-revalidate');
-    drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $this->id . '_template.csv"');
-    drupal_add_http_header('Content-type', 'text/csv; charset=utf-8');
+
+    $template_file_details = $this->getTemplateFileDetails($this->config);
+
+    $filename = "{$this->id}_template.{$template_file_details['extension']}";
+    $cache_control = 'max-age=60, must-revalidate';
+    $content_disposition = 'attachment; filename="' . $filename . '"';
+    $content_type = "{$template_file_details['mime_type']}; charset=utf-8";
+
+    drupal_add_http_header('Cache-Control', $cache_control);
+    drupal_add_http_header('Content-Disposition', $content_disposition);
+    drupal_add_http_header('Content-type', $content_type);
+
     print implode($sep, $columns);
-    return;
+  }
+
+  /**
+   * Gets an associative array of the delimiters supported by this parser.
+   *
+   * The keys represent the value that is persisted into the database, and the
+   * value represents the text that is shown in the admins UI.
+   *
+   * @return array
+   *   The associative array of delimiter types to display name.
+   */
+  protected function getAllDelimiterTypes() {
+    $delimiters = array(
+      ',',
+      ';',
+      'TAB',
+      '|',
+      '+',
+    );
+
+    return array_combine($delimiters, $delimiters);
+  }
+
+  /**
+   * Gets the appropriate delimiter character for the delimiter in the config.
+   *
+   * @param array $config
+   *   The configuration for the parser.
+   *
+   * @return string
+   *   The delimiter character.
+   */
+  protected function getDelimiterChar(array $config) {
+    $config_delimiter = $config['delimiter'];
+
+    switch ($config_delimiter) {
+      case 'TAB':
+        $delimiter = "\t";
+        break;
+
+      default:
+        $delimiter = $config_delimiter;
+        break;
+    }
+
+    return $delimiter;
+  }
+
+  /**
+   * Gets details about the template file, for the delimiter in the config.
+   *
+   * The resulting details indicate the file extension and mime type for the
+   * delimiter type.
+   *
+   * @param array $config
+   *   The configuration for the parser.
+   *
+   * @return array
+   *   An array with the following information:
+   *     - 'extension': The file extension for the template ('tsv', 'csv', etc).
+   *     - 'mime-type': The mime type for the template
+   *       ('text/tab-separated-values', 'text/csv', etc).
+   */
+  protected function getTemplateFileDetails(array $config) {
+    switch ($config['delimiter']) {
+      case 'TAB':
+        $extension = 'tsv';
+        $mime_type = 'text/tab-separated-values';
+        break;
+
+      default:
+        $extension = 'csv';
+        $mime_type = 'text/csv';
+        break;
+    }
+
+    return array(
+      'extension' => $extension,
+      'mime_type' => $mime_type,
+    );
   }
 }
