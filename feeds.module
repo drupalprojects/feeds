@@ -871,8 +871,26 @@ function feeds_importer_load_all($load_disabled = FALSE) {
         $feeds[$config->id] = feeds_importer($config->id);
       }
     }
+    uasort($feeds, 'feeds_importer_name_sort');
   }
   return $feeds;
+}
+
+/**
+ * Sorts importers by name.
+ *
+ * Callback for uasort().
+ *
+ * @param FeedsImporter $a
+ *   The first FeedsImporter for comparison.
+ * @param FeedsImporter $b
+ *   The second FeedsImporter for comparison.
+ *
+ * @return int
+ *   The comparison result for uasort().
+ */
+function feeds_importer_name_sort(FeedsImporter $a, FeedsImporter $b) {
+  return strcasecmp($a->config['name'], $b->config['name']);
 }
 
 /**
