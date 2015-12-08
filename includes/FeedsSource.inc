@@ -134,7 +134,7 @@ class FeedsState {
       $this->progress = FEEDS_BATCH_COMPLETE;
     }
     elseif ($total) {
-      $this->progress = $progress / $total;
+      $this->progress = (float) $progress / $total;
       if ($this->progress == FEEDS_BATCH_COMPLETE && $total != $progress) {
         $this->progress = 0.99;
       }

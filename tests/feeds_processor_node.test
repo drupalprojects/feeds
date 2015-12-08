@@ -669,6 +669,26 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
   }
 
   /**
+   * Tests the FeedsSource::pushImport() method with a CSV file.
+   */
+  public function testPushImportWithCSV() {
+    // Attach to standalone importer and configure.
+    $this->setSettings('syndication', NULL, array('content_type' => ''));
+    $this->setPlugin('syndication', 'FeedsCSVParser');
+    $this->removeMappings('syndication', $this->getCurrentMappings('syndication'));
+    $this->addMappings('syndication', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+      ),
+    ));
+
+    $raw = file_get_contents($this->absolutePath() . '/tests/feeds/many_nodes.csv');
+    feeds_source('syndication', 0)->pushImport(new FeedsFetcherResult($raw));
+    $this->assertEqual(86, db_query("SELECT COUNT(*) FROM {node}")->fetchField());
+  }
+
+  /**
    * Tests if target item is not updated when only non-mapped data on the source changed.
    */
   public function testIrrelevantUpdate() {
