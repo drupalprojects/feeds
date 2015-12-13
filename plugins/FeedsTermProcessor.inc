@@ -39,6 +39,21 @@ class FeedsTermProcessor extends FeedsProcessor {
   }
 
   /**
+   * Load an existing entity.
+   */
+  protected function entityLoad(FeedsSource $source, $entity_id) {
+    $entity = parent::entityLoad($source, $entity_id);
+
+    // Avoid missing bundle errors when term has been loaded directly from db.
+    if (empty($entity->vocabulary_machine_name) && !empty($entity->vid)) {
+      $vocabulary = taxonomy_vocabulary_load($entity->vid);
+      $entity->vocabulary_machine_name = ($vocabulary) ? $vocabulary->machine_name : NULL;
+    }
+
+    return $entity;
+  }
+
+  /**
    * Validates a term.
    */
   protected function entityValidate($term) {
