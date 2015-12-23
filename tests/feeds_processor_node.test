@@ -657,6 +657,46 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
   }
 
   /**
+   * Tests if the target "changed" works as expected.
+   */
+  public function testChangedTarget() {
+    // Create and configure importer.
+    $this->createImporterConfiguration('Content CSV', 'csv');
+    $this->setSettings('csv', NULL, array('content_type' => '', 'import_period' => FEEDS_SCHEDULE_NEVER));
+    $this->setPlugin('csv', 'FeedsFileFetcher');
+    $this->setPlugin('csv', 'FeedsCSVParser');
+    $this->addMappings('csv', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+      ),
+      // Borrow the timestamp value from the "created" column in the csv.
+      1 => array(
+        'source' => 'created',
+        'target' => 'changed',
+      ),
+    ));
+
+    // Import CSV file.
+    $this->importFile('csv', $this->absolutePath() . '/tests/feeds/content.csv');
+    $this->assertText('Created 2 nodes');
+
+    // Assert changed date of nodes.
+    $expected_values = array(
+      1 => array(
+        'changed' => 1251936720,
+      ),
+      2 => array(
+        'changed' => 1251932360,
+      ),
+    );
+    for ($i = 1; $i <= 2; $i++) {
+      $node = node_load($i);
+      $this->assertEqual($expected_values[$i]['changed'], $node->changed);
+    }
+  }
+
+  /**
    * Tests the FeedsSource::pushImport() method.
    */
   public function testPushImport() {

@@ -634,6 +634,11 @@ function feeds_node_presave($node) {
   }
   $last_title = NULL;
   $last_feeds = NULL;
+
+  // Update "changed" value if there was mapped to that.
+  if (isset($node->feeds_item->node_changed)) {
+    $node->changed = $node->feeds_item->node_changed;
+  }
 }
 
 /**
