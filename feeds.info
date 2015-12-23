@@ -38,6 +38,7 @@ files[] = tests/feeds_mapper_field.test
 files[] = tests/feeds_mapper_file.test
 files[] = tests/feeds_mapper_hooks.test
 files[] = tests/feeds_mapper_link.test
+files[] = tests/feeds_mapper_list.test
 files[] = tests/feeds_mapper_path.test
 files[] = tests/feeds_mapper_profile.test
 files[] = tests/feeds_mapper_unique.test

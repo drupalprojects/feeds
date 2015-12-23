@@ -58,6 +58,15 @@ function list_feeds_set_boolean_target(FeedsSource $source, $entity, $target, ar
       $value = $value->getValue();
     }
 
+    if (is_string($value) && strlen($value) == 0) {
+      // Don't convert an empty string to a boolean.
+      continue;
+    }
+    if (is_null($value)) {
+      // Don't convert a NULL value to a boolean.
+      continue;
+    }
+
     $field[LANGUAGE_NONE][] = array('value' => (int) (bool) $value);
   }
 
