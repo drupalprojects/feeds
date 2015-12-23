@@ -193,7 +193,16 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * 'label plural' ... the plural label of an entity type.
    */
   protected function entityInfo() {
-    return entity_get_info($this->entityType());
+    $info = entity_get_info($this->entityType());
+
+    // Entity module has defined the plural label in "plural label" instead of
+    // "label plural". So if "plural label" is defined, this will have priority
+    // over "label plural".
+    if (isset($info['plural label'])) {
+      $info['label plural'] = $info['plural label'];
+    }
+
+    return $info;
   }
 
   /**
