@@ -220,7 +220,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     $values['allowed_extensions'] = preg_replace('/\s+/', ' ', trim($values['allowed_extensions']));
 
     // Ensure that the upload directory exists.
-    if (!file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+    if (!empty($form['directory']) && !file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       $form_state->setError($form['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
     }
   }
