@@ -351,6 +351,24 @@ function feeds_tests_mapper_unique(FeedsSource $source, $entity_type, $bundle, $
 }
 
 /**
+ * Implements hook_feeds_after_parse().
+ *
+ * Empties the list of items to import in case the test says that there are
+ * items in there with encoding issues. These items can not be processed during
+ * tests without having a test failure because in < PHP 5.4 that would produce
+ * the following warning:
+ *   htmlspecialchars(): Invalid multibyte sequence in argument
+ *
+ * @see FeedsCSVParserTestCase::testMbstringExtensionDisabled()
+ */
+function feeds_tests_feeds_after_parse(FeedsSource $source, FeedsParserResult $result) {
+  if (variable_get('feeds_tests_feeds_after_parse_empty_items', FALSE)) {
+    // Remove all items. No items will be processed.
+    $result->items = array();
+  }
+}
+
+/**
  * Helper class to ensure callbacks can be objects.
  */
 class FeedsTestsPreprocess {

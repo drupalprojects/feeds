@@ -60,6 +60,7 @@ function feeds_requirements($phase) {
 function feeds_uninstall() {
   variable_del('http_request_timeout');
   variable_del('feeds_reschedule');
+  variable_del('feeds_use_mbstring');
 }
 
 /**
