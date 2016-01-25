@@ -124,7 +124,7 @@ class FeedTypeForm extends EntityForm {
     }, array_combine($times, $times));
 
     foreach ($period as &$p) {
-      $p = $this->t('Every !p', ['!p' => $p]);
+      $p = $this->t('Every @p', ['@p' => $p]);
     }
 
     $period = [

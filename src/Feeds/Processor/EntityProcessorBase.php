@@ -674,7 +674,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     if ($timestamp == static::EXPIRE_NEVER) {
       return $this->t('Never');
     }
-    return $this->t('after !time', ['!time' => \Drupal::service('date.formatter')->formatInterval($timestamp)]);
+    return $this->t('after @time', ['@time' => \Drupal::service('date.formatter')->formatInterval($timestamp)]);
   }
 
   /**
