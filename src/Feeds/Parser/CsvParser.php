@@ -25,9 +25,11 @@ use Drupal\feeds\StateInterface;
  *
  * @FeedsParser(
  *   id = "csv",
- *   title = @Translation("CSV"),
+ *   title = "CSV (not working yet, do not use)",
  *   description = @Translation("Parse CSV files.")
  * )
+ *
+ * @todo Make mapping sources configurable, see https://www.drupal.org/node/2443471.
  */
 class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterface, ParserInterface {
 
@@ -76,7 +78,7 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
    * {@inheritdoc}
    */
   public function getMappingSources() {
-    return FALSE;
+    return [];
   }
 
   /**
