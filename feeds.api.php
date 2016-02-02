@@ -459,10 +459,6 @@ function my_module_mapper_unique(FeedsSource $source, $entity_type, $bundle, $ta
 /**
  * Example of the preprocess_callbacks specified in hook_feeds_processor_targets().
  *
- * @param FeedsSource $source
- *   The Feed source.
- * @param object $entity
- *   The entity being processed.
  * @param array $target
  *   The full target definition.
  * @param array &$mapping
@@ -470,7 +466,7 @@ function my_module_mapper_unique(FeedsSource $source, $entity_type, $bundle, $ta
  *
  * @see hook_feeds_processor_targets()
  */
-function my_module_preprocess_callback(FeedsSource $source, $entity, array $target, array &$mapping) {
+function my_module_preprocess_callback(array $target, array &$mapping) {
   // Add in default values.
   $mapping += array('setting_value' => TRUE);
 }
