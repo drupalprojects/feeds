@@ -942,7 +942,7 @@ function theme_feeds_ui_edit_page($variables) {
   drupal_add_css(drupal_get_path('module', 'feeds_ui') . '/feeds_ui.css');
 
   // Outer wrapper.
-  $output = '<div class="feeds-settings clear-block">';
+  $output = '<div class="feeds-settings clearfix">';
 
   // Build left bar.
   $output .= '<div class="left-bar">';
