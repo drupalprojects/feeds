@@ -846,6 +846,69 @@ function feeds_flush_caches() {
 }
 
 /**
+ * Implements hook_admin_menu_output_build().
+ *
+ * Shows available importers in the "Content" section of the admin menu.
+ * Requires the "admin_menu" module to be enabled.
+ */
+function feeds_admin_menu_output_build(array &$content) {
+  // Add new top-level item to the menu.
+  if (!isset($content['menu'])) {
+    return;
+  }
+  $access = FALSE;
+  foreach (feeds_enabled_importers() as $importer_id) {
+    if (user_access('administer feeds') || user_access("import $importer_id feeds")) {
+      $access = TRUE;
+      break;
+    }
+  }
+
+  if (!$access) {
+    return;
+  }
+
+  $content['menu']['admin/content']['admin/content/feeds_import'] = array(
+    '#title' => t('Import'),
+    '#href' => 'import',
+  );
+
+  foreach (feeds_importer_load_all() as $importer) {
+    $content['menu']['admin/content']['admin/content/feeds_import'][$importer->id] = array(
+      '#title' => t($importer->config['name']),
+      '#href' => !empty($importer->config['content_type']) ? 'node/add/' . $importer->config['content_type'] : 'import/' . check_plain($importer->id),
+      '#access' => user_access('administer feeds') || user_access("import $importer->id feeds"),
+    );
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Adds "Import" link as local action on content overview page.
+ */
+function feeds_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  if ($root_path == 'admin/content') {
+    $data['actions']['output'][] = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        'title' => t('Import'),
+        'href' => 'import',
+        'localized_options' => array(
+          'attributes' => array(
+            'title' => t('Import'),
+          ),
+        ),
+      ),
+      '#access' => feeds_page_access(),
+      // Add weight so it appears after the local action "Add content".
+      '#weight' => 1,
+    );
+  }
+}
+
+
+/**
  * @}
  */
 
