@@ -1,4 +1,4 @@
-Feeds 7.x 2.0 Beta 2, 2016-02-17
+Feeds 7.x 2.0 Beta 2, 2016-02-21
 --------------------------------
 
 - By MegaChriz: test dependencies should be specified in the main module.info
