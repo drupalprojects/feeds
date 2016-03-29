@@ -149,7 +149,18 @@ class FeedsCSVParser extends FeedsParser {
 
     $output = t('Import !csv_files with one or more of these columns: @columns.', array('!csv_files' => l(t('CSV files'), 'http://en.wikipedia.org/wiki/Comma-separated_values'), '@columns' => implode(', ', $sources)));
     $items = array();
-    $items[] = format_plural(count($uniques), 'Column <strong>@columns</strong> is mandatory and considered unique: only one item per @columns value will be created.', 'Columns <strong>@columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.', array('@columns' => implode(', ', $uniques)));
+    if ($uniques) {
+      $items[] = format_plural(count($uniques),
+        'Column <strong>@columns</strong> is mandatory and considered unique: only one item per @columns value will be created.',
+        'Columns <strong>@columns</strong> are mandatory and values in these columns are considered unique: only one entry per value in one of these column will be created.',
+        array(
+          '@columns' => implode(', ', $uniques),
+        )
+      );
+    }
+    else {
+      $items[] = t('No columns are unique. The import will only create new items, no items will be updated.');
+    }
     $items[] = l(t('Download a template'), 'import/' . $this->id . '/template');
     $form['help'] = array(
       '#prefix' => '<div class="help">',
