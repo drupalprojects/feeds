@@ -73,7 +73,7 @@ class CsvParserTest extends FeedsUnitTestCase {
 
   public function testGetMappingSources() {
     // Not really much to test here.
-    $this->assertFalse($this->parser->getMappingSources());
+    $this->assertSame([], $this->parser->getMappingSources());
   }
 
   public function testFeedForm() {
