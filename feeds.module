@@ -83,6 +83,7 @@ function feeds_theme() {
  */
 function feeds_file_download($uri) {
   // Get the file record based on the URI. If not in the database just return.
+  /** @var \Drupal\file\FileInterface[] $files */
   $files = \Drupal::entityManager()
     ->getStorage('file')
     ->loadByProperties(['uri' => $uri]);
@@ -90,7 +91,7 @@ function feeds_file_download($uri) {
   foreach ($files as $item) {
     // Since some database servers sometimes use a case-insensitive comparison
     // by default, double check that the filename is an exact match.
-    if ($file->getFileUri() === $uri) {
+    if ($item->getFileUri() === $uri) {
       $file = $item;
       break;
     }
