@@ -54,7 +54,7 @@ class DateTimeTest extends FeedsUnitTestCase {
 
     $values = ['value' => 1411606273];
     $method(0, $values);
-    $this->assertSame($values['value'], date(DATETIME_DATE_STORAGE_FORMAT, 1411606273));
+    $this->assertSame(date(DATETIME_DATE_STORAGE_FORMAT, 1411606273), $values['value']);
   }
 
   public function testWithErrors() {
@@ -67,7 +67,7 @@ class DateTimeTest extends FeedsUnitTestCase {
 
     $values = ['value' => '2000-05-32'];
     $method(0, $values);
-    $this->assertSame($values['value'], '');
+    $this->assertSame('', $values['value']);
   }
 
   public function testYearValue() {
@@ -80,7 +80,7 @@ class DateTimeTest extends FeedsUnitTestCase {
 
     $values = ['value' => '2000'];
     $method(0, $values);
-    $this->assertSame($values['value'], '2000-01-01T00:00:00');
+    $this->assertSame('2000-01-01T00:00:00', $values['value']);
   }
 
 }

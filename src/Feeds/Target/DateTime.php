@@ -46,8 +46,11 @@ class DateTime extends FieldTargetBase {
       $value = 'January ' . $value;
     }
 
-    if (is_numeric($value) || ($value = strtotime($value))) {
+    if (is_numeric($value)) {
       $date = DrupalDateTime::createFromTimestamp($value, DATETIME_STORAGE_TIMEZONE);
+    }
+    elseif (strtotime($value)) {
+      $date = new DrupalDateTime($value, DATETIME_STORAGE_TIMEZONE);
     }
 
     if (isset($date) && !$date->hasErrors()) {
