@@ -604,8 +604,12 @@ function feeds_node_validate($node, $form, &$form_state) {
   $last_feeds = $node->feeds;
   $source->configFormValidate($last_feeds);
 
-  // If node title is empty, try to retrieve title from feed.
-  if (trim($node->title) == '') {
+  // Check if title form element is hidden.
+  $title_hidden = (isset($form['title']['#access']) && !$form['title']['#access']);
+
+  // If the node title is empty and the title form element wasn't hidden, try to
+  // retrieve the title from the feed.
+  if (trim($node->title) == '' && !$title_hidden) {
     try {
       $source->addConfig($last_feeds);
       if (!$last_title = $source->preview()->title) {
