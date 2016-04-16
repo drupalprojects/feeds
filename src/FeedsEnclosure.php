@@ -11,6 +11,7 @@
 namespace Drupal\feeds;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\file\Entity\File;
 
 /**
  * Enclosure element, can be part of the result array.
@@ -115,7 +116,7 @@ class FeedsEnclosure {
     file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
     // Copy or save file depending on whether it is remote or local.
     if (drupal_realpath($this->uri)) {
-      $file = entity_create('file', [
+      $file = File::create([
         'uid' => 0,
         'uri' => $this->uri,
         'filemime' => $this->mimeType,
