@@ -171,6 +171,20 @@ abstract class FeedsParser extends FeedsPlugin {
     $item = $result->currentItem();
     return isset($item[$element_key]) ? $item[$element_key] : '';
   }
+
+  /**
+   * Returns if the parsed result can have a title.
+   *
+   * Parser classes should override this method in case they support a source
+   * title.
+   *
+   * @return bool
+   *   TRUE if the parsed result can have a title.
+   *   FALSE otherwise.
+   */
+  public function providesSourceTitle() {
+    return FALSE;
+  }
 }
 
 /**
