@@ -357,6 +357,9 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
   foreach ($feed_XML->xpath('//item') as $news) {
     $title = $body = $original_author = $original_url = $guid = '';
 
+    // Get optional source url.
+    $source_url = (string) $news->source['url'];
+
     $category = $news->xpath('category');
     // Get children for current namespace.
     $content = (array)$news->children($ns["content"]);
@@ -454,6 +457,13 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
     }
     $item['url'] = trim($original_url);
     $item['guid'] = $guid;
+    if (!empty($news['source'])) {
+      $item['source:title'] = $news['source'];
+    }
+    else {
+      $item['source:title'] = NULL;
+    }
+    $item['source:url'] = trim($source_url);
 
     $item['geolocations'] = array();
     if (isset($geoname, $lat, $lon)) {
