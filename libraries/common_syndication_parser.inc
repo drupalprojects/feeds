@@ -19,6 +19,10 @@
  *  stdClass The structured datas extracted from the feed.
  */
 function common_syndication_parser_parse($string) {
+  // SimpleXML can only deal with XML declaration at the start of the document,
+  // so remove any surrounding whitespace.
+  $string = trim($string);
+
   @ $xml = simplexml_load_string($string, NULL, LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOCDATA);
 
   // Got a malformed XML.
