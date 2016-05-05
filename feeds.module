@@ -1177,8 +1177,13 @@ function feeds_plugin($plugin, $id) {
 
   $args = array('%plugin' => $plugin, '@id' => $id);
   if (user_access('administer feeds')) {
-    $args['@link'] = url('admin/structure/feeds/' . $id);
-    drupal_set_message(t('Missing Feeds plugin %plugin. See <a href="@link">@id</a>. Check whether all required libraries and modules are installed properly.', $args), 'warning', FALSE);
+    if (module_exists('feeds_ui')) {
+      $args['@link'] = url('admin/structure/feeds/' . $id);
+      drupal_set_message(t('Missing Feeds plugin %plugin. See <a href="@link">@id</a>. Check whether all required libraries and modules are installed properly.', $args), 'warning', FALSE);
+    }
+    else {
+      drupal_set_message(t('Missing Feeds plugin %plugin used by the importer "@id". Check whether all required libraries and modules are installed properly. Enable the Feeds Admin UI module to check the importer\'s settings.', $args), 'warning', FALSE);
+    }
   }
   else {
     drupal_set_message(t('Missing Feeds plugin %plugin. Please contact your site administrator.', $args), 'warning', FALSE);
