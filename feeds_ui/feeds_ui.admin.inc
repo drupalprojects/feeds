@@ -1198,9 +1198,7 @@ function feeds_ui_importer_import_validate($form, &$form_state) {
   $exists = feeds_ui_importer_machine_name_exists($feeds_importer->id);
 
   if ($exists && !$form_state['values']['id_override']) {
-    if (feeds_importer($feeds_importer->id)->export_type != EXPORT_IN_CODE) {
-      return form_error($form['id'], t('Feeds importer already exists with that id.'));
-    }
+    return form_error($form['id'], t('Feeds importer already exists with that id.'));
   }
 
   if (!$form_state['values']['bypass_validation']) {
