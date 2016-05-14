@@ -16,6 +16,15 @@ define('FEEDS_BLOCK_NON_EXISTENT', 'block');
  * Feeds processor plugin. Create users from feed items.
  */
 class FeedsUserProcessor extends FeedsProcessor {
+  /**
+   * Search by role name.
+   */
+  const ROLE_SEARCH_NAME = 'name';
+
+  /**
+   * Search by role id.
+   */
+  const ROLE_SEARCH_RID = 'rid';
 
   /**
    * Define entity type.
@@ -148,16 +157,43 @@ class FeedsUserProcessor extends FeedsProcessor {
   }
 
   /**
+   * Overrides FeedsProcessor::map().
+   *
+   * Ensures that the user is assigned additional roles that are configured on
+   * the settings. The roles could have been revoked when there was mapped to
+   * the "roles_list" target.
+   */
+  protected function map(FeedsSource $source, FeedsParserResult $result, $target_item = NULL) {
+    $target_item = parent::map($source, $result, $target_item);
+
+    // Assign additional roles as configured.
+    $roles = array_filter($this->config['roles']);
+    foreach ($roles as $rid) {
+      $target_item->roles[$rid] = $rid;
+    }
+
+    return $target_item;
+  }
+
+  /**
    * Override setTargetElement to operate on a target item that is a node.
    */
-  public function setTargetElement(FeedsSource $source, $target_user, $target_element, $value) {
+  public function setTargetElement(FeedsSource $source, $target_user, $target_element, $value, array $mapping = array()) {
     switch ($target_element) {
       case 'created':
         $target_user->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
+
       case 'language':
         $target_user->language = strtolower($value);
         break;
+
+      case 'roles_list':
+        // Ensure that the role list is an array.
+        $value = (array) $value;
+        $this->rolesListSetTarget($source, $target_user, $target_element, $value, $mapping);
+        break;
+
       default:
         parent::setTargetElement($source, $target_user, $target_element, $value);
         break;
@@ -195,6 +231,12 @@ class FeedsUserProcessor extends FeedsProcessor {
       'language' => array(
         'name' => t('User language'),
         'description' => t('Default language for the user.'),
+      ),
+      'roles_list' => array(
+        'name' => t('User roles'),
+        'description' => t('User roles provided as role names in comma separated list.'),
+        'summary_callbacks' => array(array($this, 'rolesListSummaryCallback')),
+        'form_callbacks' => array(array($this, 'rolesListFormCallback')),
       ),
     );
     if (module_exists('openid')) {
@@ -270,4 +312,170 @@ class FeedsUserProcessor extends FeedsProcessor {
     }
   }
 
+  /**
+   * Returns default values for mapper "roles_list".
+   */
+  public function rolesListDefaults() {
+    $roles = user_roles(TRUE);
+    unset($roles[DRUPAL_AUTHENTICATED_RID]);
+    $rids = array_keys($roles);
+    $rids = array_combine($rids, $rids);
+    return array(
+      'role_search' => self::ROLE_SEARCH_NAME,
+      'allowed_roles' => $rids,
+      'autocreate' => 0,
+      'revoke_roles' => 1,
+    );
+  }
+
+  /**
+   * Mapping configuration summary callback for target "roles_list".
+   */
+  public function rolesListSummaryCallback(array $mapping, $target, array $form, array $form_state) {
+    $options = array();
+
+    // Add in defaults.
+    $defaults = $this->rolesListDefaults();
+    $mapping += $defaults;
+    $mapping['allowed_roles'] += $defaults['allowed_roles'];
+
+    // Role search.
+    $role_search_options = $this->rolesListRoleSearchOptions();
+    $options[] = t('Search roles by: <strong>@search</strong>', array('@search' => $role_search_options[$mapping['role_search']]));
+
+    // Allowed roles.
+    $role_names = array();
+    $roles = user_roles(TRUE);
+    foreach (array_filter($mapping['allowed_roles']) as $rid => $enabled) {
+      $role_names[] = $roles[$rid];
+    }
+
+    if (empty($role_names)) {
+      $role_names = array('<' . t('none') . '>');
+    }
+    $options[] = t('Allowed roles: %roles', array('%roles' => implode(', ', $role_names)));
+
+    // Autocreate.
+    if ($mapping['autocreate']) {
+      $options[] = t('Automatically create roles');
+    }
+    else {
+      $options[] = t('Only assign existing roles');
+    }
+
+    // Revoke roles.
+    if ($mapping['revoke_roles']) {
+      $options[] = t('Revoke roles: yes');
+    }
+    else {
+      $options[] = t('Revoke roles: no');
+    }
+
+    return implode('<br />', $options);
+  }
+
+  /**
+   * Mapping configuration form callback for target "roles_list".
+   */
+  public function rolesListFormCallback(array $mapping, $target, array $form, array $form_state) {
+    // Add in defaults.
+    $defaults = $this->rolesListDefaults();
+    $mapping += $defaults;
+    $mapping['allowed_roles'] += $defaults['allowed_roles'];
+
+    $allowed_roles_options = user_roles(TRUE);
+    unset($allowed_roles_options[DRUPAL_AUTHENTICATED_RID]);
+
+    return array(
+      'role_search' => array(
+        '#type' => 'select',
+        '#title' => t('Search roles by'),
+        '#options' => $this->rolesListRoleSearchOptions(),
+        '#default_value' => $mapping['role_search'],
+      ),
+      'allowed_roles' => array(
+        '#type' => 'checkboxes',
+        '#title' => t('Allowed roles'),
+        '#options' => $allowed_roles_options,
+        '#default_value' => $mapping['allowed_roles'],
+        '#description' => t('Select the roles to accept from the feed.<br />Any other roles will be ignored.')
+      ),
+      'autocreate' => array(
+        '#type' => 'checkbox',
+        '#title' => t('Auto create'),
+        '#description' => t("Create the role if it doesn't exist."),
+        '#default_value' => $mapping['autocreate'],
+      ),
+      'revoke_roles' => array(
+        '#type' => 'checkbox',
+        '#title' => t('Revoke roles'),
+        '#description' => t('If enabled, roles that are not provided by the feed will be revoked for the user. This affects only the "Allowed roles" as configured above.'),
+        '#default_value' => $mapping['revoke_roles'],
+      ),
+    );
+  }
+
+  /**
+   * Returns role list options.
+   */
+  public function rolesListRoleSearchOptions() {
+    return array(
+      self::ROLE_SEARCH_NAME => t('Role name'),
+      self::ROLE_SEARCH_RID => t('Role ID'),
+    );
+  }
+
+  /**
+   * Sets role target on the user entity.
+   */
+  public function rolesListSetTarget(FeedsSource $source, $entity, $target, array $values, array $mapping) {
+    // Add in defaults.
+    $defaults = $this->rolesListDefaults();
+    $mapping += $defaults;
+    $mapping['allowed_roles'] += $defaults['allowed_roles'];
+
+    // Eventually revoke roles. Do not touch roles that are not allowed to set
+    // by the source.
+    if ($mapping['revoke_roles']) {
+      foreach ($mapping['allowed_roles'] as $rid) {
+        unset($entity->roles[$rid]);
+      }
+    }
+
+    foreach ($values as $value) {
+      $role = NULL;
+
+      $value = trim($value);
+      if (strlen($value) < 1) {
+        // No role provided. Continue to the next role.
+        continue;
+      }
+
+      switch ($mapping['role_search']) {
+        case self::ROLE_SEARCH_NAME:
+          $role = user_role_load_by_name($value);
+          if (!$role && !empty($mapping['autocreate'])) {
+            // Create new role if role doesn't exist.
+            $role = new stdClass();
+            $role->name = $value;
+            user_role_save($role);
+            $role = user_role_load_by_name($role->name);
+          }
+          break;
+
+        case self::ROLE_SEARCH_RID:
+          $role = user_role_load($value);
+          break;
+      }
+
+      if ($role) {
+        // Check if the role may be assigned.
+        if (isset($mapping['allowed_roles'][$role->rid]) && !$mapping['allowed_roles'][$role->rid]) {
+          // This role may *not* be assiged.
+          continue;
+        }
+        $entity->roles[$role->rid] = $role->name;
+      }
+    }
+  }
 }
