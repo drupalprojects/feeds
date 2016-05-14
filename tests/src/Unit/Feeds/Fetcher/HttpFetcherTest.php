@@ -11,7 +11,6 @@ use Drupal\Core\Form\FormState;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\Feeds\Fetcher\HttpFetcher;
 use Drupal\feeds\State;
-use Drupal\feeds\StateInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;

@@ -7,13 +7,7 @@
 
 namespace Drupal\Tests\feeds\Unit;
 
-use Drupal\feeds\Event\FeedsEvents;
-use Drupal\feeds\Event\FetchEvent;
-use Drupal\feeds\Event\ParseEvent;
-use Drupal\feeds\Event\ProcessEvent;
-use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedImportHandler;
-use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**

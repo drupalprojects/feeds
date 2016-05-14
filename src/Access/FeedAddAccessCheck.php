@@ -11,8 +11,6 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Route;
 
 /**
  * Access check for feeds link add list routes.

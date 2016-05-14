@@ -7,12 +7,9 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Cache\Cache;
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 
 /**

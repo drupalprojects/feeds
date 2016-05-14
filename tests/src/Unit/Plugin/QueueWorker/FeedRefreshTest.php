@@ -11,7 +11,6 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\Plugin\QueueWorker\FeedRefresh;
-use Drupal\feeds\Result\FetcherResult;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 

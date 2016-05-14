@@ -7,8 +7,6 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Target\File;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 

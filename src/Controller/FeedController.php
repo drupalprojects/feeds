@@ -10,7 +10,6 @@ namespace Drupal\feeds\Controller;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
-use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
 
 /**

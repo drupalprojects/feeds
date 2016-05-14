@@ -7,7 +7,6 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Feeds\Target\Timestamp;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 

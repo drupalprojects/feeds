@@ -19,7 +19,6 @@ use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
-use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
 use Drupal\user\UserInterface;

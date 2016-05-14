@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityHandlerBase;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\feeds\Event\EventDispatcherTrait;
-use Drupal\feeds\StateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

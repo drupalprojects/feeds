@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Component\CsvParser as CsvFileParser;
 use Drupal\feeds\Exception\EmptyFeedException;

@@ -10,7 +10,6 @@ namespace Drupal\feeds\Plugin\QueueWorker;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ParseEvent;
-use Drupal\feeds\FeedInterface;
 use Drupal\feeds\StateInterface;
 
 /**

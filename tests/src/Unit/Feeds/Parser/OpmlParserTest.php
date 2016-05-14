@@ -9,8 +9,6 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Parser;
 
 use Drupal\feeds\Feeds\Parser\OpmlParser;
 use Drupal\feeds\Result\RawFetcherResult;
-use Drupal\feeds\State;
-use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**

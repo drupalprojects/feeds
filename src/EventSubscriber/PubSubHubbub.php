@@ -9,7 +9,6 @@ namespace Drupal\feeds\EventSubscriber;
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\feeds\Component\HttpHelpers;
-use Drupal\feeds\Entity\Subscription;
 use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;

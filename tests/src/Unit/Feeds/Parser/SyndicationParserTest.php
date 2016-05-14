@@ -12,7 +12,6 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Feeds\Parser\SyndicationParser;
 use Drupal\feeds\Result\RawFetcherResult;
 use Drupal\feeds\State;
-use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**

@@ -9,7 +9,6 @@ namespace Drupal\Tests\feeds\Unit\Plugin\QueueWorker;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Exception\EmptyFeedException;
-use Drupal\feeds\Result\FetcherResult;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 

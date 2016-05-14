@@ -10,7 +10,6 @@ namespace Drupal\feeds;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
-use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**

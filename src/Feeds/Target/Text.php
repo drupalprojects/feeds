@@ -7,7 +7,6 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;

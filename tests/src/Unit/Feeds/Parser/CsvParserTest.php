@@ -11,7 +11,6 @@ use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Parser\CsvParser;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\State;
-use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
