@@ -210,16 +210,16 @@ class FeedsUserProcessor extends FeedsProcessor {
         'name' => t('User name'),
         'description' => t('Name of the user.'),
         'optional_unique' => TRUE,
-       ),
+      ),
       'mail' => array(
         'name' => t('Email address'),
         'description' => t('Email address of the user.'),
         'optional_unique' => TRUE,
-       ),
+      ),
       'created' => array(
         'name' => t('Created date'),
         'description' => t('The created (e. g. joined) data of the user.'),
-       ),
+      ),
       'pass' => array(
         'name' => t('Unencrypted Password'),
         'description' => t('The unencrypted user password.'),
@@ -244,7 +244,7 @@ class FeedsUserProcessor extends FeedsProcessor {
         'name' => t('OpenID identifier'),
         'description' => t('The OpenID identifier of the user. <strong>CAUTION:</strong> Use only for migration purposes, misconfiguration of the OpenID identifier can lead to severe security breaches like users gaining access to accounts other than their own.'),
         'optional_unique' => TRUE,
-       );
+      );
     }
 
     $this->getHookTargets($targets);
@@ -267,9 +267,11 @@ class FeedsUserProcessor extends FeedsProcessor {
         case 'name':
           $uid = db_query("SELECT uid FROM {users} WHERE name = :name", array(':name' => $value))->fetchField();
           break;
+
         case 'mail':
           $uid = db_query("SELECT uid FROM {users} WHERE mail = :mail", array(':mail' => $value))->fetchField();
           break;
+
         case 'openid':
           $uid = db_query("SELECT uid FROM {authmap} WHERE authname = :authname AND module = 'openid'", array(':authname' => $value))->fetchField();
           break;
