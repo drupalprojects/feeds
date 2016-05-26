@@ -62,6 +62,21 @@ class FeedsUserProcessor extends FeedsProcessor {
 
     // Copy the password so that we can compare it again at save.
     $user->feeds_original_pass = $user->pass;
+
+    // Reset roles and status when an user is replaced.
+    if ($this->config['update_existing'] == FEEDS_REPLACE_EXISTING) {
+      $user->roles = array_filter($this->config['roles']);
+      $user->status = $this->config['status'];
+
+      // Unserialize user data if it is still serialized.
+      if (!empty($user->data) && @unserialize($user->data)) {
+        $user->data = unserialize($user->data);
+      }
+      else {
+        $user->data = array();
+      }
+    }
+
     return $user;
   }
 

@@ -600,4 +600,72 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
       $this->assertTrue(isset($account->roles[$manager_rid]), format_string('@user has the manager role.', $vars));
     }
   }
+
+  /**
+   * Tests if roles are replaced when replacing users.
+   */
+  public function testAdditionalRolesSettingWhenReplacingUsers() {
+    // Create manager role.
+    $manager_rid = $this->drupalCreateRole(array('access content'), 'manager');
+    // Create editor role.
+    $editor_rid = $this->drupalCreateRole(array('access content'), 'editor');
+
+    // Set that the "manager" role should be assigned to every user that is
+    // imported. Other roles should be revoked.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array(
+      "roles[$manager_rid]" => TRUE,
+      'update_existing' => FEEDS_REPLACE_EXISTING,
+    ));
+
+    // Create account for Morticia with no roles. Morticia should gain the
+    // "manager" role.
+    user_save(drupal_anonymous_user(), array(
+      'name' => 'Morticia',
+      'mail' => 'morticia@example.com',
+      'pass' => 'mort',
+      'status' => 1,
+    ));
+
+    // Create account for Gomez and give it the "editor" role. After import
+    // Gomez should have lost the role "editor" and gained the role "manager".
+    user_save(drupal_anonymous_user(), array(
+      'name' => 'Gomez',
+      'mail' => 'gomez@example.com',
+      'pass' => 'gome',
+      'status' => 1,
+      'roles' => array(
+        $editor_rid => $editor_rid,
+      ),
+    ));
+
+    // Import CSV file.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users_roles.csv');
+
+    // Assert that Morticia has gained the role "manager".
+    $account = user_load_by_name('Morticia');
+    $this->assertTrue(isset($account->roles[$manager_rid]), 'Morticia has the manager role.');
+    $this->assertEqual(2, count($account->roles), 'Morticia has two roles.');
+
+    // Assert that Gomez has gained the role "manager" and but no longer has the
+    // "editor" role.
+    $account = user_load_by_name('Gomez');
+    $this->assertFalse(isset($account->roles[$editor_rid]), 'Gomez no longer has the editor role.');
+    $this->assertTrue(isset($account->roles[$manager_rid]), 'Gomez has the manager role.');
+    $this->assertEqual(2, count($account->roles), 'Gomez has two roles.');
+
+    // Now remove all default roles and import again.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array(
+      "roles[$manager_rid]" => FALSE,
+      'skip_hash_check' => TRUE,
+    ));
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users_roles.csv');
+
+    // Reset loaded users cache.
+    entity_get_controller('user')->resetCache();
+
+    // Assert that Morticia no longer has the role "manager".
+    $account = user_load_by_name('Morticia');
+    $this->assertFalse(isset($account->roles[$manager_rid]), 'Morticia no longer has the manager role.');
+    $this->assertEqual(1, count($account->roles), 'Morticia has one role.');
+  }
 }
