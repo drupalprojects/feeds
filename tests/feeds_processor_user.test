@@ -124,10 +124,7 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
     $this->assertText('Failed importing 2 user');
 
     // Attempt to log in as one of the imported users.
-    $account = user_load_by_name('Fester');
-    $this->assertTrue($account, 'Imported user account loaded.');
-    $account->pass_raw = 'fest';
-    $this->drupalLogin($account);
+    $this->feedsLoginUser('Fester', 'fest');
 
     // Login as admin.
     $this->drupalLogin($this->admin_user);
@@ -667,5 +664,110 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
     $account = user_load_by_name('Morticia');
     $this->assertFalse(isset($account->roles[$manager_rid]), 'Morticia no longer has the manager role.');
     $this->assertEqual(1, count($account->roles), 'Morticia has one role.');
+  }
+
+  /**
+   * Test if users with md5 passwords can login after import.
+   */
+  public function testMD5() {
+    // Set to update existing users.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array('update_existing' => FEEDS_UPDATE_EXISTING));
+
+    // Replace password mapper.
+    $this->removeMappings('user_import', array(
+      3 => array(
+        'source' => 'password',
+        'target' => 'pass',
+      ),
+    ));
+    $this->addMappings('user_import', array(
+      3 => array(
+        'source' => 'password_md5',
+        'target' => 'pass',
+        'pass_encryption' => 'md5',
+      ),
+    ));
+
+    // Create an account for Gomez, to ensure passwords can also be imported for
+    // existing users. Give Gomez a password different from the one that gets
+    // imported to ensure that his password gets updated.
+    user_save(drupal_anonymous_user(), array(
+      'name' => 'Gomez',
+      'mail' => 'gomez@example.com',
+      'pass' => 'temporary',
+      'status' => 1,
+    ));
+
+    // Import CSV file.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+
+    // Assert result.
+    $this->assertText('Created 2 users');
+    $this->assertText('Updated 1 user');
+
+    // Try to login as each successful imported user.
+    $this->feedsLoginUser('Morticia', 'mort');
+    $this->feedsLoginUser('Fester', 'fest');
+    $this->feedsLoginUser('Gomez', 'gome');
+  }
+
+  /**
+   * Test if users with sha512 passwords can login after import.
+   */
+  public function testSha512() {
+    // Set to update existing users.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array('update_existing' => FEEDS_UPDATE_EXISTING));
+
+    // Replace password mapper.
+    $this->removeMappings('user_import', array(
+      3 => array(
+        'source' => 'password',
+        'target' => 'pass',
+      ),
+    ));
+    $this->addMappings('user_import', array(
+      3 => array(
+        'source' => 'password_sha512',
+        'target' => 'pass',
+        'pass_encryption' => 'sha512',
+      ),
+    ));
+
+    // Create an account for Gomez, to ensure passwords can also be imported for
+    // existing users. Give Gomez a password different from the one that gets
+    // imported to ensure that his password gets updated.
+    user_save(drupal_anonymous_user(), array(
+      'name' => 'Gomez',
+      'mail' => 'gomez@example.com',
+      'pass' => 'temporary',
+      'status' => 1,
+    ));
+
+    // Import CSV file.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+
+    // Assert result.
+    $this->assertText('Created 2 users');
+    $this->assertText('Updated 1 user');
+
+    // Try to login as each successful imported user.
+    $this->feedsLoginUser('Morticia', 'mort');
+    $this->feedsLoginUser('Fester', 'fest');
+    $this->feedsLoginUser('Gomez', 'gome');
+  }
+
+  /**
+   * Log in an imported user.
+   *
+   * @param string $username
+   *   The user's username.
+   * @param string $password
+   *   The user's password.
+   */
+  protected function feedsLoginUser($username, $password) {
+    $account = user_load_by_name($username);
+    $this->assertTrue($account, 'Imported user account loaded.');
+    $account->pass_raw = $password;
+    $this->drupalLogin($account);
   }
 }
