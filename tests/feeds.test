@@ -90,6 +90,7 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $permissions[] = 'administer users';
     $permissions[] = 'administer feeds';
     $permissions[] = 'administer filters';
+    $permissions[] = 'administer fields';
 
     // Create an admin user and log in.
     $this->admin_user = $this->drupalCreateUser($permissions);
