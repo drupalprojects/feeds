@@ -21,7 +21,7 @@ class FeedController extends ControllerBase {
    * Presents the feeds feed creation form.
    *
    * @return array
-   *   A form array as expected by drupal_render().
+   *   A form array as expected by the Drupal renderer.
    *
    * @todo When node page gets converted, look at the implementation.
    */
@@ -66,7 +66,7 @@ class FeedController extends ControllerBase {
    * Presents the feed creation form.
    *
    * @return array
-   *   A form array as expected by drupal_render().
+   *   A form array as expected by the Drupal renderer.
    */
   public function createForm(FeedTypeInterface $feeds_feed_type) {
     $feed = $this->entityManager()->getStorage('feeds_feed')->create([
