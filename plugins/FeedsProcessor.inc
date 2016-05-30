@@ -1264,7 +1264,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
     foreach ($out as $key => $value) {
       if (is_string($value)) {
-        $out[$key] = truncate_utf8($value, 100, FALSE, TRUE);
+        $out[$key] = truncate_utf8(utf8_encode($value), 100, FALSE, TRUE);
       }
     }
 
