@@ -89,7 +89,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
 
   public function testGetMappingSources() {
     // Not really much to test here.
-    $this->assertSame(count($this->parser->getMappingSources()), 15);
+    $this->assertSame(count($this->parser->getMappingSources()), 16);
   }
 
 }

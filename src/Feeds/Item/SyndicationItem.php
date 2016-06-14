@@ -8,6 +8,7 @@ namespace Drupal\feeds\Feeds\Item;
 class SyndicationItem extends BaseItem {
 
   protected $title;
+  protected $content;
   protected $description;
   protected $author_name;
   protected $timestamp;
