@@ -103,7 +103,7 @@ class Text extends StringTarget implements ConfigurableTargetInterface {
    * {@inheritdoc}
    */
   public function getSummary() {
-    $formats = \Drupal::entityManager()
+    $formats = \Drupal::entityTypeManager()
       ->getStorage('filter_format')
       ->loadByProperties(['status' => '1', 'format' => $this->configuration['format']]);
 

@@ -84,7 +84,7 @@ function feeds_theme() {
 function feeds_file_download($uri) {
   // Get the file record based on the URI. If not in the database just return.
   /** @var \Drupal\file\FileInterface[] $files */
-  $files = \Drupal::entityManager()
+  $files = \Drupal::entityTypeManager()
     ->getStorage('file')
     ->loadByProperties(['uri' => $uri]);
 
@@ -107,7 +107,7 @@ function feeds_file_download($uri) {
     return;
   }
 
-  $feeds = \Drupal::entityManager()
+  $feeds = \Drupal::entityTypeManager()
     ->getStorage('feeds_feed')
     ->loadByProperties(['source' => $uri]);
 

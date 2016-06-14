@@ -54,13 +54,13 @@ class TextTest extends FeedsUnitTestCase {
       ->with(['status' => '1', 'format' => 'plain_text'])
       ->will($this->onConsecutiveCalls([new \FeedsFilterStub('Test filter')], []));
 
-    $manager = $this->getMock('Drupal\Core\Entity\EntityManagerInterface');
+    $manager = $this->getMock('Drupal\Core\Entity\EntityTypeManagerInterface');
     $manager->expects($this->exactly(2))
       ->method('getStorage')
       ->will($this->returnValue($storage));
 
     $container = new ContainerBuilder();
-    $container->set('entity.manager', $manager);
+    $container->set('entity_type.manager', $manager);
     \Drupal::setContainer($container);
 
     $this->assertSame('Format: <em class="placeholder">Test filter</em>', (string) $this->target->getSummary());
