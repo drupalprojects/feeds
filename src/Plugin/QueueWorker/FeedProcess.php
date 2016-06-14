@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\QueueWorker\FeedProcess.
- */
-
 namespace Drupal\feeds\Plugin\QueueWorker;
 
 use Drupal\feeds\Event\FeedsEvents;

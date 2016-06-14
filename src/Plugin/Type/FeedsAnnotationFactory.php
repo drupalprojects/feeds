@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\FeedsAnnotationFactory.
- */
 
 namespace Drupal\feeds\Plugin\Type;
 

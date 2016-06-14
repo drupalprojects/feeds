@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedListBuilder.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Component\Utility\SafeMarkup;

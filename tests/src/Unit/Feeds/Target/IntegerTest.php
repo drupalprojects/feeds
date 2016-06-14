@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Target\IntegerTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\feeds\Feeds\Target\Integer;

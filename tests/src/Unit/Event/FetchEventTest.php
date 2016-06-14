@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\FetchEventTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Event;
 
 use Drupal\feeds\Event\FetchEvent;

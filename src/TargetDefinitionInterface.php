@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\TargetDefinitionInterface.
- */
-
 namespace Drupal\feeds;
 
 /**

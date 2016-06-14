@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Component\XmlParserTrait.
- */
-
 namespace Drupal\feeds\Component;
 
 /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Form\FeedClearForm.
- */
-
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;

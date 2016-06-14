@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Ajax\SetHashCommand.
- */
-
 namespace Drupal\feeds\Ajax;
 
 use Drupal\Core\Ajax\CommandInterface;

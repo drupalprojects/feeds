@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\FeedsSingleLazyPluginCollection.
- */
-
 namespace Drupal\feeds\Feeds;
 
 use Drupal\Core\Plugin\DefaultSingleLazyPluginCollection;

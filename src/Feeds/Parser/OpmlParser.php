@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Parser\OpmlParser.
- */
-
 namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\feeds\Component\GenericOpmlParser;

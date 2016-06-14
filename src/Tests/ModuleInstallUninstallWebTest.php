@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Tests\ModuleInstallUninstallWebTest.
- */
-
 namespace Drupal\feeds\Tests;
 
 use Drupal\simpletest\WebTestBase;

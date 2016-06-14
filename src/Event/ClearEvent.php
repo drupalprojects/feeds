@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\ClearEvent.
- */
-
 namespace Drupal\feeds\Event;
 
 /**

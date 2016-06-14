@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedTypeForm.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Component\Utility\NestedArray;

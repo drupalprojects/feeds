@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Parser\CsvParserTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Parser;
 
 use Drupal\Core\Form\FormState;

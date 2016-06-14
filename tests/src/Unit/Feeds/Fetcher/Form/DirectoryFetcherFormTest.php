@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Fetcher\Form\DirectoryFetcherFormTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Fetcher\Form;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;

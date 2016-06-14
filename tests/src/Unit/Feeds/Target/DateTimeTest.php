@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Target\DateTimeTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;

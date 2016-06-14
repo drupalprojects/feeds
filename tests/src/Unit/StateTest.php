@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\StateTest.
- */
-
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\feeds\State;

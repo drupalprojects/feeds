@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Controller\SubscriptionControllerTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;

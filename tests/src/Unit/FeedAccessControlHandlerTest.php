@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\FeedAccessControlHandlerTest.
- */
-
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\Core\Language\Language;

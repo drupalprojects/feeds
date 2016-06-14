@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Action\DeleteFeed.
- */
-
 namespace Drupal\feeds\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\QueueWorker\FeedQueueWorkerBase.
- */
-
 namespace Drupal\feeds\Plugin\QueueWorker;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;

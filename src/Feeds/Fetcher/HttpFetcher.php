@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Fetcher\HttpFetcher.
- */
-
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Core\Cache\CacheBackendInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Target\Number.
- */
-
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Parser\SyndicationParserTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Parser;
 
 use Drupal\Component\Bridge\ZfExtensionManagerSfContainer;

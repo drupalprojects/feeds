@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\EventDispatcherTraitTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Event;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;

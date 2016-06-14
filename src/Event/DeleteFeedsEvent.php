@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\DeleteFeedsEvent.
- */
-
 namespace Drupal\feeds\Event;
 
 use Symfony\Component\EventDispatcher\Event;

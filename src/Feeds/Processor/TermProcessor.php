@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Processor\TermProcessor.
- */
-
 namespace Drupal\feeds\Feeds\Processor;
 
 /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\InitEvent.
- */
-
 namespace Drupal\feeds\Event;
 
 use Drupal\feeds\FeedInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\FeedsPluginInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;

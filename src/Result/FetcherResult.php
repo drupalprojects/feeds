@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Result\FetcherResult.
- */
-
 namespace Drupal\feeds\Result;
 
 use Drupal\Component\Utility\SafeMarkup;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Zend\Extension\Georss\EntryTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Zend\Extension\Georss;
 
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;

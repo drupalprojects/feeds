@@ -1,9 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\FetchEvent.
- */
 
 namespace Drupal\feeds\Event;
 

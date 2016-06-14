@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedStorage.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;

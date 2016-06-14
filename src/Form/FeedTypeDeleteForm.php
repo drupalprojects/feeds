@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Form\FeedTypeDeleteForm.
- */
-
 namespace Drupal\feeds\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;

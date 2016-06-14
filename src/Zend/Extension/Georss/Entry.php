@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Zend\Extension\Georss\Entry.
- */
-
 namespace Drupal\feeds\Zend\Extension\Georss;
 
 use Zend\Feed\Reader\Extension\AbstractEntry;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\EventDispatcherTrait.
- */
-
 namespace Drupal\feeds\Event;
 
 use Symfony\Component\EventDispatcher\Event;

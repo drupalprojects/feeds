@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Result\ParserResultTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Result;
 
 use Drupal\feeds\Result\ParserResult;

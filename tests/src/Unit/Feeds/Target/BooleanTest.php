@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Target\BooleanTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\feeds\Feeds\Target\Boolean;

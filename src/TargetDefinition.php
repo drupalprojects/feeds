@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\TargetDefinition.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Field\FieldDefinitionInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedTypeInterface.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;

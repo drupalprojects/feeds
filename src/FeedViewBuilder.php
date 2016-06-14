@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedViewBuilder.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\EntityViewBuilder;

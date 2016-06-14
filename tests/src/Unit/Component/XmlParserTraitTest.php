@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Component\XmlParserTraitTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Component;
 
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;

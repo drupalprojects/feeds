@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Fetcher\HttpFetcherTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Fetcher;
 
 use Drupal\Core\Form\FormState;

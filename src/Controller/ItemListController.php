@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Controller\ItemListController.
- */
-
 namespace Drupal\feeds\Controller;
 
 use Drupal\Component\Utility\SafeMarkup;

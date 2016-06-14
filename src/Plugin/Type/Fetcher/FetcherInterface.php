@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type\Fetcher;
 
 use Drupal\feeds\FeedInterface;

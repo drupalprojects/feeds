@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm.
- */
-
 namespace Drupal\feeds\Feeds\Fetcher\Form;
 
 use Drupal\Core\Form\FormStateInterface;

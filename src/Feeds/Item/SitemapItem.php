@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Item\SitemapItem.
- */
-
 namespace Drupal\feeds\Feeds\Item;
 
 /**

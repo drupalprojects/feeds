@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Processor\NodeProcessor.
- */
-
 namespace Drupal\feeds\Feeds\Processor;
 
 /**

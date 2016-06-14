@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Annotation\FeedsBase.
- */
-
 namespace Drupal\feeds\Annotation;
 
 use Drupal\Component\Annotation\Plugin;

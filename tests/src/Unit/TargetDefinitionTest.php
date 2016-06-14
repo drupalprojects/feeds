@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\TargetDefinitionTest.
- */
-
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\feeds\TargetDefinition;

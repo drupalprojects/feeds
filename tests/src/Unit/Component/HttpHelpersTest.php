@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Component\HttpHelpersTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Component;
 
 use Drupal\feeds\Component\HttpHelpers;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\feeds\Unit\Element\UriTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Element {
 
 use Drupal\Core\Form\FormState;

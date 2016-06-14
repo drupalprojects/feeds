@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Field\FieldFormatter\FeedsUriLinkFormatter.
- */
-
 namespace Drupal\feeds\Plugin\Field\FieldFormatter;
 
 use Drupal\Component\Utility\SafeMarkup;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Controller\SubscriptionController.
- */
-
 namespace Drupal\feeds\Controller;
 
 use Drupal\Component\Utility\SafeMarkup;

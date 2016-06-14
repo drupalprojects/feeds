@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Entity\Subscription.
- */
-
 namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Utility\Crypt;

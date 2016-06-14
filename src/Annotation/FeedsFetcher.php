@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Annotation\FeedsFetcher.
- */
-
 namespace Drupal\feeds\Annotation;
 
 /**

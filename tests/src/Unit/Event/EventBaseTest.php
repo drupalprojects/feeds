@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\EventBaseTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Event;
 
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;

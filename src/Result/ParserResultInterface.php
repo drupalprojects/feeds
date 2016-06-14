@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Result\ParserResultInterface.
- */
-
 namespace Drupal\feeds\Result;
 
 use Drupal\feeds\Feeds\Item\ItemInterface;

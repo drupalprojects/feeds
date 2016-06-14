@@ -1,12 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Form\MappingForm.
- *
- * @todo This needs some love.
- */
-
 namespace Drupal\feeds\Form;
 
 use Drupal\Component\Utility\SafeMarkup;

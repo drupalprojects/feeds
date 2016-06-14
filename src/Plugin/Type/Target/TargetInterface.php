@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\Target\TargetInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type\Target;
 
 use Drupal\Core\Entity\EntityInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Form\DeleteMultiple.
- */
-
 namespace Drupal\feeds\Form;
 
 use Drupal\Component\Utility\SafeMarkup;

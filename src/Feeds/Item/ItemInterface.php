@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\ItemInterface.
- */
-
 namespace Drupal\feeds\Feeds\Item;
 
 /**

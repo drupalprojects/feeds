@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\FeedTypeAccessControlHandlerTest.
- */
-
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\Core\Cache\Context\CacheContextsManager;

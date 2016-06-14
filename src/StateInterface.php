@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\StateInterface.
- */
-
 namespace Drupal\feeds;
 
 /**

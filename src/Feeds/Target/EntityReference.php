@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Target\EntityReference.
- */
-
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Component\Utility\SafeMarkup;

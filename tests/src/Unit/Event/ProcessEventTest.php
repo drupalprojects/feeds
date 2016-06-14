@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\ProcessEventTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Event;
 
 use Drupal\feeds\Event\ProcessEvent;

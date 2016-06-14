@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\SubscriptionInterface.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\ContentEntityInterface;

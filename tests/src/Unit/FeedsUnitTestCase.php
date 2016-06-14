@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\FeedsUnitTestCase.
- */
-
 namespace Drupal\Tests\feeds\Unit {
 
 use Drupal\Tests\UnitTestCase;

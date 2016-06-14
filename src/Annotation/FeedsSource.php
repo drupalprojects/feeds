@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Annotation\FeedsSource.
- */
-
 namespace Drupal\feeds\Annotation;
 
 /**

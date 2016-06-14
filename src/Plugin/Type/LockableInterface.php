@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\LockableInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 /**

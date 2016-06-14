@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\ConfigurablePluginBase.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Form\FormStateInterface;

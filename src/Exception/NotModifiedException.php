@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\NotModifiedException.
- */
-
 namespace Drupal\feeds\Exception;
 
 use RuntimeException;

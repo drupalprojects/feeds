@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\ExpireEvent.
- */
-
 namespace Drupal\feeds\Event;
 
 use Drupal\feeds\FeedInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Result\HttpFetcherResultInterface.
- */
-
 namespace Drupal\feeds\Result;
 
 /**

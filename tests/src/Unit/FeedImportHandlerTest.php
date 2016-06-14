@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\FeedImportHandlerTest.
- */
-
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\feeds\FeedImportHandler;

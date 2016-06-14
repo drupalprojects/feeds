@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\FeedHandlerBaseTest.
- */
-
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;

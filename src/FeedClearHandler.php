@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedClearHandler.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\feeds\Event\ClearEvent;

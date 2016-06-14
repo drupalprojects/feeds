@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Source\BasicFieldSource.
- */
-
 namespace Drupal\feeds\Feeds\Source;
 
 use Drupal\feeds\FeedInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Parser\CsvParser.
- */
-
 namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\Core\Form\FormStateInterface;

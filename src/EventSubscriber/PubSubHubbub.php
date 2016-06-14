@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\EventSubscriber\PubSubHubbub.
- */
-
 namespace Drupal\feeds\EventSubscriber;
 
 use Drupal\Core\Entity\EntityManagerInterface;

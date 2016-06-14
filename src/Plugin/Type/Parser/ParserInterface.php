@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\Parser\ParserInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type\Parser;
 
 use Drupal\feeds\FeedInterface;

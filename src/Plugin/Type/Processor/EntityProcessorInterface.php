@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type\Processor;
 
 use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;

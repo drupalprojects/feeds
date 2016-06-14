@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Parser\SitemapParser.
- */
-
 namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\feeds\Component\XmlParserTrait;

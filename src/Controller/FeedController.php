@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Controller\FeedController.
- */
-
 namespace Drupal\feeds\Controller;
 
 use Drupal\Component\Utility\SafeMarkup;

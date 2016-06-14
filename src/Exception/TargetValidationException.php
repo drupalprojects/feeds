@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Contains \Drupal\feeds\Exception\TargetValidationException.
- */
-
 namespace Drupal\feeds\Exception;
 
 use Drupal\Component\Utility\SafeMarkup;

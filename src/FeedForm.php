@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedForm.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\ContentEntityForm;

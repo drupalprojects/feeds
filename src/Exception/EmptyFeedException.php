@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Exception\EmptyFeedException.
- */
-
 namespace Drupal\feeds\Exception;
 
 use RuntimeException;

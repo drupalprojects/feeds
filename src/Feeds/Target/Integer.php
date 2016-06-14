@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Target\Integer.
- */
-
 namespace Drupal\feeds\Feeds\Target;
 
 /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Utility\Feed.
- */
-
 namespace Drupal\feeds\Utility;
 
 use Zend\Feed\Reader\FeedSet;

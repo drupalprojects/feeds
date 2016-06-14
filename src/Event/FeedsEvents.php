@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Event\FeedsEvents.
- */
-
 namespace Drupal\feeds\Event;
 
 /**

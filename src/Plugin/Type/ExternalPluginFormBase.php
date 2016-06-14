@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\ExternalPluginFormBase.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;

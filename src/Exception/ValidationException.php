@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Exception\ValidationException.
- */
-
 namespace Drupal\feeds\Exception;
 
 /**

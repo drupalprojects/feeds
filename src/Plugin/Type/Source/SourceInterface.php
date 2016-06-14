@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\Source\SourceInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type\Source;
 
 use Drupal\feeds\FeedInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Element\Uri.
- */
-
 namespace Drupal\feeds\Element;
 
 use Drupal\Core\Form\FormStateInterface;

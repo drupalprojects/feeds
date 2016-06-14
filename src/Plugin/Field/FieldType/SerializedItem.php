@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Field\FieldType\SerializedItem.
- */
-
 namespace Drupal\feeds\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;

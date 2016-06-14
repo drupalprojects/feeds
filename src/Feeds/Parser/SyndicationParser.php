@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Parser\SyndicationParser.
- */
-
 namespace Drupal\feeds\Feeds\Parser;
 
 use Drupal\feeds\Exception\EmptyFeedException;

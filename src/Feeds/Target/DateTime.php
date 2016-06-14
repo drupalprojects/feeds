@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Target\DateTime.
- */
-
 namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Core\Datetime\DrupalDateTime;

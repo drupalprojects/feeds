@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\ClearableInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\feeds\FeedInterface;

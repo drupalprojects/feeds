@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\PluginBase.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Plugin\PluginBase as DrupalPluginBase;

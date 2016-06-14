@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\EventSubscriber\LazySubscriber.
- */
-
 namespace Drupal\feeds\EventSubscriber;
 
 use Drupal\feeds\Event\ClearEvent;

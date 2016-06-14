@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Feeds\Item\DynamicItemTest
- */
-
 namespace Drupal\Tests\feeds\Unit\Feeds\Item;
 
 use Drupal\feeds\Feeds\Item\DynamicItem;

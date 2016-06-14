@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Result\RawFetcherResult.
- */
-
 namespace Drupal\feeds\Result;
 
 /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedViewsData.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\views\EntityViewsData;

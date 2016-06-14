@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedTypeAccessControlHandler.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Access\AccessResult;

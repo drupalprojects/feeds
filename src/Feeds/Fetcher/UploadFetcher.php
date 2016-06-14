@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Fetcher\UploadFetcher.
- */
-
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Utility\SafeMarkup;

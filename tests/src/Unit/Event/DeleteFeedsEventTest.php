@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\DeleteFeedsEventTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Event;
 
 use Drupal\feeds\Event\DeleteFeedsEvent;

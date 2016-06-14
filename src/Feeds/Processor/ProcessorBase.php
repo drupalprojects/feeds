@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Processor\EntityProcessorBase.
- */
-
 namespace Drupal\feeds\Feeds\Processor;
 
 use Drupal\feeds\FeedInterface;

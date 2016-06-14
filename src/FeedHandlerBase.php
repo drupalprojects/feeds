@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedHandlerBase.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\EntityHandlerBase;

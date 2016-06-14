@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Item\OpmlItem.
- */
-
 namespace Drupal\feeds\Feeds\Item;
 
 /**

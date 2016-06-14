@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Plugin\QueueWorker\FeedRefreshTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Plugin\QueueWorker;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;

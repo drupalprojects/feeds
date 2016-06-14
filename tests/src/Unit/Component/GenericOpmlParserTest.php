@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\Component\GenericOpmlParserTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\Component;
 
 use Drupal\feeds\Component\GenericOpmlParser;

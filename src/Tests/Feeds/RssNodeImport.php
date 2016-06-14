@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Tests\Feeds\RssNodeImport.
- */
-
 namespace Drupal\feeds\Tests\Feeds;
 
 use Drupal\Component\Utility\Unicode;

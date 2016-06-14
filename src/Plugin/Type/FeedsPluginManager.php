@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\FeedsPluginManager.
- */
-
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Cache\CacheBackendInterface;

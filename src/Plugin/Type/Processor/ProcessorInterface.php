@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Type\Processor\ProcessorInterface.
- */
-
 namespace Drupal\feeds\Plugin\Type\Processor;
 
 use Drupal\feeds\FeedInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedTypeListBuilder.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\EntityInterface;

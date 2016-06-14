@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Component\CsvParser.
- */
-
 namespace Drupal\feeds\Component;
 
 /**

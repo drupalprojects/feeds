@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Plugin\Derivative\FeedQueueWorker.
- */
-
 namespace Drupal\feeds\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;

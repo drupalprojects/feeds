@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Exception\LockException.
- */
-
 namespace Drupal\feeds\Exception;
 
 use RuntimeException;

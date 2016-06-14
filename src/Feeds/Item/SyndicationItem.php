@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Feeds\Item\SyndicationItem.
- */
-
 namespace Drupal\feeds\Feeds\Item;
 
 /**

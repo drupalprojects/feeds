@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Exception\EntityAccessException.
- */
-
 namespace Drupal\feeds\Exception;
 
 use RuntimeException;

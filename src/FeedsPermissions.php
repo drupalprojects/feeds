@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedsPermissions.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\Core\Routing\UrlGeneratorTrait;

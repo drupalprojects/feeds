@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\feeds\Unit\LazySubscriberTest.
- */
-
 namespace Drupal\Tests\feeds\Unit\EventSubscriber;
 
 use Drupal\feeds\EventSubscriber\LazySubscriber;

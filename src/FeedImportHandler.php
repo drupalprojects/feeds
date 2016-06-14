@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\FeedImportHandler.
- */
-
 namespace Drupal\feeds;
 
 use Drupal\feeds\Event\FeedsEvents;

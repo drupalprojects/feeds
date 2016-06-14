@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\feeds\Access\FeedAddAccessCheck.
- */
-
 namespace Drupal\feeds\Access;
 
 use Drupal\Core\Access\AccessResult;
