@@ -3,6 +3,7 @@
 namespace Drupal\feeds;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\file\Entity\File;
 
 /**
@@ -142,7 +143,7 @@ class FeedsEnclosure {
         $file = file_save_data($this->getContent(), $destination . $filename, $replace);
       }
       catch (\Exception $e) {
-        watchdog_exception('Feeds', $e, nl2br(SafeMarkup::checkPlain($e)));
+        watchdog_exception('Feeds', $e, nl2br(Html::escape($e)));
       }
     }
 

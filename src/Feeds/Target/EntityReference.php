@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -77,7 +77,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     $field_definitions = array_filter($field_definitions, [$this, 'filterFieldTypes']);
     $options = [];
     foreach ($field_definitions as $id => $definition) {
-      $options[$id] = SafeMarkup::checkPlain($definition->getLabel());
+      $options[$id] = Html::escape($definition->getLabel());
     }
 
     return $options;

@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Entity;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
@@ -393,7 +393,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
 
     $options = [];
     foreach ($manager->getDefinitions() as $id => $definition) {
-      $options[$id] = SafeMarkup::checkPlain($definition['title']);
+      $options[$id] = Html::escape($definition['title']);
     }
 
     return $options;

@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Controller;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -118,7 +118,7 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
     $subscription->setState('subscribed');
     $subscription->save();
 
-    return new Response(SafeMarkup::checkPlain($request->query->get('hub_challenge')), 200);
+    return new Response(Html::escape($request->query->get('hub_challenge')), 200);
   }
 
   /**
@@ -149,7 +149,7 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
 
     $this->keyValueExpireFactory->get('feeds_push_unsubscribe')->delete($id);
 
-    return new Response(SafeMarkup::checkPlain($request->query->get('hub_challenge')), 200);
+    return new Response(Html::escape($request->query->get('hub_challenge')), 200);
   }
 
   /**
