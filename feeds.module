@@ -339,6 +339,10 @@ function feeds_nodeapi(&$node, $op, $form) {
   // Break out node processor related nodeapi functionality.
   _feeds_nodeapi_node_processor($node, $op);
 
+  if (!in_array($op, array('validate', 'presave', 'insert', 'update', 'delete'))) {
+    return;
+  }
+
   if ($importer_id = feeds_get_importer_id($node->type)) {
     switch ($op) {
       case 'validate':
