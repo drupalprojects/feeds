@@ -685,24 +685,11 @@ class FeedsDateTime extends DateTime {
   private $_serialized_timezone;
 
   /**
-   * Helper function to prepare the object during serialization.
+   * The original time value passed into the constructor.
    *
-   * We are extending a core class and core classes cannot be serialized.
-   *
-   * Ref: http://bugs.php.net/41334, http://bugs.php.net/39821
+   * @var mixed
    */
-  public function __sleep() {
-    $this->_serialized_time = $this->format('c');
-    $this->_serialized_timezone = $this->getTimezone()->getName();
-    return array('_serialized_time', '_serialized_timezone');
-  }
-
-  /**
-   * Upon unserializing, we must re-build ourselves using local variables.
-   */
-  public function __wakeup() {
-    $this->__construct($this->_serialized_time, new DateTimeZone($this->_serialized_timezone));
-  }
+  protected $originalValue;
 
   /**
    * Overridden constructor.
@@ -714,6 +701,8 @@ class FeedsDateTime extends DateTime {
    *   PHP DateTimeZone object, NULL allowed
    */
   public function __construct($time = '', $tz = NULL) {
+    $this->originalValue = $time;
+
     if (is_numeric($time)) {
       // Assume UNIX timestamp if it doesn't look like a simple year.
       if (strlen($time) > 4) {
@@ -749,6 +738,43 @@ class FeedsDateTime extends DateTime {
 
     // Finally set granularity.
     $this->setGranularityFromTime($time, $tz);
+  }
+
+  /**
+   * Helper function to prepare the object during serialization.
+   *
+   * We are extending a core class and core classes cannot be serialized.
+   *
+   * Ref: http://bugs.php.net/41334, http://bugs.php.net/39821
+   */
+  public function __sleep() {
+    $this->_serialized_time = $this->format('c');
+    $this->_serialized_timezone = $this->getTimezone()->getName();
+    return array('_serialized_time', '_serialized_timezone');
+  }
+
+  /**
+   * Upon unserializing, we must re-build ourselves using local variables.
+   */
+  public function __wakeup() {
+    $this->__construct($this->_serialized_time, new DateTimeZone($this->_serialized_timezone));
+  }
+
+  /**
+   * Returns the string representation.
+   *
+   * Will try to use the literal input, if that is a string. Fallsback to
+   * ISO-8601.
+   *
+   * @return string
+   *   The string version of this DateTime object.
+   */
+  public function __toString() {
+    if (is_scalar($this->originalValue)) {
+      return (string) $this->originalValue;
+    }
+
+    return $this->format('Y-m-d\TH:i:sO');
   }
 
   /**
@@ -865,6 +891,7 @@ class FeedsDateTime extends DateTime {
   protected function toArray() {
     return array('year' => $this->format('Y'), 'month' => $this->format('m'), 'day' => $this->format('d'), 'hour' => $this->format('H'), 'minute' => $this->format('i'), 'second' => $this->format('s'), 'zone' => $this->format('e'));
   }
+
 }
 
 /**
