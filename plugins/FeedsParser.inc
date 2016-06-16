@@ -513,6 +513,8 @@ class FeedsEnclosure extends FeedsElement {
 
 /**
  * Defines a date element of a parsed result (including ranges, repeat).
+ *
+ * @deprecated This is no longer in use and will not be maintained.
  */
 class FeedsDateTimeElement extends FeedsElement {
 
@@ -673,6 +675,8 @@ class FeedsDateTimeElement extends FeedsElement {
  * class.
  *
  * @see FeedsDateTimeElement
+ *
+ * @deprecated Use DateObject instead.
  */
 class FeedsDateTime extends DateTime {
   public $granularity = array();
@@ -878,12 +882,16 @@ function feeds_to_unixtime($date, $default_value) {
   if (is_numeric($date)) {
     return $date;
   }
-  elseif (is_string($date) && !empty($date)) {
-    $date = new FeedsDateTimeElement($date);
+
+  if ($date instanceof FeedsDateTimeElement) {
     return $date->getValue();
   }
-  elseif ($date instanceof FeedsDateTimeElement) {
-    return $date->getValue();
+
+  if (is_string($date) || is_object($date) && method_exists($date, '__toString')) {
+    if ($date_object = date_create(trim($date))) {
+      return $date_object->format('U');
+    }
   }
+
   return $default_value;
 }
