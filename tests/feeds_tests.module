@@ -61,6 +61,20 @@ function feeds_tests_theme() {
 }
 
 /**
+ * Implements hook_cron_queue_alter().
+ *
+ * Changes runtime limit for feeds_source_import queue.
+ *
+ * @see FeedsFileFetcherTestCase::testRemoveFileAfterImportInBackground()
+ */
+function feeds_tests_cron_queue_info_alter(&$queues) {
+  $feeds_source_import_queue_time = variable_get('feeds_tests_feeds_source_import_queue_time', FALSE);
+  if ($feeds_source_import_queue_time && isset($queues['feeds_source_import'])) {
+    $queues['feeds_source_import']['time'] = $feeds_source_import_queue_time;
+  }
+}
+
+/**
  * Outputs flickr test feed.
  */
 function feeds_tests_flickr() {
@@ -380,6 +394,18 @@ function feeds_tests_feeds_after_parse(FeedsSource $source, FeedsParserResult $r
         $item['rids'] = explode('|', $item['rids']);
       }
     }
+  }
+}
+
+/**
+ * Implements hook_feeds_after_save().
+ *
+ * @see FeedsFileFetcherTestCase::testRemoveFileAfterImportInBackground()
+ */
+function feeds_tests_feeds_after_save() {
+  $sleep = variable_get('feeds_tests_feeds_after_save_sleep', FALSE);
+  if ($sleep) {
+    sleep($sleep);
   }
 }
 
