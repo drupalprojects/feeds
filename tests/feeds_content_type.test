@@ -79,4 +79,32 @@ class FeedsContentTypeTest extends FeedsWebTestCase {
 
     $this->assertText('Title field is required.');
   }
+
+  /**
+   * Tests that the feed node gets no title if the content type does not use the
+   * node title field.
+   */
+  public function testWithContentTypeWithoutTitle() {
+    // Set that the content type 'page' has no title.
+    db_update('node_type')
+      ->fields(array(
+        'has_title' => 0,
+      ))
+      ->condition('type', 'page')
+      ->execute();
+
+    // Flush caches so this change is picked up.
+    drupal_flush_all_caches();
+
+    // And import a RSS feed with a title.
+    $edit = array(
+      'feeds[FeedsHTTPFetcher][source]' => $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/developmentseed.rss2',
+    );
+    $this->drupalPost('node/add/page', $edit, 'Save');
+
+    // Assert that the feed node didn't got a title from the source.
+    $node = node_load(1);
+    $this->assertEqual('', $node->title, 'The feed node has no title.');
+  }
+
 }
