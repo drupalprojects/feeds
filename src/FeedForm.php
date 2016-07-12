@@ -105,7 +105,7 @@ class FeedForm extends ContentEntityForm {
    *
    * @todo Don't call buildEntity() here.
    */
-  public function validate(array $form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getErrors()) {
       return;
     }
@@ -131,7 +131,7 @@ class FeedForm extends ContentEntityForm {
       }
     }
 
-    parent::validate($form, $form_state);
+    parent::validateForm($form, $form_state);
   }
 
   /**
