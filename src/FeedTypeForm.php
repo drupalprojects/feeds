@@ -249,6 +249,13 @@ class FeedTypeForm extends EntityForm {
     }
 
     foreach ($this->getConfigurablePlugins() as $type => $plugin) {
+      if (!isset($form[$type . '_configuration'])) {
+        // When switching from a non-configurable plugin to a configurable
+        // plugin, no form is yet available. So skip validating it to avoid
+        // fatal errors.
+        continue;
+      }
+
       $plugin_state = $this->createSubFormState($type . '_configuration', $form_state);
       $plugin->validateConfigurationForm($form[$type . '_configuration'], $plugin_state);
       $form_state->setValue($type . '_configuration', $plugin_state->getValues());
