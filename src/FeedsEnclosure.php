@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\file\Entity\File;
 
@@ -68,7 +68,7 @@ class FeedsEnclosure {
         '%url' => $this->uri,
         '@code' => $response->getStatusCode(),
       ];
-      throw new \RuntimeException(SafeMarkup::format('Download of %url failed with code @code.', $args));
+      throw new \RuntimeException(new FormattableMarkup('Download of %url failed with code @code.', $args));
     }
 
     return $response->getBody(TRUE);
@@ -149,7 +149,7 @@ class FeedsEnclosure {
 
     // We couldn't make sense of this enclosure, throw an exception.
     if (!$file) {
-      throw new \RuntimeException(SafeMarkup::format('Invalid enclosure %enclosure', ['%enclosure' => $this->uri]));
+      throw new \RuntimeException(new FormattableMarkup('Invalid enclosure %enclosure', ['%enclosure' => $this->uri]));
     }
 
     return $file;

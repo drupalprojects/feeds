@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Exception;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * Thrown if the target values are invalid and cannot be recovered.
@@ -33,7 +33,7 @@ class TargetValidationException extends \RuntimeException {
    */
   public function __construct($message = '', array $args = []) {
     $this->messageString = $message;
-    $this->message = SafeMarkup::format($message, $args);
+    $this->message = new FormattableMarkup($message, $args);
     $this->args = $args;
     $this->code = 0;
   }

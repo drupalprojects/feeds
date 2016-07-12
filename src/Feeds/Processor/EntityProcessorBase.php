@@ -3,7 +3,7 @@
 namespace Drupal\feeds\Feeds\Processor;
 
 use Doctrine\Common\Inflector\Inflector;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -308,7 +308,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       '%error' => $violations[0]->getMessage(),
       '@url' => $this->url('entity.feeds_feed_type.mapping', ['feeds_feed_type' => $this->feedType->id()]),
     ];
-    throw new ValidationException(SafeMarkup::format('The @entity %label failed to validate with the error: %error Please check your <a href="@url">mappings</a>.', $args));
+    throw new ValidationException(new FormattableMarkup('The @entity %label failed to validate with the error: %error Please check your <a href="@url">mappings</a>.', $args));
   }
 
   /**

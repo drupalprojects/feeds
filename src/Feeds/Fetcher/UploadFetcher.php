@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Feeds\Fetcher;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -96,7 +96,7 @@ class UploadFetcher extends ConfigurablePluginBase implements FeedPluginFormInte
     }
 
     // File does not exist.
-    throw new \RuntimeException(SafeMarkup::format('Resource is not a file: %source', ['%source' => $feed->getSource()]));
+    throw new \RuntimeException(new FormattableMarkup('Resource is not a file: %source', ['%source' => $feed->getSource()]));
   }
 
   /**

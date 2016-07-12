@@ -2,7 +2,7 @@
 
 namespace Drupal\feeds\Entity;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -388,7 +388,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   public function lock() {
     if (!\Drupal::service('lock.persistent')->acquire("feeds_feed_{$this->id()}", 3600 * 12)) {
       $args = ['@id' => $this->bundle(), '@fid' => $this->id()];
-      throw new LockException(SafeMarkup::format('Cannot acquire lock for feed @id / @fid.', $args));
+      throw new LockException(new FormattableMarkup('Cannot acquire lock for feed @id / @fid.', $args));
     }
   }
 
