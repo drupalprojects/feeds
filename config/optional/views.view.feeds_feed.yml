@@ -41,8 +41,6 @@ display:
           replica: false
           query_comment: ''
           query_tags: {  }
-        provider: views
-        dependencies: {  }
       exposed_form:
         type: basic
         options:
@@ -184,8 +182,54 @@ display:
           id: feeds_feed_bulk_form
           table: feeds_feed
           field: feeds_feed_bulk_form
-          plugin_id: feeds_feed_bulk_form
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Bulk update'
           exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          action_title: 'With selection'
+          include_exclude: exclude
+          selected_actions: {  }
+          plugin_id: feeds_feed_bulk_form
           dependencies:
             module:
               - views
@@ -323,9 +367,6 @@ display:
           relationship: uid
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - user
           label: Name
           exclude: false
           alter:
@@ -367,6 +408,23 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: user_name
+          settings:
+            link_to_entity: 1
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: 0
+          dependencies:
+            module:
+              - user
           link_to_user: true
           overwrite_anonymous: false
           anonymous_text: ''
@@ -421,6 +479,22 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: medium
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: 0
           date_format: short
           custom_date_format: ''
           timezone: ''
@@ -434,9 +508,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           label: Imported
           exclude: false
           alter:
@@ -478,6 +549,25 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: medium
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: 0
+          dependencies:
+            module:
+              - views
           date_format: 'time ago'
           custom_date_format: ''
           timezone: ''
@@ -658,15 +748,22 @@ display:
         operator: AND
         groups:
           1: AND
+      show_admin_links: true
+      hide_attachment_summary: false
+      group_by: false
+      css_class: ''
+      use_more: false
+      use_more_always: true
+      use_more_text: more
     cache_metadata:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-        - 'url.query_args:order'
-        - 'url.query_args:sort'
+        - url.query_args
       cacheable: false
+      max-age: 0
+      tags: {  }
   page_1:
     display_plugin: page
     id: page_1
@@ -680,6 +777,11 @@ display:
       menu:
         type: normal
         title: Feeds
+        description: ''
+        expanded: false
+        parent: system.admin_content
+        weight: 0
+        context: '0'
         menu_name: admin
       display_extenders: {  }
     cache_metadata:
@@ -687,7 +789,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-        - 'url.query_args:order'
-        - 'url.query_args:sort'
+        - url.query_args
       cacheable: false
+      max-age: 0
+      tags: {  }
