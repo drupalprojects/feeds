@@ -12,6 +12,13 @@ use Drupal\feeds\FeedTypeInterface;
 class FeedsSingleLazyPluginCollection extends DefaultSingleLazyPluginCollection {
 
   /**
+   * The feed type.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
+  protected $feedType;
+
+  /**
    * Constructs a FeedsSingleLazyPluginCollection.
    *
    * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
@@ -26,6 +33,7 @@ class FeedsSingleLazyPluginCollection extends DefaultSingleLazyPluginCollection 
   public function __construct(PluginManagerInterface $manager, $instance_id, array $configuration, FeedTypeInterface $feed_type) {
     // Sneak the feed type in via configuration.
     // @todo Remove this once plugins don't need the type.
+    $this->feedType = $feed_type;
     $configuration['feed_type'] = $feed_type;
     parent::__construct($manager, $instance_id, $configuration);
   }
@@ -33,12 +41,10 @@ class FeedsSingleLazyPluginCollection extends DefaultSingleLazyPluginCollection 
   /**
    * {@inheritdoc}
    */
-  public function addInstanceId($id, $configuration = NULL) {
-    $this->instanceId = $id;
-    parent::addInstanceId($id, $configuration);
-    if ($configuration !== NULL) {
-      $this->setConfiguration($configuration);
-    }
+  public function setConfiguration($configuration) {
+    $configuration['feed_type'] = $this->feedType;
+
+    return parent::setConfiguration($configuration);
   }
 
 }

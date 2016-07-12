@@ -16,9 +16,9 @@ use Drupal\feeds\FeedInterface;
 abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterface {
 
   /**
-   * The impoter this plugin is working for.
+   * The importer this plugin is working for.
    *
-   * @var \Drupal\feeds\Entity\FeedType
+   * @var \Drupal\feeds\FeedTypeInterface
    */
   protected $feedType;
 
@@ -47,6 +47,8 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    *   The plugin implementation definition.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
+    assert('isset($configuration["feed_type"]) && $configuration["feed_type"] instanceof Drupal\feeds\FeedTypeInterface');
+
     $this->feedType = $configuration['feed_type'];
     unset($configuration['feed_type']);
     $this->setConfiguration($configuration);

@@ -333,6 +333,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
    */
   protected function getPlugin($plugin_type) {
     $bags = $this->getPluginCollections();
+
     return $bags[$plugin_type . '_configuration']->get($this->$plugin_type);
   }
 
