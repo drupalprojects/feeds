@@ -76,7 +76,12 @@ abstract class FieldTargetBase extends TargetBase {
    */
   public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, array $values) {
     if ($values = $this->prepareValues($values)) {
-      $entity->get($field_name)->setValue($values);
+      $item_list = $entity->get($field_name);
+
+      // Append these values to the existing values.
+      $values = array_merge($item_list->getValue(), $values);
+
+      $item_list->setValue($values);
     }
   }
 
@@ -101,6 +106,7 @@ abstract class FieldTargetBase extends TargetBase {
         drupal_set_message($e->getMessage(), 'error');
       }
     }
+
     return $return;
   }
 
