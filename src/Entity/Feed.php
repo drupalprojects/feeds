@@ -595,7 +595,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       ])
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['config'] = BaseFieldDefinition::create('feeds_serialized')
+    $fields['config'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Config'))
       ->setDescription(t('The config of the feed.'));
 
