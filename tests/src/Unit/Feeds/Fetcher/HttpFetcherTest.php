@@ -45,11 +45,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
   public function testFetch() {
-    $this->mockHandler->append(function ($request, $options) {
-      file_put_contents($options['sink'], 'test data');
-
-      return new Response(200);
-    });
+    $this->mockHandler->append(new Response(200, [], 'test data'));
     $result = $this->fetcher->fetch($this->getMock('Drupal\feeds\FeedInterface'), new State());
     $this->assertSame('test data', $result->getRaw());
 
