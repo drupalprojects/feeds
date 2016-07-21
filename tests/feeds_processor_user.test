@@ -757,6 +757,48 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
   }
 
   /**
+   * Tests mapping to timezone.
+   */
+  public function testTimezoneTarget() {
+    // Set to update existing users.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array('update_existing' => FEEDS_UPDATE_EXISTING));
+
+    // Add mapping to timezone.
+    $this->addMappings('user_import', array(
+      4 => array(
+        'source' => 'timezone',
+        'target' => 'timezone',
+      ),
+    ));
+
+    // Create an account for Fester, to ensure that the timezone can be emptied.
+    user_save(drupal_anonymous_user(), array(
+      'name' => 'Fester',
+      'mail' => 'fester@example.com',
+      'pass' => 'fest',
+      'status' => 1,
+      'timezone' => 'Europe/Lisbon',
+    ));
+
+    // Import CSV file.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+
+    // Assert that Morticia got the UTC timezone.
+    $account = user_load_by_name('Morticia');
+    $this->assertEqual('UTC', $account->timezone, 'Morticia has the UTC timezone.');
+
+    // Assert that Fester did not get any timezone.
+    $account = user_load_by_name('Fester');
+    $this->assertFalse($account->timezone, 'Fester does not have any timezone');
+
+    // Assert that Gomez doesn't exist after import and appropriate message is
+    // displayed.
+    $account = user_load_by_name('Gomez');
+    $this->assertFalse($account, "Gomez doesn't exist after import.");
+    $this->assertText("Failed importing 'Gomez'. User's timezone is not valid.");
+  }
+
+  /**
    * Log in an imported user.
    *
    * @param string $username

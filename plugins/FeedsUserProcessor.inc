@@ -104,6 +104,11 @@ class FeedsUserProcessor extends FeedsProcessor {
     if (empty($account->name) || empty($account->mail) || !valid_email_address($account->mail)) {
       throw new FeedsValidationException(t('User name missing or email not valid.'));
     }
+
+    // Timezone validation.
+    if (!empty($account->timezone) && !array_key_exists($account->timezone, system_time_zones())) {
+      throw new FeedsValidationException(t("Failed importing '@name'. User's timezone is not valid.", array('@name' => $account->name)));
+    }
   }
 
   /**
@@ -237,6 +242,10 @@ class FeedsUserProcessor extends FeedsProcessor {
         $this->rolesListSetTarget($source, $target_user, $target_element, $value, $mapping);
         break;
 
+      case 'timezone':
+        $target_user->timezone = $value;
+        break;
+
       default:
         parent::setTargetElement($source, $target_user, $target_element, $value);
         break;
@@ -276,6 +285,10 @@ class FeedsUserProcessor extends FeedsProcessor {
       'language' => array(
         'name' => t('User language'),
         'description' => t('Default language for the user.'),
+      ),
+      'timezone' => array(
+        'name' => t('Timezone'),
+        'description' => t('The timezone identifier, like UTC or Europe/Lisbon.'),
       ),
       'roles_list' => array(
         'name' => t('User roles'),
