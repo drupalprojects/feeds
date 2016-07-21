@@ -142,6 +142,124 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
   }
 
   /**
+   * Tests mapping to user ID.
+   */
+  public function testUidTarget() {
+    // Set to update existing users.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array('update_existing' => FEEDS_UPDATE_EXISTING));
+
+    // Add mapping to user ID.
+    $this->addMappings('user_import', array(
+      4 => array(
+        'source' => 'uid',
+        'target' => 'uid',
+        'unique' => TRUE,
+      ),
+    ));
+
+    // Create account with uid 202. The username and mail address of this account
+    // should be updated.
+    user_save(drupal_anonymous_user(), array(
+      'uid' => 202,
+      'name' => 'Joe',
+      'mail' => 'joe@example.com',
+      'pass' => 'joe',
+      'status' => 1,
+    ));
+
+    // Import CSV file.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->assertText('Created 2 users');
+    $this->assertText('Updated 1 user');
+
+    // Assert user ID's.
+    $account = user_load_by_name('Morticia');
+    $this->assertEqual(201, $account->uid, 'Morticia got user ID 201.');
+    $account = user_load_by_name('Gomez');
+    $this->assertEqual(203, $account->uid, 'Gomez got user ID 203.');
+
+    // Assert that the username and mail address of account 202 were changed.
+    $account = user_load(202);
+    $values = array(
+      'name' => array(
+        'expected' => 'Fester',
+        'actual' => $account->name,
+      ),
+      'mail' => array(
+        'expected' => 'fester@example.com',
+        'actual' => $account->mail,
+      ),
+    );
+    $this->assertEqual($values['name']['expected'], $values['name']['actual'], format_string('Username of account 202 changed in @expected (actual: @actual).', array(
+      '@expected' => $values['name']['expected'],
+      '@actual' => $values['name']['actual'],
+    )));
+    $this->assertEqual($values['mail']['expected'], $values['mail']['actual'], format_string('Mail address of account 202 changed in @expected (actual: @actual).', array(
+      '@expected' => $values['mail']['expected'],
+      '@actual' => $values['mail']['actual'],
+    )));
+
+    // Assert that user Joe no longer exists in the system.
+    $this->assertFalse(user_load_by_name('Joe'), 'No user with username Joe exists.');
+    $this->assertFalse(user_load_by_mail('joe@example.com'), 'No user with mail address joe@example.com exists.');
+  }
+
+  /**
+   * Tests if user ID's can be changed using the user ID target.
+   *
+   * Also checks if a clear error is reported when trying to change the
+   * user ID to something that is already in use.
+   */
+  public function testUidUpdating() {
+    // Set to update existing users.
+    $this->setSettings('user_import', 'FeedsUserProcessor', array('update_existing' => FEEDS_UPDATE_EXISTING));
+
+    // Add mapping to user ID, but do not mark target as unique.
+    $this->addMappings('user_import', array(
+      4 => array(
+        'source' => 'uid',
+        'target' => 'uid',
+      ),
+    ));
+
+    // Create an account which user ID should be updated.
+    user_save(drupal_anonymous_user(), array(
+      'uid' => 54,
+      'name' => 'Morticia',
+      'mail' => 'morticia@example.com',
+      'pass' => 'mort',
+      'status' => 1,
+    ));
+
+    // Create account with uid 202. Importing an other account with uid 202
+    // should fail.
+    user_save(drupal_anonymous_user(), array(
+      'uid' => 202,
+      'name' => 'Joe',
+      'mail' => 'joe@example.com',
+      'pass' => 'joe',
+      'status' => 1,
+    ));
+
+    // Import CSV file.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->assertText('Created 1 user');
+    $this->assertText('Updated 1 user');
+    $this->assertText('Failed importing 3 users.');
+    $this->assertText('Could not update user ID to 202 since that ID is already in use.');
+
+    // Assert Morticia's user ID got updated.
+    $account = user_load_by_name('Morticia');
+    $this->assertEqual(201, $account->uid, 'Morticia now got user ID 201.');
+    // Assert that Fester failed to import.
+    $this->assertFalse(user_load_by_name('Fester'), 'The account for Fester was not imported.');
+    // Assert that user 202 did not change.
+    $account = user_load(202);
+    $this->assertEqual('Joe', $account->name, 'The user name of account 202 is still Joe.');
+    $this->assertEqual('joe@example.com', $account->mail, 'The mail address of account 202 is still joe@example.com.');
+  }
+
+  /**
    * Tests mapping to role without automatically creating new roles.
    */
   public function testRoleTargetWithoutRoleCreation() {
