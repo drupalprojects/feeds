@@ -21,7 +21,7 @@ class Boolean extends FieldTargetBase {
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    $values['value'] = (bool) trim((string) $values['value']);
+    $values['value'] = (int) (bool) trim($values['value']);
   }
 
 }

@@ -2,20 +2,22 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
-use Drupal\feeds\Feeds\Target\Boolean;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
+use Drupal\feeds\FeedTypeInterface;
+use Drupal\feeds\Feeds\Target\Boolean;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Boolean
+ * @covers \Drupal\feeds\Feeds\Target\Boolean
  * @group feeds
  */
 class BooleanTest extends FeedsUnitTestCase {
 
   public function test() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Boolean', 'prepareTarget')->getClosure();
+    $method = $this->getMethod(Boolean::class, 'prepareTarget')->getClosure();
 
     $configuration = [
-      'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
+      'feed_type' => $this->getMock(FeedTypeInterface::class),
       'target_definition' =>  $method($this->getMockFieldDefinition()),
     ];
 
@@ -24,7 +26,7 @@ class BooleanTest extends FeedsUnitTestCase {
 
     $method = $this->getProtectedClosure($target, 'prepareValue');
     $method(0, $values);
-    $this->assertTrue($values['value']);
+    $this->assertSame(1, $values['value']);
   }
 
 }
