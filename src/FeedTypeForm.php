@@ -57,10 +57,6 @@ class FeedTypeForm extends EntityForm {
 
     $form['#attached']['library'][] = 'feeds/feeds';
 
-    if ($this->operation == 'edit') {
-      $form['#title'] = $this->t('Edit %label', ['%label' => $this->entity->label()]);
-    }
-
     $form['basics'] = [
       '#title' => $this->t('Basic settings'),
       '#type' => 'details',

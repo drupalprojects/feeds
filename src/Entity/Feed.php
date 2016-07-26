@@ -40,6 +40,9 @@ use Drupal\user\UserInterface;
  *       "unlock" = "Drupal\feeds\Form\FeedUnlockForm",
  *     },
  *     "list_builder" = "Drupal\feeds\FeedListBuilder",
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *     },
  *     "feed_import" = "Drupal\feeds\FeedImportHandler",
  *     "feed_clear" = "Drupal\feeds\FeedClearHandler",
  *     "feed_expire" = "Drupal\feeds\FeedExpireHandler"
@@ -57,9 +60,10 @@ use Drupal\user\UserInterface;
  *   field_ui_base_route = "entity.feeds_feed_type.edit_form",
  *   links = {
  *     "canonical" = "/feed/{feeds_feed}",
+ *     "add-page" = "/feed/add",
+ *     "add-form" = "/feed/add/{feeds_feed_type}",
  *     "delete-form" = "/feed/{feeds_feed}/delete",
  *     "edit-form" = "/feed/{feeds_feed}/edit",
- *     "admin-form" = "/admin/structure/feeds/manage/{feeds_feed_type}",
  *     "import-form" = "/feed/{feeds_feed}/import",
  *     "clear-form" = "/feed/{feeds_feed}/delete-items"
  *   }

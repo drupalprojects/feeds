@@ -1,5 +1,5 @@
 feeds.add_action:
-  route_name: feeds.add_page
+  route_name: entity.feeds_feed.add_page
   title: Add feed
   appears_on:
     - feeds.admin
@@ -22,8 +22,8 @@ feeds.unlock_action:
   appears_on:
     - entity.feeds_feed.canonical
 
-feeds.type_add:
-  route_name: feeds.type_add
+entity.feeds_feed_type.add_form:
+  route_name: entity.feeds_feed_type.add_form
   title: Add feed type
   appears_on:
     - feeds.overview_types

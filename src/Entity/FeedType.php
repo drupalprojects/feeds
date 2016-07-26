@@ -21,7 +21,11 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   handlers = {
  *     "access" = "Drupal\feeds\FeedTypeAccessControlHandler",
  *     "list_builder" = "Drupal\feeds\FeedTypeListBuilder",
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *     },
  *     "form" = {
+ *       "default" = "Drupal\feeds\FeedTypeForm",
  *       "create" = "Drupal\feeds\FeedTypeForm",
  *       "edit" = "Drupal\feeds\FeedTypeForm",
  *       "delete" = "Drupal\feeds\Form\FeedTypeDeleteForm"
@@ -36,6 +40,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *     "status" = "status"
  *   },
  *   links = {
+ *     "add-form" = "/admin/structure/feeds/add",
  *     "edit-form" = "/admin/structure/feeds/manage/{feeds_feed_type}",
  *     "delete-form" = "/admin/structure/feeds/manage/{feeds_feed_type}/delete"
  *   },

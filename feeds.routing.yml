@@ -4,56 +4,7 @@ feeds.admin:
     _title: 'Feeds'
     _entity_list: 'feeds_feed'
   requirements:
-    _permission: 'administer feeds'
-
-feeds.add_page:
-  path: '/feed/add'
-  defaults:
-    _title: 'Add feed'
-    _controller: 'Drupal\feeds\Controller\FeedController::addPage'
-  options:
-    _access_mode: 'ANY'
-    _admin_route: TRUE
-  requirements:
-    _permission: 'administer feeds'
-    _feeds_feed_add_access: 'feeds_feed'
-
-feeds.add:
-  path: '/feed/add/{feeds_feed_type}'
-  defaults:
-    _controller: 'Drupal\feeds\Controller\FeedController::createForm'
-  options:
-    _admin_route: TRUE
-  requirements:
-    _entity_create_access: 'feeds_feed:{feeds_feed_type}'
-
-entity.feeds_feed.canonical:
-  path: '/feed/{feeds_feed}'
-  defaults:
-    _entity_view: 'feeds_feed'
-  requirements:
-    _entity_access: 'feeds_feed.view'
-    feeds_feed: \d+
-
-entity.feeds_feed.edit_form:
-  path: '/feed/{feeds_feed}/edit'
-  defaults:
-    _entity_form: 'feeds_feed.update'
-  options:
-    _admin_route: TRUE
-  requirements:
-    _entity_access: 'feeds_feed.update'
-    feeds_feed: \d+
-
-entity.feeds_feed.delete_form:
-  path: '/feed/{feeds_feed}/delete'
-  defaults:
-    _entity_form: 'feeds_feed.delete'
-  options:
-    _admin_route: TRUE
-  requirements:
-    _entity_access: 'feeds_feed.delete'
-    feeds_feed: \d+
+    _permission: 'access administration pages'
 
 feeds.item_list:
   path: '/feed/{feeds_feed}/list'
@@ -129,21 +80,6 @@ feeds.overview_types:
   requirements:
     _permission: 'administer feeds'
 
-feeds.type_add:
-  path: '/admin/structure/feeds/add'
-  defaults:
-    _title: 'Add feed feed type'
-    _entity_form: 'feeds_feed_type.create'
-  requirements:
-    _permission: 'administer feeds'
-
-entity.feeds_feed_type.edit_form:
-  path: '/admin/structure/feeds/manage/{feeds_feed_type}'
-  defaults:
-    _entity_form: 'feeds_feed_type.edit'
-  requirements:
-    _entity_access: 'feeds_feed_type.edit'
-
 entity.feeds_feed_type.mapping:
   path: '/admin/structure/feeds/manage/{feeds_feed_type}/mapping'
   defaults:
@@ -151,11 +87,3 @@ entity.feeds_feed_type.mapping:
     _title_callback: '\Drupal\feeds\Form\MappingForm::mappingTitle'
   requirements:
     _entity_access: 'feeds_feed_type.mapping'
-
-entity.feeds_feed_type.delete_form:
-  path: '/admin/structure/feeds/manage/{feeds_feed_type}/delete'
-  defaults:
-    _entity_form: 'feeds_feed_type.delete'
-  requirements:
-    _entity_access: 'feeds_feed_type.delete'
-

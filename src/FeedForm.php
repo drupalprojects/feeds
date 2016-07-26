@@ -20,14 +20,6 @@ class FeedForm extends ContentEntityForm {
 
     $feed_type = $feed->getType();
 
-    $args = ['@type' => $feed_type->label(), '@title' => $feed->label()];
-    if ($this->operation === 'update') {
-      $form['#title'] = $this->t('<em>Edit @type</em> @title', $args);
-    }
-    elseif ($this->operation === 'create') {
-      $form['#title'] = $this->t('<em>Add @type</em>', $args);
-    }
-
     $form['advanced'] = [
       '#type' => 'vertical_tabs',
       '#attributes' => ['class' => ['entity-meta']],
