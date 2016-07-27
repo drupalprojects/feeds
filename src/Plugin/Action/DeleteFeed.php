@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "feeds_feed_delete_action",
  *   label = @Translation("Delete selected feeds"),
  *   type = "feeds_feed",
- *   confirm_form_path = "feeds.multiple_delete_confirm"
+ *   confirm_form_route_name = "feeds.multiple_delete_confirm"
  * )
  */
 class DeleteFeed extends ActionBase implements ContainerFactoryPluginInterface {
