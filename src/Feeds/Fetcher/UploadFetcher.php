@@ -97,7 +97,7 @@ class UploadFetcher extends PluginBase implements FetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function sourceDefaults() {
+  public function defaultFeedConfiguration() {
     return ['fid' => 0, 'usage_id' => ''];
   }
 

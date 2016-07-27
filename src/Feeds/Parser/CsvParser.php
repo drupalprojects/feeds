@@ -81,7 +81,7 @@ class CsvParser extends PluginBase implements ParserInterface {
   /**
    * {@inheritdoc}
    */
-  public function sourceDefaults() {
+  public function defaultFeedConfiguration() {
     return [
       'delimiter' => $this->configuration['delimiter'],
       'no_headers' => $this->configuration['no_headers'],

@@ -96,7 +96,7 @@ class DirectoryFetcher extends PluginBase implements FetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function sourceDefaults() {
+  public function defaultFeedConfiguration() {
     return ['source' => ''];
   }
 

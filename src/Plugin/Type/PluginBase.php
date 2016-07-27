@@ -101,7 +101,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * {@inheritodc}
    */
-  public function sourceDefaults() {
+  public function defaultFeedConfiguration() {
     return [];
   }
 

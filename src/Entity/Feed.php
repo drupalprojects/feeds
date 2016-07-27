@@ -419,7 +419,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $data = $this->get('config')->$type;
     $data = !empty($data) ? $data : array();
 
-    return $data + $client->sourceDefaults();
+    return $data + $client->defaultFeedConfiguration();
   }
 
   /**
@@ -427,7 +427,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function setConfigurationFor(FeedsPluginInterface $client, array $configuration) {
     $type = $client->pluginType();
-    $this->get('config')->$type = array_intersect_key($configuration, $client->sourceDefaults()) + $client->sourceDefaults();
+    $this->get('config')->$type = array_intersect_key($configuration, $client->defaultFeedConfiguration()) + $client->defaultFeedConfiguration();
   }
 
   /**

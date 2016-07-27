@@ -62,20 +62,6 @@ class UploadFetcherFeedFormTest extends FeedsUnitTestCase {
     $form_state->setValue('source', [1]);
 
     $form_object->submitConfigurationForm($form, $form_state, $feed->reveal());
-
-    // $form_state->setValue('source', [10]);
-    // $this->fileStorage->expects($this->exactly(2))
-    //   ->method('load')
-    //   ->will($this->returnValue($this->getMock('Drupal\file\FileInterface')));
-    // $this->fetcher->submitConfigurationForm($form, $form_state, $feed);
-
-    // // Submit again.
-    // $feed = $this->getMock(FeedInterface::class);
-    // $feed->expects($this->any())
-    //   ->method('getConfigurationFor')
-    //   ->with($this->fetcher)
-    //   ->will($this->returnValue(['fid' => 10] + $this->fetcher->sourceDefaults()));
-    // $this->fetcher->submitConfigurationForm($form, $form_state, $feed);
   }
 
 }

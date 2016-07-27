@@ -72,7 +72,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $feed->expects($this->exactly(2))
       ->method('getConfigurationFor')
       ->with($this->fetcher)
-      ->will($this->returnValue(['fid' => 10] + $this->fetcher->sourceDefaults()));
+      ->will($this->returnValue(['fid' => 10] + $this->fetcher->defaultFeedConfiguration()));
 
     $feeds = [$feed, $feed];
     $this->fetcher->onFeedDeleteMultiple($feeds);

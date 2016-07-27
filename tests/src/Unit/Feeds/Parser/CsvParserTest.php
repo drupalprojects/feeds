@@ -39,7 +39,7 @@ class CsvParserTest extends FeedsUnitTestCase {
     $this->feed->expects($this->any())
       ->method('getConfigurationFor')
       ->with($this->parser)
-      ->will($this->returnValue($this->parser->sourceDefaults()));
+      ->will($this->returnValue($this->parser->defaultFeedConfiguration()));
 
     $file = dirname(dirname(dirname(dirname(__DIR__)))) . '/resources/example.csv';
     $fetcher_result = new FetcherResult($file);
