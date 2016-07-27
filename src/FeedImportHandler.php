@@ -39,6 +39,7 @@ class FeedImportHandler extends FeedHandlerBase {
       drupal_set_message(t('The feed became locked before the import could begin.'), 'warning');
       return;
     }
+
     $feed->clearStates();
     $this->startBatchFetch($feed);
   }
@@ -77,7 +78,7 @@ class FeedImportHandler extends FeedHandlerBase {
       return $this->handleException($feed, $exception);
     }
 
-    $this->setBatchParse($feed);
+    $this->startBatchParse($feed);
     $feed->saveStates();
   }
 
@@ -87,7 +88,7 @@ class FeedImportHandler extends FeedHandlerBase {
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being fetched.
    */
-  protected function setBatchParse(FeedInterface $feed) {
+  protected function startBatchParse(FeedInterface $feed) {
     $batch = [
       'title' => $this->t('Parsing: %title', ['%title' => $feed->label()]),
       'init_message' => $this->t('Parsing: %title', ['%title' => $feed->label()]),
@@ -158,6 +159,7 @@ class FeedImportHandler extends FeedHandlerBase {
     catch (\Exception $exception) {
       return $this->handleException($feed, $exception);
     }
+
     $feed->saveStates();
   }
 
@@ -169,7 +171,7 @@ class FeedImportHandler extends FeedHandlerBase {
    */
   public function batchPostProcess(FeedInterface $feed) {
     if ($feed->progressParsing() !== StateInterface::BATCH_COMPLETE) {
-      $this->setBatchParse($feed);
+      $this->startBatchParse($feed);
     }
     elseif ($feed->progressFetching() !== StateInterface::BATCH_COMPLETE) {
       $this->startBatchFetch($feed);
@@ -247,7 +249,6 @@ class FeedImportHandler extends FeedHandlerBase {
     $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'parse'));
 
     $parse_event = $this->dispatchEvent(FeedsEvents::PARSE, new ParseEvent($feed, $fetcher_result));
-    $feed->setState(StateInterface::PROCESS, NULL);
 
     return $parse_event->getParserResult();
   }

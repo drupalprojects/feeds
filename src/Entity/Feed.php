@@ -257,6 +257,8 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * {@inheritdoc}
    */
   public function finishImport() {
+    $time = time();
+
     $this->getType()
       ->getProcessor()
       ->postProcess($this, $this->getState(StateInterface::PROCESS));
@@ -268,7 +270,6 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $this->clearStates();
     $this->setQueuedTime(0);
 
-    $time = time();
     $this->set('imported', $time);
 
     $interval = $this->getType()->getImportPeriod();

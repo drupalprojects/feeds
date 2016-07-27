@@ -35,6 +35,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
     }
 
     $feed->clearStates();
+
     try {
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'fetch'));
       $fetch_event = $this->dispatchEvent(FeedsEvents::FETCH, new FetchEvent($feed));
