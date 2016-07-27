@@ -4,14 +4,17 @@ namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\feeds\Plugin\PluginAwareInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for Feeds plugins that have external configuration forms.
  */
-abstract class ExternalPluginFormBase implements ExternalPluginFormInterface {
+abstract class ExternalPluginFormBase implements PluginFormInterface, PluginAwareInterface {
+
   use StringTranslationTrait;
   use DependencySerializationTrait;
 
@@ -23,17 +26,10 @@ abstract class ExternalPluginFormBase implements ExternalPluginFormInterface {
   protected $plugin;
 
   /**
-   * Constructs an ExternalPluginFormBase object.
-   */
-  public function __construct(FeedsPluginInterface $plugin) {
-    $this->plugin = $plugin;
-  }
-
-  /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, FeedsPluginInterface $plugin) {
-    return new static($plugin);
+  public function setPlugin(FeedsPluginInterface $plugin) {
+    $this->plugin = $plugin;
   }
 
   /**

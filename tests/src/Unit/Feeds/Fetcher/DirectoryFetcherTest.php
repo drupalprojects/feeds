@@ -89,25 +89,4 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $result = $this->fetcher->fetch($feed, $this->state);
   }
 
-  public function testFeedForm() {
-    $this->fetcher->setConfiguration(['allowed_schemes' => ['vfs']]);
-    $this->feed->expects($this->any())
-      ->method('getConfigurationFor')
-      ->with($this->fetcher)
-      ->will($this->returnValue($this->fetcher->sourceDefaults()));
-
-    $form_state = new FormState();
-    $form = $this->fetcher->buildFeedForm([], $form_state, $this->feed);
-    $form['source']['#parents'] = ['source'];
-
-    // Valid.
-    $form_state->setValue('source', 'vfs://feeds');
-    $this->fetcher->validateFeedForm($form, $form_state, $this->feed);
-
-    // Does not exist.
-    $form_state->setValue('source', 'vfs://doesnotexist');
-    $this->fetcher->validateFeedForm($form, $form_state, $this->feed);
-    $this->assertSame(count($form_state->getErrors()), 1);
-  }
-
 }

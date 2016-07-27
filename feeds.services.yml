@@ -36,3 +36,7 @@ services:
       - { name: cache.bin }
     factory: cache_factory:get
     arguments: [feeds_download]
+
+  feeds_plugin_form_factory:
+    class: Drupal\feeds\Plugin\PluginFormFactory
+    arguments: ['@class_resolver']

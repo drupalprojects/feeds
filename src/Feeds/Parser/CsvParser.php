@@ -7,9 +7,8 @@ use Drupal\feeds\Component\CsvParser as CsvFileParser;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\DynamicItem;
-use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Parser\ParserInterface;
+use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResult;
 use Drupal\feeds\StateInterface;
@@ -20,12 +19,16 @@ use Drupal\feeds\StateInterface;
  * @FeedsParser(
  *   id = "csv",
  *   title = "CSV (not working yet, do not use)",
- *   description = @Translation("Parse CSV files.")
+ *   description = @Translation("Parse CSV files."),
+ *   form = {
+ *     "configuration" = "Drupal\feeds\Feeds\Parser\Form\CsvParserForm",
+ *     "feed" = "Drupal\feeds\Feeds\Parser\Form\CsvParserFeedForm",
+ *   },
  * )
  *
  * @todo Make mapping sources configurable, see https://www.drupal.org/node/2443471.
  */
-class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterface, ParserInterface {
+class CsvParser extends PluginBase implements ParserInterface {
 
   /**
    * {@inheritdoc}
@@ -88,69 +91,12 @@ class CsvParser extends ConfigurablePluginBase implements FeedPluginFormInterfac
   /**
    * {@inheritdoc}
    */
-  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
-    $feed_config = $feed->getConfigurationFor($this);
-    $form['parser']['#tree'] = TRUE;
-    $form['parser']['#weight'] = -10;
-
-    $form['parser']['delimiter'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Delimiter'),
-      '#description' => $this->t('The character that delimits fields in the CSV file.'),
-      '#options'  => [
-        ',' => ',',
-        ';' => ';',
-        'TAB' => 'TAB',
-        '|' => '|',
-        '+' => '+',
-      ],
-      '#default_value' => $feed_config['delimiter'],
-    ];
-    $form['parser']['no_headers'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('No Headers'),
-      '#description' => $this->t("Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named '0', '1', '2' etc."),
-      '#default_value' => $feed_config['no_headers'],
-    ];
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function defaultConfiguration() {
     return [
       'delimiter' => ',',
       'no_headers' => 0,
       'line_limit' => 100,
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['delimiter'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Default delimiter'),
-      '#description' => $this->t('Default field delimiter.'),
-      '#options' => [
-        ',' => ',',
-        ';' => ';',
-        'TAB' => 'TAB',
-        '|' => '|',
-        '+' => '+',
-      ],
-      '#default_value' => $this->configuration['delimiter'],
-    ];
-    $form['no_headers'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('No headers'),
-      '#description' => $this->t("Check if the imported CSV file does not start with a header row. If checked, mapping sources must be named '0', '1', '2' etc."),
-      '#default_value' => $this->configuration['no_headers'],
-    ];
-
-    return $form;
   }
 
 }

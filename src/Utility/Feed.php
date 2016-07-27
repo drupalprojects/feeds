@@ -2,6 +2,7 @@
 
 namespace Drupal\feeds\Utility;
 
+use GuzzleHttp\Psr7\Uri;
 use Zend\Feed\Reader\FeedSet;
 use Zend\Feed\Reader\Reader;
 
@@ -94,34 +95,33 @@ class Feed {
   }
 
   /**
-   * Copy of valid_url() that supports the webcal and feed schemes.
+   * Translates the scheme of feed-type URLs into HTTP.
    *
-   * @see valid_url()
+   * @param string $url
+   *   The URL to translate.
    *
-   * @todo Replace with valid_url() when http://drupal.org/node/295021 is fixed.
+   * @return string
+   *   The URL with the scheme translated.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown then the URL contains an invalid scheme.
    */
-  public static function validUrl($url, $absolute = FALSE) {
-    if ($absolute) {
-      return (bool) preg_match("
-        /^                                                      # Start at the beginning of the text
-        (?:ftp|https?|feed|webcal):\/\/                         # Look for ftp, http, https, feed or webcal schemes
-        (?:                                                     # Userinfo (optional) which is typically
-          (?:(?:[\w\.\-\+!$&'\(\)*\+,;=]|%[0-9a-f]{2})+:)*      # a username or a username and password
-          (?:[\w\.\-\+%!$&'\(\)*\+,;=]|%[0-9a-f]{2})+@          # combination
-        )?
-        (?:
-          (?:[a-z0-9\-\.]|%[0-9a-f]{2})+                        # A domain name or a IPv4 address
-          |(?:\[(?:[0-9a-f]{0,4}:)*(?:[0-9a-f]{0,4})\])         # or a well formed IPv6 address
-        )
-        (?::[0-9]+)?                                            # Server port number (optional)
-        (?:[\/|\?]
-          (?:[|\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})   # The path and query (optional)
-        *)?
-      $/xi", $url);
+  public static function translateSchemes($url) {
+    $uri = new Uri($url);
+
+    switch ($uri->getScheme()) {
+      case 'http':
+      case 'feed':
+      case 'webcal':
+        return (string) $uri->withScheme('http');
+
+      case 'https':
+      case 'feeds':
+      case 'webcals':
+        return (string) $uri->withScheme('https');
     }
-    else {
-      return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
-    }
+
+    throw new \InvalidArgumentException();
   }
 
 }

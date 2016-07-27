@@ -8,7 +8,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
-use Drupal\feeds\Plugin\Type\FeedPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Result\HttpFetcherResult;
@@ -26,11 +25,14 @@ use Symfony\Component\HttpFoundation\Response;
  *   id = "http",
  *   title = @Translation("Download"),
  *   description = @Translation("Downloads data from a URL using Drupal's HTTP request handler."),
- *   configuration_form = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm",
+ *   form = {
+ *     "configuration" = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherForm",
+ *     "feed" = "Drupal\feeds\Feeds\Fetcher\Form\HttpFetcherFeedForm",
+ *   },
  *   arguments = {"@http_client", "@cache.feeds_download", "@file_system"}
  * )
  */
-class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFormInterface, FetcherInterface {
+class HttpFetcher extends PluginBase implements ClearableInterface, FetcherInterface {
 
   /**
    * The Guzzle client.
@@ -111,12 +113,7 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
    *   Thrown if the GET request failed.
    */
   protected function get($url, $sink, $cache_key = FALSE) {
-    $url = strtr($url, [
-      'feed://' => 'http://',
-      'webcal://' => 'http://',
-      'feeds://' => 'https://',
-      'webcals://' => 'https://',
-    ]);
+    $url = Feed::translateSchemes($url);
 
     $options = [RequestOptions::SINK => $sink];
 
@@ -175,49 +172,6 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FeedPluginFo
       'fallback_hub' => '',
       'request_timeout' => 30,
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildFeedForm(array $form, FormStateInterface $form_state, FeedInterface $feed) {
-    $form['source'] = [
-      '#title' => $this->t('Feed URL'),
-      '#type' => 'url',
-      '#default_value' => $feed->getSource(),
-    ];
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    if (!$this->configuration['auto_detect_feeds']) {
-      return;
-    }
-
-    try {
-      $response = $this->get($form_state->getValue('source'));
-    }
-    catch (\RuntimeException $e) {
-      $form_state->setError($form['source'], $e->getMessage());
-      return;
-    }
-
-    if ($url = Feed::getCommonSyndication($form_state->getValue('source'), (string) $response->getBody())) {
-      $form_state->setValue('source', $url);
-    }
-    else {
-      $form_state->setError($form['source'], $this->t('Invalid feed URL.'));
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function submitFeedForm(array &$form, FormStateInterface $form_state, FeedInterface $feed) {
-    $feed->setSource($form_state->getValue('source'));
   }
 
   /**

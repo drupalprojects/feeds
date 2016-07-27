@@ -70,17 +70,5 @@ class CsvParserTest extends FeedsUnitTestCase {
     $this->assertSame([], $this->parser->getMappingSources());
   }
 
-  public function testFeedForm() {
-    $form_state = new FormState();
-    $form = $this->parser->buildFeedForm([], $form_state, $this->feed);
-    $this->assertSame(count($form), 1);
-  }
-
-  public function testConfigurationForm() {
-    $form_state = new FormState();
-    $form = $this->parser->buildConfigurationForm([], $form_state);
-    $this->assertSame(count($form), 2);
-  }
-
 }
 

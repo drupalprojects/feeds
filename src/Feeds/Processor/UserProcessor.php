@@ -12,7 +12,11 @@ namespace Drupal\feeds\Feeds\Processor;
  *   title = @Translation("User"),
  *   description = @Translation("Creates users from feed items."),
  *   entity_type = "user",
- *   arguments = {"@entity.manager", "@entity.query"}
+ *   arguments = {"@entity.manager", "@entity.query"},
+ *   form = {
+ *     "configuration" = "Drupal\feeds\Feeds\Processor\Form\DefaultEntityProcessorForm",
+ *     "option" = "Drupal\feeds\Feeds\Processor\Form\EntityProcessorOptionForm",
+ *   },
  * )
  */
 class UserProcessor extends EntityProcessorBase {

@@ -209,7 +209,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * @return string
    *   The bundle label.
    */
-  protected function bundleLabel() {
+  public function bundleLabel() {
     if ($label = $this->entityType->getBundleLabel()) {
       return $label;
     }
@@ -222,7 +222,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * @return array
    *   A keyed array of bundle => label.
    */
-  protected function bundleOptions() {
+  public function bundleOptions() {
     $options = [];
     foreach ($this->entityManager->getBundleInfo($this->entityType()) as $bundle => $info) {
       if (!empty($info['label'])) {
@@ -242,7 +242,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The label of the entity type.
    */
-  protected function entityTypeLabel() {
+  public function entityTypeLabel() {
     return $this->entityType->getLabel();
   }
 
@@ -252,7 +252,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * @return string
    *   The plural label of the entity type.
    */
-  protected function entityTypeLabelPlural() {
+  public function entityTypeLabelPlural() {
     return Inflector::pluralize((string) $this->entityTypeLabel());
   }
 
@@ -368,86 +368,6 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     ];
 
     return $defaults;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $tokens = [
-      '@entity' => Unicode::strtolower($this->entityTypeLabel()),
-      '@entities' => Unicode::strtolower($this->entityTypeLabelPlural()),
-    ];
-
-    $form['update_existing'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Update existing @entities', $tokens),
-      '#description' => $this->t('Existing @entities will be determined using mappings that are <strong>unique</strong>.', $tokens),
-      '#options' => [
-        static::SKIP_EXISTING => $this->t('Do not update existing @entities', $tokens),
-        static::REPLACE_EXISTING => $this->t('Replace existing @entities', $tokens),
-        static::UPDATE_EXISTING => $this->t('Update existing @entities', $tokens),
-      ],
-      '#default_value' => $this->configuration['update_existing'],
-    ];
-    $times = [static::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000];
-    $period = array_map([$this, 'formatExpire'], array_combine($times, $times));
-    $form['expire'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Expire @entities', $tokens),
-      '#options' => $period,
-      '#description' => $this->t('Select after how much time @entities should be deleted.', $tokens),
-      '#default_value' => $this->configuration['expire'],
-    ];
-    if ($this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
-      $form['owner_id'] = [
-        '#type' => 'entity_autocomplete',
-        '#title' => $this->t('Owner'),
-        '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', ['%anonymous' => \Drupal::config('user.settings')->get('anonymous')]),
-        '#target_type' => 'user',
-        '#default_value' => User::load($this->configuration['owner_id']),
-      ];
-    }
-    $form['advanced'] = [
-      '#title' => $this->t('Advanced settings'),
-      '#type' => 'details',
-      '#collapsed' => TRUE,
-      '#collapsible' => TRUE,
-      '#weight' => 10,
-    ];
-    if ($this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface')) {
-      $form['advanced']['authorize'] = [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Authorize'),
-        '#description' => $this->t('Check that the author has permission to create the @entity.', $tokens),
-        '#default_value' => $this->configuration['authorize'],
-        '#parents' => ['processor_configuration', 'authorize'],
-      ];
-    }
-    $form['advanced']['skip_hash_check'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Force update'),
-      '#description' => $this->t('Forces the update of items even if the feed did not change.'),
-      '#default_value' => $this->configuration['skip_hash_check'],
-      '#parents' => ['processor_configuration', 'skip_hash_check'],
-      '#states' => [
-        'visible' => [
-          'input[name="processor_configuration[update_existing]"]' => [
-            'value' => static::UPDATE_EXISTING,
-          ],
-        ],
-      ],
-    ];
-
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $values =& $form_state->getValues();
-    $values['owner_id'] = (int) $values['owner_id'];
   }
 
   /**
@@ -652,22 +572,6 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    */
   protected function hash(ItemInterface $item) {
     return hash('md5', serialize($item) . serialize($this->feedType->getMappings()));
-  }
-
-  /**
-   * Formats UNIX timestamps to readable strings.
-   *
-   * @param int $timestamp
-   *   A UNIX timestamp.
-   *
-   * @return string
-   *   A string in the format, "After (time)" or "Never."
-   */
-  public function formatExpire($timestamp) {
-    if ($timestamp == static::EXPIRE_NEVER) {
-      return $this->t('Never');
-    }
-    return $this->t('after @time', ['@time' => \Drupal::service('date.formatter')->formatInterval($timestamp)]);
   }
 
   /**

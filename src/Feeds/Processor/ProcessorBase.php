@@ -3,14 +3,14 @@
 namespace Drupal\feeds\Feeds\Processor;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
+use Drupal\feeds\Plugin\Type\PluginBase;
 use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\feeds\StateInterface;
 
 /**
  * Defines a base processor plugin class.
  */
-abstract class ProcessorBase extends ConfigurablePluginBase implements ProcessorInterface {
+abstract class ProcessorBase extends PluginBase implements ProcessorInterface {
 
   /**
    * {@inheritdoc}

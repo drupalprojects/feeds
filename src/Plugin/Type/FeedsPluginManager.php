@@ -8,6 +8,7 @@ use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery;
 use Drupal\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecorator;
+use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
  * Manages Feeds plugins.
@@ -70,6 +71,12 @@ class FeedsPluginManager extends DefaultPluginManager {
     parent::processDefinition($definition, $plugin_id);
     // Add plugin_type key so that we can determie the plugin type later.
     $definition['plugin_type'] = $this->pluginType;
+
+    // If no default form is defined and this plugin implements
+    // \Drupal\Core\Plugin\PluginFormInterface, use that for the default form.
+    if (!isset($definition['form']['configuration']) && isset($definition['class']) && is_subclass_of($definition['class'], PluginFormInterface::class)) {
+      $definition['form']['configuration'] = $definition['class'];
+    }
   }
 
 }

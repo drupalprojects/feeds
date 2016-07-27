@@ -123,6 +123,9 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     if (!defined('FILE_EXISTS_REPLACE')) {
       define('FILE_EXISTS_REPLACE', 1);
     }
+    if (!defined('FILE_STATUS_PERMANENT')) {
+      define('FILE_STATUS_PERMANENT', 1);
+    }
   }
 
 }

@@ -11,9 +11,9 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\feeds\Ajax\SetHashCommand;
-use Drupal\feeds\Plugin\Type\AdvancedFormPluginInterface;
+use Drupal\feeds\Plugin\PluginFormFactory;
+use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -30,13 +30,21 @@ class FeedTypeForm extends EntityForm {
   protected $feedTypeStorage;
 
   /**
+   * The form factory.
+   *
+   * @var \Drupal\feeds\Plugin\PluginFormFactory
+   */
+  protected $formFactory;
+
+  /**
    * Constructs an FeedTypeForm object.
    *
    * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $feed_type_storage
    *   The feed type storage controller.
    */
-  public function __construct(ConfigEntityStorageInterface $feed_type_storage) {
+  public function __construct(ConfigEntityStorageInterface $feed_type_storage, PluginFormFactory $factory) {
     $this->feedTypeStorage = $feed_type_storage;
+    $this->formFactory = $factory;
   }
 
   /**
@@ -44,7 +52,8 @@ class FeedTypeForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager')->getStorage('feeds_feed_type')
+      $container->get('entity_type.manager')->getStorage('feeds_feed_type'),
+      $container->get('feeds_plugin_form_factory')
     );
   }
 
@@ -172,21 +181,17 @@ class FeedTypeForm extends EntityForm {
       $plugin_state = $this->createSubFormState($type . '_configuration', $form_state);
 
       // This is the small form that appears under the select box.
-      if ($plugin instanceof AdvancedFormPluginInterface) {
-        $form[$type . '_wrapper']['advanced'] = $plugin->buildAdvancedForm([], $plugin_state);
+      if ($this->pluginHasForm($plugin, 'option')) {
+        $option_form = $this->formFactory->createInstance($plugin, 'option');
+        $form[$type . '_wrapper']['advanced'] = $option_form->buildConfigurationForm([], $plugin_state);
       }
 
       $form[$type . '_wrapper']['advanced']['#prefix'] = '<div id="feeds-plugin-' . $type . '-advanced">';
       $form[$type . '_wrapper']['advanced']['#suffix'] = '</div>';
 
-      $form_builder = FALSE;
-      if ($plugin instanceof PluginFormInterface) {
-        $form_builder = $plugin;
-      }
-      elseif ($config_form = $plugin->getConfigurationForm()) {
-        $form_builder = $config_form;
-      }
-      if ($form_builder) {
+      if ($this->pluginHasForm($plugin, 'configuration')) {
+        $form_builder = $this->formFactory->createInstance($plugin, 'configuration');
+
         $plugin_form = $form_builder->buildConfigurationForm([], $plugin_state);
         $form[$type . '_configuration'] = [
           '#type' => 'details',
@@ -203,21 +208,16 @@ class FeedTypeForm extends EntityForm {
   }
 
   /**
-   * Returns the configurable plugins for this feed type.
+   * Returns the plugin forms for this feed type.
    *
-   * @return array
-   *   A plugin array keyed by plugin type.
-   *
-   * @todo Consider moving this to FeedType.
+   * @return \Drupal\feeds\Plugin\Type\ExternalPluginFormInterface[]
+   *   A list of form objects, keyed by plugin id.
    */
-  protected function getConfigurablePlugins() {
+  protected function getPluginForms() {
     $plugins = [];
     foreach ($this->entity->getPlugins() as $type => $plugin) {
-      if ($plugin instanceof PluginFormInterface || $plugin instanceof AdvancedFormPluginInterface) {
-        $plugins[$type] = $plugin;
-      }
-      elseif ($form = $plugin->getConfigurationForm()) {
-        $plugins[$type] = $form;
+      if ($this->pluginHasForm($plugin, 'configuration')) {
+        $plugins[$type] = $this->formFactory->createInstance($plugin, 'configuration');
       }
     }
 
@@ -244,7 +244,7 @@ class FeedTypeForm extends EntityForm {
       unset($values[$type . '_wrapper']);
     }
 
-    foreach ($this->getConfigurablePlugins() as $type => $plugin) {
+    foreach ($this->getPluginForms() as $type => $plugin) {
       if (!isset($form[$type . '_configuration'])) {
         // When switching from a non-configurable plugin to a configurable
         // plugin, no form is yet available. So skip validating it to avoid
@@ -267,7 +267,7 @@ class FeedTypeForm extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    foreach ($this->getConfigurablePlugins() as $type => $plugin) {
+    foreach ($this->getPluginForms() as $type => $plugin) {
       $plugin_state = $this->createSubFormState($type . '_configuration', $form_state);
       $plugin->submitConfigurationForm($form[$type . '_configuration'], $plugin_state);
       $form_state->setValue($type . '_configuration', $plugin_state->getValues());
@@ -346,6 +346,10 @@ class FeedTypeForm extends EntityForm {
     foreach ($from->getErrors() as $name => $error) {
       $to->setErrorByName($name, $error);
     }
+  }
+
+  protected function pluginHasForm(FeedsPluginInterface $plugin, $operation) {
+    return $this->formFactory->hasForm($plugin, $operation);
   }
 
 }

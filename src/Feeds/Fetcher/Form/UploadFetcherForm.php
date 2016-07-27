@@ -6,30 +6,30 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
-use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Drupal\feeds\Plugin\Type\ExternalPluginFormBase;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Defines a directory fetcher.
+ * The configuration form for the upload fetcher.
  */
-class DirectoryFetcherForm extends ExternalPluginFormBase implements ContainerInjectionInterface {
+class UploadFetcherForm extends ExternalPluginFormBase implements ContainerInjectionInterface {
 
   /**
    * The stream wrapper manager.
    *
-   * @var \Drupal\Core\StreamWrapper\StreamWrapperManager
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
    */
   protected $streamWrapperManager;
 
   /**
    * Constructs a DirectoryFetcherForm object.
    *
-   * @param \Drupal\Core\StreamWrapper\StreamWrapperManager $stream_wrapper_manager
+   * @param \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $stream_wrapper_manager
    *   The stream wrapper manager.
    */
-  public function __construct(StreamWrapperManager $stream_wrapper_manager) {
+  public function __construct(StreamWrapperManagerInterface $stream_wrapper_manager) {
     $this->streamWrapperManager = $stream_wrapper_manager;
   }
 
@@ -37,7 +37,8 @@ class DirectoryFetcherForm extends ExternalPluginFormBase implements ContainerIn
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('stream_wrapper_manager'));
+    return new static(
+      $container->get('stream_wrapper_manager'));
   }
 
   /**
@@ -51,19 +52,13 @@ class DirectoryFetcherForm extends ExternalPluginFormBase implements ContainerIn
       '#default_value' => $this->plugin->getConfiguration('allowed_extensions'),
     ];
 
-    $form['allowed_schemes'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Allowed schemes'),
-      '#default_value' => $this->plugin->getConfiguration('allowed_schemes'),
-      '#options' => $this->getSchemeOptions(),
-      '#description' => $this->t('Select the schemes you want to allow for direct upload.'),
-    ];
-
-    $form['recursive_scan'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Search recursively'),
-      '#default_value' => $this->plugin->getConfiguration('recursive_scan'),
-      '#description' => $this->t('Search through sub-directories.'),
+    $form['directory'] = [
+      '#type' => 'feeds_uri',
+      '#title' => $this->t('Upload directory'),
+      '#description' => $this->t('Directory where uploaded files get stored. Prefix the path with a scheme. Available schemes: @schemes.', ['@schemes' => implode(', ', $this->getSchemes())]),
+      '#default_value' => $this->plugin->getConfiguration('directory'),
+      '#required' => TRUE,
+      '#allowed_schemes' => $this->getSchemes(),
     ];
 
     return $form;
@@ -73,11 +68,14 @@ class DirectoryFetcherForm extends ExternalPluginFormBase implements ContainerIn
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $form_state->setValue('allowed_schemes', array_filter($form_state->getValue('allowed_schemes', [])));
+    $values =& $form_state->getValues();
 
-    $extensions = preg_replace('/\s+/', ' ', trim($form_state->getValue('allowed_extensions', '')));
+    $values['allowed_extensions'] = preg_replace('/\s+/', ' ', trim($values['allowed_extensions']));
 
-    $form_state->setValue('allowed_extensions', $extensions);
+    // Ensure that the upload directory exists.
+    if (!empty($form['directory']) && !file_prepare_directory($values['directory'], FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      $form_state->setError($form['directory'], $this->t('The chosen directory does not exist and attempts to create it failed.'));
+    }
   }
 
   /**
@@ -93,6 +91,16 @@ class DirectoryFetcherForm extends ExternalPluginFormBase implements ContainerIn
     }
 
     return $options;
+  }
+
+  /**
+   * Returns available schemes.
+   *
+   * @return string[]
+   *   The available schemes.
+   */
+  protected function getSchemes() {
+    return array_keys($this->streamWrapperManager->getWrappers(StreamWrapperInterface::WRITE_VISIBLE));
   }
 
 }
