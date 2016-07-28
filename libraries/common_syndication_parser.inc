@@ -13,10 +13,11 @@
 /**
  * Parse the feed into a data structure.
  *
- * @param $feed
- *  The feed object (contains the URL or the parsed XML structure.
- * @return
- *  stdClass The structured datas extracted from the feed.
+ * @param string $string
+ *   The feed object (contains the URL or the parsed XML structure).
+ *
+ * @return array|false
+ *   The structured datas extracted from the feed or FALSE in case of failures.
  */
 function common_syndication_parser_parse($string) {
   // SimpleXML can only deal with XML declaration at the start of the document,
@@ -45,10 +46,11 @@ function common_syndication_parser_parse($string) {
 /**
  * Determine the feed format of a SimpleXML parsed object structure.
  *
- * @param $xml
- *  SimpleXML-preprocessed feed.
- * @return
- *  The feed format short description or FALSE if not compatible.
+ * @param SimpleXMLElement $xml
+ *   SimpleXML-preprocessed feed.
+ *
+ * @return string|false
+ *   The feed format short description or FALSE if not compatible.
  */
 function _parser_common_syndication_feed_format_detect($xml) {
   if (!is_object($xml)) {
@@ -490,10 +492,11 @@ function _parser_common_syndication_RSS20_parse($feed_XML) {
 /**
  * Parse a date comes from a feed.
  *
- * @param $date_string
- *  The date string in various formats.
- * @return
- *  The timestamp of the string or the current time if can't be parsed
+ * @param string $date_str
+ *   The date string in various formats.
+ *
+ * @return int
+ *   The timestamp of the string or the current time if can't be parsed.
  */
 function _parser_common_syndication_parse_date($date_str) {
   // PHP < 5.3 doesn't like the GMT- notation for parsing timezones.
@@ -526,9 +529,10 @@ function _parser_common_syndication_parse_date($date_str) {
  * See http://www.w3.org/TR/NOTE-datetime for more information.
  * Originally from MagpieRSS (http://magpierss.sourceforge.net/).
  *
- * @param $date_str
- *   A string with a potentially W3C DTF date.
- * @return
+ * @param string $date_str
+ *   A potentially W3C DTF date.
+ *
+ * @return int|false
  *   A timestamp if parsed successfully or FALSE if not.
  */
 function _parser_common_syndication_parse_w3cdtf($date_str) {
@@ -563,8 +567,11 @@ function _parser_common_syndication_parse_w3cdtf($date_str) {
  * Extract the link that points to the original content (back to site or
  * original article)
  *
- * @param $links
- *  Array of SimpleXML objects
+ * @param array $links
+ *   Array of SimpleXML objects
+ *
+ * @return string
+ *   An URL if found. An empty string otherwise.
  */
 function _parser_common_syndication_link($links) {
   $to_link = '';
