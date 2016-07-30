@@ -179,6 +179,16 @@ class FeedsUserProcessor extends FeedsProcessor {
    * Delete multiple user accounts.
    */
   protected function entityDeleteMultiple($uids) {
+    // Prevent user 1 from being deleted.
+    if (in_array(1, $uids)) {
+      $uids = array_diff($uids, array(1));
+
+      // But do delete the associated feeds item.
+      db_delete('feeds_item')
+        ->condition('entity_type', $this->entityType())
+        ->condition('entity_id', 1)
+        ->execute();
+    }
     user_delete_multiple($uids);
   }
 
@@ -376,6 +386,18 @@ class FeedsUserProcessor extends FeedsProcessor {
       }
     }
     return 0;
+  }
+
+  /**
+   * Overrides FeedsProcessor::initEntitiesToBeRemoved().
+   *
+   * Removes user 1 from the list of entities to be removed.
+   */
+  protected function initEntitiesToBeRemoved(FeedsSource $source, FeedsState $state) {
+    parent::initEntitiesToBeRemoved($source, $state);
+
+    // Prevent user 1 from being deleted.
+    unset($state->removeList[1]);
   }
 
   /**

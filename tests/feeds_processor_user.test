@@ -917,6 +917,87 @@ class FeedsCSVtoUsersTest extends FeedsWebTestCase {
   }
 
   /**
+   * Tests if user 1 cannot be deleted using the delete non-existing feature.
+   */
+  public function testUser1ProtectionWhenDeletingNonExistent() {
+    // Set to delete non-existing users.
+    $this->setSettings('user_import', 'FeedsFileFetcher', array());
+    $this->setSettings('user_import', 'FeedsUserProcessor', array(
+      'update_existing' => FEEDS_UPDATE_EXISTING,
+      'update_non_existent' => 'delete',
+    ));
+
+    // Set mail address of user 1 to "fester@example.com". An user with this
+    // mail address is missing in the feed later.
+    $account = user_load(1);
+    $edit['mail'] = 'fester@example.com';
+    user_save($account, $edit);
+
+    // Import the first file, which contains the mail address of user 1.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->assertText('Updated 1 user');
+    // Ensure the username of user 1 was updated.
+    $account = user_load(1, TRUE);
+    $this->assertEqual('Fester', $account->name);
+
+    // Now import the second file, where the mail address of user 1 is missing.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users2.csv');
+    $this->assertNoText('Removed 1 user');
+
+    // Ensure that user 1 still exists.
+    $account = db_select('users')
+      ->fields('users')
+      ->condition('uid', 1)
+      ->execute()
+      ->fetch();
+    $this->assertTrue(is_object($account), 'User 1 still exists.');
+  }
+
+  /**
+   * Tests if user 1 cannot be deleted using the delete form.
+   */
+  public function testUser1ProtectionWhenDeletingAll() {
+    // Set to update existing users.
+    $this->setSettings('user_import', 'FeedsFileFetcher', array());
+    $this->setSettings('user_import', 'FeedsUserProcessor', array(
+      'update_existing' => FEEDS_UPDATE_EXISTING,
+    ));
+
+    // Set mail address of user 1 to "fester@example.com".
+    $account = user_load(1);
+    $edit['mail'] = 'fester@example.com';
+    user_save($account, $edit);
+
+    // Import a file that contains the mail address of user 1.
+    $this->importFile('user_import', $this->absolutePath() . '/tests/feeds/users.csv');
+    $this->assertText('Updated 1 user');
+    // Ensure the username of user 1 was updated.
+    $account = user_load(1, TRUE);
+    $this->assertEqual('Fester', $account->name);
+
+    // Now delete all items. User 1 should not be deleted.
+    $this->drupalPost('import/user_import/delete-items', array(), 'Delete');
+
+    // Ensure that user 1 still exists.
+    $account = db_select('users')
+      ->fields('users')
+      ->condition('uid', 1)
+      ->execute()
+      ->fetch();
+    $this->assertTrue(is_object($account), 'User 1 still exists.');
+
+    // But ensure that the associated feeds item did got deleted.
+    $count = db_select('feeds_item')
+      ->fields('feeds_item')
+      ->condition('entity_type', 'user')
+      ->condition('entity_id', 1)
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertEqual(0, $count, 'The feeds item for user 1 was deleted.');
+  }
+
+  /**
    * Log in an imported user.
    *
    * @param string $username
