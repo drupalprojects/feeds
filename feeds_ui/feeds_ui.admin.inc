@@ -48,7 +48,7 @@ function feeds_ui_mapping_help() {
 /**
  * Build overview of available configurations.
  */
-function feeds_ui_overview_form($form, &$form_status) {
+function feeds_ui_overview_form($form, array &$form_state) {
   $form = $form['enabled'] = $form['disabled'] = array();
 
   $form['#header'] = array(
