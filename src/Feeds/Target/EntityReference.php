@@ -141,7 +141,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     $query = $this->queryFactory->get($this->getEntityType());
 
     if ($bundles = $this->getBundles()) {
-      $query->condition($this->getBundleKey(), $bundles);
+      $query->condition($this->getBundleKey(), $bundles, 'IN');
     }
 
     $ids = array_filter($query->condition($field, $value)->range(0, 1)->execute());
