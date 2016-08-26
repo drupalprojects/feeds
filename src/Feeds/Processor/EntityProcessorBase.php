@@ -646,7 +646,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     }
     $table = $this->entityType() . '__feeds_item';
     db_delete($table)
-      ->condition('feeds_item_target_id', $fids)
+      ->condition('feeds_item_target_id', $fids, 'IN')
       ->execute();
   }
 
