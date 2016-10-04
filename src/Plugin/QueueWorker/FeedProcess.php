@@ -48,7 +48,7 @@ class FeedProcess extends FeedQueueWorkerBase {
       $this->queueFactory->get('feeds_feed_import:' . $feed->bundle())->createItem($feed);
     }
     elseif ($feed->progressFetching() !== StateInterface::BATCH_COMPLETE) {
-      $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem($feed, $fetcher_result);
+      $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem([$feed, $fetcher_result]);
     }
     else {
       $feed->finishImport();
