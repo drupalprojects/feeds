@@ -200,4 +200,24 @@ class File extends EntityReference {
     return $summary . '<br>' . $this->t('Exsting files: %existing', ['%existing' => $message]);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function createEntity($value) {
+    if (!strlen(trim($value))) {
+      return FALSE;
+    }
+
+    $bundles = $this->getBundles();
+
+    $entity = $this->entityManager->getStorage($this->getEntityType())->create([
+      $this->getLabelKey() => $value,
+      $this->getBundleKey() => reset($bundles),
+      'uri' => $value,
+    ]);
+    $entity->save();
+
+    return $entity->id();
+  }
+
 }
