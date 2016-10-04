@@ -24,20 +24,26 @@ class FeedProcess extends FeedQueueWorkerBase {
    */
   public function processItem($data) {
     list($feed, $item) = $data;
-    if ($item instanceof FetcherResultInterface) {
-      $this->finish($feed, $item);
-      return;
-    }
+
+    $switcher = $this->switchAccount($feed);
 
     try {
+      if ($item instanceof FetcherResultInterface) {
+        $this->finish($feed, $item);
+        return;
+      }
+
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'process'));
       $this->dispatchEvent(FeedsEvents::PROCESS, new ProcessEvent($feed, $item));
+
+      $feed->saveStates();
     }
     catch (\Exception $exception) {
       return $this->handleException($feed, $exception);
     }
-
-    $feed->saveStates();
+    finally {
+      $switcher->switchBack();
+    }
   }
 
   /**

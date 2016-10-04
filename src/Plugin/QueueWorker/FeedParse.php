@@ -22,23 +22,29 @@ class FeedParse extends FeedQueueWorkerBase {
    */
   public function processItem($data) {
     list($feed, $fetcher_result) = $data;
+
+    $switcher = $this->switchAccount($feed);
+
     try {
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'parse'));
       $parse_event = $this->dispatchEvent(FeedsEvents::PARSE, new ParseEvent($feed, $fetcher_result));
       $feed->setState(StateInterface::PROCESS, NULL);
+
+      $feed->saveStates();
+      $queue = $this->queueFactory->get('feeds_feed_process:' . $feed->bundle());
+
+      foreach ($parse_event->getParserResult() as $item) {
+        $queue->createItem([$feed, $item]);
+      }
+      // Add a final process queue item that finalizes the import.
+      $queue->createItem([$feed, $fetcher_result]);
     }
     catch (\Exception $exception) {
       return $this->handleException($feed, $exception);
     }
-
-    $feed->saveStates();
-    $queue = $this->queueFactory->get('feeds_feed_process:' . $feed->bundle());
-
-    foreach ($parse_event->getParserResult() as $item) {
-      $queue->createItem([$feed, $item]);
+    finally {
+      $switcher->switchBack();
     }
-    // Add a final process queue item that finalizes the import.
-    $queue->createItem([$feed, $fetcher_result]);
   }
 
 }

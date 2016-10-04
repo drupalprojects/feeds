@@ -31,6 +31,7 @@ class FeedRefreshTest extends FeedsUnitTestCase {
 
     $container->set('queue', $queue_factory);
     $container->set('event_dispatcher', $this->dispatcher);
+    $container->set('account_switcher', $this->getMockedAccountSwitcher());
 
     $this->plugin = FeedRefresh::create($container, [], 'feeds_feed_parse', []);
     $this->feed = $this->getMockFeed();

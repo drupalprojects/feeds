@@ -34,19 +34,25 @@ class FeedRefresh extends FeedQueueWorkerBase {
       return;
     }
 
-    $feed->clearStates();
+    $switcher = $this->switchAccount($feed);
 
     try {
+      $feed->clearStates();
+
       $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'fetch'));
       $fetch_event = $this->dispatchEvent(FeedsEvents::FETCH, new FetchEvent($feed));
       $feed->setState(StateInterface::PARSE, NULL);
+
+      $feed->saveStates();
+      $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())
+        ->createItem([$feed, $fetch_event->getFetcherResult()]);
     }
     catch (\Exception $exception) {
       return $this->handleException($feed, $exception);
     }
-
-    $feed->saveStates();
-    $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem([$feed, $fetch_event->getFetcherResult()]);
+    finally {
+      $switcher->switchBack();
+    }
   }
 
 }

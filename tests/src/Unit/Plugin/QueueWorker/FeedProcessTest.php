@@ -32,6 +32,7 @@ class FeedProcessTest extends FeedsUnitTestCase {
 
     $container->set('queue', $queue_factory);
     $container->set('event_dispatcher', $this->dispatcher);
+    $container->set('account_switcher', $this->getMockedAccountSwitcher());
 
     $this->plugin = FeedProcess::create($container, [], 'feeds_feed_process', []);
     $this->feed = $this->getMockFeed();

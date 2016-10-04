@@ -5,6 +5,8 @@ namespace Drupal\feeds\Plugin\QueueWorker;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\Queue\QueueWorkerBase;
+use Drupal\Core\Session\AccountSwitcherInterface;
+use Drupal\Core\Session\UserSession;
 use Drupal\feeds\Event\EventDispatcherTrait;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
@@ -16,6 +18,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 abstract class FeedQueueWorkerBase extends QueueWorkerBase implements ContainerFactoryPluginInterface {
   use EventDispatcherTrait;
+
+  /**
+   * The account switcher.
+   *
+   * @var \Drupal\Core\Session\AccountSwitcherInterface
+   */
+  protected $accountSwitcher;
 
   /**
    * The queue factory.
@@ -33,11 +42,18 @@ abstract class FeedQueueWorkerBase extends QueueWorkerBase implements ContainerF
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Queue\QueueFactory $queue_factory
+   *   The queue factory.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher.
+   * @param \Drupal\Core\Session\AccountSwitcherInterface $account_switcher
+   *   The account switcher.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, QueueFactory $queue_factory, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, QueueFactory $queue_factory, EventDispatcherInterface $event_dispatcher, AccountSwitcherInterface $account_switcher) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->queueFactory = $queue_factory;
     $this->setEventDispatcher($event_dispatcher);
+    $this->accountSwitcher = $account_switcher;
   }
 
   /**
@@ -49,7 +65,8 @@ abstract class FeedQueueWorkerBase extends QueueWorkerBase implements ContainerF
       $plugin_id,
       $plugin_definition,
       $container->get('queue'),
-      $container->get('event_dispatcher')
+      $container->get('event_dispatcher'),
+      $container->get('account_switcher')
     );
   }
 
@@ -62,6 +79,21 @@ abstract class FeedQueueWorkerBase extends QueueWorkerBase implements ContainerF
     if (!$exception instanceof EmptyFeedException) {
       throw $exception;
     }
+  }
+
+  /**
+   * Safely switches to another account.
+   *
+   * @see \Drupal\Core\Session\AccountSwitcherInterface::switchTo()
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed that has the account to switch to.
+   *
+   * @return \Drupal\Core\Session\AccountSwitcherInterface
+   *   The account switcher to call switchBack() on.
+   */
+  protected function switchAccount(FeedInterface $feed) {
+    return $this->accountSwitcher->switchTo(new UserSession(['uid' => $feed->getOwnerId()]));
   }
 
 }

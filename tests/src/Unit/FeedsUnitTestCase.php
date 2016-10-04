@@ -2,7 +2,10 @@
 
 namespace Drupal\Tests\feeds\Unit {
 
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 use org\bovigo\vfs\vfsStream;
 
 /**
@@ -66,6 +69,27 @@ abstract class FeedsUnitTestCase extends UnitTestCase {
     $method = $class->getMethod($name);
     $method->setAccessible(TRUE);
     return $method;
+  }
+
+  /**
+   * Returns a mocked AccountSwitcher object.
+   *
+   * The returned object verifies that if switchTo() is called, switchBack() is
+   * also called.
+   *
+   * @return \Drupal\Core\Session\AccountSwitcherInterface
+   */
+  protected function getMockedAccountSwitcher() {
+    $switcher = $this->prophesize(AccountSwitcherInterface::class);
+
+    $switcher->switchTo(Argument::type(AccountInterface::class))
+      ->will(function () use ($switcher) {
+        $switcher->switchBack()->shouldBeCalled();
+
+        return $switcher->reveal();
+    });
+
+    return $switcher->reveal();
   }
 
   protected function getProtectedClosure($object, $method) {
