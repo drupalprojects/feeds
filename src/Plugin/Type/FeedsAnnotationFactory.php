@@ -25,6 +25,9 @@ class FeedsAnnotationFactory extends ContainerFactory {
       if (substr($argument, 0, 1) === '@') {
         $arguments[] = \Drupal::service(substr($argument, 1));
       }
+      elseif (substr($argument, 0, 1) === '%' && substr($argument, -1) === '%') {
+        $arguments[] = \Drupal::getContainer()->getParameter(substr($argument, 1, -1));
+      }
       else {
         $arguments[] = $argument;
       }
