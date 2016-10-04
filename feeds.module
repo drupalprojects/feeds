@@ -29,6 +29,7 @@ function feeds_cron() {
     ->condition('queued', 0)
     ->condition('next', REQUEST_TIME, '<=')
     ->condition('next', -1, '<>')
+    ->condition('status', 1)
     ->range(0, 100)
     ->sort('imported')
     ->execute();

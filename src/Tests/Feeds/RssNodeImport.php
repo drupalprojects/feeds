@@ -200,6 +200,7 @@ class RssNodeImport extends WebTestBase {
     \Drupal::cache('feeds_download')->deleteAll();
     sleep(1);
     $this->cronRun();
+    $this->cronRun();
     $feed = $this->reloadFeed($feed->id());
 
     $this->assertEqual($feed->getItemCount(), 6);
@@ -212,9 +213,28 @@ class RssNodeImport extends WebTestBase {
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
     $feed = $this->reloadFeed($feed->id());
 
+    $manual_imported_time = $feed->getImportedTime();
     $this->assertEqual($feed->getItemCount(), 12);
-    $this->assertTrue($feed->getImportedTime() > $imported);
+    $this->assertTrue($manual_imported_time > $imported);
     $this->assertEqual($feed->getNextImportTime(), $feed->getImportedTime() + 3600);
+
+    // Change the next time so that the feed should be scheduled. Then, disable
+    // it to ensure the status is respected.
+    // Nothing should change on this cron run.
+    $feed = $this->reloadFeed($feed->id());
+    $feed->set('next', 0);
+    $feed->setActive(FALSE);
+    $feed->save();
+
+    \Drupal::cache('feeds_download')->deleteAll();
+    sleep(1);
+    $this->cronRun();
+    $this->cronRun();
+    $feed = $this->reloadFeed($feed->id());
+
+    $this->assertEqual($feed->getItemCount(), 12);
+    $this->assertEqual($feed->getImportedTime(), $manual_imported_time);
+    $this->assertEqual($feed->getNextImportTime(), 0);
   }
 
   protected function reloadFeed($fid) {
