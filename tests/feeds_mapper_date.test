@@ -126,6 +126,126 @@ class FeedsMapperDateTestCase extends FeedsMapperTestCase {
   }
 
   /**
+   * Tests importing dates using the timezone mapping option.
+   */
+  public function testTimezoneMappingOption() {
+    // Create content type.
+    $typename = $this->createContentType(array(), array(
+      'date' => 'date',
+      'datestamp' => 'datestamp',
+      'datetime' => 'datetime',
+    ));
+
+    // Hack to get date fields to not round to every 15 minutes.
+    foreach (array('date', 'datestamp', 'datetime') as $field) {
+      $field = 'field_' . $field;
+      $edit = array(
+        'widget_type' => 'date_select',
+      );
+      $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
+      $edit = array(
+        'instance[widget][settings][increment]' => 1,
+        'field[settings][enddate_get]' => 1,
+        'instance[settings][default_value]' => 'blank',
+      );
+      $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field, $edit, 'Save settings');
+      $edit = array(
+        'widget_type' => 'date_text',
+      );
+      $this->drupalPost('admin/structure/types/manage/' . $typename . '/fields/' . $field . '/widget-type', $edit, 'Continue');
+    }
+
+    // Create and configure importer.
+    $this->createImporterConfiguration('Content CSV', 'csv');
+    $this->setSettings('csv', NULL, array(
+      'content_type' => '',
+      'import_period' => FEEDS_SCHEDULE_NEVER,
+    ));
+    $this->setPlugin('csv', 'FeedsFileFetcher');
+    $this->setPlugin('csv', 'FeedsCSVParser');
+    $this->setSettings('csv', 'FeedsNodeProcessor', array(
+      'bundle' => $typename,
+    ));
+    $this->addMappings('csv', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+        'unique' => TRUE,
+      ),
+      // Los Angeles == UTC-08:00.
+      1 => array(
+        'source' => 'datetime_start',
+        'target' => 'field_date:start',
+        'timezone' => 'America/Los_Angeles',
+      ),
+      2 => array(
+        'source' => 'datetime_end',
+        'target' => 'field_date:end',
+        'timezone' => 'America/Los_Angeles',
+      ),
+      // Amsterdam == UTC+01:00.
+      3 => array(
+        'source' => 'datetime_start',
+        'target' => 'field_datestamp:start',
+        'timezone' => 'Europe/Amsterdam',
+      ),
+      4 => array(
+        'source' => 'datetime_end',
+        'target' => 'field_datestamp:end',
+        'timezone' => 'Europe/Amsterdam',
+      ),
+      // Sydney == UTC+10:00.
+      5 => array(
+        'source' => 'datetime_start',
+        'target' => 'field_datetime:start',
+        'timezone' => 'Australia/Sydney',
+      ),
+      6 => array(
+        'source' => 'datetime_end',
+        'target' => 'field_datetime:end',
+        'timezone' => 'Australia/Sydney',
+      ),
+    ));
+
+    // Import CSV file.
+    $this->importFile('csv', $this->absolutePath() . '/tests/feeds/content_date.csv');
+    $this->assertText('Created 2 nodes');
+
+    // Check the imported nodes.
+    $date_values = array(
+      // Wintertime.
+      // (Hear me calling)
+      1 => array(
+        'field_date_start' => '11/05/1955 - 20:00',
+        'field_date_end' => '11/05/1955 - 23:00',
+        'field_datestamp_start' => '11/05/1955 - 11:00',
+        'field_datestamp_end' => '11/05/1955 - 14:00',
+        'field_datetime_start' => '11/05/1955 - 02:00',
+        'field_datetime_end' => '11/05/1955 - 05:00',
+      ),
+      // Summertime =+0100.
+      // (Dee dee dee)
+      2 => array(
+        'field_date_start' => '10/22/2015 - 06:29',
+        'field_date_end' => '10/22/2015 - 09:29',
+        'field_datestamp_start' => '10/21/2015 - 21:29',
+        'field_datestamp_end' => '10/22/2015 - 00:29',
+        'field_datetime_start' => '10/21/2015 - 12:29',
+        'field_datetime_end' => '10/21/2015 - 15:29',
+      ),
+    );
+    for ($i = 1; $i <= 2; $i++) {
+      $this->drupalGet("node/$i/edit");
+      $this->assertFieldByName('field_date[und][0][value][date]', $date_values[$i]['field_date_start']);
+      $this->assertFieldByName('field_date[und][0][value2][date]', $date_values[$i]['field_date_end']);
+      $this->assertFieldByName('field_datestamp[und][0][value][date]', $date_values[$i]['field_datestamp_start']);
+      $this->assertFieldByName('field_datestamp[und][0][value2][date]', $date_values[$i]['field_datestamp_end']);
+      $this->assertFieldByName('field_datetime[und][0][value][date]', $date_values[$i]['field_datetime_start']);
+      $this->assertFieldByName('field_datetime[und][0][value2][date]', $date_values[$i]['field_datetime_end']);
+    }
+  }
+
+  /**
    * Tests if values are cleared out when an empty value is provided.
    */
   public function testClearOutValues() {

@@ -42,6 +42,8 @@ function date_feeds_processor_targets($entity_type, $bundle_name) {
         'callback' => 'date_feeds_set_target',
         'description' => t('The end date for the @name field.', array('@name' => $instance['label'])),
         'real_target' => $name,
+        'summary_callbacks' => array('date_feeds_summary_callback'),
+        'form_callbacks' => array('date_feeds_form_callback'),
       );
     }
   }
