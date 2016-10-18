@@ -61,6 +61,18 @@ function feeds_tests_theme() {
 }
 
 /**
+ * Implements hook_node_load().
+ */
+function feeds_tests_node_load($nodes) {
+  // Eventually keep track of nodes that get loaded.
+  if (variable_get('feeds_track_node_loads', FALSE)) {
+    $loads = variable_get('feeds_loaded_nodes', array());
+    $loads = array_merge($loads, array_keys($nodes));
+    variable_set('feeds_loaded_nodes', $loads);
+  }
+}
+
+/**
  * Implements hook_cron_queue_alter().
  *
  * Changes runtime limit for feeds_source_import queue.
