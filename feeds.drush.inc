@@ -45,10 +45,10 @@ function feeds_drush_command() {
       'importer' => 'The name of the Feeds importer that will be refreshed. Mandatory.',
     ),
     'options' => array(
-      'nid' => 'The nid of the Feeds importer that will be imported. Optional.',
-      'file' => 'The file to import. Optional.',
-      'url' => 'The URL to import. Optional.',
-      'stdin' => 'Read the file to import from stdin. Optional.',
+      'nid' => '(optional) The nid of the Feeds importer that will be imported.',
+      'file' => '(optional) The file to import. Bypasses the configured fetcher and does *not* update the source configuration.',
+      'url' => '(optional) The URL to import. Bypasses the configured fetcher and does *not* update the source configuration.',
+      'stdin' => '(optional) Read the file to import from stdin. Bypasses the configured fetcher and does *not* update the source configuration.',
     ),
     'examples' => array(
       'drush feeds-import my_importer' => "Import items with the importer 'my_importer'.",
@@ -142,7 +142,9 @@ function feeds_drush_help($section) {
     case 'drush:feeds-list-feeds':
       return dt("List all feed sources. You can limit the number of feed sources to display by setting the option '--limit'.");
     case 'drush:feeds-import':
-      return dt("Import items from a feed. Follow the command with the importer name to import items with. If the importer is attached to a content type, specify also the feed node with the option '--nid'.");
+      $help = dt("Import items from a feed. Follow the command with the importer name to import items with. If the importer is attached to a content type, specify also the feed node with the option '--nid'.");
+      $help .= "\n" . dt("Note that the options '--file', '--stdin' and '--url' temporary bypass the configured fetcher and do *not* update the source configuration. For example, if a file was uploaded for the feed source, that file will remain there even when you specify a different file using the '--file' option. Same story applies for when importing from a url. If you omit these options, the last stored source will be used.");
+      return $help;
     case 'drush:feeds-import-all':
       return dt('Import items from all feeds. Optionally specify the importer name to import all feeds for.');
     case 'drush:feeds-clear':
