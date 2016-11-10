@@ -10,6 +10,7 @@ test_dependencies[] = entity_translation:entity_translation
 test_dependencies[] = feeds_xpathparser:feeds_xpathparser
 test_dependencies[] = link:link
 test_dependencies[] = i18n:i18n_taxonomy
+test_dependencies[] = variable:variable
 
 files[] = includes/FeedsConfigurable.inc
 files[] = includes/FeedsImporter.inc
