@@ -651,6 +651,9 @@ function feeds_ui_mapping_settings_form($form, $form_state, $i, $mapping, $targe
 
     return array(
       '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('feeds-target-config'),
+      ),
       'settings' => $settings_form,
       'save_settings' => $base_button + array(
         '#type' => 'submit',

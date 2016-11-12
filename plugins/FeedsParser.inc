@@ -299,9 +299,9 @@ class FeedsEnclosure extends FeedsElement {
    *
    * @param string
    */
-   protected $mime_type;
+  protected $mime_type;
 
-   /**
+  /**
    * The default list of allowed extensions.
    *
    * @param string
@@ -443,31 +443,35 @@ class FeedsEnclosure extends FeedsElement {
   /**
    * Get a Drupal file object of the enclosed resource, download if necessary.
    *
-   * @param $destination
+   * @param string $destination
    *   The path or uri specifying the target directory in which the file is
    *   expected. Don't use trailing slashes unless it's a streamwrapper scheme.
+   * @param int $replace
+   *   Replace behavior when the destination file already exists.
+   *   @see file_save_data()
    *
-   * @return
-   *   A Drupal temporary file object of the enclosed resource.
+   * @return stdClass|FALSE
+   *   A Drupal temporary file object of the enclosed resource or FALSE if the
+   *   value is empty.
    *
    * @throws Exception
    *   If file object could not be created.
    */
-  public function getFile($destination) {
-    $file = NULL;
+  public function getFile($destination, $replace = FILE_EXISTS_RENAME) {
+    $file = FALSE;
     if ($this->getValue()) {
       // Prepare destination directory.
       file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
       // Copy or save file depending on whether it is remote or local.
       if (drupal_realpath($this->getSanitizedUri())) {
-        $file           = new stdClass();
-        $file->uid      = 0;
-        $file->uri      = $this->getSanitizedUri();
+        $file = new stdClass();
+        $file->uid = 0;
+        $file->uri = $this->getSanitizedUri();
         $file->filemime = $this->getMIMEType();
         $file->filename = $this->getSafeFilename();
 
         if (drupal_dirname($file->uri) !== $destination) {
-          $file = file_copy($file, $destination);
+          $file = file_copy($file, $destination, $replace);
         }
         else {
           // If file is not to be copied, check whether file already exists,
@@ -476,6 +480,9 @@ class FeedsEnclosure extends FeedsElement {
           $existing_files = file_load_multiple(array(), array('uri' => $file->uri));
           if (count($existing_files)) {
             $existing = reset($existing_files);
+            if ($replace == FEEDS_FILE_EXISTS_SKIP) {
+              return $existing;
+            }
             $file->fid = $existing->fid;
             $file->filename = $existing->filename;
           }
@@ -494,7 +501,7 @@ class FeedsEnclosure extends FeedsElement {
             $filename = transliteration_clean_filename($filename);
           }
 
-          $file = file_save_data($this->getContent(), $destination . $filename);
+          $file = file_save_data($this->getContent(), $destination . $filename, $replace);
         }
         catch (Exception $e) {
           watchdog_exception('Feeds', $e, nl2br(check_plain($e)));
