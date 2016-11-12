@@ -465,7 +465,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    */
   protected function clean(FeedsState $state) {
     // We clean only if needed.
-    if ($this->config['update_non_existent'] == FEEDS_SKIP_NON_EXISTENT) {
+    if ($this->config['update_non_existent'] != FEEDS_DELETE_NON_EXISTENT) {
       return;
     }
 
