@@ -86,11 +86,7 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     "georss" => "http://www.georss.org/georss",
   );
 
-  $base = $feed_XML->xpath("@base");
-  $base = (string) array_shift($base);
-  if (!valid_url($base, TRUE)) {
-    $base = FALSE;
-  }
+  $base = _parser_common_syndication_atom10_parse_base_url($feed_XML);
 
   // Detect the title
   $parsed_source['title'] = isset($feed_XML->title) ? _parser_common_syndication_title("{$feed_XML->title}") : "";
@@ -98,20 +94,13 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
   $parsed_source['description'] = isset($feed_XML->subtitle) ? "{$feed_XML->subtitle}" : "";
 
   $parsed_source['link'] = _parser_common_syndication_link($feed_XML->link);
-  if (valid_url($parsed_source['link']) && !valid_url($parsed_source['link'], TRUE) && !empty($base)) {
+  if ($base && !valid_url($parsed_source['link'], TRUE) && valid_url($parsed_source['link'])) {
     $parsed_source['link'] = $base . $parsed_source['link'];
   }
 
   $parsed_source['items'] = array();
 
   foreach ($feed_XML->entry as $news) {
-
-    $original_url = NULL;
-    $guid = !empty($news->id) ? "{$news->id}" : NULL;
-    if (valid_url($guid, TRUE)) {
-      $original_url = $guid;
-    }
-
     $georss = (array)$news->children($ns["georss"]);
     $geoname = '';
     if (isset($georss['featureName'])) {
@@ -164,13 +153,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
       $body .= "{$news->summary}";
     }
 
-    if (!empty($news->content['src'])) {
-      // some src elements in some valid atom feeds contained no urls at all
-      if (valid_url("{$news->content['src']}", TRUE)) {
-        $original_url = "{$news->content['src']}";
-      }
-    }
-
     $original_author = '';
     if (!empty($news->source->author->name)) {
       $original_author = "{$news->source->author->name}";
@@ -181,8 +163,6 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     elseif (!empty($feed_XML->author->name)) {
       $original_author = "{$feed_XML->author->name}";
     }
-
-    $original_url = _parser_common_syndication_link($news->link);
 
     $item = array();
     $item['title'] = _parser_common_syndication_title($title, $body);
@@ -201,17 +181,32 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
       $item['timestamp'] = _parser_common_syndication_parse_date("{$news->updated}");
     }
 
-    $item['url'] = trim($original_url);
-    if (valid_url($item['url']) && !valid_url($item['url'], TRUE) && !empty($base)) {
-      $item['url'] = $base . $item['url'];
+    $item['guid'] = (string) $news->id;
+
+    $item['url'] = _parser_common_syndication_link($news->link);
+
+    if (!$item['url'] && !empty($news->content['src']) && valid_url($news->content['src'], TRUE)) {
+      $item['url'] = (string) $news->content['src'];
     }
+
+    if (!strlen($item['url']) && $item['guid'] && valid_url($item['guid'], TRUE)) {
+      $item['url'] = $item['guid'];
+    }
+
+    if (!valid_url($item['url'], TRUE) && valid_url($item['url'])) {
+      if ($item_base = _parser_common_syndication_atom10_parse_base_url($news)) {
+        $item['url'] = $item_base . $item['url'];
+      }
+      elseif ($base) {
+        $item['url'] = $base . $item['url'];
+      }
+    }
+
     // Fall back on URL if GUID is empty.
-    if (!empty($guid)) {
-      $item['guid'] = $guid;
-    }
-    else {
+    if (!strlen($item['guid'])) {
       $item['guid'] = $item['url'];
     }
+
     $item['geolocations'] = array();
     if ($lat && $lon) {
       $item['geolocations'] = array(
@@ -226,7 +221,59 @@ function _parser_common_syndication_atom10_parse($feed_XML) {
     $item['domains'] = isset($additional_taxonomies['ATOM Domains']) ? $additional_taxonomies['ATOM Domains'] : array();
     $parsed_source['items'][] = $item;
   }
+
   return $parsed_source;
+}
+
+/**
+ * Finds the base URL of an Atom document.
+ *
+ * @param SimpleXMLElement $xml
+ *   The XML document.
+ *
+ * @return string|false
+ *   Returns the base URL or false on failure.
+ */
+function _parser_common_syndication_atom10_parse_base_url(SimpleXMLElement $xml) {
+  $base = $xml->attributes('xml', TRUE)->base;
+  if (!$base) {
+    $base = $xml['base'];
+  }
+
+  if ($base && valid_url($base, TRUE)) {
+    return rtrim($base, '/') . '/';
+  }
+
+  // Try to build a base from the self link.
+  foreach ($xml->xpath('*[local-name() = "link" and @rel="self" and @href]') as $self) {
+    if (valid_url($self['href'], TRUE)) {
+      return _parser_common_syndication_string_url_path((string) $self['href']);
+    }
+  }
+
+  // Try to build a base from the alternate link.
+  foreach ($xml->xpath('*[local-name() = "link" and @rel="alternate" and @href]') as $alternate) {
+    if (valid_url($alternate['href'], TRUE)) {
+      return _parser_common_syndication_string_url_path((string) $alternate['href']);
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Removes the path parts of an absolute URL.
+ *
+ * @param string $url
+ *   The absolute URL.
+ *
+ * @return string
+ *   The absolute URL with the path stripped.
+ */
+function _parser_common_syndication_string_url_path($url) {
+  $pos = strpos($url, '/', strpos($url, '//') + 2);
+
+  return $pos ? substr($url, 0, $pos + 1) : $url . '/';
 }
 
 /**
@@ -586,7 +633,7 @@ function _parser_common_syndication_link($links) {
       }
     }
   }
-  return $to_link;
+  return trim($to_link);
 }
 
 /**
