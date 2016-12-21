@@ -24,10 +24,9 @@ display:
     provider: views
     display_options:
       access:
-        type: none
-        options: {  }
-        provider: views
-        dependencies: {  }
+        type: perm
+        options:
+          perm: 'access feed overview'
       cache:
         type: none
         options: {  }
@@ -761,6 +760,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       cacheable: false
       max-age: 0
       tags: {  }
@@ -790,6 +790,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       cacheable: false
       max-age: 0
       tags: {  }
