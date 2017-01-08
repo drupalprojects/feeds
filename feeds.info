@@ -73,6 +73,7 @@ files[] = tests/feeds_mapper_link.test
 files[] = tests/feeds_mapper_summary.test
 files[] = tests/feeds_mapper_taxonomy.test
 files[] = tests/feeds_tokens.test
+files[] = tests/FeedsEnclosureTest.test
 files[] = tests/http_request.test
 files[] = tests/parser_csv.test
 
