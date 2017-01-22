@@ -758,7 +758,7 @@ function feeds_features_pipe_feeds_importer_alter(&$pipe, $data, &$export) {
  * required if there are any importers using those plugins.
  */
 function feeds_system_info_alter(array &$info, $file, $type) {
-  if ($type !== 'module' || !module_hook($file->name, 'feeds_plugins')) {
+  if ($type !== 'module' || !module_exists($file->name) || !module_hook($file->name, 'feeds_plugins')) {
     return;
   }
 
