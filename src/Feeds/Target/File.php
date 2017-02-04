@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FieldTargetDefinition;
 use GuzzleHttp\ClientInterface;
+use Drupal\Core\Utility\Token;
 
 /**
  * Defines a file field mapper.
@@ -16,7 +17,7 @@ use GuzzleHttp\ClientInterface;
  * @FeedsTarget(
  *   id = "file",
  *   field_types = {"file"},
- *   arguments = {"@entity.manager", "@entity.query", "@http_client"}
+ *   arguments = {"@entity.manager", "@entity.query", "@http_client", "@token"}
  * )
  */
 class File extends EntityReference {
@@ -36,6 +37,13 @@ class File extends EntityReference {
   protected $fileExtensions;
 
   /**
+   * Token service.
+   *
+   * @var \Drupal\Core\Utility\Token
+   */
+  protected $token;
+
+  /**
    * Constructs a File object.
    *
    * @param array $configuration
@@ -50,9 +58,12 @@ class File extends EntityReference {
    *   The entity query factory.
    * @param \GuzzleHttp\ClientInterface $client
    *   The http client.
+   * @param \Drupal\Core\Utility\Token $token
+   * The tokens.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityManagerInterface $entity_manager, QueryFactory $query_factory, ClientInterface $client) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityManagerInterface $entity_manager, QueryFactory $query_factory, ClientInterface $client, Token $token) {
     $this->client = $client;
+    $this->token = $token;
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $query_factory);
     $this->fileExtensions = array_filter(explode(' ', $this->settings['file_extensions']));
   }
@@ -96,7 +107,7 @@ class File extends EntityReference {
    */
   protected function getFile($value) {
     // Prepare destination directory.
-    $destination = $this->settings['uri_scheme'] . '://' . trim($this->settings['file_directory'], '/');
+    $destination = $this->token->replace($this->settings['uri_scheme'] . '://' . trim($this->settings['file_directory'], '/'));
     file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
     $filepath = $destination . '/' . $this->getFileName($value);
 
