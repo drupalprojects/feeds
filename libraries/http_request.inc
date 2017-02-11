@@ -116,7 +116,7 @@ function http_request_get_common_syndication($url, $settings = array()) {
 function http_request_get($url, $username = NULL, $password = NULL, $accept_invalid_cert = FALSE, $timeout = NULL) {
   // Intra-pagedownload cache, avoid to download the same content twice within
   // one page download (it's possible, compatible and parse calls).
-  static $download_cache = array();
+  $download_cache = &drupal_static(__FUNCTION__, array());
   if (isset($download_cache[$url])) {
     return $download_cache[$url];
   }
@@ -296,7 +296,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
   // In case of 304 Not Modified try to return cached data.
   if ($result->code == 304) {
 
-    if (isset($last_result)) {
+    if (isset($last_result->data)) {
       $last_result->from_cache = TRUE;
       return $last_result;
     }
@@ -423,8 +423,9 @@ function http_request_get_cache($url) {
  * @param stdClass $result
  *   The result of the HTTP request.
  */
-function http_request_set_cache($url, stdClass $result) {
-  cache_set(hash('sha256', $url), $result, 'cache_feeds_http');
+function http_request_set_cache($url, $result) {
+  $item = ($result instanceof FeedsHTTPCacheItem) ? $result : new FeedsHTTPCacheItem(hash('sha256', $url), $result);
+  $item->cacheSet();
 }
 
 /**

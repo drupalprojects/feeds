@@ -53,19 +53,32 @@ function feeds_cron() {
     ->execute();
 
   // Find importers that need to be rescheduled.
-  if (!$importers = feeds_reschedule()) {
-    return;
+  $importers = feeds_reschedule();
+  if ($importers) {
+    // @todo Maybe we should queue this somehow as well. This could be potentially
+    // very long.
+    $sources = db_query("SELECT feed_nid, id FROM {feeds_source} WHERE id IN (:ids)", array(':ids' => $importers));
+
+    foreach ($sources as $source) {
+      feeds_source($source->id, $source->feed_nid)->schedule();
+    }
+
+    feeds_reschedule(FALSE);
   }
 
-  // @todo Maybe we should queue this somehow as well. This could be potentially
-  // very long.
-  $sources = db_query("SELECT feed_nid, id FROM {feeds_source} WHERE id IN (:ids)", array(':ids' => $importers));
-
-  foreach ($sources as $source) {
-    feeds_source($source->id, $source->feed_nid)->schedule();
+  // Sync the files in the cache directory with entries in the cache every now
+  // and then. By default: every six hours.
+  $last_check = variable_get('feeds_sync_cache_feeds_http_last_check');
+  $interval = variable_get('feeds_sync_cache_feeds_http_interval', 21600);
+  if ($last_check < (REQUEST_TIME - $interval)) {
+    // Check first if the task isn't already queued.
+    $queue = DrupalQueue::get('feeds_sync_cache_feeds_http');
+    if ($queue->numberOfItems() < 1) {
+      // Queue sync task.
+      FeedsHTTPCache::getInstance('cache_feeds_http')->startSync();
+    }
+    variable_set('feeds_sync_cache_feeds_http_last_check', REQUEST_TIME);
   }
-
-  feeds_reschedule(FALSE);
 }
 
 /**
@@ -107,6 +120,9 @@ function feeds_cron_queue_info() {
   );
   $queues['feeds_push_unsubscribe'] = array(
     'worker callback' => 'feeds_push_unsubscribe',
+  );
+  $queues['feeds_sync_cache_feeds_http'] = array(
+    'worker callback' => 'feeds_sync_cache_feeds_http',
   );
 
   return $queues;
@@ -157,6 +173,14 @@ function _feeds_queue_worker_helper(array $job, $method) {
   }
 
   return $source;
+}
+
+/**
+ * Scheduler callback for syncing the feeds cache directory with the entries in
+ * the cache.
+ */
+function feeds_sync_cache_feeds_http(array $job) {
+  FeedsHTTPCache::getInstance('cache_feeds_http')->sync($job['files']);
 }
 
 /**
