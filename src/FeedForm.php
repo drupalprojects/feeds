@@ -3,7 +3,7 @@
 namespace Drupal\feeds;
 
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\PluginFormFactory;
@@ -28,8 +28,8 @@ class FeedForm extends ContentEntityForm {
    * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $feed_type_storage
    *   The feed type storage controller.
    */
-  public function __construct(EntityManagerInterface $entity_manager, PluginFormFactory $factory) {
-    $this->entityManager = $entity_manager;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, PluginFormFactory $factory) {
+    $this->entityTypeManager = $entity_type_manager;
     $this->formFactory = $factory;
   }
 
@@ -38,7 +38,7 @@ class FeedForm extends ContentEntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('feeds_plugin_form_factory')
     );
   }
