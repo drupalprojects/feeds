@@ -2,8 +2,10 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\PluginFormFactory;
@@ -25,11 +27,17 @@ class FeedForm extends ContentEntityForm {
   /**
    * Constructs an FeedTypeForm object.
    *
-   * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $feed_type_storage
-   *   The feed type storage controller.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Drupal\feeds\Plugin\PluginFormFactory $factory
+   *   The form factory.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, PluginFormFactory $factory) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(EntityManagerInterface $entity_manager, PluginFormFactory $factory, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+    parent::__construct($entity_manager, $entity_type_bundle_info, $time);
     $this->formFactory = $factory;
   }
 
@@ -38,8 +46,10 @@ class FeedForm extends ContentEntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager'),
-      $container->get('feeds_plugin_form_factory')
+      $container->get('entity.manager'),
+      $container->get('feeds_plugin_form_factory'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('datetime.time')
     );
   }
 
