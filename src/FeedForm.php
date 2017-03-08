@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\PluginFormFactory;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 /**
  * Form controller for the feed edit forms.
@@ -45,11 +46,19 @@ class FeedForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
+    // Compatibility with Drupal 8.2.x.
+    try {
+      $datetime = $container->get('datetime.time');
+    }
+    catch (ServiceNotFoundException $e) {
+      $datetime = NULL;
+    }
+
     return new static(
       $container->get('entity.manager'),
       $container->get('feeds_plugin_form_factory'),
       $container->get('entity_type.bundle.info'),
-      $container->get('datetime.time')
+      $datetime
     );
   }
 
