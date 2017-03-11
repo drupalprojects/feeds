@@ -84,6 +84,25 @@ abstract class FeedsProcessor extends FeedsPlugin {
   }
 
   /**
+   * Provides a list of languages available on the site.
+   *
+   * @return array
+   *   A keyed array of language_key => language_name (example: 'en' => 'English').
+   */
+  public function languageOptions() {
+    $languages = array(
+      LANGUAGE_NONE => t('Language neutral'),
+    );
+    $language_list = language_list('enabled');
+    if (!empty($language_list[1])) {
+      foreach ($language_list[1] as $language) {
+        $languages[$language->language] = $language->name;
+      }
+    }
+    return $languages;
+  }
+
+  /**
    * Create a new entity.
    *
    * @param FeedsSource $source
@@ -150,11 +169,11 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if (!empty($info['entity keys']['language'])) {
       // Ensure that a valid language is always set.
       $key = $info['entity keys']['language'];
-      $languages = language_list('enabled');
+      $languages = $this->languageOptions();
 
-      if (empty($entity->$key) || !isset($languages[1][$entity->$key])) {
+      if (empty($entity->$key) || !isset($languages[$entity->$key])) {
         $entity->$key = $this->entityLanguage();
-      };
+      }
     }
 
     // Perform field validation if entity is fieldable.
@@ -281,9 +300,9 @@ abstract class FeedsProcessor extends FeedsPlugin {
       return LANGUAGE_NONE;
     }
 
-    $languages = language_list('enabled');
+    $languages = $this->languageOptions();
 
-    return isset($languages[1][$this->config['language']]) ? $this->config['language'] : LANGUAGE_NONE;
+    return isset($languages[$this->config['language']]) ? $this->config['language'] : LANGUAGE_NONE;
   }
 
   /**
@@ -919,7 +938,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if (module_exists('locale') && !empty($info['entity keys']['language'])) {
       $form['language'] = array(
         '#type' => 'select',
-        '#options' => array(LANGUAGE_NONE => t('Language neutral')) + locale_language_list('name'),
+        '#options' => $this->languageOptions(),
         '#title' => t('Language'),
         '#required' => TRUE,
         '#default_value' => $this->config['language'],
@@ -995,7 +1014,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
     if (!isset($cache[$this->id])) {
       $mappings = $this->config['mappings'];
       $targets = $this->getCachedTargets();
-      $languages = language_list('enabled');
+      $languages = $this->languageOptions();
 
       foreach ($mappings as &$mapping) {
 
@@ -1012,7 +1031,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
         else {
           // Check if the configured language is available. If not, fallback to
           // LANGUAGE_NONE.
-          if (!isset($languages[1][$mapping['language']])) {
+          if (!isset($languages[$mapping['language']])) {
             $mapping['language'] = LANGUAGE_NONE;
           }
         }
