@@ -520,7 +520,7 @@ function feeds_exit() {
   }
 
   if (drupal_static('feeds_log_error', FALSE)) {
-    watchdog('feeds', 'Feeds reported errors, visit the Feeds log for details.', array(), WATCHDOG_ERROR, 'admin/reports/dblog/feeds');
+    watchdog('feeds', 'Feeds reported errors, visit the Feeds log for details.', array(), WATCHDOG_ERROR, l(t('view'), 'admin/reports/feeds'));
   }
 }
 
