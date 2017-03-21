@@ -6,7 +6,7 @@ use Drupal\feeds\FeedInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Helpler class for events that need a feed.
+ * Helper class for events that need a feed.
  */
 abstract class EventBase extends Event {
 
