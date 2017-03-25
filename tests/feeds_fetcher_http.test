@@ -59,6 +59,86 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
   }
 
   /**
+   * Configures the evironment so that multiple cron runs are needed to complete
+   * an import.
+   *
+   * @param string $source_url
+   *   The URL of the file to import.
+   */
+  protected function setUpMultipleCronRuns($source_url) {
+    // Process 5 items per batch.
+    variable_set('feeds_process_limit', 5);
+
+    // Set variable to enforce that only five items get imported per cron run.
+    // @see feeds_tests_cron_queue_alter()
+    // @see feeds_tests_feeds_after_save()
+    variable_set('feeds_tests_feeds_source_import_queue_time', 5);
+    variable_set('feeds_tests_feeds_after_save_sleep', 1);
+
+    // Set up importer.
+    $this->setUpImporter();
+    // Only import during cron runs, not immediately.
+    $this->setSettings('node', NULL, array(
+      'import_on_create' => FALSE,
+    ));
+
+    // Set source file to import.
+    $edit = array(
+      'feeds[FeedsHTTPFetcher][source]' => $source_url,
+    );
+    $this->drupalPost('import/node', $edit, t('Import'));
+
+    // Ensure that no nodes have been created yet.
+    $this->assertNodeCount(0, 'No nodes have been created yet (actual: @count).');
+  }
+
+  /**
+   * Returns the file in the Feeds in_progress directory.
+   *
+   * @return object
+   *   The found file.
+   *
+   * @throws Exception
+   *   In case no file was found, so the test can abort without issuing a fatal
+   *   error.
+   */
+  protected function getInProgressFile() {
+    // Assert that a file exists in the in_progress dir.
+    $files = file_scan_directory('private://feeds/in_progress', '/.*/');
+    debug($files);
+    $this->assertEqual(1, count($files), 'The feeds "in progress" dir contains one file.');
+    if (!count($files)) {
+      // Abort test.
+      throw new Exception('File not found.');
+    }
+    return reset($files);
+  }
+
+  /**
+   * Asserts that the given number of nodes exist.
+   *
+   * @param int $expected_node_count
+   *   The expected number of nodes in the node table.
+   * @param string $message
+   *   (optional) The message to assert.
+   */
+  protected function assertNodeCount($expected_node_count, $message = '') {
+    if (!$message) {
+      $message = '@expected nodes have been created (actual: @count).';
+    }
+
+    $node_count = db_select('node')
+      ->fields('node', array())
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertEqual($expected_node_count, $node_count, format_string($message, array(
+      '@expected' => $expected_node_count,
+      '@count' => $node_count,
+    )));
+  }
+
+  /**
    * Test the Feed URL form.
    */
   public function testFormValidation() {
@@ -404,6 +484,124 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     // import form.
     $this->assertText("The feeds cache directory (file://non-writeable-dir/feeds) either cannot be created or is not writable. You can change the cache directory by setting the 'feeds_http_file_cache_dir' variable.");
     $this->assertFieldByName('feeds[FeedsHTTPFetcher][source]', $source_url);
+  }
+
+  /**
+   * Tests importing source that needs multiple cron runs.
+   *
+   * Make sure that:
+   * - The content is not saved in the feeds_source table.
+   * - That the source is not refetched while the import has not completed yet.
+   */
+  public function testImportSourceWithMultipleCronRuns() {
+    $source_url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
+    $this->setUpMultipleCronRuns($source_url);
+
+    // Run cron. Five nodes should be imported.
+    $this->cronRun();
+
+    // Assert that only one file was created in the in_progress dir.
+    $this->getInProgressFile();
+
+    // Assert that five nodes have been created now.
+    $this->assertNodeCount(5);
+
+    // Assert that the content is *not* saved in the feeds_source table.
+    $source = db_select('feeds_source')
+      ->fields('feeds_source', array())
+      ->condition('id', 'node')
+      ->execute()
+      ->fetch();
+    $this->assertTrue(strpos($source->fetcher_result, 'Title,Body,published,GUID') === FALSE, 'The content has not been saved in the feeds_source table.');
+
+    // Now change the source to test if the source is not refetched while the
+    // import hasn't been finished yet. The following is different:
+    // - Items 1 and 4 changed.
+    // - Items 2 and 7 were removed.
+    variable_set('feeds_tests_nodes_changed', TRUE);
+
+    // Run cron again. Another four nodes should be imported.
+    $this->cronRun();
+    $this->assertNodeCount(9);
+
+    // Check if the imported nodes match that from the original source.
+    $node = node_load(1);
+    $this->assertEqual('Ut wisi enim ad minim veniam', $node->title);
+    $this->assertTrue(strpos($node->body[LANGUAGE_NONE][0]['value'], 'CHANGE') === FALSE);
+    $node = node_load(4);
+    $this->assertEqual('Typi non habent', $node->title);
+    $this->assertTrue(strpos($node->body[LANGUAGE_NONE][0]['value'], 'CHANGE') === FALSE);
+    $node = node_load(7);
+    $this->assertEqual('Claritas est etiam', $node->title);
+    $node = node_load(9);
+    $this->assertEqual('Eodem modo typi', $node->title);
+  }
+
+  /**
+   * Tests that an import is aborted when the temporary file in the in_progress
+   * dir is removed.
+   */
+  public function testAbortImportWhenTemporaryFileIsDeleted() {
+    $source_url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'feeds') . '/tests/feeds/many_nodes_ordered.csv';
+    $this->setUpMultipleCronRuns($source_url);
+
+    // Run the first cron.
+    $this->cronRun();
+
+    // Assert that five nodes have been created.
+    $this->assertNodeCount(5);
+
+    // Remove file.
+    $file = $this->getInProgressFile();
+    drupal_unlink($file->uri);
+
+    // Run cron again and assert that no more nodes are imported.
+    $this->cronRun();
+    $this->assertNodeCount(5);
+  }
+
+  /**
+   * Tests that FeedsHTTPFetcherResult::getRaw() always returns the same result
+   * for the same instance, even when caches are cleared in between.
+   *
+   * Parsers can call this method multiple times on separate requests. When an
+   * import did not complete in one run, the source should never be refetched
+   * when calling getRaw().
+   *
+   * When an import is restarted, a new FeedsHTTPFetcherResult is created and in
+   * that case the source *should* be refetched.
+   */
+  public function testFeedsHTTPFetcherResultGetRaw() {
+    // Set source file to fetch.
+    $source_url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
+
+    // Retrieve the raw content.
+    $fetcher_result1 = new FeedsHTTPFetcherResult($source_url);
+    $raw1 = $fetcher_result1->getRaw();
+
+    // Simulate the case where the import is picked up later. In between caches
+    // were cleared, the source was changed by the source provider and the
+    // fetcher result was serialized and saved in the database.
+    $fetcher_result_serialized = serialize($fetcher_result1);
+    // Assert that the raw content was not serialized.
+    $this->assertTrue(strpos($fetcher_result_serialized, $raw1) === FALSE, 'The raw data was not saved in the serialized fetcher result.');
+    variable_set('feeds_tests_nodes_changed', TRUE);
+    drupal_static_reset();
+    drupal_flush_all_caches();
+
+    // And retrieve the raw content again.
+    $fetcher_result2 = unserialize($fetcher_result_serialized);
+    $raw2 = $fetcher_result2->getRaw();
+
+    // Assert that the content didn't change.
+    $this->assertEqual($raw1, $raw2, 'The fetcher result returned the same raw data.');
+
+    // Simulate the case where the import has restarted and ensure that the
+    // contents *do* change in that case.
+    $fetcher_result3 = new FeedsHTTPFetcherResult($source_url);
+    $raw3 = $fetcher_result3->getRaw();
+    // Assert that the content changed.
+    $this->assertNotEqual($raw1, $raw3, 'A new fetcher result returned the other raw data.');
   }
 
 }

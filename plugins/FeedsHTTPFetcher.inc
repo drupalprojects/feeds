@@ -48,14 +48,19 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
    *   In case the result code of the HTTP request is not in the 2xx series.
    */
   public function getRaw() {
-    if (!isset($this->raw)) {
-      feeds_include_library('http_request.inc', 'http_request');
-      $result = http_request_get($this->url, NULL, NULL, $this->acceptInvalidCert, $this->timeout);
-      http_request_check_result($this->url, $result);
-      $this->raw = $result->data;
+    if ($this->rawExists()) {
+      return parent::getRaw();
     }
 
-    return $this->sanitizeRaw($this->raw);
+    // Include HTTP functions.
+    feeds_include_library('http_request.inc', 'http_request');
+
+    // Try to fetch the data from a URL.
+    $result = http_request_get($this->url, NULL, NULL, $this->acceptInvalidCert, $this->timeout);
+    http_request_check_result($this->url, $result);
+    $this->raw = $result->data;
+
+    return $this->sanitizeRawOptimized($this->raw);
   }
 
   public function getTimeout() {

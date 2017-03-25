@@ -72,6 +72,7 @@ function feeds_uninstall() {
   variable_del('feeds_debug');
   variable_del('feeds_http_file_cache_dir');
   variable_del('feeds_importer_class');
+  variable_del('feeds_in_progress_dir');
   variable_del('feeds_library_dir');
   variable_del('feeds_never_use_curl');
   variable_del('feeds_process_limit');
