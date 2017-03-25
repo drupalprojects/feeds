@@ -731,6 +731,18 @@ function feeds_update_7212() {
  * Set cache class for Feeds HTTP cache.
  */
 function feeds_update_7213() {
+  // Perform a registry rebuild so the system hopefully discovers the
+  // FeedsHTTPCache class.
+  if (function_exists('registry_rebuild')) {
+    registry_rebuild();
+  }
+
+  // Abort when the FeedsHTTPCache class is not yet found to avoid fatal errors
+  // in _cache_get_object().
+  if (!class_exists('FeedsHTTPCache')) {
+    throw new DrupalUpdateException('Setting the cache class for the cache_feeds_http bin failed because the FeedsHTTPCache class could not be found. Please rebuild the Drupal class registry and perform database updates again.');
+  }
+
   // Activate our custom cache handler for the HTTP cache.
   variable_set('cache_class_cache_feeds_http', 'FeedsHTTPCache');
 }
