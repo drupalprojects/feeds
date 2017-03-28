@@ -12,6 +12,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\node\Entity\Node;
 
 /**
  * Integration test that imports nodes from an RSS feed.
@@ -117,7 +118,7 @@ class RssNodeImport extends WebTestBase {
 
     foreach (range(1, 6) as $nid) {
       $item = $xml->channel->item[$nid - 1];
-      $node = node_load($nid);
+      $node = Node::load($nid);
       $this->assertEqual($node->title->value, (string) $item->title);
       $this->assertEqual($node->body->value, (string) $item->description);
       $this->assertEqual($node->feeds_item->guid, (string) $item->guid);
