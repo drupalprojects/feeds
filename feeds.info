@@ -79,6 +79,7 @@ files[] = tests/feeds_tokens.test
 files[] = tests/FeedsEnclosureTest.test
 files[] = tests/FeedsFetcherResultTest.test
 files[] = tests/FeedsHTTPCacheTest.test
+files[] = tests/FeedsSourceTest.test
 files[] = tests/http_request.test
 files[] = tests/parser_csv.test
 

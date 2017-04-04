@@ -422,7 +422,7 @@ class FeedsSource extends FeedsConfigurable {
       if (module_exists('rules')) {
         rules_invoke_event('feeds_after_import', $this);
       }
-      unset($this->fetcher_result, $this->state);
+      $this->clearStates();
     }
     $this->save();
 
@@ -478,7 +478,7 @@ class FeedsSource extends FeedsConfigurable {
     $this->imported = time();
     $this->log('import', 'Imported in @s seconds.', array('@s' => $this->imported - $start), WATCHDOG_INFO);
 
-    unset($this->fetcher_result, $this->state);
+    $this->clearStates();
 
     $this->save();
 
@@ -519,7 +519,7 @@ class FeedsSource extends FeedsConfigurable {
     $result = $this->progressClearing();
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
       module_invoke_all('feeds_after_clear', $this);
-      unset($this->state);
+      $this->clearStates();
     }
     $this->save();
     if (isset($e)) {
@@ -608,6 +608,14 @@ class FeedsSource extends FeedsConfigurable {
       $this->state[$stage] = new FeedsState();
     }
     return $this->state[$stage];
+  }
+
+  /**
+   * Clears states.
+   */
+  protected function clearStates() {
+    $this->state = array();
+    $this->fetcher_result = NULL;
   }
 
   /**
