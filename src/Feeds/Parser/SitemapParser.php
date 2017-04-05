@@ -39,9 +39,9 @@ class SitemapParser extends PluginBase implements ParserInterface {
 
     // Yes, using a DOM parser is a bit inefficient, but will do for now.
     // @todo XML error handling.
-    $this->startXmlErrorHandling();
+    static::startXmlErrorHandling();
     $xml = new \SimpleXMLElement($raw);
-    $this->stopXmlErrorHandling();
+    static::stopXmlErrorHandling();
     $result = new ParserResult();
 
     foreach ($xml->url as $url) {

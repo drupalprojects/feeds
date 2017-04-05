@@ -19,21 +19,21 @@ trait XmlParserTrait {
    *
    * @var bool
    */
-  private static $_useError;
+  protected static $_useError;
 
   /**
    * The previous value of the entity loader.
    *
    * @var bool
    */
-  private static $_entityLoader;
+  protected static $_entityLoader;
 
   /**
    * The errors reported during parsing.
    *
    * @var array
    */
-  private static $_errors = [];
+  protected static $_errors = [];
 
   /**
    * Returns a new DOMDocument.
