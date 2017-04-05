@@ -100,6 +100,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     }
 
     switch ($field->getType()) {
+      case 'integer':
       case 'string':
       case 'text_long':
       case 'path':
