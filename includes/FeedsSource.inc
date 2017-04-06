@@ -415,17 +415,10 @@ class FeedsSource extends FeedsConfigurable {
     // Clean up.
     $result = $this->progressImporting();
     if ($result == FEEDS_BATCH_COMPLETE || isset($e)) {
-      $this->imported = time();
-      $this->log('import', 'Imported in @s seconds.', array('@s' => $this->imported - $this->state[FEEDS_START]), WATCHDOG_INFO);
-      $this->importer->fetcher->afterImport($this);
-      module_invoke_all('feeds_after_import', $this);
-      if (module_exists('rules')) {
-        rules_invoke_event('feeds_after_import', $this);
-      }
-      $this->clearStates();
+      $this->finishImport();
     }
-    $this->save();
 
+    $this->save();
     $this->releaseLock();
 
     if (isset($e)) {
@@ -451,7 +444,7 @@ class FeedsSource extends FeedsConfigurable {
     }
 
     $this->acquireLock();
-    $start = time();
+    $this->state[FEEDS_START] = time();
 
     try {
       module_invoke_all('feeds_before_import', $this);
@@ -473,20 +466,33 @@ class FeedsSource extends FeedsConfigurable {
       $this->exception = $e;
     }
 
-    module_invoke_all('feeds_after_import', $this);
-
-    $this->imported = time();
-    $this->log('import', 'Imported in @s seconds.', array('@s' => $this->imported - $start), WATCHDOG_INFO);
-
-    $this->clearStates();
+    $this->finishImport();
 
     $this->save();
-
     $this->releaseLock();
 
     if (isset($e)) {
       throw $e;
     }
+  }
+
+  /**
+   * Cleans up after an import.
+   */
+  protected function finishImport() {
+    $this->imported = time();
+    $this->log('import', 'Imported in @s seconds.', array('@s' => $this->imported - $this->state[FEEDS_START]), WATCHDOG_INFO);
+
+    // Allow fetcher to react on finishing importing.
+    $this->importer->fetcher->afterImport($this);
+
+    // Allow other modules to react upon finishing importing.
+    module_invoke_all('feeds_after_import', $this);
+    if (module_exists('rules')) {
+      rules_invoke_event('feeds_after_import', $this);
+    }
+
+    $this->clearStates();
   }
 
   /**
