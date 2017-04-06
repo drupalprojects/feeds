@@ -3,6 +3,7 @@
 namespace Drupal\feeds\Entity;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -395,6 +396,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
       $args = ['@id' => $this->bundle(), '@fid' => $this->id()];
       throw new LockException(new FormattableMarkup('Cannot acquire lock for feed @id / @fid.', $args));
     }
+    Cache::invalidateTags(['feeds_feed_locked']);
   }
 
   /**
@@ -402,6 +404,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function unlock() {
     \Drupal::service('lock.persistent')->release("feeds_feed_{$this->id()}");
+    Cache::invalidateTags(['feeds_feed_locked']);
   }
 
   /**

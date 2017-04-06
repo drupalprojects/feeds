@@ -9,18 +9,24 @@ feeds.import_action:
   title: Import
   appears_on:
     - entity.feeds_feed.canonical
+  cache_tags:
+    - feeds_feed_locked
 
 feeds.clear_action:
   route_name: entity.feeds_feed.clear_form
   title: Delete items
   appears_on:
     - entity.feeds_feed.canonical
+  cache_tags:
+    - feeds_feed_locked
 
 feeds.unlock_action:
   route_name: entity.feeds_feed.unlock
   title: Unlock
   appears_on:
     - entity.feeds_feed.canonical
+  cache_tags:
+    - feeds_feed_locked
 
 entity.feeds_feed_type.add_form:
   route_name: entity.feeds_feed_type.add_form
