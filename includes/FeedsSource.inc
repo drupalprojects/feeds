@@ -626,6 +626,15 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Unlocks a feed.
+   */
+  public function unlock() {
+    $this->clearStates();
+    $this->save();
+    $this->releaseLock();
+  }
+
+  /**
    * Save configuration.
    */
   public function save() {
