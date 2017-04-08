@@ -22,6 +22,21 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
   }
 
   /**
+   * UI functionality tests on disabled feeds.
+   */
+  public function testEditDisabledImporter() {
+    // Create an importer.
+    $this->createImporterConfiguration('Test feed', 'test_feed');
+    // Disable the importer.
+    $edit = array(
+      'test_feed' => FALSE,
+    );
+    $this->drupalPost('admin/structure/feeds', $edit, t('Save'));
+    // Try to edit the importer.
+    $this->doEditFeedsConfiguration('Test feed', 'test_feed');
+  }
+
+  /**
    * UI functionality tests on
    * feeds_ui_overview(),
    * feeds_ui_create_form(),
@@ -32,21 +47,10 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     // Create an importer.
     $this->createImporterConfiguration('Test feed', 'test_feed');
 
-    // Assert UI elements.
-    $this->drupalGet('admin/structure/feeds/test_feed');
-    $this->assertText('Basic settings');
-    $this->assertText('Fetcher');
-    $this->assertText('HTTP Fetcher');
-    $this->assertText('Parser');
-    $this->assertText('Common syndication parser');
-    $this->assertText('Processor');
-    $this->assertText('Node processor');
-    $this->assertText('Getting started');
-    $this->assertRaw('admin/structure/feeds/test_feed/settings');
-    $this->assertRaw('admin/structure/feeds/test_feed/settings/FeedsNodeProcessor');
-    $this->assertRaw('admin/structure/feeds/test_feed/fetcher');
-    $this->assertRaw('admin/structure/feeds/test_feed/parser');
-    $this->assertRaw('admin/structure/feeds/test_feed/processor');
+    // Try to edit the importer.
+    $this->doEditFeedsConfiguration('Test feed', 'test_feed');
+
+    // Check if importer is available on /import.
     $this->drupalGet('import');
     $this->assertText('Basic page');
 
@@ -155,6 +159,33 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
 
     $config = $importer->processor->getConfig();
     $this->assertTrue($config['skip_hash_check']);
+  }
+
+  /**
+   * Edits an importer configuration.
+   *
+   * @param string $name
+   *   The natural name of the feed.
+   * @param string $id
+   *   The persistent id of the feed.
+   */
+  protected function doEditFeedsConfiguration($name = 'Syndication', $id = 'syndication') {
+    // Assert UI elements.
+    $this->drupalGet('admin/structure/feeds/'. $id);
+    $this->assertText($name);
+    $this->assertText('Basic settings');
+    $this->assertText('Fetcher');
+    $this->assertText('HTTP Fetcher');
+    $this->assertText('Parser');
+    $this->assertText('Common syndication parser');
+    $this->assertText('Processor');
+    $this->assertText('Node processor');
+    $this->assertText('Getting started');
+    $this->assertRaw('admin/structure/feeds/'. $id .'/settings');
+    $this->assertRaw('admin/structure/feeds/'. $id .'/settings/FeedsNodeProcessor');
+    $this->assertRaw('admin/structure/feeds/'. $id .'/fetcher');
+    $this->assertRaw('admin/structure/feeds/'. $id .'/parser');
+    $this->assertRaw('admin/structure/feeds/'. $id .'/processor');
   }
 
 }

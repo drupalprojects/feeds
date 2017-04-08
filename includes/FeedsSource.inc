@@ -722,21 +722,52 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Checks whether or not the source configuration is valid.
+   *
+   * @return bool
+   *   True if it is valid.
+   *   False otherwise.
+   */
+  public function hasValidConfiguration() {
+    // If there is no feed nid given, there must be no content type specified.
+    $standalone = empty($this->feed_nid) && empty($this->importer->config['content_type']);
+
+    // If there is a feed nid given, there must be a content type specified.
+    $attached = !empty($this->feed_nid) && !empty($this->importer->config['content_type']);
+
+    if ($standalone || $attached) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Overrides FeedsConfigurable::doesExist().
+   *
+   * Checks the following:
+   * - If the importer is persistent (= defined in code or DB).
+   * - If the source is persistent (= defined in DB).
+   */
+  public function doesExist() {
+    return $this->importer->doesExist() && parent::doesExist();
+  }
+
+  /**
    * Only return source if configuration is persistent and valid.
    *
    * @see FeedsConfigurable::existing().
    */
   public function existing() {
-    // If there is no feed nid given, there must be no content type specified.
-    // If there is a feed nid given, there must be a content type specified.
-    // Ensure that importer is persistent (= defined in code or DB).
-    // Ensure that source is persistent (= defined in DB).
-    if ((empty($this->feed_nid) && empty($this->importer->config['content_type'])) ||
-        (!empty($this->feed_nid) && !empty($this->importer->config['content_type']))) {
-      $this->importer->existing();
-      return parent::existing();
+    // Ensure that the source configuration is valid.
+    if (!$this->hasValidConfiguration()) {
+      throw new FeedsNotExistingException(t('Source configuration not valid.'));
     }
-    throw new FeedsNotExistingException(t('Source configuration not valid.'));
+
+    // Ensure that the importer is persistent (= defined in code or DB).
+    $this->importer->existing();
+
+    // Ensure that the source is persistent (= defined in DB).
+    return parent::existing();
   }
 
   /**
