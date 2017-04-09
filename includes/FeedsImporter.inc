@@ -177,6 +177,38 @@ class FeedsImporter extends FeedsConfigurable {
   }
 
   /**
+   * Validates the configuration.
+   */
+  public function validateConfig() {
+    $errors = parent::validateConfig();
+
+    // Validate errors of each plugin as well.
+    $plugin_types = array(
+      'fetcher' => t('Fetcher'),
+      'parser' => t('Parser'),
+      'processor' => t('Processor'),
+    );
+    foreach ($plugin_types as $type => $plugin_label) {
+      // Check if plugin exists.
+      $plugin = feeds_plugin($this->config[$type]['plugin_key'], $this->id);
+      if ($plugin instanceof FeedsMissingPlugin) {
+        $errors[] = t('The plugin %plugin is unavailable.', array('%plugin' => $this->config[$type]['plugin_key']));
+        continue;
+      }
+
+      $plugin_errors = $this->$type->validateConfig();
+      foreach ($plugin_errors as $key => $error) {
+        $errors[] = t('@plugin: !error', array(
+          '@plugin' => $plugin_label,
+          '!error' => $error,
+        ));
+      }
+    }
+
+    return $errors;
+  }
+
+  /**
    * Return defaults for feed configuration.
    */
   public function configDefaults() {

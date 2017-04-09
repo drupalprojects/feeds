@@ -204,6 +204,16 @@ abstract class FeedsConfigurable {
   }
 
   /**
+   * Validates the configuration.
+   *
+   * @return array
+   *   A list of errors.
+   */
+  public function validateConfig() {
+    return array();
+  }
+
+  /**
    * Returns whether or not the configurable has a config form.
    *
    * @return bool
