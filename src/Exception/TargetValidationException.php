@@ -7,7 +7,7 @@ use Drupal\Component\Render\FormattableMarkup;
 /**
  * Thrown if the target values are invalid and cannot be recovered.
  */
-class TargetValidationException extends \RuntimeException {
+class TargetValidationException extends ValidationException {
 
   /**
    * The un-formatted message string.
