@@ -100,6 +100,21 @@ class File extends EntityReference {
   }
 
   /**
+   * {@inheritdoc}
+   *
+   * Filesize and MIME-type aren't sensible fields to match on so these are
+   * filtered out.
+   */
+  protected function filterFieldTypes(FieldDefinitionInterface $field) {
+    $ignore_fields = [
+      'filesize',
+      'filemime',
+    ];
+
+    return in_array($field->getName(), $ignore_fields) ? FALSE : parent::filterFieldTypes($field);
+  }
+
+  /**
    * Returns a file id given a url.
    *
    * @param string $value

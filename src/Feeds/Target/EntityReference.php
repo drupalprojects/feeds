@@ -94,7 +94,20 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     return $options;
   }
 
-  protected function filterFieldTypes($field) {
+  /**
+   * Callback for the potential field filter.
+   *
+   * Checks whether the provided field is available to be used as reference.
+   *
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field
+   *   The field to check.
+   *
+   * @return bool
+   *   TRUE if the field can be used as reference otherwise FALSE.
+   *
+   * @see ::getPotentialFields()
+   */
+  protected function filterFieldTypes(FieldDefinitionInterface $field) {
     if ($field->isComputed()) {
       return FALSE;
     }
