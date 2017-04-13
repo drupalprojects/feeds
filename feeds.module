@@ -10,6 +10,7 @@ use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\feeds\Entity\Feed;
+use Drupal\feeds\Plugin\QueueWorker\FeedRefresh;
 
 /**
  * Implements hook_help().
@@ -40,7 +41,7 @@ function feeds_cron() {
     }
     $queue = \Drupal::queue('feeds_feed_import:' . $feed->bundle());
 
-    if ($queue->createItem($feed)) {
+    if ($queue->createItem([$feed, FeedRefresh::BEGIN])) {
       // Add timestamp to avoid queueing item more than once.
       $feed->setQueuedTime(REQUEST_TIME);
       $feed->save();

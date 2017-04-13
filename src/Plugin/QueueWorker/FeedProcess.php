@@ -6,6 +6,7 @@ use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Plugin\QueueWorker\FeedRefresh;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\StateInterface;
 
@@ -51,10 +52,10 @@ class FeedProcess extends FeedQueueWorkerBase {
    */
   protected function finish(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
     if ($feed->progressParsing() !== StateInterface::BATCH_COMPLETE) {
-      $this->queueFactory->get('feeds_feed_import:' . $feed->bundle())->createItem($feed);
+      $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem([$feed, $fetcher_result]);
     }
     elseif ($feed->progressFetching() !== StateInterface::BATCH_COMPLETE) {
-      $this->queueFactory->get('feeds_feed_parse:' . $feed->bundle())->createItem([$feed, $fetcher_result]);
+      $this->queueFactory->get('feeds_feed_import:' . $feed->bundle())->createItem([$feed, FeedRefresh::RESUME]);
     }
     else {
       $feed->finishImport();
