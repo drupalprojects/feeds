@@ -82,6 +82,17 @@ function feeds_uninstall() {
   variable_del('feeds_sync_cache_feeds_http_last_check');
   variable_del('feeds_use_mbstring');
   variable_del('http_request_timeout');
+
+  // Remove Feeds related jobs from job scheduler.
+  $names = db_or()
+    ->condition('name', 'feeds_source_import')
+    ->condition('name', 'feeds_source_clear')
+    ->condition('name', 'feeds_source_expire')
+    ->condition('name', 'feeds_push_unsubscribe');
+
+  db_delete('job_schedule')
+    ->condition($names)
+    ->execute();
 }
 
 /**
