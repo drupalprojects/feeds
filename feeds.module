@@ -133,7 +133,9 @@ function feeds_cron_queue_info() {
  */
 function feeds_source_import(array $job) {
   $source = _feeds_queue_worker_helper($job, 'import');
-  $source->scheduleImport();
+  if ($source->doesExist()) {
+    $source->scheduleImport();
+  }
 }
 
 /**
@@ -141,7 +143,9 @@ function feeds_source_import(array $job) {
  */
 function feeds_source_clear(array $job) {
   $source = _feeds_queue_worker_helper($job, 'clear');
-  $source->scheduleClear();
+  if ($source->doesExist()) {
+    $source->scheduleClear();
+  }
 }
 
 /**
@@ -149,7 +153,9 @@ function feeds_source_clear(array $job) {
  */
 function feeds_source_expire(array $job) {
   $source = _feeds_queue_worker_helper($job, 'expire');
-  $source->scheduleExpire();
+  if ($source->doesExist()) {
+    $source->scheduleExpire();
+  }
 }
 
 /**
@@ -166,7 +172,8 @@ function _feeds_queue_worker_helper(array $job, $method) {
     $source->existing()->$method();
   }
   catch (FeedsNotExistingException $e) {
-    // Do nothing.
+    // Eventually remove the job from job scheduler.
+    JobScheduler::get('feeds_source_import')->remove($job);
   }
   catch (Exception $e) {
     $source->log($method, $e->getMessage(), array(), WATCHDOG_ERROR);

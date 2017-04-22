@@ -220,6 +220,31 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
   }
 
   /**
+   * Tests if jobs are removed for feeds sources that no longer exist.
+   */
+  public function testCleanUpJobsForNonExistingFeeds() {
+    // Create a fake job.
+    $job = array(
+      'type' => 'non_existing_importer',
+      'id' => 12,
+      'period' => 0,
+      'periodic' => TRUE,
+    );
+    JobScheduler::get('feeds_source_import')->set($job);
+
+    // Assert that a job exist.
+    $count = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'non_existing_importer'")->fetchField();
+    $this->assertEqual(1, $count, 'The fake job was created.');
+
+    // Run cron.
+    $this->cronRun();
+
+    // Assert that the job has been cleaned up.
+    $count = db_query("SELECT COUNT(*) FROM {job_schedule} WHERE type = 'non_existing_importer'")->fetchField();
+    $this->assertEqual(0, $count, 'The fake job no longer exists.');
+  }
+
+  /**
    * Initialize scheduling.
    */
   protected function initSyndication() {
