@@ -124,7 +124,7 @@ function feeds_import_form_submit($form, &$form_state) {
   }
 
   // Add to schedule, make sure importer is scheduled, too.
-  $source->schedule();
+  $source->ensureSchedule();
 }
 
 /**

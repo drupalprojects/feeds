@@ -284,7 +284,7 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
-   * Schedule all periodic tasks for this source.
+   * Schedule all periodic tasks for this source, even when scheduled before.
    */
   public function schedule() {
     $this->scheduleImport();
@@ -292,9 +292,21 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
-   * Schedule periodic or background import tasks.
+   * Schedule all periodic tasks for this source if not already scheduled.
    */
-  public function scheduleImport() {
+  public function ensureSchedule() {
+    $this->scheduleImport(FALSE);
+    $this->scheduleExpire(FALSE);
+  }
+
+  /**
+   * Schedule periodic or background import tasks.
+   *
+   * @param bool $force
+   *   (optional) force scheduling to happen.
+   *   Defaults to true.
+   */
+  public function scheduleImport($force = TRUE) {
     // Check whether any fetcher is overriding the import period.
     $period = $this->importer->config['import_period'];
     $fetcher_period = $this->importer->fetcher->importPeriod($this);
@@ -311,7 +323,16 @@ class FeedsSource extends FeedsConfigurable {
       JobScheduler::get('feeds_source_import')->remove($job);
     }
     elseif ($this->progressImporting() === FEEDS_BATCH_COMPLETE) {
-      JobScheduler::get('feeds_source_import')->set($job);
+      // Check for an existing job first.
+      $existing = JobScheduler::get('feeds_source_import')->check($job);
+      if (!$existing || $force) {
+        // If there is no existing job, schedule a new job.
+        JobScheduler::get('feeds_source_import')->set($job);
+      }
+      elseif ($existing['scheduled']) {
+        // If the previous job is still marked as 'running', reschedule it.
+        JobScheduler::get('feeds_source_import')->reschedule($existing);
+      }
     }
     else {
       // Feed is not fully imported yet, so we put this job back in the queue
@@ -323,8 +344,12 @@ class FeedsSource extends FeedsConfigurable {
 
   /**
    * Schedule background expire tasks.
+   *
+   * @param bool $force
+   *   (optional) force scheduling to happen.
+   *   Defaults to true.
    */
-  public function scheduleExpire() {
+  public function scheduleExpire($force = TRUE) {
     // Schedule as soon as possible if a batch is active.
     $period = $this->progressExpiring() === FEEDS_BATCH_COMPLETE ? 3600 : 0;
 
@@ -338,7 +363,16 @@ class FeedsSource extends FeedsConfigurable {
       JobScheduler::get('feeds_source_expire')->remove($job);
     }
     else {
-      JobScheduler::get('feeds_source_expire')->set($job);
+      // Check for an existing job first.
+      $existing = JobScheduler::get('feeds_source_expire')->check($job);
+      if (!$existing || $force) {
+        // If there is no existing job, schedule a new job.
+        JobScheduler::get('feeds_source_expire')->set($job);
+      }
+      elseif ($existing['scheduled']) {
+        // If the previous job is still marked as 'running', reschedule it.
+        JobScheduler::get('feeds_source_expire')->reschedule($existing);
+      }
     }
   }
 
