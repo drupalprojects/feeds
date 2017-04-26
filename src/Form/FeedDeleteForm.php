@@ -23,7 +23,7 @@ class FeedDeleteForm extends ContentEntityConfirmFormBase {
    * @todo Set the correct route once views can override paths.
    */
   public function getCancelUrl() {
-    return $this->entity->urlInfo();
+    return $this->entity->toUrl();
   }
 
   /**
