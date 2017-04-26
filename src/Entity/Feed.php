@@ -421,7 +421,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     $type = $client->pluginType();
     // @todo Figure out why for the UploadFetcher there is no config available.
     $data = $this->get('config')->$type;
-    $data = !empty($data) ? $data : array();
+    $data = !empty($data) ? $data : [];
 
     return $data + $client->defaultFeedConfiguration();
   }

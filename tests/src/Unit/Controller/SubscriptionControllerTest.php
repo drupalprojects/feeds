@@ -178,7 +178,7 @@ class SubscriptionControllerTest extends \PHPUnit_Framework_TestCase {
     $payload = 'abcdefg';
     $sig = hash_hmac('sha1', $payload, 'secret');
 
-    $request = new Request(array(), array(), array(), array(), array(), array(), $payload);
+    $request = new Request([], [], [], [], [], [], $payload);
 
     $request->headers->set('X-Hub-Signature', 'sha1=' . $sig);
 
@@ -204,7 +204,7 @@ class SubscriptionControllerTest extends \PHPUnit_Framework_TestCase {
     $payload = 'abcdefg';
     $sig = 'oops';
 
-    $request = new Request(array(), array(), array(), array(), array(), array(), $payload);
+    $request = new Request([], [], [], [], [], [], $payload);
 
     $request->headers->set('X-Hub-Signature', 'sha1=' . $sig);
 
@@ -228,7 +228,7 @@ class SubscriptionControllerTest extends \PHPUnit_Framework_TestCase {
     $payload = 'abcdefg';
     $sig = hash_hmac('sha1', $payload, 'secret');
 
-    $request = new Request(array(), array(), array(), array(), array(), array(), $payload);
+    $request = new Request([], [], [], [], [], [], $payload);
 
     $request->headers->set('X-Hub-Signature', 'sha1=' . $sig);
 
