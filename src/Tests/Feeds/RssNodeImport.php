@@ -112,7 +112,7 @@ class RssNodeImport extends WebTestBase {
     $this->clickLink(t('Import'));
     $this->drupalPostForm(NULL, [], t('Import'));
     $this->assertText('Created 6');
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+    $this->assertEqual(\Drupal::database()->query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
 
     $xml = new \SimpleXMLElement($filepath, 0, TRUE);
 
@@ -148,13 +148,13 @@ class RssNodeImport extends WebTestBase {
     $this->type->getProcessor()->setConfiguration($configuration);
     $this->type->save();
     $this->drupalPostForm('feed/' . $feed->id() . '/import', [], t('Import'));
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
+    $this->assertEqual(\Drupal::database()->query("SELECT COUNT(*) FROM {node}")->fetchField(), 6);
     $this->assertText('Updated 6');
 
     // Delete items.
     $this->clickLink(t('Delete items'));
     $this->drupalPostForm(NULL, [], t('Delete items'));
-    $this->assertEqual(db_query("SELECT COUNT(*) FROM {node}")->fetchField(), 0);
+    $this->assertEqual(\Drupal::database()->query("SELECT COUNT(*) FROM {node}")->fetchField(), 0);
     $this->assertText('Deleted 6');
   }
 

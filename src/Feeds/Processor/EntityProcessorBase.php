@@ -648,7 +648,8 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
   /**
    * {@inheritdoc}
    *
-   * @todo Sort this out so that we aren't calling db_delete() here.
+   * @todo Sort this out so that we aren't calling \Drupal::database()->delete()
+   * here.
    */
   public function onFeedDeleteMultiple(array $feeds) {
     $fids = [];
@@ -656,7 +657,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       $fids[] = $feed->id();
     }
     $table = $this->entityType() . '__feeds_item';
-    db_delete($table)
+    \Drupal::database()->delete($table)
       ->condition('feeds_item_target_id', $fids, 'IN')
       ->execute();
   }
