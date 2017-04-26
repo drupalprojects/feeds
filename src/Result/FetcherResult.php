@@ -88,7 +88,7 @@ class FetcherResult implements FetcherResultInterface {
    *   The file path of the sanitized file.
    *
    * @throws \RuntimeException
-   *   Thrown if the file is not writeable.
+   *   Thrown if the file is not writable.
    */
   protected function sanitizeFile() {
     $handle = fopen($this->filePath, 'r');

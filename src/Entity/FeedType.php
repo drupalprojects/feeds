@@ -465,7 +465,8 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
     parent::postSave($storage, $update);
 
     if (!$update) {
-      // Clear the queue worker plugin cache so that our derivaties will be found.
+      // Clear the queue worker plugin cache so that our derivatives will be
+      // found.
       \Drupal::service('plugin.manager.queue_worker')->clearCachedDefinitions();
       \Drupal::queue('feeds_feed_import:' . $this->id())->createQueue();
     }

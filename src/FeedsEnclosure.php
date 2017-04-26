@@ -48,7 +48,7 @@ class FeedsEnclosure {
   }
 
   /**
-   * Returns the content of the enclosre as a string.
+   * Returns the content of the enclosure as a string.
    *
    * @return string|false
    *   The content of the referenced resource, or false if the file could not be

@@ -14,7 +14,7 @@ use Drupal\feeds\StateInterface;
 class FeedClearHandler extends FeedHandlerBase {
 
   /**
-   * {@inheritodc}
+   * {@inheritdoc}
    */
   public function startBatchClear(FeedInterface $feed) {
     $feed->lock();
@@ -34,7 +34,7 @@ class FeedClearHandler extends FeedHandlerBase {
   }
 
   /**
-   * {@inheritodc}
+   * {@inheritdoc}
    */
   public function clear(FeedInterface $feed, array &$context) {
     try {

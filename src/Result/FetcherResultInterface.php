@@ -3,7 +3,7 @@
 namespace Drupal\feeds\Result;
 
 /**
- * Defines the interface for result objects returned by fetcher pluings.
+ * Defines the interface for result objects returned by fetcher plugins.
  */
 interface FetcherResultInterface {
 
@@ -21,7 +21,7 @@ interface FetcherResultInterface {
   /**
    * Returns the path to the file containing the file provided by the fetcher.
    *
-   * When it comes to preference and effiency, this method should be used
+   * When it comes to preference and efficiency, this method should be used
    * whenever possible by parsers so that they do not have to load the entire
    * file into memory.
    *

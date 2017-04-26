@@ -29,7 +29,7 @@ class FeedImportHandler extends FeedHandlerBase {
   protected $fetcherResult;
 
   /**
-   * {@inheritodc}
+   * {@inheritdoc}
    */
   public function startBatchImport(FeedInterface $feed) {
     try {

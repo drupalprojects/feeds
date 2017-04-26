@@ -10,7 +10,7 @@ namespace Drupal\feeds\Component;
 class CsvParser implements \Iterator {
 
   /**
-   * The column delimeter.
+   * The column delimiter.
    *
    * @var string
    */

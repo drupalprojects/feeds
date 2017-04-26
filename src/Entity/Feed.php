@@ -461,7 +461,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
     // Delete values from other tables also referencing these feeds.
     $ids = array_keys($feeds);
 
-    // Group feeds by imporer.
+    // Group feeds by type.
     $grouped = [];
     foreach ($feeds as $fid => $feed) {
       $grouped[$feed->bundle()][$fid] = $feed;

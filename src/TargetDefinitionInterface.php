@@ -32,7 +32,7 @@ interface TargetDefinitionInterface {
   public function getLabel();
 
   /**
-   * Returns the taret description.
+   * Returns the target description.
    *
    * @return string
    *   The target description.

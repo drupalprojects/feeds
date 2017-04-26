@@ -96,7 +96,7 @@ interface ProcessorInterface extends FeedsPluginInterface {
    * Counts the number of items imported by this processor.
    *
    * @param \Drupal\feeds\FeedInterface $feed
-   *   The feed whos items we are counting.
+   *   The feed who's items we are counting.
    *
    * @return int
    *   The number of items imported by this feed.

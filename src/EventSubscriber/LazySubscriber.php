@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Event listener that registers Feeds pluings as event listeners.
+ * Event listener that registers Feeds plugins as event listeners.
  */
 class LazySubscriber implements EventSubscriberInterface {
 

@@ -99,7 +99,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   }
 
   /**
-   * {@inheritodc}
+   * {@inheritdoc}
    */
   public function defaultFeedConfiguration() {
     return [];

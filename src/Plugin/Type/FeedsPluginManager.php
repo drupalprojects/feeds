@@ -69,7 +69,7 @@ class FeedsPluginManager extends DefaultPluginManager {
    */
   public function processDefinition(&$definition, $plugin_id) {
     parent::processDefinition($definition, $plugin_id);
-    // Add plugin_type key so that we can determie the plugin type later.
+    // Add plugin_type key so that we can determine the plugin type later.
     $definition['plugin_type'] = $this->pluginType;
 
     // If no default form is defined and this plugin implements

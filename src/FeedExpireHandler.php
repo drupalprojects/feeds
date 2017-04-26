@@ -13,7 +13,7 @@ use Drupal\feeds\FeedInterface;
 class FeedExpireHandler extends FeedHandlerBase {
 
   /**
-   * {@inheritodc}
+   * {@inheritdoc}
    */
   public function startBatchExpire(FeedInterface $feed) {
     try {
@@ -49,7 +49,7 @@ class FeedExpireHandler extends FeedHandlerBase {
 
 
   /**
-   * {@inheritodc}
+   * {@inheritdoc}
    */
   public function expireItem(FeedInterface $feed, $item_id) {
     try {

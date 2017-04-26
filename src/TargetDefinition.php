@@ -152,10 +152,10 @@ class TargetDefinition implements TargetDefinitionInterface {
   }
 
   /**
-   * Marks a propert as unique.
+   * Marks a property as unique.
    *
    * @param string $property
-   *   The propert to mark as unique.
+   *   The property to mark as unique.
    *
    * @return $this
    */

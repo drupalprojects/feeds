@@ -42,7 +42,7 @@ class GenericOpmlParser {
    *   them as is. Defaults to false.
    *
    * @return array
-   *   A structed array.
+   *   A structured array.
    *
    * @todo Document the return value.
    */
