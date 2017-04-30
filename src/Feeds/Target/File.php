@@ -4,6 +4,7 @@ namespace Drupal\feeds\Feeds\Target;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -18,7 +19,7 @@ use Drupal\Core\Utility\Token;
  * @FeedsTarget(
  *   id = "file",
  *   field_types = {"file"},
- *   arguments = {"@entity_type.manager", "@entity.query", "@http_client", "@token", "@entity_field.manager"}
+ *   arguments = {"@entity_type.manager", "@entity.query", "@http_client", "@token", "@entity_field.manager", "@entity.repository"}
  * )
  */
 class File extends EntityReference {
@@ -63,11 +64,13 @@ class File extends EntityReference {
    * The tokens.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueryFactory $query_factory, ClientInterface $client, Token $token, EntityFieldManagerInterface $entity_field_manager) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueryFactory $query_factory, ClientInterface $client, Token $token, EntityFieldManagerInterface $entity_field_manager, EntityRepositoryInterface $entity_repository) {
     $this->client = $client;
     $this->token = $token;
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $query_factory, $entity_field_manager);
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $query_factory, $entity_field_manager, $entity_repository);
     $this->fileExtensions = array_filter(explode(' ', $this->settings['file_extensions']));
   }
 
@@ -115,6 +118,23 @@ class File extends EntityReference {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function getEntityType() {
+    return 'file';
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * The file entity doesn't support any bundles. Providing an empty array here
+   * will prevent the bundle check from being added in the find entity query.
+   */
+  protected function getBundles() {
+    return [];
+  }
+
+  /**
    * Returns a file id given a url.
    *
    * @param string $value
@@ -124,6 +144,11 @@ class File extends EntityReference {
    *   The file id.
    */
   protected function getFile($value) {
+    // Perform a lookup agains the value using the configured reference method.
+    if (FALSE !== ($fid = $this->findEntity($value, $this->configuration['reference_by']))) {
+      return $fid;
+    }
+
     // Prepare destination directory.
     $destination = $this->token->replace($this->settings['uri_scheme'] . '://' . trim($this->settings['file_directory'], '/'));
     file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);

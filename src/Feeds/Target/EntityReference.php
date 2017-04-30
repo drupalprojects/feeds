@@ -5,6 +5,7 @@ namespace Drupal\feeds\Feeds\Target;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -19,7 +20,7 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  * @FeedsTarget(
  *   id = "entity_reference",
  *   field_types = {"entity_reference"},
- *   arguments = {"@entity_type.manager", "@entity.query", "@entity_field.manager"}
+ *   arguments = {"@entity_type.manager", "@entity.query", "@entity_field.manager", "@entity.repository"}
  * )
  */
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
@@ -46,6 +47,13 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   protected $entityFieldManager;
 
   /**
+   * The entity repository service.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
    * Constructs an EntityReference object.
    *
    * @param array $configuration
@@ -60,11 +68,14 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    *   The entity query factory.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueryFactory $query_factory, EntityFieldManagerInterface $entity_field_manager) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueryFactory $query_factory, EntityFieldManagerInterface $entity_field_manager, EntityRepositoryInterface $entity_repository) {
     $this->entityTypeManager = $entity_type_manager;
     $this->queryFactory = $query_factory;
     $this->entityFieldManager = $entity_field_manager;
+    $this->entityRepository = $entity_repository;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -163,15 +174,23 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    *   The entity id, or false, if not found.
    */
   protected function findEntity($value, $field) {
-    $query = $this->queryFactory->get($this->getEntityType());
-
-    if ($bundles = $this->getBundles()) {
-      $query->condition($this->getBundleKey(), $bundles, 'IN');
+    // When referencing by UUID, use the EntityRepository service.
+    if ($this->configuration['reference_by'] === 'uuid') {
+      if (NULL !== ($entity = $this->entityRepository->loadEntityByUuid($this->getEntityType(), $value))) {
+        return $entity->id();
+      }
     }
+    else {
+      $query = $this->queryFactory->get($this->getEntityType());
 
-    $ids = array_filter($query->condition($field, $value)->range(0, 1)->execute());
-    if ($ids) {
-      return reset($ids);
+      if ($bundles = $this->getBundles()) {
+        $query->condition($this->getBundleKey(), $bundles, 'IN');
+      }
+
+      $ids = array_filter($query->condition($field, $value)->range(0, 1)->execute());
+      if ($ids) {
+        return reset($ids);
+      }
     }
 
     if ($this->configuration['autocreate'] && $this->configuration['reference_by'] === $this->getLabelKey()) {
