@@ -3,12 +3,13 @@
 namespace Drupal\Tests\feeds\Unit\Component;
 
 use Drupal\feeds\Component\HttpHelpers;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Component\HttpHelpers
  * @group feeds
  */
-class HttpHelpersTest extends \PHPUnit_Framework_TestCase {
+class HttpHelpersTest extends UnitTestCase {
 
   /**
    * @dataProvider httpResponses

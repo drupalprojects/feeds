@@ -4,6 +4,7 @@ namespace Drupal\Tests\feeds\Unit\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Controller\SubscriptionController;
+use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -11,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @coversDefaultClass \Drupal\feeds\Controller\SubscriptionController
  * @group feeds
  */
-class SubscriptionControllerTest extends \PHPUnit_Framework_TestCase {
+class SubscriptionControllerTest extends UnitTestCase {
 
   protected $controller;
 
