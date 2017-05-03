@@ -89,12 +89,24 @@ function feeds_import_form(array $form, array &$form_state, FeedsImporter $impor
     '#type' => 'submit',
     '#value' => t('Import'),
   );
+  // Change submit button label if processing in background.
+  if ($source->importer->config['process_in_background']) {
+    $form['submit']['#value'] = t('Schedule import');
+  }
+
+  // Disable submit button if import is initiated.
   $progress = $source->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['submit']['#disabled'] = TRUE;
     $form['submit']['#value'] =
       t('Importing (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
+
+    // Check if import task is queued.
+    if ($source->isQueued()) {
+      $form['source_status']['#value'] .= t('Run cron to continue the import.');
+    }
   }
+
   return $form;
 }
 
@@ -121,6 +133,9 @@ function feeds_import_form_submit($form, &$form_state) {
   // Refresh feed if import on create is selected.
   if ($source->importer->config['import_on_create']) {
     $source->startImport();
+    if ($source->importer->config['process_in_background']) {
+      drupal_set_message(t('Import scheduled.'));
+    }
   }
 
   // Add to schedule, make sure importer is scheduled, too.
@@ -145,12 +160,25 @@ function feeds_import_tab_form($form, &$form_state, $node) {
     '#value' => feeds_source_status($source),
   );
   $form = confirm_form($form, t('Import all content from source?'), 'node/' . $node->nid, '', t('Import'), t('Cancel'), 'confirm feeds update');
+
+  // Change submit button label if processing in background.
+  if ($source->importer->config['process_in_background']) {
+    $form['actions']['submit']['#value'] = t('Schedule import');
+  }
+
+  // Disable submit button if import is initiated.
   $progress = $source->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
     $form['actions']['submit']['#value'] =
       t('Importing (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
+
+    // Check if import task is queued.
+    if ($source->isQueued()) {
+      $form['source_status']['#value'] .= t('Run cron to continue the import.');
+    }
   }
+
   return $form;
 }
 
@@ -159,7 +187,13 @@ function feeds_import_tab_form($form, &$form_state, $node) {
  */
 function feeds_import_tab_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
-  feeds_source($form['#importer_id'], $form['#feed_nid'])->startImport();
+  $source = feeds_source($form['#importer_id'], $form['#feed_nid']);
+  $source->startImport();
+  $source->ensureSchedule();
+
+  if ($source->importer->config['process_in_background']) {
+    drupal_set_message(t('Import scheduled.'));
+  }
 }
 
 /**
@@ -188,12 +222,21 @@ function feeds_delete_tab_form(array $form, array &$form_state, FeedsImporter $i
     '#value' => feeds_source_status($source),
   );
   $form = confirm_form($form, t('Delete all items from source?'), $form['#redirect'], '', t('Delete'), t('Cancel'), 'confirm feeds update');
+
+  // Change submit button label if processing in background.
+  if ($source->importer->config['process_in_background']) {
+    $form['actions']['submit']['#value'] = t('Schedule delete');
+  }
+
+  // Disable submit button if clearing is initiated.
   $progress = $source->progressClearing();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
     $form['actions']['submit']['#value'] =
       t('Deleting (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
+    $form['source_status']['#value'] .= t('Run cron to continue the deletion of items.');
   }
+
   return $form;
 }
 
@@ -203,7 +246,13 @@ function feeds_delete_tab_form(array $form, array &$form_state, FeedsImporter $i
 function feeds_delete_tab_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
   $feed_nid = empty($form['#feed_nid']) ? 0 : $form['#feed_nid'];
-  feeds_source($form['#importer_id'], $feed_nid)->startClear();
+  $source = feeds_source($form['#importer_id'], $feed_nid);
+  $source->startClear();
+  $source->ensureSchedule();
+
+  if ($source->importer->config['process_in_background']) {
+    drupal_set_message(t('Deletion of items scheduled.'));
+  }
 }
 
 /**

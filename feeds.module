@@ -91,6 +91,9 @@ function feeds_cron_job_scheduler_info() {
   $info['feeds_source_import'] = array(
     'queue name' => 'feeds_source_import',
   );
+  // feeds_source_clear never gets called, since we now use the queue directly.
+  // This is left in case any background jobs still running after an
+  // upgrade.
   $info['feeds_source_clear'] = array(
     'queue name' => 'feeds_source_clear',
   );

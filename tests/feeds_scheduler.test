@@ -264,7 +264,7 @@ class FeedsSchedulerTestCase extends FeedsWebTestCase {
     $this->addMappings('node', $mappings);
 
     // Specify a file with many nodes.
-    $this->importFile('node', $this->absolutePath() . '/tests/feeds/many_nodes.csv');
+    $this->importFile('node', $this->absolutePath() . '/tests/feeds/many_nodes.csv', 'Schedule import');
 
     // Verify that a queue item is created.
     $count = db_query("SELECT COUNT(*) FROM {queue} WHERE name = 'feeds_source_import'")->fetchField();
