@@ -666,6 +666,131 @@ class FeedsSource extends FeedsConfigurable {
   }
 
   /**
+   * Returns the next time that the feed will be imported.
+   *
+   * @return int|null
+   *   The next time the feed will be imported as a UNIX timestamp.
+   *   NULL if not known.
+   */
+  public function getNextImportTime() {
+    $details = $this->getNextImportTimeDetails();
+    if (isset($details['time'])) {
+      return $details['time'];
+    }
+  }
+
+  /**
+   * Returns the next time that the feed will be imported.
+   *
+   * @return array|null
+   *   Information about when the next time the feed will be imported:
+   *   - time: the next time the feed will be imported as a UNIX timestamp.
+   *   - method: via which scheduler the job will ran.
+   *   - message: If set, time and method should be ignored.
+   *   Null if no information is available.
+   */
+  public function getNextImportTimeDetails() {
+    // Check queue.
+    $serialized_job_type = db_like(strtr('s:4:"type";s:!length:"!type";', array(
+      '!length' => strlen($this->id),
+      '!type' => $this->id,
+    )));
+    $serialized_job_id_as_string = db_like(strtr('s:2:"id";s:!length:"!id";', array(
+      '!length' => strlen($this->feed_nid),
+      '!id' => $this->feed_nid,
+    )));
+    $serialized_job_id_as_integer = db_like(strtr('s:2:"id";i:!id;', array(
+      '!id' => $this->feed_nid,
+    )));
+
+    $queue_created = db_select('queue')
+      ->fields('queue', array('created'))
+      ->condition('name', 'feeds_source_import')
+      ->condition('data', '%' . $serialized_job_type . '%', 'LIKE')
+      ->condition(db_or()
+        ->condition('data', '%' . $serialized_job_id_as_string . '%', 'LIKE')
+        ->condition('data', '%' . $serialized_job_id_as_integer . '%', 'LIKE')
+      )
+      ->condition('expire', 0)
+      ->execute()
+      ->fetchField();
+
+    if ($queue_created) {
+      return array(
+        'time' => $queue_created,
+        'method' => t('Queue'),
+      );
+    }
+
+    // Special case for PostgreSQL: if using that database type, we cannot
+    // search in the data column of the queue table, because the Drupal database
+    // layer adds '::text' to bytea columns, which results into the data column
+    // becoming unreadable in conditions. So instead, we check for the first 10
+    // records in the queue to see if the given importer ID + feed NID is
+    // amongst them.
+    if (Database::getConnection()->databaseType() == 'pgsql') {
+      $items = db_query("SELECT data, created FROM {queue} WHERE name = :name AND expire = 0 LIMIT 10", array(
+        ':name' => 'feeds_source_import',
+      ));
+      foreach ($items as $item) {
+        if (is_string($item->data)) {
+          $item->data = unserialize($item->data);
+        }
+        if ($item->data['type'] == $this->id && $item->data['id'] == $this->feed_nid) {
+          return array(
+            'time' => $item->created,
+            'method' => t('Queue'),
+          );
+        }
+      }
+
+      // If not found by now, count how many items there are in the
+      // feeds_source_import queue. We use this number later to indicate that
+      // the job *could* be in the queue.
+      $number_of_queue_items = db_query('SELECT COUNT(name) FROM {queue} WHERE name = :name AND expire = 0', array(
+        ':name' => 'feeds_source_import',
+      ))->fetchField();
+    }
+
+    // Check if the importer is in the process of being rescheduled.
+    $importers = feeds_reschedule();
+    if (isset($importers[$this->id])) {
+      return array(
+        'time' => NULL,
+        'method' => NULL,
+        'message' => t('to be rescheduled'),
+      );
+    }
+
+    // Check job scheduler.
+    $job = db_select('job_schedule')
+      ->fields('job_schedule', array('next', 'scheduled'))
+      ->condition('name', 'feeds_source_import')
+      ->condition('type', $this->id)
+      ->condition('id', $this->feed_nid)
+      ->execute()
+      ->fetch();
+
+    if (isset($job->next)) {
+      $details = array(
+        'time' => $job->next,
+        'method' => t('Job scheduler'),
+      );
+      if (!empty($job->scheduled)) {
+        if (isset($number_of_queue_items) && $number_of_queue_items > 10) {
+          // When using PostgreSQL we were not able to efficiently search the
+          // queue table, so it could still be in that table.
+          $details['message'] = t('unknown, could still be in the queue');
+        }
+        else {
+          $details['message'] = t('possibly stuck');
+        }
+      }
+      return $details;
+    }
+  }
+
+  /**
    * Unlocks a feed.
    */
   public function unlock() {

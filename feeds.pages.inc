@@ -301,6 +301,7 @@ function feeds_source_status($source) {
   }
   $v['imported'] = $source->imported;
   $v['count'] = $source->itemCount();
+  $v['next'] = $source->getNextImportTimeDetails();
   if (!empty($v)) {
     return theme('feeds_source_status', $v);
   }
@@ -330,6 +331,32 @@ function theme_feeds_source_status($v) {
     else {
       $items[] = t('No imported items.');
     }
+  }
+
+  if ($v['next']) {
+    // Check if medium date format contains hours/minutes.
+    $date_format = variable_get('date_format_medium');
+    $use_custom_date_format = $date_format && !strpos($date_format, 'H:i');
+
+    if (!empty($v['next']['message'])) {
+      $items[] = t('Next import: @message.', array(
+        '@message' => $v['next']['message'],
+      ));
+    }
+    elseif ($v['next']['time'] > REQUEST_TIME) {
+      $items[] = t('Next import: @date (via @method)', array(
+        '@date' => $use_custom_date_format ? format_date($v['next']['time'], 'custom', 'Y/m/d H:i:s') : format_date($v['next']['time']),
+        '@method' => $v['next']['method'],
+      ));
+    }
+    else {
+      $items[] = t('Next import: on next cron run (via @method).', array(
+        '@method' => $v['next']['method'],
+      ));
+    }
+  }
+  else {
+    $items[] = t('Next import: not scheduled.');
   }
   $output .= theme('item_list', array('items' => $items));
   $output .= '</div>';
