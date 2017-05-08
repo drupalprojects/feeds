@@ -85,14 +85,30 @@ function feeds_import_form(array $form, array &$form_state, FeedsImporter $impor
     ) + $source_form;
   }
 
+  // Set submit button label based on settings.
+  if ($source->importer->config['import_on_create']) {
+    $submit = t('Import');
+    if ($source->importer->config['process_in_background']) {
+      // When processing the import in background, the import job is put in the queue.
+      $submit = t('Schedule import');
+    }
+  }
+  elseif ($source->importer->config['import_period'] != FEEDS_SCHEDULE_NEVER) {
+    // The import would be scheduled according to the periodic import setting.
+    $submit = t('Schedule import');
+  }
+  else {
+    drupal_set_message(t('For this importer both "@import_period" and "@import_on_create" are turned off. It is possible that Feeds will not import the provided source.', array(
+      '@import_period' => t('Periodic import'),
+      '@import_on_create' => t('Import on submission'),
+    )), 'warning', FALSE);
+    $submit = t('Save');
+  }
+
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Import'),
+    '#value' => $submit,
   );
-  // Change submit button label if processing in background.
-  if ($source->importer->config['process_in_background']) {
-    $form['submit']['#value'] = t('Schedule import');
-  }
 
   // Disable submit button if import is initiated.
   $progress = $source->progressImporting();
@@ -140,6 +156,12 @@ function feeds_import_form_submit($form, &$form_state) {
 
   // Add to schedule, make sure importer is scheduled, too.
   $source->ensureSchedule();
+
+  // Check if the importer is about to be rescheduled.
+  $importers = feeds_reschedule();
+  if (isset($importers[$form['#importer_id']])) {
+    drupal_set_message(t('Rescheduling the import will happen on the next cron run.'), 'status');
+  }
 }
 
 /**
@@ -193,6 +215,12 @@ function feeds_import_tab_form_submit($form, &$form_state) {
 
   if ($source->importer->config['process_in_background']) {
     drupal_set_message(t('Import scheduled.'));
+  }
+
+  // Check if the importer is about to be rescheduled.
+  $importers = feeds_reschedule();
+  if (isset($importers[$form['#importer_id']])) {
+    drupal_set_message(t('Rescheduling the import will happen on the next cron run.'), 'status');
   }
 }
 

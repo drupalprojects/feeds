@@ -205,6 +205,48 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     $this->assertFieldByName('language', 'nl');
   }
 
+  /**
+   * Tests if the user is warned when having both "Import on submission" and
+   * "Periodic import" turned off.
+   */
+  public function testWarningPeriodicImportAndImportOnSubmissionTurnedOff() {
+    // Create an importer.
+    $this->createImporterConfiguration('Test feed', 'test_feed');
+
+    $this->setSettings('test_feed', NULL, array(
+      'content_type' => '',
+      'import_period' => FEEDS_SCHEDULE_NEVER,
+      'import_on_create' => FALSE,
+    ));
+
+    // Assert error message.
+    $this->assertText(t('"@import_period" and "@import_on_create" are both turned off and the importer is not attached to a content type. Unless you have alternative methods of running imports for this importer, Feeds will not import anything for this importer.', array(
+      '@import_period' => t('Periodic import'),
+      '@import_on_create' => t('Import on submission'),
+    )));
+  }
+
+  /**
+   * Tests if the user is warned when having "Import on submission" turned off,
+   * "Process in background" turned on and using the standalone form.
+   */
+  public function testWarningImportOnSubmissionTurnedOffAndProcessInBackgroundTurnedOn() {
+    // Create an importer.
+    $this->createImporterConfiguration('Test feed', 'test_feed');
+
+    $this->setSettings('test_feed', NULL, array(
+      'content_type' => '',
+      'import_on_create' => FALSE,
+      'process_in_background' => TRUE,
+    ));
+
+    // Assert error message.
+    $this->assertText(t('Since "@import_on_create" is turned off and the importer is not attached to a content type, the "@process_in_background" setting may have no effect. When submitting the standalone form with the "@import_on_create" setting turned off, the feed is only scheduled for periodic import.', array(
+      '@import_on_create' => t('Import on submission'),
+      '@process_in_background' => t('Process in background'),
+    )));
+  }
+
   public function testImporterImport() {
     $name = $this->randomString();
     $id = drupal_strtolower($this->randomName());

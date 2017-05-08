@@ -182,6 +182,23 @@ class FeedsImporter extends FeedsConfigurable {
   public function validateConfig() {
     $errors = parent::validateConfig();
 
+    // Check for a combination of incompatible settings.
+    $config = $this->getConfig();
+    if (!$config['import_on_create'] && empty($config['content_type'])) {
+      if ($config['import_period'] == FEEDS_SCHEDULE_NEVER) {
+        $errors[] = t('"@import_period" and "@import_on_create" are both turned off and the importer is not attached to a content type. Unless you have alternative methods of running imports for this importer, Feeds will not import anything for this importer.', array(
+          '@import_period' => t('Periodic import'),
+          '@import_on_create' => t('Import on submission'),
+        ));
+      }
+      elseif ($config['process_in_background']) {
+        $errors[] = t('Since "@import_on_create" is turned off and the importer is not attached to a content type, the "@process_in_background" setting may have no effect. When submitting the standalone form with the "@import_on_create" setting turned off, the feed is only scheduled for periodic import.', array(
+          '@import_on_create' => t('Import on submission'),
+          '@process_in_background' => t('Process in background'),
+        ));
+      }
+    }
+
     // Validate errors of each plugin as well.
     $plugin_types = array(
       'fetcher' => t('Fetcher'),
@@ -282,7 +299,7 @@ class FeedsImporter extends FeedsConfigurable {
     $form['import_on_create'] = array(
       '#type' => 'checkbox',
       '#title' => t('Import on submission'),
-      '#description' => t('Check if import should be started at the moment a standalone form or node form is submitted.'),
+      '#description' => t('Check if import should be started at the moment a standalone form or node form is submitted. If not checked and when using the standalone form, be sure to configure periodic import.'),
       '#default_value' => $config['import_on_create'],
     );
     $form['process_in_background'] = array(

@@ -86,7 +86,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     $edit = array(
       'feeds[FeedsHTTPFetcher][source]' => $source_url,
     );
-    $this->drupalPost('import/node', $edit, t('Import'));
+    $this->drupalPost('import/node', $edit, t('Schedule import'));
 
     // Ensure that no nodes have been created yet.
     $this->assertNodeCount(0, 'No nodes have been created yet (actual: @count).');
