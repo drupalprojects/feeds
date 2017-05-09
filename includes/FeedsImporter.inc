@@ -181,9 +181,31 @@ class FeedsImporter extends FeedsConfigurable {
    */
   public function validateConfig() {
     $errors = parent::validateConfig();
+    $config = $this->getConfig();
+
+    // Check if "Attach to content type" setting is the same as content type on
+    // node processor.
+    if ($this->processor instanceof FeedsNodeProcessor) {
+      $processor_config = $this->processor->getConfig();
+      if ($processor_config['bundle'] == $config['content_type']) {
+        $message = t('The importer is attached to the same content type as the content type selected on the node processor. Unless you have a very advanced use case, these two should never be the same.');
+        if (!module_exists('feeds_news')) {
+          $message .= ' ' . t('Enable the Feeds News module for an example of how the "@content_type" setting can be used.', array(
+            '@content_type' => t('Attach to content type'),
+          ));
+        }
+        elseif ($this->id != 'feed') {
+          $message .= ' ' . t('See the importer !importer_name (provided by the Feeds News module) for an example of how the "@content_type" setting can be used.', array(
+            '!importer_name' => l(check_plain(feeds_importer('feed')->config['name']), 'admin/structure/feeds/feed'),
+            '@content_type' => t('Attach to content type'),
+          ));
+        }
+
+        $errors[] = $message;
+      }
+    }
 
     // Check for a combination of incompatible settings.
-    $config = $this->getConfig();
     if (!$config['import_on_create'] && empty($config['content_type'])) {
       if ($config['import_period'] == FEEDS_SCHEDULE_NEVER) {
         $errors[] = t('"@import_period" and "@import_on_create" are both turned off and the importer is not attached to a content type. Unless you have alternative methods of running imports for this importer, Feeds will not import anything for this importer.', array(

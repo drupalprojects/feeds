@@ -247,6 +247,31 @@ class FeedsUIUserInterfaceTestCase extends FeedsWebTestCase {
     )));
   }
 
+  /**
+   * Tests if the user is warned when the importer is attached to the same
+   * content type as the one selected on the node processor.
+   */
+  public function testWarningWhenAttachImporterToContentTypeAlsoOnTheNodeProcessor() {
+    // Create content type.
+    $type = $this->drupalCreateContentType();
+    $typename = $type->type;
+
+    // Create an importer.
+    $this->createImporterConfiguration('Test feed', 'test_feed');
+
+    // Attach to content type.
+    $this->setSettings('test_feed', NULL, array(
+      'content_type' => $typename,
+    ));
+
+    // Select the same content type on the node processor.
+    $this->setSettings('test_feed', 'FeedsNodeProcessor', array(
+      'bundle' => $typename,
+    ));
+
+    $this->assertText('The importer is attached to the same content type as the content type selected on the node processor. Unless you have a very advanced use case, these two should never be the same.');
+  }
+
   public function testImporterImport() {
     $name = $this->randomString();
     $id = drupal_strtolower($this->randomName());
