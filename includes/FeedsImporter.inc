@@ -187,7 +187,7 @@ class FeedsImporter extends FeedsConfigurable {
     // node processor.
     if ($this->processor instanceof FeedsNodeProcessor) {
       $processor_config = $this->processor->getConfig();
-      if ($processor_config['bundle'] == $config['content_type']) {
+      if (!empty($config['content_type']) && $processor_config['bundle'] == $config['content_type']) {
         $message = t('The importer is attached to the same content type as the content type selected on the node processor. Unless you have a very advanced use case, these two should never be the same.');
         if (!module_exists('feeds_news')) {
           $message .= ' ' . t('Enable the Feeds News module for an example of how the "@content_type" setting can be used.', array(
