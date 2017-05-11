@@ -245,6 +245,33 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
   }
 
   /**
+   * Tests that the source isn't fetched twice during the same request.
+   */
+  public function testNoRefetchOnSameRequest() {
+    // Include http request functions.
+    feeds_include_library('http_request.inc', 'http_request');
+
+    // First request.
+    $url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
+    $result1 = http_request_get($url);
+
+    // Set flag that the source has changed.
+    variable_set('feeds_tests_nodes_changed', TRUE);
+
+    // Second request.
+    $result2 = http_request_get($url);
+
+    // Assert that the result is exactly the same.
+    $this->assertEqual($result1->data, $result2->data, 'The data was retrieved from cache.');
+
+    // Assert that the data *is* refetched (and different) after a cache clear.
+    drupal_flush_all_caches();
+    drupal_static_reset();
+    $result3 = http_request_get($url);
+    $this->assertNotEqual($result1->data, $result3->data, 'The data is refetched.');
+  }
+
+  /**
    * Tests if the data is cached on the file system even when a different cache
    * class is used.
    *

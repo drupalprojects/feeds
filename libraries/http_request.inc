@@ -116,9 +116,12 @@ function http_request_get_common_syndication($url, $settings = array()) {
 function http_request_get($url, $username = NULL, $password = NULL, $accept_invalid_cert = FALSE, $timeout = NULL) {
   // Intra-pagedownload cache, avoid to download the same content twice within
   // one page download (it's possible, compatible and parse calls).
-  $download_cache = &drupal_static(__FUNCTION__, array());
-  if (isset($download_cache[$url])) {
-    return $download_cache[$url];
+  $cached_urls = &drupal_static(__FUNCTION__, array());
+  if (!empty($cached_urls[$url])) {
+    $cache = http_request_get_cache($url);
+    if ($cache->data) {
+      return $cache->data;
+    }
   }
 
   // Determine request timeout.
@@ -231,7 +234,7 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
         curl_setopt($download, CURLOPT_SSL_VERIFYHOST, 0);
       }
       $header = '';
-      $data = curl_exec($download);
+      $result->data = curl_exec($download);
       if (curl_error($download)) {
         throw new HRCurlException(
           t('cURL error (@code) @error for @url', array(
@@ -253,15 +256,15 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
 
       if ($proxy_server && $curl_ver['version_number'] < 0x71e00 && _drupal_http_use_proxy($uri['host'])) {
         $http_header_break = "\r\n\r\n";
-        $response = explode($http_header_break, $data);
+        $response = explode($http_header_break, $result->data);
         if (count($response) > 2) {
-          $data = substr($data, strlen($response[0] . $http_header_break), strlen($data));
+          $result->data = substr($result->data, strlen($response[0] . $http_header_break), strlen($result->data));
         }
       }
 
       $header_size = curl_getinfo($download, CURLINFO_HEADER_SIZE);
-      $header = substr($data, 0, $header_size - 1);
-      $result->data = substr($data, $header_size);
+      $header = substr($result->data, 0, $header_size - 1);
+      $result->data = substr($result->data, $header_size);
       $headers = preg_split("/(\r\n){2}/", $header);
       $header_lines = preg_split("/\r\n|\n|\r/", end($headers));
       // Skip HTTP response status.
@@ -310,7 +313,8 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
 
   // Set caches.
   http_request_set_cache($url, $result);
-  $download_cache[$url] = $result;
+  // In the static cache, mark this URL as being cached.
+  $cached_urls[$url] = TRUE;
 
   return $result;
 }
