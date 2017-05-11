@@ -56,7 +56,10 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
     feeds_include_library('http_request.inc', 'http_request');
 
     // Try to fetch the data from a URL.
-    $result = http_request_get($this->url, NULL, NULL, $this->acceptInvalidCert, $this->timeout);
+    $result = feeds_http_request($this->url, array(
+      'accept_invalid_cert' => $this->acceptInvalidCert,
+      'timeout' => $this->timeout,
+    ));
     http_request_check_result($this->url, $result);
     $this->raw = $result->data;
 

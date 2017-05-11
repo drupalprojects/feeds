@@ -157,7 +157,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
 
     // First request.
     $url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
-    $result = http_request_get($url);
+    $result = feeds_http_request($url);
 
     // Assert that the first request was successful and was not retrieved from
     // cache.
@@ -169,8 +169,8 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
       '@file_url' => $file_url,
     )));
 
-    // Reset http_request_get() static cache.
-    drupal_static_reset('http_request_get');
+    // Reset feeds_http_request() static cache.
+    drupal_static_reset('feeds_http_request');
 
     // Write some garbage to the cached file to ensure that the cache is
     // retrieved from that file.
@@ -178,7 +178,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     file_put_contents($file_url, $garbage);
 
     // Second request.
-    $result2 = http_request_get($url);
+    $result2 = feeds_http_request($url);
 
     // Assert that the second request was successful and was retrieved from
     // cache.
@@ -196,7 +196,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
   /**
    * Tests if the source is refetched when the cached file is manually removed.
    *
-   * A call to http_request_get() should always get us data.
+   * A call to feeds_http_request() should always get us data.
    */
   public function testRefetchWhenCachedFileIsRemoved() {
     // Include http request functions.
@@ -204,15 +204,15 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
 
     // First request.
     $url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
-    $result1 = http_request_get($url);
+    $result1 = feeds_http_request($url);
 
     // Assert that the first request was successful and was not retrieved from
     // cache.
     $this->assertEqual(200, $result1->code, 'Request status code is 200.');
     $this->assertTrue(empty($result1->from_cache), 'Request was not retrieved from cache.');
 
-    // Reset http_request_get() static cache.
-    drupal_static_reset('http_request_get');
+    // Reset feeds_http_request() static cache.
+    drupal_static_reset('feeds_http_request');
 
     // Write some garbage to the cached file to ensure that the cache is
     // retrieved from that file.
@@ -221,7 +221,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     file_put_contents($file_url, $garbage);
 
     // Second request.
-    $result2 = http_request_get($url);
+    $result2 = feeds_http_request($url);
 
     // Assert that the second request was successful and was retrieved from
     // cache.
@@ -236,7 +236,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     )));
 
     // Third request.
-    $result3 = http_request_get($url);
+    $result3 = feeds_http_request($url);
 
     // Assert that the data is refetched, even though the source hasn't changed.
     $this->assertEqual(200, $result3->code, 'Request status code is 200.');
@@ -253,13 +253,13 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
 
     // First request.
     $url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
-    $result1 = http_request_get($url);
+    $result1 = feeds_http_request($url);
 
     // Set flag that the source has changed.
     variable_set('feeds_tests_nodes_changed', TRUE);
 
     // Second request.
-    $result2 = http_request_get($url);
+    $result2 = feeds_http_request($url);
 
     // Assert that the result is exactly the same.
     $this->assertEqual($result1->data, $result2->data, 'The data was retrieved from cache.');
@@ -267,7 +267,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     // Assert that the data *is* refetched (and different) after a cache clear.
     drupal_flush_all_caches();
     drupal_static_reset();
-    $result3 = http_request_get($url);
+    $result3 = feeds_http_request($url);
     $this->assertNotEqual($result1->data, $result3->data, 'The data is refetched.');
   }
 
@@ -281,7 +281,7 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
     // Revert back to the default cache class.
     variable_set('cache_class_cache_feeds_http', 'DrupalDatabaseCache');
 
-    // Import. We cannot test with a simple http_request_get() call here,
+    // Import. We cannot test with a simple feeds_http_request() call here,
     // because there is no way to override a cache class on a single request.
     // @see _cache_get_object().
     $this->setUpImporter();
