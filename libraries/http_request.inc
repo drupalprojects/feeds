@@ -134,6 +134,8 @@ function http_request_get($url, $username = NULL, $password = NULL, $accept_inva
  *     Defaults to FALSE.
  *   - timeout: (integer) Timeout in seconds to wait for an HTTP get request to
  *     finish. Defaults to 30 seconds.
+ *   - cache_http_result: (bool) Whether to cache the HTTP result. Defaults to
+ *     TRUE.
  *
  * @return stdClass
  *   An object that describes the data downloaded from $url.
@@ -143,6 +145,7 @@ function feeds_http_request($url, array $options = array()) {
     'username' => NULL,
     'password' => NULL,
     'accept_invalid_cert' => FALSE,
+    'cache_http_result' => TRUE,
   );
 
   // Make sure a request timeout is set.
@@ -174,7 +177,7 @@ function feeds_http_request($url, array $options = array()) {
   // Only download and parse data if really needs refresh.
   // Based on "Last-Modified" and "If-Modified-Since".
   $headers = array();
-  if ($cache = http_request_get_cache($url)) {
+  if ($options['cache_http_result'] && $cache = http_request_get_cache($url)) {
     $last_result = $cache->data;
     $last_headers = array_change_key_case($last_result->headers);
 
@@ -347,10 +350,12 @@ function feeds_http_request($url, array $options = array()) {
     }
   }
 
-  // Set caches.
-  http_request_set_cache($url, $result);
-  // In the static cache, mark this URL as being cached.
-  $cached_urls[$url] = TRUE;
+  // Set caches if asked.
+  if ($options['cache_http_result']) {
+    http_request_set_cache($url, $result);
+    // In the static cache, mark this URL as being cached.
+    $cached_urls[$url] = TRUE;
+  }
 
   return $result;
 }

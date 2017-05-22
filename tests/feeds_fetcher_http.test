@@ -272,6 +272,37 @@ class FeedsFileHTTPTestCase extends FeedsWebTestCase {
   }
 
   /**
+   * Tests if the data is not cached when the option for caching is disabled.
+   */
+  public function testHTTPCacheDisabled() {
+    $this->setUpImporter();
+
+    // Disable caching HTTP request result.
+    $this->setSettings('node', 'FeedsHTTPFetcher', array(
+      'cache_http_result' => FALSE,
+    ));
+
+    $source_url = url('testing/feeds/nodes.csv', array('absolute' => TRUE));
+    $edit = array(
+      'feeds[FeedsHTTPFetcher][source]' => $source_url,
+    );
+    $this->drupalPost('import/node', $edit, t('Import'));
+    $this->assertText('Created 9 nodes');
+
+    // Assert that no cache entries were created.
+    $number_of_cache_entries = db_query('SELECT COUNT(cid) FROM {cache_feeds_http}')->fetchField();
+    $this->assertEqual(0, $number_of_cache_entries, format_string('No cache entries were created in the cache_feeds_http table (actual: @actual).', array(
+      '@actual' => $number_of_cache_entries,
+    )));
+
+    // Assert that no cache file was created.
+    $file_url = 'private://feeds/cache/' . hash('sha256', $source_url);
+    $this->assertFalse(file_exists($file_url), format_string('The file @file_url does not exist.', array(
+      '@file_url' => $file_url,
+    )));
+  }
+
+  /**
    * Tests if the data is cached on the file system even when a different cache
    * class is used.
    *
