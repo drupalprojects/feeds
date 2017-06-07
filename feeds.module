@@ -927,7 +927,7 @@ function feeds_admin_menu_output_build(array &$content) {
   foreach (feeds_importer_load_all() as $importer) {
     $content['menu']['admin/content']['admin/content/feeds_import'][$importer->id] = array(
       '#title' => t($importer->config['name']),
-      '#href' => !empty($importer->config['content_type']) ? 'node/add/' . $importer->config['content_type'] : 'import/' . check_plain($importer->id),
+      '#href' => !empty($importer->config['content_type']) ? 'node/add/' . str_replace('_', '-', $importer->config['content_type']) : 'import/' . check_plain($importer->id),
       '#access' => user_access('administer feeds') || user_access("import $importer->id feeds"),
     );
   }
