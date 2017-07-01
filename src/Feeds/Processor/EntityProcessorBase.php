@@ -300,7 +300,12 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     $entity->enforceIsNew();
 
     if ($entity instanceof EntityOwnerInterface) {
-      $entity->setOwnerId($this->configuration['owner_id']);
+      if ($this->configuration['owner_feed_author']) {
+        $entity->setOwnerId($feed->getOwnerId());
+      }
+      else {
+        $entity->setOwnerId($this->configuration['owner_id']);
+      }
     }
     return $entity;
   }
@@ -376,6 +381,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       'authorize' => $this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface'),
       'expire' => static::EXPIRE_NEVER,
       'owner_id' => 0,
+      'owner_feed_author' => 0,
     ];
 
     return $defaults;

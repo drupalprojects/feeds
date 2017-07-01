@@ -50,12 +50,24 @@ class DefaultEntityProcessorForm extends ExternalPluginFormBase {
     $entity_type = \Drupal::entityTypeManager()->getDefinition($this->plugin->entityType());
 
     if ($entity_type->isSubclassOf(EntityOwnerInterface::class)) {
+      $form['owner_feed_author'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Owner: Feed author'),
+        '#description' => $this->t('Use the feed author as the owner of the entities to be created.'),
+        '#default_value' => $this->plugin->getConfiguration('owner_feed_author'),
+      ];
+
       $form['owner_id'] = [
         '#type' => 'entity_autocomplete',
         '#title' => $this->t('Owner'),
         '#description' => $this->t('Select the owner of the entities to be created. Leave blank for %anonymous.', ['%anonymous' => \Drupal::config('user.settings')->get('anonymous')]),
         '#target_type' => 'user',
         '#default_value' => User::load($this->plugin->getConfiguration('owner_id')),
+        '#states' => [
+          'invisible' => [
+            'input[name="processor_configuration[owner_feed_author]"]' => ['checked' => TRUE],
+          ],
+        ],
       ];
     }
 

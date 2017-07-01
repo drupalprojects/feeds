@@ -96,5 +96,7 @@ feeds.processor.entity:
       type: boolean
     expire:
       type: integer
+    owner_feed_author:
+      type: boolean
     owner_id:
       type: integer
