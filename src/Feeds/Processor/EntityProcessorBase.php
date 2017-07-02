@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Entity\FeedType;
 use Drupal\feeds\Exception\EntityAccessException;
@@ -318,13 +319,71 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     if (!count($violations)) {
       return;
     }
+
+    $errors = [];
+
+    foreach ($violations as $violation) {
+      $error = $violation->getMessage();
+
+      // Try to add more context to the message.
+      // @todo if an exception occurred because of a different bundle, add more
+      // context to the message.
+      $invalid_value = $violation->getInvalidValue();
+      if ($invalid_value instanceof FieldItemListInterface) {
+        // The invalid value is a field. Get more information about this field.
+        $error = new FormattableMarkup('@name (@property_name): @error', [
+          '@name' => $invalid_value->getFieldDefinition()->getLabel(),
+          '@property_name' => $violation->getPropertyPath(),
+          '@error' => $error,
+        ]);
+      }
+      else {
+        $error = new FormattableMarkup('@property_name: @error', [
+          '@property_name' => $violation->getPropertyPath(),
+          '@error' => $error,
+        ]);
+      }
+
+      $errors[] = $error;
+    }
+
+    $element = [
+      '#theme' => 'item_list',
+      '#items' => $errors,
+    ];
+
+    // Compose error message. If available, use the entity label to indicate
+    // which item failed. Fallback to the GUID value (if available) or else
+    // no indication.
+    $label = $entity->label();
+    $guid = $entity->get('feeds_item')->guid;
+
+    $messages = [];
     $args = [
       '@entity' => Unicode::strtolower($this->entityTypeLabel()),
-      '%label' => $entity->label(),
-      '%error' => $violations[0]->getMessage(),
-      '@url' => $this->url('entity.feeds_feed_type.mapping', ['feeds_feed_type' => $this->feedType->id()]),
+      '%label' => $label,
+      '%guid' => $guid,
+      '@errors' => \Drupal::service('renderer')->render($element),
+      ':url' => $this->url('entity.feeds_feed_type.mapping', ['feeds_feed_type' => $this->feedType->id()]),
     ];
-    throw new ValidationException(new FormattableMarkup('The @entity %label failed to validate with the error: %error Please check your <a href="@url">mappings</a>.', $args));
+    if ($label || $label === '0' || $label === 0) {
+      $messages[] = $this->t('The @entity %label failed to validate with the following errors: @errors', $args);
+    }
+    elseif ($guid || $guid === '0' || $guid === 0) {
+      $messages[] = $this->t('The @entity with GUID %guid failed to validate with the following errors: @errors', $args);
+    }
+    else {
+      $messages[] = $this->t('An entity of type "@entity" failed to validate with the following errors: @errors', $args);
+    }
+    $messages[] = $this->t('Please check your <a href=":url">mappings</a>.', $args);
+
+    // Concatenate strings as markup to mark them as safe.
+    $message_element = [
+      '#markup' => implode("\n", $messages),
+    ];
+    $message = \Drupal::service('renderer')->render($message_element);
+
+    throw new ValidationException($message);
   }
 
   /**
