@@ -39,9 +39,9 @@ function feeds_cron() {
     if ($feed->isLocked()) {
       continue;
     }
-    $queue = \Drupal::queue('feeds_feed_import:' . $feed->bundle());
+    $queue = \Drupal::queue('feeds_feed_refresh:' . $feed->bundle());
 
-    if ($queue->createItem([$feed, FeedRefresh::BEGIN])) {
+    if ($queue->createItem([$feed, FeedRefresh::BEGIN, []])) {
       // Add timestamp to avoid queueing item more than once.
       $feed->setQueuedTime(REQUEST_TIME);
       $feed->save();

@@ -468,7 +468,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
       // Clear the queue worker plugin cache so that our derivatives will be
       // found.
       \Drupal::service('plugin.manager.queue_worker')->clearCachedDefinitions();
-      \Drupal::queue('feeds_feed_import:' . $this->id())->createQueue();
+      \Drupal::queue('feeds_feed_refresh:' . $this->id())->createQueue();
     }
   }
 
@@ -476,18 +476,14 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
    * {@inheritdoc}
    */
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
-    $prefixes = ['feeds_feed_import', 'feeds_feed_parse', 'feeds_feed_process'];
-
     foreach ($entities as $entity) {
       foreach ($entity->getPlugins() as $plugin) {
         $plugin->onFeedTypeDelete();
       }
 
       // Delete any existing queues related to this type.
-      foreach ($prefixes as $prefix) {
-        if ($queue = \Drupal::queue($prefix . ':' . $entity->id())) {
-          $queue->deleteQueue();
-        }
+      if ($queue = \Drupal::queue('feeds_feed_refresh:' . $entity->id())) {
+        $queue->deleteQueue();
       }
     }
 
