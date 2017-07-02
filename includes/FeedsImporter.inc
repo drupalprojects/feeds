@@ -269,7 +269,7 @@ class FeedsImporter extends FeedsConfigurable {
       'expire_period' => 3600, // Expire every hour by default, this is a hidden setting.
       'import_on_create' => TRUE, // Import on submission.
       'process_in_background' => FALSE,
-    );
+    ) + parent::configDefaults();
   }
 
   /**

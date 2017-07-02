@@ -215,7 +215,7 @@ class FeedsFileFetcher extends FeedsFetcher {
       'direct' => FALSE,
       'directory' => $scheme . '://feeds',
       'allowed_schemes' => $schemes,
-    );
+    ) + parent::configDefaults();
   }
 
   /**

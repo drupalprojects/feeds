@@ -38,6 +38,10 @@ function feeds_hook_info() {
     'feeds_processor_targets',
     'feeds_processor_targets_alter',
     'feeds_parser_sources_alter',
+    'feeds_config_defaults',
+    'feeds_fetcher_config_defaults',
+    'feeds_parser_config_defaults',
+    'feeds_processor_config_defaults',
   );
 
   return array_fill_keys($hooks, array('group' => 'feeds'));

@@ -174,7 +174,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       'auto_scheme' => 'http',
       'accept_invalid_cert' => FALSE,
       'cache_http_result' => TRUE,
-    );
+    ) + parent::configDefaults();
   }
 
   /**

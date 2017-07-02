@@ -226,7 +226,7 @@ class FeedsCSVParser extends FeedsParser {
       'delimiter' => ',',
       'encoding' => 'UTF-8',
       'no_headers' => 0,
-    );
+    ) + parent::configDefaults();
   }
 
   /**

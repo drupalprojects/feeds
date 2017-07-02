@@ -44,6 +44,7 @@ files[] = tests/common_syndication_parser.test
 files[] = tests/feeds_content_type.test
 files[] = tests/feeds_date_time.test
 files[] = tests/feeds_entity.test
+files[] = tests/feeds_hooks.test
 files[] = tests/feeds_mapper_date.test
 files[] = tests/feeds_mapper_date_multiple.test
 files[] = tests/feeds_mapper_field.test

@@ -909,7 +909,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
       'skip_hash_check' => FALSE,
       'bundle' => $bundle,
       'language' => LANGUAGE_NONE,
-    );
+    ) + parent::configDefaults();
   }
 
   /**

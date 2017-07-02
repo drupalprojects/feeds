@@ -110,6 +110,16 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
   }
 
   /**
+   * Overrides FeedsConfigurable::configDefaults().
+   *
+   * Invokes a hook to add in additional default configuration.
+   */
+  public function configDefaults() {
+    $hook = 'feeds_' . $this->pluginType() . '_config_defaults';
+    return module_invoke_all($hook, $this) + parent::configDefaults();
+  }
+
+  /**
    * Returns TRUE if $this->sourceForm() returns a form.
    */
   public function hasSourceConfig() {

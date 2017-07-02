@@ -195,12 +195,12 @@ abstract class FeedsConfigurable {
    *
    * @todo rename to getConfigDefaults().
    *
-   * @return
+   * @return array
    *   Array where keys are the variable names of the configuration elements and
    *   values are their default values.
    */
   public function configDefaults() {
-    return array();
+    return array() + module_invoke_all('feeds_config_defaults', $this);
   }
 
   /**
