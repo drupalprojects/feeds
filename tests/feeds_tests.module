@@ -536,6 +536,15 @@ function feeds_tests_feeds_after_parse(FeedsSource $source, FeedsParserResult $r
       }
     }
   }
+
+  // Casts the 'uid' value to a float to ensure float values don't result into
+  // array_flip() warnings when using the value to load an user.
+  // @see FeedsRSStoNodesTest::testUidTargetWithFloat()
+  if (variable_get('feeds_tests_feeds_after_parse_uid_float_value', FALSE)) {
+    foreach ($result->items as &$item) {
+      $item['uid'] = (float) $item['uid'];
+    }
+  }
 }
 
 /**

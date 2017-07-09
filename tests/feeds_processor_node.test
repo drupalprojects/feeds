@@ -726,6 +726,91 @@ class FeedsRSStoNodesTest extends FeedsWebTestCase {
   }
 
   /**
+   * Tests mapping to the node author using a float value.
+   *
+   * @see feeds_tests_feeds_after_parse()
+   */
+  public function testUidTargetWithFloat() {
+    // Set flag to turn uid values to floats.
+    variable_set('feeds_tests_feeds_after_parse_uid_float_value', TRUE);
+
+    // Rebuild node type information.
+    drupal_static_reset();
+    node_types_rebuild();
+
+    // Create a role with permission to create articles.
+    $rid = $this->drupalCreateRole(array(
+      'access content',
+      'create article content',
+    ));
+
+    // Create account with uid 201.
+    user_save(drupal_anonymous_user(), array(
+      'uid' => 201,
+      'name' => 'Morticia',
+      'mail' => 'morticia@example.com',
+      'pass' => 'mort',
+      'status' => 1,
+      'roles' => array(
+        $rid => $rid,
+      ),
+    ));
+
+    // Create account with uid 202.
+    user_save(drupal_anonymous_user(), array(
+      'uid' => 202,
+      'name' => 'Joe',
+      'mail' => 'joe@example.com',
+      'pass' => 'joe',
+      'status' => 1,
+      'roles' => array(
+        $rid => $rid,
+      ),
+    ));
+
+    // Create and configure importer.
+    $this->createImporterConfiguration('Content CSV', 'csv');
+    $this->setSettings('csv', NULL, array(
+      'content_type' => '',
+      'import_period' => FEEDS_SCHEDULE_NEVER,
+    ));
+    $this->setPlugin('csv', 'FeedsFileFetcher');
+    $this->setPlugin('csv', 'FeedsCSVParser');
+    // Ensure that the "Authorize" option is enabled.
+    $this->setSettings('csv', 'FeedsNodeProcessor', array(
+      'authorize' => TRUE,
+    ));
+    $this->addMappings('csv', array(
+      0 => array(
+        'source' => 'title',
+        'target' => 'title',
+      ),
+      1 => array(
+        'source' => 'uid',
+        'target' => 'uid',
+      ),
+    ));
+
+    // Import CSV file.
+    $this->importFile('csv', $this->absolutePath() . '/tests/feeds/content_uid.csv');
+    $this->assertText('Created 2 nodes');
+
+    // And assert that the two created nodes have the expected author assigned.
+    $expected_values = array(
+      1 => array(
+        'uid' => 201,
+      ),
+      2 => array(
+        'uid' => 202,
+      ),
+    );
+    for ($i = 1; $i <= 2; $i++) {
+      $node = node_load($i);
+      $this->assertEqual($expected_values[$i]['uid'], $node->uid);
+    }
+  }
+
+  /**
    * Tests if the target "changed" works as expected.
    */
   public function testChangedTarget() {
