@@ -86,7 +86,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     // Only reference content entities. Configuration entities will need custom
     // targets.
     $type = $field_definition->getSetting('target_type');
-    if (!\Drupal::entityTypeManager()->getDefinition($type)->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface')) {
+    if (!\Drupal::entityTypeManager()->getDefinition($type)->entityClassImplements('\Drupal\Core\Entity\ContentEntityInterface')) {
       return;
     }
 
