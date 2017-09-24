@@ -923,8 +923,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
     $info = $this->entityInfo();
     $config = $this->getConfig();
 
-    // Check configured bundle.
-    if (isset($config['bundle'])) {
+    // Check configured bundle if the bundle is configurable.
+    if (isset($config['bundle']) && !empty($info['entity keys']['bundle'])) {
       $bundles = $this->bundleOptions();
       if (!in_array($config['bundle'], array_keys($bundles))) {
         $errors[] = t('Invalid value %value for config option %key.', array(
