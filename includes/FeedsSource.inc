@@ -763,6 +763,19 @@ class FeedsSource extends FeedsConfigurable {
     }
 
     if (in_array('feeds_reschedule', $methods)) {
+      if (!$this->doesExist()) {
+        if ($this->importer->config['import_period'] == FEEDS_SCHEDULE_NEVER) {
+          // Just not scheduled.
+          return NULL;
+        }
+        // Scheduling information cannot exist yet.
+        return array(
+          'time' => NULL,
+          'method' => NULL,
+          'message' => t('not scheduled yet, because there is no source'),
+        );
+      }
+
       // Check if the importer is in the process of being rescheduled.
       $importers = feeds_reschedule();
       if (isset($importers[$this->id])) {
