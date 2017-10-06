@@ -96,6 +96,8 @@ class FeedsWebTestCase extends DrupalWebTestCase {
     $this->admin_user = $this->drupalCreateUser($permissions);
     $this->drupalLogin($this->admin_user);
 
+    // Create two content types if they don't exist yet.
+    $existing_node_types = node_type_get_names();
     $types = array(
       array(
         'type' => 'page',
@@ -111,6 +113,14 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       ),
     );
     foreach ($types as $type) {
+      // Check if the content type to add already exists. Other tests which
+      // inherit from FeedsWebTestCase might already have added one of the
+      // content types in one of the modules they have enabled in their startup.
+      if (isset($existing_node_types[$type['type']])) {
+        // Content type already exists. Continue to the next one.
+        continue;
+      }
+
       $this->drupalPost('admin/structure/types/add', $type, 'Save content type');
       $this->assertText("The content type " . $type['name'] . " has been added.");
     }
