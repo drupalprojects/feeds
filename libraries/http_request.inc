@@ -241,7 +241,7 @@ function feeds_http_request($url, array $options = array()) {
       $download = curl_init($url);
       curl_setopt($download, CURLOPT_FOLLOWLOCATION, TRUE);
       if (!empty($options['username'])) {
-        curl_setopt($download, CURLOPT_USERPWD, '{' . $options['username'] . '}:{' . $options['password'] . '}');
+        curl_setopt($download, CURLOPT_USERPWD, $options['username'] . ':' . $options['password']);
         curl_setopt($download, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
       }
       curl_setopt($download, CURLOPT_HTTPHEADER, $headers);
