@@ -15,9 +15,8 @@ class feeds_views_handler_field_source extends views_handler_field {
     if (isset($value['FeedsHTTPFetcher']['source'])) {
       return check_url($value['FeedsHTTPFetcher']['source']);
     }
-    elseif (isset($value['FeedsFileFetcher']['feeds_source'])) {
-      // @todo This is untested.
-      return $GLOBALS['base_url'] . '/' . check_plain($value['FeedsFileFetcher']['feeds_source']);
+    elseif (isset($value['FeedsFileFetcher']['source'])) {
+      return file_create_url($value['FeedsFileFetcher']['source']);
     }
     return '';
   }
