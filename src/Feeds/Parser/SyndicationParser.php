@@ -171,8 +171,8 @@ class SyndicationParser extends PluginBase implements ParserInterface {
         ],
       ],
       'georss_lat' => [
-        'label' => $this->t('Item lattitude'),
-        'description' => $this->t('The feed item lattitutde.'),
+        'label' => $this->t('Item latitude'),
+        'description' => $this->t('The feed item latitude.'),
       ],
       'georss_lon' => [
         'label' => $this->t('Item longitude'),
