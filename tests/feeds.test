@@ -695,10 +695,9 @@ class FeedsWebTestCase extends DrupalWebTestCase {
    * SimplePie is downloaded.
    */
   function downloadExtractSimplePie($version) {
-    $url = "http://simplepie.org/downloads/simplepie_$version.mini.php";
-    $filename = 'simplepie.mini.php';
+    $url = "https://codeload.github.com/simplepie/simplepie/zip/$version";
 
-    // Avoid downloading the file dozens of times
+    // Avoid downloading the file dozens of times.
     $library_dir = DRUPAL_ROOT . '/' . $this->originalFileDirectory . '/simpletest/feeds';
     $simplepie_library_dir = $library_dir . '/simplepie';
 
@@ -706,12 +705,9 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       drupal_mkdir($library_dir);
     }
 
-    if (!file_exists($simplepie_library_dir)) {
-      drupal_mkdir($simplepie_library_dir);
-    }
-
     // Local file name.
-    $local_file = $simplepie_library_dir . '/' . $filename;
+    $local_file = $library_dir . '/simplepie/library/SimplePie.php';
+    $zip_file = $library_dir . '/simplepie.zip';
 
     // Begin single threaded code.
     if (function_exists('sem_get')) {
@@ -719,9 +715,21 @@ class FeedsWebTestCase extends DrupalWebTestCase {
       sem_acquire($semaphore);
     }
 
-    // Download and extact the archive, but only in one thread.
+    // Download the archive, but only in one thread.
     if (!file_exists($local_file)) {
-      $local_file = system_retrieve_file($url, $local_file, FALSE, FILE_EXISTS_REPLACE);
+      if (!file_exists($zip_file)) {
+        $zip_file = system_retrieve_file($url, $zip_file, FALSE, FILE_EXISTS_REPLACE);
+      }
+
+      // Extract the archive.
+      $zip = new ZipArchive();
+      if ($zip->open($zip_file) === TRUE) {
+        $zip->extractTo($library_dir);
+        $zip->close();
+      }
+
+      // Rename directory.
+      rename($library_dir . '/simplepie-' . $version, $simplepie_library_dir);
     }
 
     if (function_exists('sem_get')) {
