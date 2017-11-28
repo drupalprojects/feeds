@@ -466,6 +466,10 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * @todo How does ::load() behave for deleted fields?
    */
   protected function prepareFeedsItemField() {
+    // Do not create field when syncing configuration.
+    if (\Drupal::isConfigSyncing()) {
+      return FALSE;
+    }
     // Create field if it doesn't exist.
     if (!FieldStorageConfig::loadByName($this->entityType(), 'feeds_item')) {
       FieldStorageConfig::create([
