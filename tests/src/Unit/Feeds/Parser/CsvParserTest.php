@@ -23,6 +23,8 @@ class CsvParserTest extends FeedsUnitTestCase {
     parent::setUp();
 
     $this->feedType = $this->getMock('Drupal\feeds\FeedTypeInterface');
+    $this->feedType->method('getMappingSources')
+      ->will($this->returnValue([]));
     $configuration = ['feed_type' => $this->feedType, 'line_limit' => 3];
     $this->parser = new CsvParser($configuration, 'csv', []);
     $this->parser->setStringTranslation($this->getStringTranslationStub());

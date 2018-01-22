@@ -32,6 +32,17 @@ feeds.feed_type.*:
     processor_configuration:
       label: 'Processor configuration'
       type: feeds.processor.entity
+    custom_sources:
+      type: sequence
+      sequence:
+        type: mapping
+        mapping:
+          value:
+            type: string
+          label:
+            type: string
+          description:
+            type: string
     mappings:
       type: sequence
       sequence:

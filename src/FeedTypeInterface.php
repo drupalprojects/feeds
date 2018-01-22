@@ -75,6 +75,14 @@ interface FeedTypeInterface extends ConfigEntityInterface {
   public function getProcessor();
 
   /**
+   * Returns the mapping sources for this feed type.
+   *
+   * @return array
+   *   An array of mapping sources.
+   */
+  public function getMappingSources();
+
+  /**
    * Returns the mappings for this feed type.
    *
    * @return array
@@ -103,13 +111,78 @@ interface FeedTypeInterface extends ConfigEntityInterface {
    *
    * @param int $delta
    *   The mapping delta to remove.
+   *
+   * @return $this
+   *   An instance of this class.
    */
   public function removeMapping($delta);
 
   /**
    * Removes all mappings.
+   *
+   * @return $this
+   *   An instance of this class.
    */
   public function removeMappings();
+
+  /**
+   * Adds a custom source that can be used in mapping.
+   *
+   * @param string $name
+   *   The unique name for the source.
+   * @param array $values
+   *   An array of the source properties:
+   *   - label
+   *     A human readable name.
+   *   - value
+   *     The value to extract from the feed.
+   *   - description
+   *     (optional) A description of the source.
+   *
+   * @return $this
+   *   An instance of this class.
+   */
+  public function addCustomSource($name, array $source);
+
+  /**
+   * Gets a custom a source.
+   *
+   * @param string $name
+   *   The name of the custom source to get.
+   *
+   * @return array|null
+   *   The properties of the custom source:
+   *   - label
+   *     A human readable name.
+   *   - value
+   *     The value to extract from the feed.
+   *   - description
+   *     (optional) A description of the source.
+   *   Null if the custom source doesn't exist.
+   */
+  public function getCustomSource($name);
+
+  /**
+   * Returns if a custom source already exists.
+   *
+   * @param string $name
+   *   The source's machine name to check for existence.
+   *
+   * @return bool
+   *   True if the source exists, false otherwise.
+   */
+  public function customSourceExists($name);
+
+  /**
+   * Removes a custom a source.
+   *
+   * @param string $name
+   *   The name of the custom source to delete.
+   *
+   * @return $this
+   *   An instance of this class.
+   */
+  public function removeCustomSource($name);
 
   /**
    * Returns whether the feed type is considered locked.

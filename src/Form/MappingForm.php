@@ -46,6 +46,7 @@ class MappingForm extends FormBase {
     foreach ($feed_type->getMappingSources() as $key => $info) {
       $this->sourceOptions[$key] = $info['label'];
     }
+    $this->sourceOptions['__new'] = $this->t('New source...');
     $this->sourceOptions = $this->sortOptions($this->sourceOptions);
 
     $target_options = [];
@@ -151,11 +152,41 @@ class MappingForm extends FormBase {
         continue;
       }
       $row['map'][$column] = [
-        '#type' => 'select',
-        '#options' => $this->sourceOptions,
-        '#default_value' => $source,
-        '#empty_option' => $this->t('- Select a source -'),
-        '#attributes' => ['class' => ['feeds-table-select-list']],
+        'select' => [
+          '#type' => 'select',
+          '#options' => $this->sourceOptions,
+          '#default_value' => $source,
+          '#empty_option' => $this->t('- Select a source -'),
+          '#attributes' => ['class' => ['feeds-table-select-list']],
+        ],
+        '__new' => [
+          '#type' => 'container',
+          '#states' => [
+            'visible' => [
+              ':input[name="mappings[' . $delta . '][map][' . $column . '][select]"]' => ['value' => '__new'],
+            ]
+          ],
+          'value' => [
+            '#type' => 'textfield',
+            '#states' => [
+              'visible' => [
+                ':input[name="mappings[' . $delta . '][map][' . $column . '][select]"]' => ['value' => '__new'],
+              ]
+            ],
+          ],
+          'machine_name' => [
+            '#type' => 'machine_name',
+            '#machine_name' => [
+              'exists' => [$this->feedType, 'customSourceExists'],
+              'source' => ['mappings', $delta, 'map', $column, '__new', 'value'],
+              'standalone' => TRUE,
+              'label' => '',
+            ],
+            '#default_value' => '',
+            '#required' => FALSE,
+            '#disabled' => '',
+          ],
+        ],
       ];
 
       $label = Html::escape($this->targets[$mapping['target']]->getLabel());
@@ -273,7 +304,18 @@ class MappingForm extends FormBase {
 
     $mappings = $this->feedType->getMappings();
     foreach (array_filter((array) $form_state->getValue('mappings', [])) as $delta => $mapping) {
-      $mappings[$delta]['map'] = $mapping['map'];
+      foreach ($mapping['map'] as $column => $value) {
+        if ($value['select'] == '__new') {
+          // Add a new source.
+          $this->feedType->addCustomSource($value['__new']['machine_name'], [
+            'label' => $value['__new']['value'],
+          ] + $value['__new']);
+          $mappings[$delta]['map'][$column] = $value['__new']['machine_name'];
+        }
+        else {
+          $mappings[$delta]['map'][$column] = $value['select'];
+        }
+      }
       if (isset($mapping['unique'])) {
         $mappings[$delta]['unique'] = array_filter($mapping['unique']);
       }

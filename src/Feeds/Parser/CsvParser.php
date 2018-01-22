@@ -18,15 +18,13 @@ use Drupal\feeds\StateInterface;
  *
  * @FeedsParser(
  *   id = "csv",
- *   title = "CSV (not working yet, do not use)",
+ *   title = "CSV",
  *   description = @Translation("Parse CSV files."),
  *   form = {
  *     "configuration" = "Drupal\feeds\Feeds\Parser\Form\CsvParserForm",
  *     "feed" = "Drupal\feeds\Feeds\Parser\Form\CsvParserFeedForm",
  *   },
  * )
- *
- * @todo Make mapping sources configurable, see https://www.drupal.org/node/2443471.
  */
 class CsvParser extends PluginBase implements ParserInterface {
 
@@ -34,6 +32,14 @@ class CsvParser extends PluginBase implements ParserInterface {
    * {@inheritdoc}
    */
   public function parse(FeedInterface $feed, FetcherResultInterface $fetcher_result, StateInterface $state) {
+    // Get sources.
+    $sources = [];
+    foreach ($feed->getType()->getMappingSources() as $key => $info) {
+      if (!empty($info['value'])) {
+        $sources[$info['value']] = $key;
+      }
+    }
+
     $feed_config = $feed->getConfigurationFor($this);
 
     if (!filesize($fetcher_result->getFilePath())) {
@@ -57,6 +63,10 @@ class CsvParser extends PluginBase implements ParserInterface {
 
       foreach ($row as $delta => $cell) {
         $key = isset($header[$delta]) ? $header[$delta] : $delta;
+        // Pick machine name of source, if one is found.
+        if (isset($sources[$key])) {
+          $key = $sources[$key];
+        }
         $item->set($key, $cell);
       }
 

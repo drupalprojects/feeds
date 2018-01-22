@@ -136,6 +136,13 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
   protected $mappings = [];
 
   /**
+   * The list of custom sources.
+   *
+   * @var array
+   */
+  protected $custom_sources = [];
+
+  /**
    * The list of sources.
    *
    * @var array
@@ -223,17 +230,17 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
   public function getMappingSources() {
     if ($this->sources === NULL) {
       $this->sources = $this->getParser()->getMappingSources();
-      $definitions = \Drupal::service('plugin.manager.feeds.source')->getDefinitions();
+      $definitions = $this->getSourcePluginManager()->getDefinitions();
 
       foreach ($definitions as $definition) {
         $class = $definition['class'];
         $class::sources($this->sources, $this, $definition);
       }
 
-      \Drupal::moduleHandler()->alter('feeds_sources', $this->sources, $this);
+      $this->alter('feeds_sources', $this->sources);
     }
 
-    return $this->sources;
+    return $this->sources + $this->custom_sources;
   }
 
   /**
@@ -292,6 +299,40 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
    */
   public function removeMappings() {
     $this->mappings = [];
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addCustomSource($name, array $source) {
+    $this->custom_sources[$name] = $source;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCustomSource($name) {
+    if (!isset($this->custom_sources[$name])) {
+      return NULL;
+    }
+    return $this->custom_sources[$name];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function customSourceExists($name) {
+    return isset($this->custom_sources[$name]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeCustomSource($name) {
+    unset($this->custom_sources[$name]);
+    return $this;
   }
 
   /**
@@ -381,7 +422,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
       // The source is a plugin.
       if (isset($sources[$source]['id'])) {
         $configuration = ['feed_type' => $this];
-        $this->sourcePlugins[$source] = \Drupal::service('plugin.manager.feeds.source')->createInstance($sources[$source]['id'], $configuration);
+        $this->sourcePlugins[$source] = $this->getSourcePluginManager()->createInstance($sources[$source]['id'], $configuration);
       }
       else {
         $this->sourcePlugins[$source] = FALSE;
@@ -498,6 +539,31 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
     $properties = parent::toArray();
     $properties['mappings'] = $this->mappings;
     return $properties;
+  }
+
+  /**
+   * Returns the source plugin manager.
+   *
+   * @return \Drupal\feeds\Plugin\Type\FeedsPluginManager
+   *   The source plugin manager.
+   */
+  protected function getSourcePluginManager() {
+    return \Drupal::service('plugin.manager.feeds.source');
+  }
+
+  /**
+   * Wrapper around \Drupal\Core\Extension\ModuleHandlerInterface::alter().
+   *
+   * @param string|array $type
+   *   A string describing the type of the alterable $data or an array if
+   *   hook_TYPE_alter() needs to be invoked for each value in the array.
+   * @param mixed $data
+   *   The variable to be altered.
+   *
+   * @see \Drupal\Core\Extension\ModuleHandlerInterface::alter()
+   */
+  protected function alter($type, &$data) {
+    return \Drupal::moduleHandler()->alter($type, $data, $this);
   }
 
 }
