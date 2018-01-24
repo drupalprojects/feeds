@@ -105,7 +105,8 @@ function feeds_import_form(array $form, array &$form_state, FeedsImporter $impor
     $submit = t('Save');
   }
 
-  $form['submit'] = array(
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => $submit,
   );
@@ -113,8 +114,8 @@ function feeds_import_form(array $form, array &$form_state, FeedsImporter $impor
   // Disable submit button if import is initiated.
   $progress = $source->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
-    $form['submit']['#disabled'] = TRUE;
-    $form['submit']['#value'] =
+    $form['actions']['submit']['#disabled'] = TRUE;
+    $form['actions']['submit']['#value'] =
       t('Importing (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
 
     // Check if import task is queued.
