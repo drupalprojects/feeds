@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FieldTargetDefinition;
@@ -108,7 +109,7 @@ class File extends EntityReference {
    * Filesize and MIME-type aren't sensible fields to match on so these are
    * filtered out.
    */
-  protected function filterFieldTypes(FieldDefinitionInterface $field) {
+  protected function filterFieldTypes(FieldStorageDefinitionInterface $field) {
     $ignore_fields = [
       'filesize',
       'filemime',

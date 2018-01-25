@@ -8,7 +8,9 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
@@ -95,7 +97,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   }
 
   protected function getPotentialFields() {
-    $field_definitions = $this->entityFieldManager->getBaseFieldDefinitions($this->getEntityType());
+    $field_definitions = $this->entityFieldManager->getFieldStorageDefinitions($this->getEntityType());
     $field_definitions = array_filter($field_definitions, [$this, 'filterFieldTypes']);
     $options = [];
     foreach ($field_definitions as $id => $definition) {
@@ -110,7 +112,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    *
    * Checks whether the provided field is available to be used as reference.
    *
-   * @param \Drupal\Core\Field\FieldDefinitionInterface $field
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field
    *   The field to check.
    *
    * @return bool
@@ -118,8 +120,8 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    *
    * @see ::getPotentialFields()
    */
-  protected function filterFieldTypes(FieldDefinitionInterface $field) {
-    if ($field->isComputed()) {
+  protected function filterFieldTypes(FieldStorageDefinitionInterface $field) {
+    if ($field instanceof DataDefinitionInterface && $field->isComputed()) {
       return FALSE;
     }
 
@@ -129,6 +131,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       case 'text_long':
       case 'path':
       case 'uuid':
+      case 'feeds_item':
         return TRUE;
 
       default:
@@ -156,12 +159,50 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * {@inheritdoc}
    */
   protected function prepareValue($delta, array &$values) {
-    if ($target_id = $this->findEntity($values['target_id'], $this->configuration['reference_by'])) {
-      $values['target_id'] = $target_id;
-      return;
+    if ($this->configuration['reference_by'] == 'feeds_item') {
+      switch ($this->configuration['feeds_item']) {
+        case 'guid':
+          $values = ['target_id' => $this->findEntityByGuid($this->getEntityType(), $values['target_id'])];
+          return;
+      }
+    }
+    else {
+      if ($target_id = $this->findEntity($values['target_id'], $this->configuration['reference_by'])) {
+        $values['target_id'] = $target_id;
+        return;
+      }
     }
 
     throw new EmptyFeedException();
+  }
+
+  /**
+   * Searches for an entity by its Feed item's GUID value.
+   *
+   * @param string $entity_type
+   *   The entity type with the feeds_item field.
+   * @param string $guid
+   *   The GUID value to look for inside the entity's feed item field.
+   *
+   * @return int|null
+   *   The entity id, or false, if not found.
+   */
+  protected function findEntityByGuid($entity_type, $guid) {
+    // Check if the target entity type has a 'feeds_item' field.
+    $field_definitions = $this->entityFieldManager->getFieldStorageDefinitions($entity_type);
+    if (!isset($field_definitions['feeds_item']) || $field_definitions['feeds_item']->getType() != 'feeds_item') {
+      // No feeds_item field found. Abort to prevent a fatal error.
+      return NULL;
+    }
+
+    $items = $this->queryFactory->get($entity_type)
+      ->condition('feeds_item.guid', $guid)
+      ->execute();
+    if (!empty($items)) {
+      return (int) reset($items);
+    }
+
+    return NULL;
   }
 
   /**
@@ -220,9 +261,22 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return [
+    $config = [
       'reference_by' => $this->getLabelKey(),
       'autocreate' => FALSE,
+    ];
+    if (array_key_exists('feeds_item', $this->getPotentialFields())) {
+      $config['feeds_item'] = FALSE;
+    }
+    return $config;
+  }
+
+  /**
+   * Returns options for feeds_item configuration.
+   */
+  public function getFeedsItemOptions() {
+    return [
+      'guid' => $this->t('Item GUID'),
     ];
   }
 
@@ -245,6 +299,22 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       '#title' => $this->t('Reference by'),
       '#options' => $options,
       '#default_value' => $this->configuration['reference_by'],
+    ];
+
+    $feed_item_options = $this->getFeedsItemOptions();
+
+    $form['feeds_item'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Feed item'),
+      '#options' => $feed_item_options,
+      '#default_value' => $this->configuration['feeds_item_option'],
+      '#states' => [
+        'visible' => [
+          ':input[name="mappings[' . $delta . '][settings][reference_by]"]' => [
+            'value' => 'feeds_item',
+          ],
+        ],
+      ],
     ];
 
     $form['autocreate'] = [
@@ -273,6 +343,10 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
 
     if ($this->configuration['reference_by'] && isset($options[$this->configuration['reference_by']])) {
       $summary[] = $this->t('Reference by: %message', ['%message' => $options[$this->configuration['reference_by']]]);
+      if ($this->configuration['reference_by'] == 'feeds_item') {
+        $feed_item_options = $this->getFeedsItemOptions();
+        $summary[] = $this->t('Feed item: %feed_item', ['%feed_item' => $feed_item_options[$this->configuration['feeds_item']]]);
+      }
     }
     else {
       $summary[] = $this->t('Please select a field to reference by.');
