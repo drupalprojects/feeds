@@ -10,6 +10,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class UriTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Uri', 'prepareTarget')->getClosure();
     $method($this->getMockFieldDefinition());

@@ -164,14 +164,14 @@ class MappingForm extends FormBase {
           '#states' => [
             'visible' => [
               ':input[name="mappings[' . $delta . '][map][' . $column . '][select]"]' => ['value' => '__new'],
-            ]
+            ],
           ],
           'value' => [
             '#type' => 'textfield',
             '#states' => [
               'visible' => [
                 ':input[name="mappings[' . $delta . '][map][' . $column . '][select]"]' => ['value' => '__new'],
-              ]
+              ],
             ],
           ],
           'machine_name' => [

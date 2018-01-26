@@ -15,6 +15,9 @@ use Drupal\feeds\FeedTypeInterface;
  */
 class FeedTypeAccessControlHandlerTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 

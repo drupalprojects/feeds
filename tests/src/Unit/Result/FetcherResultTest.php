@@ -11,18 +11,27 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class FetcherResultTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function testGetRaw() {
     file_put_contents('vfs://feeds/test_file', pack('CCC', 0xef, 0xbb, 0xbf) . 'I am test data.');
     $result = new FetcherResult('vfs://feeds/test_file');
     $this->assertSame('I am test data.', $result->getRaw());
   }
 
+  /**
+   *
+   */
   public function testGetFilePath() {
     file_put_contents('vfs://feeds/test_file', 'I am test data.');
     $result = new FetcherResult('vfs://feeds/test_file');
     $this->assertSame('vfs://feeds/test_file', $result->getFilePath());
   }
 
+  /**
+   *
+   */
   public function testGetSanitizedFilePath() {
     file_put_contents('vfs://feeds/test_file', pack('CCC', 0xef, 0xbb, 0xbf) . 'I am test data.');
     $result = new FetcherResult('vfs://feeds/test_file');

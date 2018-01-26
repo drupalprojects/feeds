@@ -15,6 +15,9 @@ class FileTest extends FeedsUnitTestCase {
   protected $feedType;
   protected $targetDefinition;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -24,6 +27,9 @@ class FileTest extends FeedsUnitTestCase {
     $this->targetDefinition = $method($this->getMockFieldDefinition());
   }
 
+  /**
+   *
+   */
   public function test() {
     // $configuration = [
     //   'feed_type' => $this->feedType,
@@ -39,5 +45,6 @@ class FileTest extends FeedsUnitTestCase {
     // $this->assertSame($values['value'], 'longstring');
     // $this->assertSame($values['format'], 'plain_text');
   }
+
 }
 

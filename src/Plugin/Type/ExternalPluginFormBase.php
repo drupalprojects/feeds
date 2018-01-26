@@ -7,8 +7,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\feeds\Plugin\PluginAwareInterface;
-use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for Feeds plugins that have external configuration forms.

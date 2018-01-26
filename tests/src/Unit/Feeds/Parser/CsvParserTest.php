@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Parser;
 
-use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Parser\CsvParser;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\State;
@@ -19,6 +18,9 @@ class CsvParserTest extends FeedsUnitTestCase {
   protected $feed;
   protected $state;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -37,6 +39,9 @@ class CsvParserTest extends FeedsUnitTestCase {
       ->will($this->returnValue($this->feedType));
   }
 
+  /**
+   *
+   */
   public function testFetch() {
     $this->feed->expects($this->any())
       ->method('getConfigurationFor')
@@ -67,10 +72,12 @@ class CsvParserTest extends FeedsUnitTestCase {
     $this->parser->parse($this->feed, $result, $this->state);
   }
 
+  /**
+   *
+   */
   public function testGetMappingSources() {
     // Not really much to test here.
     $this->assertSame([], $this->parser->getMappingSources());
   }
 
 }
-

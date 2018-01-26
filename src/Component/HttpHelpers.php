@@ -2,8 +2,6 @@
 
 namespace Drupal\feeds\Component;
 
-use Drupal\feeds\Component\XmlParserTrait;
-
 /**
  * Various helpers for dealing with HTTP data.
  *

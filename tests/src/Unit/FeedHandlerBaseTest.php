@@ -10,6 +10,9 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
  */
 class FeedHandlerBaseTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $container = new ContainerBuilder();
     $container->set('event_dispatcher', $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface'));

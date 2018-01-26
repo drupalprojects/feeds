@@ -15,6 +15,9 @@ class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
   protected $controller;
   protected $moduleHandler;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
     $this->entityType = $this->getMock('\Drupal\Core\Entity\EntityTypeInterface');
@@ -29,6 +32,9 @@ class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
     $this->controller->setModuleHandler($this->moduleHandler);
   }
 
+  /**
+   *
+   */
   public function test() {
     $feed = $this->getMockBuilder('\Drupal\feeds\FeedInterface')
       ->disableOriginalConstructor()
@@ -69,6 +75,9 @@ class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
     $this->assertTrue($this->controller->access($feed, 'delete', $account));
   }
 
+  /**
+   *
+   */
   public function testCheckCreateAccess() {
     $account = $this->getMock('\Drupal\Core\Session\AccountInterface');
 

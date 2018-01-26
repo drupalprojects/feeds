@@ -11,6 +11,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class ParserResultTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
 
   }

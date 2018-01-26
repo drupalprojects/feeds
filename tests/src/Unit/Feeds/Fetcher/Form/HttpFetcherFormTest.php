@@ -13,6 +13,9 @@ use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
  */
 class HttpFetcherFormTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $form_object = new HttpFetcherForm();
 
@@ -25,4 +28,3 @@ class HttpFetcherFormTest extends FeedsUnitTestCase {
   }
 
 }
-

@@ -3,9 +3,7 @@
 namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Drupal\feeds\FeedInterface;

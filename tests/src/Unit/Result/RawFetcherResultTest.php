@@ -11,11 +11,17 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class RawFetcherResultTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function testRaw() {
     $result = new RawFetcherResult('raw text');
     $this->assertSame($result->getRaw(), 'raw text');
   }
 
+  /**
+   *
+   */
   public function testFilePath() {
     $result = new RawFetcherResult('raw text');
     $this->assertSame(file_get_contents($result->getFilePath()), 'raw text');
@@ -25,4 +31,3 @@ class RawFetcherResultTest extends FeedsUnitTestCase {
   }
 
 }
-

@@ -11,6 +11,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class StringTargetTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\StringTarget', 'prepareTarget')->getClosure();
     $field_definition = $this->getMockFieldDefinition(['max_length' => 5]);
@@ -19,7 +22,7 @@ class StringTargetTest extends FeedsUnitTestCase {
       ->will($this->returnValue('string'));
     $configuration = [
       'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
-      'target_definition' =>  $method($field_definition),
+      'target_definition' => $method($field_definition),
     ];
     $target = new StringTarget($configuration, 'link', []);
 

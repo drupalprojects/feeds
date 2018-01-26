@@ -5,7 +5,7 @@ namespace Drupal\feeds\Annotation;
 /**
  * Defines a Plugin annotation object for Feeds parser plugins.
  *
- * Plugin Namespace: Feeds\Parser
+ * Plugin Namespace: Feeds\Parser.
  *
  * For a working example, see \Drupal\feeds\Feeds\Parser\SyndicationParser.
  *

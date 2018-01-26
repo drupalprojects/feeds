@@ -5,8 +5,6 @@ namespace Drupal\feeds;
 use Drupal\feeds\Event\ClearEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\InitEvent;
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\StateInterface;
 
 /**
  * Deletes the items of a feed.

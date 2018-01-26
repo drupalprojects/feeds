@@ -89,7 +89,7 @@ interface StateInterface {
    *   supported:
    *   - 'status'
    *   - 'warning'
-   *   - 'error'
+   *   - 'error'.
    * @param bool $repeat
    *   (optional) If this is FALSE and the message is already set, then the
    *   message won't be repeated. Defaults to FALSE.

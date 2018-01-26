@@ -2,8 +2,6 @@
 
 namespace Drupal\feeds;
 
-use Drupal\Core\Field\FieldDefinitionInterface;
-
 /**
  * A generic target definition.
  */

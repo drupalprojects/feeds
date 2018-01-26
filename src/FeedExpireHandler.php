@@ -5,7 +5,6 @@ namespace Drupal\feeds;
 use Drupal\feeds\Event\ExpireEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\InitEvent;
-use Drupal\feeds\FeedInterface;
 
 /**
  * Expires the items of a feed.
@@ -47,7 +46,6 @@ class FeedExpireHandler extends FeedHandlerBase {
     batch_set($batch);
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -68,6 +66,9 @@ class FeedExpireHandler extends FeedHandlerBase {
     }
   }
 
+  /**
+   *
+   */
   public function postExpire(FeedInterface $feed) {
     $state = $feed->getState(StateInterface::EXPIRE);
     if ($state->total) {

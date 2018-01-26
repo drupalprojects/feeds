@@ -10,6 +10,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class XmlParserTraitTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $trait = $this->getMockForTrait('Drupal\feeds\Component\XmlParserTrait');
 
@@ -20,6 +23,9 @@ class XmlParserTraitTest extends FeedsUnitTestCase {
     $this->assertSame([], $errors);
   }
 
+  /**
+   *
+   */
   public function testErrors() {
     $trait = $this->getMockForTrait('Drupal\feeds\Component\XmlParserTrait');
 

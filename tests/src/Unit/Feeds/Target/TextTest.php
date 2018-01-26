@@ -15,6 +15,9 @@ class TextTest extends FeedsUnitTestCase {
 
   protected $target;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -27,6 +30,9 @@ class TextTest extends FeedsUnitTestCase {
     $this->target->setStringTranslation($this->getStringTranslationStub());
   }
 
+  /**
+   *
+   */
   public function test() {
     $method = $this->getProtectedClosure($this->target, 'prepareValue');
 
@@ -36,12 +42,18 @@ class TextTest extends FeedsUnitTestCase {
     $this->assertSame('plain_text', $values['format']);
   }
 
+  /**
+   *
+   */
   public function testBuildConfigurationForm() {
     $form_state = new FormState();
     $form = $this->target->buildConfigurationForm([], $form_state);
     $this->assertSame(count($form), 1);
   }
 
+  /**
+   *
+   */
   public function testSummary() {
     $storage = $this->getMock('Drupal\Core\Entity\EntityStorageInterface');
     $storage->expects($this->any())
@@ -63,4 +75,3 @@ class TextTest extends FeedsUnitTestCase {
   }
 
 }
-

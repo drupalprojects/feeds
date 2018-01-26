@@ -9,12 +9,10 @@ use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\LockException;
-use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Result\RawFetcherResult;
-use Drupal\feeds\StateInterface;
 
 /**
  * Runs the actual import on a feed.

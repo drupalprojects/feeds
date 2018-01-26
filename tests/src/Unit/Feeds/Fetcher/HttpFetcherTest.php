@@ -4,7 +4,6 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Fetcher;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
@@ -16,7 +15,6 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Stream;
 use Prophecy\Argument;
 
 /**
@@ -31,6 +29,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
   protected $mockHandler;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -56,6 +57,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     $this->feed->getSource()->willReturn('http://example.com');
   }
 
+  /**
+   *
+   */
   public function testFetch() {
     $this->mockHandler->append(new Response(200, [], 'test data'));
 
@@ -87,6 +91,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
     $this->fetcher->fetch($this->feed->reveal(), new State());
   }
 
+  /**
+   *
+   */
   public function testOnFeedDeleteMultiple() {
     $feed = $this->getMock(FeedInterface::class);
     $feed->expects($this->exactly(3))
@@ -98,4 +105,3 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
 }
-

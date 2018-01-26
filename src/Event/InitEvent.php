@@ -40,5 +40,4 @@ class InitEvent extends EventBase {
     return $this->stage;
   }
 
-
 }

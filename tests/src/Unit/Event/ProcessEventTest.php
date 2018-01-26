@@ -11,6 +11,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class ProcessEventTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $item = $this->getMock('Drupal\feeds\Feeds\Item\ItemInterface');

@@ -96,7 +96,7 @@ class DateTime extends FieldTargetBase implements ConfigurableTargetInterface {
   /**
    * Returns the timezone options.
    *
-   * @return []
+   * @return array
    *   A map of timezone options.
    */
   public function getTimezoneOptions() {

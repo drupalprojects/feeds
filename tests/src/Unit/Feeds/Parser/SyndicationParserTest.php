@@ -34,6 +34,9 @@ class SyndicationParserTest extends FeedsUnitTestCase {
     'feed.reader.georssentry' => 'Drupal\feeds\Zend\Extension\Georss\Entry',
   ];
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -61,6 +64,9 @@ class SyndicationParserTest extends FeedsUnitTestCase {
       ->will($this->returnValue($this->feedType));
   }
 
+  /**
+   *
+   */
   public function testFetch() {
     $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/googlenewstz.rss2';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
@@ -87,10 +93,12 @@ class SyndicationParserTest extends FeedsUnitTestCase {
     $this->parser->parse($this->feed, $result, $this->state);
   }
 
+  /**
+   *
+   */
   public function testGetMappingSources() {
     // Not really much to test here.
     $this->assertSame(count($this->parser->getMappingSources()), 16);
   }
 
 }
-

@@ -64,7 +64,7 @@ class LazySubscriber implements EventSubscriberInterface {
 
     switch ($stage) {
       case 'fetch':
-        $dispatcher->addListener(FeedsEvents::FETCH, function(FetchEvent $event) {
+        $dispatcher->addListener(FeedsEvents::FETCH, function (FetchEvent $event) {
           $feed = $event->getFeed();
           $result = $feed->getType()->getFetcher()->fetch($feed, $feed->getState(StateInterface::FETCH));
           $event->setFetcherResult($result);
@@ -72,7 +72,7 @@ class LazySubscriber implements EventSubscriberInterface {
         break;
 
       case 'parse':
-        $dispatcher->addListener(FeedsEvents::PARSE, function(ParseEvent $event) {
+        $dispatcher->addListener(FeedsEvents::PARSE, function (ParseEvent $event) {
           $feed = $event->getFeed();
 
           $result = $feed
@@ -84,7 +84,7 @@ class LazySubscriber implements EventSubscriberInterface {
         break;
 
       case 'process':
-        $dispatcher->addListener(FeedsEvents::PROCESS, function(ProcessEvent $event) {
+        $dispatcher->addListener(FeedsEvents::PROCESS, function (ProcessEvent $event) {
           $feed = $event->getFeed();
           $feed
             ->getType()
@@ -109,7 +109,7 @@ class LazySubscriber implements EventSubscriberInterface {
         continue;
       }
 
-      $dispatcher->addListener(FeedsEvents::CLEAR, function(ClearEvent $event) use ($plugin) {
+      $dispatcher->addListener(FeedsEvents::CLEAR, function (ClearEvent $event) use ($plugin) {
         $feed = $event->getFeed();
         $plugin->clear($feed, $feed->getState(StateInterface::CLEAR));
       });
@@ -125,7 +125,7 @@ class LazySubscriber implements EventSubscriberInterface {
     }
     $this->expireInited = TRUE;
 
-    $dispatcher->addListener(FeedsEvents::EXPIRE, function(ExpireEvent $event) {
+    $dispatcher->addListener(FeedsEvents::EXPIRE, function (ExpireEvent $event) {
       $feed = $event->getFeed();
       $state = $feed->getState(StateInterface::EXPIRE);
 

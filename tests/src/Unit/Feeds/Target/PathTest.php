@@ -11,12 +11,15 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class PathTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Path', 'prepareTarget')->getClosure();
 
     $configuration = [
       'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
-      'target_definition' =>  $method($this->getMockFieldDefinition()),
+      'target_definition' => $method($this->getMockFieldDefinition()),
     ];
     $target = new Path($configuration, 'path', []);
 

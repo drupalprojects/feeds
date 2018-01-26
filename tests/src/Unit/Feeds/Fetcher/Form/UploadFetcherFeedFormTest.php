@@ -13,7 +13,6 @@ use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\file\FileInterface;
 use Drupal\file\FileStorageInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
-use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Fetcher\Form\UploadFetcherFeedForm
@@ -21,6 +20,9 @@ use Prophecy\Argument;
  */
 class UploadFetcherFeedFormTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $file = $this->prophesize(FileInterface::class);
 
@@ -65,4 +67,3 @@ class UploadFetcherFeedFormTest extends FeedsUnitTestCase {
   }
 
 }
-

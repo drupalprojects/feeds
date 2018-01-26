@@ -10,6 +10,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class EventBaseTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $event = $this->getMockForAbstractClass('Drupal\feeds\Event\EventBase', [$feed]);

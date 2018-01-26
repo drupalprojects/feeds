@@ -13,12 +13,15 @@ use Drupal\feeds\Feeds\Target\Boolean;
  */
 class BooleanTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $method = $this->getMethod(Boolean::class, 'prepareTarget')->getClosure();
 
     $configuration = [
       'feed_type' => $this->getMock(FeedTypeInterface::class),
-      'target_definition' =>  $method($this->getMockFieldDefinition()),
+      'target_definition' => $method($this->getMockFieldDefinition()),
     ];
 
     $target = new Boolean($configuration, 'boolean', []);

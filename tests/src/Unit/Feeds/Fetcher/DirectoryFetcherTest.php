@@ -3,7 +3,6 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Fetcher;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Fetcher\DirectoryFetcher;
 use Drupal\feeds\State;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
@@ -18,6 +17,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   protected $state;
   protected $feed;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -45,6 +47,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     touch('vfs://feeds/subdir/test_file_4.mp3');
   }
 
+  /**
+   *
+   */
   public function testFetchFile() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $feed->expects($this->any())
@@ -67,6 +72,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
     $result = $this->fetcher->fetch($this->feed, $this->state);
   }
 
+  /**
+   *
+   */
   public function testRecursiveFetchDir() {
     $this->fetcher->setConfiguration(['recursive_scan' => TRUE]);
 

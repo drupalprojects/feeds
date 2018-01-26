@@ -8,7 +8,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\feeds\Plugin\Type\ExternalPluginFormBase;
-use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

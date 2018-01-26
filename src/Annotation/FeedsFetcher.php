@@ -5,7 +5,7 @@ namespace Drupal\feeds\Annotation;
 /**
  * Defines a Plugin annotation object for Feeds fetcher plugins.
  *
- * Plugin Namespace: Feeds\Fetcher
+ * Plugin Namespace: Feeds\Fetcher.
  *
  * For a working example, see \Drupal\feeds\Feeds\Fetcher\HttpFetcher.
  *

@@ -15,6 +15,9 @@ class DateTimeTest extends FeedsUnitTestCase {
   protected $feedType;
   protected $targetDefinition;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -36,6 +39,9 @@ class DateTimeTest extends FeedsUnitTestCase {
     $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'time']));
   }
 
+  /**
+   *
+   */
   public function test() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\DateTime', 'prepareTarget')->getClosure();
     $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'date']));
@@ -52,6 +58,9 @@ class DateTimeTest extends FeedsUnitTestCase {
     $this->assertSame(date(DATETIME_DATE_STORAGE_FORMAT, 1411606273), $values['value']);
   }
 
+  /**
+   *
+   */
   public function testWithErrors() {
     $configuration = [
       'feed_type' => $this->feedType,
@@ -65,6 +74,9 @@ class DateTimeTest extends FeedsUnitTestCase {
     $this->assertSame('', $values['value']);
   }
 
+  /**
+   *
+   */
   public function testYearValue() {
     $configuration = [
       'feed_type' => $this->feedType,

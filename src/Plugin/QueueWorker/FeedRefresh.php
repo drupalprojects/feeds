@@ -105,7 +105,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
    *   The feed for which to queue an item.
    * @param string $stage
    *   The stage of importing.
-   * @param [] $params
+   * @param array $params
    *   Additional parameters.
    */
   protected function queueItem(FeedInterface $feed, $stage, $params = []) {

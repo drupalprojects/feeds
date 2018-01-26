@@ -5,7 +5,7 @@ namespace Drupal\feeds\Annotation;
 /**
  * Defines a Plugin annotation object for Feeds target plugins.
  *
- * Plugin Namespace: Feeds\Target
+ * Plugin Namespace: Feeds\Target.
  *
  * For a working example, see \Drupal\feeds\Feeds\Target\Text.
  *

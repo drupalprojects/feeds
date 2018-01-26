@@ -72,7 +72,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
       if ($author = $entry->getAuthor()) {
         $author += ['name' => '', 'email' => ''];
         $item->set('author_name', $author['name'])
-             ->set('author_email', $author['email']);
+          ->set('author_email', $author['email']);
       }
       if ($date = $entry->getDateModified()) {
         $item->set('timestamp', $date->getTimestamp());
@@ -80,7 +80,7 @@ class SyndicationParser extends PluginBase implements ParserInterface {
 
       if ($point = $entry->getGeoPoint()) {
         $item->set('georss_lat', $point['lat'])
-             ->set('georss_lon', $point['lon']);
+          ->set('georss_lon', $point['lon']);
       }
 
       $result->addItem($item);

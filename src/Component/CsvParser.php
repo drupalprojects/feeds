@@ -5,7 +5,7 @@ namespace Drupal\feeds\Component;
 /**
  * Parses an RFC 4180 style CSV file.
  *
- * http://tools.ietf.org/html/rfc4180
+ * @see http://tools.ietf.org/html/rfc4180
  */
 class CsvParser implements \Iterator {
 
@@ -117,7 +117,7 @@ class CsvParser implements \Iterator {
   }
 
   /**
-   * Destructs a CsvParser object,
+   * Destructs a CsvParser object.
    */
   public function __destruct() {
     if (is_resource($this->handle)) {

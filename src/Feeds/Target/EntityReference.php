@@ -96,6 +96,9 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
       ->addProperty('target_id');
   }
 
+  /**
+   *
+   */
   protected function getPotentialFields() {
     $field_definitions = $this->entityFieldManager->getFieldStorageDefinitions($this->getEntityType());
     $field_definitions = array_filter($field_definitions, [$this, 'filterFieldTypes']);
@@ -139,18 +142,30 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     }
   }
 
+  /**
+   *
+   */
   protected function getEntityType() {
     return $this->settings['target_type'];
   }
 
+  /**
+   *
+   */
   protected function getBundles() {
     return $this->settings['handler_settings']['target_bundles'];
   }
 
+  /**
+   *
+   */
   protected function getBundleKey() {
     return $this->entityTypeManager->getDefinition($this->getEntityType())->getKey('bundle');
   }
 
+  /**
+   *
+   */
   protected function getLabelKey() {
     return $this->entityTypeManager->getDefinition($this->getEntityType())->getKey('label');
   }
@@ -241,6 +256,9 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
     return FALSE;
   }
 
+  /**
+   *
+   */
   protected function createEntity($value) {
     if (!strlen(trim($value))) {
       return FALSE;

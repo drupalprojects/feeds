@@ -259,6 +259,9 @@ class FeedForm extends ContentEntityForm {
     return $feed;
   }
 
+  /**
+   *
+   */
   protected function pluginHasForm(FeedsPluginInterface $plugin, $operation) {
     return $this->formFactory->hasForm($plugin, $operation);
   }

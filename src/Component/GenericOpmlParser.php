@@ -49,8 +49,8 @@ class GenericOpmlParser {
   public function parse($normalize_case = FALSE) {
     $this->normalizeCase = $normalize_case;
 
-    $return = ['head' => ['#title' => '']];
     // Title is a required field, let parsers assume its existence.
+    $return = ['head' => ['#title' => '']];
 
     foreach ($this->xpath->query('/opml/head/*') as $element) {
       if ($this->normalizeCase) {

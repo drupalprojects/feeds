@@ -89,6 +89,9 @@ class HttpFetcherFeedForm extends ExternalPluginFormBase implements ContainerInj
     $feed->setSource($form_state->getValue('source'));
   }
 
+  /**
+   *
+   */
   protected function get($url) {
     try {
       $response = $this->client->get(Feed::translateSchemes($url));

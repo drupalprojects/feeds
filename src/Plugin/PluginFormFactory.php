@@ -4,7 +4,6 @@ namespace Drupal\feeds\Plugin;
 
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\feeds\Plugin\PluginAwareInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
 /**
@@ -29,6 +28,9 @@ class PluginFormFactory {
     $this->classResolver = $class_resolver;
   }
 
+  /**
+   *
+   */
   public function hasForm(FeedsPluginInterface $plugin, $operation) {
     $definition = $plugin->getPluginDefinition();
 

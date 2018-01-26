@@ -10,7 +10,6 @@ use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
-use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\Node;
 
@@ -28,6 +27,9 @@ class RssNodeImport extends WebTestBase {
    */
   public static $modules = ['block', 'taxonomy', 'node', 'feeds'];
 
+  /**
+   *
+   */
   protected function setUp() {
     parent::setUp();
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
@@ -99,6 +101,9 @@ class RssNodeImport extends WebTestBase {
     $this->drupalPlaceBlock('system_messages_block');
   }
 
+  /**
+   *
+   */
   public function testHttpImport() {
     $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
 
@@ -158,6 +163,9 @@ class RssNodeImport extends WebTestBase {
     $this->assertText('Deleted 6');
   }
 
+  /**
+   *
+   */
   public function testCron() {
     // Run cron once before, so any other bookkeeping can get done.
     $this->cronRun();
@@ -188,7 +196,8 @@ class RssNodeImport extends WebTestBase {
     // Clear the download cache so that the http fetcher doesn't trick us.
     \Drupal::cache('feeds_download')->deleteAll();
     sleep(1);
-    $this->cronRun(); // Run cron twice for testbot.
+    // Run cron twice for testbot.
+    $this->cronRun();
     $this->cronRun();
     $feed = $this->reloadFeed($feed->id());
 
@@ -238,6 +247,9 @@ class RssNodeImport extends WebTestBase {
     $this->assertEqual($feed->getNextImportTime(), 0);
   }
 
+  /**
+   *
+   */
   protected function reloadFeed($fid) {
     $this->container
       ->get('entity_type.manager')

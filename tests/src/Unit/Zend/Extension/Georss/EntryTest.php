@@ -11,6 +11,9 @@ use Drupal\feeds\Zend\Extension\Georss\Entry;
  */
 class EntryTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $text = '<feed xmlns:georss="http://www.georss.org/georss">';
     $text .= '<entry><georss:point>45.256 -71.92</georss:point></entry>';

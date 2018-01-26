@@ -3,7 +3,6 @@
 namespace Drupal\Tests\feeds\Unit;
 
 use Drupal\feeds\TargetDefinition;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\TargetDefinition
@@ -11,6 +10,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class TargetDefinitionTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $target_definition = TargetDefinition::create()
       ->setPluginId('test_plugin')

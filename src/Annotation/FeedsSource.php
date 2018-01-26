@@ -5,7 +5,7 @@ namespace Drupal\feeds\Annotation;
 /**
  * Defines a Plugin annotation object for Feeds source plugins.
  *
- * Plugin Namespace: Feeds\Source
+ * Plugin Namespace: Feeds\Source.
  *
  * For a working example, see \Drupal\feeds\Feeds\Source\BasicFieldSource.
  *

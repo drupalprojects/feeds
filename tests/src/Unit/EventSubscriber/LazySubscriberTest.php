@@ -30,6 +30,9 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   protected $parser;
   protected $processor;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -39,7 +42,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
     $this->explodingDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
     $this->explodingDispatcher->expects($this->any())
       ->method('addListener')
-      ->will($this->throwException(new \Exception));
+      ->will($this->throwException(new \Exception()));
 
     $this->state = $this->getMock('Drupal\feeds\StateInterface');
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
@@ -58,11 +61,17 @@ class LazySubscriberTest extends FeedsUnitTestCase {
       ->will($this->returnValue($this->feedType));
   }
 
+  /**
+   *
+   */
   public function testGetSubscribedEvents() {
     $events = LazySubscriber::getSubscribedEvents();
     $this->assertSame(3, count($events));
   }
 
+  /**
+   *
+   */
   public function testOnInitImport() {
     $fetcher_result = $this->getMock('Drupal\feeds\Result\FetcherResultInterface');
     $parser_result = new ParserResult();
@@ -111,6 +120,9 @@ class LazySubscriberTest extends FeedsUnitTestCase {
     $subscriber->onInitImport(new InitEvent($this->feed, 'fetch'), FeedsEvents::INIT_IMPORT, $this->explodingDispatcher);
   }
 
+  /**
+   *
+   */
   public function testOnInitClear() {
     $clearable = $this->getMock('Drupal\feeds\Plugin\Type\ClearableInterface');
     $clearable->expects($this->exactly(2))
@@ -130,6 +142,9 @@ class LazySubscriberTest extends FeedsUnitTestCase {
     $subscriber->onInitClear(new InitEvent($this->feed), FeedsEvents::INIT_CLEAR, $this->explodingDispatcher);
   }
 
+  /**
+   *
+   */
   public function testOnInitExpire() {
     $this->feedType->expects($this->once())
       ->method('getProcessor')

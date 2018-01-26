@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Drupal\feeds\Event;
 
 use Drupal\feeds\Result\FetcherResultInterface;

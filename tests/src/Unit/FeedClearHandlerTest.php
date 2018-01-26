@@ -18,6 +18,9 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
   protected $feed;
   protected $context;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -35,6 +38,9 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
       ->will($this->returnValue($state));
   }
 
+  /**
+   *
+   */
   public function testStartBatchClear() {
     $this->feed
       ->expects($this->once())
@@ -44,6 +50,9 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
     $this->handler->startBatchClear($this->feed);
   }
 
+  /**
+   *
+   */
   public function testClear() {
     $this->feed->expects($this->exactly(2))
       ->method('progressClearing')
@@ -59,7 +68,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
    * @expectedException \Exception
    */
   public function testException() {
-    $this->dispatcher->addListener(FeedsEvents::CLEAR, function($event) {
+    $this->dispatcher->addListener(FeedsEvents::CLEAR, function ($event) {
       throw new \Exception();
     });
 

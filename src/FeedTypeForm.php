@@ -119,7 +119,7 @@ class FeedTypeForm extends EntityForm {
 
     $times = [900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200];
 
-    $period = array_map(function($time) {
+    $period = array_map(function ($time) {
       return \Drupal::service('date.formatter')->formatInterval($time);
     }, array_combine($times, $times));
 
@@ -325,10 +325,10 @@ class FeedTypeForm extends EntityForm {
    *
    * @param string|array $key
    *   The form state key.
-   * @param FormStateInterface $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state to copy values from.
    *
-   * @return FormStateInterface
+   * @return \Drupal\Core\Form\FormStateInterface
    *   A new form state object.
    *
    * @see FormStateInterface::getValue()
@@ -348,6 +348,9 @@ class FeedTypeForm extends EntityForm {
     }
   }
 
+  /**
+   *
+   */
   protected function pluginHasForm(FeedsPluginInterface $plugin, $operation) {
     return $this->formFactory->hasForm($plugin, $operation);
   }

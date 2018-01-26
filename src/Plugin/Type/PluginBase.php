@@ -3,7 +3,6 @@
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Plugin\PluginBase as DrupalPluginBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedInterface;
 
 /**
@@ -180,7 +179,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * Returns the service container.
    *
-   * @return \Symfony\Component\DependencyInjection\ContainerInterface $container
+   * @return \Symfony\Component\DependencyInjection\ContainerInterface
    *   The service container.
    */
   private function container() {

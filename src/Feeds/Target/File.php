@@ -62,7 +62,7 @@ class File extends EntityReference {
    * @param \GuzzleHttp\ClientInterface $client
    *   The http client.
    * @param \Drupal\Core\Utility\Token $token
-   * The tokens.
+   *   The token service.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
@@ -177,6 +177,9 @@ class File extends EntityReference {
     throw new TargetValidationException('There was an error saving the file: %file', ['%file' => $filepath]);
   }
 
+  /**
+   *
+   */
   protected function getFileName($url) {
     $filename = trim(drupal_basename($url), " \t\n\r\0\x0B.");
     $extension = substr($filename, strrpos($filename, '.') + 1);
@@ -188,6 +191,9 @@ class File extends EntityReference {
     return $filename;
   }
 
+  /**
+   *
+   */
   protected function getContent($url) {
     $response = $this->client->get($url);
 

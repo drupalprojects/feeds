@@ -4,7 +4,6 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Fetcher;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
@@ -22,6 +21,9 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   protected $fetcher;
   protected $state;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -46,6 +48,9 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $this->state = $this->getMock(StateInterface::class);
   }
 
+  /**
+   *
+   */
   public function testFetch() {
     touch('vfs://feeds/test_file');
 
@@ -67,6 +72,9 @@ class UploadFetcherTest extends FeedsUnitTestCase {
     $this->fetcher->fetch($feed, $this->state);
   }
 
+  /**
+   *
+   */
   public function testOnFeedDeleteMultiple() {
     $feed = $this->getMock(FeedInterface::class);
     $feed->expects($this->exactly(2))
@@ -79,4 +87,3 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   }
 
 }
-

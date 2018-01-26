@@ -43,6 +43,9 @@ class CsvParserTest extends FeedsUnitTestCase {
     }
   }
 
+  /**
+   *
+   */
   public function provider() {
     $expected = [
       ['Header A', 'Header B', 'Header C'],
@@ -70,6 +73,9 @@ class CsvParserTest extends FeedsUnitTestCase {
     ];
   }
 
+  /**
+   *
+   */
   public function testHasHeader() {
     $file = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/example.csv';
     $parser = CsvParser::createFromFilePath($file)->setHasHeader();
@@ -78,7 +84,10 @@ class CsvParserTest extends FeedsUnitTestCase {
     $this->assertSame(['Header A', 'Header B', 'Header C'], $parser->getHeader());
   }
 
-  public function  testAlternateSeparator() {
+  /**
+   *
+   */
+  public function testAlternateSeparator() {
     // This implicitly tests lines without a newline.
     $parser = CsvParser::createFromString("a*b*c")
       ->setDelimiter('*');
@@ -124,6 +133,9 @@ class CsvParserTest extends FeedsUnitTestCase {
     $this->assertSame($expected, $output);
   }
 
+  /**
+   *
+   */
   public function csvFileProvider() {
     $path = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csvs';
     $return = [];

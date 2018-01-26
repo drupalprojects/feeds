@@ -5,7 +5,6 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Parser;
 use Drupal\feeds\Feeds\Parser\SitemapParser;
 use Drupal\feeds\Result\RawFetcherResult;
 use Drupal\feeds\State;
-use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
@@ -19,6 +18,9 @@ class SitemapParserTest extends FeedsUnitTestCase {
   protected $feed;
   protected $state;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -35,6 +37,9 @@ class SitemapParserTest extends FeedsUnitTestCase {
       ->will($this->returnValue($this->feedType));
   }
 
+  /**
+   *
+   */
   public function testFetch() {
     $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/sitemap-example.xml';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
@@ -61,10 +66,12 @@ class SitemapParserTest extends FeedsUnitTestCase {
     $this->parser->parse($this->feed, $result, $this->state);
   }
 
+  /**
+   *
+   */
   public function testGetMappingSources() {
     // Not really much to test here.
     $this->assertSame(count($this->parser->getMappingSources()), 4);
   }
 
 }
-

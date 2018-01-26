@@ -4,7 +4,6 @@ namespace Drupal\feeds\Feeds\Fetcher;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;

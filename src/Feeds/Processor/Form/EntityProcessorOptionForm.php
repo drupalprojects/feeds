@@ -2,12 +2,8 @@
 
 namespace Drupal\feeds\Feeds\Processor\Form;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\ExternalPluginFormBase;
-use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
-use Drupal\user\EntityOwnerInterface;
-use Drupal\user\Entity\User;
 
 /**
  * The configuration form for the CSV parser.

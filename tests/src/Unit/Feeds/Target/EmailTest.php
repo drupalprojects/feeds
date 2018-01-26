@@ -11,12 +11,15 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class EmailTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Email', 'prepareTarget')->getClosure();
 
     $configuration = [
       'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
-      'target_definition' =>  $method($this->getMockFieldDefinition()),
+      'target_definition' => $method($this->getMockFieldDefinition()),
     ];
     $target = new Email($configuration, 'email', []);
 

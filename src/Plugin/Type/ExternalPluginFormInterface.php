@@ -3,7 +3,6 @@
 namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

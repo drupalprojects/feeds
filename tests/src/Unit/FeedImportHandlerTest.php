@@ -14,6 +14,9 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
   protected $dispatcher;
   protected $feed;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -30,6 +33,9 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
       ->will($this->returnValue('test_feed'));
   }
 
+  /**
+   *
+   */
   public function testStartBatchImport() {
     $this->feed->expects($this->once())
       ->method('lock')
@@ -38,6 +44,9 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
     $this->handler->startBatchImport($this->feed);
   }
 
+  /**
+   *
+   */
   public function testBatchFetch() {
     $this->handler->batchFetch($this->feed);
   }

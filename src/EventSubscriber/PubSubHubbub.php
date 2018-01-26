@@ -109,6 +109,9 @@ class PubSubHubbub implements EventSubscriberInterface {
     }
   }
 
+  /**
+   *
+   */
   protected function subscribe(FeedInterface $feed, SubscriptionInterface $subscription) {
     $subscription->subscribe();
 
@@ -125,6 +128,9 @@ class PubSubHubbub implements EventSubscriberInterface {
     batch_set($batch);
   }
 
+  /**
+   *
+   */
   protected function unsubscribe(FeedInterface $feed, SubscriptionInterface $subscription = NULL) {
     if (!$subscription) {
       return;
@@ -145,6 +151,9 @@ class PubSubHubbub implements EventSubscriberInterface {
     batch_set($batch);
   }
 
+  /**
+   *
+   */
   public static function runSubscribeBatch(SubscriptionInterface $subscription) {
     switch ($subscription->getState()) {
       case 'subscribing':

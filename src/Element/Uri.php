@@ -49,16 +49,16 @@ class Uri extends Url {
     }
   }
 
-/**
- * Returns the scheme of a URI (e.g. a stream).
- *
- * @param string $uri
- *   A stream, referenced as "scheme://target".
- *
- * @return string
- *   A string containing the name of the scheme, or FALSE if none. For example,
- *   the URI "public://example.txt" would return "public".
- */
+  /**
+   * Returns the scheme of a URI (e.g. a stream).
+   *
+   * @param string $uri
+   *   A stream, referenced as "scheme://target".
+   *
+   * @return string
+   *   A string containing the name of the scheme, or FALSE if none. For example,
+   *   the URI "public://example.txt" would return "public".
+   */
   protected static function getScheme($uri) {
     $position = strpos($uri, '://');
     return $position ? substr($uri, 0, $position) : FALSE;

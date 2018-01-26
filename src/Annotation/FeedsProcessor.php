@@ -5,7 +5,7 @@ namespace Drupal\feeds\Annotation;
 /**
  * Defines a Plugin annotation object for Feeds processor plugins.
  *
- * Plugin Namespace: Feeds\Processor
+ * Plugin Namespace: Feeds\Processor.
  *
  * For a working example, see \Drupal\feeds\Feeds\Processor\EntityProcessor.
  *

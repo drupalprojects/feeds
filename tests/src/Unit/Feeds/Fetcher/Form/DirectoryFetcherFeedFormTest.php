@@ -7,7 +7,6 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Fetcher\Form\DirectoryFetcherFeedForm;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
-use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Fetcher\Form\DirectoryFetcherFeedForm
@@ -15,6 +14,9 @@ use Prophecy\Argument;
  */
 class DirectoryFetcherFeedFormTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     file_put_contents('vfs://feeds/test.txt', 'data');
 
@@ -42,4 +44,3 @@ class DirectoryFetcherFeedFormTest extends FeedsUnitTestCase {
   }
 
 }
-

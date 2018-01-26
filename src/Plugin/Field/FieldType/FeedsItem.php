@@ -30,7 +30,6 @@ class FeedsItem extends EntityReferenceItem {
     return ['target_type' => 'feeds_feed'] + parent::defaultStorageSettings();
   }
 
-
   /**
    * {@inheritdoc}
    */

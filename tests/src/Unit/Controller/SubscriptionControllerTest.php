@@ -28,6 +28,9 @@ class SubscriptionControllerTest extends UnitTestCase {
 
   protected $kv;
 
+  /**
+   *
+   */
   public function setUp() {
     $this->request = new Request();
     $this->request->query->set('hub_mode', 'subscribe');

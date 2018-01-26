@@ -2,7 +2,6 @@
 
 namespace Drupal\feeds\Feeds\Parser;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Component\CsvParser as CsvFileParser;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\FeedInterface;

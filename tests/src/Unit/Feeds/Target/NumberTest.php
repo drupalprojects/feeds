@@ -11,12 +11,15 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class NumberTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Number', 'prepareTarget')->getClosure();
 
     $configuration = [
       'feed_type' => $this->getMock('Drupal\feeds\FeedTypeInterface'),
-      'target_definition' =>  $method($this->getMockFieldDefinition()),
+      'target_definition' => $method($this->getMockFieldDefinition()),
     ];
     $target = new Number($configuration, 'link', []);
 

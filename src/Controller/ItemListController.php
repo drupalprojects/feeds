@@ -47,10 +47,10 @@ class ItemListController extends ControllerBase {
     }
 
     $entity_ids = \Drupal::entityQuery($processor->entityType())
-    ->condition('feeds_item.target_id', $feeds_feed->id())
-    ->pager(50)
-    ->sort('feeds_item.imported', 'DESC')
-    ->execute();
+      ->condition('feeds_item.target_id', $feeds_feed->id())
+      ->pager(50)
+      ->sort('feeds_item.imported', 'DESC')
+      ->execute();
 
     $storage = $this->entityTypeManager()->getStorage($processor->entityType());
     foreach ($storage->loadMultiple($entity_ids) as $entity) {

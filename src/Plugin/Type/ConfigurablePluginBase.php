@@ -4,7 +4,6 @@ namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\feeds\Plugin\Type\PluginBase;
 
 /**
  * Base class for Feeds plugins that have configuration forms.

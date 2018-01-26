@@ -11,6 +11,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class FetchEventTest extends FeedsUnitTestCase {
 
+  /**
+   *
+   */
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $result = $this->getMock('Drupal\feeds\Result\FetcherResultInterface');

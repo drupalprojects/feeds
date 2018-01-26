@@ -79,8 +79,8 @@ class OpmlParser extends PluginBase implements ParserInterface {
         $item->set('title', $outline['#text']);
 
         $item->set('categories', $categories)
-             ->set('xmlurl', $outline['#xmlurl'])
-             ->set('htmlurl', $outline['#htmlurl']);
+          ->set('xmlurl', $outline['#xmlurl'])
+          ->set('htmlurl', $outline['#htmlurl']);
 
         $items[] = $item;
       }

@@ -17,6 +17,9 @@ class OpmlParserTest extends FeedsUnitTestCase {
   protected $feed;
   protected $state;
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp();
 
@@ -33,6 +36,9 @@ class OpmlParserTest extends FeedsUnitTestCase {
     $this->state = $this->getMock('Drupal\feeds\StateInterface');
   }
 
+  /**
+   *
+   */
   public function testFetch() {
     $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/opml-example.xml';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
@@ -51,10 +57,12 @@ class OpmlParserTest extends FeedsUnitTestCase {
     $this->parser->parse($this->feed, new RawFetcherResult(''), $this->state);
   }
 
+  /**
+   *
+   */
   public function testGetMappingSources() {
     // Not really much to test here.
     $this->assertSame(count($this->parser->getMappingSources()), 5);
   }
 
 }
-

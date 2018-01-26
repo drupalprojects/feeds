@@ -150,7 +150,7 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
   protected $sources;
 
   /**
-   * The list of targets;
+   * The list of targets.
    *
    * @var array
    */

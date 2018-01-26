@@ -21,7 +21,6 @@ use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\user\EntityOwnerInterface;
-use Drupal\user\Entity\User;
 
 /**
  * Defines a base entity processor.

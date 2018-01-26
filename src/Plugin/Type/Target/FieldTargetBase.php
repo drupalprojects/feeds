@@ -124,11 +124,17 @@ abstract class FieldTargetBase extends TargetBase {
     }
   }
 
+  /**
+   *
+   */
   protected function getUniqueQuery() {
     return \Drupal::entityQuery($this->feedType->getProcessor()->entityType())
       ->range(0, 1);
   }
 
+  /**
+   *
+   */
   public function getUniqueValue(FeedInterface $feed, $target, $key, $value) {
     $base_fields = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($this->feedType->getProcessor()->entityType());
 

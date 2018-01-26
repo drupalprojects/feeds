@@ -2,12 +2,8 @@
 
 namespace Drupal\feeds\Plugin\Type\Target;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\feeds\FeedInterface;
-use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
-use Drupal\feeds\Plugin\Type\Target\TargetInterface;
 
 /**
  * @todo Document this.
