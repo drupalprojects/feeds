@@ -35,7 +35,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
   ];
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

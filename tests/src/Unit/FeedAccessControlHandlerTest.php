@@ -16,7 +16,7 @@ class FeedAccessControlHandlerTest extends FeedsUnitTestCase {
   protected $moduleHandler;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

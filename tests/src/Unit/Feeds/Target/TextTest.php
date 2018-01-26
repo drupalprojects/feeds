@@ -16,7 +16,7 @@ class TextTest extends FeedsUnitTestCase {
   protected $target;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

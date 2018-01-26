@@ -29,7 +29,7 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $kv;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     $this->request = new Request();

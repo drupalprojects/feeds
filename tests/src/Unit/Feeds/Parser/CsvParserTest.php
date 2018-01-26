@@ -19,7 +19,7 @@ class CsvParserTest extends FeedsUnitTestCase {
   protected $state;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

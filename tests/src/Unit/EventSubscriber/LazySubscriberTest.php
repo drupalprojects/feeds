@@ -31,7 +31,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   protected $processor;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

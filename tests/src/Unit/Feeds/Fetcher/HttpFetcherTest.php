@@ -30,7 +30,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   protected $mockHandler;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

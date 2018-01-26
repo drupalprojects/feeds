@@ -18,7 +18,7 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   protected $feed;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();

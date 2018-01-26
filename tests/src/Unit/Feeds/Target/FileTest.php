@@ -16,7 +16,7 @@ class FileTest extends FeedsUnitTestCase {
   protected $targetDefinition;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
