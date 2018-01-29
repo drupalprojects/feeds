@@ -168,8 +168,14 @@ namespace Drupal\Tests\feeds\Unit {
       if (!defined('FILE_CREATE_DIRECTORY')) {
         define('FILE_CREATE_DIRECTORY', 1);
       }
+      if (!defined('FILE_EXISTS_RENAME')) {
+        define('FILE_EXISTS_RENAME', 0);
+      }
       if (!defined('FILE_EXISTS_REPLACE')) {
         define('FILE_EXISTS_REPLACE', 1);
+      }
+      if (!defined('FILE_EXISTS_ERROR')) {
+        define('FILE_EXISTS_ERROR', 2);
       }
       if (!defined('FILE_STATUS_PERMANENT')) {
         define('FILE_STATUS_PERMANENT', 1);
