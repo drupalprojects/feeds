@@ -12,7 +12,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class LinkTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Link', 'prepareTarget')->getClosure();
@@ -33,16 +33,5 @@ class LinkTest extends FeedsUnitTestCase {
     $method(0, $values);
     $this->assertSame($values['uri'], 'http://example.com');
   }
-
-  // public function testPrepareTarget() {
-  //   $method = $this->getMethod('Drupal\feeds\Feeds\Target\Link', 'prepareTarget')->getClosure();
-  //   $targets = [
-  //     'properties' => [
-  //       'attributes' => [],
-  //     ],
-  //   ];
-  //   $method($targets);
-  //   $this->assertSame($targets, ['properties' => []]);
-  // }
 
 }
