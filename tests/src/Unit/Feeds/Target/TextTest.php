@@ -13,6 +13,11 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class TextTest extends FeedsUnitTestCase {
 
+  /**
+   * The FeedsTarget plugin being tested.
+   *
+   * @var \Drupal\feeds\Feeds\Target\Text
+   */
   protected $target;
 
   /**
@@ -31,9 +36,9 @@ class TextTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::prepareValue
    */
-  public function test() {
+  public function testPrepareValue() {
     $method = $this->getProtectedClosure($this->target, 'prepareValue');
 
     $values = ['value' => 'longstring'];
@@ -43,7 +48,7 @@ class TextTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::buildConfigurationForm
    */
   public function testBuildConfigurationForm() {
     $form_state = new FormState();
@@ -52,9 +57,9 @@ class TextTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getSummary
    */
-  public function testSummary() {
+  public function testGetSummary() {
     $storage = $this->getMock('Drupal\Core\Entity\EntityStorageInterface');
     $storage->expects($this->any())
       ->method('loadByProperties')

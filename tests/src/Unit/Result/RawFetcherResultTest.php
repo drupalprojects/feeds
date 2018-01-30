@@ -12,17 +12,17 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class RawFetcherResultTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::getRaw
    */
-  public function testRaw() {
+  public function testGetRaw() {
     $result = new RawFetcherResult('raw text');
     $this->assertSame($result->getRaw(), 'raw text');
   }
 
   /**
-   *
+   * @covers ::getFilePath
    */
-  public function testFilePath() {
+  public function testGetFilePath() {
     $result = new RawFetcherResult('raw text');
     $this->assertSame(file_get_contents($result->getFilePath()), 'raw text');
 

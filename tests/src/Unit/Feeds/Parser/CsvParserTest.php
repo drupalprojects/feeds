@@ -13,9 +13,32 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class CsvParserTest extends FeedsUnitTestCase {
 
+  /**
+   * The Feeds parser plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Parser\CsvParser
+   */
   protected $parser;
+
+  /**
+   * The feed type entity.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
   protected $feedType;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
 
   /**
@@ -40,9 +63,11 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing a CSV file that succeeds.
    *
+   * @covers ::parse
    */
-  public function testFetch() {
+  public function testParse() {
     $this->feed->expects($this->any())
       ->method('getConfigurationFor')
       ->with($this->parser)
@@ -64,6 +89,9 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an empty CSV file.
+   *
+   * @covers ::parse
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyFeed() {
@@ -73,7 +101,7 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getMappingSources
    */
   public function testGetMappingSources() {
     // Not really much to test here.

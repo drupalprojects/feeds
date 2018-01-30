@@ -11,7 +11,7 @@ use Drupal\feeds\TargetDefinition;
 class TargetDefinitionTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * Tests several methods of TargetDefinition class.
    */
   public function test() {
     $target_definition = TargetDefinition::create()

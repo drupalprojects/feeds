@@ -12,9 +12,23 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class FeedExpireHandlerTest extends FeedsUnitTestCase {
 
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcher
+   */
   protected $dispatcher;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
 
@@ -22,40 +36,58 @@ class FeedExpireHandlerTest extends FeedsUnitTestCase {
     $this->feed = $this->getMock('Drupal\feeds\FeedInterface');
   }
 
-  public function test() {
-    $this->assertTrue(TRUE);
+  /**
+   * @covers ::startBatchExpire
+   */
+  public function testBatchExpire() {
+    $this->markTestIncomplete('The expire functionality is not working yet.');
   }
 
-  // public function testExpire() {
-  //   $this->feed
-  //     ->expects($this->exactly(2))
-  //     ->method('progressExpiring')
-  //     ->will($this->onConsecutiveCalls(0.5, 1.0));
-  //   $this->feed
-  //     ->expects($this->once())
-  //     ->method('clearStates');
+  /**
+   * @covers ::expireItem
+   */
+  public function testExpireItem() {
+    $this->markTestIncomplete('The expire functionality is not working yet.');
 
-  //   $handler = new FeedExpireHandler($this->dispatcher);
-  //   $result = $handler->expire($this->feed);
-  //   $this->assertSame($result, 0.5);
-  //   $result = $handler->expire($this->feed);
-  //   $this->assertSame($result, 1.0);
-  // }
+    $this->feed
+      ->expects($this->exactly(2))
+      ->method('progressExpiring')
+      ->will($this->onConsecutiveCalls(0.5, 1.0));
+    $this->feed
+      ->expects($this->once())
+      ->method('clearStates');
+
+    $handler = new FeedExpireHandler($this->dispatcher);
+    $result = $handler->expireItem($this->feed);
+    $this->assertSame($result, 0.5);
+    $result = $handler->expireItem($this->feed);
+    $this->assertSame($result, 1.0);
+  }
 
   /**
+   * @covers ::postExpire
+   */
+  public function testPostExpire() {
+    $this->markTestIncomplete('The expire functionality is not working yet.');
+  }
+
+  /**
+   * @covers ::expireItem
    * @expectedException \Exception
    */
-  // public function testException() {
-  //   $this->dispatcher->addListener(FeedsEvents::EXPIRE, function($event) {
-  //     throw new \Exception();
-  //   });
+  public function testException() {
+    $this->markTestIncomplete('The expire functionality is not working yet.');
 
-  //   $this->feed
-  //     ->expects($this->once())
-  //     ->method('clearStates');
+    $this->dispatcher->addListener(FeedsEvents::EXPIRE, function ($event) {
+      throw new \Exception();
+    });
 
-  //   $handler = new FeedExpireHandler($this->dispatcher);
-  //   $handler->expire($this->feed);
-  // }
+    $this->feed
+      ->expects($this->once())
+      ->method('clearStates');
+
+    $handler = new FeedExpireHandler($this->dispatcher);
+    $handler->expireItem($this->feed);
+  }
 
 }

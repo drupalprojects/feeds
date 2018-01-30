@@ -12,7 +12,8 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class ParseEventTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::getFetcherResult
+   * @covers ::getParserResult
    */
   public function test() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');

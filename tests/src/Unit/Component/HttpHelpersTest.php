@@ -12,6 +12,8 @@ use Drupal\Tests\UnitTestCase;
 class HttpHelpersTest extends UnitTestCase {
 
   /**
+   * Tests finding relation links in several headers.
+   *
    * @dataProvider httpResponses
    */
   public function testFindLinkHeader($headers, $rel, $expected) {
@@ -19,7 +21,7 @@ class HttpHelpersTest extends UnitTestCase {
   }
 
   /**
-   *
+   * @covers ::findRelationFromXml
    */
   public function testFindLinkXml() {
     $xml = '<feed xmlns="http://www.w3.org/2005/Atom">
@@ -44,7 +46,7 @@ class HttpHelpersTest extends UnitTestCase {
   }
 
   /**
-   *
+   * Data provider for testFindLinkHeader().
    */
   public function httpResponses() {
     $headers1 = [

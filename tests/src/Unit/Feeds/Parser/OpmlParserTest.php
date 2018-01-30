@@ -12,9 +12,32 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class OpmlParserTest extends FeedsUnitTestCase {
 
+  /**
+   * The Feeds parser plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Parser\OpmlParser
+   */
   protected $parser;
+
+  /**
+   * The feed type entity.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
   protected $feedType;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
 
   /**
@@ -37,9 +60,11 @@ class OpmlParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an OPML file that succeeds.
    *
+   * @covers ::parse
    */
-  public function testFetch() {
+  public function testParse() {
     $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/opml-example.xml';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
@@ -51,6 +76,9 @@ class OpmlParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an empty feed.
+   *
+   * @covers ::parse
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyFeed() {
@@ -58,7 +86,7 @@ class OpmlParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getMappingSources
    */
   public function testGetMappingSources() {
     // Not really much to test here.

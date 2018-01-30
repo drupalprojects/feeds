@@ -12,9 +12,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class FetchEventTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::getFetcherResult
    */
-  public function test() {
+  public function testGetFetcherResult() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $result = $this->getMock('Drupal\feeds\Result\FetcherResultInterface');
     $event = new FetchEvent($feed);

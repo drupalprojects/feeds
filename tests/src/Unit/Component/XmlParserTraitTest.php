@@ -11,7 +11,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class XmlParserTraitTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * Basic XML parsing test.
    */
   public function test() {
     $trait = $this->getMockForTrait('Drupal\feeds\Component\XmlParserTrait');
@@ -24,7 +24,7 @@ class XmlParserTraitTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * Tests parsing a document with invalid XML.
    */
   public function testErrors() {
     $trait = $this->getMockForTrait('Drupal\feeds\Component\XmlParserTrait');
@@ -49,6 +49,8 @@ class XmlParserTraitTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Data provider for testRemoveDefaultNamespaces().
+   *
    * Checks that the input and output are equal.
    */
   public function namespaceProvider() {

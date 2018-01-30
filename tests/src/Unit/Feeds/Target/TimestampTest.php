@@ -12,9 +12,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class TimestampTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
-  public function test() {
+  public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Timestamp', 'prepareTarget')->getClosure();
     $target_definition = $method($this->getMockFieldDefinition());
 

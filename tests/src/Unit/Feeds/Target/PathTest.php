@@ -12,7 +12,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class PathTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Path', 'prepareTarget')->getClosure();

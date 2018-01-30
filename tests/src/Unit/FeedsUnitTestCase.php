@@ -14,7 +14,7 @@ namespace Drupal\Tests\feeds\Unit {
   abstract class FeedsUnitTestCase extends UnitTestCase {
 
     /**
-     *
+     * {@inheritdoc}
      */
     public function setUp() {
       parent::setUp();
@@ -24,7 +24,10 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
+     * Returns a mocked feed type entity.
      *
+     * @return \Drupal\feeds\FeedTypeInterface
+     *   A mocked feed type entity.
      */
     protected function getMockFeedType() {
       $feed_type = $this->getMock('\Drupal\feeds\FeedTypeInterface');
@@ -38,7 +41,10 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
+     * Returns a mocked feed entity.
      *
+     * @return \Drupal\feeds\FeedInterface
+     *   A mocked feed entity.
      */
     protected function getMockFeed() {
       $feed = $this->getMock('Drupal\feeds\FeedInterface');
@@ -74,7 +80,15 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
+     * Gets a ReflectionMethod for a class method.
      *
+     * @param string $class
+     *   The class to reflect.
+     * @param string $name
+     *   The method name to reflect.
+     *
+     * @return \ReflectionMethod
+     *   A ReflectionMethod.
      */
     protected function getMethod($class, $name) {
       $class = new \ReflectionClass($class);
@@ -86,10 +100,11 @@ namespace Drupal\Tests\feeds\Unit {
     /**
      * Returns a mocked AccountSwitcher object.
      *
-     * The returned object verifies that if switchTo() is called, switchBack() is
-     * also called.
+     * The returned object verifies that if switchTo() is called, switchBack()
+     * is also called.
      *
      * @return \Drupal\Core\Session\AccountSwitcherInterface
+     *   A mocked AccountSwitcher object.
      */
     protected function getMockedAccountSwitcher() {
       $switcher = $this->prophesize(AccountSwitcherInterface::class);
@@ -105,14 +120,32 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
+     * Returns a dynamically created closure for the object's method.
      *
+     * @param object $object
+     *   The object for which to get a closure.
+     * @param string $method
+     *   The object's method for which to get a closure.
+     *
+     * @return \Closure
+     *   A Closure object.
      */
     protected function getProtectedClosure($object, $method) {
       return $this->getMethod(get_class($object), $method)->getClosure($object);
     }
 
     /**
+     * Calls a protected method on the given object.
      *
+     * @param object $object
+     *   The object on which to call a protected method.
+     * @param string $method
+     *   The protected method to call.
+     * @param array $args
+     *   The arguments to pass to the method.
+     *
+     * @return mixed
+     *   The result of the method call.
      */
     protected function callProtectedMethod($object, $method, array $args = []) {
       $closure = $this->getProtectedClosure($object, $method);
@@ -120,7 +153,13 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
+     * Mocks an account object.
      *
+     * @param array $perms
+     *   The account's permissions.
+     *
+     * @return \Drupal\Core\Session\AccountInterface
+     *   The mocked acount object.
      */
     protected function getMockAccount(array $perms = []) {
       $account = $this->getMock('\Drupal\Core\Session\AccountInterface');
@@ -138,10 +177,16 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
+     * Mocks a field definition.
      *
+     * @param array $settings
+     *   The field storage and instance settings.
+     *
+     * @return \Drupal\Core\Field\FieldDefinitionInterface
+     *   A mocked field definition.
      */
     protected function getMockFieldDefinition(array $settings = []) {
-      $definition = $this->getMock('Drupal\Core\Field\FieldDefinitionInterface');
+      $definition = $this->getMock('\Drupal\Core\Field\FieldDefinitionInterface');
       $definition->expects($this->any())
         ->method('getSettings')
         ->will($this->returnValue($settings));
@@ -285,7 +330,8 @@ namespace {
      *
      */
     function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
-      // We cache translations to avoid redundant and rather costly calls to t().
+      // We cache translations to avoid redundant and rather costly calls to
+      // t().
       static $cache, $langcode;
 
       if (!isset($matches)) {
@@ -316,6 +362,7 @@ namespace {
     }
 
   }
+
   /**
    *
    */

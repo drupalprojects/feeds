@@ -12,9 +12,11 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class EmailTest extends FeedsUnitTestCase {
 
   /**
+   * Basic test for the email target.
    *
+   * @covers ::prepareValue
    */
-  public function test() {
+  public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Email', 'prepareTarget')->getClosure();
 
     $configuration = [

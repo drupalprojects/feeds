@@ -11,7 +11,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 class FeedHandlerBaseTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * Tests if an instance of FeedHandlerBase can be created.
    */
   public function test() {
     $container = new ContainerBuilder();

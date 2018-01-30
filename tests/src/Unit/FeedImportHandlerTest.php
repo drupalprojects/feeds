@@ -11,7 +11,18 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class FeedImportHandlerTest extends FeedsUnitTestCase {
 
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcher
+   */
   protected $dispatcher;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
 
   /**
@@ -34,7 +45,7 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::startBatchImport
    */
   public function testStartBatchImport() {
     $this->feed->expects($this->once())
@@ -45,7 +56,7 @@ class FeedImportHandlerTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::batchFetch
    */
   public function testBatchFetch() {
     $this->handler->batchFetch($this->feed);

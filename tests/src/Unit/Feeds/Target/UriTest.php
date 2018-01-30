@@ -11,7 +11,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class UriTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Uri', 'prepareTarget')->getClosure();

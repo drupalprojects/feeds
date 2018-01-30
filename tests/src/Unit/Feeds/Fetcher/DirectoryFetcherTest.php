@@ -13,8 +13,25 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class DirectoryFetcherTest extends FeedsUnitTestCase {
 
+  /**
+   * The Feeds fetcher plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Fetcher\DirectoryFetcher
+   */
   protected $fetcher;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
 
   /**
@@ -48,7 +65,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests fetching a file.
    *
+   * @covers ::fetch
    */
   public function testFetchFile() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
@@ -60,6 +79,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests fetching from a directory on which we don't have read permissions.
+   *
+   * @covers ::fetch
    * @expectedException \RuntimeException
    */
   public function testFetchDir() {
@@ -73,7 +95,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests fetching a directory resursively.
    *
+   * @covers ::fetch
    */
   public function testRecursiveFetchDir() {
     $this->fetcher->setConfiguration(['recursive_scan' => TRUE]);
@@ -86,6 +110,9 @@ class DirectoryFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests fetching an empty directory.
+   *
+   * @covers ::fetch
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyDirectory() {

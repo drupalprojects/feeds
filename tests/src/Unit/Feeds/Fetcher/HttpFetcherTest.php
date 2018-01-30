@@ -23,10 +23,25 @@ use Prophecy\Argument;
  */
 class HttpFetcherTest extends FeedsUnitTestCase {
 
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
 
+  /**
+   * The Feeds fetcher plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Fetcher\HttpFetcher
+   */
   protected $fetcher;
 
+  /**
+   * A mocked HTTP handler to use within the handler stack.
+   *
+   * @var \GuzzleHttp\Handler\MockHandler
+   */
   protected $mockHandler;
 
   /**
@@ -58,7 +73,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests a successful fetch from a HTTP source.
    *
+   * @covers ::fetch
    */
   public function testFetch() {
     $this->mockHandler->append(new Response(200, [], 'test data'));
@@ -68,6 +85,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests fetching from a HTTP source that returns a 304 (not modified).
+   *
+   * @covers ::fetch
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testFetch304() {
@@ -76,6 +96,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests fetching from a HTTP source that returns a 404 (not found).
+   *
+   * @covers ::fetch
    * @expectedException \RuntimeException
    */
   public function testFetch404() {
@@ -84,6 +107,9 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests a fetch that fails.
+   *
+   * @covers ::fetch
    * @expectedException \RuntimeException
    */
   public function testFetchError() {
@@ -92,7 +118,7 @@ class HttpFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::onFeedDeleteMultiple
    */
   public function testOnFeedDeleteMultiple() {
     $feed = $this->getMock(FeedInterface::class);

@@ -21,13 +21,60 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class LazySubscriberTest extends FeedsUnitTestCase {
 
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcher
+   */
   protected $dispatcher;
+
+  /**
+   * A second event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
   protected $explodingDispatcher;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
+
+  /**
+   * The feed type entity.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
   protected $feedType;
+
+  /**
+   * The Feeds fetcher plugin.
+   *
+   * @var \Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface
+   */
   protected $fetcher;
+
+  /**
+   * The Feeds parser plugin.
+   *
+   * @var \Drupal\feeds\Plugin\Type\Parser\ParserInterface
+   */
   protected $parser;
+
+  /**
+   * The Feeds processor plugin.
+   *
+   * @var \Drupal\feeds\Plugin\Type\Processor\ProcessorInterface
+   */
   protected $processor;
 
   /**
@@ -62,7 +109,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getSubscribedEvents
    */
   public function testGetSubscribedEvents() {
     $events = LazySubscriber::getSubscribedEvents();
@@ -70,7 +117,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::onInitImport
    */
   public function testOnInitImport() {
     $fetcher_result = $this->getMock('Drupal\feeds\Result\FetcherResultInterface');
@@ -121,7 +168,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::onInitClear
    */
   public function testOnInitClear() {
     $clearable = $this->getMock('Drupal\feeds\Plugin\Type\ClearableInterface');
@@ -143,7 +190,7 @@ class LazySubscriberTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::onInitExpire
    */
   public function testOnInitExpire() {
     $this->feedType->expects($this->once())

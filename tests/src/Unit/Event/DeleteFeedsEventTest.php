@@ -12,9 +12,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class DeleteFeedsEventTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::getFeeds
    */
-  public function test() {
+  public function testGetFeeds() {
     $feeds = [$this->getMock('Drupal\feeds\FeedInterface')];
     $event = new DeleteFeedsEvent($feeds);
 

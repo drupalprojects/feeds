@@ -12,7 +12,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class FetcherResultTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::getRaw
    */
   public function testGetRaw() {
     file_put_contents('vfs://feeds/test_file', pack('CCC', 0xef, 0xbb, 0xbf) . 'I am test data.');
@@ -21,7 +21,7 @@ class FetcherResultTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getFilePath
    */
   public function testGetFilePath() {
     file_put_contents('vfs://feeds/test_file', 'I am test data.');
@@ -30,7 +30,7 @@ class FetcherResultTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getFilePath
    */
   public function testGetSanitizedFilePath() {
     file_put_contents('vfs://feeds/test_file', pack('CCC', 0xef, 0xbb, 0xbf) . 'I am test data.');
@@ -39,6 +39,7 @@ class FetcherResultTest extends FeedsUnitTestCase {
   }
 
   /**
+   * @covers ::getRaw
    * @expectedException \RuntimeException
    */
   public function testNonExistantFile() {
@@ -47,6 +48,7 @@ class FetcherResultTest extends FeedsUnitTestCase {
   }
 
   /**
+   * @covers ::getRaw
    * @expectedException \RuntimeException
    */
   public function testNonReadableFile() {
@@ -57,6 +59,7 @@ class FetcherResultTest extends FeedsUnitTestCase {
   }
 
   /**
+   * @covers ::getFilePath
    * @expectedException \RuntimeException
    */
   public function testNonWritableFile() {

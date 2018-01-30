@@ -14,12 +14,29 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class FeedClearHandlerTest extends FeedsUnitTestCase {
 
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcher
+   */
   protected $dispatcher;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
+
+  /**
+   * Status of the batch.
+   *
+   * @var array
+   */
   protected $context;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
@@ -39,7 +56,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::startBatchClear
    */
   public function testStartBatchClear() {
     $this->feed
@@ -51,7 +68,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::clear
    */
   public function testClear() {
     $this->feed->expects($this->exactly(2))
@@ -65,6 +82,7 @@ class FeedClearHandlerTest extends FeedsUnitTestCase {
   }
 
   /**
+   * @covers ::clear
    * @expectedException \Exception
    */
   public function testException() {

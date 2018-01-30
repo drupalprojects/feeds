@@ -12,7 +12,18 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class DateTimeTest extends FeedsUnitTestCase {
 
+  /**
+   * The feed type entity.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
   protected $feedType;
+
+  /**
+   * The target definition.
+   *
+   * @var \Drupal\feeds\TargetDefinitionInterface
+   */
   protected $targetDefinition;
 
   /**
@@ -40,7 +51,9 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests preparing a value that succeeds.
    *
+   * @covers ::prepareValue
    */
   public function test() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\DateTime', 'prepareTarget')->getClosure();
@@ -59,7 +72,9 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests preparing a value that fails.
    *
+   * @covers ::prepareValue
    */
   public function testWithErrors() {
     $configuration = [
@@ -75,7 +90,9 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing a year value.
    *
+   * @covers ::prepareValue
    */
   public function testYearValue() {
     $configuration = [

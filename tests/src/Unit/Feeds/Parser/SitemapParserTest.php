@@ -13,9 +13,32 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class SitemapParserTest extends FeedsUnitTestCase {
 
+  /**
+   * The Feeds parser plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Parser\SitemapParser
+   */
   protected $parser;
+
+  /**
+   * The feed type entity.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
   protected $feedType;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
 
   /**
@@ -38,9 +61,11 @@ class SitemapParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing a sitemap XML file that succeeds.
    *
+   * @covers ::parse
    */
-  public function testFetch() {
+  public function testParse() {
     $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/sitemap-example.xml';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
@@ -51,6 +76,9 @@ class SitemapParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an invalid feed.
+   *
+   * @covers ::parse
    * @expectedException \Exception
    */
   public function testInvalidFeed() {
@@ -59,6 +87,9 @@ class SitemapParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an empty feed.
+   *
+   * @covers ::parse
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyFeed() {
@@ -67,7 +98,7 @@ class SitemapParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getMappingSources
    */
   public function testGetMappingSources() {
     // Not really much to test here.

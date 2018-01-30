@@ -14,9 +14,9 @@ use Drupal\feeds\Feeds\Target\Boolean;
 class BooleanTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
-  public function test() {
+  public function testPrepareValue() {
     $method = $this->getMethod(Boolean::class, 'prepareTarget')->getClosure();
 
     $configuration = [

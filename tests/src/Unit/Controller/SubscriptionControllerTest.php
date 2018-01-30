@@ -14,18 +14,46 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class SubscriptionControllerTest extends UnitTestCase {
 
+  /**
+   * The controller under test.
+   *
+   * @var \Drupal\feeds\Controller\SubscriptionController
+   */
   protected $controller;
 
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
 
-  protected $feedStorage;
-
+  /**
+   * The HTTP request.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
   protected $request;
 
+  /**
+   * The subscription entity.
+   *
+   * @var \Drupal\feeds\SubscriptionInterface
+   */
   protected $subscription;
 
+  /**
+   * The key/value store.
+   *
+   * @var \Drupal\Core\KeyValueStore\KeyValueStoreExpirableInterface
+   */
   protected $kv;
 
   /**
@@ -169,7 +197,7 @@ class SubscriptionControllerTest extends UnitTestCase {
    * @covers ::handleUnsubscribe
    * @expectedException \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
-  public function testSubscriptionMissingKV() {
+  public function testSubscriptionMissingKv() {
     $this->request->query->set('hub_mode', 'unsubscribe');
     $this->request->query->set('hub_topic', 'http://example.com/topic');
     $this->controller->subscribe(1, 'valid_token', $this->request);

@@ -13,7 +13,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class DateRangeTest extends FeedsUnitTestCase {
 
   /**
-   * The mocked feed.
+   * The mocked feed type entity.
    *
    * @var \Drupal\feeds\FeedTypeInterface
    */
@@ -22,7 +22,7 @@ class DateRangeTest extends FeedsUnitTestCase {
   /**
    * The target definition.
    *
-   * @var \Drupal\feeds\FieldTargetDefinition
+   * @var \Drupal\feeds\TargetDefinitionInterface
    */
   protected $targetDefinition;
 
@@ -51,7 +51,7 @@ class DateRangeTest extends FeedsUnitTestCase {
   }
 
   /**
-   * Basic test.
+   * @covers ::prepareValue
    */
   public function test() {
     $configuration = [

@@ -12,9 +12,9 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class ProcessEventTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::getParserResult
    */
-  public function test() {
+  public function testGetParserResult() {
     $feed = $this->getMock('Drupal\feeds\FeedInterface');
     $item = $this->getMock('Drupal\feeds\Feeds\Item\ItemInterface');
     $event = new ProcessEvent($feed, $item);

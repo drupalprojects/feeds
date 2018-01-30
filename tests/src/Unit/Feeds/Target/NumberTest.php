@@ -12,7 +12,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class NumberTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Number', 'prepareTarget')->getClosure();

@@ -17,8 +17,25 @@ use Drupal\file\FileUsage\FileUsageInterface;
  */
 class UploadFetcherTest extends FeedsUnitTestCase {
 
+  /**
+   * The file entity storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
   protected $fileStorage;
+
+  /**
+   * The Feeds fetcher plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Fetcher\UploadFetcher
+   */
   protected $fetcher;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
 
   /**
@@ -49,7 +66,9 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests a fetch that succeeds.
    *
+   * @covers ::fetch
    */
   public function testFetch() {
     touch('vfs://feeds/test_file');
@@ -62,6 +81,9 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests a fetch that fails.
+   *
+   * @covers ::fetch
    * @expectedException \RuntimeException
    */
   public function testFetchException() {
@@ -73,7 +95,7 @@ class UploadFetcherTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::onFeedDeleteMultiple
    */
   public function testOnFeedDeleteMultiple() {
     $feed = $this->getMock(FeedInterface::class);

@@ -6,12 +6,14 @@ use Drupal\feeds\Component\CsvParser;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
- * @group feeds
  * @coversDefaultClass \Drupal\feeds\Component\CsvParser
+ * @group feeds
  */
 class CsvParserTest extends FeedsUnitTestCase {
 
   /**
+   * Tests parsing a CSV source with several line endings.
+   *
    * @dataProvider provider
    */
   public function testAlternateLineEnding(array $expected, $ending) {
@@ -44,7 +46,7 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * Data provider for testAlternateLineEnding().
    */
   public function provider() {
     $expected = [
@@ -74,7 +76,8 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::setHasHeader
+   * @covers ::getHeader
    */
   public function testHasHeader() {
     $file = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/example.csv';
@@ -85,7 +88,7 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * Tests using an asterisk as delimiter.
    */
   public function testAlternateSeparator() {
     // This implicitly tests lines without a newline.
@@ -96,6 +99,8 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tries to create a CsvParser instance with an invalid file path.
+   *
    * @expectedException \InvalidArgumentException
    */
   public function testInvalidFilePath() {
@@ -103,6 +108,8 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Creates a new CsvParser instance with an invalid CSV source.
+   *
    * @expectedException \InvalidArgumentException
    */
   public function testInvalidResourcePath() {
@@ -110,6 +117,8 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Basic test for parsing CSV.
+   *
    * @dataProvider csvFileProvider
    */
   public function testCsvParsing($file, $expected) {
@@ -134,7 +143,7 @@ class CsvParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * Data provider for testCsvParsing().
    */
   public function csvFileProvider() {
     $path = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csvs';

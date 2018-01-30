@@ -15,11 +15,39 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
  */
 class SyndicationParserTest extends FeedsUnitTestCase {
 
+  /**
+   * The Feeds parser plugin under test.
+   *
+   * @var \Drupal\feeds\Feeds\Parser\SyndicationParser
+   */
   protected $parser;
+
+  /**
+   * The feed type entity.
+   *
+   * @var \Drupal\feeds\FeedTypeInterface
+   */
   protected $feedType;
+
+  /**
+   * The feed entity.
+   *
+   * @var \Drupal\feeds\FeedInterface
+   */
   protected $feed;
+
+  /**
+   * The state object.
+   *
+   * @var \Drupal\feeds\StateInterface
+   */
   protected $state;
 
+  /**
+   * A list of syndication readers.
+   *
+   * @var array
+   */
   protected $readerExtensions = [
     'feed.reader.dublincoreentry' => 'Zend\Feed\Reader\Extension\DublinCore\Entry',
     'feed.reader.dublincorefeed' => 'Zend\Feed\Reader\Extension\DublinCore\Feed',
@@ -65,9 +93,11 @@ class SyndicationParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing a RSS feed that succeeds.
    *
+   * @covers ::parse
    */
-  public function testFetch() {
+  public function testParse() {
     $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/googlenewstz.rss2';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
@@ -78,6 +108,9 @@ class SyndicationParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an invalid feed.
+   *
+   * @covers ::parse
    * @expectedException \RuntimeException
    */
   public function testInvalidFeed() {
@@ -86,6 +119,9 @@ class SyndicationParserTest extends FeedsUnitTestCase {
   }
 
   /**
+   * Tests parsing an empty feed.
+   *
+   * @covers ::parse
    * @expectedException \Drupal\feeds\Exception\EmptyFeedException
    */
   public function testEmptyFeed() {
@@ -94,7 +130,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
   }
 
   /**
-   *
+   * @covers ::getMappingSources
    */
   public function testGetMappingSources() {
     // Not really much to test here.

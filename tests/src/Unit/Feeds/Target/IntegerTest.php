@@ -12,7 +12,7 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class IntegerTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::prepareValue
    */
   public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\Integer', 'prepareTarget')->getClosure();
