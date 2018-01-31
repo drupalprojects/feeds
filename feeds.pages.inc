@@ -89,7 +89,8 @@ function feeds_import_form(array $form, array &$form_state, FeedsImporter $impor
   if ($source->importer->config['import_on_create']) {
     $submit = t('Import');
     if ($source->importer->config['process_in_background']) {
-      // When processing the import in background, the import job is put in the queue.
+      // When processing the import in background, the import job is put in the
+      // queue.
       $submit = t('Schedule import');
     }
   }
@@ -115,8 +116,9 @@ function feeds_import_form(array $form, array &$form_state, FeedsImporter $impor
   $progress = $source->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
-    $form['actions']['submit']['#value'] =
-      t('Importing (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
+    $form['actions']['submit']['#value'] = t('Importing (@progress %)', array(
+      '@progress' => number_format(100 * $progress, 0),
+    ));
 
     // Check if import task is queued.
     if ($source->isQueued()) {
@@ -197,8 +199,9 @@ function feeds_import_tab_form($form, &$form_state, $node) {
   $progress = $source->progressImporting();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
-    $form['actions']['submit']['#value'] =
-      t('Importing (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
+    $form['actions']['submit']['#value'] = t('Importing (@progress %)', array(
+      '@progress' => number_format(100 * $progress, 0),
+    ));
 
     // Check if import task is queued.
     if ($source->isQueued()) {
@@ -259,8 +262,9 @@ function feeds_delete_tab_form(array $form, array &$form_state, FeedsImporter $i
   $progress = $source->progressClearing();
   if ($progress !== FEEDS_BATCH_COMPLETE) {
     $form['actions']['submit']['#disabled'] = TRUE;
-    $form['actions']['submit']['#value'] =
-      t('Deleting (@progress %)', array('@progress' => number_format(100 * $progress, 0)));
+    $form['actions']['submit']['#value'] = t('Deleting (@progress %)', array(
+      '@progress' => number_format(100 * $progress, 0),
+    ));
     $form['source_status']['#value'] .= t('Run cron to continue the deletion of items.');
   }
 
@@ -353,7 +357,7 @@ function feeds_fetcher_callback($importer, $feed_nid = 0) {
 }
 
 /**
- * Template generation
+ * Template generation.
  */
 function feeds_importer_template(FeedsImporter $importer) {
   if ($importer->parser instanceof FeedsCSVParser) {
@@ -391,18 +395,26 @@ function theme_feeds_source_status($v) {
   $items = array();
   if ($v['progress_importing']) {
     $progress = number_format(100.0 * $v['progress_importing'], 0);
-    $items[] = t('Importing - @progress % complete.', array('@progress' => $progress));
+    $items[] = t('Importing - @progress % complete.', array(
+      '@progress' => $progress,
+    ));
   }
   if ($v['progress_clearing']) {
     $progress = number_format(100.0 * $v['progress_clearing'], 0);
-    $items[] = t('Deleting items - @progress % complete.', array('@progress' => $progress));
+    $items[] = t('Deleting items - @progress % complete.', array(
+      '@progress' => $progress,
+    ));
   }
   if (!count($items)) {
     if ($v['count']) {
       if ($v['imported']) {
-        $items[] = t('Last import: @ago ago.', array('@ago' => format_interval(REQUEST_TIME - $v['imported'], 1)));
+        $items[] = t('Last import: @ago ago.', array(
+          '@ago' => format_interval(REQUEST_TIME - $v['imported'], 1),
+        ));
       }
-      $items[] = t('@count imported items total.', array('@count' => $v['count']));
+      $items[] = t('@count imported items total.', array(
+        '@count' => $v['count'],
+      ));
     }
     else {
       $items[] = t('No imported items.');
@@ -456,7 +468,9 @@ function theme_feeds_upload($variables) {
       $summary .= l($file->filename, $wrapper->getExternalUrl());
     }
     else {
-      $summary .= t('URI scheme %scheme not available.', array('%scheme' =>  file_uri_scheme($uri)));
+      $summary .= t('URI scheme %scheme not available.', array(
+        '%scheme' => file_uri_scheme($uri),
+      ));
     }
     $summary .= '</div>';
     $summary .= '<div class="file-size">';
