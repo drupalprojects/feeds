@@ -15,9 +15,13 @@ use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
 class DirectoryFetcherFeedFormTest extends FeedsUnitTestCase {
 
   /**
+   * Tests the feed form.
    *
+   * @covers ::buildConfigurationForm
+   * @covers ::validateConfigurationForm
+   * @covers ::submitConfigurationForm
    */
-  public function test() {
+  public function testFeedForm() {
     file_put_contents('vfs://feeds/test.txt', 'data');
 
     $plugin = $this->prophesize(FetcherInterface::class);

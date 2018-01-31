@@ -14,6 +14,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class FeedQueueWorkerBaseTest extends FeedsUnitTestCase {
 
   /**
+   * Tests various methods on the FeedQueueWorkerBase class.
+   *
    * @expectedException \RuntimeException
    */
   public function test() {

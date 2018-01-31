@@ -38,7 +38,11 @@ namespace Drupal\Tests\feeds\Unit\Element {
       $this->assertSame('The URI <em class="placeholder">@@</em> is not valid.', (string) $form_state->getError($element));
       $form_state->clearErrors();
 
-      $element = ['#value' => 'badscheme://foo', '#parents' => ['element'], '#allowed_schemes' => ['public']];
+      $element = [
+        '#value' => 'badscheme://foo',
+        '#parents' => ['element'],
+        '#allowed_schemes' => ['public'],
+      ];
       $element += $element_object->getInfo();
       Uri::validateUrl($element, $form_state, $complete_form);
       $this->assertSame('The scheme <em class="placeholder">badscheme</em> is invalid. Available schemes: public.', (string) $form_state->getError($element));
@@ -54,7 +58,7 @@ namespace {
   if (!function_exists('t')) {
 
     /**
-     *
+     * Stub for t() function.
      */
     function t($string, array $args = []) {
       return new FormattableMarkup($string, $args);

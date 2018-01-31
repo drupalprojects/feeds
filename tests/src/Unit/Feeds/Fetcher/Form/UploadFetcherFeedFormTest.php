@@ -21,9 +21,13 @@ use Drupal\file\FileUsage\FileUsageInterface;
 class UploadFetcherFeedFormTest extends FeedsUnitTestCase {
 
   /**
+   * Tests the feed form.
    *
+   * @covers ::buildConfigurationForm
+   * @covers ::validateConfigurationForm
+   * @covers ::submitConfigurationForm
    */
-  public function test() {
+  public function testFeedForm() {
     $file = $this->prophesize(FileInterface::class);
 
     $file_storage = $this->prophesize(FileStorageInterface::class);

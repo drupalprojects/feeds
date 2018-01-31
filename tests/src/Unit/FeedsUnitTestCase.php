@@ -237,7 +237,7 @@ namespace {
   if (!function_exists('drupal_set_message')) {
 
     /**
-     *
+     * Stub for drupal_set_message() function.
      */
     function drupal_set_message() {
     }
@@ -247,7 +247,7 @@ namespace {
   if (!function_exists('filter_formats')) {
 
     /**
-     *
+     * Stub for filter_formats() function.
      */
     function filter_formats(AccountInterface $account) {
       return ['test_format' => new FeedsFilterStub('Test format')];
@@ -258,7 +258,7 @@ namespace {
   if (!function_exists('file_stream_wrapper_uri_normalize')) {
 
     /**
-     *
+     * Stub for file_stream_wrapper_uri_normalize() function.
      */
     function file_stream_wrapper_uri_normalize($dir) {
       return $dir;
@@ -269,7 +269,7 @@ namespace {
   if (!function_exists('drupal_tempnam')) {
 
     /**
-     *
+     * Stub for drupal_tempnam() function.
      */
     function drupal_tempnam($scheme, $dir) {
       mkdir('vfs://feeds/' . $dir);
@@ -283,7 +283,7 @@ namespace {
   if (!function_exists('file_prepare_directory')) {
 
     /**
-     *
+     * Stub for file_prepare_directory() function.
      */
     function file_prepare_directory(&$directory) {
       return mkdir($directory);
@@ -294,7 +294,7 @@ namespace {
   if (!function_exists('drupal_basename')) {
 
     /**
-     *
+     * Stub for drupal_basename() function.
      */
     function drupal_basename($uri, $suffix = NULL) {
       return basename($uri, $suffix);
@@ -305,7 +305,7 @@ namespace {
   if (!function_exists('drupal_get_user_timezone')) {
 
     /**
-     *
+     * Stub for drupal_get_user_timezone() function.
      */
     function drupal_get_user_timezone() {
       return 'UTC';
@@ -316,7 +316,7 @@ namespace {
   if (!function_exists('batch_set')) {
 
     /**
-     *
+     * Stub for batch_set() function.
      */
     function batch_set() {
     }

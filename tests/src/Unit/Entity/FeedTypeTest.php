@@ -31,7 +31,7 @@ class FeedTypeTest extends FeedsUnitTestCase {
    * @return \Drupal\feeds\FeedTypeInterface
    *   The mocked feed type.
    */
-  protected function getFeedTypeMock($feed_type_id, $stubs = []) {
+  protected function getFeedTypeMock($feed_type_id, array $stubs = []) {
     // Plugin manager.
     $pluginManager = $this->getMockBuilder(FeedsPluginManager::class)
       ->disableOriginalConstructor()

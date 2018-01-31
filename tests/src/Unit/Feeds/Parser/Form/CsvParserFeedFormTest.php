@@ -15,9 +15,13 @@ use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 class CsvParserFeedFormTest extends FeedsUnitTestCase {
 
   /**
+   * Tests the feed form.
    *
+   * @covers ::buildConfigurationForm
+   * @covers ::validateConfigurationForm
+   * @covers ::submitConfigurationForm
    */
-  public function test() {
+  public function testFeedForm() {
     $plugin = $this->prophesize(FeedsPluginInterface::class);
 
     $feed = $this->prophesize(FeedInterface::class);

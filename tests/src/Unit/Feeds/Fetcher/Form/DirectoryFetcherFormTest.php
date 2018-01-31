@@ -15,7 +15,10 @@ use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 class DirectoryFetcherFormTest extends FeedsUnitTestCase {
 
   /**
+   * Tests the configuration form.
    *
+   * @covers ::buildConfigurationForm
+   * @covers ::validateConfigurationForm
    */
   public function testConfigurationForm() {
     $container = new ContainerBuilder();

@@ -43,10 +43,18 @@ class FeedTypeAccessControlHandlerTest extends FeedsUnitTestCase {
    */
   public function testCheckAccess() {
     $method = $this->getMethod(FeedTypeAccessControlHandler::class, 'checkAccess');
-    $result = $method->invokeArgs($this->controller, [$this->entity->reveal(), 'view', $this->account->reveal()]);
+    $result = $method->invokeArgs($this->controller, [
+      $this->entity->reveal(),
+      'view',
+      $this->account->reveal(),
+    ]);
     $this->assertTrue($result->isAllowed());
 
-    $result = $method->invokeArgs($this->controller, [$this->entity->reveal(), 'delete', $this->account->reveal()]);
+    $result = $method->invokeArgs($this->controller, [
+      $this->entity->reveal(),
+      'delete',
+      $this->account->reveal(),
+    ]);
     $this->assertTrue($result->isAllowed());
 
     $this->entity->getCacheContexts()->willReturn([]);
@@ -55,18 +63,34 @@ class FeedTypeAccessControlHandlerTest extends FeedsUnitTestCase {
 
     $this->entity->isLocked()->willReturn(TRUE);
     $this->entity->isNew()->willReturn(FALSE);
-    $result = $method->invokeArgs($this->controller, [$this->entity->reveal(), 'delete', $this->account->reveal()]);
+    $result = $method->invokeArgs($this->controller, [
+      $this->entity->reveal(),
+      'delete',
+      $this->account->reveal(),
+    ]);
     $this->assertFalse($result->isAllowed());
 
     $this->account->hasPermission('administer feeds')->willReturn(FALSE);
-    $result = $method->invokeArgs($this->controller, [$this->entity->reveal(), 'delete', $this->account->reveal()]);
+    $result = $method->invokeArgs($this->controller, [
+      $this->entity->reveal(),
+      'delete',
+      $this->account->reveal(),
+    ]);
     $this->assertFalse($result->isAllowed());
 
-    $result = $method->invokeArgs($this->controller, [$this->entity->reveal(), 'view', $this->account->reveal()]);
+    $result = $method->invokeArgs($this->controller, [
+      $this->entity->reveal(),
+      'view',
+      $this->account->reveal(),
+    ]);
     $this->assertFalse($result->isAllowed());
 
     $this->entity->isNew()->willReturn(TRUE);
-    $result = $method->invokeArgs($this->controller, [$this->entity->reveal(), 'delete', $this->account->reveal()]);
+    $result = $method->invokeArgs($this->controller, [
+      $this->entity->reveal(),
+      'delete',
+      $this->account->reveal(),
+    ]);
     $this->assertFalse($result->isAllowed());
   }
 

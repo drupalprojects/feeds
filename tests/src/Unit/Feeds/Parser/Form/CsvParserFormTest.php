@@ -14,7 +14,7 @@ use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 class CsvParserFormTest extends FeedsUnitTestCase {
 
   /**
-   *
+   * @covers ::buildConfigurationForm
    */
   public function testConfigurationForm() {
     $form_state = new FormState();

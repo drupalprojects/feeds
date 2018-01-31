@@ -14,9 +14,11 @@ use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 class HttpFetcherFormTest extends FeedsUnitTestCase {
 
   /**
+   * Tests the configuration form.
    *
+   * @covers ::buildConfigurationForm
    */
-  public function test() {
+  public function testConfigurationForm() {
     $form_object = new HttpFetcherForm();
 
     $form_object->setPlugin($this->getMock(FeedsPluginInterface::class));

@@ -122,7 +122,10 @@ class FeedRefreshTest extends FeedsUnitTestCase {
   }
 
   /**
-   * Tests that a parse event is dispatched when a queue task at the parse stage runs.
+   * Tests dispatching a parse event when running a queue task.
+   *
+   * When running a queue task at the parse stage, a parse event should get
+   * dispatched.
    *
    * @expectedException \RuntimeException
    */
@@ -152,7 +155,10 @@ class FeedRefreshTest extends FeedsUnitTestCase {
   }
 
   /**
-   * Tests that a process event is dispatched when a queue task at the process stage runs.
+   * Tests dispatching a process event when running a queue task.
+   *
+   * When running a queue task at the process stage, a process event should get
+   * dispatched.
    *
    * @expectedException \RuntimeException
    */

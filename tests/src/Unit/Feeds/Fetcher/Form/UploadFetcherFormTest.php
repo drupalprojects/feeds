@@ -18,8 +18,11 @@ class UploadFetcherFormTest extends FeedsUnitTestCase {
 
   /**
    * Tests the configuration form.
+   *
+   * @covers ::buildConfigurationForm
+   * @covers ::validateConfigurationForm
    */
-  public function test() {
+  public function testConfigurationForm() {
     $container = new ContainerBuilder();
     \Drupal::setContainer($container);
 
