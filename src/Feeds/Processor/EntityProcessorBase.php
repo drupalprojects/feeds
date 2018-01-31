@@ -413,7 +413,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     }
 
     $args = [
-      '%name' => $account->getUsername(),
+      '%name' => $account->getDisplayName(),
       '@op' => $op,
       '@bundle' => $this->getItemLabelPlural(),
     ];
