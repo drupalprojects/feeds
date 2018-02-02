@@ -27,6 +27,40 @@ class FeedImportHandler extends FeedHandlerBase {
   protected $fetcherResult;
 
   /**
+   * Imports the whole feed at once.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to import for.
+   *
+   * @throws \Exception
+   *   In case of an error.
+   */
+  public function import(FeedInterface $feed) {
+    $feed->lock();
+    $fetcher_result = $this->doFetch($feed);
+
+    try {
+      do {
+        foreach ($this->doParse($feed, $fetcher_result) as $item) {
+          $this->doProcess($feed, $item);
+        }
+      } while ($feed->progressImporting() !== StateInterface::BATCH_COMPLETE);
+    }
+    catch (EmptyFeedException $e) {
+      // Not an error.
+    }
+    catch (\Exception $exception) {
+      // Do nothing. Will throw later.
+    }
+
+    $feed->finishImport();
+
+    if (isset($exception)) {
+      throw $exception;
+    }
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function startBatchImport(FeedInterface $feed) {

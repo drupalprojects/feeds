@@ -98,7 +98,7 @@ class SyndicationParserTest extends FeedsUnitTestCase {
    * @covers ::parse
    */
   public function testParse() {
-    $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/googlenewstz.rss2';
+    $file = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/tests/resources/rss/googlenewstz.rss2';
     $fetcher_result = new RawFetcherResult(file_get_contents($file));
 
     $result = $this->parser->parse($this->feed, $fetcher_result, $this->state);

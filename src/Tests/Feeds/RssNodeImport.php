@@ -105,7 +105,7 @@ class RssNodeImport extends WebTestBase {
    *
    */
   public function testHttpImport() {
-    $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
+    $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/rss/googlenewstz.rss2';
 
     $feed = entity_create('feeds_feed', [
       'title' => $this->randomString(),
@@ -176,7 +176,7 @@ class RssNodeImport extends WebTestBase {
     $this->type->setMappings($mappings);
     $this->type->save();
 
-    $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/googlenewstz.rss2';
+    $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/rss/googlenewstz.rss2';
 
     $feed = Feed::create([
       'title' => $this->randomString(),

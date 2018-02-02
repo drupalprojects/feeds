@@ -212,6 +212,15 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
+  public function import() {
+    $this->entityTypeManager()
+      ->getHandler('feeds_feed', 'feed_import')
+      ->import($this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function startBatchImport() {
     $this->entityTypeManager()
       ->getHandler('feeds_feed', 'feed_import')

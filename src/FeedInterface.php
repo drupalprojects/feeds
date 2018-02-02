@@ -99,6 +99,17 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function setQueuedTime($queued);
 
   /**
+   * Imports the whole feed at once.
+   *
+   * This does not batch. It assumes that the input is small enough to not need
+   * it.
+   *
+   * @throws \Exception
+   *   Re-throws any exception that bubbles up.
+   */
+  public function import();
+
+  /**
    * Starts importing a feed via the batch API.
    *
    * @throws \Exception
