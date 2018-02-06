@@ -2,12 +2,44 @@
 
 namespace Drupal\Tests\feeds\Traits;
 
+use Drupal\feeds\FeedInterface;
+use Drupal\node\Entity\Node;
+
 /**
  * Provides methods useful for Kernel and Functional Feeds tests.
  *
  * This trait is meant to be used only by test classes.
  */
 trait FeedsCommonTrait {
+
+  /**
+   * Creates a new node with a feeds item field.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed with which the node was imported.
+   * @param array $settings
+   *   (optional) An associative array of settings for the node.
+   *
+   * @return \Drupal\node\NodeInterface
+   *   The created node entity.
+   */
+  protected function createNodeWithFeedsItem(FeedInterface $feed, array $settings = []) {
+    $settings += [
+      'title'  => $this->randomMachineName(8),
+      'type'  => 'article',
+      'uid'  => 0,
+      'feeds_item' => [
+        'target_id' => $feed->id(),
+        'imported' => 0,
+        'guid' => 1,
+        'hash' => static::randomString(),
+      ],
+    ];
+    $node = Node::create($settings);
+    $node->save();
+
+    return $node;
+  }
 
   /**
    * Asserts that the given number of nodes exist.

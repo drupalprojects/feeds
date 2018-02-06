@@ -6,6 +6,7 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\feeds\Traits\FeedCreationTrait;
 use Drupal\Tests\feeds\Traits\FeedsCommonTrait;
+use Drupal\Tests\feeds\Traits\FeedsReflectionTrait;
 
 /**
  * Provides a base class for Feeds kernel tests.
@@ -14,6 +15,7 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
 
   use FeedCreationTrait;
   use FeedsCommonTrait;
+  use FeedsReflectionTrait;
 
   /**
    * Modules to enable.
