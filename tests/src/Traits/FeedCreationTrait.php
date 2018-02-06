@@ -5,6 +5,7 @@ namespace Drupal\Tests\feeds\Traits;
 use Drupal\Component\Utility\Unicode;
 use Drupal\feeds\Entity\Feed;
 use Drupal\feeds\Entity\FeedType;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
 
 /**
@@ -84,6 +85,21 @@ trait FeedCreationTrait {
     $feed->save();
 
     return $feed;
+  }
+
+  /**
+   * Reloads a feed entity.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed entity to reload.
+   *
+   * @return \Drupal\feeds\FeedInterface
+   *   The reloaded feed.
+   */
+  protected function reloadFeed(FeedInterface $feed) {
+    /** @var \Drupal\feeds\FeedStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage('feeds_feed');
+    return $storage->load($feed->id());
   }
 
 }

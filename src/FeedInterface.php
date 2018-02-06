@@ -166,7 +166,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function finishImport();
 
   /**
-   * Cleans up after feed items have been delted.
+   * Cleans up after feed items have been deleted.
    */
   public function finishClear();
 
@@ -271,7 +271,7 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
    * Inactive feeds do not get imported.
    *
    * @return bool
-   *   Tur if the feed is active.
+   *   True if the feed is active.
    */
   public function isActive();
 

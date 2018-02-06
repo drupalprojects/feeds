@@ -20,4 +20,12 @@ interface FeedsPluginInterface extends PluginInspectionInterface, ConfigurablePl
    */
   public function pluginType();
 
+  /**
+   * Returns default feed configuration.
+   *
+   * @return array
+   *   The default feed configuration.
+   */
+  public function defaultFeedConfiguration();
+
 }
