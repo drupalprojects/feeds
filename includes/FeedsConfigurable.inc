@@ -39,7 +39,7 @@ abstract class FeedsConfigurable {
   EXPORT_IN_DATABASE - the configurable is defined in the database.
   EXPORT_IN_CODE - the configurable is defined in code.
   EXPORT_IN_CODE | EXPORT_IN_DATABASE - the configurable is defined in code, but
-                                        overridden in the database.*/
+  overridden in the database.*/
   protected $export_type;
 
   /**
@@ -247,9 +247,9 @@ abstract class FeedsConfigurable {
   }
 
   /**
-   *  Submission handler for configForm().
+   * Submission handler for configForm().
    *
-   *  @param $values
+   * @param $values
    */
   public function configFormSubmit(&$values) {
     $this->addConfig($values);
@@ -267,6 +267,7 @@ abstract class FeedsConfigurable {
   public function dependencies() {
     return array();
   }
+
 }
 
 /**

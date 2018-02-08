@@ -95,4 +95,5 @@ class FeedsSyndicationParser extends FeedsParser {
   public function providesSourceTitle() {
     return TRUE;
   }
+
 }

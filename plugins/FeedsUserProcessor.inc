@@ -544,7 +544,7 @@ class FeedsUserProcessor extends FeedsProcessor {
         '#title' => t('Allowed roles'),
         '#options' => $allowed_roles_options,
         '#default_value' => $mapping['allowed_roles'],
-        '#description' => t('Select the roles to accept from the feed.<br />Any other roles will be ignored.')
+        '#description' => t('Select the roles to accept from the feed.<br />Any other roles will be ignored.'),
       ),
       'autocreate' => array(
         '#type' => 'checkbox',
@@ -719,4 +719,5 @@ class FeedsUserProcessor extends FeedsProcessor {
         break;
     }
   }
+
 }

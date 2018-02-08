@@ -5,12 +5,15 @@
  * Views handler for showing a feeds source config field.
  */
 
+/**
+ *
+ */
 class feeds_views_handler_field_source extends views_handler_field {
 
   /**
    * Override parent::render().
    */
-  function render($values) {
+  public function render($values) {
     $value = unserialize($values->{$this->field_alias});
     if (isset($value['FeedsHTTPFetcher']['source'])) {
       return check_url($value['FeedsHTTPFetcher']['source']);
@@ -24,7 +27,8 @@ class feeds_views_handler_field_source extends views_handler_field {
   /**
    * Disallow advanced rendering.
    */
-  function allow_advanced_render() {
+  public function allow_advanced_render() {
     return FALSE;
   }
+
 }

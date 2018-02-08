@@ -63,6 +63,7 @@ interface FeedsSourceInterface {
    * A source is being deleted.
    */
   public function sourceDelete(FeedsSource $source);
+
 }
 
 /**
@@ -143,6 +144,7 @@ class FeedsState {
       $this->progress = FEEDS_BATCH_COMPLETE;
     }
   }
+
 }
 
 /**
@@ -985,7 +987,7 @@ class FeedsSource extends FeedsConfigurable {
   /**
    * Only return source if configuration is persistent and valid.
    *
-   * @see FeedsConfigurable::existing().
+   * @see FeedsConfigurable::existing()
    */
   public function existing() {
     // Ensure that the source configuration is valid.
@@ -1082,8 +1084,8 @@ class FeedsSource extends FeedsConfigurable {
   /**
    * Background job helper. Starts a background job using the Drupal queue.
    *
-   * @see FeedsSource::startImport().
-   * @see FeedsSource::startClear().
+   * @see FeedsSource::startImport()
+   * @see FeedsSource::startClear()
    *
    * @param string $method
    *   Method to execute on importer; one of 'import' or 'clear'.
@@ -1119,8 +1121,8 @@ class FeedsSource extends FeedsConfigurable {
   /**
    * Batch API helper. Starts a Batch API job.
    *
-   * @see FeedsSource::startImport().
-   * @see FeedsSource::startClear().
+   * @see FeedsSource::startImport()
+   * @see FeedsSource::startClear()
    * @see feeds_batch()
    *
    * @param $title

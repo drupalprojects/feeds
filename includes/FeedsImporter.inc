@@ -134,7 +134,7 @@ class FeedsImporter extends FeedsConfigurable {
    * @todo Error handling, handle setting to the same plugin.
    */
   public function setPlugin($plugin_key) {
-    // $plugin_type can be either 'fetcher', 'parser' or 'processor'
+    // $plugin_type can be either 'fetcher', 'parser' or 'processor'.
     if ($plugin_type = FeedsPlugin::typeOf($plugin_key)) {
       if ($plugin = feeds_plugin($plugin_key, $this->id)) {
         // Unset existing plugin, switch to new plugin.
@@ -153,18 +153,18 @@ class FeedsImporter extends FeedsConfigurable {
    * @param FeedsConfigurable $configurable
    *   The feeds importer object to copy from.
    */
-   public function copy(FeedsConfigurable $configurable) {
-     parent::copy($configurable);
+  public function copy(FeedsConfigurable $configurable) {
+    parent::copy($configurable);
 
-     if ($configurable instanceof FeedsImporter) {
-       // Instantiate new fetcher, parser and processor and initialize their
-       // configurations.
-       foreach ($this->plugin_types as $plugin_type) {
-         $this->setPlugin($configurable->config[$plugin_type]['plugin_key']);
-         $this->$plugin_type->setConfig($configurable->config[$plugin_type]['config']);
-       }
-     }
-   }
+    if ($configurable instanceof FeedsImporter) {
+      // Instantiate new fetcher, parser and processor and initialize their
+      // configurations.
+      foreach ($this->plugin_types as $plugin_type) {
+        $this->setPlugin($configurable->config[$plugin_type]['plugin_key']);
+        $this->$plugin_type->setConfig($configurable->config[$plugin_type]['config']);
+      }
+    }
+  }
 
   /**
    * Get configuration of this feed.
@@ -265,9 +265,12 @@ class FeedsImporter extends FeedsConfigurable {
       ),
       'content_type' => '',
       'update' => 0,
-      'import_period' => 1800, // Refresh every 30 minutes by default.
-      'expire_period' => 3600, // Expire every hour by default, this is a hidden setting.
-      'import_on_create' => TRUE, // Import on submission.
+      // Refresh every 30 minutes by default.
+      'import_period' => 1800,
+      // Expire every hour by default, this is a hidden setting.
+      'expire_period' => 3600,
+      // Import on submission.
+      'import_on_create' => TRUE,
       'process_in_background' => FALSE,
     ) + parent::configDefaults();
   }
@@ -302,7 +305,7 @@ class FeedsImporter extends FeedsConfigurable {
       '#options' => array('' => t('Use standalone form')) + $node_types,
       '#default_value' => $config['content_type'],
     );
-    $cron_required =  ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
+    $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
     $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
     foreach ($period as &$p) {
       $p = t('Every !p', array('!p' => $p));
@@ -353,6 +356,7 @@ class FeedsImporter extends FeedsConfigurable {
     }
     return $dependencies;
   }
+
 }
 
 /**

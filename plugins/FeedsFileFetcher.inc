@@ -10,6 +10,7 @@
  * FeedsFileFetcher.
  */
 class FeedsFileFetcherResult extends FeedsFetcherResult {
+
   /**
    * Constructor.
    */
@@ -32,6 +33,7 @@ class FeedsFileFetcherResult extends FeedsFetcherResult {
     $this->checkFile();
     return $this->sanitizeFile($this->file_path);
   }
+
 }
 
 /**

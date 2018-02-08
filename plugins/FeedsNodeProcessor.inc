@@ -149,7 +149,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
 
     // Set or correct user ID.
     if (!isset($entity->uid) || !is_numeric($entity->uid)) {
-       $entity->uid = $this->config['author'];
+      $entity->uid = $this->config['author'];
     }
     elseif (!is_int($entity->uid)) {
       // Cast user ID to an integer to prevent array_flip() notices in
@@ -212,7 +212,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
       '#title' => t('Author'),
       '#description' => t('Select the author of the nodes to be created - leave empty to assign "anonymous".'),
       '#autocomplete_path' => 'user/autocomplete',
-      '#default_value' => empty($author->name) ?  'anonymous' : check_plain($author->name),
+      '#default_value' => empty($author->name) ? 'anonymous' : check_plain($author->name),
     );
     $form['authorize'] = array(
       '#type' => 'checkbox',
@@ -265,12 +265,14 @@ class FeedsNodeProcessor extends FeedsProcessor {
       case 'created':
         $target_node->created = feeds_to_unixtime($value, REQUEST_TIME);
         break;
+
       case 'changed':
         // The 'changed' value will be set on the node in feeds_node_presave().
         // This is because node_save() always overwrites this value (though
         // before invoking hook_node_presave()).
         $target_node->feeds_item->node_changed = feeds_to_unixtime($value, REQUEST_TIME);
         break;
+
       case 'feeds_source':
         // Get the class of the feed node importer's fetcher and set the source
         // property. See feeds_node_update() how $node->feeds gets stored.
@@ -282,16 +284,19 @@ class FeedsNodeProcessor extends FeedsProcessor {
           $target_node->feeds['suppress_import'] = TRUE;
         }
         break;
+
       case 'user_name':
         if ($user = user_load_by_name($value)) {
           $target_node->uid = $user->uid;
         }
         break;
+
       case 'user_mail':
         if ($user = user_load_by_mail($value)) {
           $target_node->uid = $user->uid;
         }
         break;
+
       default:
         parent::setTargetElement($source, $target_node, $target_element, $value);
         break;
@@ -396,9 +401,11 @@ class FeedsNodeProcessor extends FeedsProcessor {
         case 'nid':
           $nid = db_query("SELECT nid FROM {node} WHERE nid = :nid", array(':nid' => $value))->fetchField();
           break;
+
         case 'title':
           $nid = db_query("SELECT nid FROM {node} WHERE title = :title AND type = :type", array(':title' => $value, ':type' => $this->bundle()))->fetchField();
           break;
+
         case 'feeds_source':
           if ($id = feeds_get_importer_id($this->bundle())) {
             $nid = db_query("SELECT fs.feed_nid FROM {node} n JOIN {feeds_source} fs ON n.nid = fs.feed_nid WHERE fs.id = :id AND fs.source = :source", array(':id' => $id, ':source' => $value))->fetchField();

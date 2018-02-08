@@ -73,10 +73,16 @@ class FeedsHTTPFetcherResult extends FeedsFetcherResult {
     return $this->sanitizeRawOptimized($this->raw);
   }
 
+  /**
+   *
+   */
   public function getTimeout() {
     return $this->timeout;
   }
 
+  /**
+   *
+   */
   public function setTimeout($timeout) {
     $this->timeout = $timeout;
   }
@@ -225,7 +231,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
       '#default_value' => $this->config['request_timeout'],
       '#element_validate' => array('element_validate_integer_positive'),
       '#maxlength' => 3,
-      '#size'=> 30,
+      '#size' => 30,
     );
     $form['advanced']['accept_invalid_cert'] = array(
       '#type' => 'checkbox',
@@ -348,7 +354,8 @@ class FeedsHTTPFetcher extends FeedsFetcher {
    */
   public function importPeriod(FeedsSource $source) {
     if ($this->subscriber($source->feed_nid)->subscribed()) {
-      return 259200; // Delay for three days if there is a successful subscription.
+      // Delay for three days if there is a successful subscription.
+      return 259200;
     }
   }
 
@@ -358,6 +365,7 @@ class FeedsHTTPFetcher extends FeedsFetcher {
   protected function subscriber($subscriber_id) {
     return PushSubscriber::instance($this->id, $subscriber_id, 'PuSHSubscription', PuSHEnvironment::instance());
   }
+
 }
 
 /**
@@ -414,12 +422,14 @@ class PuSHSubscription implements PuSHSubscriptionInterface {
       ->condition('subscriber_id', $this->subscriber_id)
       ->execute();
   }
+
 }
 
 /**
  * Provide environmental functions to the PuSHSubscriber library.
  */
 class PuSHEnvironment implements PuSHSubscriberEnvironmentInterface {
+
   /**
    * Singleton.
    */
@@ -446,9 +456,11 @@ class PuSHEnvironment implements PuSHSubscriberEnvironmentInterface {
       case 'error':
         $severity = WATCHDOG_ERROR;
         break;
+
       case 'warning':
         $severity = WATCHDOG_WARNING;
         break;
+
       default:
         $severity = WATCHDOG_NOTICE;
         break;
@@ -456,4 +468,5 @@ class PuSHEnvironment implements PuSHSubscriberEnvironmentInterface {
     feeds_dbg($msg);
     watchdog('FeedsHTTPFetcher', $msg, array(), $severity);
   }
+
 }

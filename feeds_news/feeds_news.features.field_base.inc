@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * feeds_news.features.field_base.inc
@@ -10,7 +11,7 @@
 function feeds_news_field_default_field_bases() {
   $field_bases = array();
 
-  // Exported field_base: 'field_feed_item_description'
+  // Exported field_base: 'field_feed_item_description'.
   $field_bases['field_feed_item_description'] = array(
     'active' => 1,
     'cardinality' => 1,

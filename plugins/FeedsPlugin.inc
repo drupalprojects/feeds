@@ -178,7 +178,7 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
       $files = drupal_system_listing('/.*\.inc$/', $path, 'name', 0);
       foreach ($files as $file) {
         if (strstr($file->uri, '/mappers/')) {
-          require_once(DRUPAL_ROOT . '/' . $file->uri);
+          require_once DRUPAL_ROOT . '/' . $file->uri;
         }
       }
     }
@@ -299,16 +299,24 @@ abstract class FeedsPlugin extends FeedsConfigurable implements FeedsSourceInter
 
     return $dependencies;
   }
+
 }
 
 /**
  * Used when a plugin is missing.
  */
 class FeedsMissingPlugin extends FeedsPlugin {
+
+  /**
+   *
+   */
   public function pluginType() {
     return 'missing';
   }
 
+  /**
+   *
+   */
   public function save() {}
 
   /**
@@ -318,20 +326,38 @@ class FeedsMissingPlugin extends FeedsPlugin {
     return new FeedsFetcherResult('');
   }
 
+  /**
+   *
+   */
   public function clear(FeedsSource $source) {}
 
+  /**
+   *
+   */
   public function request($feed_nid = 0) {
     drupal_access_denied();
   }
 
+  /**
+   *
+   */
   public function menuItem() {
     return array();
   }
 
+  /**
+   *
+   */
   public function subscribe(FeedsSource $source) {}
 
+  /**
+   *
+   */
   public function unsubscribe(FeedsSource $source) {}
 
+  /**
+   *
+   */
   public function importPeriod(FeedsSource $source) {}
 
   /**
@@ -341,6 +367,9 @@ class FeedsMissingPlugin extends FeedsPlugin {
     return new FeedsParserResult();
   }
 
+  /**
+   *
+   */
   public function getMappingSources() {
     return array();
   }
@@ -350,32 +379,59 @@ class FeedsMissingPlugin extends FeedsPlugin {
    */
   public function process(FeedsSource $source, FeedsParserResult $parser_result) {}
 
+  /**
+   *
+   */
   public function entityType() {}
 
+  /**
+   *
+   */
   public function bundle() {}
 
+  /**
+   *
+   */
   public function bundleOptions() {
     return array();
   }
 
+  /**
+   *
+   */
   public function getLimit() {
     return 0;
   }
 
+  /**
+   *
+   */
   public function getMappings() {
     return array();
   }
 
+  /**
+   *
+   */
   public function getMappingTargets() {
     return array();
   }
 
+  /**
+   *
+   */
   public function expire(FeedsSource $source, $time = NULL) {}
 
+  /**
+   *
+   */
   public function itemCount(FeedsSource $source) {
     return 0;
   }
 
+  /**
+   *
+   */
   public function expiryTime() {
     return FEEDS_EXPIRE_NEVER;
   }

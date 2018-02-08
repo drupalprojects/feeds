@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains FeedsHTTPCacheItem class.
+ */
+
+/**
  * Class of a cached item.
  */
 class FeedsHTTPCacheItem {
@@ -155,4 +160,5 @@ class FeedsHTTPCacheItem {
   public function cacheSet() {
     cache_set($this->cid, $this, self::CACHE_BIN);
   }
+
 }

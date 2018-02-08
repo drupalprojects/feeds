@@ -119,7 +119,6 @@ function taxonomy_feeds_set_target(FeedsSource $source, $entity, $target, array 
     ->entityCondition('bundle', $cache['allowed_vocabularies'][$target])
     ->range(0, 1);
 
-
   $field = isset($entity->$target) ? $entity->$target : array($language => array());
 
   if (!isset($field[$language])) {
@@ -253,7 +252,7 @@ function _taxonomy_feeds_extract_tid($item) {
  * @param string $guid
  *   The Feeds GUID to compare against.
  *
- * @return int|FALSE
+ * @return int|false
  *   The term id, or FALSE if one was not found.
  */
 function taxonomy_feeds_term_lookup_term_by_guid($guid) {
