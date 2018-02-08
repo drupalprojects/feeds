@@ -177,11 +177,25 @@ class FeedsSource extends FeedsConfigurable {
   // standalone import form within Feeds or by other API users.
   protected $feed_nid;
 
-  // The FeedsImporter object that this source is expected to be used with.
+  /**
+   * The FeedsImporter object that this source is expected to be used with.
+   *
+   * @var FeedsImporter
+   */
   protected $importer;
 
-  // A FeedsSourceState object holding the current import/clearing state of this
-  // source.
+  /**
+   * A FeedsSourceState object holding the current import/clearing state of this
+   * source.
+   *
+   * Array keys are stages, such as FEEDS_START or FEEDS_PARSE.
+   * Array values can be FeedsState objects, or integer timestamps, or possibly
+   * something else.
+   *
+   * @todo Clarify the role of this variable.
+   *
+   * @var FeedsState[]|array|null
+   */
   protected $state;
 
   // Fetcher result, used to cache fetcher result when batching.
@@ -249,6 +263,8 @@ class FeedsSource extends FeedsConfigurable {
 
   /**
    * Returns the FeedsImporter object that this source is expected to be used with.
+   *
+   * @return FeedsImporter
    */
   public function importer() {
     return $this->importer;
@@ -257,10 +273,10 @@ class FeedsSource extends FeedsConfigurable {
   /**
    * Preview = fetch and parse a feed.
    *
-   * @return
+   * @return FeedsParserResult
    *   FeedsParserResult object.
    *
-   * @throws
+   * @throws Exception
    *   Throws Exception if an error occurs when fetching or parsing.
    */
   public function preview() {
@@ -665,8 +681,13 @@ class FeedsSource extends FeedsConfigurable {
    * @param $stage
    *   One of FEEDS_FETCH, FEEDS_PARSE, FEEDS_PROCESS or FEEDS_PROCESS_CLEAR.
    *
-   * @return
+   * @return FeedsState|mixed
    *   The FeedsState object for the given stage.
+   *   In theory, this could return something else, if $this->state has been
+   *   polluted with e.g. integer timestamps.
+   *
+   * @see FeedsSource::$state
+   * @todo Clarify the role of $this->state.
    */
   public function state($stage) {
     if (!is_array($this->state)) {
@@ -1008,7 +1029,7 @@ class FeedsSource extends FeedsConfigurable {
    * @param FeedsSourceInterface $client
    *   An object that is an implementer of FeedsSourceInterface.
    *
-   * @return
+   * @return array
    *   An array stored for $client.
    */
   public function getConfigFor(FeedsSourceInterface $client) {
@@ -1021,10 +1042,10 @@ class FeedsSource extends FeedsConfigurable {
    *
    * @param FeedsSourceInterface $client
    *   An object that is an implementer of FeedsSourceInterface.
-   * @param $config
+   * @param array $config
    *   The configuration for $client.
    *
-   * @return
+   * @return array
    *   An array stored for $client.
    */
   public function setConfigFor(FeedsSourceInterface $client, $config) {
@@ -1033,6 +1054,8 @@ class FeedsSource extends FeedsConfigurable {
 
   /**
    * Return defaults for feed configuration.
+   *
+   * @return array
    */
   public function configDefaults() {
     // Collect information from plugins.

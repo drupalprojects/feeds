@@ -27,14 +27,34 @@ class FeedsImporter extends FeedsConfigurable {
   // Every feed has a fetcher, a parser and a processor.
   // These variable names match the possible return values of
   // FeedsPlugin::typeOf().
-  protected $fetcher, $parser, $processor;
 
-  // This array defines the variable names of the plugins above.
+  /**
+   * @var FeedsFetcher|null
+   */
+  protected $fetcher;
+
+  /**
+   * @var FeedsParser|null
+   */
+  protected $parser;
+
+  /**
+   * @var FeedsProcessor|null
+   */
+  protected $processor;
+
+  /**
+   * This array defines the variable names of the plugins above.
+   *
+   * @var string[]
+   */
   protected $plugin_types = array('fetcher', 'parser', 'processor');
 
   /**
    * Instantiate class variables, initialize and configure
    * plugins.
+   *
+   * @param string $id
    */
   protected function __construct($id) {
     parent::__construct($id);
@@ -277,6 +297,10 @@ class FeedsImporter extends FeedsConfigurable {
 
   /**
    * Override parent::configForm().
+   *
+   * @param array $form_state
+   *
+   * @return array
    */
   public function configForm(&$form_state) {
     $config = $this->getConfig();
@@ -338,6 +362,8 @@ class FeedsImporter extends FeedsConfigurable {
 
   /**
    * Reschedule if import period changes.
+   *
+   * @param array $values
    */
   public function configFormSubmit(&$values) {
     if ($this->config['import_period'] != $values['import_period']) {
@@ -361,6 +387,10 @@ class FeedsImporter extends FeedsConfigurable {
 
 /**
  * Helper, see FeedsDataProcessor class.
+ *
+ * @param int $timestamp
+ *
+ * @return null|string
  */
 function feeds_format_expire($timestamp) {
   if ($timestamp == FEEDS_EXPIRE_NEVER) {

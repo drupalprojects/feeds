@@ -22,10 +22,18 @@ class FeedsNotExistingException extends Exception {
  */
 abstract class FeedsConfigurable {
 
-  // Holds the actual configuration information.
+  /**
+   * Holds the actual configuration information.
+   *
+   * @var array
+   */
   protected $config;
 
-  // A unique identifier for the configuration.
+  /**
+   * A unique identifier for the configuration.
+   *
+   * @var string
+   */
   protected $id;
 
   /*
@@ -40,22 +48,36 @@ abstract class FeedsConfigurable {
   EXPORT_IN_CODE - the configurable is defined in code.
   EXPORT_IN_CODE | EXPORT_IN_DATABASE - the configurable is defined in code, but
   overridden in the database.*/
+
+  /**
+   * @var int
+   */
   protected $export_type;
 
   /**
    * CTools export enabled status of this object.
+   *
+   * @var bool
    */
   protected $disabled;
 
   /**
-   * Instantiates a FeedsConfigurable object.
+   * Provides a statically cached instance of a FeedsConfigurable subclass.
    *
    * Don't use directly, use feeds_importer() or feeds_plugin() instead.
+   *
+   * @param string $class
+   *   The name of a subclass of FeedsConfigurable.
+   * @param string $id
+   *
+   * @return FeedsConfigurable
+   * @throws \Exception
    *
    * @see feeds_importer()
    * @see feeds_plugin()
    */
   public static function instance($class, $id) {
+    // @todo Verify that $class is an existing subclass of FeedsConfigurable.
     if (!strlen($id)) {
       throw new InvalidArgumentException(t('Empty configuration identifier.'));
     }
@@ -70,6 +92,8 @@ abstract class FeedsConfigurable {
 
   /**
    * Constructor, set id and load default configuration.
+   *
+   * @param string $id
    */
   protected function __construct($id) {
     // Set this object's id.
@@ -84,6 +108,10 @@ abstract class FeedsConfigurable {
 
   /**
    * Override magic method __isset(). This is needed due to overriding __get().
+   *
+   * @param string $name
+   *
+   * @return bool
    */
   public function __isset($name) {
     return isset($this->$name) ? TRUE : FALSE;
@@ -114,6 +142,10 @@ abstract class FeedsConfigurable {
   /**
    * Determine whether this object is persistent and enabled. I. e. it is
    * defined either in code or in the database and it is enabled.
+   *
+   * @return $this
+   *
+   * @throws FeedsNotExistingException
    */
   public function existing() {
     if (!$this->doesExist()) {
@@ -133,6 +165,8 @@ abstract class FeedsConfigurable {
 
   /**
    * Copy a configuration.
+   *
+   * @param FeedsConfigurable $configurable
    */
   public function copy(FeedsConfigurable $configurable) {
     $this->setConfig($configurable->config);
@@ -141,7 +175,7 @@ abstract class FeedsConfigurable {
   /**
    * Set configuration.
    *
-   * @param $config
+   * @param array $config
    *   Array containing configuration information. Config array will be filtered
    *   by the keys returned by configDefaults() and populated with default
    *   values that are not included in $config.
@@ -154,7 +188,7 @@ abstract class FeedsConfigurable {
   /**
    * Similar to setConfig but adds to existing configuration.
    *
-   * @param $config
+   * @param array $config
    *   Array containing configuration information. Will be filtered by the keys
    *   returned by configDefaults().
    */
@@ -184,6 +218,8 @@ abstract class FeedsConfigurable {
    * Implements getConfig().
    *
    * Return configuration array, ensure that all default values are present.
+   *
+   * @return array
    */
   public function getConfig() {
     $defaults = $this->configDefaults();
@@ -228,7 +264,9 @@ abstract class FeedsConfigurable {
    * Return configuration form for this object. The keys of the configuration
    * form must match the keys of the array returned by configDefaults().
    *
-   * @return
+   * @param array $form_state
+   *
+   * @return array
    *   FormAPI style form definition.
    */
   public function configForm(&$form_state) {
@@ -249,7 +287,7 @@ abstract class FeedsConfigurable {
   /**
    * Submission handler for configForm().
    *
-   * @param $values
+   * @param array $values
    */
   public function configFormSubmit(&$values) {
     $this->addConfig($values);
@@ -274,12 +312,11 @@ abstract class FeedsConfigurable {
  * Config form wrapper. Use to render the configuration form of
  * a FeedsConfigurable object.
  *
- * @param $configurable
- *   FeedsConfigurable object.
- * @param $form_method
+ * @param FeedsConfigurable $configurable
+ * @param string $form_method
  *   The form method that should be rendered.
  *
- * @return
+ * @return array|null
  *   Config form array if available. NULL otherwise.
  */
 function feeds_get_form($configurable, $form_method) {
@@ -292,14 +329,15 @@ function feeds_get_form($configurable, $form_method) {
  * Config form callback. Don't call directly, but use
  * feeds_get_form($configurable, 'method') instead.
  *
- * @param
- *   FormAPI $form_state.
- * @param
- *   FeedsConfigurable object.
- * @param
+ * @param array $form
+ * @param array $form_state
+ * @param FeedsConfigurable $configurable
  *   The object to perform the save() operation on.
- * @param $form_method
+ * @param string $form_method
  *   The $form_method that should be rendered.
+ *
+ * @return array
+ *   Form array.
  */
 function feeds_form($form, &$form_state, $configurable, $form_method) {
   $form = $configurable->$form_method($form_state);
@@ -317,6 +355,9 @@ function feeds_form($form, &$form_state, $configurable, $form_method) {
 
 /**
  * Validation handler for feeds_form().
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function feeds_form_validate($form, &$form_state) {
   _feeds_form_helper($form, $form_state, 'Validate');
@@ -324,6 +365,9 @@ function feeds_form_validate($form, &$form_state) {
 
 /**
  * Submit handler for feeds_form().
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function feeds_form_submit($form, &$form_state) {
   _feeds_form_helper($form, $form_state, 'Submit');
@@ -333,6 +377,10 @@ function feeds_form_submit($form, &$form_state) {
  * Helper for Feeds validate and submit callbacks.
  *
  * @todo This is all terrible. Remove.
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $action
  */
 function _feeds_form_helper($form, &$form_state, $action) {
   $method = $form['#feeds_form_method'] . $action;

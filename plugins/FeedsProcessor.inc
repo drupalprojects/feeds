@@ -641,7 +641,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    * @param FeedsSource $source
    *   The source to expire entities for.
    *
-   * @param $time
+   * @param int|null $time
    *   (optional) All items produced by this configuration that are older than
    *   REQUEST_TIME - $time should be deleted. If NULL, processor should use
    *   internal configuration. Defaults to NULL.
@@ -714,6 +714,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
   /**
    * Counts the number of items imported by this processor.
+   *
+   * @return int
    */
   public function itemCount(FeedsSource $source) {
     return db_query("SELECT count(*) FROM {feeds_item} WHERE id = :id AND entity_type = :entity_type AND feed_nid = :feed_nid", array(':id' => $this->id, ':entity_type' => $this->entityType(), ':feed_nid' => $source->feed_nid))->fetchField();
@@ -886,6 +888,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
   /**
    * Per default, don't support expiry. If processor supports expiry of imported
    * items, return the time after which items should be removed.
+   *
+   * @return int
    */
   public function expiryTime() {
     return FEEDS_EXPIRE_NEVER;
@@ -893,6 +897,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
   /**
    * Declare default configuration.
+   *
+   * @return array
    */
   public function configDefaults() {
     $info = $this->entityInfo();
@@ -950,6 +956,10 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
   /**
    * Overrides parent::configForm().
+   *
+   * @param array $form_state
+   *
+   * @return array
    */
   public function configForm(&$form_state) {
     $info = $this->entityInfo();
@@ -1058,6 +1068,8 @@ abstract class FeedsProcessor extends FeedsPlugin {
 
   /**
    * Get mappings.
+   *
+   * @return array
    */
   public function getMappings() {
     $cache = &drupal_static('FeedsProcessor::getMappings', array());
@@ -1099,7 +1111,7 @@ abstract class FeedsProcessor extends FeedsPlugin {
    *
    * @ingroup mappingapi
    *
-   * @return
+   * @return array
    *   An array of mapping targets. Keys are paths to targets
    *   separated by ->, values are TRUE if target can be unique,
    *   FALSE otherwise.
