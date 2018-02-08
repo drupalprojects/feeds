@@ -305,6 +305,109 @@ class FeedsMapperTaxonomyTestCase extends FeedsMapperTestCase {
   }
 
   /**
+   * Tests that only term references are added from allowed vocabularies.
+   */
+  public function testAllowedVocabularies() {
+    // Create a second vocabulary.
+    $vocabulary = new stdClass();
+    $vocabulary->name = 'Foo';
+    $vocabulary->machine_name = 'foo';
+    taxonomy_vocabulary_save($vocabulary);
+
+    // Add a term to this vocabulary.
+    $term1 = new stdClass();
+    $term1->name = 'Foo1';
+    $term1->vid = $vocabulary->vid;
+    taxonomy_term_save($term1);
+
+    // Add a term to the tags vocabulary.
+    $term2 = new stdClass();
+    $term2->name = 'Bar1';
+    $term2->vid = 1;
+    taxonomy_term_save($term2);
+
+    FeedsPlugin::loadMappers();
+
+    $entity = new stdClass();
+    $target = 'field_tags';
+    $terms = array(
+      'Foo1',
+      'Bar1',
+    );
+    $mapping = array(
+      'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_NAME,
+      'language' => LANGUAGE_NONE,
+    );
+
+    $source = FeedsSource::instance('tmp', 0);
+
+    taxonomy_feeds_set_target($source, $entity, $target, $terms, $mapping);
+
+    // Assert that only the term 'Bar1' was set.
+    $this->assertEqual(count($entity->field_tags[LANGUAGE_NONE]), 1);
+    $this->assertEqual($term2->tid, $entity->field_tags[LANGUAGE_NONE][0]['tid']);
+  }
+
+  /**
+   * Tests if terms can be mapped when term access modules are enabled.
+   */
+  public function testTermAccess() {
+    FeedsPlugin::loadMappers();
+
+    // Set acting user.
+    // @see feeds_tests_query_term_access_alter()
+    variable_set('feeds_tests_term_reference_allowed_user', $this->admin_user->uid);
+
+    // Set to import using cron.
+    $this->setSettings('syndication', NULL, array(
+      'import_period' => 0,
+      'import_on_create' => FALSE,
+      'process_in_background' => TRUE,
+    ));
+
+    // Add target to taxonomy reference field.
+    $this->addMappings('syndication', array(
+      5 => array(
+        'source' => 'tags',
+        'target' => 'field_tags',
+        'term_search' => FEEDS_TAXONOMY_SEARCH_TERM_NAME,
+      ),
+    ));
+
+    // Create a few terms used in developmentseed.rss2.
+    $term1 = new stdClass();
+    $term1->name = 'Drupal';
+    $term1->vid = 1;
+    taxonomy_term_save($term1);
+    $term2 = new stdClass();
+    $term2->name = 'translation';
+    $term2->vid = 1;
+    taxonomy_term_save($term2);
+
+    // Create feed node and initiate import.
+    $nid = $this->createFeedNode('syndication', NULL, 'Syndication');
+
+    // Log out to ensure cron is ran as anonymous user.
+    $this->drupalLogout();
+    // Run cron to run the import and assert 11 created nodes in total.
+    $this->cronRun();
+    $node_count = db_select('node')
+      ->fields('node', array('nid'))
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertEqual(11, $node_count, format_string('There are @expected nodes (actual: @actual).', array(
+      '@expected' => 11,
+      '@actual' => $node_count,
+    )));
+
+    // Assert that node 2 got two terms assigned.
+    $node = node_load(2);
+    $this->assertEqual($term1->tid, $node->field_tags[LANGUAGE_NONE][0]['tid']);
+    $this->assertEqual($term2->tid, $node->field_tags[LANGUAGE_NONE][1]['tid']);
+  }
+
+  /**
    * Tests importing empty values
    */
   public function testBlankSourceValues() {

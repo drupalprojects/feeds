@@ -310,6 +310,44 @@ function feeds_tests_nodes() {
 }
 
 /**
+ * Implements hook_query_TAG_alter() for tag 'term_access'.
+ */
+function feeds_tests_query_term_access_alter(QueryAlterableInterface $query) {
+  global $user;
+
+  $allowed_user = variable_get('feeds_tests_term_reference_allowed_user', NULL);
+  if (is_null($allowed_user)) {
+    // No allowed user set. Abort.
+    return;
+  }
+
+  // Read meta-data from query, if provided.
+  if (!$account = $query->getMetaData('account')) {
+    $account = $user;
+  }
+
+  // If the current active user is the set user, abort.
+  if ($account->uid == $allowed_user) {
+    return;
+  }
+
+  // If $account can bypass node access, or there are no node access
+  // modules, we don't need to alter the query.
+  if (user_access('bypass node access', $account)) {
+    return;
+  }
+
+  // Disallow any terms.
+  $tables = $query->getTables();
+  foreach ($tables as $talias => $tableinfo) {
+    $table = $tableinfo['table'];
+    if (!($table instanceof SelectQueryInterface) && $table == 'taxonomy_term_data') {
+      $query->condition("$talias.tid", 0);
+    }
+  }
+}
+
+/**
  * Implements hook_feeds_processor_targets().
  */
 function feeds_tests_feeds_processor_targets($entity_type, $bundle) {
@@ -544,6 +582,20 @@ function feeds_tests_feeds_after_parse(FeedsSource $source, FeedsParserResult $r
     foreach ($result->items as &$item) {
       $item['uid'] = (float) $item['uid'];
     }
+  }
+
+  // Conditionally set the 'uid' value to the current user.
+  // @see FeedsAccountSwitcherTest
+  if (variable_get('feeds_tests_set_uid_current_user', FALSE)) {
+    foreach ($result->items as &$item) {
+      $item['uid'] = $GLOBALS['user']->uid;
+    }
+  }
+
+  // Conditionally abort the import abruptly.
+  // @see FeedsAccountSwitcherTest
+  if (variable_get('feeds_tests_trigger_import_disruption', FALSE)) {
+    die();
   }
 }
 

@@ -14,6 +14,8 @@ test_dependencies[] = link:link
 test_dependencies[] = rules:rules
 test_dependencies[] = variable:variable
 
+files[] = includes/FeedsAccountSwitcher.inc
+files[] = includes/FeedsAccountSwitcherInterface.inc
 files[] = includes/FeedsConfigurable.inc
 files[] = includes/FeedsHTTPCache.inc
 files[] = includes/FeedsHTTPCacheItem.inc
@@ -79,6 +81,7 @@ files[] = tests/feeds_mapper_link.test
 files[] = tests/feeds_mapper_summary.test
 files[] = tests/feeds_mapper_taxonomy.test
 files[] = tests/feeds_tokens.test
+files[] = tests/FeedsAccountSwitcherTest.test
 files[] = tests/FeedsEnclosureTest.test
 files[] = tests/FeedsFetcherResultTest.test
 files[] = tests/FeedsHTTPCacheTest.test

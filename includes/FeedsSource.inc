@@ -192,26 +192,55 @@ class FeedsSource extends FeedsConfigurable {
   protected $exception;
 
   /**
+   * The account switcher.
+   *
+   * @var FeedsAccountSwitcherInterface
+   */
+  protected $accountSwitcher;
+
+  /**
    * Instantiate a unique object per class/id/feed_nid. Don't use
    * directly, use feeds_source() instead.
+   *
+   * @param string $importer_id
+   *   The machine name of the importer.
+   * @param int $feed_nid
+   *   The node id of a feed node if the source is attached to a feed node.
+   * @param FeedsAccountSwitcherInterface $account_switcher
+   *   The account switcher to use to be able to perform actions as a different
+   *   user.
    */
-  public static function instance($importer_id, $feed_nid) {
+  public static function instance($importer_id, $feed_nid, FeedsAccountSwitcherInterface $account_switcher = NULL) {
     $class = variable_get('feeds_source_class', 'FeedsSource');
 
     $instances = &drupal_static(__METHOD__, array());
 
     if (!isset($instances[$class][$importer_id][$feed_nid])) {
-      $instances[$class][$importer_id][$feed_nid] = new $class($importer_id, $feed_nid);
+      $instances[$class][$importer_id][$feed_nid] = new $class($importer_id, $feed_nid, $account_switcher);
     }
     return $instances[$class][$importer_id][$feed_nid];
   }
 
   /**
    * Constructor.
+   *
+   * @param string $importer_id
+   *   The machine name of the importer.
+   * @param int $feed_nid
+   *   The node id of a feed node if the source is attached to a feed node.
+   * @param FeedsAccountSwitcherInterface $account_switcher
+   *   The account switcher to use to be able to perform actions as a different
+   *   user.
    */
-  protected function __construct($importer_id, $feed_nid) {
+  protected function __construct($importer_id, $feed_nid, FeedsAccountSwitcherInterface $account_switcher = NULL) {
     $this->feed_nid = $feed_nid;
     $this->importer = feeds_importer($importer_id);
+    if (is_null($account_switcher)) {
+      $this->accountSwitcher = new FeedsAccountSwitcher();
+    }
+    else {
+      $this->accountSwitcher = $account_switcher;
+    }
     parent::__construct($importer_id);
     $this->load();
   }
@@ -1120,6 +1149,9 @@ class FeedsSource extends FeedsConfigurable {
     if (!lock_acquire("feeds_source_{$this->id}_{$this->feed_nid}", 60.0)) {
       throw new FeedsLockException(t('Cannot acquire lock for source @id / @feed_nid.', array('@id' => $this->id, '@feed_nid' => $this->feed_nid)));
     }
+
+    // Switch account.
+    $this->switchAccount();
   }
 
   /**
@@ -1127,6 +1159,38 @@ class FeedsSource extends FeedsConfigurable {
    */
   protected function releaseLock() {
     lock_release("feeds_source_{$this->id}_{$this->feed_nid}");
+
+    // Switch back to original account.
+    $this->switchBack();
+  }
+
+  /**
+   * Switches to the owner of the feed or user 1 if the importer is not attached
+   * to a content type.
+   */
+  protected function switchAccount() {
+    // Use author of feed node.
+    if ($this->feed_nid) {
+      $node = node_load($this->feed_nid);
+      if (!empty($node->uid)) {
+        $account = user_load($node->uid);
+      }
+    }
+
+    // If the owner of the feed node is anonymous or if the importer is not
+    // attached to a content type, pick user 1 instead.
+    if (empty($account)) {
+      $account = user_load(1);
+    }
+
+    $this->accountSwitcher->switchTo($account);
+  }
+
+  /**
+   * Switches back to the original user.
+   */
+  protected function switchBack() {
+    $this->accountSwitcher->switchBack();
   }
 
   /**
