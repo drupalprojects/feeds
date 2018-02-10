@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains FeedsAccountSwitcherInterface interface.
+ */
+
+/**
  * Defines an interface for a service for safe account switching.
  */
 interface FeedsAccountSwitcherInterface {

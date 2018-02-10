@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains FeedsAccountSwitcher class.
+ */
+
+/**
  * An implementation of FeedsAccountSwitcherInterface.
  *
  * This allows for safe switching of user accounts by ensuring that session

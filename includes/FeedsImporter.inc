@@ -6,6 +6,8 @@
  */
 
 /**
+ * Class for a Feeds importer.
+ *
  * A FeedsImporter object describes how an external source should be fetched,
  * parsed and processed. Feeds can manage an arbitrary amount of importers.
  *
@@ -24,21 +26,30 @@
  */
 class FeedsImporter extends FeedsConfigurable {
 
-  // Every feed has a fetcher, a parser and a processor.
-  // These variable names match the possible return values of
-  // FeedsPlugin::typeOf().
+  /**
+   * Every feed has a fetcher, a parser and a processor.
+   *
+   * These variable names match the possible return values of
+   * FeedsPlugin::typeOf().
+   */
 
   /**
+   * The selected fetcher for this importer.
+   *
    * @var FeedsFetcher|null
    */
   protected $fetcher;
 
   /**
+   * The selected parser for this importer.
+   *
    * @var FeedsParser|null
    */
   protected $parser;
 
   /**
+   * The selected processor for this importer.
+   *
    * @var FeedsProcessor|null
    */
   protected $processor;
@@ -51,10 +62,10 @@ class FeedsImporter extends FeedsConfigurable {
   protected $plugin_types = array('fetcher', 'parser', 'processor');
 
   /**
-   * Instantiate class variables, initialize and configure
-   * plugins.
+   * Instantiate class variables, initialize and configure plugins.
    *
    * @param string $id
+   *   The importer ID.
    */
   protected function __construct($id) {
     parent::__construct($id);
@@ -75,8 +86,7 @@ class FeedsImporter extends FeedsConfigurable {
   }
 
   /**
-   * Report how many items *should* be created on one page load by this
-   * importer.
+   * Reports how many items *should* be created on one request by this importer.
    *
    * Note:
    *
@@ -85,7 +95,7 @@ class FeedsImporter extends FeedsConfigurable {
    * number of items that can be created on one page load is actually without
    * limit.
    *
-   * @return
+   * @return int
    *   A positive number defining the number of items that can be created on
    *   one page load. 0 if this number is unlimited.
    */
@@ -148,8 +158,8 @@ class FeedsImporter extends FeedsConfigurable {
   /**
    * Set plugin.
    *
-   * @param $plugin_key
-   *   A fetcher, parser or processor plugin.
+   * @param string $plugin_key
+   *   The name of a fetcher, parser or processor plugin.
    *
    * @todo Error handling, handle setting to the same plugin.
    */
@@ -296,13 +306,15 @@ class FeedsImporter extends FeedsConfigurable {
   }
 
   /**
-   * Override parent::configForm().
+   * Overrides parent::configForm().
    *
    * @param array $form_state
+   *   The current state of the form.
    *
    * @return array
+   *   The form definition.
    */
-  public function configForm(&$form_state) {
+  public function configForm(array &$form_state) {
     $config = $this->getConfig();
     $form = array();
     $form['name'] = array(
@@ -323,14 +335,25 @@ class FeedsImporter extends FeedsConfigurable {
     $form['content_type'] = array(
       '#type' => 'select',
       '#title' => t('Attach to content type'),
-      '#description' => t('If "Use standalone form" is selected a source is imported by using a form under !import_form.
-                           If a content type is selected a source is imported by creating a node of that content type.',
-                           array('!import_form' => l(url('import', array('absolute' => TRUE)), 'import', array('attributes' => array('target' => '_new'))))),
+      '#description' => '<p>' . t('If "Use standalone form" is selected, a source is imported by using a form under !import_form. If a content type is selected, a source is imported by creating a node of that content type.', array(
+        '!import_form' => l(url('import', array('absolute' => TRUE)), 'import', array('attributes' => array('target' => '_new'))),
+      )) . '</p>',
       '#options' => array('' => t('Use standalone form')) + $node_types,
       '#default_value' => $config['content_type'],
     );
     $cron_required = ' ' . l(t('Requires cron to be configured.'), 'http://drupal.org/cron', array('attributes' => array('target' => '_new')));
-    $period = drupal_map_assoc(array(900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200), 'format_interval');
+    $period = drupal_map_assoc(array(
+      900,
+      1800,
+      3600,
+      10800,
+      21600,
+      43200,
+      86400,
+      259200,
+      604800,
+      2419200,
+    ), 'format_interval');
     foreach ($period as &$p) {
       $p = t('Every !p', array('!p' => $p));
     }
@@ -361,11 +384,14 @@ class FeedsImporter extends FeedsConfigurable {
   }
 
   /**
+   * Overrides parent::configFormSubmit().
+   *
    * Reschedule if import period changes.
    *
    * @param array $values
+   *   An array that contains the values entered by the user through configForm.
    */
-  public function configFormSubmit(&$values) {
+  public function configFormSubmit(array &$values) {
     if ($this->config['import_period'] != $values['import_period']) {
       feeds_reschedule($this->id);
     }
@@ -386,11 +412,13 @@ class FeedsImporter extends FeedsConfigurable {
 }
 
 /**
- * Helper, see FeedsDataProcessor class.
+ * Formats a time interval.
  *
  * @param int $timestamp
+ *   The length of the interval in seconds.
  *
- * @return null|string
+ * @return string
+ *   A translated string representation of the interval.
  */
 function feeds_format_expire($timestamp) {
   if ($timestamp == FEEDS_EXPIRE_NEVER) {
