@@ -186,7 +186,7 @@ abstract class FeedsConfigurable {
    *   by the keys returned by configDefaults() and populated with default
    *   values that are not included in $config.
    */
-  public function setConfig(array $config) {
+  public function setConfig($config) {
     $defaults = $this->configDefaults();
     $this->config = array_intersect_key($config, $defaults) + $defaults;
   }
@@ -198,7 +198,7 @@ abstract class FeedsConfigurable {
    *   Array containing configuration information. Will be filtered by the keys
    *   returned by configDefaults().
    */
-  public function addConfig(array $config) {
+  public function addConfig($config) {
     $this->config = is_array($this->config) ? array_merge($this->config, $config) : $config;
     $default_keys = $this->configDefaults();
     $this->config = array_intersect_key($this->config, $default_keys);
@@ -279,7 +279,7 @@ abstract class FeedsConfigurable {
    * @return array
    *   FormAPI style form definition.
    */
-  public function configForm(array &$form_state) {
+  public function configForm(&$form_state) {
     return array();
   }
 
@@ -291,7 +291,7 @@ abstract class FeedsConfigurable {
    * @param array $values
    *   An array that contains the values entered by the user through configForm.
    */
-  public function configFormValidate(array &$values) {
+  public function configFormValidate(&$values) {
   }
 
   /**
@@ -300,7 +300,7 @@ abstract class FeedsConfigurable {
    * @param array $values
    *   An array that contains the values entered by the user through configForm.
    */
-  public function configFormSubmit(array &$values) {
+  public function configFormSubmit(&$values) {
     $this->addConfig($values);
     $this->save();
     drupal_set_message(t('Your changes have been saved.'));

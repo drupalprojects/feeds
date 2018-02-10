@@ -314,7 +314,7 @@ class FeedsImporter extends FeedsConfigurable {
    * @return array
    *   The form definition.
    */
-  public function configForm(array &$form_state) {
+  public function configForm(&$form_state) {
     $config = $this->getConfig();
     $form = array();
     $form['name'] = array(
@@ -391,7 +391,7 @@ class FeedsImporter extends FeedsConfigurable {
    * @param array $values
    *   An array that contains the values entered by the user through configForm.
    */
-  public function configFormSubmit(array &$values) {
+  public function configFormSubmit(&$values) {
     if ($this->config['import_period'] != $values['import_period']) {
       feeds_reschedule($this->id);
     }
