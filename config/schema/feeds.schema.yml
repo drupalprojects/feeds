@@ -25,7 +25,7 @@ feeds.feed_type.*:
       label: 'Parser id'
     parser_configuration:
       label: 'Parser configuration'
-      type: mapping
+      type: feeds.parser.[%parent.parser]
     processor:
       type: string
       label: 'Processor id'
@@ -41,7 +41,7 @@ feeds.feed_type.*:
             type: string
           label:
             type: string
-          description:
+          machine_name:
             type: string
     mappings:
       type: sequence
@@ -103,6 +103,30 @@ feeds.fetcher.directory:
         type: string
     recursive_scan:
       type: boolean
+
+# Parser configurations.
+feeds.parser.csv:
+  type: mapping
+  label: 'CSV parser settings'
+  mapping:
+    delimiter:
+      type: string
+    no_headers:
+      type: boolean
+    line_limit:
+      type: integer
+
+feeds.parser.opml:
+  type: mapping
+  label: 'OPML parser settings'
+
+feeds.parser.sitemap:
+  type: mapping
+  label: 'Sitemap XML parser settings'
+
+feeds.parser.syndication:
+  type: mapping
+  label: 'RSS/Atom parser settings'
 
 # Processor configurations.
 feeds.processor.entity:
