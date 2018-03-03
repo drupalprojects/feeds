@@ -17,7 +17,7 @@ class CsvParserTest extends FeedsUnitTestCase {
    * @dataProvider provider
    */
   public function testAlternateLineEnding(array $expected, $ending) {
-    $text = file_get_contents(dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/example.csv');
+    $text = file_get_contents(dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csv/example.csv');
     $text = str_replace("\r\n", $ending, $text);
 
     $parser = new \LimitIterator(CsvParser::createFromString($text), 0, 4);
@@ -80,7 +80,7 @@ class CsvParserTest extends FeedsUnitTestCase {
    * @covers ::getHeader
    */
   public function testHasHeader() {
-    $file = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/example.csv';
+    $file = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csv/example.csv';
     $parser = CsvParser::createFromFilePath($file)->setHasHeader();
 
     $this->assertSame(count(iterator_to_array($parser)), 5);
@@ -146,10 +146,10 @@ class CsvParserTest extends FeedsUnitTestCase {
    * Data provider for testCsvParsing().
    */
   public function csvFileProvider() {
-    $path = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csvs';
+    $path = dirname(dirname(dirname(dirname(__DIR__)))) . '/tests/resources/csv-parser-component-files';
     $return = [];
 
-    foreach (glob($path . '/*.csv') as $file) {
+    foreach (glob($path . '/csv/*.csv') as $file) {
       $json_file = $path . '/json/' . str_replace('.csv', '.json', basename($file));
 
       $return[] = [
