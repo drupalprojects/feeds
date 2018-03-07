@@ -2,21 +2,21 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Item;
 
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
+use Drupal\feeds\Feeds\Item\BaseItem;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Item\BaseItem
  * @group feeds
  */
-class BaseItemTest extends FeedsUnitTestCase {
+class BaseItemTest extends ItemTestBase {
 
   /**
-   * Tests basic behavior.
+   * {@inheritdoc}
    */
-  public function test() {
-    $item = $this->getMockForAbstractClass('Drupal\feeds\Feeds\Item\BaseItem');
-    $item->set('field', 'value');
-    $this->assertSame($item->get('field'), 'value');
+  public function setUp() {
+    parent::setUp();
+
+    $this->item = $this->getMockForAbstractClass(BaseItem::class);
   }
 
 }

@@ -27,7 +27,27 @@ interface ItemInterface {
    *   The value for the field.
    *
    * @return $this
+   *   An instance of this class.
    */
   public function set($field, $value);
+
+  /**
+   * Converts the item to an array.
+   *
+   * @return array
+   *   The data of the item.
+   */
+  public function toArray();
+
+  /**
+   * Loads data in from an array.
+   *
+   * @param array $data
+   *   The data to load in.
+   *
+   * @return $this
+   *   An instance of this class.
+   */
+  public function fromArray(array $data);
 
 }

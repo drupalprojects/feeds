@@ -31,4 +31,21 @@ class DynamicItem implements ItemInterface {
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray() {
+    return $this->data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fromArray(array $data) {
+    foreach ($data as $field => $value) {
+      $this->set($field, $value);
+    }
+    return $this;
+  }
+
 }

@@ -22,4 +22,21 @@ abstract class BaseItem implements ItemInterface {
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray() {
+    return get_object_vars($this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fromArray(array $data) {
+    foreach ($data as $field => $value) {
+      $this->set($field, $value);
+    }
+    return $this;
+  }
+
 }
