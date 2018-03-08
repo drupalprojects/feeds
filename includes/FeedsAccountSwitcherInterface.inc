@@ -31,7 +31,7 @@ interface FeedsAccountSwitcherInterface {
    * @return FeedsAccountSwitcherInterface
    *   $this.
    *
-   * @throws RuntimeException
+   * @throws FeedsAccountSwitcherException
    *   When there are no more account switches to revert.
    */
   public function switchBack();

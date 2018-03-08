@@ -78,7 +78,7 @@ class FeedsAccountSwitcher implements FeedsAccountSwitcherInterface {
       $this->activateCurrentUser();
     }
     else {
-      throw new RuntimeException('No more accounts to revert to.');
+      throw new FeedsAccountSwitcherException('No more accounts to revert to.');
     }
     // Restore original session saving status if all account switches are
     // reverted.

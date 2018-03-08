@@ -15,6 +15,7 @@ test_dependencies[] = rules:rules
 test_dependencies[] = variable:variable
 
 files[] = includes/FeedsAccountSwitcher.inc
+files[] = includes/FeedsAccountSwitcherException.inc
 files[] = includes/FeedsAccountSwitcherInterface.inc
 files[] = includes/FeedsConfigurable.inc
 files[] = includes/FeedsHTTPCache.inc

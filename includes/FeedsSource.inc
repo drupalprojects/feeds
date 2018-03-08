@@ -933,7 +933,12 @@ class FeedsSource extends FeedsConfigurable {
   public function unlock() {
     $this->clearStates();
     $this->save();
-    $this->releaseLock();
+    try {
+      $this->releaseLock();
+    }
+    catch (FeedsAccountSwitcherException $exception) {
+      // Ignore switch back exceptions.
+    }
   }
 
   /**
