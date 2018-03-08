@@ -2,7 +2,9 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
 
@@ -25,6 +27,31 @@ class FeedsItem extends FieldTargetBase {
       ->addProperty('guid')
       ->markPropertyUnique('url')
       ->markPropertyUnique('guid');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setTarget(FeedInterface $feed, EntityInterface $entity, $field_name, array $values) {
+    if ($values = $this->prepareValues($values)) {
+      $item_list = $entity->get($field_name);
+
+      // Append these values to the existing values.
+      $values = array_merge($item_list->getValue()[0], $values[0]);
+
+      $item_list->setValue($values);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function prepareValue($delta, array &$values) {
+    if (isset($values['url']) && empty($values['url'])) {
+      // If 'url' is empty, set it explicitly to NULL to prevent validation
+      // errors.
+      $values['url'] = NULL;
+    }
   }
 
 }

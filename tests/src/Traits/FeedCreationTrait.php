@@ -42,23 +42,35 @@ trait FeedCreationTrait {
           'type' => 'article',
         ],
       ],
-      'mappings' => [
-        [
-          'target' => 'feeds_item',
-          'map' => ['guid' => 'guid', 'url' => 'url'],
-          'unique' => ['guid' => TRUE],
-        ],
-        [
-          'target' => 'title',
-          'map' => ['value' => 'title'],
-        ],
-      ],
+      'mappings' => $this->getDefaultMappings(),
     ];
 
     $feed_type = FeedType::create($settings);
     $feed_type->save();
 
     return $feed_type;
+  }
+
+  /**
+   * Returns default mappings for tests.
+   *
+   * Can be overridden by specific tests.
+   *
+   * @return array
+   *   A list of default mappings.
+   */
+  protected function getDefaultMappings() {
+    return [
+      [
+        'target' => 'feeds_item',
+        'map' => ['guid' => 'guid'],
+        'unique' => ['guid' => TRUE],
+      ],
+      [
+        'target' => 'title',
+        'map' => ['value' => 'title'],
+      ],
+    ];
   }
 
   /**

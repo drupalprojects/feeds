@@ -22,7 +22,14 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['node', 'feeds'];
+  public static $modules = ['field', 'node', 'feeds', 'text', 'filter'];
+
+  /**
+   * The node type to test with.
+   *
+   * @var \Drupal\node\Entity\NodeType
+   */
+  protected $nodeType;
 
   /**
    * {@inheritdoc}
@@ -35,12 +42,20 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
     $this->installEntitySchema('feeds_subscription');
     $this->installSchema('node', 'node_access');
 
-    // Create a content type.
-    $type = NodeType::create([
+    // Create a content type with a body field.
+    $this->nodeType = NodeType::create([
       'type' => 'article',
       'name' => 'Article',
     ]);
-    $type->save();
+    $this->nodeType->save();
+  }
+
+  /**
+   * Installs body field (not needed for every kernel test).
+   */
+  protected function setUpBodyField() {
+    $this->installConfig(['field', 'filter', 'node']);
+    node_add_body_field($this->nodeType);
   }
 
 }

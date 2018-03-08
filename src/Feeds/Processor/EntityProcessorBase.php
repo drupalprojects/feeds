@@ -129,15 +129,18 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     }
 
     try {
+      // Set feeds_item values.
+      $feeds_item = $entity->get('feeds_item');
+      $feeds_item->target_id = $feed->id();
+      $feeds_item->hash = $hash;
+
       // Set field values.
       $this->map($feed, $entity, $item);
       $this->entityValidate($entity);
 
       // This will throw an exception on failure.
       $this->entitySaveAccess($entity);
-      // Set the values that we absolutely need.
-      $entity->get('feeds_item')->target_id = $feed->id();
-      $entity->get('feeds_item')->hash = $hash;
+      // Set imported time.
       $entity->get('feeds_item')->imported = REQUEST_TIME;
 
       // And... Save! We made it.
@@ -668,6 +671,10 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     // to clear target elements of each item before mapping in case we are
     // mapping on a prepopulated item such as an existing node.
     foreach ($mappings as $mapping) {
+      if ($mapping['target'] == 'feeds_item') {
+        // Skip feeds item as this field gets default values before mapping.
+        continue;
+      }
       unset($entity->{$mapping['target']});
     }
 
@@ -677,6 +684,11 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       $target = $mapping['target'];
 
       foreach ($mapping['map'] as $column => $source) {
+
+        if ($source === '') {
+          // Skip empty sources.
+          continue;
+        }
 
         if (!isset($source_values[$target][$column])) {
           $source_values[$target][$column] = [];

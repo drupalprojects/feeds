@@ -26,6 +26,17 @@ class FeedsItem extends EntityReferenceItem {
   /**
    * {@inheritdoc}
    */
+  public function setValue($values, $notify = TRUE) {
+    if (isset($values['url']) && empty($values['url'])) {
+      // Set url explicitly to NULL to prevent validation errors.
+      $values['url'] = NULL;
+    }
+    return parent::setValue($values, $notify);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function defaultStorageSettings() {
     return ['target_type' => 'feeds_feed'] + parent::defaultStorageSettings();
   }
@@ -105,7 +116,10 @@ class FeedsItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public function preSave() {
-    $this->url = trim($this->url);
+    if (is_string($this->url)) {
+      // Only trim if url is a string.
+      $this->url = trim($this->url);
+    }
     $this->guid = trim($this->guid);
     $this->imported = (int) $this->imported;
   }
