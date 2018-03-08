@@ -7,7 +7,9 @@ use Drupal\feeds\Feeds\Processor\EntityProcessorBase;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Feeds\Item\ItemInterface;
+use Drupal\feeds\Feeds\State\CleanState;
 use Drupal\feeds\State;
+use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Kernel\FeedsKernelTestBase;
 
 /**
@@ -92,6 +94,10 @@ class EntityProcessorBaseTest extends FeedsKernelTestBase {
     $this->feed->expects($this->any())
       ->method('id')
       ->will($this->returnValue(1));
+    $this->feed->expects($this->any())
+      ->method('getState')
+      ->with(StateInterface::CLEAN)
+      ->will($this->returnValue(new CleanState()));
 
     $this->state = new State();
 
@@ -109,6 +115,78 @@ class EntityProcessorBaseTest extends FeedsKernelTestBase {
     // @todo This method should be tested with multiple times with different
     // settings.
     $this->markTestIncomplete('Test is a stub.');
+  }
+
+  /**
+   * @covers ::clean
+   */
+  public function testCleanWithKeepNonExistent() {
+    // Add feeds_item field to article content type.
+    $this->callProtectedMethod($this->processor, 'prepareFeedsItemField');
+
+    // Create an entity with a feeds item field.
+    $node = $this->createNodeWithFeedsItem($this->feed);
+
+    // Get hash of node.
+    $hash = $node->feeds_item->hash;
+
+    // Clean.
+    $this->processor->clean($this->feed, $node, new CleanState());
+
+    // Assert that the hash did not change.
+    $this->assertEquals($hash, $node->feeds_item->hash);
+  }
+
+  /**
+   * @covers ::clean
+   */
+  public function testCleanWithUnpublishAction() {
+    // Change configuration of processor.
+    $config = $this->processor->getConfiguration();
+    $config['update_non_existent'] = 'node_unpublish_action';
+    $this->processor->setConfiguration($config);
+
+    // Add feeds_item field to article content type.
+    $this->callProtectedMethod($this->processor, 'prepareFeedsItemField');
+
+    // Create an entity with a feeds item field.
+    $node = $this->createNodeWithFeedsItem($this->feed);
+    // Assert that the node is published.
+    $this->assertTrue($node->isPublished());
+
+    // Clean.
+    $this->processor->clean($this->feed, $node, new CleanState());
+
+    // Reload node.
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($node->id());
+
+    // Assert that the node is unpublished now.
+    $this->assertFalse($node->isPublished());
+    // Assert that the hash is now 'node_unpublish_action'.
+    $this->assertEquals('node_unpublish_action', $node->feeds_item->hash);
+  }
+
+  /**
+   * @covers ::clean
+   */
+  public function testCleanWithDeleteAction() {
+    // Change configuration of processor.
+    $config = $this->processor->getConfiguration();
+    $config['update_non_existent'] = EntityProcessorBase::DELETE_NON_EXISTENT;
+    $this->processor->setConfiguration($config);
+
+    // Add feeds_item field to article content type.
+    $this->callProtectedMethod($this->processor, 'prepareFeedsItemField');
+
+    // Create an entity with a feeds item field.
+    $node = $this->createNodeWithFeedsItem($this->feed);
+    $this->assertNodeCount(1);
+
+    // Clean.
+    $this->processor->clean($this->feed, $node, new CleanState());
+
+    // Assert that the node is deleted.
+    $this->assertNodeCount(0);
   }
 
   /**
@@ -242,6 +320,33 @@ class EntityProcessorBaseTest extends FeedsKernelTestBase {
   public function testGetItemCount() {
     $this->markTestIncomplete('Test not yet implemented.');
     $this->processor->getItemCount($this->feed);
+  }
+
+  /**
+   * @covers ::getImportedItemIds
+   */
+  public function testGetImportedItemIds() {
+    $feed_type = $this->createFeedType();
+    $feed = $this->createFeed($feed_type->id());
+
+    // Create an entity with a feeds item field.
+    $node = $this->createNodeWithFeedsItem($feed);
+
+    $expected = [
+      $node->id() => $node->id(),
+    ];
+    $this->assertEquals($expected, $feed_type->getProcessor()->getImportedItemIds($this->feed));
+
+    // Create two other nodes.
+    $node2 = $this->createNodeWithFeedsItem($feed);
+    $node3 = $this->createNodeWithFeedsItem($feed);
+
+    $expected = [
+      $node->id() => $node->id(),
+      $node2->id() => $node2->id(),
+      $node3->id() => $node3->id(),
+    ];
+    $this->assertEquals($expected, $feed_type->getProcessor()->getImportedItemIds($this->feed));
   }
 
   /**

@@ -41,6 +41,20 @@ interface ProcessorInterface extends FeedsPluginInterface {
   const EXPIRE_NEVER = -1;
 
   /**
+   * Keep items that no longer exist in the feed.
+   *
+   * @var string
+   */
+  const KEEP_NON_EXISTENT = '_keep';
+
+  /**
+   * Delete items that no longer exist in the feed.
+   *
+   * @var string
+   */
+  const DELETE_NON_EXISTENT = '_delete';
+
+  /**
    * Processes the results from a parser.
    *
    * @param \Drupal\feeds\FeedInterface $feed
@@ -102,6 +116,17 @@ interface ProcessorInterface extends FeedsPluginInterface {
    *   The number of items imported by this feed.
    */
   public function getItemCount(FeedInterface $feed);
+
+  /**
+   * Returns a list of ID's of entities that were imported.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to check fo imported entity ID's.
+   *
+   * @return array
+   *   A list of entity ID's.
+   */
+  public function getImportedItemIds(FeedInterface $feed);
 
   /**
    * Returns the label for feed items created.

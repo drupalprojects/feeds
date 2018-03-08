@@ -43,6 +43,11 @@ final class FeedsEvents {
   const PROCESS = 'feeds.process';
 
   /**
+   * Fired when cleaning has started.
+   */
+  const CLEAN = 'feeds.clean';
+
+  /**
    * Fired before clearing begins.
    */
   const INIT_CLEAR = 'feeds.init_clear';

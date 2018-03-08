@@ -2,6 +2,8 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\feeds\Event\CleanEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\InitEvent;
@@ -10,6 +12,7 @@ use Drupal\feeds\Event\ProcessEvent;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\Feeds\Item\ItemInterface;
+use Drupal\feeds\Feeds\State\CleanStateInterface;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Result\RawFetcherResult;
@@ -45,6 +48,14 @@ class FeedImportHandler extends FeedHandlerBase {
           $this->doProcess($feed, $item);
         }
       } while ($feed->progressImporting() !== StateInterface::BATCH_COMPLETE);
+
+      // Clean up if needed.
+      $clean_state = $feed->getState(StateInterface::CLEAN);
+      if ($clean_state instanceof CleanStateInterface && $clean_state->count()) {
+        while ($entity = $clean_state->nextEntity()) {
+          $this->doClean($feed, $entity);
+        }
+      }
     }
     catch (EmptyFeedException $e) {
       // Not an error.
@@ -208,10 +219,66 @@ class FeedImportHandler extends FeedHandlerBase {
     elseif ($feed->progressFetching() !== StateInterface::BATCH_COMPLETE) {
       $this->startBatchFetch($feed);
     }
+    elseif ($feed->progressCleaning() !== StateInterface::BATCH_COMPLETE) {
+      $this->startBatchClean($feed);
+    }
     else {
       $feed->finishImport();
       $feed->startBatchExpire();
     }
+  }
+
+  /**
+   * Starts the clean batch.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed.
+   */
+  protected function startBatchClean(FeedInterface $feed) {
+    $batch = [
+      'title' => $this->t('Cleaning: %title', ['%title' => $feed->label()]),
+      'init_message' => $this->t('Cleaning: %title', ['%title' => $feed->label()]),
+      'progress_message' => $this->t('Cleaning: %title', ['%title' => $feed->label()]),
+      'error_message' => $this->t('An error occored while cleaning %title.', ['%title' => $feed->label()]),
+    ];
+
+    $batch['operations'][] = [[$this, 'batchClean'], [$feed]];
+    $batch['operations'][] = [[$this, 'batchPostProcess'], [$feed]];
+
+    batch_set($batch);
+  }
+
+  /**
+   * Performs the batch cleaning.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed.
+   * @param array $context
+   *   Batch context.
+   */
+  public function batchClean(FeedInterface $feed, array &$context) {
+    $state = $feed->getState(StateInterface::CLEAN);
+    if (empty($context['sandbox'])) {
+      $context['sandbox']['max'] = $state->count();
+      $context['sandbox']['progress'] = 0;
+    }
+
+    try {
+      $entity = $state->nextEntity();
+      if ($entity) {
+        $this->doClean($feed, $entity);
+      }
+      $context['sandbox']['progress']++;
+      $context['finished'] = ($context['sandbox']['progress'] >= $context['sandbox']['max']);
+      if (!$state->count()) {
+        $state->setCompleted();
+      }
+    }
+    catch (\Exception $exception) {
+      return $this->handleException($feed, $exception);
+    }
+
+    $feed->saveStates();
   }
 
   /**
@@ -234,6 +301,14 @@ class FeedImportHandler extends FeedHandlerBase {
           $this->doProcess($feed, $item);
         }
       } while ($feed->progressImporting() !== StateInterface::BATCH_COMPLETE);
+
+      // Clean up if needed.
+      $clean_state = $feed->getState(StateInterface::CLEAN);
+      if ($clean_state instanceof CleanStateInterface && $clean_state->count()) {
+        while ($entity = $clean_state->nextEntity()) {
+          $this->doClean($feed, $entity);
+        }
+      }
     }
     catch (EmptyFeedException $e) {
       // Not an error.
@@ -296,6 +371,19 @@ class FeedImportHandler extends FeedHandlerBase {
   protected function doProcess(FeedInterface $feed, ItemInterface $item) {
     $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'process'));
     $this->dispatchEvent(FeedsEvents::PROCESS, new ProcessEvent($feed, $item));
+  }
+
+  /**
+   * Invokes the clean stage.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to fetch.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to apply an action on.
+   */
+  protected function doClean(FeedInterface $feed, EntityInterface $entity) {
+    $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'clean'));
+    $this->dispatchEvent(FeedsEvents::CLEAN, new CleanEvent($feed, $entity));
   }
 
   /**

@@ -9,6 +9,8 @@ use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\InitEvent;
 use Drupal\feeds\Event\ParseEvent;
 use Drupal\feeds\Event\ProcessEvent;
+use Drupal\feeds\Event\CleanEvent;
+use Drupal\feeds\Plugin\Type\CleanableInterface;
 use Drupal\feeds\Plugin\Type\ClearableInterface;
 use Drupal\feeds\StateInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -92,6 +94,20 @@ class LazySubscriber implements EventSubscriberInterface {
             ->process($feed, $event->getParserResult(), $feed->getState(StateInterface::PROCESS));
         });
         break;
+
+      case 'clean':
+        foreach ($event->getFeed()->getType()->getPlugins() as $plugin) {
+          if (!$plugin instanceof CleanableInterface) {
+            continue;
+          }
+
+          $dispatcher->addListener(FeedsEvents::CLEAN, function (CleanEvent $event) use ($plugin) {
+            $feed = $event->getFeed();
+            $plugin->clean($feed, $event->getEntity(), $feed->getState(StateInterface::CLEAN));
+          });
+        }
+        break;
+
     }
   }
 

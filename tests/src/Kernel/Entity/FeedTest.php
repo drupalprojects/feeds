@@ -3,6 +3,7 @@
 namespace Drupal\Tests\feeds\Kernel\Entity;
 
 use Drupal\feeds\StateInterface;
+use Drupal\feeds\Feeds\State\CleanStateInterface;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\Plugin\Type\Fetcher\FetcherInterface;
@@ -270,6 +271,14 @@ class FeedTest extends FeedsKernelTestBase {
   }
 
   /**
+   * @covers ::progressCleaning
+   */
+  public function testProgressCleaning() {
+    $feed = $this->createFeed($this->feedType->id());
+    $this->assertInternalType('float', $feed->progressCleaning());
+  }
+
+  /**
    * @covers ::progressClearing
    */
   public function testProgressClearing() {
@@ -293,6 +302,7 @@ class FeedTest extends FeedsKernelTestBase {
     $this->assertInstanceOf(StateInterface::class, $feed->getState(StateInterface::FETCH));
     $this->assertInstanceOf(StateInterface::class, $feed->getState(StateInterface::PARSE));
     $this->assertInstanceOf(StateInterface::class, $feed->getState(StateInterface::PROCESS));
+    $this->assertInstanceOf(CleanStateInterface::class, $feed->getState(StateInterface::CLEAN));
     $this->assertInstanceOf(StateInterface::class, $feed->getState(StateInterface::CLEAR));
   }
 

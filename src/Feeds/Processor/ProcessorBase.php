@@ -33,6 +33,12 @@ abstract class ProcessorBase extends PluginBase implements ProcessorInterface {
     if (!$state->created && !$state->updated && !$state->failed) {
       $state->setMessage($this->t('There are no new @items.', $tokens));
     }
+
+    // Find out how many items were cleaned.
+    $clean_state = $feed->getState(StateInterface::CLEAN);
+    if ($clean_state->updated) {
+      $clean_state->setMessage($this->formatPlural($clean_state->updated, 'Cleaned @count @item.', 'Cleaned @count @items.', $tokens));
+    }
   }
 
   /**

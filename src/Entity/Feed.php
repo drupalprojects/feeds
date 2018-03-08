@@ -13,6 +13,7 @@ use Drupal\feeds\Event\DeleteFeedsEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\State\CleanState;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 use Drupal\feeds\State;
@@ -80,6 +81,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
    * @var array
    */
   protected $states;
+
+  /**
+   * Implements the magic __wakeup function to reset states.
+   */
+  public function __wakeup() {
+    $this->states = [];
+  }
 
   /**
    * {@inheritdoc}
@@ -312,7 +320,17 @@ class Feed extends ContentEntityBase implements FeedInterface {
    */
   public function getState($stage) {
     if (!isset($this->states[$stage])) {
-      $this->states[$stage] = \Drupal::keyValue('feeds_feed.' . $this->id())->get($stage, new State());
+      // @todo move this logic to a factory or alike.
+      switch ($stage) {
+        case StateInterface::CLEAN:
+          $state = new CleanState();
+          break;
+
+        default:
+          $state = new State();
+          break;
+      }
+      $this->states[$stage] = \Drupal::keyValue('feeds_feed.' . $this->id())->get($stage, $state);
     }
     return $this->states[$stage];
   }
@@ -374,6 +392,13 @@ class Feed extends ContentEntityBase implements FeedInterface {
     }
 
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function progressCleaning() {
+    return $this->getState(StateInterface::CLEAN)->progress;
   }
 
   /**

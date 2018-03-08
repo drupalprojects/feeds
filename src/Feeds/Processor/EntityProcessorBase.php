@@ -16,6 +16,7 @@ use Drupal\feeds\Exception\EntityAccessException;
 use Drupal\feeds\Exception\ValidationException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Feeds\Item\ItemInterface;
+use Drupal\feeds\Feeds\State\CleanStateInterface;
 use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
 use Drupal\feeds\StateInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -101,8 +102,20 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * {@inheritdoc}
    */
   public function process(FeedInterface $feed, ItemInterface $item, StateInterface $state) {
+    // Initialize clean list if needed.
+    $clean_state = $feed->getState(StateInterface::CLEAN);
+    if (!$clean_state->initiated()) {
+      $this->initCleanList($feed, $clean_state);
+    }
+
     $existing_entity_id = $this->existingEntityId($feed, $item);
     $skip_existing = $this->configuration['update_existing'] == static::SKIP_EXISTING;
+
+    // If the entity is an existing entity it must be removed from the clean
+    // list.
+    if ($existing_entity_id) {
+      $clean_state->removeItem($existing_entity_id);
+    }
 
     // Bulk load existing entities to save on db queries.
     if ($skip_existing && $existing_entity_id) {
@@ -155,6 +168,74 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       $state->failed++;
       $state->setMessage($e->getMessage(), 'warning');
     }
+  }
+
+  /**
+   * Initializes the list of entities to clean.
+   *
+   * This populates $state->cleanList with all existing entities previously
+   * imported from the source.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to import.
+   * @param \Drupal\feeds\Feeds\State\CleanStateInterface $state
+   *   The state of the clean stage.
+   */
+  protected function initCleanList(FeedInterface $feed, CleanStateInterface $state) {
+    $state->setEntityTypeId($this->entityType());
+
+    // Fill the list only if needed.
+    if ($this->getConfiguration('update_non_existent') === static::KEEP_NON_EXISTENT) {
+      return;
+    }
+
+    // Set list of entities to clean.
+    $state->setList($this->getImportedItemIds($feed));
+
+    // And set progress.
+    $state->total = $state->count();
+    $state->progress($state->total, 0);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clean(FeedInterface $feed, EntityInterface $entity, CleanStateInterface $state) {
+    $update_non_existent = $this->getConfiguration('update_non_existent');
+    if ($update_non_existent === static::KEEP_NON_EXISTENT) {
+      // No action to take on this entity.
+      return;
+    }
+
+    switch ($update_non_existent) {
+      case static::KEEP_NON_EXISTENT:
+        // No action to take on this entity.
+        return;
+
+      case static::DELETE_NON_EXISTENT:
+        $entity->delete();
+        break;
+
+      default:
+        // Apply action on entity.
+        \Drupal::service('plugin.manager.action')
+          ->createInstance($update_non_existent)
+          ->execute($entity);
+        break;
+    }
+
+    // Check if the entity was deleted.
+    $entity = $this->storageController->load($entity->id());
+
+    // If the entity was not deleted, update hash.
+    if (isset($entity->feeds_item)) {
+      $entity->get('feeds_item')->hash = $update_non_existent;
+      $this->storageController->save($entity);
+    }
+
+    // State progress.
+    $state->updated++;
+    $state->progress($state->total, $state->updated);
   }
 
   /**
@@ -437,6 +518,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
   public function defaultConfiguration() {
     $defaults = [
       'update_existing' => static::SKIP_EXISTING,
+      'update_non_existent' => static::KEEP_NON_EXISTENT,
       'skip_hash_check' => FALSE,
       'values' => [$this->entityType->getKey('bundle') => NULL],
       'authorize' => $this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface'),
@@ -577,6 +659,15 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     return $this->queryFactory->get($this->entityType())
       ->condition('feeds_item.target_id', $feed->id())
       ->count()
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getImportedItemIds(FeedInterface $feed) {
+    return $this->queryFactory->get($this->entityType())
+      ->condition('feeds_item.target_id', $feed->id())
       ->execute();
   }
 
@@ -740,6 +831,36 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     \Drupal::database()->delete($table)
       ->condition('feeds_item_target_id', $fids, 'IN')
       ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $dependencies = parent::calculateDependencies();
+
+    // Add dependency on entity type.
+    $entity_type_provider = \Drupal::entityTypeManager()
+      ->getDefinition($this->entityType())
+      ->getProvider();
+    $dependencies['module'][$entity_type_provider] = $entity_type_provider;
+
+    // For the 'update_non_existent' setting, add dependency on selected action.
+    switch ($this->getConfiguration('update_non_existent')) {
+      case static::KEEP_NON_EXISTENT:
+      case static::DELETE_NON_EXISTENT:
+        // No dependency to add.
+        break;
+
+      default:
+        $definition = \Drupal::service('plugin.manager.action')->getDefinition($this->getConfiguration('update_non_existent'));
+        if (isset($definition['provider'])) {
+          $dependencies['module'][$definition['provider']] = $definition['provider'];
+        }
+        break;
+    }
+
+    return $dependencies;
   }
 
 }

@@ -140,6 +140,8 @@ feeds.processor.entity:
           type: string
     update_existing:
       type: integer
+    update_non_existent:
+      type: string
     skip_hash_check:
       type: boolean
     authorize:

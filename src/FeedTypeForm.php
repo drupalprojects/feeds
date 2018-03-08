@@ -129,7 +129,7 @@ class FeedTypeForm extends EntityForm {
 
     $period = [
       FeedTypeInterface::SCHEDULE_NEVER => $this->t('Off'),
-      0 => $this->t('As often as possible'),
+      FeedTypeInterface::SCHEDULE_CONTINUOUSLY => $this->t('As often as possible'),
     ] + $period;
 
     $form['feed_type_settings']['import_period'] = [

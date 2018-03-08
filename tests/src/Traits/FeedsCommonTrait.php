@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\feeds\Traits;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\node\Entity\Node;
 
@@ -39,6 +40,22 @@ trait FeedsCommonTrait {
     $node->save();
 
     return $node;
+  }
+
+  /**
+   * Reloads an entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to reload.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The reloaded entity.
+   */
+  protected function reloadEntity(EntityInterface $entity) {
+    /** @var \Drupal\Core\Entity\ $storageEntityStorageInterface */
+    $storage = \Drupal::entityTypeManager()->getStorage($entity->getEntityTypeId());
+    $storage->resetCache([$entity->id()]);
+    return $storage->load($entity->id());
   }
 
   /**

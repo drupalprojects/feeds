@@ -10,7 +10,7 @@ interface StateInterface {
   /**
    * Batch operation complete.
    *
-   * @var floar
+   * @var float
    */
   const BATCH_COMPLETE = 1.0;
 
@@ -43,6 +43,13 @@ interface StateInterface {
   const PROCESS = 'process';
 
   /**
+   * Denotes the clean stage.
+   *
+   * @var string
+   */
+  const CLEAN = 'clean';
+
+  /**
    * Denotes the clear stage.
    *
    * @var string
@@ -73,6 +80,11 @@ interface StateInterface {
    *   A number that is the progress made on $total.
    */
   public function progress($total, $progress);
+
+  /**
+   * Immediately completes the batch.
+   */
+  public function setCompleted();
 
   /**
    * Sets a message to display to the user.

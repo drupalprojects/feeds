@@ -19,6 +19,11 @@ interface FeedTypeInterface extends ConfigEntityInterface {
   const SCHEDULE_NEVER = -1;
 
   /**
+   * Indicates that a feed should be imported as often as possible.
+   */
+  const SCHEDULE_CONTINUOUSLY = 0;
+
+  /**
    * Returns the description of the feed type.
    *
    * @return string

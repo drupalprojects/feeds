@@ -2,6 +2,7 @@
 
 namespace Drupal\feeds\Plugin\QueueWorker;
 
+use Drupal\feeds\Event\CleanEvent;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Event\FetchEvent;
 use Drupal\feeds\Event\InitEvent;
@@ -52,6 +53,13 @@ class FeedRefresh extends FeedQueueWorkerBase {
   const PROCESS = 'process';
 
   /**
+   * Parameter passed when cleaning.
+   *
+   * @var string
+   */
+  const CLEAN = 'clean';
+
+  /**
    * Parameter passed when finishing.
    *
    * @var string
@@ -83,6 +91,10 @@ class FeedRefresh extends FeedQueueWorkerBase {
 
         case static::PROCESS:
           $this->doProcess($feed, $params['item']);
+          break;
+
+        case static::CLEAN:
+          $this->doClean($feed);
           break;
 
         case static::FINISH:
@@ -185,6 +197,28 @@ class FeedRefresh extends FeedQueueWorkerBase {
   }
 
   /**
+   * Cleans an entity.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to perform a clean event on.
+   */
+  protected function doClean(FeedInterface $feed) {
+    $state = $feed->getState(StateInterface::CLEAN);
+
+    $entity = $state->nextEntity();
+    if ($entity) {
+      $this->dispatchEvent(FeedsEvents::INIT_IMPORT, new InitEvent($feed, 'clean'));
+      $this->dispatchEvent(FeedsEvents::CLEAN, new CleanEvent($feed, $entity));
+    }
+
+    if (!$state->count()) {
+      $state->setCompleted();
+    }
+
+    $feed->saveStates();
+  }
+
+  /**
    * Finalizes the import.
    */
   protected function finish(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
@@ -198,6 +232,17 @@ class FeedRefresh extends FeedQueueWorkerBase {
     }
     elseif ($feed->progressFetching() !== StateInterface::BATCH_COMPLETE) {
       $this->queueItem($feed, static::RESUME);
+    }
+    elseif ($feed->progressCleaning() !== StateInterface::BATCH_COMPLETE) {
+      $clean_state = $feed->getState(StateInterface::CLEAN);
+      for ($i = 0; $i < $clean_state->count(); $i++) {
+        $this->queueItem($feed, static::CLEAN);
+      }
+
+      // Add a final queue item that finalizes the import.
+      $this->queueItem($feed, static::FINISH, [
+        'fetcher_result' => $fetcher_result,
+      ]);
     }
     else {
       $feed->finishImport();

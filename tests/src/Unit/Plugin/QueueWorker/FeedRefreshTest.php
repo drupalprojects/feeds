@@ -6,6 +6,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\Feeds\Item\DynamicItem;
+use Drupal\feeds\Feeds\State\CleanState;
 use Drupal\feeds\Plugin\QueueWorker\FeedRefresh;
 use Drupal\feeds\Result\FetcherResult;
 use Drupal\feeds\Result\ParserResult;
@@ -59,6 +60,10 @@ class FeedRefreshTest extends FeedsUnitTestCase {
 
     $this->plugin = FeedRefresh::create($container, [], 'feeds_feed_refresh', []);
     $this->feed = $this->getMockFeed();
+    $this->feed->expects($this->any())
+      ->method('getState')
+      ->with(StateInterface::CLEAN)
+      ->will($this->returnValue(new CleanState()));
   }
 
   /**

@@ -2,6 +2,7 @@
 
 namespace Drupal\feeds\Feeds\Processor\Form;
 
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\ExternalPluginFormBase;
@@ -37,6 +38,17 @@ class DefaultEntityProcessorForm extends ExternalPluginFormBase {
 
     $times = [ProcessorInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000];
     $period = array_map([$this, 'formatExpire'], array_combine($times, $times));
+
+    $options = $this->getUpdateNonExistentActions();
+    if (!empty($options)) {
+      $form['update_non_existent'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Previously imported items'),
+        '#description' => $this->t('Select what to do with items that were previously imported, but are now no longer in the feed.'),
+        '#options' => $options,
+        '#default_value' => $this->plugin->getConfiguration('update_non_existent'),
+      ];
+    }
 
     $form['expire'] = [
       '#type' => 'select',
@@ -129,6 +141,37 @@ class DefaultEntityProcessorForm extends ExternalPluginFormBase {
     }
 
     return $this->t('after @time', ['@time' => \Drupal::service('date.formatter')->formatInterval($timestamp)]);
+  }
+
+  /**
+   * Get available actions to apply on the entity.
+   *
+   * @return array
+   *   A list of applyable actions.
+   */
+  protected function getUpdateNonExistentActions() {
+    $options = [];
+
+    $action_definitions = \Drupal::service('plugin.manager.action')->getDefinitionsByType($this->plugin->entityType());
+    foreach ($action_definitions as $definition) {
+      // Filter out configurable actions.
+      $interfaces = class_implements($definition['class']);
+      if (isset($interfaces[ConfigurablePluginInterface::class])) {
+        continue;
+      }
+
+      // Filter out actions that need confirmation.
+      if (!empty($definition['confirm_form_route_name'])) {
+        continue;
+      }
+
+      $options[$definition['id']] = $definition['label'];
+    }
+
+    return [
+      '_keep' => $this->t('Keep'),
+      '_delete' => $this->t('Delete'),
+    ] + $options;
   }
 
 }

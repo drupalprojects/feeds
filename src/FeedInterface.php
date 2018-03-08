@@ -195,6 +195,11 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function progressImporting();
 
   /**
+   * Reports progress on cleaning.
+   */
+  public function progressCleaning();
+
+  /**
    * Reports progress on clearing.
    */
   public function progressClearing();
