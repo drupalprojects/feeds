@@ -48,6 +48,7 @@ class HttpFetcherFeedForm extends ExternalPluginFormBase implements ContainerInj
       '#title' => $this->t('Feed URL'),
       '#type' => 'url',
       '#default_value' => $feed->getSource(),
+      '#required' => TRUE,
     ];
 
     return $form;
@@ -57,7 +58,17 @@ class HttpFetcherFeedForm extends ExternalPluginFormBase implements ContainerInj
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state, FeedInterface $feed = NULL) {
-    $url = Feed::translateSchemes($form_state->getValue('source'));
+    try {
+      $url = Feed::translateSchemes($form_state->getValue('source'));
+    }
+    catch (\InvalidArgumentException $e) {
+      $form_state->setError($form['source'], $this->t("The url's scheme is not supported. Supported schemes are: @supported.", [
+        '@supported' => implode(', ', Feed::getSupportedSchemes()),
+      ]));
+      // If the source doesn't have a valid scheme the rest of the validation
+      // isn't helpful. Break out early.
+      return;
+    }
     $form_state->setValue('source', $url);
 
     if (!$this->plugin->getConfiguration('auto_detect_feeds')) {

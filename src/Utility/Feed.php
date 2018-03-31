@@ -124,4 +124,21 @@ class Feed {
     throw new \InvalidArgumentException();
   }
 
+  /**
+   * Returns which url schemes are supported by Feeds.
+   *
+   * @return array
+   *   The support schemes.
+   */
+  public static function getSupportedSchemes() {
+    return [
+      'http',
+      'feed',
+      'webcal',
+      'https',
+      'feeds',
+      'webcals',
+    ];
+  }
+
 }
