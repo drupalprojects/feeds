@@ -36,10 +36,6 @@ trait FeedCreationTrait {
       'id' => Unicode::strtolower($this->randomMachineName()),
       'label' => $this->randomMachineName(),
       'import_period' => FeedTypeInterface::SCHEDULE_NEVER,
-      // @todo fix auto_detect_feeds bug.
-      'fetcher_configuration' => [
-        'auto_detect_feeds' => FALSE,
-      ],
       'processor_configuration' => [
         'authorize' => FALSE,
         'values' => [

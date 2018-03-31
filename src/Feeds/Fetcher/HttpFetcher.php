@@ -166,7 +166,10 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FetcherInter
    */
   public function defaultConfiguration() {
     return [
-      'auto_detect_feeds' => TRUE,
+      // @todo auto_detect_feeds causes issues with downloading files that are
+      // not a RSS feed. Set the default to TRUE as soon as that issue is
+      // resolved.
+      'auto_detect_feeds' => FALSE,
       'use_pubsubhubbub' => FALSE,
       'fallback_hub' => '',
       'request_timeout' => 30,
