@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\FeedTypeInterface;
+use Drupal\feeds\Plugin\Type\MappingPluginFormInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
 /**
@@ -125,6 +126,13 @@ class MappingForm extends FormBase {
       '#value' => $this->t('Save'),
       '#button_type' => 'primary',
     ];
+
+    // Allow plugins to hook into the mapping form.
+    foreach ($feed_type->getPlugins() as $plugin) {
+      if ($plugin instanceof MappingPluginFormInterface) {
+        $plugin->mappingFormAlter($form, $form_state);
+      }
+    }
 
     return $form;
   }
@@ -350,6 +358,14 @@ class MappingForm extends FormBase {
       $this->feedType->getTargetPlugin($delta)->validateConfigurationForm($form, $form_state);
       $form_state->setRebuild();
     }
+    else {
+      // Allow plugins to validate the mapping form.
+      foreach ($this->feedType->getPlugins() as $plugin) {
+        if ($plugin instanceof MappingPluginFormInterface) {
+          $plugin->mappingFormValidate($form, $form_state);
+        }
+      }
+    }
   }
 
   /**
@@ -357,6 +373,14 @@ class MappingForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->processFormState($form, $form_state);
+
+    // Allow plugins to hook into the mapping form.
+    foreach ($this->feedType->getPlugins() as $plugin) {
+      if ($plugin instanceof MappingPluginFormInterface) {
+        $plugin->mappingFormSubmit($form, $form_state);
+      }
+    }
+
     $this->feedType->save();
   }
 
