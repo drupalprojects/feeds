@@ -3,7 +3,6 @@
 namespace Drupal\Tests\feeds\Functional;
 
 use Drupal\feeds\FeedInterface;
-use Drupal\node\Entity\NodeType;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\feeds\Traits\FeedCreationTrait;
 use Drupal\Tests\feeds\Traits\FeedsCommonTrait;
@@ -43,11 +42,7 @@ abstract class FeedsBrowserTestBase extends BrowserTestBase {
     parent::setUp();
 
     // Create a content type.
-    $type = NodeType::create([
-      'type' => 'article',
-      'name' => 'Article',
-    ]);
-    $type->save();
+    $this->setUpNodeType();
 
     // Create an user with Feeds admin privileges.
     $this->adminUser = $this->drupalCreateUser([

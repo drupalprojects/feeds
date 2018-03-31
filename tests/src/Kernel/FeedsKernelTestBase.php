@@ -3,7 +3,6 @@
 namespace Drupal\Tests\feeds\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
-use Drupal\node\Entity\NodeType;
 use Drupal\Tests\feeds\Traits\FeedCreationTrait;
 use Drupal\Tests\feeds\Traits\FeedsCommonTrait;
 use Drupal\Tests\feeds\Traits\FeedsReflectionTrait;
@@ -25,13 +24,6 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
   public static $modules = ['field', 'node', 'feeds', 'text', 'filter'];
 
   /**
-   * The node type to test with.
-   *
-   * @var \Drupal\node\Entity\NodeType
-   */
-  protected $nodeType;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -42,12 +34,8 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
     $this->installEntitySchema('feeds_subscription');
     $this->installSchema('node', 'node_access');
 
-    // Create a content type with a body field.
-    $this->nodeType = NodeType::create([
-      'type' => 'article',
-      'name' => 'Article',
-    ]);
-    $this->nodeType->save();
+    // Create a content type.
+    $this->setUpNodeType();
   }
 
   /**
