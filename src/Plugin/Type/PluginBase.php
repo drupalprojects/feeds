@@ -4,6 +4,7 @@ namespace Drupal\feeds\Plugin\Type;
 
 use Drupal\Core\Plugin\PluginBase as DrupalPluginBase;
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\FeedTypeInterface;
 
 /**
  * The base class for the fetcher, parser, and processor plugins.
@@ -46,7 +47,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    *   The plugin implementation definition.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
-    assert('isset($configuration["feed_type"]) && $configuration["feed_type"] instanceof Drupal\feeds\FeedTypeInterface');
+    assert(isset($configuration["feed_type"]) && $configuration["feed_type"] instanceof FeedTypeInterface);
 
     $this->feedType = $configuration['feed_type'];
     unset($configuration['feed_type']);
