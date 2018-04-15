@@ -14,23 +14,27 @@ interface TargetInterface {
   /**
    * Returns the targets defined by this plugin.
    *
-   * @return array
+   * @param \Drupal\feeds\TargetDefinitionInterface[] $targets
    *   An array of targets.
-   *
-   * @todo Finish documenting this.
+   * @param \Drupal\feeds\FeedTypeInterface $feed_type
+   *   The feed type object.
+   * @param array $definition
+   *   The plugin implementation definition.
    */
   public static function targets(array &$targets, FeedTypeInterface $feed_type, array $definition);
 
   /**
    * Sets the values on an object.
    *
-   * @param mixed $target_item
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed object.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The target object.
    * @param string $target
    *   The name of the target to set.
    * @param array $values
    *   A list of values to set on the target.
    */
-  public function setTarget(FeedInterface $feed, EntityInterface $target_item, $target, array $values);
+  public function setTarget(FeedInterface $feed, EntityInterface $entity, $target, array $values);
 
 }
