@@ -2,7 +2,6 @@
 
 namespace Drupal\feeds\Feeds\Target;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
@@ -32,16 +31,6 @@ class StringTarget extends FieldTargetBase {
       $definition->markPropertyUnique('value');
     }
     return $definition;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function prepareValue($delta, array &$values) {
-    // Trim the value if it's too long.
-    if (!empty($this->settings['max_length'])) {
-      $values['value'] = Unicode::substr($values['value'], 0, $this->settings['max_length']);
-    }
   }
 
 }
