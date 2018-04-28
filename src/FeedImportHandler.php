@@ -13,6 +13,7 @@ use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\Feeds\State\CleanStateInterface;
+use Drupal\feeds\Plugin\QueueWorker\FeedRefresh;
 use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\Result\ParserResultInterface;
 use Drupal\feeds\Result\RawFetcherResult;
@@ -279,6 +280,30 @@ class FeedImportHandler extends FeedHandlerBase {
     }
 
     $feed->saveStates();
+  }
+
+  /**
+   * Starts importing a feed via cron.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to queue.
+   *
+   * @throws \Drupal\feeds\Exception\LockException
+   *   Thrown if a feed is locked.
+   */
+  public function startCronImport(FeedInterface $feed) {
+    if ($feed->isLocked()) {
+      $args = ['@id' => $feed->bundle(), '@fid' => $feed->id()];
+      throw new LockException($this->t('The feed @id / @fid is locked.', $args));
+    }
+
+    // Add feed import task to the queue.
+    $queue = \Drupal::queue('feeds_feed_refresh:' . $feed->bundle());
+    if ($queue->createItem([$feed, FeedRefresh::BEGIN, []])) {
+      // Add timestamp to avoid queueing item more than once.
+      $feed->setQueuedTime(\Drupal::time()->getRequestTime());
+      $feed->save();
+    }
   }
 
   /**

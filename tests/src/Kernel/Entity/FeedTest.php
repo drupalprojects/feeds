@@ -3,6 +3,7 @@
 namespace Drupal\Tests\feeds\Kernel\Entity;
 
 use Drupal\feeds\StateInterface;
+use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\Feeds\State\CleanStateInterface;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
@@ -143,17 +144,33 @@ class FeedTest extends FeedsKernelTestBase {
     ]);
 
     // Assert that the item is not queued yet.
-    $this->assertSame(0, $feed->getQueuedTime());
-    $queue = \Drupal::service('queue')->get('feeds_feed_refresh');
-    $this->assertSame(0, $queue->numberOfItems());
+    $this->assertEquals(0, $feed->getQueuedTime());
+    $queue = \Drupal::service('queue')->get('feeds_feed_refresh:' . $feed->bundle());
+    $this->assertEquals(0, $queue->numberOfItems());
 
-    // @todo implement FeedImportHandler::startCronImport().
-    $this->markTestIncomplete('FeedImportHandler::startCronImport() is not yet implemented.');
     $feed->startCronImport();
     $this->assertGreaterThanOrEqual(\Drupal::time()->getRequestTime(), $feed->getQueuedTime());
 
     // Verify that a queue item is created.
-    $this->assertSame(1, $queue->numberOfItems());
+    $this->assertEquals(1, $queue->numberOfItems());
+  }
+
+  /**
+   * @covers ::startCronImport
+   */
+  public function testStartCronImportFailsOnLockedFeed() {
+    $this->installSchema('system', ['key_value_expire']);
+
+    $feed = $this->createFeed($this->feedType->id(), [
+      'source' => $this->resourcesPath() . '/rss/googlenewstz.rss2',
+    ]);
+
+    // Lock a feed.
+    $feed->lock();
+
+    // Assert that starting a cron import task now fails.
+    $this->setExpectedException(LockException::class);
+    $feed->startCronImport();
   }
 
   /**
