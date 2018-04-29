@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\feeds\Unit {
 
-  use Drupal\Core\Session\AccountInterface;
-  use Drupal\Core\Session\AccountSwitcherInterface;
+  use Drupal\Core\StreamWrapper\StreamWrapperManager;
+  use Drupal\Tests\feeds\Traits\FeedsMockingTrait;
   use Drupal\Tests\feeds\Traits\FeedsReflectionTrait;
   use Drupal\Tests\UnitTestCase;
-  use Prophecy\Argument;
   use org\bovigo\vfs\vfsStream;
 
   /**
@@ -14,6 +13,7 @@ namespace Drupal\Tests\feeds\Unit {
    */
   abstract class FeedsUnitTestCase extends UnitTestCase {
 
+    use FeedsMockingTrait;
     use FeedsReflectionTrait;
 
     /**
@@ -27,44 +27,13 @@ namespace Drupal\Tests\feeds\Unit {
     }
 
     /**
-     * Returns a mocked feed type entity.
-     *
-     * @return \Drupal\feeds\FeedTypeInterface
-     *   A mocked feed type entity.
-     */
-    protected function getMockFeedType() {
-      $feed_type = $this->getMock('\Drupal\feeds\FeedTypeInterface');
-      $feed_type->id = 'test_feed_type';
-      $feed_type->description = 'This is a test feed type';
-      $feed_type->label = 'Test feed type';
-      $feed_type->expects($this->any())
-        ->method('label')
-        ->will($this->returnValue($feed_type->label));
-      return $feed_type;
-    }
-
-    /**
-     * Returns a mocked feed entity.
-     *
-     * @return \Drupal\feeds\FeedInterface
-     *   A mocked feed entity.
-     */
-    protected function getMockFeed() {
-      $feed = $this->getMock('Drupal\feeds\FeedInterface');
-      $feed->expects($this->any())
-        ->method('getType')
-        ->will($this->returnValue($this->getMockFeedType()));
-      return $feed;
-    }
-
-    /**
      * Returns a mock stream wrapper manager.
      *
      * @return \Drupal\Core\StreamWrapper\StreamWrapperManager
      *   A mocked stream wrapper manager.
      */
     protected function getMockStreamWrapperManager() {
-      $mock = $this->getMock('Drupal\Core\StreamWrapper\StreamWrapperManager', [], [], '', FALSE);
+      $mock = $this->getMock(StreamWrapperManager::class, [], [], '', FALSE);
 
       $wrappers = [
         'vfs' => 'VFS',
@@ -80,69 +49,6 @@ namespace Drupal\Tests\feeds\Unit {
         ->will($this->returnValue($wrappers));
 
       return $mock;
-    }
-
-    /**
-     * Returns a mocked AccountSwitcher object.
-     *
-     * The returned object verifies that if switchTo() is called, switchBack()
-     * is also called.
-     *
-     * @return \Drupal\Core\Session\AccountSwitcherInterface
-     *   A mocked AccountSwitcher object.
-     */
-    protected function getMockedAccountSwitcher() {
-      $switcher = $this->prophesize(AccountSwitcherInterface::class);
-
-      $switcher->switchTo(Argument::type(AccountInterface::class))
-        ->will(function () use ($switcher) {
-          $switcher->switchBack()->shouldBeCalled();
-
-          return $switcher->reveal();
-        });
-
-      return $switcher->reveal();
-    }
-
-    /**
-     * Mocks an account object.
-     *
-     * @param array $perms
-     *   The account's permissions.
-     *
-     * @return \Drupal\Core\Session\AccountInterface
-     *   The mocked acount object.
-     */
-    protected function getMockAccount(array $perms = []) {
-      $account = $this->getMock('\Drupal\Core\Session\AccountInterface');
-      if ($perms) {
-        $map = [];
-        foreach ($perms as $perm => $has) {
-          $map[] = [$perm, $has];
-        }
-        $account->expects($this->any())
-          ->method('hasPermission')
-          ->will($this->returnValueMap($map));
-      }
-
-      return $account;
-    }
-
-    /**
-     * Mocks a field definition.
-     *
-     * @param array $settings
-     *   The field storage and instance settings.
-     *
-     * @return \Drupal\Core\Field\FieldDefinitionInterface
-     *   A mocked field definition.
-     */
-    protected function getMockFieldDefinition(array $settings = []) {
-      $definition = $this->getMock('\Drupal\Core\Field\FieldDefinitionInterface');
-      $definition->expects($this->any())
-        ->method('getSettings')
-        ->will($this->returnValue($settings));
-      return $definition;
     }
 
     /**
