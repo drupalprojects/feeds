@@ -2,6 +2,7 @@
 
 namespace Drupal\feeds;
 
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 
@@ -32,6 +33,26 @@ class FeedTypeListBuilder extends EntityListBuilder {
     $row['description'] = $this->t('Description');
     $row['operations'] = $this->t('Operations');
     return $row;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOperations(EntityInterface $entity) {
+    $operations = parent::getOperations($entity);
+
+    if ($entity->access('mapping') && $entity->hasLinkTemplate('mapping')) {
+      $operations['mapping'] = [
+        'title' => $this->t('Mapping'),
+        'url' => $entity->toUrl('mapping'),
+        // Appear after operation "edit".
+        'weight' => 11,
+      ];
+    }
+
+    uasort($operations, [SortArray::class, 'sortByWeightElement']);
+
+    return $operations;
   }
 
 }

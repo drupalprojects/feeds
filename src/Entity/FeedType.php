@@ -42,6 +42,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *   links = {
  *     "add-form" = "/admin/structure/feeds/add",
  *     "edit-form" = "/admin/structure/feeds/manage/{feeds_feed_type}",
+ *     "mapping" = "/admin/structure/feeds/manage/{feeds_feed_type}/mapping",
  *     "delete-form" = "/admin/structure/feeds/manage/{feeds_feed_type}/delete"
  *   },
  *   admin_permission = "administer feeds"
