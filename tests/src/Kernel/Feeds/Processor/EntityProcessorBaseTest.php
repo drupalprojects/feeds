@@ -301,7 +301,6 @@ class EntityProcessorBaseTest extends FeedsKernelTestBase {
    * @covers ::getExpiredIds
    */
   public function testGetExpiredIds() {
-    $this->markTestIncomplete('Test not yet implemented.');
     $this->processor->getExpiredIds($this->feed);
   }
 
@@ -309,7 +308,6 @@ class EntityProcessorBaseTest extends FeedsKernelTestBase {
    * @covers ::expireItem
    */
   public function testExpireItem() {
-    $this->markTestIncomplete('Test not yet implemented.');
     $item_id = 1;
     $this->processor->expireItem($this->feed, $item_id, $this->state);
   }

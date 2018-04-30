@@ -154,7 +154,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       // This will throw an exception on failure.
       $this->entitySaveAccess($entity);
       // Set imported time.
-      $entity->get('feeds_item')->imported = REQUEST_TIME;
+      $entity->get('feeds_item')->imported = \Drupal::service('datetime.time')->getRequestTime();
 
       // And... Save! We made it.
       $this->storageController->save($entity);
@@ -637,10 +637,10 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     if ($time == static::EXPIRE_NEVER) {
       return;
     }
-
+    $expire_time = \Drupal::service('datetime.time')->getRequestTime() - $time;
     return $this->queryFactory->get($this->entityType())
       ->condition('feeds_item.target_id', $feed->id())
-      // ->condition('feeds_item.imported', REQUEST_TIME -1, '<')
+      ->condition('feeds_item.imported', $expire_time, '<')
       ->execute();
   }
 

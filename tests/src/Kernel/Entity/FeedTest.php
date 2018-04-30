@@ -226,8 +226,6 @@ class FeedTest extends FeedsKernelTestBase {
     // Start batch expire.
     $feed->startBatchExpire();
 
-    // @todo Repaire expire functionality.
-    $this->markTestIncomplete('The expire functionality is not working yet.');
     // Assert that still no batch was created, since there was nothing to
     // expire.
     $this->assertEquals([], batch_get());
