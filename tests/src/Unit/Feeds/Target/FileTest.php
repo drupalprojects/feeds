@@ -95,14 +95,37 @@ class FileTest extends FeedsUnitTestCase {
 
   /**
    * @covers ::prepareValue
+   * @dataProvider dataProviderPrepareValue
    */
-  public function testPrepareValue() {
+  public function testPrepareValue($expected, array $values, $expected_exception = NULL) {
     $method = $this->getProtectedClosure($this->targetPlugin, 'prepareValue');
 
-    $values = ['description' => 'mydescription'];
+    if ($expected_exception) {
+      $this->setExpectedException($expected_exception);
+    }
+
     $method(0, $values);
-    $this->assertSame($values['description'], 'mydescription');
-    $this->assertEquals($values['display'], FALSE);
+    foreach ($expected as $key => $value) {
+      $this->assertEquals($value, $values[$key]);
+    }
+  }
+
+  /**
+   * Data provider for testPrepareValue().
+   */
+  public function dataProviderPrepareValue() {
+    return [
+      // Description.
+      [
+        'expected' => [
+          'description' => 'mydescription',
+          'display' => FALSE,
+        ],
+        'values' => [
+          'description' => 'mydescription',
+        ],
+      ],
+    ];
   }
 
 }

@@ -150,10 +150,8 @@ class File extends EntityReference {
       return $fid;
     }
 
-    // Prepare destination directory.
-    $destination = $this->token->replace($this->settings['uri_scheme'] . '://' . trim($this->settings['file_directory'], '/'));
-    file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
-    $filepath = $destination . '/' . $this->getFileName($value);
+    // Compose file path.
+    $filepath = $this->getDestinationDirectory() . '/' . $this->getFileName($value);
 
     switch ($this->configuration['existing']) {
       case FILE_EXISTS_ERROR:
@@ -178,7 +176,28 @@ class File extends EntityReference {
   }
 
   /**
+   * Prepares destination directory and returns its path.
    *
+   * @return string
+   *   The directory to save the file to.
+   */
+  protected function getDestinationDirectory() {
+    $destination = $this->token->replace($this->settings['uri_scheme'] . '://' . trim($this->settings['file_directory'], '/'));
+    file_prepare_directory($destination, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
+    return $destination;
+  }
+
+  /**
+   * Extracts the file name from the given url and checks for valid extension.
+   *
+   * @param string $url
+   *   The URL to get the file name for.
+   *
+   * @return string
+   *   The file name.
+   *
+   * @throws \Drupal\feeds\Exception\TargetValidationException
+   *   In case the file extension is not valid.
    */
   protected function getFileName($url) {
     $filename = trim(drupal_basename($url), " \t\n\r\0\x0B.");
@@ -192,10 +211,19 @@ class File extends EntityReference {
   }
 
   /**
+   * Attempts to download the file at the given url.
    *
+   * @param string $url
+   *   The URL to download a file from.
+   *
+   * @return string
+   *   The file contents.
+   *
+   * @throws \Drupal\feeds\Exception\TargetValidationException
+   *   In case the file could not be downloaded.
    */
   protected function getContent($url) {
-    $response = $this->client->get($url);
+    $response = $this->client->request('GET', $url);
 
     if ($response->getStatusCode() >= 400) {
       $args = [

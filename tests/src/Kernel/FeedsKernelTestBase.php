@@ -46,4 +46,35 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
     node_add_body_field($this->nodeType);
   }
 
+  /**
+   * Installs a file and image fields (not needed for every kernel test).
+   */
+  protected function setUpFileFields() {
+    // Create a file field.
+    $this->installModule('file');
+    $this->installConfig(['field', 'node', 'file']);
+    $this->installEntitySchema('file');
+    $this->installSchema('file', ['file_usage']);
+
+    $this->createFieldWithStorage('field_file', [
+      'type' => 'file',
+      'bundle' => 'article',
+      'field' => [
+        'settings' => ['file_extensions' => 'txt'],
+      ],
+    ]);
+
+    // Create an image field.
+    $this->installModule('image');
+    $this->installConfig(['image']);
+
+    $this->createFieldWithStorage('field_image', [
+      'type' => 'image',
+      'bundle' => 'article',
+      'field' => [
+        'settings' => ['file_extensions' => 'svg'],
+      ],
+    ]);
+  }
+
 }
