@@ -16,7 +16,7 @@ use Drupal\feeds\Entity\Feed;
  */
 function feeds_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    case 'feeds.overview_types':
+    case 'entity.feeds_feed_type.collection':
       return '<p>' . t('Create one or more feed types for pulling content into Drupal.') . '</p>';
   }
 }
@@ -129,6 +129,23 @@ function feeds_form_field_ui_field_overview_form_alter(array &$form, FormStateIn
   //   $key = array_search('feeds_item', $rows_order);
   //   unset($form['fields']['#regions']['content']['rows_order'][$key]);
   // }
+}
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function feeds_menu_links_discovered_alter(&$links) {
+  // Add "Mapping" link for each feed type.
+  foreach (\Drupal::entityTypeManager()->getStorage('feeds_feed_type')->loadMultiple() as $machine_name => $bundle) {
+    $links['entity.feeds_feed_type.mapping' . $machine_name] = [
+      'title' => t('Mapping'),
+      'route_name' => 'entity.feeds_feed_type.mapping',
+      'menu_name' => 'admin',
+      'parent' => 'entity.feeds_feed_type.edit_form.' . $machine_name,
+      'route_parameters' => ['feeds_feed_type' => $machine_name],
+      'weight' => -1,
+    ];
+  }
 }
 
 /**

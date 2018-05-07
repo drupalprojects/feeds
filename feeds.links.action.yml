@@ -32,4 +32,4 @@ entity.feeds_feed_type.add_form:
   route_name: entity.feeds_feed_type.add_form
   title: Add feed type
   appears_on:
-    - feeds.overview_types
+    - entity.feeds_feed_type.collection

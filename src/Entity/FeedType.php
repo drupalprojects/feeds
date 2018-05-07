@@ -40,6 +40,7 @@ use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
  *     "status" = "status"
  *   },
  *   links = {
+ *     "collection" = "/admin/structure/feeds",
  *     "add-form" = "/admin/structure/feeds/add",
  *     "edit-form" = "/admin/structure/feeds/manage/{feeds_feed_type}",
  *     "mapping" = "/admin/structure/feeds/manage/{feeds_feed_type}/mapping",

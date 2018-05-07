@@ -22,7 +22,7 @@ class FeedTypeDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('feeds.overview_types');
+    return new Url('entity.feeds_feed_type.collection');
   }
 
   /**

@@ -71,12 +71,11 @@ entity.feeds_feed.subscribe:
   methods: [GET]
 
 # Admin UI routes.
-
-feeds.overview_types:
+entity.feeds_feed_type.collection:
   path: '/admin/structure/feeds'
   defaults:
-    _title: 'Feed types'
     _entity_list: 'feeds_feed_type'
+    _title: 'Feed types'
   requirements:
     _permission: 'administer feeds'
 
