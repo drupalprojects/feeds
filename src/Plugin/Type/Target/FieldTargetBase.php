@@ -10,6 +10,7 @@ use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
+use LogicException;
 
 /**
  * Helper class for field mappers.
@@ -103,7 +104,7 @@ abstract class FieldTargetBase extends TargetBase {
       }
       catch (TargetValidationException $e) {
         // Validation failed.
-        drupal_set_message($e->getMessage(), 'error');
+        $this->addMessage($e->getFormattedMessage(), 'error');
       }
     }
 
@@ -146,6 +147,44 @@ abstract class FieldTargetBase extends TargetBase {
     }
     if ($result = $this->getUniqueQuery()->condition($field, $value)->execute()) {
       return reset($result);
+    }
+  }
+
+  /**
+   * Returns the messenger to use.
+   *
+   * @return \Drupal\Core\Messenger\MessengerInterface
+   *   The messenger service.
+   *
+   * @throws \LogicException
+   *   In case the messinger does not exist (we're on < Drupal core 8.5.0).
+   */
+  protected function getMessenger() {
+    if (!interface_exists('\Drupal\Core\Messenger\MessengerInterface')) {
+      throw new LogicException('Messenger not found. Install Drupal core 8.5.0 or later.');
+    }
+    return \Drupal::messenger();
+  }
+
+  /**
+   * Adds a message.
+   *
+   * @param string|\Drupal\Component\Render\MarkupInterface $message
+   *   The translated message to be displayed to the user.
+   * @param string $type
+   *   (optional) The message's type.
+   * @param bool $repeat
+   *   (optional) If this is FALSE and the message is already set, then the
+   *   message won't be repeated. Defaults to FALSE.
+   */
+  protected function addMessage($message, $type = 'status', $repeat = FALSE) {
+    try {
+      $this->getMessenger()->addMessage($message, $type, $repeat);
+    }
+    catch (LogicException $e) {
+      // Backwards compatibility with Drupal core < 8.5.0.
+      // @todo remove once Drupal core 8.6.0 is released.
+      drupal_set_message($message, $type, $repeat);
     }
   }
 

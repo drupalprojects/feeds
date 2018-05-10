@@ -164,6 +164,10 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     }
 
     // Something bad happened, log it.
+    catch (ValidationException $e) {
+      $state->failed++;
+      $state->setMessage($e->getFormattedMessage(), 'warning');
+    }
     catch (\Exception $e) {
       $state->failed++;
       $state->setMessage($e->getMessage(), 'warning');

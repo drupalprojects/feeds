@@ -181,7 +181,9 @@ class File extends EntityReference {
     // Something bad happened while trying to save the file to the database. We
     // need to throw an exception so that we don't save an incomplete field
     // value.
-    throw new TargetValidationException('There was an error saving the file: %file', ['%file' => $filepath]);
+    throw new TargetValidationException($this->t('There was an error saving the file: %file', [
+      '%file' => $filepath,
+    ]));
   }
 
   /**
@@ -213,7 +215,10 @@ class File extends EntityReference {
     $extension = substr($filename, strrpos($filename, '.') + 1);
 
     if (!in_array($extension, $this->fileExtensions)) {
-      throw new TargetValidationException('The file, %url, failed to save because the extension, %ext, is invalid.', ['%url' => $url, '%ext' => $extension]);
+      throw new TargetValidationException($this->t('The file, %url, failed to save because the extension, %ext, is invalid.', [
+        '%url' => $url,
+        '%ext' => $extension,
+      ]));
     }
 
     return $filename;
@@ -239,7 +244,7 @@ class File extends EntityReference {
         '%url' => $url,
         '@code' => $response->getStatusCode(),
       ];
-      throw new TargetValidationException('Download of %url failed with code @code.', $args);
+      throw new TargetValidationException($this->t('Download of %url failed with code @code.', $args));
     }
 
     return (string) $response->getBody();
