@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Utility\Token;
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Feeds\Target\File;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use GuzzleHttp\ClientInterface;
@@ -124,6 +125,15 @@ class FileTest extends FeedsUnitTestCase {
         'values' => [
           'description' => 'mydescription',
         ],
+      ],
+
+      // Empty file target value.
+      [
+        'expected' => [],
+        'values' => [
+          'target_id' => '',
+        ],
+        'expected_exception' => EmptyFeedException::class,
       ],
     ];
   }

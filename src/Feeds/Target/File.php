@@ -9,6 +9,7 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\FieldTargetDefinition;
 use GuzzleHttp\ClientInterface;
@@ -143,8 +144,16 @@ class File extends EntityReference {
    *
    * @return int
    *   The file id.
+   *
+   * @throws \Drupal\feeds\Exception\EmptyFeedException
+   *   In case an empty file url is given.
    */
   protected function getFile($value) {
+    if (empty($value)) {
+      // No file.
+      throw new EmptyFeedException('The given file url is empty.');
+    }
+
     // Perform a lookup agains the value using the configured reference method.
     if (FALSE !== ($fid = $this->findEntity($value, $this->configuration['reference_by']))) {
       return $fid;

@@ -2,85 +2,27 @@
 
 namespace Drupal\Tests\feeds\Kernel\Feeds\Target;
 
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\Query\QueryFactory;
-use Drupal\Core\Utility\Token;
-use Drupal\feeds\Exception\TargetValidationException;
 use Drupal\feeds\Feeds\Target\File;
-use Drupal\feeds\FeedTypeInterface;
-use Drupal\Tests\feeds\Kernel\FeedsKernelTestBase;
-use Drupal\Tests\feeds\Traits\FeedsMockingTrait;
-use Drupal\user\Entity\Role;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Psr7\Response;
-use Prophecy\Argument;
+use Drupal\feeds\Plugin\Type\Processor\ProcessorInterface;
+use Drupal\node\entity\Node;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\File
  * @group feeds
  */
-class FileTest extends FeedsKernelTestBase {
-
-  use FeedsMockingTrait;
-
-  /**
-   * The entity type manager prophecy used in the test.
-   *
-   * @var \Prophecy\Prophecy\ProphecyInterface|\Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * Query factory used in the test.
-   *
-   * @var \Prophecy\Prophecy\ProphecyInterface|\Drupal\Core\Entity\Query\QueryFactory
-   */
-  protected $entityQueryFactory;
-
-  /**
-   * The http client prophecy used in the test.
-   *
-   * @var \Prophecy\Prophecy\ProphecyInterface|\GuzzleHttp\ClientInterface
-   */
-  protected $client;
-
-  /**
-   * Token service.
-   *
-   * @var \Prophecy\Prophecy\ProphecyInterface|\Drupal\Core\Utility\Token
-   */
-  protected $token;
-
-  /**
-   * The FeedsTarget plugin being tested.
-   *
-   * @var \Drupal\feeds\Feeds\Target\File
-   */
-  protected $targetPlugin;
+class FileTest extends FileTestBase {
 
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
-    parent::setUp();
-    $this->setUpFileFields();
+  protected function getTargetPluginClass() {
+    return File::class;
+  }
 
-    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
-    $this->entityQueryFactory = $this->prophesize(QueryFactory::class);
-    $this->client = $this->prophesize(ClientInterface::class);
-    $this->token = $this->prophesize(Token::class);
-    $this->entityFieldManager = $this->prophesize(EntityFieldManagerInterface::class);
-    $this->entityFieldManager->getFieldStorageDefinitions('file')->willReturn([]);
-    $this->entityRepository = $this->prophesize(EntityRepositoryInterface::class);
-
-    // Made-up entity type that we are referencing to.
-    $referenceable_entity_type = $this->prophesize(EntityTypeInterface::class);
-    $referenceable_entity_type->getKey('label')->willReturn('file label');
-    $this->entityTypeManager->getDefinition('file')->willReturn($referenceable_entity_type)->shouldBeCalled();
-
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetDefinition() {
     $method = $this->getMethod(File::class, 'prepareTarget')->getClosure();
     $field_definition_mock = $this->getMockFieldDefinition([
       'display_field' => 'false',
@@ -95,100 +37,14 @@ class FileTest extends FeedsKernelTestBase {
       'handler_settings' => [],
     ]);
 
-    $configuration = [
-      'feed_type' => $this->getMock(FeedTypeInterface::class),
-      'target_definition' => $method($field_definition_mock),
-    ];
-
-    $this->targetPlugin = $this->getMock(File::class, ['findEntity', 'getDestinationDirectory'], [
-      $configuration,
-      'file',
-      [],
-      $this->entityTypeManager->reveal(),
-      $this->entityQueryFactory->reveal(),
-      $this->client->reveal(),
-      $this->token->reveal(),
-      $this->entityFieldManager->reveal(),
-      $this->entityRepository->reveal(),
-    ]);
-
-    $this->targetPlugin->expects($this->any())
-      ->method('findEntity')
-      ->will($this->returnValue(FALSE));
-    $this->targetPlugin->expects($this->any())
-      ->method('getDestinationDirectory')
-      ->will($this->returnValue('public:/'));
-
-    // Role::load fails without installing the user config.
-    $this->installConfig(['user']);
-    // Give anonymous users permission to access content, so that they can view
-    // and download public files. Without this we get an access denied error
-    // when trying to import public files.
-    Role::load(Role::ANONYMOUS_ID)
-      ->grantPermission('access content')
-      ->save();
-  }
-
-  /**
-   * @covers ::prepareValue
-   * @dataProvider dataProviderPrepareValue
-   *
-   * @param array $expected
-   *   The expected values.
-   * @param array $values
-   *   The values to pass to prepareValue().
-   * @param string $expected_exception
-   *   (optional) The name of the expected exception class.
-   * @param string $expected_exception_message
-   *   (optional) The expected exception message.
-   */
-  public function testPrepareValue(array $expected, array $values, $expected_exception = NULL, $expected_exception_message = NULL) {
-    $method = $this->getProtectedClosure($this->targetPlugin, 'prepareValue');
-
-    // Add in base URL.
-    if (isset($values['target_id'])) {
-      $file_path = strtr($values['target_id'], [
-        '[url]' => $this->resourcesPath(),
-      ]);
-      $values['target_id'] = strtr($values['target_id'], [
-        '[url]' => $this->resourcesUrl(),
-      ]);
-
-      // Set guzzle client response.
-      if (file_exists($file_path)) {
-        $this->client->request('GET', $values['target_id'], Argument::any())->will(function () use ($file_path) {
-          return new Response(200, [], file_get_contents($file_path));
-        });
-      }
-      else {
-        $this->client->request('GET', $values['target_id'], Argument::any())->will(function () {
-          return new Response(404, [], '');
-        });
-      }
-    }
-
-    // Set expected exception if there is one expected.
-    if ($expected_exception) {
-      $expected_exception_message = strtr($expected_exception_message, [
-        '[url]' => $this->resourcesUrl(),
-      ]);
-      $this->setExpectedException($expected_exception, $expected_exception_message);
-    }
-
-    // Call prepareValue().
-    $method(0, $values);
-
-    // Asserts.
-    foreach ($expected as $key => $value) {
-      $this->assertEquals($value, $values[$key]);
-    }
+    return $method($field_definition_mock);
   }
 
   /**
    * Data provider for testPrepareValue().
    */
   public function dataProviderPrepareValue() {
-    $return = [
+    return [
       // Description.
       'description' => [
         'expected' => [
@@ -199,39 +55,114 @@ class FileTest extends FeedsKernelTestBase {
           'description' => 'mydescription',
         ],
       ],
+    ] + parent::dataProviderPrepareValue();
+  }
 
-      // Importing a file url that exists.
-      'file-success' => [
-        'expected' => [
-          'target_id' => 1,
-        ],
+  /**
+   * Tests if an import succeeds when mapping files, both full and empty.
+   */
+  public function testFullImportProcess() {
+    // Add the file and image to test.
+    $scheme = file_default_scheme();
+    $testImage = file_save_data('<svg width="5" height="5"><circle cx="3" cy="3" r="2" stroke="black" stroke-width="1" fill="white" /></svg>', $scheme . '://testImage.svg', FILE_EXISTS_REPLACE);
+    $testFile = file_save_data('feeds test file', $scheme . '://testFile.txt', FILE_EXISTS_REPLACE);
+
+    $feed_type = $this->createFeedType([
+      'fetcher' => 'directory',
+      'fetcher_configuration' => [
+        'allowed_extensions' => 'csv',
+      ],
+      'parser' => 'csv',
+      'processor_configuration' => [
+        'update_existing' => ProcessorInterface::UPDATE_EXISTING,
+        'authorize' => 0,
         'values' => [
-          'target_id' => '[url]/assets/attersee.jpeg',
+          'type' => 'article',
         ],
       ],
-
-      // Importing a file url that does *not* exist.
-      'file-not-found' => [
-        'expected' => [],
-        'values' => [
-          'target_id' => '[url]/assets/not-found.jpg',
+      'custom_sources' => [
+        'guid' => [
+          'label' => 'guid',
+          'value' => 'guid',
+          'machine_name' => 'guid',
         ],
-        'expected_exception' => TargetValidationException::class,
-        'expected_exception_message' => 'Download of <em class="placeholder">[url]/assets/not-found.jpg</em> failed with code 404.',
+        'title' => [
+          'label' => 'title',
+          'value' => 'title',
+          'machine_name' => 'title',
+        ],
+        'image' => [
+          'label' => 'image',
+          'value' => 'image',
+          'machine_name' => 'image',
+        ],
+        'file' => [
+          'label' => 'file',
+          'value' => 'file',
+          'machine_name' => 'file',
+        ],
       ],
-
-      // Importing a file with invalid extension.
-      'invalid-extension' => [
-        'expected' => [],
-        'values' => [
-          'target_id' => '[url]/file.foo',
+      'mappings' => array_merge($this->getDefaultMappings(), [
+        [
+          'target' => 'field_file',
+          'map' => ['target_id' => 'file', 'description' => ''],
+          'settings' => [
+            'reference_by' => 'fid',
+            'existing' => '2',
+            'autocreate' => '1',
+          ],
         ],
-        'expected_exception' => TargetValidationException::class,
-        'expected_exception_message' => 'The file, <em class="placeholder">[url]/file.foo</em>, failed to save because the extension, <em class="placeholder">foo</em>, is invalid.',
+        [
+          'target' => 'field_image',
+          'map' => ['target_id' => 'image', 'alt' => '', 'title' => ''],
+          'settings' => [
+            'reference_by' => 'fid',
+            'existing' => '2',
+            'autocreate' => '1',
+          ],
+        ],
+      ]),
+    ]);
+
+    // Import first feed.
+    $feed = $this->createFeed($feed_type->id(), [
+      'source' => $this->resourcesPath() . '/csv/content_with_files.csv',
+    ]);
+    $feed->import();
+
+    // Assert one created node.
+    $this->assertNodeCount(1);
+
+    // Check for the existence of the files.
+    $node = Node::load(1);
+    $expected_file_value = [
+      [
+        'target_id' => $testFile->id(),
+        'display' => '0',
+        'description' => '',
       ],
     ];
+    $expected_image_value = [
+      [
+        'target_id' => $testImage->id(),
+        'alt' => '',
+        'title' => '',
+        'width' => '',
+        'height' => '',
+      ],
+    ];
+    $this->assertEquals($expected_file_value, $node->get('field_file')->getValue());
+    $this->assertEquals($expected_image_value, $node->get('field_image')->getValue());
 
-    return $return;
+    // Now import updated feed.
+    $feed->setSource($this->resourcesPath() . '/csv/content_no_files.csv');
+    $feed->save();
+    $feed->import();
+
+    // Reload the node and assert that the file and image have been removed.
+    $node = Node::load(1);
+    $this->assertEquals([], $node->get('field_file')->getValue());
+    $this->assertEquals([], $node->get('field_image')->getValue());
   }
 
 }
