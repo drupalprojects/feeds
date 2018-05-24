@@ -5,6 +5,7 @@ namespace Drupal\feeds\Plugin\Type;
 use Drupal\Core\Plugin\PluginBase as DrupalPluginBase;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
+use Drupal\Core\Entity\DependencyTrait;
 
 /**
  * The base class for the fetcher, parser, and processor plugins.
@@ -14,6 +15,8 @@ use Drupal\feeds\FeedTypeInterface;
  *   implemented by other interfaces. We're working on it.
  */
 abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterface {
+
+  use DependencyTrait;
 
   /**
    * The importer this plugin is working for.
@@ -95,7 +98,7 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    return [];
+    return $this->dependencies;
   }
 
   /**

@@ -599,11 +599,6 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
       return FALSE;
     }
 
-    // If the bundle that is used on the processor is being removed, we delete
-    // the feed type because this is not something that can be fixed manually.
-    // @todo implement + maybe this should be implemented on the processor
-    // level.
-
     // Check each target plugin for if they want to do something on dependency
     // removal.
     foreach ($this->getMappings() as $delta => $mapping) {

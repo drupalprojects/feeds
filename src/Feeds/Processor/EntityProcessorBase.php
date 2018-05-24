@@ -848,13 +848,15 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    $dependencies = parent::calculateDependencies();
-
     // Add dependency on entity type.
-    $entity_type_provider = \Drupal::entityTypeManager()
-      ->getDefinition($this->entityType())
-      ->getProvider();
-    $dependencies['module'][$entity_type_provider] = $entity_type_provider;
+    $entity_type = $this->entityTypeManager->getDefinition($this->entityType());
+    $this->addDependency('module', $entity_type->getProvider());
+
+    // Add dependency on entity bundle.
+    if ($this->bundle()) {
+      $bundle_dependency = $entity_type->getBundleConfigDependency($this->bundle());
+      $this->addDependency($bundle_dependency['type'], $bundle_dependency['name']);
+    }
 
     // For the 'update_non_existent' setting, add dependency on selected action.
     switch ($this->getConfiguration('update_non_existent')) {
@@ -866,12 +868,12 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       default:
         $definition = \Drupal::service('plugin.manager.action')->getDefinition($this->getConfiguration('update_non_existent'));
         if (isset($definition['provider'])) {
-          $dependencies['module'][$definition['provider']] = $definition['provider'];
+          $this->addDependency('module', $definition['provider']);
         }
         break;
     }
 
-    return $dependencies;
+    return $this->dependencies;
   }
 
 }
