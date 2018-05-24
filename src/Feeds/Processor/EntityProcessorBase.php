@@ -789,7 +789,12 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
           $source_values[$target][$column] = [];
         }
 
-        $value = $item->get($source);
+        if ($plugin = $feed->getType()->getSourcePlugin($source)) {
+          $value = $plugin->getSourceElement($feed, $item);
+        }
+        else {
+          $value = $item->get($source);
+        }
         if (!is_array($value)) {
           $source_values[$target][$column][] = $value;
         }

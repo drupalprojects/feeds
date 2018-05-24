@@ -47,6 +47,49 @@ abstract class FeedsKernelTestBase extends EntityKernelTestBase {
   }
 
   /**
+   * Installs a taxonomy term reference field.
+   *
+   * @return \Drupal\taxonomy\Entity\Vocabulary
+   *   The created vocabulary.
+   */
+  protected function setUpTermReferenceField() {
+    // Install taxonomy module and schema.
+    $this->installModule('taxonomy');
+    $this->installConfig(['filter', 'taxonomy']);
+    $this->installEntitySchema('taxonomy_term');
+
+    // Create tags vocabulary.
+    $vocabulary = $this->entityManager->getStorage('taxonomy_vocabulary')->create([
+      'vid' => 'tags',
+      'name' => 'Tags',
+    ]);
+    $vocabulary->save();
+
+    // Create field for article content type.
+    $this->createFieldWithStorage('field_tags', [
+      'type' => 'entity_reference',
+      'storage' => [
+        'settings' => [
+          'target_type' => 'taxonomy_term',
+        ],
+      ],
+      'field' => [
+        'settings' => [
+          'handler' => 'default',
+          'handler_settings' => [
+            // Restrict selection of terms to a single vocabulary.
+            'target_bundles' => [
+              $vocabulary->id() => $vocabulary->id(),
+            ],
+          ],
+        ],
+      ],
+    ]);
+
+    return $vocabulary;
+  }
+
+  /**
    * Installs a file and image fields (not needed for every kernel test).
    */
   protected function setUpFileFields() {

@@ -424,7 +424,10 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
 
       // The source is a plugin.
       if (isset($sources[$source]['id'])) {
-        $configuration = ['feed_type' => $this];
+        $configuration = [
+          'feed_type' => $this,
+          'source' => $source,
+        ];
         $this->sourcePlugins[$source] = $this->getSourcePluginManager()->createInstance($sources[$source]['id'], $configuration);
       }
       else {

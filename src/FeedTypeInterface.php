@@ -91,6 +91,17 @@ interface FeedTypeInterface extends ConfigEntityInterface {
   public function getTargetPlugin($delta);
 
   /**
+   * Returns the source plugin for the given source if it exists.
+   *
+   * @param string $source
+   *   The source to get a plugin for.
+   *
+   * @return \Drupal\feeds\Plugin\Type\Source\SourceInterface|false
+   *   A source plugin instance, if there is one. False otherwise.
+   */
+  public function getSourcePlugin($source);
+
+  /**
    * Returns the mapping sources for this feed type.
    *
    * @return array

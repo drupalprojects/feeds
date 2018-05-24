@@ -3,6 +3,7 @@
 namespace Drupal\feeds\Plugin\Type\Source;
 
 use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\FeedsPluginInterface;
 
@@ -28,12 +29,12 @@ interface SourceInterface extends FeedsPluginInterface {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed being processed.
-   * @param string $element_key
-   *   The element to return a value for.
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
+   *   The item that is processed.
    *
    * @return array
    *   A list of scalar field values.
    */
-  public function getSourceElement(FeedInterface $feed, array $item, $element_key);
+  public function getSourceElement(FeedInterface $feed, ItemInterface $item);
 
 }
