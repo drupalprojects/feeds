@@ -188,4 +188,45 @@ abstract class FieldTargetBase extends TargetBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $this->dependencies = parent::calculateDependencies();
+
+    // Add the configured field as a dependency.
+    $field_definition = $this->targetDefinition
+      ->getFieldDefinition();
+    if ($field_definition && $field_definition instanceof EntityInterface) {
+      $this->dependencies['config'][] = $field_definition->getConfigDependencyName();
+    }
+
+    return $this->dependencies;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onDependencyRemoval(array $dependencies) {
+    // See if this target is responsible for any of the dependencies being
+    // removed. If this is the case, indicate that the mapping that uses this
+    // target needs to be removed from the feed type.
+    $remove = FALSE;
+    // Get all the current dependencies for this target.
+    $current_dependencies = $this->calculateDependencies();
+    foreach ($current_dependencies as $group => $dependency_list) {
+      // Check if any of the target dependencies match the dependencies being
+      // removed.
+      foreach ($dependency_list as $config_key) {
+        if (isset($dependencies[$group]) && array_key_exists($config_key, $dependencies[$group])) {
+          // This targets dependency matches a dependency being removed,
+          // indicate that mapping using this target needs to be removed.
+          $remove = TRUE;
+          break 2;
+        }
+      }
+    }
+    return $remove;
+  }
+
 }

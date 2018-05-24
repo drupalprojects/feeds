@@ -5,11 +5,12 @@ namespace Drupal\feeds\Plugin\Type\Target;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
+use Drupal\feeds\Plugin\DependentWithRemovalPluginInterface;
 
 /**
  * Interface for Feed targets.
  */
-interface TargetInterface {
+interface TargetInterface extends DependentWithRemovalPluginInterface {
 
   /**
    * Returns the targets defined by this plugin.

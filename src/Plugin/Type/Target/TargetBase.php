@@ -65,4 +65,11 @@ abstract class TargetBase extends ConfigurablePluginBase implements TargetInterf
     $this->setConfiguration($configuration);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function onDependencyRemoval(array $dependencies) {
+    return FALSE;
+  }
+
 }

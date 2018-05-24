@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\feeds\Feeds\FeedsSingleLazyPluginCollection;
 use Drupal\feeds\FeedTypeInterface;
+use Drupal\feeds\Plugin\DependentWithRemovalPluginInterface;
 use Drupal\feeds\Plugin\Type\LockableInterface;
 use Drupal\feeds\Plugin\Type\Target\ConfigurableTargetInterface;
 
@@ -566,6 +567,58 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
    */
   protected function alter($type, &$data) {
     return \Drupal::moduleHandler()->alter($type, $data, $this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+
+    // Calculate plugin dependencies for each target plugin.
+    // @todo support other plugin types as well.
+    foreach ($this->getMappings() as $delta => $mapping) {
+      $plugin = $this->getTargetPlugin($delta);
+      $this->calculatePluginDependencies($plugin);
+    }
+
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onDependencyRemoval(array $dependencies) {
+    $changed = FALSE;
+
+    // Don't intervene if the feeds module is removed.
+    if (isset($dependencies['module']) && in_array('feeds', $dependencies['module'])) {
+      return FALSE;
+    }
+
+    // If the bundle that is used on the processor is being removed, we delete
+    // the feed type because this is not something that can be fixed manually.
+    // @todo implement + maybe this should be implemented on the processor
+    // level.
+
+    // Check each target plugin for if they want to do something on dependency
+    // removal.
+    foreach ($this->getMappings() as $delta => $mapping) {
+      $plugin = $this->getTargetPlugin($delta);
+      if ($plugin instanceof DependentWithRemovalPluginInterface) {
+        if ($plugin->onDependencyRemoval($dependencies)) {
+          $this->removeMapping($delta);
+          $changed = TRUE;
+        }
+      }
+    }
+
+    if ($changed) {
+      // Force a recalculation of the dependencies if we made changes.
+      $this->calculateDependencies();
+    }
+
+    return $changed;
   }
 
 }
