@@ -80,12 +80,31 @@ interface FeedTypeInterface extends ConfigEntityInterface {
   public function getProcessor();
 
   /**
+   * Returns the target plugin for the given target.
+   *
+   * @param int $delta
+   *   The number under which this target is indexed in the mappings.
+   *
+   * @return \Drupal\feeds\Plugin\Type\Target\TargetInterface
+   *   A target plugin instance.
+   */
+  public function getTargetPlugin($delta);
+
+  /**
    * Returns the mapping sources for this feed type.
    *
    * @return array
    *   An array of mapping sources.
    */
   public function getMappingSources();
+
+  /**
+   * Returns the mapping targets for this feed type.
+   *
+   * @return array
+   *   An array of mapping targets.
+   */
+  public function getMappingTargets();
 
   /**
    * Returns the mappings for this feed type.
@@ -135,7 +154,7 @@ interface FeedTypeInterface extends ConfigEntityInterface {
    *
    * @param string $name
    *   The unique name for the source.
-   * @param array $values
+   * @param array $source
    *   An array of the source properties:
    *   - label
    *     A human readable name.

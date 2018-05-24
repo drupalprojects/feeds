@@ -2,12 +2,16 @@
 
 namespace Drupal\Tests\feeds\Kernel\Feeds\Processor;
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Feeds\Processor\EntityProcessorBase;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\feeds\Feeds\State\CleanState;
+use Drupal\feeds\Feeds\Target\StringTarget;
+use Drupal\feeds\FieldTargetDefinition;
 use Drupal\feeds\State;
 use Drupal\feeds\StateInterface;
 use Drupal\Tests\feeds\Kernel\FeedsKernelTestBase;
@@ -362,6 +366,60 @@ class EntityProcessorBaseTest extends FeedsKernelTestBase {
   public function testIsLocked() {
     $this->processor->isLocked();
     $this->markTestIncomplete('Test is a stub.');
+  }
+
+  /**
+   * @covers ::map
+   */
+  public function testMapWithEmptySource() {
+    // Create a new feed type mock.
+    $feed_type = $this->getMock(FeedTypeInterface::class);
+    $feed_type->expects($this->once())
+      ->method('getMappings')
+      ->will($this->returnValue([
+        [
+          'target' => 'title',
+          'map' => [
+            'value' => '',
+          ],
+        ],
+      ]));
+
+    // And set this on the processor.
+    $this->setProtectedProperty($this->processor, 'feedType', $feed_type);
+
+    // Instantiate target plugin.
+    $field_definition = $this->getMock(FieldDefinitionInterface::class);
+    $definition = FieldTargetDefinition::createFromFieldDefinition($field_definition)
+      ->addProperty('value');
+
+    $target = new StringTarget(
+      [
+        'feed_type' => $feed_type,
+        'target_definition' => $definition,
+      ],
+      'string',
+      [
+        'id' => 'string',
+        'field_types' => [
+          'string',
+          'string_long',
+          'list_string',
+        ],
+      ]
+    );
+
+    // And let the feed type always return this plugin.
+    $feed_type->expects($this->once())
+      ->method('getTargetPlugin')
+      ->will($this->returnValue($target));
+
+    // Map.
+    $this->callProtectedMethod($this->processor, 'map', [
+      $this->feed,
+      $this->getMock(EntityInterface::class),
+      $this->getMock(ItemInterface::class),
+    ]);
   }
 
   /**

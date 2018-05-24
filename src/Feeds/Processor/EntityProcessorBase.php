@@ -814,7 +814,9 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     // Set target values.
     foreach ($mappings as $delta => $mapping) {
       $plugin = $this->feedType->getTargetPlugin($delta);
-      $plugin->setTarget($feed, $entity, $mapping['target'], $field_values[$mapping['target']]);
+      if (isset($field_values[$mapping['target']])) {
+        $plugin->setTarget($feed, $entity, $mapping['target'], $field_values[$mapping['target']]);
+      }
     }
 
     return $entity;
