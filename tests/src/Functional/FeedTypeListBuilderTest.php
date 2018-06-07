@@ -14,8 +14,10 @@ class FeedTypeListBuilderTest extends FeedsBrowserTestBase {
    */
   public function testUi() {
     $this->drupalGet('/admin/structure/feeds');
-    // Assert that a message is displayed that there is no feed type yet.
-    $this->assertSession()->pageTextContains('There is no Feed type yet.');
+
+    // Assert that there are no warnings nor errors displayed.
+    $this->assertSession()->pageTextNotContains('warning');
+    $this->assertSession()->pageTextNotContains('error');
 
     // Now add a feed type.
     $this->feedType = $this->createFeedType([
