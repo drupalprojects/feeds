@@ -4,13 +4,12 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Feeds\Target\DateTime;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\DateTime
  * @group feeds
  */
-class DateTimeTest extends FeedsUnitTestCase {
+class DateTimeTest extends FieldTargetTestBase {
 
   /**
    * The feed type entity.
@@ -51,11 +50,18 @@ class DateTimeTest extends FeedsUnitTestCase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return DateTime::class;
+  }
+
+  /**
    * Tests preparing a value that succeeds.
    *
    * @covers ::prepareValue
    */
-  public function test() {
+  public function testPrepareValue() {
     $method = $this->getMethod('Drupal\feeds\Feeds\Target\DateTime', 'prepareTarget')->getClosure();
     $this->targetDefinition = $method($this->getMockFieldDefinition(['datetime_type' => 'date']));
 

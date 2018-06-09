@@ -3,20 +3,20 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
-use Drupal\feeds\Feeds\Target\EntityReference;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\feeds\Feeds\Target\EntityReference;
+use Drupal\feeds\FieldTargetDefinition;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\EntityReference
  * @group feeds
  */
-class EntityReferenceTest extends FeedsUnitTestCase {
+class EntityReferenceTest extends FieldTargetTestBase {
 
   /**
    * The entity type manager prophecy used in the test.
@@ -90,6 +90,26 @@ class EntityReferenceTest extends FeedsUnitTestCase {
       'target_definition' => $method($field_definition_mock),
     ];
     $this->targetPlugin = new EntityReference($configuration, 'entity_reference', [], $this->entityTypeManager->reveal(), $this->entityQueryFactory->reveal(), $this->entityFieldManager->reveal(), $this->entityRepository->reveal());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return EntityReference::class;
+  }
+
+  /**
+   * @covers ::prepareTarget
+   */
+  public function testPrepareTarget() {
+    $field_definition_mock = $this->getMockFieldDefinition();
+    $field_definition_mock->expects($this->once())
+      ->method('getSetting')
+      ->will($this->returnValue('referenceable_entity_type'));
+
+    $method = $this->getMethod($this->getTargetClass(), 'prepareTarget')->getClosure();
+    $this->assertInstanceof(FieldTargetDefinition::class, $method($field_definition_mock));
   }
 
   /**

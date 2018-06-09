@@ -3,13 +3,19 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\feeds\Feeds\Target\Timestamp;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Timestamp
  * @group feeds
  */
-class TimestampTest extends FeedsUnitTestCase {
+class TimestampTest extends FieldTargetTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return Timestamp::class;
+  }
 
   /**
    * @covers ::prepareValue

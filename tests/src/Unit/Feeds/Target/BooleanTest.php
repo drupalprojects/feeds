@@ -2,16 +2,21 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Feeds\Target\Boolean;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Boolean
- * @covers \Drupal\feeds\Feeds\Target\Boolean
  * @group feeds
  */
-class BooleanTest extends FeedsUnitTestCase {
+class BooleanTest extends FieldTargetTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return Boolean::class;
+  }
 
   /**
    * @covers ::prepareValue

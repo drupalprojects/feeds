@@ -3,13 +3,19 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\feeds\Feeds\Target\Email;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Email
  * @group feeds
  */
-class EmailTest extends FeedsUnitTestCase {
+class EmailTest extends FieldTargetTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return Email::class;
+  }
 
   /**
    * Basic test for the email target.

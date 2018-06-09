@@ -3,13 +3,19 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\feeds\Feeds\Target\Telephone;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Telephone
  * @group feeds
  */
-class TelephoneTest extends FeedsUnitTestCase {
+class TelephoneTest extends FieldTargetTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return Telephone::class;
+  }
 
   /**
    * @covers ::prepareValue

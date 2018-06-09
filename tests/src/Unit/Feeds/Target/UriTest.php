@@ -2,20 +2,19 @@
 
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
+use Drupal\feeds\Feeds\Target\Uri;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Uri
  * @group feeds
  */
-class UriTest extends FeedsUnitTestCase {
+class UriTest extends FieldTargetTestBase {
 
   /**
-   * @covers ::prepareValue
+   * {@inheritdoc}
    */
-  public function testPrepareValue() {
-    $method = $this->getMethod('Drupal\feeds\Feeds\Target\Uri', 'prepareTarget')->getClosure();
-    $method($this->getMockFieldDefinition());
+  protected function getTargetClass() {
+    return Uri::class;
   }
 
 }

@@ -3,13 +3,19 @@
 namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\feeds\Feeds\Target\Integer;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Integer
  * @group feeds
  */
-class IntegerTest extends FeedsUnitTestCase {
+class IntegerTest extends FieldTargetTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return Integer::class;
+  }
 
   /**
    * @covers ::prepareValue

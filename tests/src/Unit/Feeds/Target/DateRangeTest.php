@@ -4,13 +4,12 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\feeds\Feeds\Target\DateRange;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\DateRange
  * @group feeds
  */
-class DateRangeTest extends FeedsUnitTestCase {
+class DateRangeTest extends FieldTargetTestBase {
 
   /**
    * The mocked feed type entity.
@@ -51,9 +50,16 @@ class DateRangeTest extends FeedsUnitTestCase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return DateRange::class;
+  }
+
+  /**
    * @covers ::prepareValue
    */
-  public function test() {
+  public function testPrepareValue() {
     $configuration = [
       'feed_type' => $this->feedType,
       'target_definition' => $this->targetDefinition,

@@ -10,14 +10,13 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Utility\Token;
 use Drupal\feeds\Exception\EmptyFeedException;
 use Drupal\feeds\Feeds\Target\File;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 use GuzzleHttp\ClientInterface;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\File
  * @group feeds
  */
-class FileTest extends FeedsUnitTestCase {
+class FileTest extends FieldTargetTestBase {
 
   /**
    * The entity type manager prophecy used in the test.
@@ -92,6 +91,13 @@ class FileTest extends FeedsUnitTestCase {
       'target_definition' => $method($field_definition_mock),
     ];
     $this->targetPlugin = new File($configuration, 'file', [], $this->entityTypeManager->reveal(), $this->entityQueryFactory->reveal(), $this->client->reveal(), $this->token->reveal(), $this->entityFieldManager->reveal(), $this->entityRepository->reveal());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return File::class;
   }
 
   /**

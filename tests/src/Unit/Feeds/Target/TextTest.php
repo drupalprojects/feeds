@@ -5,13 +5,12 @@ namespace Drupal\Tests\feeds\Unit\Feeds\Target;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormState;
 use Drupal\feeds\Feeds\Target\Text;
-use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\feeds\Feeds\Target\Text
  * @group feeds
  */
-class TextTest extends FeedsUnitTestCase {
+class TextTest extends FieldTargetTestBase {
 
   /**
    * The FeedsTarget plugin being tested.
@@ -33,6 +32,13 @@ class TextTest extends FeedsUnitTestCase {
     ];
     $this->target = new Text($configuration, 'text', [], $this->getMock('Drupal\Core\Session\AccountInterface'));
     $this->target->setStringTranslation($this->getStringTranslationStub());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTargetClass() {
+    return Text::class;
   }
 
   /**
