@@ -2,7 +2,9 @@
 
 namespace Drupal\Tests\feeds\Unit\Plugin\QueueWorker;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Queue\QueueFactory;
+use Drupal\Core\Queue\QueueInterface;
 use Drupal\feeds\Event\FeedsEvents;
 use Drupal\feeds\Exception\LockException;
 use Drupal\feeds\Feeds\Item\DynamicItem;
@@ -46,19 +48,28 @@ class FeedRefreshTest extends FeedsUnitTestCase {
    */
   public function setUp() {
     parent::setUp();
-    $container = new ContainerBuilder();
     $this->dispatcher = new EventDispatcher();
-    $queue_factory = $this->getMock('Drupal\Core\Queue\QueueFactory', [], [], '', FALSE);
+    $queue_factory = $this->getMock(QueueFactory::class, [], [], '', FALSE);
     $queue_factory->expects($this->any())
       ->method('get')
       ->with('feeds_feed_refresh:')
-      ->will($this->returnValue($this->getMock('Drupal\Core\Queue\QueueInterface')));
+      ->will($this->returnValue($this->getMock(QueueInterface::class)));
 
-    $container->set('queue', $queue_factory);
-    $container->set('event_dispatcher', $this->dispatcher);
-    $container->set('account_switcher', $this->getMockedAccountSwitcher());
+    $entity_type_manager = $this->getMock(EntityTypeManagerInterface::class);
 
-    $this->plugin = FeedRefresh::create($container, [], 'feeds_feed_refresh', []);
+    $this->plugin = $this->getMock(FeedRefresh::class, ['feedExists'], [
+      [],
+      'feeds_feed_refresh',
+      [],
+      $queue_factory,
+      $this->dispatcher,
+      $this->getMockedAccountSwitcher(),
+      $entity_type_manager,
+    ]);
+    $this->plugin->expects($this->any())
+      ->method('feedExists')
+      ->will($this->returnValue(TRUE));
+
     $this->feed = $this->getMockFeed();
     $this->feed->expects($this->any())
       ->method('getState')

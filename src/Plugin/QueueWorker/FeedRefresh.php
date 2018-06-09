@@ -15,6 +15,8 @@ use Drupal\feeds\Result\FetcherResultInterface;
 use Drupal\feeds\StateInterface;
 
 /**
+ * A queue worker for importing feeds.
+ *
  * @QueueWorker(
  *   id = "feeds_feed_refresh",
  *   title = @Translation("Feed refresh"),
@@ -76,6 +78,12 @@ class FeedRefresh extends FeedQueueWorkerBase {
       return;
     }
 
+    // Check if the feed still exists.
+    if (!$this->feedExists($feed)) {
+      // The feed in question has been deleted. Abort.
+      return;
+    }
+
     $switcher = $this->switchAccount($feed);
 
     try {
@@ -111,6 +119,25 @@ class FeedRefresh extends FeedQueueWorkerBase {
   }
 
   /**
+   * Returns if a feed entity still exists or not.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed entity to check for existance in the database.
+   *
+   * @return bool
+   *   True if the feed still exists, false otherwise.
+   */
+  protected function feedExists(FeedInterface $feed) {
+    // Check if the feed still exists.
+    $result = $this->entityTypeManager->getStorage($feed->getEntityTypeId())->getQuery()->condition('fid', $feed->id())->execute();
+    if (empty($result)) {
+      // The feed in question has been deleted.
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+  /**
    * Queues an item.
    *
    * @param \Drupal\feeds\FeedInterface $feed
@@ -120,7 +147,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
    * @param array $params
    *   Additional parameters.
    */
-  protected function queueItem(FeedInterface $feed, $stage, $params = []) {
+  protected function queueItem(FeedInterface $feed, $stage, array $params = []) {
     $this->queueFactory->get('feeds_feed_refresh:' . $feed->bundle())
       ->createItem([$feed, $stage, $params]);
   }
@@ -160,7 +187,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to perform a parse event on.
-   * @param \Drupal\feeds\Result\FetcherResultInterface
+   * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
    *   The fetcher result.
    */
   protected function doParse(FeedInterface $feed, FetcherResultInterface $fetcher_result) {
@@ -186,7 +213,7 @@ class FeedRefresh extends FeedQueueWorkerBase {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed to perform a process event on.
-   * @param \Drupal\feeds\Feeds\Item\ItemInterface
+   * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
    *   The item to import.
    */
   protected function doProcess(FeedInterface $feed, ItemInterface $item) {
