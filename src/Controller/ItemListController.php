@@ -5,6 +5,7 @@ namespace Drupal\feeds\Controller;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\Exception\UndefinedLinkTemplateException;
 use Drupal\feeds\FeedInterface;
 use Drupal\feeds\Plugin\Type\Processor\EntityProcessorInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,7 @@ class ItemListController extends ControllerBase {
     $processor = $feeds_feed->getType()->getProcessor();
 
     $header = [
+      'id' => $this->t('ID'),
       'title' => $this->t('Label'),
       'imported' => $this->t('Imported'),
       'guid' => [
@@ -57,11 +59,20 @@ class ItemListController extends ControllerBase {
       $ago = \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $entity->get('feeds_item')->imported);
       $row = [];
 
+      // Entity ID.
+      $row[] = $entity->id();
+
       // Entity link.
-      $row[] = [
-        'data' => $entity->link(Unicode::truncate($entity->label(), 75, TRUE, TRUE)),
-        'title' => $entity->label(),
-      ];
+      try {
+        $row[] = [
+          'data' => $entity->toLink(Unicode::truncate($entity->label(), 75, TRUE, TRUE)),
+          'title' => $entity->label(),
+        ];
+      }
+      catch (UndefinedLinkTemplateException $e) {
+        $row[] = $entity->label();
+      }
+
       // Imported ago.
       $row[] = $this->t('@time ago', ['@time' => $ago]);
       // Item GUID.

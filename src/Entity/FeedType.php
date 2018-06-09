@@ -185,6 +185,23 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
   /**
    * {@inheritdoc}
    */
+  public function __sleep() {
+    $vars = parent::__sleep();
+
+    // Do not serialize pluginCollection as this can contain a
+    // \Drupal\Core\Entity\EntityType instance which can contain a
+    // stringTranslation object that is not serializable.
+    // @see https://www.drupal.org/project/drupal/issues/2893029
+    $vars = array_flip($vars);
+    unset($vars['pluginCollection']);
+    $vars = array_flip($vars);
+
+    return $vars;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function set($property_name, $value) {
     // Remove mappings when processor changes.
     if ($property_name === 'processor' && $this->processor !== $value) {

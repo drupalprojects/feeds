@@ -142,6 +142,7 @@ class FeedTypeForm extends EntityForm {
 
     foreach ($this->entity->getPlugins() as $type => $plugin) {
       $options = $this->entity->getPluginOptionsList($type);
+      natcasesort($options);
 
       $form[$type . '_wrapper'] = [
         '#type' => 'container',

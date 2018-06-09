@@ -134,10 +134,9 @@ feeds.processor.entity:
   label: 'Entity processor settings'
   mapping:
     values:
-      type: mapping
-      mapping:
-        type:
-          type: string
+      type: sequence
+      sequence:
+        type: ignore
     update_existing:
       type: integer
     update_non_existent:
@@ -152,3 +151,6 @@ feeds.processor.entity:
       type: boolean
     owner_id:
       type: integer
+
+feeds.processor.entity:*:
+  type: feeds.processor.entity

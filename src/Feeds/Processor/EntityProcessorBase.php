@@ -362,7 +362,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    *   The item label.
    */
   public function getItemLabel() {
-    if (!$this->entityType->getKey('bundle')) {
+    if (!$this->entityType->getKey('bundle') || !$this->entityType->getBundleEntityType()) {
       return $this->entityTypeLabel();
     }
     $storage = $this->entityTypeManager->getStorage($this->entityType->getBundleEntityType());
@@ -376,7 +376,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    *   The plural item label.
    */
   public function getItemLabelPlural() {
-    return Inflector::pluralize($this->getItemLabel());
+    return Inflector::pluralize((string) $this->getItemLabel());
   }
 
   /**
@@ -524,12 +524,17 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       'update_existing' => static::SKIP_EXISTING,
       'update_non_existent' => static::KEEP_NON_EXISTENT,
       'skip_hash_check' => FALSE,
-      'values' => [$this->entityType->getKey('bundle') => NULL],
+      'values' => [],
       'authorize' => $this->entityType->isSubclassOf('Drupal\user\EntityOwnerInterface'),
       'expire' => static::EXPIRE_NEVER,
       'owner_id' => 0,
       'owner_feed_author' => 0,
     ];
+
+    // Bundle.
+    if ($bundle_key = $this->entityType->getKey('bundle')) {
+      $defaults['values'] = [$bundle_key => NULL];
+    }
 
     return $defaults;
   }

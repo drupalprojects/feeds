@@ -7,8 +7,8 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery;
-use Drupal\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecorator;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\feeds\Plugin\Discovery\OverridableDerivativeDiscoveryDecorator;
 
 /**
  * Manages Feeds plugins.
@@ -57,7 +57,7 @@ class FeedsPluginManager extends DefaultPluginManager {
     $this->pluginType = $type;
     $this->subdir = 'Feeds/' . ucfirst($type);
     $this->discovery = new AnnotatedClassDiscovery($this->subdir, $namespaces, $type_annotations[$type]);
-    $this->discovery = new ContainerDerivativeDiscoveryDecorator($this->discovery);
+    $this->discovery = new OverridableDerivativeDiscoveryDecorator($this->discovery);
     $this->factory = new FeedsAnnotationFactory($this, $plugin_interfaces[$type]);
     $this->moduleHandler = $module_handler;
     $this->alterInfo("feeds_{$type}_plugins");
