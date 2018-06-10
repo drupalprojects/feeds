@@ -94,6 +94,9 @@ class FeedExpireHandler extends FeedHandlerBase {
 
   /**
    * Handles clean up tasks after expiring items is done.
+   *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed for which items got expired.
    */
   public function postExpire(FeedInterface $feed) {
     $state = $feed->getState(StateInterface::EXPIRE);

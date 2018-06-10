@@ -86,7 +86,9 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FetcherInter
 
     $response = $this->get($feed->getSource(), $sink, $this->getCacheKey($feed));
     // @todo Handle redirects.
+    // @codingStandardsIgnoreStart
     // $feed->setSource($response->getEffectiveUrl());
+    // @codingStandardsIgnoreEnd
 
     // 304, nothing to see here.
     if ($response->getStatusCode() == Response::HTTP_NOT_MODIFIED) {
@@ -102,6 +104,9 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FetcherInter
    *
    * @param string $url
    *   The URL to GET.
+   * @param string $sink
+   *   The location where the downloaded content will be saved. This can be a
+   *   resource, path or a StreamInterface object.
    * @param string $cache_key
    *   (optional) The cache key to find cached headers. Defaults to false.
    *
@@ -110,6 +115,8 @@ class HttpFetcher extends PluginBase implements ClearableInterface, FetcherInter
    *
    * @throws \RuntimeException
    *   Thrown if the GET request failed.
+   *
+   * @see \GuzzleHttp\RequestOptions
    */
   protected function get($url, $sink, $cache_key = FALSE) {
     $url = Feed::translateSchemes($url);

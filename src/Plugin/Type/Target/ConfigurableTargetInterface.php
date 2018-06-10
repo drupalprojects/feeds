@@ -5,7 +5,7 @@ namespace Drupal\feeds\Plugin\Type\Target;
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 
 /**
- *
+ * Interface for configurable target plugins.
  */
 interface ConfigurableTargetInterface extends ConfigurablePluginInterface {
 

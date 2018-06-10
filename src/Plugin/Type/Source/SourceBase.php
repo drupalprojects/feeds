@@ -2,7 +2,6 @@
 
 namespace Drupal\feeds\Plugin\Type\Source;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\PluginBase;
 
 /**

@@ -18,6 +18,7 @@ class FeedsPermissions {
    * Returns an array of content permissions.
    *
    * @return array
+   *   Permissions for operations on feeds.
    */
   public function contentPermissions() {
     return [
@@ -32,6 +33,7 @@ class FeedsPermissions {
    * Returns an array of feeds type permissions.
    *
    * @return array
+   *   Permissions for operations on feed types.
    */
   public function feedTypePermissions() {
     $perms = [];

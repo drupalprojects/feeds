@@ -131,11 +131,13 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * Renders a link to a route given a route name and its parameters.
    *
-   * @see \Drupal\Core\Utility\LinkGeneratorInterface::generate() for details
-   *   on the arguments, usage, and possible exceptions.
+   * See \Drupal\Core\Utility\LinkGeneratorInterface::generate() for details
+   * on the arguments, usage, and possible exceptions.
    *
    * @return string
    *   An HTML string containing a link to the given route and parameters.
+   *
+   * @see \Drupal\Core\Utility\LinkGeneratorInterface::generate()
    */
   protected function l($text, $route_name, array $parameters = [], array $options = []) {
     return $this->linkGenerator()->generate($text, $route_name, $parameters, $options);
@@ -144,11 +146,13 @@ abstract class PluginBase extends DrupalPluginBase implements FeedsPluginInterfa
   /**
    * Generates a URL or path for a specific route based on the given parameters.
    *
-   * @see \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
-   *   details on the arguments, usage, and possible exceptions.
+   * See \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
+   * details on the arguments, usage, and possible exceptions.
    *
    * @return string
    *   The generated URL for the given route.
+   *
+   * @see \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute()
    */
   protected function url($route_name, $route_parameters = [], $options = []) {
     return $this->urlGenerator()->generateFromRoute($route_name, $route_parameters, $options);

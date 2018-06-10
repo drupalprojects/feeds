@@ -17,7 +17,10 @@ class DeleteFeedsEvent extends Event {
   protected $feeds;
 
   /**
-   * @param \Drupal\feeds\FeedInterface[]
+   * Constructs a new DeleteFeedsEvent object.
+   *
+   * @param \Drupal\feeds\FeedInterface[] $feeds
+   *   A list of feed entities.
    */
   public function __construct(array $feeds) {
     $this->feeds = $feeds;

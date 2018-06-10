@@ -42,6 +42,8 @@ class UploadFetcherFeedForm extends ExternalPluginFormBase implements ContainerI
    *
    * @param \Drupal\file\FileStorageInterface $file_storage
    *   The file storage backend.
+   * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
+   *   The file usage backend.
    * @param \Drupal\Component\Uuid\UuidInterface $uuid
    *   The UUID generator.
    */

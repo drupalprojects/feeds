@@ -21,6 +21,8 @@ class ExpireEvent extends EventBase {
    *
    * @param \Drupal\feeds\FeedInterface $feed
    *   The feed.
+   * @param int $item_id
+   *   The ID of the item that is being expired.
    */
   public function __construct(FeedInterface $feed, $item_id) {
     $this->feed = $feed;

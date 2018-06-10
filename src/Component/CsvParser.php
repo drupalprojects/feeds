@@ -284,7 +284,7 @@ class CsvParser implements \Iterator {
    * @return array
    *   The list of cells in the CSV row.
    */
-  protected function parseLine($line, $in_quotes = FALSE, $field = '', $fields = []) {
+  protected function parseLine($line, $in_quotes = FALSE, $field = '', array $fields = []) {
     $line_length = strlen($line);
 
     // Traverse the line byte-by-byte.

@@ -36,7 +36,20 @@ class DefaultEntityProcessorForm extends ExternalPluginFormBase {
       '#default_value' => $this->plugin->getConfiguration('update_existing'),
     ];
 
-    $times = [ProcessorInterface::EXPIRE_NEVER, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2592000, 2592000 * 3, 2592000 * 6, 31536000];
+    $times = [
+      ProcessorInterface::EXPIRE_NEVER,
+      3600,
+      10800,
+      21600,
+      43200,
+      86400,
+      259200,
+      604800,
+      2592000,
+      2592000 * 3,
+      2592000 * 6,
+      31536000,
+    ];
     $period = array_map([$this, 'formatExpire'], array_combine($times, $times));
 
     $options = $this->getUpdateNonExistentActions();

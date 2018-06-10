@@ -338,7 +338,7 @@ class Feed extends ContentEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function setState($stage, $state) {
+  public function setState($stage, StateInterface $state = NULL) {
     $this->states[$stage] = $state;
   }
 

@@ -115,11 +115,15 @@ function feeds_file_download($uri) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
+ * Implements hook_form_FORM_ID_alter() for field_ui_field_overview_form().
  *
- * Remove our field from the Field UI overview form.
+ * Removes our field from the Field UI overview form.
+ *
+ * @todo implement the feeds_item field as base field instead? See
+ * https://www.drupal.org/project/feeds/issues/2799225
  */
 function feeds_form_field_ui_field_overview_form_alter(array &$form, FormStateInterface $form_state) {
+  // @codingStandardsIgnoreStart
   // if (in_array('feeds_item', $form['#fields'])) {
 
   //   unset($form['#fields'][array_search('feeds_item', $form['#fields'])]);
@@ -129,6 +133,7 @@ function feeds_form_field_ui_field_overview_form_alter(array &$form, FormStateIn
   //   $key = array_search('feeds_item', $rows_order);
   //   unset($form['fields']['#regions']['content']['rows_order'][$key]);
   // }
+  // @codingStandardsIgnoreEnd
 }
 
 /**
@@ -163,7 +168,7 @@ function feeds_menu_links_discovered_alter(&$links) {
  *   - feed: The feed object.
  *   - view_mode: View mode; e.g., 'full', 'teaser'...
  */
-function template_preprocess_feeds_feed(&$variables) {
+function template_preprocess_feeds_feed(array &$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['feed'] = $feed = $variables['elements']['#feeds_feed'];
 

@@ -12,7 +12,11 @@ use Drupal\feeds\Feeds\Processor\EntityProcessorBase;
  *   title = @Translation("Test entity overridden"),
  *   description = @Translation("Creates test entities from feed items."),
  *   entity_type = "entity_test",
- *   arguments = {"@entity_type.manager", "@entity.query", "@entity_type.bundle.info"},
+ *   arguments = {
+ *     "@entity_type.manager",
+ *     "@entity.query",
+ *     "@entity_type.bundle.info",
+ *   },
  *   form = {
  *     "configuration" = "Drupal\feeds\Feeds\Processor\Form\DefaultEntityProcessorForm",
  *     "option" = "Drupal\feeds\Feeds\Processor\Form\EntityProcessorOptionForm",

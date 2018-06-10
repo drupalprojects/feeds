@@ -185,7 +185,7 @@ namespace {
   if (!function_exists('_format_date_callback')) {
 
     /**
-     *
+     * Stub for _format_date_callback() function.
      */
     function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
       // We cache translations to avoid redundant and rather costly calls to
@@ -222,19 +222,25 @@ namespace {
   }
 
   /**
-   *
+   * Stub for a filter format entity.
    */
   class FeedsFilterStub {
 
     /**
+     * Constructs a new FeedsFilterStub.
      *
+     * @param string $label
+     *   The filter's label.
      */
     public function __construct($label) {
       $this->label = $label;
     }
 
     /**
+     * Returns the filter's label.
      *
+     * @return string
+     *   The label of this filter.
      */
     public function label() {
       return $this->label;

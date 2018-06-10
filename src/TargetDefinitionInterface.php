@@ -42,7 +42,7 @@ interface TargetDefinitionInterface {
   /**
    * Returns whether this target has a given property.
    *
-   * @param string
+   * @param string $property
    *   The property to check for.
    *
    * @return bool

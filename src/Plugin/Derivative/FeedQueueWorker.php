@@ -24,8 +24,6 @@ class FeedQueueWorker extends DeriverBase implements ContainerDeriverInterface {
   /**
    * Constructs an FeedQueueWorker object.
    *
-   * @param string $base_plugin_id
-   *   The base plugin id.
    * @param \Drupal\Core\Entity\EntityStorageInterface $storage
    *   The entity manager.
    */

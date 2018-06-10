@@ -248,9 +248,9 @@ class FeedForm extends ContentEntityForm {
   /**
    * Form submission handler for the 'import' action.
    *
-   * @param $form
+   * @param array $form
    *   An associative array containing the structure of the form.
-   * @param $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
   public function import(array $form, FormStateInterface $form_state) {
@@ -260,7 +260,18 @@ class FeedForm extends ContentEntityForm {
   }
 
   /**
+   * Returns whether or not the plugin implements a form for the given type.
    *
+   * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $plugin
+   *   The Feeds plugin.
+   * @param string $operation
+   *   The type of form to check for. See
+   *   \Drupal\feeds\Plugin\PluginFormFactory::hasForm() for more information.
+   *
+   * @return bool
+   *   True if the plugin implements a form of the given type. False otherwise.
+   *
+   * @see \Drupal\feeds\Plugin\PluginFormFactory::hasForm()
    */
   protected function pluginHasForm(FeedsPluginInterface $plugin, $operation) {
     return $this->formFactory->hasForm($plugin, $operation);

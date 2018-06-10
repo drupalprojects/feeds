@@ -50,6 +50,9 @@ class PubSubHubbub implements EventSubscriberInterface {
 
   /**
    * Subscribes to a feed.
+   *
+   * @param \Drupal\feeds\Event\FetchEvent $event
+   *   The fetch event.
    */
   public function onPostFetch(FetchEvent $event) {
     $feed = $event->getFeed();
@@ -110,7 +113,12 @@ class PubSubHubbub implements EventSubscriberInterface {
   }
 
   /**
+   * Subscribes a subscription to a hub in a batch.
    *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to which the subscription is linked.
+   * @param \Drupal\feeds\SubscriptionInterface $subscription
+   *   The subscription to subscribe.
    */
   protected function subscribe(FeedInterface $feed, SubscriptionInterface $subscription) {
     $subscription->subscribe();
@@ -129,7 +137,12 @@ class PubSubHubbub implements EventSubscriberInterface {
   }
 
   /**
+   * Unsubscribes a subscription from a hub in a batch.
    *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed to which the subscription is linked.
+   * @param \Drupal\feeds\SubscriptionInterface $subscription
+   *   The subscription to unsubscribe.
    */
   protected function unsubscribe(FeedInterface $feed, SubscriptionInterface $subscription = NULL) {
     if (!$subscription) {
@@ -152,7 +165,15 @@ class PubSubHubbub implements EventSubscriberInterface {
   }
 
   /**
+   * Subscribes to or unsubscribes from a hub.
    *
+   * This method is used as callback for a batch.
+   *
+   * @param \Drupal\feeds\SubscriptionInterface $subscription
+   *   The subscription entity.
+   *
+   * @see ::subscribe
+   * @see ::unsubscribe
    */
   public static function runSubscribeBatch(SubscriptionInterface $subscription) {
     switch ($subscription->getState()) {
@@ -237,6 +258,8 @@ class PubSubHubbub implements EventSubscriberInterface {
    *
    * @param \Drupal\feeds\Result\FetcherResultInterface $fetcher_result
    *   The fetcher result.
+   * @param string $relation
+   *   The type of relation to find.
    *
    * @return string|null
    *   The hub URL or null if one wasn't found.
@@ -253,6 +276,9 @@ class PubSubHubbub implements EventSubscriberInterface {
 
   /**
    * Deletes subscriptions when feeds are deleted.
+   *
+   * @param \Drupal\feeds\Event\DeleteFeedsEvent $event
+   *   The delete event.
    */
   public function onDeleteMultipleFeeds(DeleteFeedsEvent $event) {
     $subscriptions = $this->storage->loadMultiple(array_keys($event->getFeeds()));

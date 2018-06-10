@@ -75,7 +75,7 @@ class DeleteMultiple extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormID() {
+  public function getFormId() {
     return 'feeds_feed_multiple_delete_confirm';
   }
 

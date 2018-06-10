@@ -30,6 +30,8 @@ class SubscriptionController extends ControllerBase implements ContainerInjectio
    *
    * @param \Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface $key_value_expire_factory
    *   The key value expirable factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
   public function __construct(KeyValueExpirableFactoryInterface $key_value_expire_factory, EntityTypeManagerInterface $entity_type_manager) {
     $this->keyValueExpireFactory = $key_value_expire_factory;

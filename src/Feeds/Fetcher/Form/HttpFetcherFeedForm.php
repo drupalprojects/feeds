@@ -101,7 +101,16 @@ class HttpFetcherFeedForm extends ExternalPluginFormBase implements ContainerInj
   }
 
   /**
+   * Performs a GET request.
    *
+   * @param string $url
+   *   The URL to GET.
+   *
+   * @return \Guzzle\Http\Message\Response
+   *   A Guzzle response.
+   *
+   * @throws \RuntimeException
+   *   Thrown if the GET request failed.
    */
   protected function get($url) {
     try {

@@ -6,7 +6,7 @@ use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Wrapper methods for \Symfony\Component\EventDispatcher\EventDispatcherInterface.
+ * Wrapper methods for the event dispatcher interface.
  *
  * If the class is capable of injecting services from the container, it should
  * inject the 'event_dispatcher' service and assign it to
@@ -29,6 +29,7 @@ trait EventDispatcherTrait {
    * @param string $event_name
    *   The name of the event.
    * @param \Symfony\Component\EventDispatcher\Event $event
+   *   The event to dispatch.
    *
    * @return \Symfony\Component\EventDispatcher\Event
    *   The invoked event.

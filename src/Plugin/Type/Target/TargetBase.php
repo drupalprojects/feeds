@@ -6,7 +6,18 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\feeds\Plugin\Type\ConfigurablePluginBase;
 
 /**
- * @todo Document this.
+ * A base class for Feed targets.
+ *
+ * Feed targets are objects where you can map to. Each feed target receives an
+ * array of values. A feed target is responsible for converting the values to
+ * something usable and then do something with it, usually storing it on a field
+ * on the entity.
+ *
+ * Most feed targets store data on a field. For these target plugins you should
+ * usually extend \Drupal\feeds\Plugin\Type\Target\FieldTargetBase instead of
+ * extending this class directly. You should extend this class directly if
+ * either you find FieldTargetBase not suitable or if you want to do something
+ * else than storing data on a field on the entity.
  */
 abstract class TargetBase extends ConfigurablePluginBase implements TargetInterface {
 

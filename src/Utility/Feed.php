@@ -37,7 +37,7 @@ class Feed {
   /**
    * Returns if the provided $content_type is a feed.
    *
-   * @param string $document
+   * @param string $data
    *   The actual HTML or XML document from the HTTP request.
    *
    * @return bool

@@ -29,7 +29,22 @@ class PluginFormFactory {
   }
 
   /**
+   * Returns whether or not the plugin implements a form for the given type.
    *
+   * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $plugin
+   *   The Feeds plugin.
+   * @param string $operation
+   *   The type of form to check for, which can be for example:
+   *   - configuration
+   *     Displayed when configuring the feed type.
+   *   - feed
+   *     Displayed on the feed add/edit form.
+   *   - option
+   *     A small form to appear on the plugin select box. The entity processor
+   *     plugins use this to display a form for selecting an entity bundle.
+   *
+   * @return bool
+   *   True if the plugin implements a form of the given type. False otherwise.
    */
   public function hasForm(FeedsPluginInterface $plugin, $operation) {
     $definition = $plugin->getPluginDefinition();
@@ -44,7 +59,15 @@ class PluginFormFactory {
   }
 
   /**
-   * {@inheritdoc}
+   * Creates a form instance for the plugin.
+   *
+   * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $plugin
+   *   The Feeds plugin.
+   * @param string $operation
+   *   The type of form to create. See ::hasForm above for possible types.
+   *
+   * @return \Drupal\Core\Plugin\PluginFormInterface
+   *   A form for the plugin.
    */
   public function createInstance(FeedsPluginInterface $plugin, $operation) {
     $definition = $plugin->getPluginDefinition();

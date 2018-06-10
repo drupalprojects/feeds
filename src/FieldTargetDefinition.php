@@ -57,9 +57,11 @@ class FieldTargetDefinition extends TargetDefinition {
    *   The plugin id.
    *
    * @return $this
+   *   An instance of itself.
    */
   public function setPluginId($plugin_id) {
     $this->pluginId = $plugin_id;
+    return $this;
   }
 
   /**

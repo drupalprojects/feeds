@@ -21,7 +21,14 @@ use Drupal\Core\Utility\Token;
  * @FeedsTarget(
  *   id = "file",
  *   field_types = {"file"},
- *   arguments = {"@entity_type.manager", "@entity.query", "@http_client", "@token", "@entity_field.manager", "@entity.repository"}
+ *   arguments = {
+ *     "@entity_type.manager",
+ *     "@entity.query",
+ *     "@http_client",
+ *     "@token",
+ *     "@entity_field.manager",
+ *     "@entity.repository",
+ *   }
  * )
  */
 class File extends EntityReference {

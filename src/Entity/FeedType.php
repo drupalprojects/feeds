@@ -83,9 +83,9 @@ class FeedType extends ConfigEntityBundleBase implements FeedTypeInterface, Enti
   /**
    * The types of plugins we support.
    *
-   * @todo Make this dynamic?
-   *
    * @var array
+   *
+   * @todo Make this dynamic?
    */
   protected $pluginTypes = ['fetcher', 'parser', 'processor'];
 

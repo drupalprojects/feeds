@@ -196,16 +196,25 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
 
   /**
    * Reports progress on cleaning.
+   *
+   * @return float
+   *   A float between 0 and 1. 1 = StateInterface::BATCH_COMPLETE.
    */
   public function progressCleaning();
 
   /**
    * Reports progress on clearing.
+   *
+   * @return float
+   *   A float between 0 and 1. 1 = StateInterface::BATCH_COMPLETE.
    */
   public function progressClearing();
 
   /**
    * Reports progress on expiry.
+   *
+   * @return float
+   *   A float between 0 and 1. 1 = StateInterface::BATCH_COMPLETE.
    */
   public function progressExpiring();
 
@@ -224,17 +233,23 @@ interface FeedInterface extends ContentEntityInterface, EntityChangedInterface, 
   public function getState($stage);
 
   /**
-   * @todo
+   * Sets a state object for a given stage.
+   *
+   * @param string $stage
+   *   One of StateInterface::FETCH, StateInterface::PARSE,
+   *   StateInterface::PROCESS or StateInterface::CLEAR.
+   * @param \Drupal\feeds\StateInterface|null $state
+   *   A state object or null to unset the state for the given stage.
    */
-  public function setState($stage, $state);
+  public function setState($stage, StateInterface $state = NULL);
 
   /**
-   * @todo
+   * Clears all state objects for the feed.
    */
   public function clearStates();
 
   /**
-   * @todo
+   * Saves all state objects on the key/value collection of the feed.
    */
   public function saveStates();
 

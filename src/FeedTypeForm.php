@@ -37,10 +37,12 @@ class FeedTypeForm extends EntityForm {
   protected $formFactory;
 
   /**
-   * Constructs an FeedTypeForm object.
+   * Constructs a new FeedTypeForm object.
    *
    * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $feed_type_storage
    *   The feed type storage controller.
+   * @param \Drupal\feeds\Plugin\PluginFormFactory $factory
+   *   The form factory.
    */
   public function __construct(ConfigEntityStorageInterface $feed_type_storage, PluginFormFactory $factory) {
     $this->feedTypeStorage = $feed_type_storage;
@@ -117,7 +119,18 @@ class FeedTypeForm extends EntityForm {
       '#tree' => FALSE,
     ];
 
-    $times = [900, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800, 2419200];
+    $times = [
+      900,
+      1800,
+      3600,
+      10800,
+      21600,
+      43200,
+      86400,
+      259200,
+      604800,
+      2419200,
+    ];
 
     $period = array_map(function ($time) {
       return \Drupal::service('date.formatter')->formatInterval($time);
@@ -350,7 +363,18 @@ class FeedTypeForm extends EntityForm {
   }
 
   /**
+   * Returns whether or not the plugin implements a form for the given type.
    *
+   * @param \Drupal\feeds\Plugin\Type\FeedsPluginInterface $plugin
+   *   The Feeds plugin.
+   * @param string $operation
+   *   The type of form to check for. See
+   *   \Drupal\feeds\Plugin\PluginFormFactory::hasForm() for more information.
+   *
+   * @return bool
+   *   True if the plugin implements a form of the given type. False otherwise.
+   *
+   * @see \Drupal\feeds\Plugin\PluginFormFactory::hasForm()
    */
   protected function pluginHasForm(FeedsPluginInterface $plugin, $operation) {
     return $this->formFactory->hasForm($plugin, $operation);

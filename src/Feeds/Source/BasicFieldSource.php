@@ -8,6 +8,8 @@ use Drupal\feeds\FeedTypeInterface;
 use Drupal\feeds\Plugin\Type\Source\SourceBase;
 
 /**
+ * A source plugin that provides feed type fields as mapping sources.
+ *
  * @FeedsSource(
  *   id = "basic_field"
  * )

@@ -68,6 +68,17 @@ class State implements StateInterface {
 
   /**
    * The list of messages to display to the user.
+   *
+   * Each entry on the array is expected to have the following values:
+   * - message (string|\Drupal\Component\Render\MarkupInterface): the translated
+   *   message to be displayed to the user;
+   * - type (string): the message's type. These values are supported:
+   *   - 'status'
+   *   - 'warning'
+   *   - 'error'
+   * - repeat (bool): whether or not showing the same message more than once.
+   *
+   * @var array
    */
   protected $messages = [];
 

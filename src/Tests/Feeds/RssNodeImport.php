@@ -28,7 +28,7 @@ class RssNodeImport extends WebTestBase {
   public static $modules = ['block', 'taxonomy', 'node', 'feeds'];
 
   /**
-   *
+   * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
@@ -102,7 +102,7 @@ class RssNodeImport extends WebTestBase {
   }
 
   /**
-   *
+   * Tests importing a RSS feed using the HTTP fetcher.
    */
   public function testHttpImport() {
     $filepath = drupal_get_path('module', 'feeds') . '/tests/resources/rss/googlenewstz.rss2';
@@ -164,7 +164,7 @@ class RssNodeImport extends WebTestBase {
   }
 
   /**
-   *
+   * Tests importing through cron.
    */
   public function testCron() {
     // Run cron once before, so any other bookkeeping can get done.
@@ -248,7 +248,13 @@ class RssNodeImport extends WebTestBase {
   }
 
   /**
+   * Reloads a feeds_feed entity.
    *
+   * @param int $fid
+   *   The ID of the feeds_feet entity.
+   *
+   * @return \Drupal\feeds\Entity\Feed
+   *   The reloaded feeds_feed entity.
    */
   protected function reloadFeed($fid) {
     $this->container

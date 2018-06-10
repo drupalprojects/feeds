@@ -126,7 +126,12 @@ abstract class FieldTargetBase extends TargetBase {
   }
 
   /**
+   * Constructs a base query which is used to find an existing entity.
    *
+   * @return \Drupal\Core\Entity\Query\QueryInterface
+   *   An entity query.
+   *
+   * @see ::getUniqueValue()
    */
   protected function getUniqueQuery() {
     return \Drupal::entityQuery($this->feedType->getProcessor()->entityType())
@@ -134,7 +139,19 @@ abstract class FieldTargetBase extends TargetBase {
   }
 
   /**
+   * Looks for an existing entity and returns an entity ID if found.
    *
+   * @param \Drupal\feeds\FeedInterface $feed
+   *   The feed that is being processed.
+   * @param string $target
+   *   The ID of the field target plugin.
+   * @param string $key
+   *   The property of the field to search on.
+   * @param string $value
+   *   The value to look for.
+   *
+   * @return string|int|null
+   *   An entity ID, if found. Null otherwise.
    */
   public function getUniqueValue(FeedInterface $feed, $target, $key, $value) {
     $base_fields = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($this->feedType->getProcessor()->entityType());

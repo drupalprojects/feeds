@@ -22,7 +22,12 @@ use Drupal\feeds\Plugin\Type\Target\FieldTargetBase;
  * @FeedsTarget(
  *   id = "entity_reference",
  *   field_types = {"entity_reference"},
- *   arguments = {"@entity_type.manager", "@entity.query", "@entity_field.manager", "@entity.repository"}
+ *   arguments = {
+ *     "@entity_type.manager",
+ *     "@entity.query",
+ *     "@entity_field.manager",
+ *     "@entity.repository",
+ *   }
  * )
  */
 class EntityReference extends FieldTargetBase implements ConfigurableTargetInterface {
@@ -56,7 +61,7 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   protected $entityRepository;
 
   /**
-   * Constructs an EntityReference object.
+   * Constructs a new EntityReference object.
    *
    * @param array $configuration
    *   The plugin configuration.
@@ -97,7 +102,10 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   }
 
   /**
+   * Returns a list of fields that may be used to reference by.
    *
+   * @return array
+   *   A list subfields of the entity reference field.
    */
   protected function getPotentialFields() {
     $field_definitions = $this->entityFieldManager->getFieldStorageDefinitions($this->getEntityType());
@@ -143,28 +151,46 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   }
 
   /**
+   * Returns the entity type to reference.
    *
+   * @return string
+   *   The entity type to reference.
    */
   protected function getEntityType() {
     return $this->settings['target_type'];
   }
 
   /**
+   * Returns a list of bundles that may be referenced.
    *
+   * If there are no target bundles configured on the entity reference field, an
+   * empty array is returned.
+   *
+   * @return array
+   *   Bundles that are allowed to be referenced.
    */
   protected function getBundles() {
-    return $this->settings['handler_settings']['target_bundles'];
+    if (!empty($this->settings['handler_settings']['target_bundles'])) {
+      return $this->settings['handler_settings']['target_bundles'];
+    }
+    return [];
   }
 
   /**
+   * Returns the entity type's bundle key.
    *
+   * @return string
+   *   The bundle key of the entity type.
    */
   protected function getBundleKey() {
     return $this->entityTypeManager->getDefinition($this->getEntityType())->getKey('bundle');
   }
 
   /**
+   * Returns the entity type's label key.
    *
+   * @return string
+   *   The label key of the entity type.
    */
   protected function getLabelKey() {
     return $this->entityTypeManager->getDefinition($this->getEntityType())->getKey('label');
@@ -225,13 +251,15 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
    *
    * @param string $value
    *   The value to search for.
+   * @param string $field
+   *   The subfield to search in.
    *
    * @return int|bool
    *   The entity id, or false, if not found.
    */
   protected function findEntity($value, $field) {
     // When referencing by UUID, use the EntityRepository service.
-    if ($this->configuration['reference_by'] === 'uuid') {
+    if ($field === 'uuid') {
       if (NULL !== ($entity = $this->entityRepository->loadEntityByUuid($this->getEntityType(), $value))) {
         return $entity->id();
       }
@@ -257,17 +285,23 @@ class EntityReference extends FieldTargetBase implements ConfigurableTargetInter
   }
 
   /**
+   * Creates a new entity with the given label and saves it.
    *
+   * @param string $label
+   *   The label the new entity should get.
+   *
+   * @return int|string|false
+   *   The ID of the new entity or false if the given label is empty.
    */
-  protected function createEntity($value) {
-    if (!strlen(trim($value))) {
+  protected function createEntity($label) {
+    if (!strlen(trim($label))) {
       return FALSE;
     }
 
     $bundles = $this->getBundles();
 
     $entity = $this->entityTypeManager->getStorage($this->getEntityType())->create([
-      $this->getLabelKey() => $value,
+      $this->getLabelKey() => $label,
       $this->getBundleKey() => reset($bundles),
     ]);
     $entity->save();

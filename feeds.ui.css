@@ -17,9 +17,6 @@ table.feeds-admin-feed-type tr.disabled.odd {
 }
 
 /* Feeds edit form layout. */
-div.feeds-settings {
-}
-
 div.left-bar {
   float: left;
   position: relative;
@@ -38,9 +35,6 @@ div.configuration-squeeze {
 }
 
 /* Container theming. */
-div.feeds-container {
-}
-
 div.feeds-container h4 {
   font-size: 1.2em;
   font-weight: bold;
@@ -95,11 +89,5 @@ ul.container-actions .form-item,
 ul.container-actions li form,
 ul.container-actions li form input {
   padding: 0;
-  margin: 0;
   display: inline;
-}
-
-/* Mapping form. */
-#center table form {
-  margin: 0;
 }

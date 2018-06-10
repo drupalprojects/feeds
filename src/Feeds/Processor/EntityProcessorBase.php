@@ -688,8 +688,8 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
    * @param \Drupal\feeds\Feeds\Item\ItemInterface $item
    *   The item to find existing ids for.
    *
-   * @return int|false
-   *   The integer of the entity, or false if not found.
+   * @return int|string|null
+   *   The ID of the entity, or null if not found.
    */
   protected function existingEntityId(FeedInterface $feed, ItemInterface $item) {
     foreach ($this->feedType->getMappings() as $delta => $mapping) {

@@ -18,6 +18,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Base class for Feed queue workers.
  */
 abstract class FeedQueueWorkerBase extends QueueWorkerBase implements ContainerFactoryPluginInterface {
+
   use EventDispatcherTrait;
 
   /**
