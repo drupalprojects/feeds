@@ -48,6 +48,7 @@ class HttpFetcherFeedForm extends ExternalPluginFormBase implements ContainerInj
       '#title' => $this->t('Feed URL'),
       '#type' => 'url',
       '#default_value' => $feed->getSource(),
+      '#maxlength' => 2048,
       '#required' => TRUE,
     ];
 
