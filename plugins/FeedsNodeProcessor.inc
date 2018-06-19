@@ -38,7 +38,7 @@ class FeedsNodeProcessor extends FeedsProcessor {
   public function languageOptions() {
     // Content types can have "extended" language enabled, allowing all
     // available languages, not just enabled. Account for this here.
-    if (module_exists('i18n_node')) {
+    if (module_exists('i18n_node') && $this->bundle()) {
       $node = new stdClass();
       $node->type = $this->bundle();
       $node->is_new = TRUE;
