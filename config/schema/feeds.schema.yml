@@ -104,6 +104,15 @@ feeds.fetcher.directory:
     recursive_scan:
       type: boolean
 
+feeds.fetcher.upload:
+  type: mapping
+  label: 'Upload fetcher settings'
+  mapping:
+    allowed_extensions:
+      type: string
+    directory:
+      type: string
+
 # Parser configurations.
 feeds.parser.csv:
   type: mapping

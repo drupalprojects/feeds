@@ -26,6 +26,7 @@ abstract class FeedsBrowserTestBase extends BrowserTestBase {
     'feeds',
     'node',
     'user',
+    'file',
   ];
 
   /**
