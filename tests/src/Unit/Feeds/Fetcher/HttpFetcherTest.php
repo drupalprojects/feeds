@@ -58,7 +58,10 @@ class HttpFetcherTest extends FeedsUnitTestCase {
 
     $file_system = $this->prophesize(FileSystemInterface::class);
     $file_system->tempnam(Argument::type('string'), Argument::type('string'))->will(function ($args) {
-      return tempnam($args[0], $args[1]);
+      // We suppress any notices as since PHP 7.1, this results into a warning
+      // when the temporary directory is not configured in php.ini. We are not
+      // interested in that artefact for this test.
+      return @tempnam($args[0], $args[1]);
     });
     $file_system->realpath(Argument::type('string'))->will(function ($args) {
       return realpath($args[0]);
