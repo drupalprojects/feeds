@@ -3,6 +3,8 @@
 namespace Drupal\Tests\feeds\Unit\Event;
 
 use Drupal\feeds\Event\ProcessEvent;
+use Drupal\feeds\FeedInterface;
+use Drupal\feeds\Feeds\Item\ItemInterface;
 use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 
 /**
@@ -12,14 +14,14 @@ use Drupal\Tests\feeds\Unit\FeedsUnitTestCase;
 class ProcessEventTest extends FeedsUnitTestCase {
 
   /**
-   * @covers ::getParserResult
+   * @covers ::getItem
    */
-  public function testGetParserResult() {
-    $feed = $this->getMock('Drupal\feeds\FeedInterface');
-    $item = $this->getMock('Drupal\feeds\Feeds\Item\ItemInterface');
+  public function testGetItem() {
+    $feed = $this->getMock(FeedInterface::class);
+    $item = $this->getMock(ItemInterface::class);
     $event = new ProcessEvent($feed, $item);
 
-    $this->assertSame($item, $event->getParserResult());
+    $this->assertSame($item, $event->getItem());
   }
 
 }

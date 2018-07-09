@@ -58,10 +58,13 @@ class UploadFetcherFeedFormTest extends FeedsUnitTestCase {
     $feed = $this->prophesize(FeedInterface::class);
     $feed->getConfigurationFor($plugin->reveal())
       ->willReturn(['fid' => 1, 'usage_id' => 'foo']);
-    $feed->setConfigurationFor($plugin->reveal(), ['fid' => 1, 'usage_id' => 'foo'])
-      ->willReturn(NULL);
+    $feed->setConfigurationFor($plugin->reveal(), [
+      'fid' => 1,
+      'usage_id' => 'foo',
+    ])->shouldBeCalled();
 
     $form = $form_object->buildConfigurationForm([], $form_state, $feed->reveal());
+    $this->assertInternalType('array', $form);
 
     $form_object->validateConfigurationForm($form, $form_state, $feed->reveal());
 

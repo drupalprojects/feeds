@@ -11,9 +11,9 @@ use Drupal\feeds\Feeds\Item\ItemInterface;
 class ProcessEvent extends EventBase {
 
   /**
-   * The parser result.
+   * The item to process.
    *
-   * @var \Drupal\feeds\Result\ParserResultInterface
+   * @var \Drupal\feeds\Feeds\Item\ItemInterface
    */
   protected $item;
 
@@ -33,10 +33,10 @@ class ProcessEvent extends EventBase {
   /**
    * Returns the parser result.
    *
-   * @return \Drupal\feeds\Result\ParserResultInterface
-   *   The parser result.
+   * @return \Drupal\feeds\Feeds\Item\ItemInterface
+   *   The item to process.
    */
-  public function getParserResult() {
+  public function getItem() {
     return $this->item;
   }
 

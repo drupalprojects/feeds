@@ -91,7 +91,7 @@ class LazySubscriber implements EventSubscriberInterface {
           $feed
             ->getType()
             ->getProcessor()
-            ->process($feed, $event->getParserResult(), $feed->getState(StateInterface::PROCESS));
+            ->process($feed, $event->getItem(), $feed->getState(StateInterface::PROCESS));
         });
         break;
 
