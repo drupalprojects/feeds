@@ -39,6 +39,13 @@ function feeds_tests_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  if (module_exists('rules')) {
+    $items['testing/feeds/trigger-rules-event'] = array(
+      'page callback' => 'feeds_tests_trigger_rules_event',
+      'access arguments' => array('access content'),
+      'type' => MENU_CALLBACK,
+    );
+  }
   return $items;
 }
 
@@ -348,6 +355,16 @@ function feeds_tests_query_term_access_alter(QueryAlterableInterface $query) {
 }
 
 /**
+ * Page callback. Triggers the rules event 'feeds_tests_rules_event'.
+ */
+function feeds_tests_trigger_rules_event() {
+  rules_invoke_event('feeds_tests_rules_event');
+  return array(
+    '#markup' => 'Rules event "feeds_tests_rules_event" triggered.',
+  );
+}
+
+/**
  * Implements hook_feeds_processor_targets().
  */
 function feeds_tests_feeds_processor_targets($entity_type, $bundle) {
@@ -551,7 +568,7 @@ function feeds_tests_feeds_after_parse(FeedsSource $source, FeedsParserResult $r
   // items in there with encoding issues. These items can not be processed
   // during tests without having a test failure because in < PHP 5.4 that would
   // produce the following warning:
-  //   htmlspecialchars(): Invalid multibyte sequence in argument
+  // > htmlspecialchars(): Invalid multibyte sequence in argument
   // @see FeedsCSVParserTestCase::testMbstringExtensionDisabled()
   if (variable_get('feeds_tests_feeds_after_parse_empty_items', FALSE)) {
     // Remove all items. No items will be processed.
@@ -617,11 +634,11 @@ function feeds_tests_feeds_after_save() {
  */
 class FeedsTestsPreprocess {
 
-/**
- * Preprocess callback for test_target.
- *
- * @see feeds_tests_feeds_processor_targets()
- */
+  /**
+   * Preprocess callback for test_target.
+   *
+   * @see feeds_tests_feeds_processor_targets()
+   */
   public static function callback(array $target, array &$mapping) {
     $mapping['required_value'] = TRUE;
   }
