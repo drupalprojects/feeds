@@ -194,7 +194,11 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     }
 
     // Set list of entities to clean.
-    $state->setList($this->getImportedItemIds($feed));
+    $ids = $this->queryFactory->get($this->entityType())
+      ->condition('feeds_item.target_id', $feed->id())
+      ->condition('feeds_item.hash', $this->getConfiguration('update_non_existent'), '<>')
+      ->execute();
+    $state->setList($ids);
 
     // And set progress.
     $state->total = $state->count();

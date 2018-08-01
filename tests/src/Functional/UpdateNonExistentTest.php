@@ -76,23 +76,18 @@ class UpdateNonExistentTest extends FeedsBrowserTestBase {
     $node = $this->getNodeByTitle('Egypt, Hamas exchange fire on Gaza frontier, 1 dead - Reuters');
     $this->assertFalse($node->isPublished());
 
-    // Manually set title and the last changed date of this node.
-    $update_date = $node->getChangedTime() - 100;
+    // Manually publish the node.
+    $node->status = 1;
     $node->setTitle('Lorem');
-    $node->changed = $update_date;
     $node->save();
+    $this->assertTrue($node->isPublished(), 'Node is published');
 
-    // Assert that the updated date has changed.
-    $node = $this->reloadEntity($node);
-    $this->assertText('Cleaned 1 Article.');
-    static::assertEquals($update_date, $node->getChangedTime());
-
-    // Import the same file again to ensure that the unpublished node does not
-    // get unpublished again (since the node was already unpublished during the
+    // Import the same file again to ensure that the node does not get
+    // unpublished again (since the node was already unpublished during the
     // previous import).
     $this->batchImport($feed);
     $node = $this->reloadEntity($node);
-    static::assertEquals($update_date, $node->getChangedTime());
+    $this->assertTrue($node->isPublished(), 'Node is not updated');
 
     // Re-import the original feed to ensure the unpublished node is updated,
     // even though the item is the same since the last time it was available in
@@ -105,7 +100,6 @@ class UpdateNonExistentTest extends FeedsBrowserTestBase {
     $node = $this->reloadEntity($node);
     $this->assertText('Updated 1 Article.');
     static::assertEquals('Egypt, Hamas exchange fire on Gaza frontier, 1 dead - Reuters', $node->getTitle());
-    static::assertNotEquals($update_date, $node->getChangedTime());
   }
 
   /**
@@ -193,22 +187,18 @@ class UpdateNonExistentTest extends FeedsBrowserTestBase {
     $node = $this->getNodeByTitle('Egypt, Hamas exchange fire on Gaza frontier, 1 dead - Reuters');
     $this->assertFalse($node->isPublished());
 
-    // Manually set title and the last changed date of this node.
-    $update_date = $node->getChangedTime() - 100;
+    // Manually publish the node.
+    $node->status = 1;
     $node->setTitle('Lorem');
-    $node->changed = $update_date;
     $node->save();
+    $this->assertTrue($node->isPublished(), 'Node is published');
 
-    // Assert that the updated date has changed.
-    $node = $this->reloadEntity($node);
-    static::assertEquals($update_date, $node->getChangedTime());
-
-    // Import the same file again to ensure that the unpublished node does not
-    // get unpublished again (since the node was already unpublished during the
+    // Import the same file again to ensure that the node does not get
+    // unpublished again (since the node was already unpublished during the
     // previous import).
     $this->cronRun();
     $node = $this->reloadEntity($node);
-    static::assertEquals($update_date, $node->getChangedTime());
+    $this->assertTrue($node->isPublished(), 'Node is not updated');
 
     // Re-import the original feed to ensure the unpublished node is updated,
     // even though the item is the same since the last time it was available in
@@ -220,7 +210,6 @@ class UpdateNonExistentTest extends FeedsBrowserTestBase {
     $this->cronRun();
     $node = $this->reloadEntity($node);
     static::assertEquals('Egypt, Hamas exchange fire on Gaza frontier, 1 dead - Reuters', $node->getTitle());
-    static::assertNotEquals($update_date, $node->getChangedTime());
   }
 
   /**
