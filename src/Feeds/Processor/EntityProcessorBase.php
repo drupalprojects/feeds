@@ -454,7 +454,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
       '@entity' => Unicode::strtolower($this->entityTypeLabel()),
       '%label' => $label,
       '%guid' => $guid,
-      '@errors' => \Drupal::service('renderer')->render($element),
+      '@errors' => \Drupal::service('renderer')->renderRoot($element),
       ':url' => $this->url('entity.feeds_feed_type.mapping', ['feeds_feed_type' => $this->feedType->id()]),
     ];
     if ($label || $label === '0' || $label === 0) {
@@ -472,7 +472,7 @@ abstract class EntityProcessorBase extends ProcessorBase implements EntityProces
     $message_element = [
       '#markup' => implode("\n", $messages),
     ];
-    $message = \Drupal::service('renderer')->render($message_element);
+    $message = \Drupal::service('renderer')->renderRoot($message_element);
 
     throw new ValidationException($message);
   }
