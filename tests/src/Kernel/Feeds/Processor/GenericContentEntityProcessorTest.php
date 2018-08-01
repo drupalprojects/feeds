@@ -20,24 +20,27 @@ class GenericContentEntityProcessorTest extends FeedsKernelTestBase {
     'feeds',
     'field',
     'text',
+    'filter',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->installConfig(['field', 'filter', 'node']);
+  }
 
   /**
    * Tests importing various entity types.
    *
    * @dataProvider dataProviderEntityImport
    */
-  public function testEntityImport($entity_type, array $mapping = [], array $feed_type_config = []) {
+  public function testEntityImport($entity_type, array $mapping = [], array $feed_type_config = [], $settings = []) {
     if (empty($mapping)) {
       $mapping = [
         'name' => 'title',
       ];
-    }
-
-    // @todo fix "Render context" issues.
-    // @see https://www.drupal.org/project/feeds/issues/2969259
-    if ($entity_type == 'entity_test_with_bundle') {
-      $this->markTestIncomplete('Results into the error "Render context is empty, because render() was called outside of a renderRoot() or renderPlain() call. Use renderPlain()/renderRoot() or #lazy_builder/#pre_render instead."');
     }
 
     $this->installEntitySchema('entity_test_bundle');
@@ -69,6 +72,7 @@ class GenericContentEntityProcessorTest extends FeedsKernelTestBase {
       $mappings[] = [
         'target' => $target,
         'map' => ['value' => $source],
+        'settings' => isset($settings[$source]) ? $settings[$source] : [],
       ];
     }
 
@@ -98,7 +102,7 @@ class GenericContentEntityProcessorTest extends FeedsKernelTestBase {
     ]);
     $feed->import();
 
-    // Ensure no warnings or errors were generated.
+    // Ensure no warnings nor errors were generated.
     $messages = drupal_get_messages();
     $this->assertArrayNotHasKey('warning', $messages);
     $this->assertArrayNotHasKey('error', $messages);
@@ -163,6 +167,9 @@ class GenericContentEntityProcessorTest extends FeedsKernelTestBase {
               'type' => 'test',
             ],
           ],
+        ],
+        'settings' => [
+          'field_test_text' => ['format' => 'plain_text'],
         ],
       ],
     ];
